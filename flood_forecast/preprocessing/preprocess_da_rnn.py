@@ -4,11 +4,7 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 from typing import List
-
-class TrainData(typing.NamedTuple):
-    feats: np.ndarray
-    targs: np.ndarray
-      
+from flood_forecast.da_rnn.constants import TrainData
     
 def format_data(dat, targ_column:List[str]) -> Tuple[TrainData, StandardScaler]:
     scale = StandardScaler().fit(dat)
