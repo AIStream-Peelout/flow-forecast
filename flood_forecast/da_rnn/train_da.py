@@ -1,5 +1,5 @@
 import typing
-from typing import Tuple
+from typing import Tuple, List
 import json
 import os
 
@@ -8,12 +8,13 @@ from torch import nn
 from torch import optim
 from sklearn.preprocessing import StandardScaler
 from sklearn.externals import joblib
-
+# TODO disable for non mac systems 
+import matplotlib
+matplotlib.use('TkAgg')  
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-
-import utils
+from flood_forecast.da_rnn import utils
 from modules import Encoder, Decoder
 from custom_types import DaRnnNet, TrainData, TrainConfig
 from utils import numpy_to_tvar
@@ -101,7 +102,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             utils.save_or_show_plot(f"pred_{e_i}.png", save_plots)
             if tensorboard:
                 writer.add_scalar('Loss/Validation', val_loss, e_i)
-                writer.add_scalar('Validation/MSE', mse, e_i)
+                writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
 
     return iter_losses, epoch_losses
 
@@ -173,3 +174,6 @@ def predict(t_net: DaRnnNet, t_dat: TrainData, train_size: int, batch_size: int,
         y_pred[y_slc] = t_net.decoder(input_encoded, y_history).cpu().data.numpy()
 
     return y_pred
+
+def run_da_rnn(river_csv_list:List[str], epochs:str):
+    pass 
