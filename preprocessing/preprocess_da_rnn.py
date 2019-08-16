@@ -25,10 +25,13 @@ def format_data(dat, targ_column) -> Tuple[TrainData, StandardScaler]:
     targs = proc_dat[:, ~mask].astype(float)
     return TrainData(feats, targs), scale
 
-def make_data(csv_path:str, target_col:str):
+def make_data(csv_path:str, target_col:str)->TrainData:
     final_df = pd.read_csv("sebring.csv")
     # Doing this a temporary fix please comment in or out.
     final_df = final_df[:6087]
     height_df = final_df[['height', 'precip', 'temp']]
     height_df.columns = ['height', 'precip', 'temp']
     preprocessed_data2, s = format_data(height_df, ['height'])
+    return preprocessed_data2
+
+
