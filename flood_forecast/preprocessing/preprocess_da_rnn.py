@@ -26,7 +26,7 @@ def make_data(csv_path:str, target_col:str)->TrainData:
     final_df = final_df[:6087]
     height_df = final_df[[target_col, 'precip', 'temp']]
     height_df.columns = [target_col, 'precip', 'temp']
-    preprocessed_data2, s = format_data(height_df, [target_col])
+    preprocessed_data2 = format_data(height_df, [target_col])
     return preprocessed_data2
 
 
