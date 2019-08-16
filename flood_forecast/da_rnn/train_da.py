@@ -18,9 +18,11 @@ from modules import Encoder, Decoder
 from custom_types import DaRnnNet, TrainData, TrainConfig
 from utils import numpy_to_tvar
 from constants import device
+from torch.utils.tensorboard import SummaryWriter
 
 logger = utils.setup_log()
 logger.info(f"Using computation device: {device}")
+
 
 def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
            T=10, learning_rate=0.01, batch_size=128):
@@ -54,17 +56,18 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     return train_cfg, da_rnn_net
 
 
-def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10, save_plots=False):
+def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10, save_plots=False, tensorboard=False):
     iter_per_epoch = int(np.ceil(t_cfg.train_size * 1. / t_cfg.batch_size))
     iter_losses = np.zeros(n_epochs * iter_per_epoch)
     epoch_losses = np.zeros(n_epochs)
     logger.info(f"Iterations per epoch: {t_cfg.train_size * 1. / t_cfg.batch_size:3.3f} ~ {iter_per_epoch:d}.")
 
     n_iter = 0
+    if tensorboard:
+        writer = SummaryWriter()
 
     for e_i in range(n_epochs):
         perm_idx = np.random.permutation(t_cfg.train_size - t_cfg.T)
-
         for t_i in range(0, t_cfg.train_size, t_cfg.batch_size):
             batch_idx = perm_idx[t_i:(t_i + t_cfg.batch_size)]
             feats, y_history, y_target = prep_train_data(batch_idx, t_cfg, train_data)
@@ -76,8 +79,8 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             adjust_learning_rate(net, n_iter)
 
         epoch_losses[e_i] = np.mean(iter_losses[range(e_i * iter_per_epoch, (e_i + 1) * iter_per_epoch)])
-
-        if e_i % 10 == 0:
+        
+        if e_i % 1 == 0:
             y_test_pred = predict(net, train_data,
                                   t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
                                   on_train=False)
@@ -96,6 +99,10 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
                      label='Predicted - Test')
             plt.legend(loc='upper left')
             utils.save_or_show_plot(f"pred_{e_i}.png", save_plots)
+            if tensorboard:
+                writer.add_scalar('Loss/train', epoch_losses, e_i)
+                # TODO compute MSE
+                writer.add_scalar('Validation/MSE', np.random.random(), e_i)
 
     return iter_losses, epoch_losses
 
