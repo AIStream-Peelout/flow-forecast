@@ -61,7 +61,6 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
     iter_losses = np.zeros(n_epochs * iter_per_epoch)
     epoch_losses = np.zeros(n_epochs)
     logger.info(f"Iterations per epoch: {t_cfg.train_size * 1. / t_cfg.batch_size:3.3f} ~ {iter_per_epoch:d}.")
-
     n_iter = 0
     if tensorboard:
         writer = SummaryWriter()
@@ -90,6 +89,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             y_train_pred = predict(net, train_data,
                                    t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
                                    on_train=True)
+            mse = np.mean((y_test_pred-train_data.targs[t_cfg.train_size:])**2)
             plt.figure()
             plt.plot(range(1, 1 + len(train_data.targs)), train_data.targs,
                      label="True")
@@ -100,9 +100,8 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             plt.legend(loc='upper left')
             utils.save_or_show_plot(f"pred_{e_i}.png", save_plots)
             if tensorboard:
-                writer.add_scalar('Loss/train', epoch_losses, e_i)
-                # TODO compute MSE
-                writer.add_scalar('Validation/MSE', np.random.random(), e_i)
+                writer.add_scalar('Loss/Validation', val_loss, e_i)
+                writer.add_scalar('Validation/MSE', mse, e_i)
 
     return iter_losses, epoch_losses
 
