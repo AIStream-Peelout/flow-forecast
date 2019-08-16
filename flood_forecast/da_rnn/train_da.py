@@ -24,7 +24,11 @@ logger.info(f"Using computation device: {device}")
 
 def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
            T=10, learning_rate=0.01, batch_size=128):
+    """
+    n_targs: The number of target columns (not steps)
+    T: The number timesteps in the window
 
+    """
     train_cfg = TrainConfig(T, int(train_data.feats.shape[0] * 0.7), batch_size, nn.MSELoss())
     logger.info(f"Training size: {train_cfg.train_size:d}.")
 
@@ -67,8 +71,6 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
 
             loss = train_iteration(net, t_cfg.loss_func, feats, y_history, y_target)
             iter_losses[e_i * iter_per_epoch + t_i // t_cfg.batch_size] = loss
-           
-            self.logger.info("Epoch %d, Batch %d: loss = %3.3f.", i, j / t_cfg.batch_size, loss)
             n_iter += 1
 
             adjust_learning_rate(net, n_iter)
