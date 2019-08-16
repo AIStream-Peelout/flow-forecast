@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch.autograd import Variable
 
-from constants import device
+from flood_forecast.da_rnn.constants import device
 
 
 def setup_log(tag='VOC_TOPICS'):
