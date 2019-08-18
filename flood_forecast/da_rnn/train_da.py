@@ -16,9 +16,9 @@ import pandas as pd
 import numpy as np
 from flood_forecast.da_rnn import utils
 from flood_forecast.da_rnn.constants import device
-from modules import Encoder, Decoder
-from custom_types import DaRnnNet, TrainData, TrainConfig
-from utils import numpy_to_tvar
+from flood_forecast.da_rnn.modules import Encoder, Decoder
+from flood_forecast.da_rnn.custom_types import DaRnnNet, TrainData, TrainConfig
+from flood_forecast.da_rnn.utils import numpy_to_tvar
 from torch.utils.tensorboard import SummaryWriter
 
 logger = utils.setup_log()
