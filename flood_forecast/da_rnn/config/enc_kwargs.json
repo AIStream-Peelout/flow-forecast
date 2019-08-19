@@ -1,0 +1,5 @@
+{
+    "input_size": 2,
+    "hidden_size": 64,
+    "T": 10
+}

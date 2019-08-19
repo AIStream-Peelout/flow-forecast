@@ -3,3 +3,4 @@ dist
 flood_forecast.egg-info
 *.DS_STORE
 *.pyc
+tests/runs

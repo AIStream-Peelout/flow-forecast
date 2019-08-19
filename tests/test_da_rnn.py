@@ -6,11 +6,11 @@ import unittest
 import pandas as pd
 class TestPreprocessingDA(unittest.TestCase):
     def setUp(self):
-        self.preprocessed_data = make_data("test_data/kenduskeag_small.csv", "cfs")
+        self.preprocessed_data = make_data("test_data/keag_small.csv", "cfs")
 
     def test_train_model(self):
-        da = da_rnn(self.preprocessed_data, 1, 64)
-        train(da, self.preprocessed_data, )
+        config, da_network = da_rnn(self.preprocessed_data, 1, 64)
+        train(da_network, self.preprocessed_data, config, n_epochs=20, tensorboard=True)
         self.assertEqual(1,1)
     def test_make_data(self):
         self.assertTrue('FOO'.isupper())

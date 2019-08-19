@@ -37,13 +37,14 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
 
     enc_kwargs = {"input_size": train_data.feats.shape[1], "hidden_size": encoder_hidden_size, "T": T}
     encoder = Encoder(**enc_kwargs).to(device)
-    with open(os.path.join("data", "enc_kwargs.json"), "w") as fi:
+    dirname = os.path.dirname(__file__)
+    with open(os.path.join(dirname, "config", "enc_kwargs.json"), "w") as fi:
         json.dump(enc_kwargs, fi, indent=4)
 
     dec_kwargs = {"encoder_hidden_size": encoder_hidden_size,
                   "decoder_hidden_size": decoder_hidden_size, "T": T, "out_feats": n_targs}
     decoder = Decoder(**dec_kwargs).to(device)
-    with open(os.path.join("data", "dec_kwargs.json"), "w") as fi:
+    with open(os.path.join(dirname, "config", "dec_kwargs.json"), "w") as fi:
         json.dump(dec_kwargs, fi, indent=4)
 
     encoder_optimizer = optim.Adam(
@@ -101,7 +102,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             plt.legend(loc='upper left')
             utils.save_or_show_plot(f"pred_{e_i}.png", save_plots)
             if tensorboard:
-                writer.add_scalar('Loss/Validation', val_loss, e_i)
+                #writer.add_scalar('Loss/Validation', val_loss, e_i)
                 writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
 
     return iter_losses, epoch_losses

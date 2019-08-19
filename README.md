@@ -5,3 +5,4 @@ This repostiory provides open source benchmark and codes for flash flood and riv
 This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index. 
 
 ## Task 2 Flood severity forecasting
+Task two focuses on predicting the severity of the flood based on . Flood severity is defined on seven scales 
