@@ -20,6 +20,7 @@ class TestPreprocessingDA(unittest.TestCase):
     def test_create_model(self):
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64)
         self.assertNotEqual(config.batch_size, 20)
+        self.assertIsNotNone(dnn_network)
 
 if __name__ == '__main__':
     unittest.main()
