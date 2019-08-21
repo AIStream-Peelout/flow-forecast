@@ -91,6 +91,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             y_train_pred = predict(net, train_data,
                                    t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
                                    on_train=True)
+            #train_mse = np.mean((y_train_pred-train_data.targs[:t_cfg.train_size])**2)
             mse = np.mean((y_test_pred-train_data.targs[t_cfg.train_size:])**2)
             plt.figure()
             plt.plot(range(1, 1 + len(train_data.targs)), train_data.targs,
@@ -104,7 +105,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             if tensorboard:
                 #writer.add_scalar('Loss/Validation', val_loss, e_i)
                 writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
-
+                #writer.add_scalar("Train/MSE", train_mse, e_i )
     return iter_losses, epoch_losses
 
 

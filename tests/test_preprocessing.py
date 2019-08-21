@@ -8,16 +8,10 @@ class TestPreprocessingDA(unittest.TestCase):
         df = pd.read_csv("test_data/test_format_data.csv")
         self.assertEqual(type(format_data(df, ["height"])), TrainData)
         self.assertEqual(len(format_data(df, ["height"]).feats[0]), 2)
-    def test_make_data(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
 
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
-
+    def test_make_function(self):
+        result = make_data("test_data/test_format_data.csv", "height", 3)
+        self.assertEqual(len(result.feats), 1)
+        self.assertEqual(len(result.targs), 1)
 if __name__ == '__main__':
     unittest.main()

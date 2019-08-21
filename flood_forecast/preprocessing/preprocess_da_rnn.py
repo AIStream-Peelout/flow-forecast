@@ -16,9 +16,13 @@ def format_data(dat, targ_column:List[str]) -> Tuple[TrainData, StandardScaler]:
     targs = proc_dat[:, ~mask].astype(float)
     return TrainData(feats, targs)
 
-def make_data(csv_path:str, target_col:str)->TrainData:
+def make_data(csv_path:str, target_col:str, test_length:int)->TrainData:
+    """
+    """
     final_df = pd.read_csv(csv_path)
-    final_df = final_df[:6087]
+    print(final_df.shape[0])
+    total = len(final_df.index)-test_length
+    final_df = final_df[:total]
     height_df = final_df[[target_col, 'precip', 'temp']]
     height_df.columns = [target_col, 'precip', 'temp']
     preprocessed_data2 = format_data(height_df, [target_col])

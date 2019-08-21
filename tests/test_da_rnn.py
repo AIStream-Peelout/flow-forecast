@@ -6,7 +6,7 @@ import unittest
 import pandas as pd
 class TestPreprocessingDA(unittest.TestCase):
     def setUp(self):
-        self.preprocessed_data = make_data("test_data/keag_small.csv", "cfs")
+        self.preprocessed_data = make_data("test_data/keag_small.csv", "cfs", 72)
 
     def test_train_model(self):
         config, da_network = da_rnn(self.preprocessed_data, 1, 64)
