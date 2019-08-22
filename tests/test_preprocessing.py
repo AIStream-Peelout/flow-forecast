@@ -13,5 +13,6 @@ class TestPreprocessingDA(unittest.TestCase):
         result = make_data("test_data/test_format_data.csv", "height", 3)
         self.assertEqual(len(result.feats), 1)
         self.assertEqual(len(result.targs), 1)
+
 if __name__ == '__main__':
     unittest.main()
