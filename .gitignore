@@ -5,3 +5,4 @@ flood_forecast.egg-info
 *.pyc
 tests/runs
 .ipynb_checkpoints
+data
