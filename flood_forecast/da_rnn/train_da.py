@@ -176,6 +176,3 @@ def predict(t_net: DaRnnNet, t_dat: TrainData, train_size: int, batch_size: int,
         y_pred[y_slc] = t_net.decoder(input_encoded, y_history).cpu().data.numpy()
 
     return y_pred
-
-def run_da_rnn(river_csv_list:List[str], epochs:str):
-    pass 
