@@ -1,7 +1,7 @@
 import argparse
-from typing import Sequence, List, Tuple 
+from typing import Sequence, List, Tuple, Dict
 
-def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], n_targs=1):
+def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], additional_params:Dict=None):
     if model == "da_rnn":
         from flood_forecast.da_rnn.train_da import da_rnn, train
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
