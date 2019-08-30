@@ -3,10 +3,11 @@ sys.path.append("..")
 from flood_forecast.preprocessing.preprocess_da_rnn import TrainData, format_data, make_data 
 from flood_forecast.da_rnn.train_da import da_rnn, train
 import unittest
+import os
 import pandas as pd
 class TestPreprocessingDA(unittest.TestCase):
     def setUp(self):
-        self.preprocessed_data = make_data("test_data/keag_small.csv", "cfs", 72)
+        self.preprocessed_data = make_data(os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv"), ["cfs"], 72)
 
     def test_train_model(self):
         config, da_network = da_rnn(self.preprocessed_data, 1, 64)
