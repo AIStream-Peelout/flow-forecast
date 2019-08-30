@@ -24,7 +24,7 @@ def make_data(csv_path:str, target_col:List[str], test_length:int)->TrainData:
     total = len(final_df.index)-test_length
     final_df = final_df[:total]
     height_df = final_df[[target_col[0], 'precip', 'temp']]
-    if len(target_col>1):
+    if len(target_col)>1:
         # Restrict target columns to height and cfs
         height_df = final_df[[target_col[0], target_col[1], 'precip', 'temp']]
     height_df.columns = [target_col, 'precip', 'temp']
