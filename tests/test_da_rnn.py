@@ -7,13 +7,13 @@ import os
 import pandas as pd
 class TestPreprocessingDA(unittest.TestCase):
     def setUp(self):
-        self.preprocessed_data = make_data(os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv"), ["cfs"], 72)
+        self.preprocessed_data = self.preprocessed_data = make_data("test_data/keag_small.csv", ["cfs"], 72)
 
     def test_train_model(self):
         config, da_network = da_rnn(self.preprocessed_data, 1, 64)
         train(da_network, self.preprocessed_data, config, n_epochs=20, tensorboard=True)
         self.assertEqual(1,1)
-        
+         
     def test_make_data(self):
         self.assertTrue('FOO'.isupper())
         self.assertFalse('Foo'.isupper())
