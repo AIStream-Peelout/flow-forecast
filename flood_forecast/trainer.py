@@ -7,6 +7,7 @@ def train_function(model:str, training_file_dir:str, test_hours:int, target_col:
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
         preprocessed_data = make_data(training_file_dir, target_col, test_hours)
         config, model = da_rnn(preprocessed_data, len(target_col))
+        print(preprocessed_data)
         train(model, preprocessed_data, config)
     elif model == "":
         pass 
@@ -20,12 +21,13 @@ def main():
     parser.add_argument("-b", "--task", help="The task you want to train the model for")
     parser.add_argument("-c", "--column", default="cfs", help="The target column either height, cfs or both")
     parser.add_argument("-s", "--max_epochs", default="10")
+    parser.add_argument("--tensorboard", default="False")
     args = parser.parse_args()
     if args.column == "both":
         args.column = ['cfs', 'height']
     else: 
         args.column = [args.column]
-    train_function(args.model, args.dataset, args.test, args.columns)
+    train_function(args.model, args.dataset, args.test, args.column)
 if __name__ == "__main__":
     main()
 
