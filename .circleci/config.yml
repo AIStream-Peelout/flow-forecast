@@ -19,8 +19,8 @@ jobs:
 
     steps:
       - checkout
-    - restore_cache:  # ensure this step occurs *before* installing dependencies
-        key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
 
       - run:
           name: install dependencies
