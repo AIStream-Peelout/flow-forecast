@@ -16,7 +16,8 @@ class TestDARNN(unittest.TestCase):
         self.assertEqual(1,1)
          
     def test_tf_data(self):
-        self.assertTrue(pathlib.Path("tests/runs").exists())
+        self.assertTrue(os.listdir("tests/runs"))
+        
 
     def test_create_model(self):
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64)

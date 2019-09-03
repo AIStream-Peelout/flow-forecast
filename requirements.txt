@@ -2,3 +2,4 @@ scikit-learn
 pandas 
 torch
 tb-nightly
+seaborn 
