@@ -26,7 +26,7 @@ logger.info(f"Using computation device: {device}")
 
 
 def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
-           T=10, learning_rate=0.01, batch_size=128)->Tuple[dict, DaRnnNet]:
+           T=10, learning_rate=0.01, batch_size=128, param_output_path="")->Tuple[dict, DaRnnNet]:
     """
     n_targs: The number of target columns (not steps)
     T: The number timesteps in the window
@@ -37,14 +37,13 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
 
     enc_kwargs = {"input_size": train_data.feats.shape[1], "hidden_size": encoder_hidden_size, "T": T}
     encoder = Encoder(**enc_kwargs).to(device)
-    dirname = os.path.dirname(__file__)
-    with open(os.path.join(dirname, "config", "enc_kwargs.json"), "w+") as fi:
+    with open(os.path.join(param_output_path, "enc_kwargs.json"), "w+") as fi:
         json.dump(enc_kwargs, fi, indent=4)
 
     dec_kwargs = {"encoder_hidden_size": encoder_hidden_size,
                   "decoder_hidden_size": decoder_hidden_size, "T": T, "out_feats": n_targs}
     decoder = Decoder(**dec_kwargs).to(device)
-    with open(os.path.join(dirname, "config", "dec_kwargs.json"), "w+") as fi:
+    with open(os.path.join(param_output_path, "dec_kwargs.json"), "w+") as fi:
         json.dump(dec_kwargs, fi, indent=4)
 
     encoder_optimizer = optim.Adam(

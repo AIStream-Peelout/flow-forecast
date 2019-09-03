@@ -18,7 +18,7 @@ class TestDARNN(unittest.TestCase):
     def test_tf_data(self):
         dirname = os.path.dirname(__file__)
         # Test that Tensorboard directory was indeed created 
-        self.assertTrue(os.listdir(os.path.join(dirname,"tests", "runs")))
+        self.assertTrue(os.listdir(os.path.join(dirname, "runs")))
         
 
     def test_create_model(self):
