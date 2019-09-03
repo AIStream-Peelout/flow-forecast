@@ -54,6 +54,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
+            python setup.py install 
             python tests/test_preprocessing.py
             python tests/test_da_rnn.py
       - store_artifacts:
