@@ -26,7 +26,7 @@ logger.info(f"Using computation device: {device}")
 
 
 def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
-           T=10, learning_rate=0.01, batch_size=128):
+           T=10, learning_rate=0.01, batch_size=128)->Tuple(dict,DaRnnNet):
     """
     n_targs: The number of target columns (not steps)
     T: The number timesteps in the window
