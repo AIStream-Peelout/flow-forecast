@@ -19,13 +19,15 @@ jobs:
 
     steps:
       - checkout
+    - restore_cache:  # ensure this step occurs *before* installing dependencies
+        key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
 
       - run:
           name: install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
+           sudo pip install pipenv
+            pipenv install -r requirements.txt
+            python setup.py install
 
         
       # run tests!
@@ -38,7 +40,6 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python setup.py install 
             python tests/test_preprocessing.py
             python tests/test_da_rnn.py
       - store_artifacts:
