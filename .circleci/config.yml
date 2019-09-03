@@ -46,7 +46,7 @@ jobs:
       - run:
           name: install important 
           command: |
-          python setup.py install 
+            python setup.py install 
           
 
 
