@@ -33,7 +33,6 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            python setup.py install
       - save_cache:
           paths:
             - ./venv
@@ -44,6 +43,13 @@ jobs:
       # other common Python testing frameworks include pytest and nose
       # https://pytest.org
       # https://nose.readthedocs.io
+      - run:
+          name: install important 
+          command: |
+          python setup.py install 
+          
+
+
       - run:
           name: run tests
           command: |
