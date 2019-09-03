@@ -46,10 +46,10 @@ jobs:
       - run:
           name: install important 
           command: |
+            python3 -m venv venv
+            . venv/bin/activate
             python setup.py install 
           
-
-
       - run:
           name: run tests
           command: |
