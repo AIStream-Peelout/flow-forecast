@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 from flood_forecast.preprocessing.preprocess_da_rnn import TrainData, format_data, make_data 
 import unittest
 import pandas as pd
