@@ -12,7 +12,7 @@ class TestDARNN(unittest.TestCase):
 
     def test_train_model(self):
         config, da_network = da_rnn(self.preprocessed_data, 1, 64)
-        train(da_network, self.preprocessed_data, config, n_epochs=20, tensorboard=True)
+        train(da_network, self.preprocessed_data, config, n_epochs=2, tensorboard=True)
         self.assertEqual(1,1)
          
     def test_tf_data(self):
