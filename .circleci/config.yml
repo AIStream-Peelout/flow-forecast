@@ -47,7 +47,8 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python test_all.py      
+            python tests/test_preprocessing.py
+            python tests/test_da_rnn.py
       - store_artifacts:
           path: test-reports
           destination: test-reports
