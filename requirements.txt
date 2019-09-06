@@ -3,4 +3,5 @@ pandas
 torch
 tb-nightly
 seaborn
-future 
+future
+wandb 
