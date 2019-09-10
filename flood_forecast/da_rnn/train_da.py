@@ -105,6 +105,10 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
                 #writer.add_scalar('Loss/Validation', val_loss, e_i)
                 writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
                 #writer.add_scalar("Train/MSE", train_mse, e_i )
+            #
+    torch.save(net.encoder.state_dict(), os.path.join("checkpoint", "encoder.torch"))
+    torch.save(net.decoder.state_dict(), os.path.join("checkpoint", "decoder.torch"))
+    
     return iter_losses, epoch_losses
 
 
@@ -133,7 +137,6 @@ def adjust_learning_rate(net: DaRnnNet, n_iter: int):
 def train_iteration(t_net: DaRnnNet, loss_func: typing.Callable, X, y_history, y_target):
     t_net.enc_opt.zero_grad()
     t_net.dec_opt.zero_grad()
-
     input_weighted, input_encoded = t_net.encoder(numpy_to_tvar(X))
     y_pred = t_net.decoder(input_encoded, numpy_to_tvar(y_history))
 
