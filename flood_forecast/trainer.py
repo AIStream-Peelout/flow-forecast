@@ -22,6 +22,9 @@ def main():
     parser.add_argument("r", "--resume", default=None, help="Resume from a checkpoint")
     parser.add_argument("-s", "--max_epochs", default="10")
     parser.add_argument("--tensorboard", default="False")
+    parser.add_argument("--wandb", default="False", help="Use weights and biases for enhanced logging" )
+    parser.add_argument("--weight_path", default=None, help="Restore a previous train session or try to levarage transfer learning")
+    parser.add_argument("--gpu", default=False, help="If using GPU pass true")
     args = parser.parse_args()
     if args.column == "both":
         args.column = ['cfs', 'height']
