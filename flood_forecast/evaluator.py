@@ -14,6 +14,7 @@ def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forec
     mean_value = train_river_data[[forecast_column]].median()[0]
     test_river_data['predicted_baseline'] = mean_value
     mse_baseline = sklearn.metrics.mean_squared_error(test_river_data[forecast_column], test_river_data["predicted_baseline"])
+    print(mse_baseline)
     return test_river_data, round(mse_baseline, ndigits=3)
 
 def plot_r2(river_flow_preds:pd.DataFrame)->float:
@@ -29,3 +30,12 @@ def get_model_score(river_flow_df, model_evaluate_function:Callable, forecast_co
     model_evaluate_function should call any necessary preprocessing
     """
     test_river_data, baseline_mse = stream_baseline(river_flow_df, forecast_column)
+
+def get_r2_value(model_mse, baseline_mse):
+    return 1-model_mse/baseline_mse
+def get_value():
+    df = pd.read_csv("final_keag.csv")
+    res = stream_baseline(df, "cfs", 22112.253550975067)
+    print(get_r2_value(0.120, res[1]))
+
+get_value()
