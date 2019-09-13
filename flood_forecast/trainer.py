@@ -19,7 +19,7 @@ def main():
     parser.add_argument("-t", "--test", default=336, help="The number of hours to forecast for the test")
     parser.add_argument("-b", "--task", help="The task you want to train the model for")
     parser.add_argument("-c", "--column", default="cfs", help="The target column either height, cfs or both")
-    parser.add_argument("r", "--resume", default=None, help="Resume from a checkpoint")
+    parser.add_argument("-r", "--resume", default=None, help="Resume from a checkpoint")
     parser.add_argument("-s", "--max_epochs", default="10")
     parser.add_argument("--tensorboard", default="False")
     parser.add_argument("--wandb", default="False", help="Use weights and biases for enhanced logging" )
@@ -34,4 +34,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Example command python trainer.py --dataset data/flow_data/concord_final.csv --model da_rnn --task flow --columns cfs
+# Example command python flood_forecast/trainer.py --dataset data/flow_data/concord_final.csv --model da_rnn --task flow --columns cfs
