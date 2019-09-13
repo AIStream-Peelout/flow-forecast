@@ -6,7 +6,7 @@ import pandas as pd
 from typing import List
 from flood_forecast.da_rnn.custom_types import TrainData
     
-def format_data(dat, targ_column:List[str]) -> Tuple[TrainData, StandardScaler]:
+def format_data(dat, targ_column:List[str]) -> TrainData:
     proc_dat = dat.as_matrix()
     mask = np.ones(proc_dat.shape[1], dtype=bool)
     dat_cols = list(dat.columns)
@@ -23,8 +23,6 @@ def make_data(csv_path:str, target_col:List[str], test_length:int)->TrainData:
     final_df = pd.read_csv(csv_path)
     print(final_df.shape[0])
     total = len(final_df.index)-test_length
-    final_df = final_df[:total]
-   
     if len(target_col)>1:
         # Restrict target columns to height and cfs. Alternatively could replace this with loop
         height_df = final_df[[target_col[0], target_col[1], 'precip', 'temp']]
@@ -32,7 +30,9 @@ def make_data(csv_path:str, target_col:List[str], test_length:int)->TrainData:
     else:
          height_df = final_df[[target_col[0], 'precip', 'temp']]
          height_df.columns = [target_col[0], 'precip', 'temp']
-    
+
+    final_df_train = final_df[:total]
+    final_df_test = final_df[total:]
     print(target_col)
     preprocessed_data2 = format_data(height_df, target_col)
     return preprocessed_data2
