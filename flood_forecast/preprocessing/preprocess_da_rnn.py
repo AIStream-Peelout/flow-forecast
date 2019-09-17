@@ -19,6 +19,8 @@ def format_data(dat, targ_column:List[str]) -> TrainData:
 
 def make_data(csv_path:str, target_col:List[str], test_length:int)->TrainData:
     """
+    Returns full preprocessed data. 
+    Does not split train/test that must be done later.
     """
     final_df = pd.read_csv(csv_path)
     print(final_df.shape[0])
@@ -30,10 +32,6 @@ def make_data(csv_path:str, target_col:List[str], test_length:int)->TrainData:
     else:
          height_df = final_df[[target_col[0], 'precip', 'temp']]
          height_df.columns = [target_col[0], 'precip', 'temp']
-
-    final_df_train = final_df[:total]
-    final_df_test = final_df[total:]
-    print(target_col)
     preprocessed_data2 = format_data(height_df, target_col)
     return preprocessed_data2
 

@@ -26,12 +26,14 @@ logger.info(f"Using computation device: {device}")
 
 
 def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
-           T=10, learning_rate=0.01, batch_size=128, param_output_path="")->Tuple[dict, DaRnnNet]:
+           T=10, learning_rate=0.01, batch_size=128, param_output_path="", save_path:str=None)->Tuple[dict, DaRnnNet]:
     """
     n_targs: The number of target columns (not steps)
     T: The number timesteps in the window
 
     """
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     train_cfg = TrainConfig(T, int(train_data.feats.shape[0] * 0.7), batch_size, nn.MSELoss())
     logger.info(f"Training size: {train_cfg.train_size:d}.")
 
@@ -45,6 +47,9 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     decoder = Decoder(**dec_kwargs).to(device)
     with open(os.path.join(param_output_path, "dec_kwargs.json"), "w+") as fi:
         json.dump(dec_kwargs, fi, indent=4)
+    if save_path:
+        encoder.load_state_dict(torch.load(os.path.join(save_path, "encoder.torch")), map_location=device)
+        decoder.load_state_dict(torch.load(os.path.join(save_path, "decoder.torch")), map_location=device)
 
     encoder_optimizer = optim.Adam(
         params=[p for p in encoder.parameters() if p.requires_grad],
