@@ -1,11 +1,11 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 
-def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], additional_params:Dict=None):
+def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], **kwargs):
     if model == "da_rnn":
         from flood_forecast.da_rnn.train_da import da_rnn, train
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
-        preprocessed_data = make_data(training_file_dir, target_col, test_hours)
+        preprocessed_data = make_data(training_file_dir, target_col, test_hours, **kwargs)
         config, model = da_rnn(preprocessed_data, len(target_col))
         train(model, preprocessed_data, config)
     elif model == "":
@@ -30,7 +30,7 @@ def main():
         args.column = ['cfs', 'height']
     else: 
         args.column = [args.column]
-    train_function(args.model, args.dataset, args.test, args.column)
+    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.weight_path)
 if __name__ == "__main__":
     main()
 
