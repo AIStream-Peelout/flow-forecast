@@ -74,14 +74,14 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
     for e_i in range(n_epochs):
         perm_idx = np.random.permutation(t_cfg.train_size - t_cfg.T)
         for t_i in range(0, t_cfg.train_size, t_cfg.batch_size):
+            
             batch_idx = perm_idx[t_i:(t_i + t_cfg.batch_size)]
             feats, y_history, y_target = prep_train_data(batch_idx, t_cfg, train_data)
-
-            loss = train_iteration(net, t_cfg.loss_func, feats, y_history, y_target)
-            iter_losses[e_i * iter_per_epoch + t_i // t_cfg.batch_size] = loss
-            n_iter += 1
-
-            adjust_learning_rate(net, n_iter)
+            if len(feats)>0 and len(y_target)>0 and len(y_history)>0:
+                loss = train_iteration(net, t_cfg.loss_func, feats, y_history, y_target)
+                iter_losses[e_i * iter_per_epoch + t_i // t_cfg.batch_size] = loss
+                n_iter += 1
+                adjust_learning_rate(net, n_iter)
 
         epoch_losses[e_i] = np.mean(iter_losses[range(e_i * iter_per_epoch, (e_i + 1) * iter_per_epoch)])
         
