@@ -12,7 +12,7 @@ class TestDARNN(unittest.TestCase):
 
     def test_train_model(self):
         config, da_network = da_rnn(self.preprocessed_data, 1, 64)
-        train(da_network, self.preprocessed_data, config, n_epochs=2, tensorboard=True)
+        train_cfg, train(da_network, self.preprocessed_data, config, n_epochs=2, tensorboard=True)
         self.assertEqual(1,1)
          
     def test_tf_data(self):
@@ -25,6 +25,9 @@ class TestDARNN(unittest.TestCase):
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64)
         self.assertNotEqual(config.batch_size, 20)
         self.assertIsNotNone(dnn_network)
-
+    
+    def test_resume_ckpt(self):
+        config, dnn_network = da_rnn(self.preprocessed_data, save_path="models_weights")
+        self.assertEqual(1,1)
 if __name__ == '__main__':
     unittest.main()
