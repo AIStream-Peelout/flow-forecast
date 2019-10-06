@@ -33,7 +33,7 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
 
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+    print("Using device: " + device)
     train_cfg = TrainConfig(T, int(train_data.feats.shape[0] * 0.7), batch_size, nn.MSELoss())
     logger.info(f"Training size: {train_cfg.train_size:d}.")
 
@@ -48,6 +48,7 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     with open(os.path.join(param_output_path, "dec_kwargs.json"), "w+") as fi:
         json.dump(dec_kwargs, fi, indent=4)
     if save_path:
+        print("Resuming training from " + os.path.join(save_path, "encoder.torch"))
         encoder.load_state_dict(torch.load(os.path.join(save_path, "encoder.torch")), map_location=device)
         decoder.load_state_dict(torch.load(os.path.join(save_path, "decoder.torch")), map_location=device)
 
@@ -74,7 +75,6 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
     for e_i in range(n_epochs):
         perm_idx = np.random.permutation(t_cfg.train_size - t_cfg.T)
         for t_i in range(0, t_cfg.train_size, t_cfg.batch_size):
-            
             batch_idx = perm_idx[t_i:(t_i + t_cfg.batch_size)]
             feats, y_history, y_target = prep_train_data(batch_idx, t_cfg, train_data)
             if len(feats)>0 and len(y_target)>0 and len(y_history)>0:
