@@ -2,15 +2,25 @@ import argparse
 from typing import Sequence, List, Tuple, Dict
 
 def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], **kwargs):
+    # Takes a model name, training directory a number of hours testing, a target column 
+    # and returns the trained model
+    ## TODO define standard model hyperparams here
+    training_param_dict = {}
+    training_param_dict["weight_path"] = None
+    training_param_dict["learning_rate"] = .09
+    for key, value in kwargs.items():
+        training_param_dict[key] = value 
+
     if model == "da_rnn":
         from flood_forecast.da_rnn.train_da import da_rnn, train
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
-        preprocessed_data = make_data(training_file_dir, target_col, test_hours, transformations)
+        preprocessed_data = make_data(training_file_dir, target_col, test_hours)
         config, model = da_rnn(preprocessed_data, len(target_col))
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
-    elif model == "":
+    elif model == "":   
         pass 
+    return trained_model 
 
 def main():
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
@@ -29,7 +39,7 @@ def main():
         args.column = ['cfs', 'height']
     else: 
         args.column = [args.column]
-    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.resume, **kwargs)
+    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.resume, )
 if __name__ == "__main__":
     main()
 
