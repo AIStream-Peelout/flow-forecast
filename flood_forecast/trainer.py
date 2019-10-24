@@ -7,7 +7,8 @@ def train_function(model:str, training_file_dir:str, test_hours:int, target_col:
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
         preprocessed_data = make_data(training_file_dir, target_col, test_hours, transformations)
         config, model = da_rnn(preprocessed_data, len(target_col))
-        train(model, preprocessed_data, config)
+        # All train functions return trained_model
+        trained_model = train(model, preprocessed_data, config)
     elif model == "":
         pass 
 
@@ -28,7 +29,7 @@ def main():
         args.column = ['cfs', 'height']
     else: 
         args.column = [args.column]
-    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.resume)
+    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.resume, **kwargs)
 if __name__ == "__main__":
     main()
 
