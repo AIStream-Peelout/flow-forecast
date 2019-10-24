@@ -10,3 +10,13 @@ This task focuses on forecasting a stream's future flow/height (in either cfs or
 
 ## Task 2 Flood severity forecasting
 Task two focuses on predicting the severity of the flood based on the flood forecast, population information, and topography. Flood severity is defined based on several factors including the number of injuires, property damage, and crop damage.
+
+If you use either the data or codes from this repository please cite as
+```
+@inproceedings{GodfriedFlow2018,
+Author = {Isaac Godfried},
+Title = {Flow: A large scale dataset for stream flow and flood damage forecasting},
+Booktitle  = {Arxiv Preprint},
+Year = {2019}
+}
+```
