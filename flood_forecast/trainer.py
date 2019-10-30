@@ -1,16 +1,18 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 
-def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], **kwargs):
-    # Takes a model name, training directory a number of hours testing, a target column 
-    # and returns the trained model
-    ## TODO define standard model hyperparams here
+def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], model_type="PyTorch":str, **kwargs):
+   """
+   Function to train a Model(TimeSeriesModel) or da_rnn will return the trained model
+   """
     training_param_dict = {}
     training_param_dict["weight_path"] = None
     training_param_dict["learning_rate"] = .09
+    training_param_dict["tensorboard_path"] = None
+    training_param_dict["max_epochs"] = 2
+    training_param_dict["early_stopping"] = False
     for key, value in kwargs.items():
         training_param_dict[key] = value 
-
     if model == "da_rnn":
         from flood_forecast.da_rnn.train_da import da_rnn, train
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
@@ -18,7 +20,7 @@ def train_function(model:str, training_file_dir:str, test_hours:int, target_col:
         config, model = da_rnn(preprocessed_data, len(target_col))
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
-    elif model == "":   
+    elif model_type == "PyTorch":   
         pass 
     return trained_model 
 
@@ -39,7 +41,7 @@ def main():
         args.column = ['cfs', 'height']
     else: 
         args.column = [args.column]
-    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.resume, )
+    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.resume,  )
 if __name__ == "__main__":
     main()
 
