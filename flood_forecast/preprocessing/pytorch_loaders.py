@@ -16,14 +16,20 @@ class CSVDataLoader(Dataset):
         
     def __getitem__(self, idx):
         rows = self.df.iloc[idx:self.forecast_history+idx]
-        targs_idx_start = self.forecast_history+idx+1
+        targs_idx_start = self.forecast_history+idx
         targ_rows = self.df.iloc[targs_idx_start:self.forecast_length+targs_idx_start]
         src_data = rows.to_numpy()
         src_data = torch.from_numpy(src_data)
         trg_dat = targ_rows.to_numpy()
         trg_dat = torch.from_numpy(trg_dat)
         return src_data, trg_dat
-   
-     def __len__(self):
+    
+    def __len__(self):
         return len(self.df.index)
+        
+
+        
+        
+        
+    
         
