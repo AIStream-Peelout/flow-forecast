@@ -19,9 +19,9 @@ class CSVDataLoader(Dataset):
         targs_idx_start = self.forecast_history+idx
         targ_rows = self.df.iloc[targs_idx_start:self.forecast_length+targs_idx_start]
         src_data = rows.to_numpy()
-        src_data = torch.from_numpy(src_data)
+        src_data = torch.from_numpy(src_data).float()
         trg_dat = targ_rows.to_numpy()
-        trg_dat = torch.from_numpy(trg_dat)
+        trg_dat = torch.from_numpy(trg_dat).float()
         return src_data, trg_dat
     
     def __len__(self):
