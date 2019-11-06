@@ -15,11 +15,11 @@ class CSVDataLoader(Dataset):
         self.targ_col = target_col
         
     def __getitem__(self, idx):
-        rows = self.df.iloc[idx:self.history_length+idx]
-        targs_idx_start = self.history_length+idx+1
-        targ_rows = self.df.iloc[targs_idx_start:forecast_length+targs_idx_start]
+        rows = self.df.iloc[idx:self.forecast_history+idx]
+        targs_idx_start = self.forecast_history+idx+1
+        targ_rows = self.df.iloc[targs_idx_start:self.forecast_length+targs_idx_start]
         src_data = rows.to_numpy()
-        src_data = torch.from_numpy(numpy_data)
+        src_data = torch.from_numpy(src_data)
         trg_dat = targ_rows.to_numpy()
         trg_dat = torch.from_numpy(trg_dat)
         return src_data, trg_dat
