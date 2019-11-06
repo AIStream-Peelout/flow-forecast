@@ -23,4 +23,7 @@ class CSVDataLoader(Dataset):
         trg_dat = targ_rows.to_numpy()
         trg_dat = torch.from_numpy(trg_dat)
         return src_data, trg_dat
+   
+     def __len__(self):
+        return len(self.df.index)
         
