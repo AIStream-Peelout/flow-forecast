@@ -1,7 +1,8 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 
-def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], model_type="PyTorch":str, **kwargs):
+def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], wandb:bool = False, 
+                   model_type="PyTorch":str, **kwargs):
    """
    Function to train a Model(TimeSeriesModel) or da_rnn will return the trained model
    """
@@ -20,8 +21,8 @@ def train_function(model:str, training_file_dir:str, test_hours:int, target_col:
         config, model = da_rnn(preprocessed_data, len(target_col))
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
-    elif model_type == "PyTorch":   
-        pass 
+    elif model_type == "PyTorch":
+      pass 
     return trained_model 
 
 def main():
@@ -36,12 +37,17 @@ def main():
     parser.add_argument("--tensorboard", default="False")
     parser.add_argument("--wandb", default="False", help="Use weights and biases for enhanced logging" )
     parser.add_argument("--gpu", default=False, help="If using GPU pass true")
+    if args.wandb:
+      import wandb
+      wandb = True
+    else: 
+      wandb = False
     args = parser.parse_args()
     if args.column == "both":
         args.column = ['cfs', 'height']
     else: 
         args.column = [args.column]
-    train_function(args.model, args.dataset, args.test, args.column, weight_path=args.resume,  )
+    train_function(args.model, args.dataset, args.test, args.column, wandb)
 if __name__ == "__main__":
     main()
 
