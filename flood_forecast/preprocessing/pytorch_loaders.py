@@ -25,7 +25,8 @@ class CSVDataLoader(Dataset):
         return src_data, trg_dat
     
     def __len__(self):
-        return len(self.df.index)
+        return len(self.df.index)-self.forecast_history-self.forecast_length-1
+        
         
 
         
