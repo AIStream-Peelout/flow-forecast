@@ -1,4 +1,5 @@
 from torch.nn.modules.activation import MultiheadAttention
+from flood_forecast.transformer_xl.transformer_basic import SimplePositionalEncoding
 class MultiAttnHeadSimple(torch.nn.Module):
     def __init__(self, n_time_series, d_model=128):
         super().__init__()
