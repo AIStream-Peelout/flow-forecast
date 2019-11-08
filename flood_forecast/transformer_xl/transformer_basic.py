@@ -4,8 +4,9 @@ import torch
 import math
 from torch.nn.modules import Transformer 
 class SimpleTransformer(PyTorchForecast):
-    def __init__(self, param_dict, n_time_series, d_model=128, n_heads=6):
+    def __init__(self, param_dict, series_length, n_time_series, d_model=128, n_heads=6):
         super().__init__(param_dict)
+        self.mask = generate_square_subsequent_mask(series_length)
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
         self.transformer = Transformer(d_model, nhead=8)
@@ -17,7 +18,7 @@ class SimpleTransformer(PyTorchForecast):
         t = self.pe(t)
         x = x.permute(1,0,2)
         t = t.permute(1,0,2)
-        x = self.transformer(x, t, src_mask=tgt_mask, tgt_mask=tgt_mask)
+        x = self.transformer(x, t, src_mask=self.mask, self.mask)
         print(torch.isnan(x))
         x = self.final_layer(x)
         return x
@@ -38,5 +39,12 @@ class SimplePositionalEncoding(torch.nn.Module):
     def forward(self, x):
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
-   
+    
+def generate_square_subsequent_mask(sz):
+        r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
+            Unmasked positions are filled with float(0.0).
+        """
+        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        return mask
 
