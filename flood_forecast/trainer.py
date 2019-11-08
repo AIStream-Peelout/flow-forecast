@@ -1,11 +1,11 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 
-def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], wandb:bool = False, 
-                   model_type="PyTorch":str, **kwargs):
-   """
-   Function to train a Model(TimeSeriesModel) or da_rnn will return the trained model
-   """
+def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], wandb:bool = False,
+                model_type:str = "PyTorch", **kwargs):
+    """
+    Function to train a Model(TimeSeriesModel) or da_rnn will return the trained model
+     """
     training_param_dict = {}
     training_param_dict["weight_path"] = None
     training_param_dict["learning_rate"] = .09
@@ -22,7 +22,7 @@ def train_function(model:str, training_file_dir:str, test_hours:int, target_col:
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
     elif model_type == "PyTorch":
-      pass 
+        pass 
     return trained_model 
 
 def main():
@@ -35,14 +35,14 @@ def main():
     parser.add_argument("-r", "--resume", default=None, help="Resume from a checkpoint")
     parser.add_argument("-s", "--max_epochs", default="10")
     parser.add_argument("--tensorboard", default="False")
-    parser.add_argument("--wandb", default="False", help="Use weights and biases for enhanced logging" )
+    parser.add_argument("--wandb", default=False, help="Use weights and biases for enhanced logging" )
     parser.add_argument("--gpu", default=False, help="If using GPU pass true")
-    if args.wandb:
-      import wandb
-      wandb = True
-    else: 
-      wandb = False
     args = parser.parse_args()
+    if args.wandb:
+        import wandb
+        wandb = True
+    else: 
+        wandb = False
     if args.column == "both":
         args.column = ['cfs', 'height']
     else: 
