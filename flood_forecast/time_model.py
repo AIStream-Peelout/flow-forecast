@@ -3,7 +3,9 @@ from abc import ABC
 class TimeSeriesModel(ABC):
     def __init__(self, model_base, training_data, validation_data, test_data):
         self.model = load_model()
-        self.training_data_path =   
+        self.training_data_path = training_data 
+        self.validation_data_path = validation_path
+        self.test_data = test_data
         
     @abstractmethod
     def load_model(model_path:str) -> object:
@@ -19,8 +21,6 @@ class PyTorchForecast(TimeSeriesModel):
        if self.weight_path is not None:
           # TODO implement weight loading
           pass 
-       
-       
         
     def train():
         pass
