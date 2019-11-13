@@ -19,15 +19,25 @@ class TimeSeriesModel(ABC):
         This function should load and return the model 
         this will vary based on the underlying framework used
         """
-        pass 
+        raise NotImplementedError 
     
     @abc.abstractmethod
     def make_data_load(self, data_path, **kwargs) -> object:
         """
-        Intializes a data loader based on
-        the provided data path. This may be as simple 
-        as a pandas dataframe or as complex as a custom PyTorch data loader
+        Intializes a data loader based on the provided data path. 
+        This may be as simple as a pandas dataframe or as complex as 
+        a custom PyTorch data loader
         """
+        raise NotImplementedError
+        
+    @abc.abstractmethod
+    def save_model(output_path:str):
+        """
+        Saves a model to a specific path along with a configuration report 
+        of the parameters, data, and 
+        """
+        raise NotImplementedError
+    
         
     
 class PyTorchForecast(TimeSeriesModel):
