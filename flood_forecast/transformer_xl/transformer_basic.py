@@ -22,7 +22,32 @@ class SimpleTransformer(PyTorchForecast):
         print(torch.isnan(x))
         x = self.final_layer(x)
         return x
-        
+    
+class CustomTransformer(torch.nn.Module):
+    def __init__(self, n_time_series, d_model=128):
+        super().__init__()
+        self.dense_shape = torch.nn.Linear(n_time_series, d_model)
+        self.pe = SimplePositionalEncoding(d_model)
+        encoder_layer = TransformerEncoderLayer(d_model, 8)
+        encoder_norm = LayerNorm(d_model)
+        self.transformer_enc = TransformerEncoder(encoder_layer, 6, encoder_norm)
+        decoder_layer = TransformerDecoderLayer(d_model, 8, 2048, 0.1)
+        decoder_norm = LayerNorm(d_model)
+        self.transformer_decoder = TransformerDecoder(decoder_layer, 6, decoder_norm)
+        self.final_layer = torch.nn.Linear(d_model, 1)
+    def forward(self, x, t, tgt_mask):
+        x = self.dense_shape(x)
+        x = self.pe(x)
+        t = self.dense_shape(t)
+        t = self.pe(t)
+        x = x.permute(1,0,2)
+        t = t.permute(1,0,2)
+        x = self.transformer_enc(x, tgt_mask)
+        x = self.transformer_decoder(x, t, tgt_mask)
+        #print(torch.isnan(x))
+        x = self.final_layer(x)
+        return x
+    
 class SimplePositionalEncoding(torch.nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=5000):
         super(SimplePositionalEncoding, self).__init__()
