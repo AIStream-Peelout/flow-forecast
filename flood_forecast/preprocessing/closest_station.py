@@ -53,14 +53,28 @@ def get_weather_data(file_path:str, econet_gages:Set, base_url:str):
                                          "dist":station["dist"], "cat":"ECO"})
   return gage_meta_info
 
+def format_dt(date_time_str:str):
+  proper_datetime = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
+  if proper_datetime.minute != 0:
+    proper_datetime = proper_datetime + timedelta(hours=1)
+    proper_datetime.minute = 0
+  return proper_datetime
+
 def process_asos_data(file_path, base_url):
   """
-  Function that saves the ASOS data to a CSV file
+  Function that saves the ASOS data to CSV 
   """
   with open(file_path) as f:
     gage_data = json.load(f)
   for station in gage_data["stations"]:
-    if station["cat"] = "ASOS":
-      response = requests.get(base_url)
-      df = pd.read_csv(response.text)
-      df.to_csv(gage_data["gage_id"] + "_" + gage_data["station_id"]+".csv")
+    if station["cat"] == "ASOS":
+      response = requests.get(base_url.format(station["station_id"]))
+      with open("temp_weather_data.csv", "w+") as f:
+        f.write(response.text)
+      df = pd.read_csv("temp_weather_data.csv")
+      df['hour_updated'] = df['valid'].map(format_dt)
+      #times = pd.to_datetime(df.hour_updated)
+      #df = df.groupby(by=[times.dt.year, times.dt.month, times.dt.day, times.dt.hour]).sum() 
+      df.to_csv(str(gage_data["gage_id"]) + "_" + str(station["station_id"])+".csv")
+      
+
