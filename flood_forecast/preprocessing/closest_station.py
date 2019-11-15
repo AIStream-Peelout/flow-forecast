@@ -7,6 +7,7 @@ import requests
 
 def get_closest_gage(gage_df:pd.DataFrame, station_df:pd.DataFrame, path_dir:str, start_row:int, end_row:int):
   # Function that calculates the closest weather stations to gage and stores in JSON
+  # Base u
   for row in range(start_row, end_row):
     gage_info = {}
     gage_info["river_id"] = int(gage_df.iloc[row]['id'])
@@ -31,6 +32,8 @@ def get_weather_data(file_path:str, econet_gages:Set, base_url:str):
   Function that retrieves if station has weather 
   data for a specific gage either from ASOS or ECONet 
   """
+  # Base URL "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station={}&data=tmpf&data=p01m&year1=2019&month1=1&day1=1&year2=2019&month2=1&day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
+
   gage_meta_info = {}
   
   with open(file_path) as f:
