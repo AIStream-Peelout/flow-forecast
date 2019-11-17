@@ -6,6 +6,7 @@ import unittest
 import os
 import pandas as pd
 import pathlib
+import torch
 class TestDARNN(unittest.TestCase):
     def setUp(self):
         self.preprocessed_data = self.preprocessed_data = make_data(os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv"), ["cfs"], 72)
@@ -28,6 +29,8 @@ class TestDARNN(unittest.TestCase):
     
     def test_resume_ckpt(self):
         """ This test is dependent on test_train_model succeding"""
+        config, da = da_rnn(self.preprocessed_data, 1, 64)
+        torch.save(da.encoder.state_dict(), os.path.join("checkpoint", "encoder.pth"))
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="checkpoint")
         self.assertTrue(config)
         #self.assertTrue(dnn_network)

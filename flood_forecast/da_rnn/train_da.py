@@ -48,10 +48,10 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     with open(os.path.join(param_output_path, "dec_kwargs.json"), "w+") as fi:
         json.dump(dec_kwargs, fi, indent=4)
     if save_path:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        print("Resuming training from " + os.path.join(dir_path, save_path, "encoder.pth"))
-        encoder.load_state_dict(torch.load(os.path.join(dir_path, save_path, "encoder.pth")), map_location=device)
-        decoder.load_state_dict(torch.load(os.path.join(dir_path, save_path, "decoder.pth")), map_location=device)
+        #dir_path = os.path.dirname(os.path.realpath(__file__))
+        print("Resuming training from " + os.path.join(save_path, "encoder.pth"))
+        encoder.load_state_dict(torch.load(os.path.join(save_path, "encoder.pth")), map_location=device)
+        decoder.load_state_dict(torch.load(os.path.join(save_path, "decoder.pth")), map_location=device)
 
     encoder_optimizer = optim.Adam(
         params=[p for p in encoder.parameters() if p.requires_grad],
