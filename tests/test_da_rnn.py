@@ -4,7 +4,6 @@ from flood_forecast.preprocessing.preprocess_da_rnn import TrainData, format_dat
 from flood_forecast.da_rnn.train_da import da_rnn, train
 import unittest
 import os
-import pandas as pd
 import pathlib
 import torch
 class TestDARNN(unittest.TestCase):
@@ -34,7 +33,6 @@ class TestDARNN(unittest.TestCase):
         torch.save(da.encoder.state_dict(), os.path.join("checkpoint", "encoder.pth"))
         torch.save(da.decoder.state_dict(), os.path.join("checkpoint", "decoder.pth"))
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="checkpoint")
-        #self.assertTrue(config)
         self.assertTrue(dnn_network)
 if __name__ == '__main__':
     unittest.main()
