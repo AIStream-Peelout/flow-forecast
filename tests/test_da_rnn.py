@@ -30,10 +30,9 @@ class TestDARNN(unittest.TestCase):
     def test_resume_ckpt(self):
         """ This test is dependent on test_train_model succeding"""
         config, da = da_rnn(self.preprocessed_data, 1, 64)
-        os.mkdir("checkpoint")
+        os.mkdir("checkpoint") 
         torch.save(da.encoder.state_dict(), os.path.join("checkpoint", "encoder.pth"))
         torch.save(da.encoder.state_dict(), os.path.join("checkpoint", "decoder.pth"))
-        print("Run save weight")
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="checkpoint")
         #self.assertTrue(config)
         self.assertTrue(dnn_network)
