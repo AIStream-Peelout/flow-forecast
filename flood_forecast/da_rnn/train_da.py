@@ -48,9 +48,9 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     with open(os.path.join(param_output_path, "dec_kwargs.json"), "w+") as fi:
         json.dump(dec_kwargs, fi, indent=4)
     if save_path:
-        print("Resuming training from " + save_path)
-        encoder.load_state_dict(torch.load(save_path), map_location=device)
-        decoder.load_state_dict(torch.load(save_path), map_location=device)
+        print("Resuming training from " + os.path.join(save_path, "encoder.torch"))
+        encoder.load_state_dict(torch.load(os.path.join(save_path, "encoder.pth")), map_location=device)
+        decoder.load_state_dict(torch.load(os.path.join(save_path, "decoder.pth")), map_location=device)
 
     encoder_optimizer = optim.Adam(
         params=[p for p in encoder.parameters() if p.requires_grad],
@@ -115,8 +115,8 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
     # 
     if not os.path.exists("checkpoint"):
         os.makedirs("checkpoint")
-    torch.save(net.encoder.state_dict(), "checkpoint")
-    torch.save(net.decoder.state_dict(), "checkpoint")
+    torch.save(net.encoder.state_dict(), os.path.join("checkpoint", "encoder.pth"))
+    torch.save(net.decoder.state_dict(), os.path.join("checkpoint", "decoder.pth"))
     
     return [iter_losses, epoch_losses], net
 
