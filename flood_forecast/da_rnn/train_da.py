@@ -49,7 +49,6 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
         json.dump(dec_kwargs, fi, indent=4)
     if save_path:
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        print(dir_path)
         print("Resuming training from " + os.path.join(dir_path, save_path, "encoder.pth"))
         encoder.load_state_dict(torch.load(os.path.join(dir_path, save_path, "encoder.pth")), map_location=device)
         decoder.load_state_dict(torch.load(os.path.join(dir_path, save_path, "decoder.pth")), map_location=device)
@@ -116,6 +115,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
     dir_path = os.path.dirname(os.path.realpath(__file__))
     if not os.path.exists("checkpoint"):
         os.makedirs("checkpoint")
+    print(s.path.join(dir_path, "checkpoint", "encoder.pth"))
     torch.save(net.encoder.state_dict(), os.path.join(dir_path, "checkpoint", "encoder.pth"))
     torch.save(net.decoder.state_dict(), os.path.join(dir_path, "checkpoint", "decoder.pth"))
     
