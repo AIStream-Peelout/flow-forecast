@@ -167,17 +167,17 @@ def predict(t_net: DaRnnNet, t_dat: TrainData, train_size: int, batch_size: int,
         y_slc = slice(y_i, y_i + batch_size)
         batch_idx = range(len(y_pred))[y_slc]
         b_len = len(batch_idx)
-        X = np.zeros((b_len, T, t_dat.feats.shape[1]))
+        X = np.zeros((b_len, T - 1, t_dat.feats.shape[1]))
         y_history = np.zeros((b_len, T - 1, t_dat.targs.shape[1]))
 
         for b_i, b_idx in enumerate(batch_idx):
             if on_train:
-                start, stop = b_idx, b_idx + T
+                idx = range(b_idx, b_idx + T - 1)
             else:
-                start, stop = b_idx + train_size - T, b_idx + train_size
+                idx = range(b_idx + train_size - T, b_idx + train_size - 1)
 
-            X[b_i, :, :] = t_dat.feats[start : stop, :]
-            y_history[b_i, :] = t_dat.targs[start : stop - 1]
+            X[b_i, :, :] = t_dat.feats[idx, :]
+            y_history[b_i, :] = t_dat.targs[idx]
 
         y_history = numpy_to_tvar(y_history)
         _, input_encoded = t_net.encoder(numpy_to_tvar(X))
