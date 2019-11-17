@@ -4,6 +4,7 @@ import os
 import json
 from typing import Set 
 import requests
+from datetime import datetime, timedelta
 
 def get_closest_gage(gage_df:pd.DataFrame, station_df:pd.DataFrame, path_dir:str, start_row:int, end_row:int):
   # Function that calculates the closest weather stations to gage and stores in JSON
@@ -57,7 +58,7 @@ def format_dt(date_time_str:str):
   proper_datetime = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
   if proper_datetime.minute != 0:
     proper_datetime = proper_datetime + timedelta(hours=1)
-    proper_datetime.minute = 0
+    proper_datetime = proper_datetime.replace(minute=0)
   return proper_datetime
 
 def process_asos_data(file_path, base_url):

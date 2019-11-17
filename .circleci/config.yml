@@ -39,8 +39,8 @@ jobs:
       - run:
           name: run tests
           command: |
-            python tests/test_preprocessing.py
             python tests/test_da_rnn.py
+            python tests/data_format_tests.py
       - store_artifacts:
           path: test-reports
           destination: test-reports
