@@ -12,9 +12,10 @@ class TestDARNN(unittest.TestCase):
 
     def test_train_model(self):
         config, da_network = da_rnn(self.preprocessed_data, 1, 64)
-        train_cfg, train(da_network, self.preprocessed_data, config, n_epochs=2, tensorboard=True)
-        self.assertEqual(1,1)
-         
+        train_config, model = train(da_network, self.preprocessed_data, config, n_epochs=2, tensorboard=True)
+        self.assertTrue(train_config)
+        self.assertTrue(model)
+
     def test_tf_data(self):
         dirname = os.path.dirname(__file__)
         # Test that Tensorboard directory was indeed created 
@@ -27,6 +28,7 @@ class TestDARNN(unittest.TestCase):
         self.assertIsNotNone(dnn_network)
     
     def test_resume_ckpt(self):
+        """ This test is dependent on test_train_model succeding"""
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="models_weights")
         self.assertTrue(config)
         #self.assertTrue(dnn_network)
