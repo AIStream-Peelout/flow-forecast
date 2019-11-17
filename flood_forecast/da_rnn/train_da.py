@@ -111,9 +111,9 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
                 writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
                 #writer.add_scalar("Train/MSE", train_mse, e_i )
             #     
-    dir_path = os.path.dirname(os.path.realpath(__file__))          
-    torch.save(net.encoder.state_dict(), os.path.join(dir_path, "checkpoint", "encoder.torch"))
-    torch.save(net.decoder.state_dict(), os.path.join(dir_path, "checkpoint", "decoder.torch"))
+    #dir_path = os.path.dirname(os.path.realpath(__file__))          
+    torch.save(net.encoder.state_dict(), os.path.join("checkpoint", "encoder.torch"))
+    torch.save(net.decoder.state_dict(), os.path.join("checkpoint", "decoder.torch"))
     
     return iter_losses, epoch_losses
 

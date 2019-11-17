@@ -13,7 +13,6 @@ class TestDARNN(unittest.TestCase):
     def test_train_model(self):
         config, da_network = da_rnn(self.preprocessed_data, 1, 64)
         train_config, model = train(da_network, self.preprocessed_data, config, n_epochs=2, tensorboard=True)
-        self.assertTrue(train_config)
         self.assertTrue(model)
 
     def test_tf_data(self):
@@ -29,7 +28,7 @@ class TestDARNN(unittest.TestCase):
     
     def test_resume_ckpt(self):
         """ This test is dependent on test_train_model succeding"""
-        config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="models_weights")
+        config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="checkpoint")
         self.assertTrue(config)
         #self.assertTrue(dnn_network)
 if __name__ == '__main__':
