@@ -115,7 +115,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
     dir_path = os.path.dirname(os.path.realpath(__file__))
     if not os.path.exists("checkpoint"):
         os.makedirs("checkpoint")
-    print(s.path.join(dir_path, "checkpoint", "encoder.pth"))
+    print(os.path.join(dir_path, "checkpoint", "encoder.pth"))
     torch.save(net.encoder.state_dict(), os.path.join(dir_path, "checkpoint", "encoder.pth"))
     torch.save(net.decoder.state_dict(), os.path.join(dir_path, "checkpoint", "decoder.pth"))
     
