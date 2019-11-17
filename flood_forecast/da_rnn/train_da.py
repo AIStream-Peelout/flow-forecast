@@ -111,7 +111,10 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
                 writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
                 #writer.add_scalar("Train/MSE", train_mse, e_i )
             #     
-    #dir_path = os.path.dirname(os.path.realpath(__file__))          
+    #dir_path = os.path.dirname(os.path.realpath(__file__))   
+    # 
+    if not os.path.exists("checkpoint"):
+        os.makedirs("checkpoint")
     torch.save(net.encoder.state_dict(), os.path.join("checkpoint", "encoder.torch"))
     torch.save(net.decoder.state_dict(), os.path.join("checkpoint", "decoder.torch"))
     
