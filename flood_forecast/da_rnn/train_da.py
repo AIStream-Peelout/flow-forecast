@@ -118,7 +118,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
     torch.save(net.encoder.state_dict(), os.path.join("checkpoint", "encoder.torch"))
     torch.save(net.decoder.state_dict(), os.path.join("checkpoint", "decoder.torch"))
     
-    return iter_losses, epoch_losses
+    return [iter_losses, epoch_losses], net
 
 
 def prep_train_data(batch_idx: np.ndarray, t_cfg: TrainConfig, train_data: TrainData):
