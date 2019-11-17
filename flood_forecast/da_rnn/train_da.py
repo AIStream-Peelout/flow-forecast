@@ -33,7 +33,7 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
 
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print("Using device: " + device)
+    print("Using device: " + str(device))
     train_cfg = TrainConfig(T, int(train_data.feats.shape[0] * 0.7), batch_size, nn.MSELoss())
     logger.info(f"Training size: {train_cfg.train_size:d}.")
 

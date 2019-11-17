@@ -27,7 +27,8 @@ class TestDARNN(unittest.TestCase):
         self.assertIsNotNone(dnn_network)
     
     def test_resume_ckpt(self):
-        config, dnn_network = da_rnn(self.preprocessed_data, save_path="models_weights")
-        self.assertEqual(1,1)
+        config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="models_weights")
+        self.assertTrue(config)
+        #self.assertTrue(dnn_network)
 if __name__ == '__main__':
     unittest.main()
