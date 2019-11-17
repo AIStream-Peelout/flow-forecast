@@ -32,7 +32,7 @@ class TestDARNN(unittest.TestCase):
         config, da = da_rnn(self.preprocessed_data, 1, 64)
         os.mkdir("checkpoint") 
         torch.save(da.encoder.state_dict(), os.path.join("checkpoint", "encoder.pth"))
-        torch.save(da.encoder.state_dict(), os.path.join("checkpoint", "decoder.pth"))
+        torch.save(da.decoder.state_dict(), os.path.join("checkpoint", "decoder.pth"))
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="checkpoint")
         #self.assertTrue(config)
         self.assertTrue(dnn_network)
