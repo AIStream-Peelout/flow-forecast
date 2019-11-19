@@ -22,7 +22,7 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError 
     
     @abstractmethod
-    def make_data_load(self, data_path, **kwargs) -> object:
+    def make_data_load(self, data_path, params) -> object:
         """
         Intializes a data loader based on the provided data path. 
         This may be as simple as a pandas dataframe or as complex as 
