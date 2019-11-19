@@ -7,14 +7,14 @@ class TimeSeriesModel(ABC):
     This class assumes that data is already split into test train 
     and validation at this point.
     """
-    def __init__(self, model_base, training_data, validation_data, test_data):
-        self.model = load_model()
-        self.training = make_data_load(training_data)
-        self.validation = make_data_load(validation_path)
-        self.test_loader = make_data_load(test_data)
+    def __init__(self, model_base, training_data, validation_data, test_data, params):
+        self.model = load_model(model_base, params)
+        self.training = make_data_load(training_data, params)
+        self.validation = make_data_load(validation_path, params)
+        self.test_loader = make_data_load(test_data, params)
         
     @abstractmethod
-    def load_model(self, model_base, **kwargs) -> object:
+    def load_model(self, model_base, model_params) -> object:
         """
         This function should load and return the model 
         this will vary based on the underlying framework used
