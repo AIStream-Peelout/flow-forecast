@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Dict
 class TimeSeriesModel(ABC):
     """
@@ -13,7 +13,7 @@ class TimeSeriesModel(ABC):
         self.validation = make_data_load(validation_path)
         self.test_loader = make_data_load(test_data)
         
-    @abc.abstractmethod
+    @abstractmethod
     def load_model(self, model_base, **kwargs) -> object:
         """
         This function should load and return the model 
@@ -21,7 +21,7 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError 
     
-    @abc.abstractmethod
+    @abstractmethod
     def make_data_load(self, data_path, **kwargs) -> object:
         """
         Intializes a data loader based on the provided data path. 
@@ -30,7 +30,7 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
         
-    @abc.abstractmethod
+    @abstractmethod
     def save_model(output_path:str):
         """
         Saves a model to a specific path along with a configuration report 
