@@ -50,11 +50,14 @@ class PyTorchForecast(TimeSeriesModel):
             
     def load_model(self, model_base, model_params:Dict):
         model_base_to_class = {"PyTorchBasic":PyTorchBasic, "PyTorchTransformer":SimplePositionalEncoding} # Define all PyTorch models here
-        model = model_base_to_class[model_base]
+        model = model_base_to_class[model_base](**model_params)
         return model
     
-    def save_model(path:str):
-        pass 
+    def save_model(self, final_path):
+        torch.save(self.model.state_dict(), os.path.join(final_path, "model.pth"))
+        with open(os.path.join(final_path,datetime.now().strftime("%A%d%B%Y%I:%M%p")) + ".json", "w+") as p:
+            json.dump(self.params, p)
     
-    def make_data_load():
+    def make_data_load(forecast_history, forecast_length):
         pass 
+                        
