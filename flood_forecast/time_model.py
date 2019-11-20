@@ -9,6 +9,7 @@ class TimeSeriesModel(ABC):
     """
     def __init__(self, model_base:str, training_data:str, validation_data:str, test_data:str, params:Dict):
         self.model = load_model(model_base, params["model_params"])
+        self.params = params
         self.training = make_data_load(training_data, params)
         self.validation = make_data_load(validation_path, params)
         self.test_data = make_data_load(test_data, params)
