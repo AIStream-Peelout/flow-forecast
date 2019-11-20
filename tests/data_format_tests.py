@@ -7,9 +7,17 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(format_dt("2017-04-07 08:55"), datetime(year=2017, month=4, day=7, hour=9))
         self.assertEqual(format_dt("2018-04-08 23:55"), datetime(year=2018, month=4, day=9, hour=0)) 
 
+    def test_convert_temp(self):
+        self.assertEqual(convert_temp("50.3"), 50.3)
+        self.assertEqual(convert_temp("-12.0"), -12.0)
+        self.assertEqual(convert_temp("M"), 50)
+
+
     def test_process_asos_csv(self):
         df = process_asos_csv("small_test.csv")
         self.assertEqual(df.illoc[0]['p01m'], 92)
         self.assertEqual(df.illoc[0]['tmpf'], 52.5)
         self.assertEqual(df.illoc[0]['hour_updated'].hour, 1)
+
+   
     

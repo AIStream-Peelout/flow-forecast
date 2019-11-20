@@ -79,10 +79,10 @@ def process_asos_data(file_path, base_url):
       with open("temp_weather_data.csv", "w+") as f:
         f.write(response.text)
 
-  def process_asos_csv(path:str):
-      df = pd.read_csv(path)
-      df['hour_updated'] = df['valid'].map(format_dt)
-      df['tmpf'] = df['tmpf'].map(convert_temp)
-      df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
-      return df
+def process_asos_csv(path:str):
+    df = pd.read_csv(path)
+    df['hour_updated'] = df['valid'].map(format_dt)
+    df['tmpf'] = df['tmpf'].map(convert_temp)
+    df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
+    return df
 
