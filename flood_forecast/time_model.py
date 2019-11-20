@@ -40,7 +40,6 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError
     
         
-    
 class PyTorchForecast(TimeSeriesModel):
     def __init__(self, model_base, training_data, validation_data, test_data, params_dict, weight_path=None):
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
@@ -55,7 +54,7 @@ class PyTorchForecast(TimeSeriesModel):
     
     def save_model(self, final_path):
         torch.save(self.model.state_dict(), os.path.join(final_path, "model.pth"))
-        with open(os.path.join(final_path,datetime.now().strftime("%A%d%B%Y%I:%M%p")) + ".json", "w+") as p:
+        with open(os.path.join(final_path,datetime.now().strftime("d%B%Y%I:%M%p")) + ".json", "w+") as p:
             json.dump(self.params, p)
     
     def make_data_load(forecast_history, forecast_length):
