@@ -8,7 +8,7 @@ class TimeSeriesModel(ABC):
     and validation at this point.
     """
     def __init__(self, model_base:str, training_data:str, validation_data:str, test_data:str, params:Dict):
-        self.model = load_model(model_base, params)
+        self.model = load_model(model_base, params["model_params"])
         self.training = make_data_load(training_data, params)
         self.validation = make_data_load(validation_path, params)
         self.test_data = make_data_load(test_data, params)
@@ -49,7 +49,6 @@ class PyTorchForecast(TimeSeriesModel):
             
     def load_model(self, model_base, model_params:Dict):
         model_base_to_class = {"PyTorchBasic":PyTorchBasic, "PyTorchTransformer":SimplePositionalEncoding} # Define all PyTorch models here
-        # Todo fix params for model (i.e params)...
         model = model_base_to_class[model_base]
         return model
     
