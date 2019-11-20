@@ -10,12 +10,12 @@ class TimeSeriesModel(ABC):
     def __init__(self, model_base:str, training_data:str, validation_data:str, test_data:str, params:Dict):
         self.model = load_model(model_base, params["model_params"])
         self.params = params
-        self.training = make_data_load(training_data, params)
-        self.validation = make_data_load(validation_path, params)
-        self.test_data = make_data_load(test_data, params)
+        self.training = make_data_load(training_data, params["dataset_params"])
+        self.validation = make_data_load(validation_path, params["dataset_params"])
+        self.test_data = make_data_load(test_data, params["dataset_params"])
         
     @abstractmethod
-    def load_model(self, model_base, model_params) -> object:
+    def load_model(self, model_base:str, model_params) -> object:
         """
         This function should load and return the model 
         this will vary based on the underlying framework used
@@ -23,11 +23,11 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError 
     
     @abstractmethod
-    def make_data_load(self, data_path, params) -> object:
+    def make_data_load(self, data_path:str, params:Dict) -> object:
         """
         Intializes a data loader based on the provided data path. 
         This may be as simple as a pandas dataframe or as complex as 
-        a custom PyTorch data loader
+        a custom PyTorch data loader.
         """
         raise NotImplementedError
         
@@ -53,7 +53,7 @@ class PyTorchForecast(TimeSeriesModel):
         model = model_base_to_class[model_base]
         return model
     
-    def save_model():
+    def save_model(path:str):
         pass 
     
     def make_data_load():
