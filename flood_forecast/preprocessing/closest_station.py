@@ -82,8 +82,7 @@ def process_asos_data(file_path, base_url):
   def process_asos_csv(path:str):
       df = pd.read_csv(path)
       df['hour_updated'] = df['valid'].map(format_dt)
-      #times = pd.to_datetime(df.hour_updated)
-      #df = df.groupby(by=[times.dt.year, times.dt.month, times.dt.day, times.dt.hour]).sum() 
+      df['tmpf'] = df['tmpf'].map(convert_temp)
       df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
       return df
 
