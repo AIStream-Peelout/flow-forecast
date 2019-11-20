@@ -53,4 +53,5 @@ def compute_trans_validation(validation_loader, model, epoch, sequence_size, cri
             loss = criterion(output.view(-1, sequence_size), labels.float())
             loop_loss += len(labels.float())*loss.item()
         wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_data_loader.dataset)-1)})
-    return loop_loss
+    model.train()
+    return loop_loss/(len(validation_data_loader.dataset)-1)
