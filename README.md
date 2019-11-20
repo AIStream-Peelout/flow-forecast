@@ -1,5 +1,5 @@
 # Flow and flash flood forecasting benchmark
-This repository provides open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contains baseline methods for forecasting stream flows around the United States. Task two focuses on forecasting on the severity of the flood based on the forecast and the surrounding area. Additionally, some of the pre-processing scripts used to form the dataset are included for reproduciblity purposes and to facilitate appending new gages and weather stations.
+This repository provides open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contains baseline methods for forecasting stream flows around the United States. Task two focuses on forecasting the severity of the flood based on the forecast and the surrounding area. Additionally, some of the pre-processing scripts used to form the dataset are included for reproduciblity purposes and to facilitate appending new gages and weather stations.
 
 Using the library
 1. Run `pip install flood_forecast`
