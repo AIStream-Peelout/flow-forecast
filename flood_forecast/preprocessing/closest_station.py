@@ -60,6 +60,12 @@ def format_dt(date_time_str:str):
     proper_datetime = proper_datetime + timedelta(hours=1)
     proper_datetime = proper_datetime.replace(minute=0)
   return proper_datetime
+  
+def convert_temp(temparature):
+  try: 
+    return float(temparature)
+  except:
+    return 50
 
 def process_asos_data(file_path, base_url):
   """
@@ -72,10 +78,12 @@ def process_asos_data(file_path, base_url):
       response = requests.get(base_url.format(station["station_id"]))
       with open("temp_weather_data.csv", "w+") as f:
         f.write(response.text)
-      df = pd.read_csv("temp_weather_data.csv")
+
+  def process_asos_csv(path:str):
+      df = pd.read_csv(path)
       df['hour_updated'] = df['valid'].map(format_dt)
       #times = pd.to_datetime(df.hour_updated)
       #df = df.groupby(by=[times.dt.year, times.dt.month, times.dt.day, times.dt.hour]).sum() 
-      df.to_csv(str(gage_data["gage_id"]) + "_" + str(station["station_id"])+".csv")
-      
+      df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
+      return df
 
