@@ -24,6 +24,9 @@ class DataQualityTests(unittest.TestCase):
         df, precip_missing, temp_missing = process_asos_csv("asos_raw.csv")
         self.assertGreater(temp_missing,10)
         self.assertEqual(1,2)
+        
+if __name__ == '__main__':
+    unittest.main()
     
 
 

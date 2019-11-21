@@ -37,11 +37,10 @@ jobs:
       # https://nose.readthedocs.io
           
       - run:
-          name: run da tests
-          command:
+          name: run tests
+          command: |
             python tests/test_da_rnn.py
-      - run:
-         command: python tests/data_format_tests.py
+            python tests/data_format_tests.py
       - store_artifacts:
           path: test-reports
           destination: test-reports
