@@ -100,7 +100,7 @@ def process_asos_csv(path:str):
     missing_temp = df['tmpf'][df['tmpf']=='M'].count()
     df['hour_updated'] = df['valid'].map(format_dt)
     df['tmpf'] = df['tmpf'].map(convert_temp)
-    median = df['p01m'].median()
+    median = df['p01m'][df['p01m']!='M'].median()
     # TODO use average of preceeding and subsequent non-missing value
     df['p01m'] = df['p01m'].map(lambda x: handle_missing_precip(x, median))
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
