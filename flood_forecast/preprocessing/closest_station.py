@@ -2,7 +2,7 @@ from math import radians, cos, sin, asin, sqrt
 import pandas as pd
 import os
 import json
-from typing import Set 
+from typing import Set, Tuple, Dict
 import requests
 from datetime import datetime, timedelta
 
@@ -61,18 +61,23 @@ def format_dt(date_time_str:str):
     proper_datetime = proper_datetime.replace(minute=0)
   return proper_datetime
   
-def convert_temp(temparature):
+def convert_temp(temparature:str):
+  """
+  Note here temp could be a number or 'M'
+  which stands for missing. We use 50 at the moment 
+  to fill missing values. 
+  """
   try: 
     return float(temparature)
   except:
     return 50
 
-def handle_missing_precip(precip, median):
+def handle_missing_precip(precip:float, median:float):
   if precip=='M':
     return median
   return precip
 
-def process_asos_data(file_path, base_url):
+def process_asos_data(file_path:str, base_url:str):
   """
   Function that saves the ASOS data to CSV 
   uses output of get weather data.
@@ -91,10 +96,13 @@ def process_asos_data(file_path, base_url):
 
 def process_asos_csv(path:str):
     df = pd.read_csv(path)
-    missing_precip = df[['p10m']=='M'].count()
-    missing_temp = df[['tempf']=='M'].count()
+    missing_precip = df['p01m'][df['p10m']=='M'].count()
+    missing_temp = df['tempf'][df['tempf']=='M'].count()
     df['hour_updated'] = df['valid'].map(format_dt)
     df['tmpf'] = df['tmpf'].map(convert_temp)
+    median = df['p10m'].median()
+    # TODO use average of preceeding and subsequent non-missing value
+    df['p10m'] = df['p10m'].map(lambda x: handle_missing_precip(x, median))
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
     return df, missing_precip, missing_temp
 
