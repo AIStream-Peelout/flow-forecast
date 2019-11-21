@@ -4,7 +4,7 @@ import unittest
 import os 
 
 class DataQualityTests(unittest.TestCase):
-    def __init__(self):
+    def setUp(self):
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"test_data")
 
     def test_format_dt(self):
