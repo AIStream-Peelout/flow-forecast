@@ -54,14 +54,14 @@ def get_weather_data(file_path:str, econet_gages:Set, base_url:str):
                                          "dist":station["dist"], "cat":"ECO"})
   return gage_meta_info
 
-def format_dt(date_time_str:str):
+def format_dt(date_time_str:str) -> datetime:
   proper_datetime = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M")
   if proper_datetime.minute != 0:
     proper_datetime = proper_datetime + timedelta(hours=1)
     proper_datetime = proper_datetime.replace(minute=0)
   return proper_datetime
   
-def convert_temp(temparature:str):
+def convert_temp(temparature:str) -> float:
   """
   Note here temp could be a number or 'M'
   which stands for missing. We use 50 at the moment 
@@ -72,7 +72,7 @@ def convert_temp(temparature:str):
   except:
     return 50
 
-def handle_missing_precip(precip:float, median:float):
+def handle_missing_precip(precip:float, median:float) -> float:
   if precip=='M':
     return median
   return precip
@@ -96,13 +96,13 @@ def process_asos_data(file_path:str, base_url:str):
 
 def process_asos_csv(path:str):
     df = pd.read_csv(path)
-    missing_precip = df['p01m'][df['p10m']=='M'].count()
+    missing_precip = df['p01m'][df['p02m']=='M'].count()
     missing_temp = df['tempf'][df['tempf']=='M'].count()
     df['hour_updated'] = df['valid'].map(format_dt)
     df['tmpf'] = df['tmpf'].map(convert_temp)
-    median = df['p10m'].median()
+    median = df['01m'].median()
     # TODO use average of preceeding and subsequent non-missing value
-    df['p10m'] = df['p10m'].map(lambda x: handle_missing_precip(x, median))
+    df['p01m'] = df['p01m'].map(lambda x: handle_missing_precip(x, median))
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
     return df, missing_precip, missing_temp
 
