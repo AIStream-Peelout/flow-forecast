@@ -97,7 +97,7 @@ def process_asos_data(file_path:str, base_url:str):
 def process_asos_csv(path:str):
     df = pd.read_csv(path)
     missing_precip = df['p01m'][df['p01m']=='M'].count()
-    missing_temp = df['tempf'][df['tempf']=='M'].count()
+    missing_temp = df['tmpf'][df['tmpf']=='M'].count()
     df['hour_updated'] = df['valid'].map(format_dt)
     df['tmpf'] = df['tmpf'].map(convert_temp)
     median = df['01m'].median()
