@@ -12,12 +12,19 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(convert_temp("-12.0"), -12.0)
         self.assertEqual(convert_temp("M"), 50)
 
-
     def test_process_asos_csv(self):
-        df = process_asos_csv("small_test.csv")
+        df, precip_missing, temp_missing = process_asos_csv("small_test.csv")
         self.assertEqual(df.illoc[0]['p01m'], 92)
         self.assertEqual(df.illoc[0]['tmpf'], 52.5)
         self.assertEqual(df.illoc[0]['hour_updated'].hour, 1)
+        self.assertEqual(precip_missing, 0)
+        self.assertEqual(temp_missing, 0)
+    
+    def test_process_asos_full(self):
+        df, precip_missing, temp_missing = process_asos_csv("asos_raw.csv")
+        self.assertGreater(temp_missing,10)
+    
+
 
    
     

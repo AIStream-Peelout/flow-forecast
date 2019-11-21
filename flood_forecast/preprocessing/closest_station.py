@@ -67,9 +67,15 @@ def convert_temp(temparature):
   except:
     return 50
 
+def handle_missing_precip(precip, median):
+  if precip=='M':
+    return median
+  return precip
+
 def process_asos_data(file_path, base_url):
   """
   Function that saves the ASOS data to CSV 
+  uses output of get weather data.
   """
   with open(file_path) as f:
     gage_data = json.load(f)
@@ -78,11 +84,17 @@ def process_asos_data(file_path, base_url):
       response = requests.get(base_url.format(station["station_id"]))
       with open("temp_weather_data.csv", "w+") as f:
         f.write(response.text)
+      df, missing_precip, missing_temp = process_asos_csv("temp_weather_data.csv")
+      station["missing_precip"] = missing_precip
+      station["missing_temp"] = missing_temp
+      df.to_csv(str(gage_data["gage_id"]) + "_" + str(station["station_id"])+".csv")
 
 def process_asos_csv(path:str):
     df = pd.read_csv(path)
+    missing_precip = df[['p10m']=='M'].count()
+    missing_temp = df[['tempf']=='M'].count()
     df['hour_updated'] = df['valid'].map(format_dt)
     df['tmpf'] = df['tmpf'].map(convert_temp)
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
-    return df
+    return df, missing_precip, missing_temp
 
