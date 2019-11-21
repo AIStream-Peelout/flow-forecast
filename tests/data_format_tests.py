@@ -23,6 +23,7 @@ class DataQualityTests(unittest.TestCase):
     def test_process_asos_full(self):
         df, precip_missing, temp_missing = process_asos_csv("asos_raw.csv")
         self.assertGreater(temp_missing,10)
+        self.assertEqual(1,2)
     
 
 
