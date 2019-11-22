@@ -1,4 +1,4 @@
-from math import radians, cos, sin, asin, sqrt, haversine
+from math import radians, cos, sin, asin, sqrt
 import pandas as pd
 import os
 import json
@@ -27,6 +27,22 @@ def get_closest_gage(gage_df:pd.DataFrame, station_df:pd.DataFrame, path_dir:str
       if count%100 == 0:
         print("Currently at " + str(count))
       count +=1 
+
+def haversine(lon1, lat1, lon2, lat2):
+  """
+  Calculate the great circle distance between two points 
+  on the earth (specified in decimal degrees)
+  """
+  # convert decimal degrees to radians 
+  lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+  # haversine formula 
+  dlon = lon2 - lon1 
+  dlat = lat2 - lat1 
+  a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+  c = 2 * asin(sqrt(a)) 
+  r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+  return c * r
       
 def get_weather_data(file_path:str, econet_gages:Set, base_url:str):
   """
@@ -107,4 +123,3 @@ def process_asos_csv(path:str):
     df['tmpf']=(df['tmpf'].fillna(method='ffill') + df['tmpf'].fillna(method='bfill'))/2
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
     return df, missing_precip, missing_temp
-

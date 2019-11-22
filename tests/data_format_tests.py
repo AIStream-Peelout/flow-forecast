@@ -30,6 +30,9 @@ class DataQualityTests(unittest.TestCase):
         self.assertGreater(temp_missing,10)
         self.assertGreater(precip_missing, 2)
 
+    def test_value_imputation(self):
+        pass 
+    
 if __name__ == '__main__':
     unittest.main()
     
