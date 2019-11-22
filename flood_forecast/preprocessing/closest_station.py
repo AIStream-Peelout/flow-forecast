@@ -1,4 +1,4 @@
-from math import radians, cos, sin, asin, sqrt
+from math import radians, cos, sin, asin, sqrt, haversine
 import pandas as pd
 import os
 import json
@@ -84,26 +84,27 @@ def process_asos_data(file_path:str, base_url:str):
   """
   with open(file_path) as f:
     gage_data = json.load(f)
-  for station in gage_data["stations"]:
-    if station["cat"] == "ASOS":
-      response = requests.get(base_url.format(station["station_id"]))
-      with open("temp_weather_data.csv", "w+") as f:
-        f.write(response.text)
-      df, missing_precip, missing_temp = process_asos_csv("temp_weather_data.csv")
-      station["missing_precip"] = missing_precip
-      station["missing_temp"] = missing_temp
-      df.to_csv(str(gage_data["gage_id"]) + "_" + str(station["station_id"])+".csv")
-
+    for station in gage_data["stations"]:
+      if station["cat"] == "ASOS":
+        response = requests.get(base_url.format(station["station_id"]))
+        with open("temp_weather_data.csv", "w+") as f:
+          f.write(response.text)
+        df, missing_precip, missing_temp = process_asos_csv("temp_weather_data.csv")
+        station["missing_precip"] = missing_precip
+        station["missing_temp"] = missing_temp
+        df.to_csv(str(gage_data["gage_id"]) + "_" + str(station["station_id"])+".csv")
+    json.dump(gage_data, f)
+  
 def process_asos_csv(path:str):
     df = pd.read_csv(path)
     missing_precip = df['p01m'][df['p01m']=='M'].count()
     missing_temp = df['tmpf'][df['tmpf']=='M'].count()
     df['hour_updated'] = df['valid'].map(format_dt)
-    df['tmpf'] = df['tmpf'].map(convert_temp)
+    df['tmpf'] = pd.to_numeric(df['tmpf'], errors='coerce')
     df['p01m'] = pd.to_numeric(df['p01m'], errors='coerce')
-    median = df['p01m'][df['p01m']!='M'].median()
-    # TODO use average of preceeding and subsequent non-missing value
-    df['p01m'] = df['p01m'].map(lambda x: handle_missing_precip(x, median))
+    # Replace mising values with an average of the two closest values
+    df['p01m']=(df['p01m'].fillna(method='ffill') + df['p01m'].fillna(method='bfill'))/2
+    df['tmpf']=(df['tmpf'].fillna(method='ffill') + df['tmpf'].fillna(method='bfill'))/2
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
     return df, missing_precip, missing_temp
 
