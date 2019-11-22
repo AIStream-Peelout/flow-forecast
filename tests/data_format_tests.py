@@ -18,9 +18,10 @@ class DataQualityTests(unittest.TestCase):
 
     def test_process_asos_csv(self):
         df, precip_missing, temp_missing = process_asos_csv(os.path.join( self.test_data_path,"small_test.csv"))
-        self.assertEqual(df.iloc[0]['p01m'], 92)
-        self.assertEqual(df.iloc[0]['tmpf'], 52.5)
-        self.assertEqual(df.iloc[0]['hour_updated'].hour, 1)
+        self.assertEqual(df.iloc[1]['p01m'], 47)
+        self.assertEqual(df.iloc[0]['tmpf'], 25)
+        self.assertEqual(df.iloc[1]['hour_updated'].hour, 1)
+        self.assertEqual(df.iloc[1]['tempf'], 53)
         self.assertEqual(precip_missing, 0)
         self.assertEqual(temp_missing, 0)
     
