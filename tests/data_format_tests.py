@@ -21,7 +21,7 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(df.iloc[1]['p01m'], 47)
         self.assertEqual(df.iloc[0]['tmpf'], 50)
         self.assertEqual(df.iloc[1]['hour_updated'].hour, 1)
-        self.assertEqual(df.iloc[1]['tempf'], 53)
+        self.assertEqual(df.iloc[1]['tmpf'], 53)
         self.assertEqual(precip_missing, 0)
         self.assertEqual(temp_missing, 0)
     
