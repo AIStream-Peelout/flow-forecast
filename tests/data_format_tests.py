@@ -18,16 +18,15 @@ class DataQualityTests(unittest.TestCase):
 
     def test_process_asos_csv(self):
         df, precip_missing, temp_missing = process_asos_csv(os.path.join( self.test_data_path,"small_test.csv"))
-        self.assertEqual(df.illoc[0]['p01m'], 92)
-        self.assertEqual(df.illoc[0]['tmpf'], 52.5)
-        self.assertEqual(df.illoc[0]['hour_updated'].hour, 1)
+        self.assertEqual(df.iloc[0]['p01m'], 92)
+        self.assertEqual(df.iloc[0]['tmpf'], 52.5)
+        self.assertEqual(df.iloc[0]['hour_updated'].hour, 1)
         self.assertEqual(precip_missing, 0)
         self.assertEqual(temp_missing, 0)
     
     def test_process_asos_full(self):
         df, precip_missing, temp_missing = process_asos_csv(os.path.join( self.test_data_path, "asos_raw.csv"))
         self.assertGreater(temp_missing,10)
-        self.assertEqual(1,2)
 
 if __name__ == '__main__':
     unittest.main()
