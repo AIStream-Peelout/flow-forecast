@@ -31,8 +31,10 @@ class DataQualityTests(unittest.TestCase):
         self.assertGreater(precip_missing, 2)
 
     def test_value_imputation(self):
-        pass 
-    
+        df, precip_missing, temp_missing = process_asos_csv(os.path.join(self.test_data_path, "imputation_test.csv"))
+        self.assertEqual(df.iloc[0]['p01m'], 0)
+        #self.assertEqual(df.iloc[2]['p01m'], 1)
+
 if __name__ == '__main__':
     unittest.main()
     

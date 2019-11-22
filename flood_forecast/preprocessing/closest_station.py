@@ -117,9 +117,13 @@ def process_asos_csv(path:str):
     missing_temp = df['tmpf'][df['tmpf']=='M'].count()
     df['hour_updated'] = df['valid'].map(format_dt)
     df['tmpf'] = pd.to_numeric(df['tmpf'], errors='coerce')
+    
     df['p01m'] = pd.to_numeric(df['p01m'], errors='coerce')
     # Replace mising values with an average of the two closest values
-    df['p01m']=(df['p01m'].fillna(method='ffill') + df['p01m'].fillna(method='bfill'))/2
+    # Since stations record at different intervals this could 
+    # actually cause an overestimation of precip. Instead replace with 0
+    #df['p01m']=(df['p01m'].fillna(method='ffill') + df['p01m'].fillna(method='bfill'))/2
+    df['p01m'] = df['p01m'].fillna(0)
     df['tmpf']=(df['tmpf'].fillna(method='ffill') + df['tmpf'].fillna(method='bfill'))/2
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
     return df, missing_precip, missing_temp
