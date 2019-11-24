@@ -87,12 +87,7 @@ def convert_temp(temparature:str) -> float:
     return float(temparature)
   except:
     return 50
-
-def handle_missing_precip(precip:float, median:float) -> float:
-  if precip=='M':
-    return median
-  return precip
-
+    
 def process_asos_data(file_path:str, base_url:str)->Dict:
   """
   Function that saves the ASOS data to CSV 
