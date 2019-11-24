@@ -1,4 +1,4 @@
-from flood_forecast.preprocessing.closest_station import get_weather_data, get_closest_gage, format_dt, convert_temp, process_asos_csv
+from flood_forecast.preprocessing.closest_station import get_weather_data, get_closest_gage, format_dt, convert_temp, process_asos_csv, process_asos_data
 from datetime import datetime
 import unittest
 import os 
@@ -35,6 +35,15 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(df.iloc[0]['p01m'], 0)
         #self.assertEqual(df.iloc[2]['p01m'], 1)
 
+    def test_get_weather_data(self):
+        url = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station={}&data=tmpf&data=p01m&year1=2019&month1=1&day1=1&year2=2019&month2=1&day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
+        get_weather_data(os.path.join(self.test_data_path, "full_out.json"), {}, url)
+        self.assertEqual(1,1)
+
+    def test_process_asos_data(self):
+        full_data_url = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station={}&data=tmpf&data=p01m&year1=2014&month1=1&day1=1&year2=2019&month2=1&day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
+        process_asos_data(os.path.join(self.test_data_path, "output_example.json"), full_data_url)
+        self.assertEqual(1,1)
 if __name__ == '__main__':
     unittest.main()
     
