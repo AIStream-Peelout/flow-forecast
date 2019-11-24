@@ -93,7 +93,7 @@ def handle_missing_precip(precip:float, median:float) -> float:
     return median
   return precip
 
-def process_asos_data(file_path:str, base_url:str):
+def process_asos_data(file_path:str, base_url:str)->Dict:
   """
   Function that saves the ASOS data to CSV 
   uses output of get weather data.
@@ -110,6 +110,7 @@ def process_asos_data(file_path:str, base_url:str):
         station["missing_temp"] = missing_temp
         df.to_csv(str(gage_data["gage_id"]) + "_" + str(station["station_id"])+".csv")
     json.dump(gage_data, f)
+    return gage_data
   
 def process_asos_csv(path:str):
     df = pd.read_csv(path)

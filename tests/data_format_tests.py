@@ -42,8 +42,9 @@ class DataQualityTests(unittest.TestCase):
 
     def test_process_asos_data(self):
         full_data_url = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station={}&data=tmpf&data=p01m&year1=2014&month1=1&day1=1&year2=2019&month2=1&day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
-        process_asos_data(os.path.join(self.test_data_path, "output_example.json"), full_data_url)
-        self.assertEqual(1,1)
+        river_result = process_asos_data(os.path.join(self.test_data_path, "asos_process.json"), full_data_url)
+        self.assertGreater(river_result["stations"][1]["missing_temp"], -1)
+        self.assertGreater(river_result["stations"][2]["missing_precip"], -1)
 if __name__ == '__main__':
     unittest.main()
     
