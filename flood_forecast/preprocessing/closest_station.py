@@ -98,7 +98,7 @@ def process_asos_data(file_path:str, base_url:str)->Dict:
   Function that saves the ASOS data to CSV 
   uses output of get weather data.
   """
-  with open(file_path, "a+") as f:
+  with open(file_path) as f:
     gage_data = json.load(f)
     for station in gage_data["stations"]:
       if station["cat"] == "ASOS":
@@ -109,8 +109,9 @@ def process_asos_data(file_path:str, base_url:str)->Dict:
         station["missing_precip"] = missing_precip
         station["missing_temp"] = missing_temp
         df.to_csv(str(gage_data["gage_id"]) + "_" + str(station["station_id"])+".csv")
+  with open(file_path, "w") as f:
     json.dump(gage_data, f)
-    return gage_data
+  return gage_data
   
 def process_asos_csv(path:str):
     df = pd.read_csv(path)
