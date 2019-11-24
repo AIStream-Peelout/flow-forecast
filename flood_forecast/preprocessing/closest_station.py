@@ -128,4 +128,4 @@ def process_asos_csv(path:str):
     df['p01m'] = df['p01m'].fillna(0)
     df['tmpf']=(df['tmpf'].fillna(method='ffill') + df['tmpf'].fillna(method='bfill'))/2
     df = df.groupby(by=['hour_updated'], as_index=False).agg({'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
-    return df, missing_precip, missing_temp
+    return df, int(missing_precip), int(missing_temp)
