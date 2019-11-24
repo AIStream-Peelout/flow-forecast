@@ -98,7 +98,7 @@ def process_asos_data(file_path:str, base_url:str)->Dict:
   Function that saves the ASOS data to CSV 
   uses output of get weather data.
   """
-  with open(file_path) as f:
+  with open(file_path, "a+") as f:
     gage_data = json.load(f)
     for station in gage_data["stations"]:
       if station["cat"] == "ASOS":
