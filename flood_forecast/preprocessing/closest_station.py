@@ -21,6 +21,8 @@ def get_closest_gage(gage_df:pd.DataFrame, station_df:pd.DataFrame, path_dir:str
       dist = haversine(stat_row["lon"], stat_row["lat"], gage_long, gage_lat)
       st_id = stat_row['stid']
       gage_info["stations"].append({"station_id":st_id, "dist":dist})
+    # This bug was actually only later discovered that it puts further away stations first.
+    # However subsequent code was then based on it. So we just use negative indices later on (i.e [-20:])
     gage_info["stations"] = sorted(gage_info['stations'], key = lambda i: i["dist"], reverse=True) 
     with open(os.path.join(path_dir, str(gage_info["river_id"]) + "stations.json"), 'w') as w:
       json.dump(gage_info, w)
@@ -87,7 +89,7 @@ def convert_temp(temparature:str) -> float:
     return float(temparature)
   except:
     return 50
-    
+
 def process_asos_data(file_path:str, base_url:str)->Dict:
   """
   Function that saves the ASOS data to CSV 
@@ -116,9 +118,10 @@ def process_asos_csv(path:str):
     df['tmpf'] = pd.to_numeric(df['tmpf'], errors='coerce')
     
     df['p01m'] = pd.to_numeric(df['p01m'], errors='coerce')
-    # Replace mising values with an average of the two closest values
-    # Since stations record at different intervals this could 
-    # actually cause an overestimation of precip. Instead replace with 0
+    # Originally the idea for imputation was to 
+    # replace missing values with an average of the two closest values
+    # But since ASOS stations record at different intervals this could 
+    # actually cause an overestimation of precip. Instead for now we are replacing with 0
     #df['p01m']=(df['p01m'].fillna(method='ffill') + df['p01m'].fillna(method='bfill'))/2
     df['p01m'] = df['p01m'].fillna(0)
     df['tmpf']=(df['tmpf'].fillna(method='ffill') + df['tmpf'].fillna(method='bfill'))/2
