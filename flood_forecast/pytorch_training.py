@@ -1,12 +1,19 @@
 
+import torch
 import torch.optim as optim
 from torch.autograd import Variable
 import numpy as np
-max_epochs = 20
-def train_transformer_style():
-  criterion = torch.nn.MSELoss()
-  optimizer = torch.optim.Adam(a.parameters())
-  #wandb.watch(a)
+from typing import Type
+from torch.nn.modules.loss import _Loss
+
+def train_transformer_style(model: Type[torch.nn.module], max_expochs: int, criterion: Type[torch.nn._Loss]):
+  """
+  Function to train a PyTorch model 
+  """
+  #criterion = torch.nn.MSELoss()
+  #optimizer = torch.optim.Adam(a.parameters())
+  if use_wandb:
+    wandb.watch(model)
   for epoch in range(max_epochs):
       i = 0
       running_loss = 0.0
