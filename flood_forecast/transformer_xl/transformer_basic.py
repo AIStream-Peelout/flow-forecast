@@ -18,7 +18,7 @@ class SimpleTransformer(PyTorchForecast):
         t = self.pe(t)
         x = x.permute(1,0,2)
         t = t.permute(1,0,2)
-        x = self.transformer(x, t, src_mask=self.mask, self.mask)
+        x = self.transformer(x, t, self.mask, src_mask=self.mask)
         print(torch.isnan(x))
         x = self.final_layer(x)
         return x
