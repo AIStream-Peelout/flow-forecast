@@ -2,8 +2,11 @@
 Model from Keita Kurita
 https://github.com/keitakurita/Practical_NLP_in_PyTorch/blob/master/deep_dives/transformer_xl_from_scratch.ipynb
 """
+import torch
+from torch import nn
+from typing import Optional, Dict, List
 
-class TransformerXL(nn.Module):
+class TransformerXL(torch.nn.Module):
     def __init__(self, num_embeddings, n_layers, n_heads, 
                  d_model, d_head_inner, d_ff_inner,
                  dropout=0.1, dropouta=0., 
