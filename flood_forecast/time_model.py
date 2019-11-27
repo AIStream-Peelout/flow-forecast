@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict
+import torch 
+import json
+
 class TimeSeriesModel(ABC):
     """
     An abstract class used to handle different configurations 
@@ -8,11 +11,11 @@ class TimeSeriesModel(ABC):
     and validation at this point.
     """
     def __init__(self, model_base:str, training_data:str, validation_data:str, test_data:str, params:Dict):
-        self.model = load_model(model_base, params["model_params"])
+        self.model = self.load_model(model_base, params["model_params"])
         self.params = params
-        self.training = make_data_load(training_data, params["dataset_params"])
-        self.validation = make_data_load(validation_path, params["dataset_params"])
-        self.test_data = make_data_load(test_data, params["dataset_params"])
+        self.training = self.make_data_load(training_data, params["dataset_params"])
+        self.validation = self.make_data_load(validation_path, params["dataset_params"])
+        self.test_data = self.make_data_load(test_data, params["dataset_params"])
         
     @abstractmethod
     def load_model(self, model_base:str, model_params) -> object:
