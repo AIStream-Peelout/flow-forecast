@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 import torch 
-import json
+import json, os
+from datetime import datetime
+from flood_forecast.model_dict_function import pytorch_model_dict
 
 class TimeSeriesModel(ABC):
     """
@@ -14,7 +16,7 @@ class TimeSeriesModel(ABC):
         self.model = self.load_model(model_base, params["model_params"])
         self.params = params
         self.training = self.make_data_load(training_data, params["dataset_params"])
-        self.validation = self.make_data_load(validation_path, params["dataset_params"])
+        self.validation = self.make_data_load(validation_data, params["dataset_params"])
         self.test_data = self.make_data_load(test_data, params["dataset_params"])
         
     @abstractmethod
@@ -35,7 +37,7 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError
         
     @abstractmethod
-    def save_model(output_path:str):
+    def save_model(self, output_path:str):
         """
         Saves a model to a specific path along with a configuration report 
         of the parameters, data, and 
@@ -48,18 +50,21 @@ class PyTorchForecast(TimeSeriesModel):
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         if weight_path is not None:
-            model.load_state_dict(torch.load(weight_path, map_location=self.device))
+            self.model.load_state_dict(torch.load(weight_path, map_location=self.device))
             
-    def load_model(self, model_base, model_params:Dict):
-        model_base_to_class = {"PyTorchBasic":PyTorchBasic, "PyTorchTransformer":SimplePositionalEncoding} # Define all PyTorch models here
-        model = model_base_to_class[model_base](**model_params)
+    def load_model(self, model_base:str, model_params:Dict):
+        # Load model here 
+        if model_base in pytorch_model_dict:
+            model = pytorch_model_dict[model_base](**model_params)
+        else: 
+            raise "Error the model " + model_base + " was not found in the model dict. Please add it."
         return model
     
-    def save_model(self, final_path):
+    def save_model(self, final_path:str):
         torch.save(self.model.state_dict(), os.path.join(final_path, "model.pth"))
         with open(os.path.join(final_path,datetime.now().strftime("d%B%Y%I:%M%p")) + ".json", "w+") as p:
             json.dump(self.params, p)
     
-    def make_data_load(forecast_history, forecast_length):
+    def make_data_load(self, forecast_history, forecast_length):
         pass 
                         
