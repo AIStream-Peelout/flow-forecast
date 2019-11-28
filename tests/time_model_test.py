@@ -11,13 +11,13 @@ class TimeSeriesModelTest(unittest.TestCase):
         self.assertEqual(type(pytorch_model_dict1), dict)
 
     def test_pytorch_wrapper_default(self):
-        model_params = {"number_time_series":3}
+        model_params = {"model_params":{"number_time_series":3}}
         model = PyTorchForecast("MultiAttnHeadSimple", "", "", "", model_params)
         self.assertEqual(model.model.dense_shape.in_features, 3)
         self.assertEqual(model.model.multi_attn.embed_dim, 128)
 
     def test_pytorch_wrapper_custom(self):
-        model_params = {"number_time_series":6, "d_model":112}
+        model_params = {"model_params":{"number_time_series":6, "d_model":112}}
         model = PyTorchForecast("MultiAttnHeadSimple", "", "", "", model_params)
         self.assertEqual(model.model.dense_shape.in_features, 6)
         self.assertEqual(model.model.multi_attn.embed_dim, 112)
