@@ -11,7 +11,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         self.assertEqual(type(pytorch_model_dict1), dict)
 
     def test_pytorch_wrapper_default(self):
-        model_params = {"model_params":{"number_time_series":3}, "dataset_param":""}
+        model_params = {"model_params":{"number_time_series":3}, "dataset_params":""}
         model = PyTorchForecast("MultiAttnHeadSimple", "", "", "", model_params)
         self.assertEqual(model.model.dense_shape.in_features, 3)
         self.assertEqual(model.model.multi_attn.embed_dim, 128)
