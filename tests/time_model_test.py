@@ -1,7 +1,6 @@
 import sys
 sys.path.append("..")
-from flood_forecast.model_dict_function import pytorch_model_dict as pytorch_model_dict1
-from flood_forecast.time_model import PyTorchForecast
+from flood_forecast.time_model import PyTorchForecast, pytorch_model_dict
 import unittest
 import os
 
@@ -10,7 +9,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         self.test_path = ""
 
     def test_pytorch_model_dict(self):
-        self.assertEqual(type(pytorch_model_dict1), dict)
+        self.assertEqual(type(pytorch_model_dict), dict)
 
     def test_pytorch_wrapper_default(self):
         model_params = {"number_time_series":3}
