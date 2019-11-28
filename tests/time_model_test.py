@@ -1,4 +1,5 @@
 from flood_forecast.model_dict_function import pytorch_model_dict as pytorch_model_dict1
+from flood_forecast.time_model import PyTorchForecast
 import unittest
 import os
 

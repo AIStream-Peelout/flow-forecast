@@ -1,9 +1,8 @@
 from torch import nn
-from flood_forecast.time_model import PyTorchForecast
 import torch 
 import math
-from torch.nn.modules import Transformer 
-class SimpleTransformer(PyTorchForecast):
+from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer
+class SimpleTransformer(torch.nn.Module):
     def __init__(self, param_dict, series_length, n_time_series, d_model=128, n_heads=6):
         super().__init__(param_dict)
         self.mask = generate_square_subsequent_mask(series_length)
