@@ -69,7 +69,7 @@ class PyTorchForecast(TimeSeriesModel):
     def make_data_load(self, data_path:str, dataset_params:Dict):
         if dataset_params["class"] == "default":
             l = CSVDataLoader(data_path, dataset_params["history"], dataset_params["forecast_length"], 
-            dataset_params["target_col"], dataset_params["relvant_cols"])
+            dataset_params["target_col"], dataset_params["relevant_cols"])
         else:
             # TODO support custom UDL 
             l = None

@@ -6,3 +6,4 @@ seaborn
 future
 wandb 
 pandas_gbq
+google-cloud
