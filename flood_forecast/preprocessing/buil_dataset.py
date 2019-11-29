@@ -1,19 +1,21 @@
 import os
-from flood_forecast.preprocessing.closest_station import get_weather_data
+from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_csv
 from flood_forecast.eco_gage_set import eco_gage_set
 from typing import Set
+import json
 
 
-def build_dataset(json_full_path:str, asos_base_url:str, econet_data:Set, start:int, end_index:int):
+def build_dataset(json_full_path, asos_base_url, base_url_2, econet_data, visited_gages_path, start=0, end_index=100):
   directory = os.fsencode(json_full_path)
-  directory_list = sorted(os.listdir(directory))
-  for idx in range(start, end_index):
-    json_file = directory_list[idx]
-    filename = os.fsdecode(json_file)
-    get_weather_data(os.path.join(json_full_path, filename), econet_data, asos_base_url)
+  sorted_list = sorted(os.listdir(directory))
+  for i in range(start, end_index):
+    file = sorted_list[i]
+    filename = os.fsdecode(file)
+    get_weather_data(os.path.join(json_full_path, filename), econet_data, asos_base_url, visited_gages_path)
+    process_asos_data(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
 
 def create_visited():
-  visited_gages = {"stations_visited":[], "saved_complete":[]}
+  visited_gages = {"stations_visited":{}, "saved_complete":{}}
   with open("visited_gages.json", "w+") as f:
     json.dump(visited_gages,f)
 
