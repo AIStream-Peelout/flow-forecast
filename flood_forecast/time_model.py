@@ -62,8 +62,8 @@ class PyTorchForecast(TimeSeriesModel):
         return model
     
     def save_model(self, final_path:str):
-        torch.save(self.model.state_dict(), os.path.join(final_path, "model.pth"))
-        with open(os.path.join(final_path,datetime.now().strftime("d%B%Y%I:%M%p")) + ".json", "w+") as p:
+        torch.save(self.model.state_dict(), os.path.join(final_path, datetime.now().strftime("d%B%Y%I:%M%p") + "_model.pth"))
+        with open(os.path.join(final_path, datetime.now().strftime("d%B%Y%I:%M%p")) + ".json", "w+") as p:
             json.dump(self.params, p)
     
     def make_data_load(self, data_path:str, dataset_params:Dict):

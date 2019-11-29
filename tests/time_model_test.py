@@ -19,9 +19,16 @@ class TimeSeriesModelTest(unittest.TestCase):
         self.assertEqual(model.model.multi_attn.embed_dim, 128)
 
     def test_pytorch_wrapper_custom(self):
+        self.model_params["model_params"] = {"number_time_series":6, "d_model":112}
         keag_file = os.path.join(self.test_path, "keag_small.csv")
         model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
         self.assertEqual(model.model.dense_shape.in_features, 6)
         self.assertEqual(model.model.multi_attn.embed_dim, 112)
+    
+    def test_model_save(self):
+        keag_file = os.path.join(self.test_path, "keag_small.csv")
+        model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
+        model.save_model("output")
+        self.assertEqual(1,1)
 if __name__ == '__main__':
     unittest.main()
