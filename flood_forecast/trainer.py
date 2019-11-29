@@ -1,5 +1,6 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
+import json
 
 def train_function(model:str, training_file_dir:str, test_hours:int, target_col:List[str], wandb:bool = False,
                 model_type:str = "PyTorch", **kwargs):

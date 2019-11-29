@@ -1,6 +1,8 @@
 from torch.utils.data import Dataset
 import pandas as pd
-from typing import Type
+import torch
+from typing import Type, List
+
 
 class CSVDataLoader(Dataset):
     def __init__(self, file_path:str, history_length:int, forecast_length:int, target_col:List, 
@@ -20,13 +22,13 @@ class CSVDataLoader(Dataset):
         self.forecast_history = history_length
         self.forecast_length = forecast_length 
         self.df = pd.read_csv(file_path)[relevant_cols]
-        if scaling not None:
+        if scaling is not None:
             self.scale = scaling
-            temp_df = scale.fit_transform(self.df)
+            temp_df = self.scale.fit_transform(self.df)
             # We define a second scaler to scale the end output 
             # back to normal as models might not necessarily predict
             # other present time series values.
-            self.output_scale = scale.fit_transform(self.df[target_col[0]]].values.reshape(-1,1))
+            self.output_scale = self.scale.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
             self.df = temp_df
         self.targ_col = target_col
         

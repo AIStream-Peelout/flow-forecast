@@ -4,6 +4,7 @@ import torch
 import json, os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
+from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 
 class TimeSeriesModel(ABC):
     """
@@ -28,7 +29,7 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError 
     
     @abstractmethod
-    def make_data_load(self, data_path:str, params:Dict) -> object:
+    def make_data_load(self, data_path, params:Dict) -> object:
         """
         Intializes a data loader based on the provided data path. 
         This may be as simple as a pandas dataframe or as complex as 
@@ -65,6 +66,12 @@ class PyTorchForecast(TimeSeriesModel):
         with open(os.path.join(final_path,datetime.now().strftime("d%B%Y%I:%M%p")) + ".json", "w+") as p:
             json.dump(self.params, p)
     
-    def make_data_load(self, forecast_history, forecast_length):
-        pass 
+    def make_data_load(self, data_path:str, dataset_params:Dict):
+        if dataset_params["class"] == "default":
+            l = CSVDataLoader(data_path, dataset_params["history"], dataset_params["forecast_length"], 
+            dataset_params["target_col"], dataset_params["relvant_cols"])
+        else:
+            # TODO support custom UDL 
+            l = None
+        return l
                         
