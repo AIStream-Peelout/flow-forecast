@@ -5,3 +5,4 @@ tb-nightly
 seaborn
 future
 wandb 
+pandas_gbq
