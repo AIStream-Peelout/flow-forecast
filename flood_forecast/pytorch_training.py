@@ -5,15 +5,17 @@ from torch.autograd import Variable
 import numpy as np
 from typing import Type
 from torch.nn.modules.loss import _Loss
+from flood_forecast.time_model import PyTorchForecast
 
-def train_transformer_style(model: Type[torch.nn.module], max_expochs: int, criterion: Type[torch.nn._Loss]):
+def train_transformer_style(model: PyTorchForecast , max_epochs: int, criterion: Type[torch.nn._Loss], use_wandb = False):
   """
-  Function to train a PyTorch model 
+  Function to train any PyTorchForecast model  
   """
   #criterion = torch.nn.MSELoss()
   #optimizer = torch.optim.Adam(a.parameters())
   if use_wandb:
-    wandb.watch(model)
+    import wandb
+    wandb.watch(model.model)
   for epoch in range(max_epochs):
       i = 0
       running_loss = 0.0
@@ -41,14 +43,14 @@ def train_transformer_style(model: Type[torch.nn.module], max_expochs: int, crit
       print(compute_validation(validation_data_loader, a, epoch, sequence_size, criterion))
       wandb.log({'epoch': epoch, 'loss': loss/i})
 
-def compute_trans_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False):
+def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False):
     model.eval()
     mask = generate_square_subsequent_mask(sequence_size)
     loop_loss = 0.0
     print(loop_loss)
     with torch.no_grad():
         i = 0 
-        for src, targ in validation_loader:
+        for src, trg in validation_loader:
             i+=1
             if decoder_structure:
                 output = model(src.float(), trg.float(), mask)

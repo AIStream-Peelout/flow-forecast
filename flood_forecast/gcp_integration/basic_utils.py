@@ -5,7 +5,7 @@ import json
 def get_storage_client()-> storage.Client:
     """
     Utility function to return a properly authenticated GCS 
-    storage client whether working in Colab, CircleCI, or other enviroment.
+    storage client whether working in Colab, CircleCI, or other environment.
     """
     try:
         # GOOGLE_APPLICATION_CREDENTIALS must be set

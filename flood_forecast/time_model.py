@@ -44,6 +44,9 @@ class TimeSeriesModel(ABC):
         of the parameters, data, and 
         """
         raise NotImplementedError
+
+    def upload_gcs():
+        pass
     
         
 class PyTorchForecast(TimeSeriesModel):

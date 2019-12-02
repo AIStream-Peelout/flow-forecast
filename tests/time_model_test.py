@@ -30,5 +30,6 @@ class TimeSeriesModelTest(unittest.TestCase):
         model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
         model.save_model("output")
         self.assertEqual(1,1)
+
 if __name__ == '__main__':
     unittest.main()
