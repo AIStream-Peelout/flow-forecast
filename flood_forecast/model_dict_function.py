@@ -6,3 +6,5 @@ pytorch_model_dict = {"MultiAttnHeadSimple":MultiAttnHeadSimple, "SimpleTransfor
 "TransformerXL":TransformerXL
 }
 pytorch_criterion_dict = {}
+
+scikit_dict = {}
