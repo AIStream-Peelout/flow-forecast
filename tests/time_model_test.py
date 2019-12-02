@@ -30,6 +30,14 @@ class TimeSeriesModelTest(unittest.TestCase):
         model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
         model.save_model("output")
         self.assertEqual(1,1)
+        self.assertGreater(model.training.__len__, 0)
+
+    def test_simple_transformer(self):
+        self.model_params["model_params"] = {"series_length":19, "number_time_series":6, "d_model":136, "n_heads":8}
+        keag_file = os.path.join(self.test_path, "keag_small.csv")
+        model = PyTorchForecast("SimpleTransformer", keag_file, keag_file, keag_file, self.model_params)
+        self.assertEqual(model.model.dense_shape.in_features, 6)
+        self.assertEqual(model.model.mask.shape, (0,1))
 
 if __name__ == '__main__':
     unittest.main()

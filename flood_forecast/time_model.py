@@ -45,7 +45,7 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
 
-    def upload_gcs():
+    def upload_gcs(self):
         pass
     
         
