@@ -2,6 +2,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict as pytorch_mod
 from flood_forecast.time_model import PyTorchForecast
 import unittest
 import os
+import torch
 
 class TimeSeriesModelTest(unittest.TestCase):
     def setUp(self):
@@ -38,7 +39,6 @@ class TimeSeriesModelTest(unittest.TestCase):
         model = PyTorchForecast("SimpleTransformer", keag_file, keag_file, keag_file, self.model_params)
         self.assertEqual(model.model.dense_shape.in_features, 6)
         self.assertEqual(model.model.mask.shape, torch.Size([19, 19]))
-        self.assertEqual(3, 1)
 
 if __name__ == '__main__':
     unittest.main()

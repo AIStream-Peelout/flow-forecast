@@ -34,5 +34,6 @@ class TestDARNN(unittest.TestCase):
         torch.save(da.decoder.state_dict(), os.path.join("checkpoint", "decoder.pth"))
         config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="checkpoint")
         self.assertTrue(dnn_network)
+        
 if __name__ == '__main__':
     unittest.main()

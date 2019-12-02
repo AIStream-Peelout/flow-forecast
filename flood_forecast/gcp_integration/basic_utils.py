@@ -17,7 +17,7 @@ def get_storage_client()-> storage.Client:
         elif os.environ["ENVIRONMENT_GCP"] == "Colab":
             return storage.Client(project=os.environ["GCP_PROJECT"])
         
-def upload_file(bucket_name:str, file_name:str, upload_name:str, client):
+def upload_file(bucket_name:str, file_name:str, upload_name:str, client:storage.Client):
     bucket = client.get_bucket(bucket_name)
     blob = bucket.blob(file_name)
     blob.upload_from_filename(upload_name)

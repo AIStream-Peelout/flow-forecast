@@ -2,6 +2,7 @@ from torch import nn
 import torch 
 import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
+
 class SimpleTransformer(torch.nn.Module):
     def __init__(self, series_length, n_time_series, d_model=128, n_heads=6):
         super().__init__()
