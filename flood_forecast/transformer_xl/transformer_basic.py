@@ -3,8 +3,8 @@ import torch
 import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer
 class SimpleTransformer(torch.nn.Module):
-    def __init__(self, param_dict, series_length, n_time_series, d_model=128, n_heads=6):
-        super().__init__(param_dict)
+    def __init__(self, series_length, n_time_series, d_model=128, n_heads=6):
+        super().__init__()
         self.mask = generate_square_subsequent_mask(series_length)
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
