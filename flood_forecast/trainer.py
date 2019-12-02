@@ -10,9 +10,9 @@ def train_function(model_type, model_params):
     if model_type == "da_rnn":
         from flood_forecast.da_rnn.train_da import da_rnn, train
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
-
-        preprocessed_data = make_data(model_params["datase_params"]["training_path"], target_col, test_hours)
-        config, model = da_rnn(preprocessed_data, len(target_col))
+        dataset_params = model_params["dataset_param"]
+        preprocessed_data = make_data(model_params["datase_params"]["training_path"], model_params["dataset_params"]["target_col"], model_params["dataset_param"]["forecast_length"])
+        config, model = da_rnn(preprocessed_data, len(dataset_params["target_col"]))
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
     elif model_type == "PyTorch":
@@ -25,7 +25,7 @@ def main():
     args = parser.parse_args()
     with open(args.c) as f: 
       training_config = json.loads(f)
-    trained_model = train_function(training_config["model_type"], model_params)
+    trained_model = train_function(training_config["model_type"], training_config)
 if __name__ == "__main__":
     main()
 
