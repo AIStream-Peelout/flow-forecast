@@ -36,9 +36,6 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       running_loss = 0.0
       for src, trg in data_loader:
           forward_params = {}
-          if model.model.mask: 
-              mask = generate_square_subsequent_mask(model.params["dataset_params"]["history"])
-              forward_params["mask"] = mask
           opt.zero_grad()
           #print(src)
           output = model.model(src, **forward_params)
