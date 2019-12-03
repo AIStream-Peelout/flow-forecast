@@ -34,7 +34,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
           output = model.model(src, **forward_params)
           #output = s(src.float(), trg.float(), mask)
           labels = trg[:, :, 0] 
-          # TODO loss should be handled in model itseflf no need o view in output 
+          # TODO loss should be handled in model itseflf no need view in output 
           loss = criterion(output, labels.float())
           if loss > 10:
               print(src)

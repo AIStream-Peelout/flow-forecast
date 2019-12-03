@@ -5,6 +5,7 @@ import json, os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
+from flood_forecast.gcp_integration.basic_utils import get_storage_client
 
 class TimeSeriesModel(ABC):
     """
@@ -19,6 +20,10 @@ class TimeSeriesModel(ABC):
         self.training = self.make_data_load(training_data, params["dataset_params"])
         self.validation = self.make_data_load(validation_data, params["dataset_params"])
         self.test_data = self.make_data_load(test_data, params["dataset_params"])
+        if "GCS" in self.params:
+            self.gcs_client = get_storage_client()
+        else:
+            self.gcs_client = None
         
     @abstractmethod
     def load_model(self, model_base:str, model_params) -> object:
@@ -45,7 +50,7 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
 
-    def upload_gcs(self):
+    def upload_gcs(self, save_path:str):
         pass
     
         
@@ -70,6 +75,7 @@ class PyTorchForecast(TimeSeriesModel):
         torch.save(self.model.state_dict(), os.path.join(final_path, datetime.now().strftime("%d_%B_%Y%I_%M%p") + "_model.pth"))
         with open(os.path.join(final_path, datetime.now().strftime("%d_%B_%Y_%I_%M%p")) + ".json", "w+") as p:
             json.dump(self.params, p)
+        self.upload_gcs("")
     
     def make_data_load(self, data_path:str, dataset_params:Dict):
         if dataset_params["class"] == "default":
