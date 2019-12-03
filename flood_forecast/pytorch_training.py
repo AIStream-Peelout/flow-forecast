@@ -5,8 +5,10 @@ from torch.autograd import Variable
 import numpy as np
 from typing import Type, Dict
 from torch.nn.modules.loss import _Loss
+from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt, pytorch_criterion
+from flood_forecast.model_dict_function import generate_square_subsequent_mask
 def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wandb = False):
   """
   Function to train any PyTorchForecast model  
@@ -16,6 +18,14 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
   opt = pytorch_opt(training_params["optimizer"])(model.model.parameters())
   criterion = pytorch_criterion[training_params["criterion"]]
   max_epochs = training_params["epochs"]
+  data_loader = DataLoader(model.training, batch_size=training_params["batch_size"], shuffle=False, sampler=None,
+           batch_sampler=None, num_workers=0, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None)
+  validation_data_loader = DataLoader(model.validation_data_loader, batch_size=training_params["batch_size"], shuffle=False, sampler=None,
+           batch_sampler=None, num_workers=0, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None)
   #criterion = torch.nn.MSELoss()
   #optimizer = torch.optim.Adam(a.parameters())
   if use_wandb:
@@ -27,7 +37,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       for src, trg in data_loader:
           forward_params = {}
           if model.model.mask: 
-              mask = generate_square_subsequent_mask(sequence_size)
+              mask = generate_square_subsequent_mask(model.params["dataset_params"]["history"])
               forward_params["mask"] = mask
           opt.zero_grad()
           #print(src)
@@ -45,12 +55,12 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
           running_loss += loss.item()
           i+=1
           if torch.isnan(loss) or loss==float('inf'):
-              print(i)
-              break
+              raise "Error infinite or NaN loss detected. Try normalizing data"
       print("The loss is")
       print(loss)
-      print(compute_validation(validation_data_loader, a, epoch, sequence_size, criterion))
-      wandb.log({'epoch': epoch, 'loss': loss/i})
+      print(compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion))
+      if wandb:
+        wandb.log({'epoch': epoch, 'loss': loss/i})
 
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False):
     model.eval()
@@ -67,9 +77,9 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
                 # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
             else: 
                 output = model(src.float(), mask)
-            labels = targ[:, :, 0]
+            labels = trg[:, :, 0]
             loss = criterion(output.view(-1, sequence_size), labels.float())
             loop_loss += len(labels.float())*loss.item()
-        wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_data_loader.dataset)-1)})
+        wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
     model.train()
-    return loop_loss/(len(validation_data_loader.dataset)-1)
+    return loop_loss/(len(validation_loader.dataset)-1)
