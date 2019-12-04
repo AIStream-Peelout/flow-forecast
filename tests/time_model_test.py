@@ -33,7 +33,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         self.assertEqual(model.training[0][0].shape, torch.Size([20, 3]))
 
     def test_simple_transformer(self):
-        self.model_params["model_params"] = {"series_length":19, "n_time_series":6, "d_model":136, "n_heads":8}
+        self.model_params["model_params"] = {"series_length":19, "n_time_series":6, "seq_len":5, "d_model":136, "n_heads":8}
         keag_file = os.path.join(self.test_path, "keag_small.csv")
         model = PyTorchForecast("SimpleTransformer", keag_file, keag_file, keag_file, self.model_params)
         self.assertEqual(model.model.dense_shape.in_features, 6)

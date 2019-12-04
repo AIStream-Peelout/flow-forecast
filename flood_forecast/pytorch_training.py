@@ -12,7 +12,7 @@ from flood_forecast.model_dict_function import generate_square_subsequent_mask
 def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wandb = False):
   """
   Function to train any PyTorchForecast model  
-  :model The initialized
+  :model The initialized PyTorchForecastModel
   :training_params_dict
   """
   opt = pytorch_opt(training_params["optimizer"])(model.model.parameters())
@@ -37,9 +37,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       for src, trg in data_loader:
           forward_params = {}
           opt.zero_grad()
-          #print(src)
           output = model.model(src, **forward_params)
-          #output = s(src.float(), trg.float(), mask)
           labels = trg[:, :, 0] 
           # TODO loss should be handled in model itseflf no need view in output 
           loss = criterion(output, labels.float())
@@ -59,7 +57,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       if wandb:
         wandb.log({'epoch': epoch, 'loss': loss/i})
 
-def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False):
+def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, wandb=False):
     model.eval()
     mask = generate_square_subsequent_mask(sequence_size)
     loop_loss = 0.0
@@ -77,6 +75,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
             labels = trg[:, :, 0]
             loss = criterion(output.view(-1, sequence_size), labels.float())
             loop_loss += len(labels.float())*loss.item()
-        wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
+        if wandb:
+            wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
     model.train()
     return loop_loss/(len(validation_loader.dataset)-1)

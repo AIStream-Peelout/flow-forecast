@@ -4,24 +4,38 @@ import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
 
 class SimpleTransformer(torch.nn.Module):
-    def __init__(self, series_length, n_time_series, d_model=128, n_heads=6):
+    def __init__(self, n_time_series, seq_len=48, d_model=128):
         super().__init__()
-        self.mask = generate_square_subsequent_mask(series_length)
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
         self.transformer = Transformer(d_model, nhead=8)
         self.final_layer = torch.nn.Linear(d_model, 1)
-    def forward(self, x, t, tgt_mask):
+        self.sequence_size = seq_len
+    def forward(self, x, t, tgt_mask, src_mask=None):
+        if src_mask:
+            x = self.encode_sequence(x, src_mask)
+        else: 
+            x = self.encode_sequence(x, src_mask)
+        return self.decode_seq(x, t, tgt_mask)
+    
+    def basic_feature(self, x):
         x = self.dense_shape(x)
         x = self.pe(x)
-        t = self.dense_shape(t)
-        t = self.pe(t)
         x = x.permute(1,0,2)
-        t = t.permute(1,0,2)
-        x = self.transformer(x, t, self.mask, src_mask=self.mask)
-        print(torch.isnan(x))
-        x = self.final_layer(x)
+        return x 
+    
+    def encode_sequence(self, x, src_mask=None):
+        x = self.basic_feature(x)
+        x = self.transformer.encoder(x, src_mask)
         return x
+    
+    def decode_seq(self, mem, t, tgt_mask, seq_size=None):
+        if seq_size == None:
+            seq_size = self.sequence_size
+        t = self.basic_feature(t)
+        x = self.transformer.decoder(t, mem, tgt_mask=tgt_mask)
+        x = self.final_layer(x)
+        return x.view(-1, seq_size)
     
 class CustomTransformer(torch.nn.Module):
     def __init__(self, n_time_series, d_model=128):
