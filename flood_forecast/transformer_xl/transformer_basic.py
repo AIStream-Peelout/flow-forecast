@@ -4,13 +4,13 @@ import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
 
 class SimpleTransformer(torch.nn.Module):
-    def __init__(self, n_time_series, seq_len=48, d_model=128):
+    def __init__(self, n_time_series, series_length=48, d_model=128):
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
         self.transformer = Transformer(d_model, nhead=8)
         self.final_layer = torch.nn.Linear(d_model, 1)
-        self.sequence_size = seq_len
+        self.sequence_size = series_length
     def forward(self, x, t, tgt_mask, src_mask=None):
         if src_mask:
             x = self.encode_sequence(x, src_mask)
