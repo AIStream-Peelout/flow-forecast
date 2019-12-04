@@ -1,6 +1,5 @@
 eco_gage_set = {'A', 'AURO',
- 'BEAR',
- 'BUCK',
+ 'BEAR', 'BUCK',
  'BURN',
  'CAST',
  'CLA2',

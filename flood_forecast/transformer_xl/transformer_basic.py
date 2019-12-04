@@ -8,7 +8,7 @@ class SimpleTransformer(torch.nn.Module):
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
-        self.transformer = Transformer(d_model, nhead=n_head)
+        self.transformer = Transformer(d_model, nhead=n_heads)
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.sequence_size = series_length
     def forward(self, x, t, tgt_mask, src_mask=None):
