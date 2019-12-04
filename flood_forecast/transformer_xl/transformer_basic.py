@@ -6,6 +6,7 @@ from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder
 class SimpleTransformer(torch.nn.Module):
     def __init__(self, n_time_series, series_length=48, d_model=128, n_heads=8):
         super().__init__()
+        self.mask = generate_square_subsequent_mask(series_length)
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
         self.transformer = Transformer(d_model, nhead=n_heads)
