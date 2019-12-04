@@ -5,7 +5,9 @@ This repository provides open source benchmark and codes for flash flood and riv
 
 Using the library
 1. Run `pip install flood-forecast`
-2. Download the data into the `data` folder
+2. Download the data from GCS into the `data` folder
+
+For instructions on contributing please se Wiki/Issue Board.
 
 ## Task 1 Stream Flow Forecasting 
 This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index. 

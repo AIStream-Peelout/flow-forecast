@@ -10,7 +10,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {"model_params":{"number_time_series":3}, 
         "dataset_params":{"history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"]},
-        "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE"}}
+        "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2}}
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
 
