@@ -4,7 +4,7 @@ import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
 
 class SimpleTransformer(torch.nn.Module):
-    def __init__(self, n_time_series, series_length=48, d_model=128, n_head=8):
+    def __init__(self, n_time_series, series_length=48, d_model=128, n_heads=8):
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
