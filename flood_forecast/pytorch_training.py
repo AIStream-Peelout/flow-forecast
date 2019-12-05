@@ -53,7 +53,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       print("The loss is")
       print(loss)
       print(compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion))
-      if wandb:
+      if use_wandb:
         wandb.log({'epoch': epoch, 'loss': loss/i})
 
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, wandb=False):
