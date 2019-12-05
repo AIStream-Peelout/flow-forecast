@@ -7,7 +7,7 @@ from typing import Type, Dict
 from torch.nn.modules.loss import _Loss
 from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
-from flood_forecast.model_dict_function import pytorch_opt, pytorch_criterion
+from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wandb = False):
   """
