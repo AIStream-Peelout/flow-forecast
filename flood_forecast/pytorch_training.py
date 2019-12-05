@@ -22,7 +22,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)
-  validation_data_loader = DataLoader(model.validation_data_loader, batch_size=training_params["batch_size"], shuffle=False, sampler=None,
+  validation_data_loader = DataLoader(model.validation, batch_size=training_params["batch_size"], shuffle=False, sampler=None,
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)

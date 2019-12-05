@@ -1,6 +1,7 @@
 import os
 from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_csv
 from flood_forecast.eco_gage_set import eco_gage_set
+from flood_forecast.make_usgs import make_usgs_data
 from typing import Set
 import json
 
@@ -14,8 +15,13 @@ def build_weather_csv(json_full_path, asos_base_url, base_url_2, econet_data, vi
     get_weather_data(os.path.join(json_full_path, filename), econet_data, asos_base_url, visited_gages_path)
     process_asos_data(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
 
-def make_usgs():
-  pass 
+def make_usgs(meta_data_path:str, start, end_index):
+  meta_directory = os.fsencode(meta_data_path)
+  sorted_list = sorted(os.listdir(directory))
+  for i in range(start, end_index):
+    with open(i) as d:
+      data = json.loads(d)
+    #make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), data["gage_id"])
 
 def join_data(weather_csv, meta_json_file, flow_csv):
   pass
