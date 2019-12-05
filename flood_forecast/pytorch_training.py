@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
-def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wandb = False):
+def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wandb = False, forward_params = {}):
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
@@ -35,7 +35,6 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       i = 0
       running_loss = 0.0
       for src, trg in data_loader:
-          forward_params = {}
           opt.zero_grad()
           output = model.model(src, **forward_params)
           labels = trg[:, :, 0] 
@@ -72,6 +71,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
                 # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
             else: 
                 output = model(src, mask)
+            # Select just the CFS from the targ
             labels = trg[:, :, 0]
             loss = criterion(output.view(-1, sequence_size), labels)
             loop_loss += len(labels.float())*loss.item()
