@@ -5,7 +5,7 @@ from typing import Set
 import json
 
 
-def build_dataset(json_full_path, asos_base_url, base_url_2, econet_data, visited_gages_path, start=0, end_index=100):
+def build_weather_csv(json_full_path, asos_base_url, base_url_2, econet_data, visited_gages_path, start=0, end_index=100):
   directory = os.fsencode(json_full_path)
   sorted_list = sorted(os.listdir(directory))
   for i in range(start, end_index):
@@ -13,6 +13,12 @@ def build_dataset(json_full_path, asos_base_url, base_url_2, econet_data, visite
     filename = os.fsdecode(file)
     get_weather_data(os.path.join(json_full_path, filename), econet_data, asos_base_url, visited_gages_path)
     process_asos_data(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
+
+def make_usgs():
+  pass 
+
+def join_data(weather_csv, meta_json_file, flow_csv):
+  pass
 
 def create_visited():
   visited_gages = {"stations_visited":{}, "saved_complete":{}}

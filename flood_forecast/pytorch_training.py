@@ -15,8 +15,8 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
   :model The initialized PyTorchForecastModel
   :training_params_dict
   """
-  opt = pytorch_opt(training_params["optimizer"])(model.model.parameters())
-  criterion = pytorch_criterion[training_params["criterion"]]
+  opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters())
+  criterion = pytorch_criterion_dict[training_params["criterion"]]
   max_epochs = training_params["epochs"]
   data_loader = DataLoader(model.training, batch_size=training_params["batch_size"], shuffle=False, sampler=None,
            batch_sampler=None, num_workers=0, collate_fn=None,
