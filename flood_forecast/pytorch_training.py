@@ -67,13 +67,13 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
         for src, trg in validation_loader:
             i+=1
             if decoder_structure:
-                output = model(src.float(), trg.float(), mask)
+                pass
                 # To do implement greedy decoding
                 # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
             else: 
-                output = model(src.float(), mask)
+                output = model(src, mask)
             labels = trg[:, :, 0]
-            loss = criterion(output.view(-1, sequence_size), labels.float())
+            loss = criterion(output.view(-1, sequence_size), labels)
             loop_loss += len(labels.float())*loss.item()
         if wandb:
             wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
