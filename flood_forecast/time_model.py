@@ -85,7 +85,7 @@ class PyTorchForecast(TimeSeriesModel):
         with open(params_save_path, "w+") as p:
             json.dump(self.params, p)
         self.upload_gcs(model_save_path, model_name)
-        self.upload_gcs(params_save_path, params_name )
+        self.upload_gcs(params_save_path, params_name)
     
     def make_data_load(self, data_path:str, dataset_params:Dict):
         if dataset_params["class"] == "default":

@@ -56,7 +56,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       print(compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion))
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': loss/i})
-      epoch_params = {"epoch":epoch, "train_loss":loss/i} 
+      epoch_params = {"epoch":epoch, "train_loss":str(loss/i)} 
       session_params.append(epoch_params)
   model.params["run"] = session_params
   model.save_model("model_save")
