@@ -59,7 +59,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       epoch_params = {"epoch":epoch, "train_loss":loss/i} 
       session_params.append(epoch_params)
   model.params["run"] = session_params
-  model.save_model("")
+  model.save_model("model_save")
 
     
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, wandb=False):
