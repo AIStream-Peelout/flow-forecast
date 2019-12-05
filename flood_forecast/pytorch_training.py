@@ -31,6 +31,7 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
   if use_wandb:
     import wandb
     wandb.watch(model.model)
+  session_params = []
   for epoch in range(max_epochs):
       i = 0
       running_loss = 0.0
@@ -55,7 +56,12 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
       print(compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion))
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': loss/i})
+      epoch_params = {"epoch":epoch, "train_loss":loss/i} 
+      session_params.append(epoch_params)
+  model.params["run"] = session_params
+  model.save_model("")
 
+    
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, wandb=False):
     model.eval()
     mask = generate_square_subsequent_mask(sequence_size)

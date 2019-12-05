@@ -5,7 +5,7 @@ import json, os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
-from flood_forecast.gcp_integration.basic_utils import get_storage_client
+from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 
 class TimeSeriesModel(ABC):
     """
@@ -50,8 +50,12 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
 
-    def upload_gcs(self, save_path:str):
-        pass
+    def upload_gcs(self, save_path:str, name, bucket_name=os.environ["MODEL_BUCKET"]):
+        """
+        Function to upload model checkpoints to GCS
+        """
+        if self.gcs_client:
+            upload_file(bucket_name, save_path, "experiments/ " + name, self.gcs_client)
     
         
 class PyTorchForecast(TimeSeriesModel):
@@ -72,17 +76,23 @@ class PyTorchForecast(TimeSeriesModel):
     def save_model(self, final_path:str):
         if not os.path.exists(final_path):
             os.mkdir(final_path)
-        torch.save(self.model.state_dict(), os.path.join(final_path, datetime.now().strftime("%d_%B_%Y%I_%M%p") + "_model.pth"))
-        with open(os.path.join(final_path, datetime.now().strftime("%d_%B_%Y_%I_%M%p")) + ".json", "w+") as p:
+        time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
+        model_name = time_stamp + "_model.pth"
+        params_name = time_stamp + ".json"
+        model_save_path = os.path.join(final_path, model_name)
+        params_save_path = os.path.join(final_path, time_stamp + ".json")
+        torch.save(self.model.state_dict(), model_save_path)
+        with open(params_save_path, "w+") as p:
             json.dump(self.params, p)
-        self.upload_gcs("")
+        self.upload_gcs(model_save_path, model_name)
+        self.upload_gcs(params_save_path, params_name )
     
     def make_data_load(self, data_path:str, dataset_params:Dict):
         if dataset_params["class"] == "default":
             l = CSVDataLoader(data_path, dataset_params["history"], dataset_params["forecast_length"], 
             dataset_params["target_col"], dataset_params["relevant_cols"])
         else:
-            # TODO support custom UDL 
+            # TODO support custom Daa Loader
             l = None
         return l
                         
