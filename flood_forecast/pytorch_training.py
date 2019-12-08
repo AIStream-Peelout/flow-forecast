@@ -9,7 +9,9 @@ from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
-def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wandb = False, forward_params = {}):
+from flood_forecast.transformer_xl.transformer_basic import simple_decode
+
+def train_transformer_style(model: PyTorchForecast, training_params: Dict, use_wandb: bool = False, forward_params = {}):
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
@@ -61,27 +63,27 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
   model.params["run"] = session_params
   model.save_model("model_save")
 
-def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False):
+def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, use_wandb=False):
   model.eval()
   mask = generate_square_subsequent_mask(sequence_size)
   loop_loss = 0.0
   with torch.no_grad():
-  i = 0 
-  for src, targ in validation_loader:
-    print(src.shape)
-    i+=1
-    if decoder_structure:
-      break
-      src_mask = generate_square_subsequent_mask(sequence_size)
-      greedy_decode(model, src, src_mask, sequence_size, targ, src)
+    i = 0
+    for src, targ in validation_loader:
+      print(src.shape)
+      i+=1
+      if decoder_structure:
+        src_mask = generate_square_subsequent_mask(sequence_size)
+        simple_decode(model, src, src_mask, sequence_size, targ, src)
 
-    # To do implement greedy decoding
-    # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
-   else: 
-    output = model(src.float(), mask)
-    labels = targ[:, :, 0]
-    loss = criterion(output.view(-1, sequence_size), labels.float())
-    loop_loss += len(labels.float())*loss.item()
-  wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_data_loader.dataset)-1)})
+      # To do implement greedy decoding
+      # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
+    else:
+      output = model(src.float(), mask)
+      labels = targ[:, :, 0]
+      loss = criterion(output.view(-1, sequence_size), labels.float())
+      loop_loss += len(labels.float())*loss.item()
+  if use_wandb:
+    wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
   model.train()
   return loop_loss
