@@ -89,18 +89,17 @@ def generate_square_subsequent_mask(sz):
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
     
-def simple_decode(model, src, src_mask, max_len, start_symbol, real_target):
-    # A very simple decoder for use with transformer
+def greedy_decode(model, src, src_mask, max_len, real_target, start_symbol, unsqueeze_dim=1):
     memory = model.encode_sequence(src, src_mask)
-    ys = start_symbol[-1].unsqueeze(0).unsqueeze(0)
-    print(ys.shape)
+    ys = start_symbol[:, -1, :].unsqueeze(unsqueeze_dim)
     for i in range(max_len-1):
         mask = generate_square_subsequent_mask(i+1)
         with torch.no_grad():
             out = model.decode_seq(memory, 
-                               Variable(ys),
+                               Variable(ys), 
                               Variable(mask), i+1)
-            real_target[i][0] = out[0][i]
-            #print(start_symbol[i+1].shape)
-            ys = torch.cat((ys, start_symbol[i+1].unsqueeze(0).unsqueeze(0)), 1)
+            #print(real_target[:, i, :])
+            real_target[:, i, 0] = out[:, i]
+            #print(real_target[:, i, :])
+            ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
     return ys

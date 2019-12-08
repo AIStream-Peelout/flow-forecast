@@ -1,7 +1,7 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 import json
-from flood_forecast.pytorch_training import train_tranformer_style
+from flood_forecast.pytorch_training import train_transformer_style
 
 def train_function(model_type, model_params):
     """

@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
-from flood_forecast.transformer_xl.transformer_basic import simple_decode
+from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 
 def train_transformer_style(model: PyTorchForecast, training_params: Dict, use_wandb: bool = False, forward_params = {}):
   """
@@ -74,15 +74,15 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
       i+=1
       if decoder_structure:
         src_mask = generate_square_subsequent_mask(sequence_size)
-        simple_decode(model, src, src_mask, sequence_size, targ, src)
+        output = greedy_decode(model, src, src_mask, sequence_size, targ, src)[:, :, 0]
 
       # To do implement greedy decoding
       # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
     else:
       output = model(src.float(), mask)
       labels = targ[:, :, 0]
-      loss = criterion(output.view(-1, sequence_size), labels.float())
-      loop_loss += len(labels.float())*loss.item()
+    loss = criterion(output, labels.float())
+    loop_loss += len(labels.float())*loss.item()
   if use_wandb:
     wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
   model.train()
