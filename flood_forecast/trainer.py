@@ -1,6 +1,7 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 import json
+from flood_forecast.pytorch_training import train_tranformer_style
 
 def train_function(model_type, model_params):
     """
@@ -16,7 +17,8 @@ def train_function(model_type, model_params):
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
     elif model_type == "PyTorch":
-        pass 
+        train_transformer_style(model_type, model_param, model_params["wandb"], model_params["model_params"]["forward_param"])
+        
     return trained_model 
 
 def main():
@@ -26,6 +28,7 @@ def main():
     with open(args.c) as f: 
       training_config = json.loads(f)
     trained_model = train_function(training_config["model_type"], training_config)
+
 if __name__ == "__main__":
     main()
 

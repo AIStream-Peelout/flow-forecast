@@ -61,27 +61,27 @@ def train_transformer_style(model: PyTorchForecast, training_params:Dict, use_wa
   model.params["run"] = session_params
   model.save_model("model_save")
 
-    
-def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, wandb=False):
-    model.eval()
-    mask = generate_square_subsequent_mask(sequence_size)
-    loop_loss = 0.0
-    print(loop_loss)
-    with torch.no_grad():
-        i = 0 
-        for src, trg in validation_loader:
-            i+=1
-            if decoder_structure:
-                pass
-                # To do implement greedy decoding
-                # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
-            else: 
-                output = model(src, mask)
-            # Select just the CFS from the targ
-            labels = trg[:, :, 0]
-            loss = criterion(output.view(-1, sequence_size), labels)
-            loop_loss += len(labels.float())*loss.item()
-        if wandb:
-            wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
-    model.train()
-    return loop_loss/(len(validation_loader.dataset)-1)
+def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False):
+  model.eval()
+  mask = generate_square_subsequent_mask(sequence_size)
+  loop_loss = 0.0
+  with torch.no_grad():
+  i = 0 
+  for src, targ in validation_loader:
+    print(src.shape)
+    i+=1
+    if decoder_structure:
+      break
+      src_mask = generate_square_subsequent_mask(sequence_size)
+      greedy_decode(model, src, src_mask, sequence_size, targ, src)
+
+    # To do implement greedy decoding
+    # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
+   else: 
+    output = model(src.float(), mask)
+    labels = targ[:, :, 0]
+    loss = criterion(output.view(-1, sequence_size), labels.float())
+    loop_loss += len(labels.float())*loss.item()
+  wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_data_loader.dataset)-1)})
+  model.train()
+  return loop_loss
