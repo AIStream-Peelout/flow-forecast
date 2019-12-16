@@ -24,7 +24,7 @@ class TimeSeriesModel(ABC):
             self.gcs_client = get_storage_client()
         else:
             self.gcs_client = None
-        
+            
     @abstractmethod
     def load_model(self, model_base:str, model_params) -> object:
         """
@@ -56,6 +56,12 @@ class TimeSeriesModel(ABC):
         """
         if self.gcs_client:
             upload_file(bucket_name, save_path, "experiments/ " + name, self.gcs_client)
+        
+    def wandb_init(self):
+        if "wandb" in self.params:
+            import wandb
+            wandb.init()
+            wandb.config(config=self.params)
     
         
 class PyTorchForecast(TimeSeriesModel):
@@ -65,7 +71,7 @@ class PyTorchForecast(TimeSeriesModel):
         if weight_path is not None:
             self.model.load_state_dict(torch.load(weight_path, map_location=self.device))
             
-    def load_model(self, model_base:str, model_params:Dict):
+    def load_model(self, model_base: str, model_params: Dict):
         # Load model here 
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
@@ -73,7 +79,7 @@ class PyTorchForecast(TimeSeriesModel):
             raise "Error the model " + model_base + " was not found in the model dict. Please add it."
         return model
     
-    def save_model(self, final_path:str):
+    def save_model(self, final_path: str):
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
@@ -87,9 +93,9 @@ class PyTorchForecast(TimeSeriesModel):
         self.upload_gcs(model_save_path, model_name)
         self.upload_gcs(params_save_path, params_name)
     
-    def make_data_load(self, data_path:str, dataset_params:Dict):
+    def make_data_load(self, data_path: str, dataset_params: Dict):
         if dataset_params["class"] == "default":
-            l = CSVDataLoader(data_path, dataset_params["history"], dataset_params["forecast_length"], 
+            l = CSVDataLoader(data_path, dataset_params["history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"])
         else:
             # TODO support custom Daa Loader

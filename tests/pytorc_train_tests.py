@@ -20,6 +20,7 @@ class PyTorchTrainTests(unittest.TestCase):
 
     def test_train(self):
         train_transformer_style(self.model, self.model_params["training_params"], False)
+        self.assertEqual(len(os.listdir("model_save")), 3)
         self.assertEqual(1,1)
 
 if __name__ == '__main__':
