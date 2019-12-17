@@ -57,12 +57,16 @@ class TimeSeriesModel(ABC):
         """
         if self.gcs_client:
             upload_file(bucket_name, save_path, "experiments/ " + name, self.gcs_client)
+            if self.wandb:
+                wandb.config.gcs_path = save_path + "experiments/ " + name
         
     def wandb_init(self):
         if "wandb" in self.params:
             import wandb
             wandb.init()
             wandb.config(config=self.params)
+            return True 
+        return False
     
         
 class PyTorchForecast(TimeSeriesModel):
