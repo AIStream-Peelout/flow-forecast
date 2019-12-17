@@ -24,6 +24,7 @@ class TimeSeriesModel(ABC):
             self.gcs_client = get_storage_client()
         else:
             self.gcs_client = None
+        self.wandb = wandb_init()
             
     @abstractmethod
     def load_model(self, model_base:str, model_params) -> object:
