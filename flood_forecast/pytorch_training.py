@@ -89,4 +89,4 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
     import wandb
     wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
   model.train()
-  return loop_loss
+  return loop_loss/(len(validation_loader.dataset)-1)
