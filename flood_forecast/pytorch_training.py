@@ -33,7 +33,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, use_w
   if use_wandb:
     import wandb
     wandb.watch(model.model)
-    wandb.config(config=training_params)
   session_params = []
   for epoch in range(max_epochs):
       i = 0

@@ -24,7 +24,7 @@ class TimeSeriesModel(ABC):
             self.gcs_client = get_storage_client()
         else:
             self.gcs_client = None
-        self.wandb = wandb_init()
+        self.wandb = self.wandb_init()
             
     @abstractmethod
     def load_model(self, model_base:str, model_params) -> object:
@@ -61,7 +61,7 @@ class TimeSeriesModel(ABC):
                 wandb.config.gcs_path = save_path + "experiments/ " + name
         
     def wandb_init(self):
-        if "wandb" in self.params:
+        if self.params["wandb"] == "True":
             import wandb
             wandb.init()
             wandb.config(config=self.params)
