@@ -1,11 +1,10 @@
-import sys
-sys.path.append("..")
+import torch
+import unittest
+import pathlib
 from flood_forecast.preprocessing.preprocess_da_rnn import TrainData, format_data, make_data 
 from flood_forecast.da_rnn.train_da import da_rnn, train
-import unittest
 import os
-import pathlib
-import torch
+
 class TestDARNN(unittest.TestCase):
     def setUp(self):
         self.preprocessed_data = self.preprocessed_data = make_data(os.path.join(os.path.dirname(__file__), "test_init", "keag_small.csv"), ["cfs"], 72)
