@@ -1,9 +1,10 @@
 import torch
 import unittest
 import pathlib
+import os
 from flood_forecast.preprocessing.preprocess_da_rnn import TrainData, format_data, make_data 
 from flood_forecast.da_rnn.train_da import da_rnn, train
-import os
+
 
 class TestDARNN(unittest.TestCase):
     def setUp(self):

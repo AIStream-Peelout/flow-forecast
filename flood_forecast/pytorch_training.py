@@ -34,7 +34,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, use_w
     import wandb
     wandb.watch(model.model)
     wandb.config(config=training_params)
-
   session_params = []
   for epoch in range(max_epochs):
       i = 0
@@ -57,13 +56,14 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, use_w
               raise "Error infinite or NaN loss detected. Try normalizing data"
       print("The loss is")
       print(loss)
-      print(compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion))
+      valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion)
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': loss/i})
-      epoch_params = {"epoch":epoch, "train_loss":str(loss/i)} 
+      epoch_params = {"epoch":epoch, "train_loss":str(loss/i), "validation_loss":str(valid)} 
       session_params.append(epoch_params)
   model.params["run"] = session_params
   model.save_model("model_save")
+
 
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, use_wandb=False):
   model.eval()
@@ -86,6 +86,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
     loss = criterion(output, labels.float())
     loop_loss += len(labels.float())*loss.item()
   if use_wandb:
+    import wandb
     wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
   model.train()
   return loop_loss
