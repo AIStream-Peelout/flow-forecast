@@ -18,7 +18,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
         self.assertEqual(model.model.dense_shape.in_features, 3)
         self.assertEqual(model.model.multi_attn.embed_dim, 128)
-        self.assertEqual(model.model.multi_attn.dropout, None)
+        self.assertEqual(model.model.multi_attn.num_heads, 8)
 
     def test_pytorch_wrapper_custom(self):
         self.model_params["model_params"] = {"number_time_series":6, "d_model":112}
