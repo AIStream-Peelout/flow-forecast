@@ -8,8 +8,8 @@ class TimeSeriesModelTest(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {"model_params":{"number_time_series":3}, 
-        "dataset_params":{"history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"]}}
-
+        "dataset_params":{"history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"]},
+                            "wandb":"False"}
     def test_pytorch_model_dict(self):
         self.assertEqual(type(pytorch_model_dict1), dict)
 
@@ -18,6 +18,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
         self.assertEqual(model.model.dense_shape.in_features, 3)
         self.assertEqual(model.model.multi_attn.embed_dim, 128)
+        self.assertEqual(model.model.multi_attn.out_features, 3)
 
     def test_pytorch_wrapper_custom(self):
         self.model_params["model_params"] = {"number_time_series":6, "d_model":112}
