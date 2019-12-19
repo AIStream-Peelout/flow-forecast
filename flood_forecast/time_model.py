@@ -14,7 +14,7 @@ class TimeSeriesModel(ABC):
     This class assumes that data is already split into test train 
     and validation at this point.
     """
-    def __init__(self, model_base:str, training_data:str, validation_data:str, test_data:str, params:Dict):
+    def __init__(self, model_base: str, training_data: str, validation_data: str, test_data:str, params:Dict):
         self.model = self.load_model(model_base, params["model_params"])
         self.params = params
         self.training = self.make_data_load(training_data, params["dataset_params"])
@@ -51,10 +51,12 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
 
-    def upload_gcs(self, save_path:str, name, bucket_name=os.environ["MODEL_BUCKET"]):
+    def upload_gcs(self, save_path:str, name, bucket_name=None):
         """
         Function to upload model checkpoints to GCS
         """
+        if bucket_name is None:
+            bucket_name = os.environ["MODEL_BUCKET"]
         if self.gcs_client:
             upload_file(bucket_name, save_path, "experiments/ " + name, self.gcs_client)
             if self.wandb:

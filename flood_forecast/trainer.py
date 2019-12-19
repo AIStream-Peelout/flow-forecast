@@ -24,9 +24,9 @@ def train_function(model_type:str, params:Dict):
 
 def main():
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
-    parser.add_argument("-t", "--train_config", help="Path to model config file")
+    parser.add_argument("-t", "--config", help="Path to model config file")
     args = parser.parse_args()
-    with open(args.t) as f: 
+    with open(args.config) as f: 
       training_config = json.loads(f)
     trained_model = train_function(training_config["model_type"], training_config)
 
