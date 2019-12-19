@@ -9,22 +9,22 @@
     {
        "training_path": "gcs://",
        "validation_path": "string ",
-       "test_path": string,
-       "batch_size":integer,
-       "forecast_history":integer,
-       "forecast_length":integer 
+       "test_path": "gcs://",
+       "batch_size":4,
+       "forecast_history":5,
+       "forecast_length":5 
     },
     "training_params":
     {
-       "criterion":string,
-       "optimizer": string,
-       "lr": number,
-       "epochs": integer
+       "criterion":"MSELoss",
+       "optimizer": "Adam",
+       "lr": 0.1,
+       "epochs": 1
     
     },
     "GCS":{
-       "run_save_path": string,
-       "project_id": string
+       "run_save_path": "",
+       "project_id": "string",
        "service_key_path": ""
        
     },
