@@ -83,7 +83,7 @@ class PyTorchForecast(TimeSeriesModel):
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
         else: 
-            raise "Error the model " + model_base + " was not found in the model dict. Please add it."
+            raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model
     
     def save_model(self, final_path: str):
