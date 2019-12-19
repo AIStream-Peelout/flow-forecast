@@ -1,0 +1,35 @@
+{
+    "model_name": "MultiHeadAttn",
+    "model_type": "PyTorch",
+    "model_params": {
+      "":"",
+      "":""
+     },
+    "dataset_params":
+    {
+       "training_path": "gcs://",
+       "validation_path": "string ",
+       "test_path": string,
+       "batch_size":integer,
+       "forecast_history":integer,
+       "forecast_length":integer 
+    },
+    "training_params":
+    {
+       "criterion":string,
+       "optimizer": string,
+       "lr": number,
+       "epochs": integer
+    
+    },
+    "GCS":{
+       "run_save_path": string,
+       "project_id": string
+       "service_key_path": ""
+       
+    },
+    
+    "wandb": false 
+    
+    }
+    
