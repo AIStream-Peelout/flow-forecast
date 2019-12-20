@@ -2,7 +2,7 @@ from torch import nn
 import torch 
 import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
-
+from torch.autograd import Variable 
 class SimpleTransformer(torch.nn.Module):
     def __init__(self, n_time_series, series_length=48, d_model=128, n_heads=8):
         super().__init__()
@@ -60,7 +60,6 @@ class CustomTransformer(torch.nn.Module):
         t = t.permute(1,0,2)
         x = self.transformer_enc(x, tgt_mask)
         x = self.transformer_decoder(x, t, tgt_mask)
-        #print(torch.isnan(x))
         x = self.final_layer(x)
         return x
     

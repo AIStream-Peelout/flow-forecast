@@ -2,8 +2,8 @@
     "model_name": "MultiHeadAttn",
     "model_type": "PyTorch",
     "model_params": {
-      "":"",
-      "":""
+      "number_of_time_series":3,
+      "seq_len":4
      },
     "dataset_params":
     {
