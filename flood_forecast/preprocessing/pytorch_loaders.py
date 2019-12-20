@@ -44,6 +44,9 @@ class CSVDataLoader(Dataset):
     
     def __len__(self):
         return len(self.df.index)-self.forecast_history-self.forecast_length-1
+    
+    def inverse_scale(self, result_data):
+        return self.output_scale.inverse_transform(result_data)
         
         
 
