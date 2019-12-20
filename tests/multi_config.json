@@ -8,7 +8,7 @@
     "dataset_params":
     {
        "training_path": "gcs://",
-       "validation_path": "string ",
+       "validation_path": "gcs://",
        "test_path": "gcs://",
        "batch_size":4,
        "forecast_history":5,

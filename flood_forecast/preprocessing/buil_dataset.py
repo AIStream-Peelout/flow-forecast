@@ -54,6 +54,5 @@ def create_usgs(meta_data_dir):
   for file_name in os.listdir(meta_data_dir):
     gage_id = file_name.split("stations")[0]
     with open(os.path.join(meta_data_dir , file_name)) as f:
-      #data = json.load(f)
-      pass 
-    make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), "0"+gage_id)
+      data = json.load(f)
+    df = make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), "0"+gage_id))
