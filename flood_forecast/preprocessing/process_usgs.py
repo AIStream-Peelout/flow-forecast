@@ -14,7 +14,7 @@ def make_usgs_data(start_date:datetime, end_date:datetime, site_number:str):
     print("Request finished")
     response_data = process_response_text(site_number + ".txt")
     create_csv(response_data[0], response_data[1], site_number)
-    return pd.read_csv(site_number + "final.csv")
+    return pd.read_csv(site_number + "_flow_data.csv")
 
 def process_response_text(file_name:str)->Tuple[str, Dict]:
     extractive_params = {}
@@ -45,8 +45,8 @@ def df_label(usgs_text:str)->str:
         return "cfs"
     elif usgs_text=="Gage":
         return "height"
-    else: 
-        return "unknown"
+    else:
+        return usgs_text
 
 def create_csv(file_path:str, params_names:dict, site_number:str):
     """
