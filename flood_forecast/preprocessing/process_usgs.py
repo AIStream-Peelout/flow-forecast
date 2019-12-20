@@ -2,6 +2,7 @@ import pandas as pd
 import requests 
 from datetime import datetime
 from typing import Tuple, Dict
+import pytz
 # url format 
 def make_usgs_data(start_date:datetime, end_date:datetime, site_number:str):
     base_url = "https://nwis.waterdata.usgs.gov/usa/nwis/uv/?cb_00060=on&cb_00065&format=rdb&"
