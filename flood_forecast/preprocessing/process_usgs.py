@@ -57,18 +57,18 @@ def create_csv(file_path:str, params_names:dict, site_number:str):
     for key, value in params_names.items():
         df[value] = df[key]
     df.to_csv(site_number + "_flow_data.csv")
+
 def get_timezone_map():
     timezone_map = {"EST": "America/New_York", "EDT":"America/New_York", "CST":"America/Chicago", "CDT":"America/Chicago", "MDT":"America/Denver", "MST":"America/Denver",
                     "PST": "America/Los_Angeles", "PDT": "America/Los_Angeles"}
     return timezone_map
 
-def process_intermediate_csv(df:pd.DataFrame) -> (pd.DataFrame, int, int):
+def process_intermediate_csv(df:pd.DataFrame) -> (pd.DataFrame, int, int, int):
   # Remove garbage first row
   # TODO check if more rows are garabage
-  timezone_map = get_timezone_map()
   df = df.iloc[1:]
   time_zone = df["tz_cd"].iloc[0]
-  time_zone = timezone_map[time_zone]
+  time_zone = get_timezone_map()[time_zone]
   old_timezone = pytz.timezone(time_zone)
   new_timezone = pytz.timezone("UTC")
   # This assumes timezones are consistent throughout the USGS stream (this should be true)
@@ -76,5 +76,5 @@ def process_intermediate_csv(df:pd.DataFrame) -> (pd.DataFrame, int, int):
   df["cfs"] = pd.to_numeric(df['cfs'], errors='coerce')
   max_flow = df["cfs"].max()
   min_flow = df["cfs"].min()
-  #count_nan = len(df["cfs"]) - df["cfs"].count()
-  return df, max_flow, min_flow
+  count_nan = len(df["cfs"]) - df["cfs"].count()
+  return df[df.datetime.dt.minute==0], max_flow, min_flow

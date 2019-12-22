@@ -1,10 +1,12 @@
 import os
 from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_csv
 from flood_forecast.eco_gage_set import eco_gage_set
-from flood_forecast.make_usgs import make_usgs_data
+from flood_forecast.make_usgs import make_usgs_data, process_intermediate_csv
 from typing import Set
 import json
 from datetime import datetime
+import pytz
+import pandas as pd
 
 
 def build_weather_csv(json_full_path, asos_base_url, base_url_2, econet_data, visited_gages_path, start=0, end_index=100):
@@ -50,9 +52,25 @@ def get_eco_netset(directory_path):
         print(filename)
   return eco_gage_set
 
-def create_usgs(meta_data_dir):
+def combine_data(flow_df, precip_df):
+  tz = pytz.timezone("UTC")
+  precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
+  precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: tz.localize(x))
+  joined_df = precip_df.merge(flow_df, left_on='hour_updated', right_on='datetime', how='outer')[5:-5]
+  return joined_df
+
+def create_usgs(meta_data_dir:str, precip_path:str):
   for file_name in os.listdir(meta_data_dir):
     gage_id = file_name.split("stations")[0]
     with open(os.path.join(meta_data_dir , file_name)) as f:
       data = json.load(f)
-    df = make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), "0"+gage_id)
+    raw_df = make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), "0"+gage_id)
+    df, max_flow, min_flow = process_intermediate_csv(raw_df)
+    data["time_zone_code"] = df["tz_cd"].iloc[0]
+    data["max_flow"] = max_flow
+    data["min_flow"] = min_flow
+    precip_df = pd.read_csv(os.path.join(precip_path, data["stations"][0]["station_id"] + ".csv"))
+    fixed_df = combine_data(df, precip_df)
+    fixed_df.to_csv(str(gage_id) + file_name + "_flow.csv")
+    with open(os.path.join(meta_data_dir , file_name), 'w') as f:
+      json.dumps(f)
