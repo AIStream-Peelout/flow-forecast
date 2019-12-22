@@ -59,10 +59,13 @@ def combine_data(flow_df, precip_df):
   joined_df = precip_df.merge(flow_df, left_on='hour_updated', right_on='datetime', how='outer')[5:-5]
   return joined_df
 
-def create_usgs(meta_data_dir:str, precip_path:str):
-  for file_name in os.listdir(meta_data_dir):
+def create_usgs(meta_data_dir:str, precip_path:str, start:int, end:int):
+  gage_list = sorted(os.listdir(meta_data_dir))
+  for i in range(start, end):
+    file_name = gage_list[i]
     gage_id = file_name.split("stations")[0]
     with open(os.path.join(meta_data_dir , file_name)) as f:
+      print(os.path.join(meta_data_dir , file_name))
       data = json.load(f)
     raw_df = make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), "0"+gage_id)
     df, max_flow, min_flow = process_intermediate_csv(raw_df)
@@ -73,4 +76,4 @@ def create_usgs(meta_data_dir:str, precip_path:str):
     fixed_df = combine_data(df, precip_df)
     fixed_df.to_csv(str(gage_id) + file_name + "_flow.csv")
     with open(os.path.join(meta_data_dir , file_name), 'w') as f:
-      json.dumps(f)
+      json.dump(data, f)
