@@ -20,7 +20,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(self.model.model.multi_attn.embed_dim, 128)
 
     def test_train(self):
-        train_transformer_style(self.model, self.model_params["training_params"], False)
+        train_transformer_style(self.model, self.model_params["training_params"])
         self.assertEqual(len(os.listdir("model_save")), 2)
         self.assertEqual(1,1)
 
