@@ -11,12 +11,13 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 
-def train_transformer_style(model: PyTorchForecast, training_params: Dict, use_wandb: bool = False, forward_params = {}):
+def train_transformer_style(model: PyTorchForecast, training_params: Dict, forward_params = {}):
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
   :training_params_dict
   """
+  use_wandb = model.wandb
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters())
   criterion = pytorch_criterion_dict[training_params["criterion"]]
   max_epochs = training_params["epochs"]

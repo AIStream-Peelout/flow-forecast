@@ -9,16 +9,16 @@ def train_function(model_type: str, params: Dict):
     """
     Function to train a Model(TimeSeriesModel) or da_rnn will return the trained model
      """
-    dataset_params = params["dataset_param"]
+    dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
         from flood_forecast.da_rnn.train_da import da_rnn, train
         from flood_forecast.preprocessing.preprocess_da_rnn import make_data
-        preprocessed_data = make_data(params["dataset_params"]["training_path"], params["dataset_params"]["target_col"], params["dataset_param"]["forecast_length"])
+        preprocessed_data = make_data(params["dataset_params"]["training_path"], params["dataset_params"]["target_col"], params["dataset_params"]["forecast_length"])
         config, model = da_rnn(preprocessed_data, len(dataset_params["target_col"]))
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
     elif model_type == "PyTorch":
-        model = PyTorchForecast(params["model_name"], dataset_params["training_path"], dataset_params["validation_path"], dataset_params["test_path"], params)
+        trained_model = PyTorchForecast(params["model_name"], dataset_params["training_path"], dataset_params["validation_path"], dataset_params["test_path"], params)
         train_transformer_style(model, params, params["wandb"], params["model_params"]["forward_param"])
     return trained_model 
 

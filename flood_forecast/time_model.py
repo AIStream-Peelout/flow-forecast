@@ -63,7 +63,7 @@ class TimeSeriesModel(ABC):
                 wandb.config.gcs_path = save_path + "experiments/ " + name
         
     def wandb_init(self):
-        if self.params["wandb"] == "True":
+        if self.params["wandb"] != False:
             import wandb
             wandb.init()
             wandb.config(config=self.params)
