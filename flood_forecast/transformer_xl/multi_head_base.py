@@ -10,6 +10,11 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.length_data = seq_len
     def forward(self, x, mask=None):
+        """
+        :param x torch.Tensor: of shape (B, L, M)
+        Where B is the batch size, 
+        :param mask: 
+        """
         x = self.dense_shape(x)
         x = self.pe(x)
         x = x.permute(1,0,2)
