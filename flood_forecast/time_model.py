@@ -106,7 +106,7 @@ class PyTorchForecast(TimeSeriesModel):
         if loader_type + "_end" in dataset_params:
             start_end_params["end_stamp"] = dataset_params[loader_type + "_end"] 
         if dataset_params["class"] == "default":
-            l = CSVDataLoader(data_path, dataset_params["history"], dataset_params["forecast_length"],
+            l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
         else:
             # TODO support custom Daa Loader
