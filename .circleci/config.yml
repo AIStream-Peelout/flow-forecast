@@ -45,7 +45,7 @@ jobs:
             python tests/pytorc_train_tests.py
             python tests/model_config_tests.py
             python tests/usgs_tests.py
-            python trainer.py -t tests/test_config.py
+            python flood_forecast/trainer.py -p tests/test_config.py
       - store_artifacts:
           path: test-reports
           destination: test-reports
