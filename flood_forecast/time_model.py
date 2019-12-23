@@ -65,7 +65,7 @@ class TimeSeriesModel(ABC):
     def wandb_init(self):
         if self.params["wandb"] != False:
             import wandb
-            wandb.init(config=self.params)
+            wandb.init(config=self.params, name=self.params["wandb"]["name"], tags=self.params["wandb"]["tags"])
             return True 
         return False
     
