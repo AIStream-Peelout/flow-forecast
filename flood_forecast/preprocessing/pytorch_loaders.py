@@ -6,7 +6,7 @@ from typing import Type, List
 
 class CSVDataLoader(Dataset):
     def __init__(self, file_path:str, history_length:int, forecast_length:int, target_col:List, 
-                 relevant_cols:List, scaling=None):
+                 relevant_cols:List, scaling=None, start_stamp:int=0, end_stamp:int=None):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
         :param file_path: The path to the CSV file you wish to use. 
@@ -17,11 +17,17 @@ class CSVDataLoader(Dataset):
         :param scaling: (highly reccomended) If provided should be a subclass of sklearn.base.BaseEstimator 
         and sklearn.base.TransformerMixin) i.e StandardScaler,  MaxAbsScaler, MinMaxScaler, etc) Note without 
         a scaler the loss is likely to explode and cause infinite loss which will corrupt weights
+        :param start_stamp int: Optional if you want to only use part of a CSV for training, validation or testing supply these
+        "param end_stamp int: Optional if you want to only use part of a CSV for training, validation, or testing supply these
         """
         super().__init__()
         self.forecast_history = history_length
         self.forecast_length = forecast_length 
         self.df = pd.read_csv(file_path)[relevant_cols]
+        if start_stamp !=0:
+            self.df = self.df[start_stamp:]
+        if end_stamp != None: 
+            self.df = self.df[:end_stamp]
         if scaling is not None:
             self.scale = scaling
             temp_df = self.scale.fit_transform(self.df)

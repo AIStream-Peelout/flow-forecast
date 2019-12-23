@@ -17,9 +17,9 @@ class TimeSeriesModel(ABC):
     def __init__(self, model_base: str, training_data: str, validation_data: str, test_data:str, params:Dict):
         self.model = self.load_model(model_base, params["model_params"])
         self.params = params
-        self.training = self.make_data_load(training_data, params["dataset_params"])
-        self.validation = self.make_data_load(validation_data, params["dataset_params"])
-        self.test_data = self.make_data_load(test_data, params["dataset_params"])
+        self.training = self.make_data_load(training_data, params["dataset_params"], "train")
+        self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
+        self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
         if "GCS" in self.params:
             self.gcs_client = get_storage_client()
         else:
@@ -35,7 +35,7 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError 
     
     @abstractmethod
-    def make_data_load(self, data_path, params:Dict) -> object:
+    def make_data_load(self, data_path, params:Dict, loader_type:str) -> object:
         """
         Intializes a data loader based on the provided data path. 
         This may be as simple as a pandas dataframe or as complex as 
@@ -100,10 +100,15 @@ class PyTorchForecast(TimeSeriesModel):
         self.upload_gcs(model_save_path, model_name)
         self.upload_gcs(params_save_path, params_name)
     
-    def make_data_load(self, data_path: str, dataset_params: Dict):
+    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type):
+        start_end_params = {}
+        if loader_type + "_start" in dataset_params:
+            start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
+        if loader_type + "_end" in dataset_params:
+            start_end_params["end_stamp"] = dataset_params[loader_type + "_end"] 
         if dataset_params["class"] == "default":
             l = CSVDataLoader(data_path, dataset_params["history"], dataset_params["forecast_length"],
-            dataset_params["target_col"], dataset_params["relevant_cols"])
+            dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
         else:
             # TODO support custom Daa Loader
             l = None
