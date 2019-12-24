@@ -9,7 +9,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {"model_params":{"number_time_series":3}, 
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"]},
-                            "wandb":"False"}
+                            "wandb":False}
     def test_pytorch_model_dict(self):
         self.assertEqual(type(pytorch_model_dict1), dict)
 
