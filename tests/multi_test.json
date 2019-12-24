@@ -21,9 +21,9 @@
     },
     "training_params":
     {
-       "criterion":"MSELoss",
+       "criterion":"MSE",
        "optimizer": "Adam",
-       "lr": 0.1,
+       "lr": 0.3,
        "epochs": 1
     
     },
