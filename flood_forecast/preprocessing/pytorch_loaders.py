@@ -12,7 +12,7 @@ class CSVDataLoader(Dataset):
         :param file_path: The path to the CSV file you wish to use. 
         :param history_length: This is the length of the historical time series data you wish to utilize for forecasting
         :param forecast_length: The number of time steps to forecast ahead (for transformer this must equal history_length)
-        :param relevant_cols: Supply column names you wish to in the forecast (others will not be used)
+        :param relevant_cols: Supply column names you wish to predict in the forecast (others will not be used)
         :param target_col: The target column or columns you to predict. If you only have one still use a list ['cfs']
         :param scaling: (highly reccomended) If provided should be a subclass of sklearn.base.BaseEstimator 
         and sklearn.base.TransformerMixin) i.e StandardScaler,  MaxAbsScaler, MinMaxScaler, etc) Note without 
@@ -35,7 +35,7 @@ class CSVDataLoader(Dataset):
             # back to normal as models might not necessarily predict
             # other present time series values.
             self.output_scale = self.scale.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
-            self.df = temp_df
+            self.df = pd.DataFrame(temp_df, index=self.df.index, columns=self.df.columns)
         self.targ_col = target_col
         
     def __getitem__(self, idx):
@@ -52,7 +52,8 @@ class CSVDataLoader(Dataset):
         return len(self.df.index)-self.forecast_history-self.forecast_length-1
     
     def inverse_scale(self, result_data):
-        return self.output_scale.inverse_transform(result_data)
+        result_data_np = result_data.to_numpy()
+        return self.output_scale.inverse_transform(result_data_np)
         
         
 
