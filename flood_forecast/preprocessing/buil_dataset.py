@@ -2,6 +2,7 @@ import os
 from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_csv
 from flood_forecast.eco_gage_set import eco_gage_set
 from flood_forecast.make_usgs import make_usgs_data, process_intermediate_csv
+from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 from typing import Set
 import json
 from datetime import datetime
@@ -57,23 +58,46 @@ def combine_data(flow_df, precip_df):
   precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
   precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: tz.localize(x))
   joined_df = precip_df.merge(flow_df, left_on='hour_updated', right_on='datetime', how='outer')[5:-5]
-  return joined_df
+  nan_precip = sum(pd.isnull(joined_df['p01m']))
+  nan_flow = sum(pd.isnull(joined_df['cfs']))
+  return joined_df, nan_flow, nan_precip
 
 def create_usgs(meta_data_dir:str, precip_path:str, start:int, end:int):
   gage_list = sorted(os.listdir(meta_data_dir))
+  exceptions = {} 
+  client = get_storage_client()
   for i in range(start, end):
-    file_name = gage_list[i]
-    gage_id = file_name.split("stations")[0]
-    with open(os.path.join(meta_data_dir , file_name)) as f:
-      print(os.path.join(meta_data_dir , file_name))
-      data = json.load(f)
-    raw_df = make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), "0"+gage_id)
-    df, max_flow, min_flow = process_intermediate_csv(raw_df)
-    data["time_zone_code"] = df["tz_cd"].iloc[0]
-    data["max_flow"] = max_flow
-    data["min_flow"] = min_flow
-    precip_df = pd.read_csv(os.path.join(precip_path, data["stations"][0]["station_id"] + ".csv"))
-    fixed_df = combine_data(df, precip_df)
-    fixed_df.to_csv(str(gage_id) + file_name + "_flow.csv")
-    with open(os.path.join(meta_data_dir , file_name), 'w') as f:
-      json.dump(data, f)
+    try:
+      file_name = gage_list[i]
+      gage_id = file_name.split("stations")[0]
+      with open(os.path.join(meta_data_dir , file_name)) as f:
+        print(os.path.join(meta_data_dir , file_name))
+        data = json.load(f)
+      if len(gage_id) == 7:
+        gage_id = "0"+gage_id
+        raw_df = make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), gage_id)
+      else: 
+        raw_df = make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), gage_id)
+      df, max_flow, min_flow = process_intermediate_csv(raw_df)
+      data["time_zone_code"] = df["tz_cd"].iloc[0]
+      data["max_flow"] = max_flow
+      data["min_flow"] = min_flow
+      precip_df = pd.read_csv(os.path.join(precip_path, data["stations"][0]["station_id"] + ".csv"))
+      fixed_df, nan_flow, nan_precip = combine_data(df, precip_df)
+      data["nan_flow"] = nan_flow
+      data["nan_precip"] = nan_precip
+      joined_name = str(gage_id) + data["stations"][0]["station_id"] + "_flow.csv"
+      joined_upload = "joined/" + joined_name
+      meta_path = os.path.join(meta_data_dir , file_name)
+      data["files"] = [joined_name]
+      fixed_df.to_csv(joined_name)
+      with open(meta_path, 'w') as f:
+        json.dump(data, f)
+      upload_file("predict_cfs", "meta2/" + file_name, meta_path, client)
+      upload_file("predict_cfs", joined_upload, joined_name, client)
+    except Exception as e:
+      exceptions[str(gage_id)] = str(e)
+      with open("exceptions.json", "w+") as a:
+        json.dump(exceptions, a)
+      print("exception")
+      upload_file("predict_cfs", "meta2/" + "exceptions.json", "exceptions.json", client)

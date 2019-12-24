@@ -27,12 +27,7 @@
        "epochs": 1
     
     },
-    "GCS":{
-       "run_save_path": "",
-       "project_id": "string",
-       "service_key_path": ""
-       
-    },
+    "GCS": false,
     
     "wandb": {
        "name": "flood_forecast_circleci",
