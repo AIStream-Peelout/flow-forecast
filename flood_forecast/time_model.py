@@ -52,7 +52,7 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
 
-    def upload_gcs(self, save_path:str, name, bucket_name=None):
+    def upload_gcs(self, save_path:str, name:str, bucket_name=None):
         """
         Function to upload model checkpoints to GCS
         """
@@ -100,14 +100,14 @@ class PyTorchForecast(TimeSeriesModel):
         self.upload_gcs(model_save_path, model_name)
         self.upload_gcs(params_save_path, params_name)
     
-    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type):
+    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str):
         start_end_params = {}
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
             start_end_params["end_stamp"] = dataset_params[loader_type + "_end"] 
         if "scaler" in dataset_params:
-            start_end_params["scaler"] = scaler_dict[dataset_params["scaler"]] 
+            start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]] 
         if dataset_params["class"] == "default":
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)

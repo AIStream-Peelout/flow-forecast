@@ -9,7 +9,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.multi_attn = MultiheadAttention(embed_dim=d_model, num_heads=num_heads, dropout=dropout)
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.length_data = seq_len
-    def forward(self, x, mask=None):
+    def forward(self, x:torch.Tensor, mask=None):
         """
         :param x torch.Tensor: of shape (B, L, M)
         Where B is the batch size, 
