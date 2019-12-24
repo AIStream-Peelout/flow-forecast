@@ -15,7 +15,9 @@
        "forecast_length":5,
        "train_end": 300,
        "valid_start":301,
-       "valid_end": 401
+       "valid_end": 401,
+       "target_col": "cfs",
+       "relevant_cols": ["cfs", "p01m", "tmpf"]
     },
     "training_params":
     {
