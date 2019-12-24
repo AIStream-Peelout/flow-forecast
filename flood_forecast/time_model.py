@@ -20,7 +20,7 @@ class TimeSeriesModel(ABC):
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
-        if "GCS" in self.params:
+        if "GCS" in self.params and self.params["GCS"]!=False:
             self.gcs_client = get_storage_client()
         else:
             self.gcs_client = None
