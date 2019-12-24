@@ -3,7 +3,7 @@
     "model_type": "PyTorch",
     "model_params": {
       "number_time_series":3,
-      "seq_len":4
+      "seq_len":5
      },
     "dataset_params":
     {  "class": "default",
