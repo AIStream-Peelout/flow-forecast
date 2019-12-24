@@ -24,7 +24,8 @@
        "criterion":"MSE",
        "optimizer": "Adam",
        "lr": 0.3,
-       "epochs": 1
+       "epochs": 1,
+       "batch_size":4
     
     },
     "GCS": false,
