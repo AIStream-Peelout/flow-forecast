@@ -1,0 +1,2 @@
+from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler
+scaler_dict = {"StandardScaler":StandardScaler(), "RobustScaler":RobustScaler(), "MinMaxScaler":MinMaxScaler, "MaxAbsScaler":MaxAbsScaler}

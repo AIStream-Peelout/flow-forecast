@@ -4,6 +4,7 @@ import torch
 import json, os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
+from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 
@@ -105,6 +106,8 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
             start_end_params["end_stamp"] = dataset_params[loader_type + "_end"] 
+        if "scaler" in dataset_params:
+            start_end_params["scaler"] = scaler_dict[dataset_params["scaler"]] 
         if dataset_params["class"] == "default":
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)

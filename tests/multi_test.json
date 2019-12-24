@@ -17,7 +17,8 @@
        "valid_start":301,
        "valid_end": 401,
        "target_col": "cfs",
-       "relevant_cols": ["cfs", "p01m", "tmpf"]
+       "relevant_cols": ["cfs", "p01m", "tmpf"],
+       "scaler": "StandardScaler"
     },
     "training_params":
     {
