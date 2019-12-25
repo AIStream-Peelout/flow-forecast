@@ -1,7 +1,7 @@
 import os 
 import pandas as pd
 
-def fix_timezones(csv_path:str)->pd.Dataframe:
+def fix_timezones(csv_path:str)->pd.DataFrame:
   """
   Basic function to fix intial data bug 
   related to NaN values in non-eastern-time zones due 
@@ -14,7 +14,7 @@ def fix_timezones(csv_path:str)->pd.Dataframe:
 def split_on_na_chunks(csv_path:str):
   pass 
 
-def interpolate_missing_values(csv_path)->pd.Dataframe:
+def interpolate_missing_values(csv_path)->pd.DataFrame:
   """
   Function to fill missing values with nearest
   value. Should be run only after splitting on the NaN
