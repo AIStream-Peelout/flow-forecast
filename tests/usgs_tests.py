@@ -25,8 +25,10 @@ class DataQualityTests(unittest.TestCase):
         revised_df = interpolate_missing_values(revised_df)
         self.assertEqual(0, sum(pd.isnull(revised_df['cfs'])))
         self.assertEqual(0, sum(pd.isnull(revised_df['precip'])))
-        
+
     def test_chunking(self):
         self.assertEqual(1,1)
 
+if __name__ == '__main__':
+    unittest.main()
 
