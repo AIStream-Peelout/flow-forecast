@@ -8,7 +8,7 @@ class DataQualityTests(unittest.TestCase):
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"test_data")
 
     def test_intermediate_csv(self): 
-        df = pd.read(os.path.join(self.test_data_path, "big_black_test_small.csv"), sep="\t")
+        df = pd.read_csv(os.path.join(self.test_data_path, "big_black_test_small.csv"), sep="\t")
         result_df, max_flow, min_flow = process_intermediate_csv(df)
         self.assertEqual(result_df.iloc[1]['datetime'].hour, 5)
         self.assertGreater(max_flow, 2640)
@@ -21,7 +21,7 @@ class DataQualityTests(unittest.TestCase):
         file_path = os.path.join(self.test_data_path, "river_test_sm.csv")
         revised_df = fix_timezones(file_path)
         self.assertEqual(revised_df.iloc[0]['cfs'], 0.0)
-        self.assertEqual(revised_df.iloc[1]['tmpf'], 19.4)
+        self.assertEqual(revised_df.iloc[1]['tmpf'], 19.94)
         revised_df = interpolate_missing_values(revised_df)
         self.assertEqual(0, sum(pd.isnull(revised_df['cfs'])))
         self.assertEqual(0, sum(pd.isnull(revised_df['precip'])))
