@@ -22,5 +22,5 @@ def interpolate_missing_values(df:pd.DataFrame)->pd.DataFrame:
   """
   df['cfs1'] = df['cfs'].interpolate(method='nearest')
   df['precip'] = df['p01m'].interpolate(method='nearest')
-  df['temp'] = df['tempf'].interpolate(method='nearest')
+  df['temp'] = df['tmpf'].interpolate(method='nearest')
   return df

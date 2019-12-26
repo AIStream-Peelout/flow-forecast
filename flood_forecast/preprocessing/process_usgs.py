@@ -65,7 +65,7 @@ def get_timezone_map():
 
 def process_intermediate_csv(df:pd.DataFrame) -> (pd.DataFrame, int, int, int):
   # Remove garbage first row
-  # TODO check if more rows are garabage
+  # TODO check if more rows are garbage
   df = df.iloc[1:]
   time_zone = df["tz_cd"].iloc[0]
   time_zone = get_timezone_map()[time_zone]
