@@ -14,13 +14,12 @@ def fix_timezones(csv_path:str)->pd.DataFrame:
 def split_on_na_chunks(csv_path:str):
   pass 
 
-def interpolate_missing_values(csv_path)->pd.DataFrame:
+def interpolate_missing_values(df:pd.DataFrame)->pd.DataFrame:
   """
   Function to fill missing values with nearest
   value. Should be run only after splitting on the NaN
   chunks.
   """
-  df = pd.read_csv(csv_path)
   df['cfs1'] = df['cfs'].interpolate(method='nearest')
   df['precip'] = df['p01m'].interpolate(method='nearest')
   df['temp'] = df['tempf'].interpolate(method='nearest')

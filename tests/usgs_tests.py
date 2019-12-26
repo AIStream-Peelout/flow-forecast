@@ -19,7 +19,7 @@ class DataQualityTests(unittest.TestCase):
         Additional function to test interpolation
         """
         file_path = os.path.join(self.test_data_path, "river_test_sm.csv")
-        revised_df = pd.read_csv(file_path)
+        revised_df = fix_timezones(file_path)
         self.assertEqual(revised_df.iloc[0]['cfs'], 0.0)
         self.assertEqual(revised_df.iloc[1]['tempf'], 19.4)
         revised_df = interpolate_missing_values(revised_df)
