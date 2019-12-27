@@ -9,7 +9,7 @@ class JoinTest(unittest.TestCase):
     def setUp(self):
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"test_data")
     def test_join_function(self):
-        df = pd.read_csv(os.path.join(self.test_data_path, "big_black_test_small.csv"), sep="\t")
+        df = pd.read_csv(os.path.join(self.test_data_path, "fake_test_small.csv"), sep="\t")
         asos_df = pd.read_csv(os.path.join(self.test_data_path, "asos-12N_small.csv"))
         old_timezone = pytz.timezone("America/New_York")
         new_timezone = pytz.timezone("UTC")
