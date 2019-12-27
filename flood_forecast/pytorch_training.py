@@ -42,18 +42,16 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
           opt.zero_grad()
           output = model.model(src, **forward_params)
           labels = trg[:, :, 0] 
-          # TODO loss should be handled in model itseflf no need view in output 
           loss = criterion(output, labels.float())
           if loss > 10:
               print(src)
-          #print(loss)
           loss.backward()
           #torch.nn.utils.clip_grad_norm_(s.parameters(), 0.5)
           opt.step()
           running_loss += loss.item()
           i+=1
           if torch.isnan(loss) or loss==float('inf'):
-              raise "Error infinite or NaN loss detected. Try normalizing data"
+              raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
       print("The loss is")
       print(loss)
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion)
