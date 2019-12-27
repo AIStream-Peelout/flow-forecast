@@ -1,4 +1,3 @@
-f
 import torch
 import torch.optim as optim
 from torch.autograd import Variable
