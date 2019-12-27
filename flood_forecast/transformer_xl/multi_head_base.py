@@ -12,7 +12,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
     def forward(self, x:torch.Tensor, mask=None):
         """
         :param x torch.Tensor: of shape (B, L, M)
-        Where B is the batch size, 
+        Where B is the batch size, L is the seq length
         :param mask: 
         """
         x = self.dense_shape(x)

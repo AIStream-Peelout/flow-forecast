@@ -3,6 +3,7 @@ from typing import Sequence, List, Tuple, Dict
 import json
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.model_dict_function import pytorch_model_dict
+from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.time_model import PyTorchForecast
 
 def train_function(model_type: str, params: Dict):
