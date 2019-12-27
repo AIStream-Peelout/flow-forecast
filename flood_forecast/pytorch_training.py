@@ -53,7 +53,10 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
               raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
       print("The loss is")
       print(loss)
-      valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion)
+      use_decoder = False
+      if "use_decoder" in  model.params["model_params"]:
+        use_decoder = True
+      valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, decoder_structure=use_decoder, use_wandb=use_wandb)
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': loss/i})
       epoch_params = {"epoch":epoch, "train_loss":str(loss/i), "validation_loss":str(valid)} 
