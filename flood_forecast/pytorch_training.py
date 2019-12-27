@@ -82,6 +82,11 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
     else:
       output = model(src.float(), mask)
       labels = targ[:, :, 0]
+    if validation_loader.scale:
+      unscaled_out = validation_loader.inverse_scale(output)
+      unscaled_labels = validation_loader.inverse_scale(labels)
+      loss_unscaled = criterion(unscaled_out, unscaled_labels)
+      loss_unscaled_full = len(labels.float())*loss_unscaled.item()
     loss = criterion(output, labels.float())
     loop_loss += len(labels.float())*loss.item()
   if use_wandb:
