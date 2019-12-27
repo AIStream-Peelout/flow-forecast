@@ -1,6 +1,5 @@
 import os
 from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_csv
-from flood_forecast.eco_gage_set import eco_gage_set
 from flood_forecast.make_usgs import make_usgs_data, process_intermediate_csv
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 from typing import Set
