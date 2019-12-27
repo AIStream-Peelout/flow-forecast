@@ -36,6 +36,8 @@ class CSVDataLoader(Dataset):
             # other present time series values.
             self.output_scale = self.scale.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
             self.df = pd.DataFrame(temp_df, index=self.df.index, columns=self.df.columns)
+        if self.df.isna().sum() != 0:
+            raise "Error nan values detected in data. Please run interpolate ffill or bfill on data"
         self.targ_col = target_col
         
     def __getitem__(self, idx):

@@ -1,4 +1,4 @@
-
+f
 import torch
 import torch.optim as optim
 from torch.autograd import Variable
@@ -72,7 +72,6 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
   with torch.no_grad():
     i = 0
     for src, targ in validation_loader:
-      print(src.shape)
       i+=1
       if decoder_structure:
         src_mask = generate_square_subsequent_mask(sequence_size)

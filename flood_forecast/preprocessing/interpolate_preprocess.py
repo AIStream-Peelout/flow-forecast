@@ -20,7 +20,7 @@ def interpolate_missing_values(df:pd.DataFrame)->pd.DataFrame:
   value. Should be run only after splitting on the NaN
   chunks.
   """
-  df['cfs1'] = df['cfs'].interpolate(method='nearest')
-  df['precip'] = df['p01m'].interpolate(method='nearest')
-  df['temp'] = df['tmpf'].interpolate(method='nearest')
+  df['cfs1'] = df['cfs'].interpolate(method='nearest').ffill().bfill()
+  df['precip'] = df['p01m'].interpolate(method='nearest').ffill().bfill()
+  df['temp'] = df['tmpf'].interpolate(method='nearest').ffill().bfill()
   return df
