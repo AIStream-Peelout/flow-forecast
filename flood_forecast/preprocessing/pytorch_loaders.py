@@ -24,6 +24,7 @@ class CSVDataLoader(Dataset):
         self.forecast_history = history_length
         self.forecast_length = forecast_length 
         self.df = pd.read_csv(file_path)[relevant_cols]
+        self.scaling = None
         if start_stamp !=0:
             self.df = self.df[start_stamp:]
         if end_stamp != None: 
