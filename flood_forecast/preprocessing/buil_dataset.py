@@ -2,6 +2,7 @@ import os
 from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_csv
 from flood_forecast.preprocessing.process_usgs import make_usgs_data, process_intermediate_csv
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
+from flood_forecast.preprocessing.eco_gage_set import eco_gage_set
 from typing import Set
 import json
 from datetime import datetime
@@ -40,7 +41,6 @@ def get_eco_netset(directory_path):
   us a directory of CSV files in following format `LastName_First_station_id_Hourly.txt`
   This code simply constructs a set of stations based on what is in the folder.
   """
-  eco_gage_set = {"A"}
   directory = os.fsencode(directory_path)
   print(sorted(os.listdir(directory)))
   for file in sorted(os.listdir(directory)):

@@ -8,6 +8,8 @@ class JoinTest(unittest.TestCase):
     def test_join_function(self):
         df = pd.read_csv(os.path.join(self.test_data_path, "big_black_test_small.csv"), sep="\t")
         asos_df = pd.read_csv(os.path.join(self.test_data_path, "asos-12N.csv"))
+        #join_data(asos_df,)
+        # TODO create dummy joined data
         self.assertEqual(1,1)
 
 if __name__ == '__main__':
