@@ -82,15 +82,21 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
     else:
       output = model(src.float(), mask)
       labels = targ[:, :, 0]
-    if validation_loader.scale:
-      unscaled_out = validation_loader.inverse_scale(output)
-      unscaled_labels = validation_loader.inverse_scale(labels)
+    loss_unscaled_full = None
+    validation_dataset = validation_loader.dataset
+    if validation_dataset.scale :
+      unscaled_out = validation_dataset.inverse_scale(output)
+      unscaled_labels = validation_dataset.inverse_scale(labels)
       loss_unscaled = criterion(unscaled_out, unscaled_labels)
       loss_unscaled_full = len(labels.float())*loss_unscaled.item()
     loss = criterion(output, labels.float())
     loop_loss += len(labels.float())*loss.item()
   if use_wandb:
     import wandb
-    wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
+    if loss_unscaled_full:
+      tot_unscaled_loss = loss_unscaled_full/(len(validation_loader.dataset)-1)
+      wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1), "unscaled_loss": tot_unscaled_loss})
+    else:
+      wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
   model.train()
   return loop_loss/(len(validation_loader.dataset)-1)
