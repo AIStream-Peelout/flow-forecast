@@ -56,7 +56,7 @@ def combine_data(flow_df, precip_df):
   tz = pytz.timezone("UTC")
   precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
   precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: tz.localize(x))
-  joined_df = precip_df.merge(flow_df, left_on='hour_updated', right_on='datetime', how='outer')[5:-5]
+  joined_df = precip_df.merge(flow_df, left_on='hour_updated', right_on='datetime', how='outer')[4:-4]
   nan_precip = sum(pd.isnull(joined_df['p01m']))
   nan_flow = sum(pd.isnull(joined_df['cfs']))
   return joined_df, nan_flow, nan_precip
