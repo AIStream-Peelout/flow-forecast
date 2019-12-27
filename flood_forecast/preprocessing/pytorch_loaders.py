@@ -35,7 +35,8 @@ class CSVDataLoader(Dataset):
             # We define a second scaler to scale the end output 
             # back to normal as models might not necessarily predict
             # other present time series values.
-            self.output_scale = self.scale.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
+            self.targ_scaler = self.scale
+            self.targ_scaler.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
             self.df = pd.DataFrame(temp_df, index=self.df.index, columns=self.df.columns)
         if (len(self.df) - self.df.count()).max()!= 0:
             raise "Error nan values detected in data. Please run interpolate ffill or bfill on data"
@@ -56,7 +57,7 @@ class CSVDataLoader(Dataset):
     
     def inverse_scale(self, result_data):
         result_data_np = result_data.numpy()
-        return self.output_scale.inverse_transform(result_data_np)
+        return self.targ_scaler.inverse_transform(result_data_np)
         
         
 
