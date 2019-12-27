@@ -10,7 +10,7 @@ class DataQualityTests(unittest.TestCase):
     def test_intermediate_csv(self): 
         df = pd.read_csv(os.path.join(self.test_data_path, "big_black_test_small.csv"), sep="\t")
         result_df, max_flow, min_flow = process_intermediate_csv(df)
-        self.assertEqual(result_df.iloc[1]['datetime'].hour, 5)
+        self.assertEqual(result_df.iloc[1]['datetime'].hour, 6)
         self.assertGreater(max_flow, 2640)
         self.assertLess(min_flow,  1600)
 
