@@ -18,7 +18,7 @@ class JoinTest(unittest.TestCase):
         with open(os.path.join(self.test_data_path, "big_black_md.json")) as a:
             meta_data = json.load(a)
         result_df, nan_f, nan_p = combine_data(df, asos_df)
-        self.assertEqual(result_df.iloc[0]['precip'], 0)
+        self.assertEqual(result_df.iloc[0]['p01m'], 0)
         self.assertEqual(result_df.iloc[0]['cfs'], 2210)
         self.assertEqual(result_df.iloc[0]['tmpf'], 19.94)
 
