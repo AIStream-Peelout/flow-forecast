@@ -9,7 +9,6 @@ from datetime import datetime
 import pytz
 import pandas as pd
 
-
 def build_weather_csv(json_full_path, asos_base_url, base_url_2, econet_data, visited_gages_path, start=0, end_index=100):
   directory = os.fsencode(json_full_path)
   sorted_list = sorted(os.listdir(directory))

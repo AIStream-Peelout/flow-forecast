@@ -57,7 +57,7 @@ class CSVDataLoader(Dataset):
     
     def inverse_scale(self, result_data):
         result_data_np = result_data.numpy()
-        return self.targ_scaler.inverse_transform(result_data_np)
+        return torch.from_numpy(self.targ_scaler.inverse_transform(result_data_np))
         
         
 

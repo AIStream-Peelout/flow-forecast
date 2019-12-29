@@ -14,7 +14,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
-  :training_params_dict
+  :training_params_dict A dictionary of the 
   """
   use_wandb = model.wandb
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters())
