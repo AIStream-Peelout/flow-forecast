@@ -13,7 +13,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
         """
         :param x torch.Tensor: of shape (B, L, M)
         Where B is the batch size, L is the seq length
-        :param mask: 
+        :param mask: A mask to cover 
         """
         x = self.dense_shape(x)
         x = self.pe(x)

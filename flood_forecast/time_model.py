@@ -16,7 +16,10 @@ class TimeSeriesModel(ABC):
     and validation at this point.
     """
     def __init__(self, model_base: str, training_data: str, validation_data: str, test_data:str, params:Dict):
-        self.model = self.load_model(model_base, params["model_params"])
+        if "weight_path" in params:
+            self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
+        else: 
+            self.model = self.load_model(model_base, params["model_params"])
         self.params = params
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
@@ -28,7 +31,7 @@ class TimeSeriesModel(ABC):
         self.wandb = self.wandb_init()
             
     @abstractmethod
-    def load_model(self, model_base:str, model_params) -> object:
+    def load_model(self, model_base:str, model_params, weight_path=None) -> object:
         """
         This function should load and return the model 
         this will vary based on the underlying framework used
@@ -78,11 +81,11 @@ class PyTorchForecast(TimeSeriesModel):
         if weight_path is not None:
             self.model.load_state_dict(torch.load(weight_path, map_location=self.device))
             
-    def load_model(self, model_base: str, model_params: Dict):
+    def load_model(self, model_base: str, model_params: Dict, weight_path = None):
         # Load model here 
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
-            if "weight_path" in pytorch_model_dict:
+            if weight_path:
                 checkpoint = torch.load(model_params["weight_path"])
                 model.load_state_dict(checkpoint)
         else: 
