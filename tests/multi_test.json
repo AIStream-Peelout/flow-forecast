@@ -24,6 +24,10 @@
     {
        "criterion":"MSE",
        "optimizer": "Adam",
+       "optim_params":
+       {
+
+       },
        "lr": 0.3,
        "epochs": 1,
        "batch_size":4
