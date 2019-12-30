@@ -87,8 +87,6 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
     if validation_dataset.scale :
       unscaled_out = validation_dataset.inverse_scale(output)
       unscaled_labels = validation_dataset.inverse_scale(labels)
-      print(type(unscaled_labels))
-      print(type(unscaled_out))
       loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
       loss_unscaled_full = len(labels.float())*loss_unscaled.item()
     loss = criterion(output, labels.float())

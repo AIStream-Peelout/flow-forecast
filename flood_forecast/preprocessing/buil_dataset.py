@@ -45,7 +45,6 @@ def get_eco_netset(directory_path):
   for file in sorted(os.listdir(directory)):
     filename = os.fsdecode(file)
     try: 
-        #print(filename.split("c_")[1].split("_H")[0])
         eco_gage_set.add(filename.split("c_")[1].split("_H")[0])
     except:
         print(filename)

@@ -56,9 +56,9 @@ class TimeSeriesModel(ABC):
         """
         Function to upload model checkpoints to GCS
         """
-        if bucket_name is None:
-            bucket_name = os.environ["MODEL_BUCKET"]
         if self.gcs_client:
+            if bucket_name is None:
+                bucket_name = os.environ["MODEL_BUCKET"]
             upload_file(bucket_name, save_path, "experiments/ " + name, self.gcs_client)
             if self.wandb:
                 wandb.config.gcs_path = save_path + "experiments/ " + name
@@ -82,6 +82,9 @@ class PyTorchForecast(TimeSeriesModel):
         # Load model here 
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
+            if "weight_path" in pytorch_model_dict:
+                checkpoint = torch.load(model_params["weight_path"])
+                model.load_state_dict(checkpoint)
         else: 
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model
@@ -99,6 +102,9 @@ class PyTorchForecast(TimeSeriesModel):
             json.dump(self.params, p)
         self.upload_gcs(model_save_path, model_name)
         self.upload_gcs(params_save_path, params_name)
+        if self.wandb:
+            import wandb
+            wandb.config.save_path = model_save_path
     
     def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str):
         start_end_params = {}
