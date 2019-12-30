@@ -86,7 +86,7 @@ class PyTorchForecast(TimeSeriesModel):
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
-                checkpoint = torch.load(model_params["weight_path"])
+                checkpoint = torch.load(weight_path)
                 model.load_state_dict(checkpoint)
                 print("Weights sucessfully loaded")
         else: 

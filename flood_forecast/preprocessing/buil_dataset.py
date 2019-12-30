@@ -18,7 +18,7 @@ def build_weather_csv(json_full_path, asos_base_url, base_url_2, econet_data, vi
     get_weather_data(os.path.join(json_full_path, filename), econet_data, asos_base_url, visited_gages_path)
     process_asos_data(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
 
-def make_usgs(meta_data_path:str, start, end_index):
+def make_usgs(meta_data_path:str, start, end_index:int):
   meta_directory = os.fsencode(meta_data_path)
   sorted_list = sorted(os.listdir(directory))
   for i in range(start, end_index):
