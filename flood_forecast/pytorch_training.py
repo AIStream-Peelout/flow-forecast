@@ -58,8 +58,8 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
         use_decoder = True
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, decoder_structure=use_decoder, use_wandb=use_wandb)
       if use_wandb:
-        wandb.log({'epoch': epoch, 'loss': loss/i})
-      epoch_params = {"epoch":epoch, "train_loss":str(loss/i), "validation_loss":str(valid)} 
+        wandb.log({'epoch': epoch, 'loss': running_loss/i})
+      epoch_params = {"epoch":epoch, "train_loss":str(running_loss/i), "validation_loss":str(valid)} 
       session_params.append(epoch_params)
   model.params["run"] = session_params
   model.save_model("model_save")
@@ -95,6 +95,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
         loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
         loss_unscaled_full = len(labels.float())*loss_unscaled.item()
       loss = criterion(output, labels.float())
+      print(loop_loss)
       loop_loss += len(labels.float())*loss.item()
   if use_wandb:
     import wandb
