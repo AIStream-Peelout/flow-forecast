@@ -69,12 +69,9 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
   model.eval()
   mask = generate_square_subsequent_mask(sequence_size)
   loop_loss = 0.0
-  # Log some of the validation tensor for analysis 
-  last_src = None
-  last_targ = None 
-  last_output = None
   with torch.no_grad():
     i = 0
+    loss_unscaled_full = None
     for src, targ in validation_loader:
       i+=1
       if decoder_structure:
@@ -86,14 +83,13 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
       else:
         output = model(src.float(), mask)
         labels = targ[:, :, 0]
-      loss_unscaled_full = None
       validation_dataset = validation_loader.dataset
       if validation_dataset.scale :
         #unscaled_src = validation_dataset.scale.inverse_scale(src)
         unscaled_out = validation_dataset.inverse_scale(output)
         unscaled_labels = validation_dataset.inverse_scale(labels)
         loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
-        loss_unscaled_full = len(labels.float())*loss_unscaled.item()
+        loss_unscaled_full += len(labels.float())*loss_unscaled.item()
       loss = criterion(output, labels.float())
       print(loop_loss)
       loop_loss += len(labels.float())*loss.item()
