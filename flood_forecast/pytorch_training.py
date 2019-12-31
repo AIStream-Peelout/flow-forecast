@@ -71,7 +71,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
   loop_loss = 0.0
   with torch.no_grad():
     i = 0
-    loss_unscaled_full = None
+    loss_unscaled_full = 0.0
     for src, targ in validation_loader:
       i+=1
       if decoder_structure:
