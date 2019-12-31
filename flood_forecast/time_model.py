@@ -41,7 +41,7 @@ class TimeSeriesModel(ABC):
     @abstractmethod
     def make_data_load(self, data_path, params:Dict, loader_type:str) -> object:
         """
-        Intializes a data loader based on the provided data path. 
+        Intializes a data loader based on the provided data_path. 
         This may be as simple as a pandas dataframe or as complex as 
         a custom PyTorch data loader.
         """
@@ -51,7 +51,7 @@ class TimeSeriesModel(ABC):
     def save_model(self, output_path:str):
         """
         Saves a model to a specific path along with a configuration report 
-        of the parameters, data, and 
+        of the parameters and data info.
         """
         raise NotImplementedError
 
