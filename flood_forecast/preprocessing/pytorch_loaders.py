@@ -23,10 +23,11 @@ class CSVDataLoader(Dataset):
         super().__init__()
         self.forecast_history = history_length
         self.forecast_length = forecast_length 
-        df = pd.read_csv(file_path)
         if interpolate_params: 
             df = fix_timezones(file_path)
             df = interpolate_missing_values(df)
+        else:
+            df = pd.read_csv(file_path)
         self.df = df.sort_values(by='datetime')[relevant_cols]
         self.scale = None
         if start_stamp !=0:
