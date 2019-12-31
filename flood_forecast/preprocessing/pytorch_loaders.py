@@ -27,7 +27,7 @@ class CSVDataLoader(Dataset):
         if interpolate_params: 
             df = fix_timezones(df)
             df = interpolate_missing_values(df)
-        self.df = df[relevant_cols]
+        self.df = df.sort_values(by='datetime')[relevant_cols]
         self.scale = None
         if start_stamp !=0:
             self.df = self.df[start_stamp:]
