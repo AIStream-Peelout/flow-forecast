@@ -119,7 +119,7 @@ class PyTorchForecast(TimeSeriesModel):
         if "scaler" in dataset_params:
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]] 
         if "interpolate" in dataset_params:
-            start_end_params["interpolate"] = dataset_params["interpolate"]
+            start_end_params["interpolate_param"] = dataset_params["interpolate"]
         if dataset_params["class"] == "default":
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)

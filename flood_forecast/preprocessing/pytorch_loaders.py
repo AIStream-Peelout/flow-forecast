@@ -6,7 +6,7 @@ from flood_forecast.preprocessing.interpolate_preprocess import interpolate_miss
 
 class CSVDataLoader(Dataset):
     def __init__(self, file_path:str, history_length:int, forecast_length:int, target_col:List, 
-                 relevant_cols:List, scaling=None, start_stamp:int=0, end_stamp:int=None, interpolate_params=True):
+                 relevant_cols:List, scaling=None, start_stamp:int=0, end_stamp:int=None, interpolate_param=True):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
         :param file_path: The path to the CSV file you wish to use. 
@@ -23,7 +23,8 @@ class CSVDataLoader(Dataset):
         super().__init__()
         self.forecast_history = history_length
         self.forecast_length = forecast_length 
-        if interpolate_params: 
+        # TODO allow other filling methods 
+        if interpolate_param: 
             df = fix_timezones(file_path)
             df = interpolate_missing_values(df)
         else:
