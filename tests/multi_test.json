@@ -18,7 +18,8 @@
        "valid_end": 401,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "StandardScaler"
+       "scaler": "StandardScaler", 
+       "interpolate": false
     },
     "training_params":
     {
