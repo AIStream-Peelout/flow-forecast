@@ -42,8 +42,8 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
           output = model.model(src, **forward_params)
           labels = trg[:, :, 0] 
           loss = criterion(output, labels.float())
-          if loss > 10:
-              print(src)
+          if loss > 100:
+              print("Highloss detected")
           loss.backward()
           #torch.nn.utils.clip_grad_norm_(s.parameters(), 0.5)
           opt.step()
@@ -92,6 +92,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
         loss_unscaled_full += len(labels.float())*loss_unscaled.item()
         if i%100 ==0 and use_wandb:
           import wandb
+          # TODO replace with matplotlib plot
           wandb.log({"source":unscaled_src, "trg":unscaled_labels, "model_pred":unscaled_out})
       loss = criterion(output, labels.float())
       print(loop_loss)

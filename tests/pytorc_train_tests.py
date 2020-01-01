@@ -25,5 +25,14 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(len(os.listdir("model_save")), 2)
         self.assertEqual(1,1)
 
+    def test_load_weights(self):
+        model2 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
+        data = torch.rand(2, 20,3)
+        self.model_params["weight_path"] = sorted(os.listdir("model_save"))[0]
+        model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
+        basic_model = model2.model
+        pre_loaded_model = model3.model
+        self.assertNotEqual(pre_loaded_model(data), basic_model(data))
+
 if __name__ == '__main__':
     unittest.main()
