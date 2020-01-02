@@ -29,7 +29,9 @@ class PyTorchTrainTests(unittest.TestCase):
         self.model_params["weight_path"] = os.path.join("model_save", sorted(os.listdir("model_save"))[1])
         model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         basic_model = model2.model
+        basic_model.eval()
         pre_loaded_model = model3.model
+        pre_loaded_model.eval()
         self.assertFalse(torch.allclose(pre_loaded_model(data), basic_model(data)))
         self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
 
