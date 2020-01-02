@@ -26,7 +26,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(1,1)
         model2 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         data = torch.rand(2, 20,3)
-        self.model_params["weight_path"] = sorted(os.listdir("model_save"))[0]
+        self.model_params["weight_path"] = os.path.join("model_save", sorted(os.listdir("model_save"))[1])
         model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         basic_model = model2.model
         pre_loaded_model = model3.model

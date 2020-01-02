@@ -65,7 +65,7 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     return train_cfg, da_rnn_net
 
 
-def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10, save_plots=True, tensorboard=False):
+def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10, save_plots=True, wandb=False, tensorboard=False):
     iter_per_epoch = int(np.ceil(t_cfg.train_size * 1. / t_cfg.batch_size))
     iter_losses = np.zeros(n_epochs * iter_per_epoch)
     epoch_losses = np.zeros(n_epochs)
