@@ -86,7 +86,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
                 adjust_learning_rate(net, n_iter)
 
         epoch_losses[e_i] = np.mean(iter_losses[range(e_i * iter_per_epoch, (e_i + 1) * iter_per_epoch)])
-        
+            
         if e_i % 1 == 0:
             y_test_pred = predict(net, train_data,
                                   t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
@@ -97,8 +97,11 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, n_epochs=10,
             y_train_pred = predict(net, train_data,
                                    t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
                                    on_train=True)
+            
             #train_mse = np.mean((y_train_pred-train_data.targs[:t_cfg.train_size])**2)
             mse = np.mean((y_test_pred-train_data.targs[t_cfg.train_size:])**2)
+            if wandb:
+                wandb.log({"epoch":n_epochs, "validation_loss":val_loss, "validation_mse":mse})
             plt.figure()
             plt.plot(range(1, 1 + len(train_data.targs)), train_data.targs,
                      label="True")

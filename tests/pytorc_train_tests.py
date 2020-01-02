@@ -30,7 +30,8 @@ class PyTorchTrainTests(unittest.TestCase):
         model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         basic_model = model2.model
         pre_loaded_model = model3.model
-        self.assertNotEqual(pre_loaded_model(data), basic_model(data))
+        self.assertFalse(torch.allclose(pre_loaded_model(data), basic_model(data)))
+        self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
 
 if __name__ == '__main__':
     unittest.main()
