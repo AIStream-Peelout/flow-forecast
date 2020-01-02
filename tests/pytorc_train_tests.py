@@ -20,12 +20,10 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
         self.assertEqual(self.model.model.multi_attn.embed_dim, 128)
 
-    def test_train(self):
+    def test_train_and_resume(self):
         train_transformer_style(self.model, self.model_params["training_params"])
         self.assertEqual(len(os.listdir("model_save")), 2)
         self.assertEqual(1,1)
-
-    def test_load_weights(self):
         model2 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         data = torch.rand(2, 20,3)
         self.model_params["weight_path"] = sorted(os.listdir("model_save"))[0]
