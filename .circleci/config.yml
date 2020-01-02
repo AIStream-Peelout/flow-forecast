@@ -37,16 +37,26 @@ jobs:
       # https://nose.readthedocs.io
           
       - run:
-          name: run tests
+          name: Data Tests
+          command: |
+            python tests/data_format_tests.py
+            python tests/usgs_tests.py
+            python tests/test_join.py
+            
+      - run:
+          name: Model basic tests 
+          when: always
           command: |
             python tests/test_da_rnn.py
-            python tests/data_format_tests.py
             python tests/time_model_test.py
             python tests/pytorc_train_tests.py
             python tests/model_config_tests.py
-            python tests/usgs_tests.py
-            python tests/test_join.py
+
+      - run: 
+          name: Trainer tests
+          command:
             python flood_forecast/trainer.py -p tests/multi_test.json
+          
       - store_artifacts:
           path: test-reports
           destination: test-reports
