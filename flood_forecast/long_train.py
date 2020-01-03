@@ -8,6 +8,8 @@ def split_on_letter(s):
     match = re.compile("[^\W\d]").search(s)
     return [s[:match.start()], s[match.start():]]
 
+from flood_forecast.trainer import train_function
+import json
 def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True): 
   """
   Function that makes and executes a set of config files
@@ -23,13 +25,17 @@ def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True):
     file_path_name = os.path.join(data_dir, file_name)
     if use_transfer and len(os.listdir("model_save")) >1 :
       weight_files = filter(lambda x: x.endswith(".pth"), os.listdir("model_save"))
-      correct_file = max(weight_files, key = os.path.getctime)
+      paths = [] 
+      for weight_file in weight_files:
+        paths.append(os.path.join("model_save", weight_file)) 
+      correct_file = max(paths, key = os.path.getctime)
       print(correct_file)
     config = make_config_file(file_path_name, gage_id, station_id)
-    train_function("PyTorch", config)
     extension = ".json"
-    with open(station_id + "config_f"+extension, "w+") as f:
+    file_name_json = station_id + "config_f"+extension
+    with open(file_name_json, "w+") as f:
         json.dump(config, f)
+    os.system('python flood_forecast/trainer.py -p ' + file_name_json)
     
 def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
   the_config = {                 
@@ -71,7 +77,7 @@ def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
       "GCS": False,
       
       "wandb": {
-        "name": "flood_forecast_010750001",
+        "name": "flood_forecast_"+str(gage_id),
         "tags": [gage_id, station_id, "MultiAttnHeadSimple", "36", "corrected"]
       },
       "forward_params":{}
