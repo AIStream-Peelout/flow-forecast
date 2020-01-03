@@ -24,7 +24,7 @@ def plot_r2(river_flow_preds:pd.DataFrame)->float:
     """
     pass
 
-def get_model_score(river_flow_df, model_evaluate_function:Callable, forecast_column:str, hours_forecast=336):
+def get_model_r2_score(river_flow_df, model_evaluate_function:Callable, forecast_column:str, hours_forecast=336):
     """
 
     model_evaluate_function should call any necessary preprocessing
@@ -33,9 +33,15 @@ def get_model_score(river_flow_df, model_evaluate_function:Callable, forecast_co
 
 def get_r2_value(model_mse, baseline_mse):
     return 1-model_mse/baseline_mse
+
 def get_value():
     df = pd.read_csv("final_keag.csv")
-    res = stream_baseline(df, "cfs", 22112.253550975067)
+    res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
 
-get_value()
+def infer_model(model, metric:str, hours_forecast:int = 336): 
+    forecast_length = model.params["forecast_length"]
+    for i in range(0, forecast_length/hours_forecast):
+        pass 
+    
+
