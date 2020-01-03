@@ -66,6 +66,7 @@ class TimeSeriesModel(ABC):
             print(save_path)
             upload_file(bucket_name, os.path.join("experiments", name), save_path, self.gcs_client)
             if self.wandb:
+                import wandb
                 wandb.config.gcs_path = save_path + "experiments/ " + name
         
     def wandb_init(self):
