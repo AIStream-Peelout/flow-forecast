@@ -1,15 +1,14 @@
-from flood_forecast.trainer import train_function
 import json
 import re
 import uuid
 import os
+import argparse
+from flood_forecast.trainer import train_function
 
 def split_on_letter(s):
     match = re.compile("[^\W\d]").search(s)
     return [s[:match.start()], s[match.start():]]
 
-from flood_forecast.trainer import train_function
-import json
 def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True): 
   """
   Function that makes and executes a set of config files
@@ -74,7 +73,7 @@ def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
         "batch_size":20
       
       },
-      "GCS": False,
+      "GCS": True,
       
       "wandb": {
         "name": "flood_forecast_"+str(gage_id),
@@ -88,7 +87,6 @@ def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
   return the_config
 
 def main():
-    import argparse
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--path", help="Data path")
 

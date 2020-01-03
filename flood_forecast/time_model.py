@@ -62,7 +62,7 @@ class TimeSeriesModel(ABC):
         if self.gcs_client:
             if bucket_name is None:
                 bucket_name = os.environ["MODEL_BUCKET"]
-            upload_file(bucket_name, save_path, "experiments/ " + name, self.gcs_client)
+            upload_file(bucket_name, "experiments/" + name, save_path, self.gcs_client)
             if self.wandb:
                 wandb.config.gcs_path = save_path + "experiments/ " + name
         
