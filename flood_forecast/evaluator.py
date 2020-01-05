@@ -42,17 +42,19 @@ def get_value():
 
 def infer_on_torch_model(model, metric:str, test_df:pd.DataFrame = None, hours_forecast:int = 336): 
     """
-    Function to handle both test evaluation and infering on a test dataframe 
+    Function to handle both test evaluation and inference on a test dataframe 
     """
     forecast_length = model.params["forecast_length"]
     # If the test dataframe is none use default one supplied in params
     if test_df is None:
-        data_loader = DataLoader(model.test, batch_size=training_params["batch_size"], shuffle=False, sampler=None,
+        data_loader = DataLoader(model.test, batch_size=1, shuffle=False, sampler=None,
             batch_sampler=None, num_workers=0, collate_fn=None,
             pin_memory=False, drop_last=False, timeout=0,
             worker_init_fn=None)
+
     for i in range(0, hours_forecast/forecast_length):
-        pass 
+        pass
+        
     
     
 

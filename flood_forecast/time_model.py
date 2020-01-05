@@ -55,7 +55,7 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
 
-    def upload_gcs(self, save_path:str, name:str, epoch=0, bucket_name=None):
+    def upload_gcs(self, save_path:str, name:str, file_type:str, epoch=0, bucket_name=None):
         """
         Function to upload model checkpoints to GCS
         """
@@ -68,7 +68,7 @@ class TimeSeriesModel(ABC):
             online_path = os.path.join("gs://", bucket_name, "experiments", name)
             if self.wandb:
                 import wandb
-                wandb.config.update({"gcs_model_path" + str(epoch):online_path})
+                wandb.config.update({"gcs_m_path_" + str(epoch) + file_type:online_path})
         
     def wandb_init(self):
         if self.params["wandb"] != False:
@@ -97,7 +97,7 @@ class PyTorchForecast(TimeSeriesModel):
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model
     
-    def save_model(self, final_path: str):
+    def save_model(self, final_path: str, epoch):
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
@@ -108,8 +108,8 @@ class PyTorchForecast(TimeSeriesModel):
         torch.save(self.model.state_dict(), model_save_path)
         with open(params_save_path, "w+") as p:
             json.dump(self.params, p)
-        self.upload_gcs(model_save_path, model_name)
-        self.upload_gcs(params_save_path, params_name)
+        self.upload_gcs(params_save_path, params_name, "_params", epoch)
+        self.upload_gcs(model_save_path, model_name, "_model",  epoch)
         if self.wandb:
             import wandb
             wandb.config.save_path = model_save_path

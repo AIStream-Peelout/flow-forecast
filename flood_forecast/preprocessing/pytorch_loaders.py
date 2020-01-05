@@ -41,7 +41,7 @@ class CSVDataLoader(Dataset):
             # We define a second scaler to scale the end output 
             # back to normal as models might not necessarily predict
             # other present time series values.
-            self.targ_scaler = self.scale
+            self.targ_scaler = self.scale 
             self.targ_scaler.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
             self.df = pd.DataFrame(temp_df, index=self.df.index, columns=self.df.columns)
         if (len(self.df) - self.df.count()).max()!= 0:
