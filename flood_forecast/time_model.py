@@ -55,7 +55,7 @@ class TimeSeriesModel(ABC):
         """
         raise NotImplementedError
 
-    def upload_gcs(self, save_path:str, name:str, bucket_name=None):
+    def upload_gcs(self, save_path:str, name:str, epoch=0, bucket_name=None):
         """
         Function to upload model checkpoints to GCS
         """
@@ -65,9 +65,10 @@ class TimeSeriesModel(ABC):
             print(name)
             print(save_path)
             upload_file(bucket_name, os.path.join("experiments", name), save_path, self.gcs_client)
+            online_path = os.path.join("gs://", bucket_name, "experiments", name)
             if self.wandb:
                 import wandb
-                wandb.config.gcs_path = save_path + "experiments/ " + name
+                wandb.config.update({"gcs_model_path" + str(epoch):online_path})
         
     def wandb_init(self):
         if self.params["wandb"] != False:

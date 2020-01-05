@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Callable, Tuple
 import sklearn.metrics
+from torch
 
 def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forecast=336)->(pd.DataFrame, float):
     """
@@ -39,9 +40,19 @@ def get_value():
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
 
-def infer_model(model, metric:str, hours_forecast:int = 336): 
+def infer_on_torch_model(model, metric:str, test_df:pd.DataFrame = None, hours_forecast:int = 336): 
+    """
+    Function to handle both test evaluation and infering on a test dataframe 
+    """
     forecast_length = model.params["forecast_length"]
-    for i in range(0, forecast_length/hours_forecast):
+    # If the test dataframe is none use default one supplied in params
+    if test_df is None:
+        data_loader = DataLoader(model.test, batch_size=training_params["batch_size"], shuffle=False, sampler=None,
+            batch_sampler=None, num_workers=0, collate_fn=None,
+            pin_memory=False, drop_last=False, timeout=0,
+            worker_init_fn=None)
+    for i in range(0, hours_forecast/forecast_length):
         pass 
+    
     
 
