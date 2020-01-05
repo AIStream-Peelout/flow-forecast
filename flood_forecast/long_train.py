@@ -25,6 +25,7 @@ def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start
     gage_id = res[0]
     station_id = res[1]
     file_path_name = os.path.join(data_dir, file_name)
+    print("Training on: " + file_path_name)
     correct_file = None
     if use_transfer and len(os.listdir("model_save")) >1 :
       weight_files = filter(lambda x: x.endswith(".pth"), os.listdir("model_save"))

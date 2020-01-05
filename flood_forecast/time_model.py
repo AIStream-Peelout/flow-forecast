@@ -86,13 +86,14 @@ class PyTorchForecast(TimeSeriesModel):
 
     def load_model(self, model_base: str, model_params: Dict, weight_path = None):
         # Load model here 
-        
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
-                checkpoint = torch.load(weight_path)
-                model.load_state_dict(checkpoint, map_location=self.device)
+                checkpoint = torch.load(weight_path, map_location=self.device)
+                model.load_state_dict(checkpoint)
                 print("Weights sucessfully loaded")
+            else:
+                model.to(self.device)
         else: 
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model

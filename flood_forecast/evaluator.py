@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Callable, Tuple
 import sklearn.metrics
-from torch
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forecast=336)->(pd.DataFrame, float):
     """
