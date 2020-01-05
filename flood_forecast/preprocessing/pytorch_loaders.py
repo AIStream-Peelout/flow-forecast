@@ -29,6 +29,7 @@ class CSVDataLoader(Dataset):
             df = interpolate_missing_values(df)
         else:
             df = pd.read_csv(file_path)
+        print("Now loading and scaling " + file_path)
         self.df = df.sort_values(by='datetime')[relevant_cols]
         self.scale = None
         if start_stamp !=0:
@@ -67,7 +68,9 @@ class CSVDataLoader(Dataset):
         
         
 
-        
+class CSVTestLoader(CSVDataLoader):
+    def __init__(self, forecast_total, **kwargs):
+        pass 
         
         
     

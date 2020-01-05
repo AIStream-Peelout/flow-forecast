@@ -51,7 +51,9 @@ def infer_on_torch_model(model, metric:str, test_df:pd.DataFrame = None, hours_f
             batch_sampler=None, num_workers=0, collate_fn=None,
             pin_memory=False, drop_last=False, timeout=0,
             worker_init_fn=None)
-
+    else: 
+        pass
+        
     for i in range(0, hours_forecast/forecast_length):
         pass
         
