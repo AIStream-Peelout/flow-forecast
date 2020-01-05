@@ -62,8 +62,8 @@ class TimeSeriesModel(ABC):
         if self.gcs_client:
             if bucket_name is None:
                 bucket_name = os.environ["MODEL_BUCKET"]
+            print("Data saved to: ")
             print(name)
-            print(save_path)
             upload_file(bucket_name, os.path.join("experiments", name), save_path, self.gcs_client)
             online_path = os.path.join("gs://", bucket_name, "experiments", name)
             if self.wandb:
@@ -79,19 +79,19 @@ class TimeSeriesModel(ABC):
     
         
 class PyTorchForecast(TimeSeriesModel):
-    def __init__(self, model_base, training_data, validation_data, test_data, params_dict, weight_path=None):
-        super().__init__(model_base, training_data, validation_data, test_data, params_dict)
+    def __init__(self, model_base, training_data, validation_data, test_data, params_dict):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        if weight_path is not None:
-            self.model.load_state_dict(torch.load(weight_path, map_location=self.device))
-            
+        super().__init__(model_base, training_data, validation_data, test_data, params_dict)
+        print("Torch is using " + str(self.device)) 
+
     def load_model(self, model_base: str, model_params: Dict, weight_path = None):
         # Load model here 
+        
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
                 checkpoint = torch.load(weight_path)
-                model.load_state_dict(checkpoint)
+                model.load_state_dict(checkpoint, map_location=self.device)
                 print("Weights sucessfully loaded")
         else: 
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")

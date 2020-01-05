@@ -43,7 +43,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
           labels = trg[:, :, 0] 
           loss = criterion(output, labels.float())
           if loss > 100:
-              print("Highloss detected")
+              print("Warning: high loss detected")
           loss.backward()
           #torch.nn.utils.clip_grad_norm_(s.parameters(), 0.5)
           opt.step()
@@ -51,7 +51,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
           i+=1
           if torch.isnan(loss) or loss==float('inf'):
               raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
-      print("The loss is")
+      print("The loss for epoch " + str(epoch) )
       print(loss)
       use_decoder = False
       if "use_decoder" in  model.params["model_params"]:
@@ -95,7 +95,6 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
           # TODO replace with matplotlib plot
           wandb.log({"source":unscaled_src, "trg":unscaled_labels, "model_pred":unscaled_out})
       loss = criterion(output, labels.float())
-      print(loop_loss)
       loop_loss += len(labels.float())*loss.item()
   if use_wandb:
     import wandb
