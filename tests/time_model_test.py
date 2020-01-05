@@ -31,7 +31,7 @@ class TimeSeriesModelTest(unittest.TestCase):
     def test_model_save(self):
         keag_file = os.path.join(self.test_path, "keag_small.csv")
         model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
-        model.save_model("output")
+        model.save_model("output", 0)
         self.assertEqual(model.training[0][0].shape, torch.Size([20, 3]))
 
     def test_simple_transformer(self):
