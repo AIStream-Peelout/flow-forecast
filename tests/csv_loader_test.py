@@ -1,3 +1,4 @@
 import unittest
 class CSVLoaderTests(unittest.TestCase):
-   pass 
+    #Tests for the main data loader
+    pass 

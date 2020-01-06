@@ -39,6 +39,9 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
       running_loss = 0.0
       for src, trg in data_loader:
           opt.zero_grad()
+          if model.device == 'cuda':
+            src = src.cuda()
+            trg = trg.cuda()
           output = model.model(src, **forward_params)
           labels = trg[:, :, 0] 
           loss = criterion(output, labels.float())
