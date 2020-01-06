@@ -69,9 +69,33 @@ class CSVDataLoader(Dataset):
         
 
 class CSVTestLoader(CSVDataLoader):
-    def __init__(self, forecast_total, **kwargs):
+    def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, **kwargs):
+        """
+        :param df_path 
+        A data loader for the test data.
+        """
+        super().__init__(**kwargs)
+        self.original_df = pd.read_csv(df_path)
+        self.forecast_total = forecast_total
+        self.use_real_precip = use_real_precip
+
+    def get_from_start_date(self, forecast_start):
         pass 
-        
+
+    def __getitem__(self, idx):
+        if self.target_supplied:
+            historical_rows = self.df.iloc[idx:self.forecast_history+idx]
+            target_idx_start = self.forecast_history+idx
+            targ_rows = self.df.iloc[target_idx_start:self.forecast_total+target_idx_start]
+            all_rows_orig = self.original_df.iloc[idx:self.forecast_total+target_idx_start]
+            historical_rows = torch.from_numpy(historical_rows.numpy())
+            return historical_rows, all_rows_orig, target_idx_start
+
+        def __len__(self):
+            return len(self.df.index)-self.forecast_history-self.forecast_total-1
+            
+
+
         
     
         
