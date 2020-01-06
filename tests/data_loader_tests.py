@@ -1,5 +1,7 @@
 import unittest
 import os 
+import torch
+import pandas as pd
 from datetime import datetime
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
@@ -10,7 +12,10 @@ class DataLoaderTests(unittest.TestCase):
         self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
 
     def test_loader2_get_item(self):
-        self.test_loader[0] 
+        src, forecast_start_index, df = self.test_loader[0]  
+        self.assertEqual(type(src), torch.Tensor)
+        self.assertEqual(forecast_start_index, 20)
+        self.assertEqual(type(df), pd.Dataframe)
     
 if __name__ == '__main__':
     unittest.main()
