@@ -81,7 +81,7 @@ class CSVTestLoader(CSVDataLoader):
         self.target_supplied = target_supplied
 
     def get_from_start_date(self, forecast_start):
-        pass 
+        self.original_df[['datetime'] == forecast_start]
 
     def __getitem__(self, idx):
         if self.target_supplied:
