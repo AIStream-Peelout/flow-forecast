@@ -59,7 +59,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
       use_decoder = False
       if "use_decoder" in  model.params["model_params"]:
         use_decoder = True
-      valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, decoder_structure=use_decoder, use_wandb=use_wandb)
+      valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=use_decoder, use_wandb=use_wandb)
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': running_loss/i})
       epoch_params = {"epoch":epoch, "train_loss":str(running_loss/i), "validation_loss":str(valid)} 
@@ -68,7 +68,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
   model.save_model("model_save", max_epochs)
 
 
-def compute_validation(validation_loader, model, epoch, sequence_size, criterion, decoder_structure=False, use_wandb=False):
+def compute_validation(validation_loader, model, epoch, sequence_size, criterion, device, decoder_structure=False, use_wandb=False):
   model.eval()
   mask = generate_square_subsequent_mask(sequence_size)
   loop_loss = 0.0
@@ -76,6 +76,8 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
     i = 0
     loss_unscaled_full = 0.0
     for src, targ in validation_loader:
+      src = src.to(device)
+      targ = targ.to(device)
       i+=1
       if decoder_structure:
         src_mask = generate_square_subsequent_mask(sequence_size)

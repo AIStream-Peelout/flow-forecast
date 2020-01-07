@@ -78,6 +78,7 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df = pd.read_csv(df_path)
         self.forecast_total = forecast_total
         self.use_real_precip = use_real_precip
+        self.target_supplied = target_supplied
 
     def get_from_start_date(self, forecast_start):
         pass 
