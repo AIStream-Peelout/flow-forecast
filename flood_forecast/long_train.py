@@ -39,7 +39,10 @@ def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start
     file_name_json = station_id + "config_f"+extension
     with open(file_name_json, "w+") as f:
         json.dump(config, f)
-    train_function("PyTorch", config)
+    try:
+        train_function("PyTorch", config)
+    except Exception as e:
+        print(e)
     
 def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
   the_config = {                 
