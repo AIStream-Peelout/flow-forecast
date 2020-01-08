@@ -10,7 +10,7 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 
-def train_transformer_style(model: PyTorchForecast, training_params: Dict, forward_params = {}):
+def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params = {}):
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
@@ -42,6 +42,9 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, forwa
           # Convert to CPU/GPU/TPU 
           src = src.to(model.device)
           trg = trg.to(model.device)
+          # TODO figure how to avoid
+          if takes_target:
+            forward_params["t"] = trg 
           output = model.model(src, **forward_params)
           labels = trg[:, :, 0] 
           loss = criterion(output, labels.float())
