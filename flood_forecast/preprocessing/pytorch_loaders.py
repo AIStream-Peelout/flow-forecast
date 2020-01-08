@@ -71,7 +71,7 @@ class CSVDataLoader(Dataset):
 class CSVTestLoader(CSVDataLoader):
     def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, **kwargs):
         """
-        :param df_path 
+        :param str df_path
         A data loader for the test data.
         """
         super().__init__(**kwargs)
@@ -81,7 +81,8 @@ class CSVTestLoader(CSVDataLoader):
         self.target_supplied = target_supplied
 
     def get_from_start_date(self, forecast_start):
-        self.original_df[['datetime'] == forecast_start]
+        start_index = self.original_df[['datetime'] == forecast_start].index
+        return self.__getitem__(start_index)
 
     def __getitem__(self, idx):
         if self.target_supplied:

@@ -93,9 +93,9 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
         labels = targ[:, :, 0]
       validation_dataset = validation_loader.dataset
       if validation_dataset.scale:
-        unscaled_src = validation_dataset.scale.inverse_transform(src)
-        unscaled_out = validation_dataset.inverse_scale(output)
-        unscaled_labels = validation_dataset.inverse_scale(labels)
+        unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
+        unscaled_out = validation_dataset.inverse_scale(output.cpu())
+        unscaled_labels = validation_dataset.inverse_scale(labels.cpu())
         loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
         loss_unscaled_full += len(labels.float())*loss_unscaled.item()
         if i%100 ==0 and use_wandb:
