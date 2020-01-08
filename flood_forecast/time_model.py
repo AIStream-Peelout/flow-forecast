@@ -91,6 +91,7 @@ class PyTorchForecast(TimeSeriesModel):
             if weight_path:
                 checkpoint = torch.load(weight_path, map_location=self.device)
                 model.load_state_dict(checkpoint)
+                model.to(self.device)
                 print("Weights sucessfully loaded")
             else:
                 model.to(self.device)
