@@ -16,7 +16,7 @@ class SimpleTransformer(torch.nn.Module):
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.sequence_size = seq_length
 
-    def forward(self, x, t, tgt_mask, src_mask=None):
+    def forward(self, x, t, tgt_mask=None, src_mask=None):
         if src_mask:
             x = self.encode_sequence(x, src_mask)
         else: 
@@ -34,7 +34,9 @@ class SimpleTransformer(torch.nn.Module):
         x = self.transformer.encoder(x, src_mask)
         return x
     
-    def decode_seq(self, mem, t, tgt_mask):
+    def decode_seq(self, mem, t, tgt_mask=None):
+        if tgt_mask == None:
+            tgt_mask = self.tgt_mask
         t = self.basic_feature(t)
         x = self.transformer.decoder(t, mem, tgt_mask=tgt_mask)
         x = self.final_layer(x)

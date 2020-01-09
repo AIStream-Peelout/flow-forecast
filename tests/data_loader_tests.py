@@ -12,18 +12,17 @@ class DataLoaderTests(unittest.TestCase):
         self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
 
     def test_loader2_get_item(self):
-        src, forecast_start_index, df = self.test_loader[0]  
+        src, df, forecast_start_index,  = self.test_loader[0]  
         self.assertEqual(type(src), torch.Tensor)
         self.assertEqual(forecast_start_index, 20)
-        self.assertEqual(type(df), pd.Dataframe)
+        self.assertEqual(df.iloc[2]['cfs'], 41.1)
 
     def test_loader2_get_date(self):
-        src, forecast_start_index, df = self.test_loader.get_from_start_date(datetime(2019, 2, 25, 0))
+        src, df, forecast_start_index, = self.test_loader.get_from_start_date(datetime(2019, 2, 25, 0))
         self.assertEqual(type(src), torch.Tensor)
         self.assertEqual(forecast_start_index, 20)
         self.assertEqual(type(df), pd.Dataframe)
 
-    
 if __name__ == '__main__':
     unittest.main()
     
