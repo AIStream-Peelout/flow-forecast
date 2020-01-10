@@ -51,6 +51,7 @@ jobs:
             python tests/time_model_test.py
             python tests/pytorc_train_tests.py
             python tests/model_config_tests.py
+            python tests/data_loader_tests.py
 
       - run: 
           name: Trainer tests

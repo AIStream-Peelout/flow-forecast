@@ -19,10 +19,10 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(len(df), 356)
 
     def test_loader2_get_date(self):
-        src, df, forecast_start_index, = self.test_loader.get_from_start_date(datetime(2019, 2, 25, 0))
+        src, df, forecast_start_index, = self.test_loader.get_from_start_date(datetime(2014, 6, 3, 0))
         self.assertEqual(type(src), torch.Tensor)
         self.assertEqual(forecast_start_index, 20)
-        self.assertEqual(type(df), pd.Dataframe)
+        self.assertEqual(df.iloc[0]['datetime'], '2014-06-02 4:00:00')
 
 if __name__ == '__main__':
     unittest.main()
