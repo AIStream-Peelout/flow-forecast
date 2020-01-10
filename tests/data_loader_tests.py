@@ -15,7 +15,7 @@ class DataLoaderTests(unittest.TestCase):
         src, df, forecast_start_index = self.test_loader[0]  
         self.assertEqual(type(src), torch.Tensor)
         self.assertEqual(forecast_start_index, 20)
-        self.assertEqual(df.iloc[2]['cfs'], 41.1)
+        self.assertEqual(df.iloc[2]['cfs'], 445)
         self.assertEqual(len(df), 356)
 
     def test_loader2_get_date(self):
