@@ -84,12 +84,8 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df['original_index'] = self.original_df.index
 
     def get_from_start_date(self, forecast_start):
-        dt_row = self.original_df[self.original_df['datetime'] == forecast_start]
-        print(dt_row)
-        start_index = dt_row.index[0]
-        print(start_index)
-        revised_index = dt_row.iloc[start_index]['original_index']
-        return self.__getitem__(revised_index-self.forecast_history)vbdw 
+        fixed_index = self.original_df[self.original_df['datetime'] == forecast_start].index[0]
+        return self.__getitem__(fixed_index-self.forecast_history)
 
     def __getitem__(self, idx):
         if self.target_supplied:
