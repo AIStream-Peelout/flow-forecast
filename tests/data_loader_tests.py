@@ -8,7 +8,7 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 class DataLoaderTests(unittest.TestCase):
     def setUp(self):
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"test_data")
-        data_base_params = {"history_length": 20, "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate_param": False}
+        data_base_params = {"file_path":os.path.join(self.test_data_path, "keag_small.csv"), "history_length": 20, "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate_param": False}
         self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
 
     def test_loader2_get_item(self):
