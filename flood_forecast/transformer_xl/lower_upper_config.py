@@ -1,11 +1,10 @@
 import numpy as np
 import torch.nn as nn
+from typing import List, Dict
 import torch.nn.functional as F
-def initial_layers(number_time_series:int, d_model:int, layer_type:str, layer_number:int = 1): 
-    layer_map = {"1DConv":nn.Conv1d(number_time_series, d_model, 1), "Linear":nn.Linear(number_time_series, d_model),
-    "PositionWiseFeedForward":PositionwiseFeedForward(number_time_series, d_model)
-    }
-    return layer_map[layer_type]
+def initial_layer(layer_type:str, layer_params:Dict, layer_number:int = 1): 
+    layer_map = {"1DConv":nn.Conv1d, "Linear":nn.Linear}
+    return layer_map[layer_type](**layer_params)
 
 
 class PositionwiseFeedForward(nn.Module):

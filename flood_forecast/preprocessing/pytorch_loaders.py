@@ -79,9 +79,14 @@ class CSVTestLoader(CSVDataLoader):
         self.forecast_total = forecast_total
         self.use_real_precip = use_real_precip
         self.target_supplied = target_supplied
+        # Convert back to datetime and save index
+        self.original_df['datetime'] = self.original_df['datetime'].astype('datetime64[ns]')
+        self.original_df['original_index'] = self.original_df.index
 
     def get_from_start_date(self, forecast_start):
-        start_index = self.original_df[['datetime'] == forecast_start].index
+        dt_row = self.original_df[['datetime'] == forecast_start]
+        start_index = dt_row.index[0]
+        start_index = dt_row.iloc[start_index]['original_index']
         return self.__getitem__(start_index)
 
     def __getitem__(self, idx):
