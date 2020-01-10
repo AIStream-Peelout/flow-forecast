@@ -2,17 +2,15 @@ import numpy as np
 import torch.nn as nn
 from typing import List, Dict
 import torch.nn.functional as F
+
 def initial_layer(layer_type:str, layer_params:Dict, layer_number:int = 1): 
     layer_map = {"1DConv":nn.Conv1d, "Linear":nn.Linear}
     return layer_map[layer_type](**layer_params)
 
-
 class PositionwiseFeedForward(nn.Module):
     ''' A two-feed-forward-layer module
     Take from DSANET 
-
      '''
-
     def __init__(self, d_in, d_hid, dropout=0.1):
         super().__init__()
         self.w_1 = nn.Conv1d(d_in, d_hid, 1)
