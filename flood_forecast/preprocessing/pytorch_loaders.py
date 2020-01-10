@@ -87,8 +87,9 @@ class CSVTestLoader(CSVDataLoader):
         dt_row = self.original_df[self.original_df['datetime'] == forecast_start]
         print(dt_row)
         start_index = dt_row.index[0]
+        print(start_index)
         revised_index = dt_row.iloc[start_index]['original_index']
-        return self.__getitem__(revised_index-self.forecast_history)
+        return self.__getitem__(revised_index-self.forecast_history)vbdw 
 
     def __getitem__(self, idx):
         if self.target_supplied:
