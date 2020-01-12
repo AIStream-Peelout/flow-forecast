@@ -57,7 +57,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     history = torch.zeros(forecast_length)
     all_tensor = [history]
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
-    for i in range(0, hours_to_forecast/forecast_length):
+    for i in range(0, np.ceil(hours_to_forecast/forecast_length)):
         output = model(history)
         all_tensor.append(output)
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
