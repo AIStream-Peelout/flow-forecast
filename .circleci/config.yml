@@ -42,10 +42,7 @@ jobs:
             python tests/data_format_tests.py
             python tests/usgs_tests.py
             python tests/test_join.py
-      - run: 
-          name: Evaluation tests
-          command: 
-            python tests/test_evaluation.py
+
       - run:
           name: Model basic tests 
           when: always
