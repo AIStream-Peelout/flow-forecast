@@ -42,11 +42,12 @@ jobs:
             python tests/data_format_tests.py
             python tests/usgs_tests.py
             python tests/test_join.py
-<<<<<<< HEAD
-
-=======
             
->>>>>>> parent of f9ed1da... Add tests + evaluator
+      - run: 
+          name: Evaluator tests 
+          command: 
+            python tests/test_evaluation.py
+
       - run:
           name: Model basic tests 
           when: always
