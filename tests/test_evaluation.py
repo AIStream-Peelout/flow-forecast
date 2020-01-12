@@ -17,10 +17,11 @@ class EvaluationTest(unittest.TestCase):
         self.data_base_params = {"file_path":os.path.join(self.test_path, "keag_small.csv"), "history_length": 20, "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate_param": False}
     
     def test_infer_on_torch(self):
-        df, end_tensor = infer_on_torch_model(self.model, os.path.join(self.test_path, "keag_small.csv"), datetime_start=datetime.datetime(2014,6,2,0), dataset_params=self.data_base_params)
+        df, end_tensor, idx = infer_on_torch_model(self.model, os.path.join(self.test_path, "keag_small.csv"), datetime_start=datetime.datetime(2014,6,2,0), dataset_params=self.data_base_params)
         self.assertEqual(end_tensor.shape, 356)
         self.assertEqual(df.iloc[0]['preds'], 0)
         self.assertNotEqual(df.iloc[22]['preds'], 0)
+        self.assertEqual(idx, 760)
 
 if __name__ == '__main__':
     unittest.main()
