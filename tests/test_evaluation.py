@@ -20,3 +20,6 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(end_tensor.shape, 356)
         self.assertEqual(df.iloc[0]['preds'], 0)
         self.assertNotEqual(df.iloc[22]['preds'], 0)
+        
+if __name__ == '__main__':
+    unittest.main()
