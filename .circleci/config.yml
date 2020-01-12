@@ -43,9 +43,9 @@ jobs:
             python tests/usgs_tests.py
             python tests/test_join.py
       - run: 
-        name: Evaluation tests
-        command: 
-          python tests/test_evaluation.py
+          name: Evaluation tests
+          command: 
+            python tests/test_evaluation.py
       - run:
           name: Model basic tests 
           when: always
