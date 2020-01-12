@@ -42,16 +42,16 @@ def get_value():
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
 
-def infer_on_torch_model(model, test_df_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params={}): 
+def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params={}): 
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
     forecast_length = model.params["dataset_params"]["forecast_length"]
     # If the test dataframe is none use default one supplied in params
-    if test_df_path is None:
+    if test_csv_path is None:
         test_data = model.test
     else:
-        test_data = CSVTestLoader(test_data, hours_to_forecast, **dataset_params)
+        test_data = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params)
         
     model.model.eval()
     history = torch.zeros(forecast_length)
