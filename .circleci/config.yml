@@ -35,19 +35,18 @@ jobs:
       # other common Python testing frameworks include pytest and nose
       # https://pytest.org
       # https://nose.readthedocs.io
-          
+      - run: 
+        name: Evaluator tests 
+        command: 
+          python tests/test_evaluation.py
+
       - run:
           name: Data Tests
           command: |
             python tests/data_format_tests.py
             python tests/usgs_tests.py
             python tests/test_join.py
-            
-      - run: 
-          name: Evaluator tests 
-          command: 
-            python tests/test_evaluation.py
-
+     
       - run:
           name: Model basic tests 
           when: always
@@ -60,6 +59,7 @@ jobs:
 
       - run: 
           name: Trainer tests
+          when: always
           command:
             python flood_forecast/trainer.py -p tests/multi_test.json
           

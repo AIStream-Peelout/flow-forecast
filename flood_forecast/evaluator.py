@@ -46,7 +46,7 @@ def infer_on_torch_model(model, test_df_path:str = None, datetime_start=datetime
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
-    forecast_length = model.params["forecast_length"]
+    forecast_length = model.params["dataset_params"]["forecast_length"]
     # If the test dataframe is none use default one supplied in params
     if test_df_path is None:
         test_data = model.test
