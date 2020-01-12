@@ -3,8 +3,6 @@ import pandas as pd
 from typing import Callable, Tuple
 import sklearn.metrics
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
-from datetime import datetime
-import torch
 
 def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forecast=336)->(pd.DataFrame, float):
     """
@@ -42,29 +40,22 @@ def get_value():
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
 
-def infer_on_torch_model(model, test_df_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params={}): 
+def infer_on_torch_model(model, metric:str, test_df:pd.DataFrame = None, hours_forecast:int = 336): 
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
     forecast_length = model.params["forecast_length"]
     # If the test dataframe is none use default one supplied in params
     if test_df is None:
-        test_data = model.test
-    else:
-        test_data = CSVTestLoader(test_data, hours_to_forecast, **dataset_params)
+        data_loader = DataLoader(model.test, batch_size=1, shuffle=False, sampler=None,
+            batch_sampler=None, num_workers=0, collate_fn=None,
+            pin_memory=False, drop_last=False, timeout=0,
+            worker_init_fn=None)
+    else: 
+        pass
         
-    model.model.eval()
-    history = torch.zeros(forecast_length)
-    all_tensor = [history]
-    history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
-    for i in range(0, hours_to_forecast/forecast_length):
-        output = model(history)
-        all_tensor.append(output)
-    end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
-    df['preds'] = end_tensor
-    return df, end_tensor
-        
-
+    for i in range(0, hours_forecast/forecast_length):
+        pass
         
     
     
