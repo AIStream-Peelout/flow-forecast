@@ -36,9 +36,9 @@ jobs:
       # https://pytest.org
       # https://nose.readthedocs.io
       - run: 
-        name: Evaluator tests 
-        command: 
-          python tests/test_evaluation.py
+          name: Evaluator tests 
+          command: 
+             python tests/test_evaluation.py
 
       - run:
           name: Data Tests
