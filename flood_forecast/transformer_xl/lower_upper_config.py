@@ -7,8 +7,8 @@ def initial_layer(layer_type:str, layer_params:Dict, layer_number:int = 1):
     layer_map = {"1DConv":nn.Conv1d, "Linear":nn.Linear}
     return layer_map[layer_type](**layer_params)
 
-def variable_forecast_layer():
-    pass 
+def variable_forecast_layer(forecast_length, layer_type):
+    final_layer_map = {"Linear":nn.Linear}
 
 class PositionwiseFeedForward(nn.Module):
     ''' A two-feed-forward-layer module

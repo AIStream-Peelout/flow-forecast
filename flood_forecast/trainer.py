@@ -23,9 +23,6 @@ def train_function(model_type: str, params: Dict):
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
     return trained_model 
 
-def evaluate_function(model):
-    pass 
-
 def main():
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")
