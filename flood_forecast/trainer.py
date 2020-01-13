@@ -30,7 +30,6 @@ def main():
     with open(args.params) as f: 
         training_config = json.load(f)
     trained_model = train_function(training_config["model_type"], training_config)
-    evaluate_function(trained_model)
     print("Process complete")
 if __name__ == "__main__":
     main()

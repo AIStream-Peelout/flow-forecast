@@ -56,6 +56,8 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     model.model.eval()
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = [history]
+    print("shape of history is ")
+    print(history.shape)
     for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
         output = model.model(all_tensor[i])
         all_tensor.append(output)
