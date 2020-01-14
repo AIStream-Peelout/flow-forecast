@@ -52,7 +52,6 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         test_data = model.test
     else:
         test_data = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params)
-        
     model.model.eval()
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = [history]
