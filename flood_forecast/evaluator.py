@@ -68,7 +68,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         output = model.model(full_history[i])
         all_tensor.append(output)
         if test_data.use_real_precip and test_data.use_real_temp:
-            stacked_tensor = torch.stack([temp_cols, precip_cols, output]).unsqueeze(0)
+            stacked_tensor = torch.stack([output, precip_cols, temp_cols]).unsqueeze(0)
             full_history.append(stacked_tensor)
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
     df['preds'] = end_tensor
