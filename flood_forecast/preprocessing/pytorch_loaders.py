@@ -77,6 +77,7 @@ class CSVTestLoader(CSVDataLoader):
         super().__init__(**kwargs)
         self.original_df = pd.read_csv(df_path)
         self.forecast_total = forecast_total
+        self.use_real_temp = use_real_temp
         self.use_real_precip = use_real_precip
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
@@ -97,6 +98,15 @@ class CSVTestLoader(CSVDataLoader):
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start
 
+    def convert_real_batches(self, the_col, rows_to_convert):
+        """
+        A helper function to return properly divided precip and temp 
+        values to be stacked with forecasted cfs.
+        """
+        the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
+        chunks = [the_column[self.forecast_length*i:self.forecast_length*(i+1)] for i in range(len(the_column)//self.forecast_length + 1)]
+        return chunks
+        
     def __len__(self):
         return len(self.df.index)-self.forecast_history-self.forecast_total-1
             

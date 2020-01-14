@@ -56,11 +56,20 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     model.model.eval()
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = [history]
-    print("shape of history is ")
-    print(history.shape)
+    full_history = [history]
+    if test_data.use_real_precip:
+        precip_cols = test_data.convert_real_batches('precip')
+    if test_data.use_real_temp:
+        temp_cols = test_data.convert_real_batches('temp')
+
     for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
-        output = model.model(all_tensor[i])
+        print("stacked tensor below")
+        print(full_history[i])
+        output = model.model(full_history[i])
         all_tensor.append(output)
+        if test_data.use_real_precip and test_data.use_real_temp:
+            stacked_tensor = torch.stack([temp_cols, precip_cols, output]).unsqueeze(0)
+            full_history.append(stacked_tensor)
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
     df['preds'] = end_tensor
     return df, end_tensor, forecast_start_idx
