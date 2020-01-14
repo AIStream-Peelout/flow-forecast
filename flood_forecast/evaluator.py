@@ -58,9 +58,9 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     all_tensor = [history]
     full_history = [history]
     if test_data.use_real_precip:
-        precip_cols = test_data.convert_real_batches('precip')
+        precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
     if test_data.use_real_temp:
-        temp_cols = test_data.convert_real_batches('temp')
+        temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
 
     for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
         print("stacked tensor below")
@@ -68,6 +68,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         output = model.model(full_history[i])
         all_tensor.append(output)
         if test_data.use_real_precip and test_data.use_real_temp:
+            # Order here should match order of original tensor...
             stacked_tensor = torch.stack([output, precip_cols, temp_cols]).unsqueeze(0)
             full_history.append(stacked_tensor)
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
