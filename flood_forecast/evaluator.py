@@ -68,8 +68,9 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         output = model.model(full_history[i])
         all_tensor.append(output)
         if test_data.use_real_precip and test_data.use_real_temp:
-            # Order here should match order of original tensor...
-            stacked_tensor = torch.stack([output, precip_cols, temp_cols]).unsqueeze(0)
+            # Order here should match order of original tensor... But what is the best way todo that...? 
+            # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
+            stacked_tensor = torch.stack([output, precip_cols[i], temp_cols[i]]).unsqueeze(0)
             full_history.append(stacked_tensor)
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
     df['preds'] = end_tensor
