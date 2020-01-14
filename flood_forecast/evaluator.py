@@ -70,8 +70,10 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         if test_data.use_real_precip and test_data.use_real_temp:
             # Order here should match order of original tensor... But what is the best way todo that...? 
             # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
-            stacked_tensor = torch.stack([output, precip_cols[i], temp_cols[i]]).unsqueeze(0)
-            full_history.append(stacked_tensor)
+            intial_numpy = torch.stack([output, precip_cols[i].float(), temp_cols[i].float()]).numpy()
+            temp_df = pd.DataFrame(intial_numpy.T, columns=['cfs', 'precip', 'temp'])
+            revised_np = temp_df[model.params["dataset_params"]["relevant_cols"]].to_numpy()
+            full_history.append(torch.from_numpy(revised_np).to(model.device))
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
     df['preds'] = end_tensor
     return df, end_tensor, forecast_start_idx
