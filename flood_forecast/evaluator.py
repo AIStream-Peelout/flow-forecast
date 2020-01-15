@@ -55,7 +55,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     model.model.eval()
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = [history]
-    full_history = [history]
+    full_history = [history.unsqueeze(0)]
     if test_data.use_real_precip:
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
     if test_data.use_real_temp:
@@ -76,7 +76,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
             intial_numpy = torch.stack([output.float(), precip_cols[i].float(), temp_cols[i].float()]).numpy()
             temp_df = pd.DataFrame(intial_numpy.T, columns=['cfs', 'precip', 'temp'])
             revised_np = temp_df[model.params["dataset_params"]["relevant_cols"]].to_numpy()
-            full_history.append(torch.from_numpy(revised_np).to(model.device))
+            full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
     df['preds'] = end_tensor
     return df, end_tensor, forecast_start_idx
