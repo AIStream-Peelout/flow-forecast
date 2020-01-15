@@ -65,7 +65,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         print("stacked tensor below")
         print(full_history[i])
         output = model.model(full_history[i])
-        all_tensor.append(output)
+        all_tensor.append(output).view(-1)
         if test_data.use_real_precip and test_data.use_real_temp:
             # Order here should match order of original tensor... But what is the best way todo that...? 
             # Hmm right now this will create a bug if for some reason the order [precip, temp, output]

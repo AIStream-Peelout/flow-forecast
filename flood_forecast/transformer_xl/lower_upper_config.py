@@ -29,3 +29,16 @@ class PositionwiseFeedForward(nn.Module):
         output = self.dropout(output)
         output = self.layer_norm(output + residual)
         return output
+        
+class AR(nn.Module):
+
+    def __init__(self, window):
+
+        super(AR, self).__init__()
+        self.linear = nn.Linear(window, 1)
+
+    def forward(self, x):
+        x = torch.transpose(x, 1, 2)
+        x = self.linear(x)
+        x = torch.transpose(x, 1, 2)
+        return x
