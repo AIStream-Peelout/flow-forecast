@@ -11,20 +11,19 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.length_data = seq_len
         self.forecast_length = forecast_length
-        self.mask
         if self.forecast_length:
             self.last_layer = torch.nn.Linear(seq_len, forecast_length)
-    def forward(self, x:torch.Tensor):
+    def forward(self, x:torch.Tensor, mask=None):
         """
         :param x torch.Tensor: of shape (B, L, M)
         Where B is the batch size, L is the sequence length and M is the number of 
-        :returns a tensor of dimension
+        :returns a tensor of dimension 
         """
         x = self.dense_shape(x)
         x = self.pe(x)
         # Permute to (L, B, M)
         x = x.permute(1,0,2)
-        if self.mask is None:
+        if mask is None:
             x = self.multi_attn(x, x, x)[0]
         else: 
             x = self.multi_attn(x, x, x, attn_mask=self.mask)[0]
