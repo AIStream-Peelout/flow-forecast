@@ -46,4 +46,5 @@ class AR(nn.Module):
         return x
 
 class MetaEmbedding(nn.Module):
-    pass
+    def __init__(self, meta_vector_dim, output_dim, predictor_number, predictor_order):
+        pass
