@@ -46,6 +46,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
+    history_length = model.params["dataset_params"]["history_length"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
@@ -60,7 +61,6 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
     if test_data.use_real_temp:
         temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
-
     for i in range(0, int(np.floor(hours_to_forecast/forecast_length).item())):
         print("stacked tensor below")
         print(full_history[i])
@@ -77,8 +77,11 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
             temp_df = pd.DataFrame(intial_numpy.T, columns=['cfs', 'precip', 'temp'])
             revised_np = temp_df[model.params["dataset_params"]["relevant_cols"]].to_numpy()
             full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
-    end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').numpy()
-    df['preds'] = end_tensor
+    end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()
+    print(end_tensor.shape)
+    print(len(df))
+    df['preds'] = 0
+    df['pred'][history_length:] = end_tensor
     return df, end_tensor, forecast_start_idx
     
         

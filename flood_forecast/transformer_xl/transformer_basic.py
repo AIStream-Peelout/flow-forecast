@@ -93,6 +93,9 @@ def generate_square_subsequent_mask(sz):
         return mask
     
 def greedy_decode(model, src, src_mask, max_len, real_target, start_symbol, unsqueeze_dim=1):
+    """
+    Mechanism to sequentially decode the model
+    """
     memory = model.encode_sequence(src, src_mask)
     ys = start_symbol[:, -1, :].unsqueeze(unsqueeze_dim)
     for i in range(max_len-1):
@@ -101,8 +104,6 @@ def greedy_decode(model, src, src_mask, max_len, real_target, start_symbol, unsq
             out = model.decode_seq(memory, 
                                Variable(ys), 
                               Variable(mask), i+1)
-            #print(real_target[:, i, :])
             real_target[:, i, 0] = out[:, i]
-            #print(real_target[:, i, :])
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
     return ys
