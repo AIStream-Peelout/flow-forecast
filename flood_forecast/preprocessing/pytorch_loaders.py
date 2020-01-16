@@ -5,12 +5,12 @@ from typing import Type, List
 from flood_forecast.preprocessing.interpolate_preprocess import interpolate_missing_values, fix_timezones
 
 class CSVDataLoader(Dataset):
-    def __init__(self, file_path:str, history_length:int, forecast_length:int, target_col:List, 
+    def __init__(self, file_path:str, forecast_history:int, forecast_length:int, target_col:List, 
                  relevant_cols:List, scaling=None, start_stamp:int=0, end_stamp:int=None, interpolate_param=True):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
         :param file_path: The path to the CSV file you wish to use. 
-        :param history_length: This is the length of the historical time series data you wish to utilize for forecasting
+        :param forecast_history: This is the length of the historical time series data you wish to utilize for forecasting
         :param forecast_length: The number of time steps to forecast ahead (for transformer this must equal history_length)
         :param relevant_cols: Supply column names you wish to predict in the forecast (others will not be used)
         :param target_col: The target column or columns you to predict. If you only have one still use a list ['cfs']
@@ -21,7 +21,7 @@ class CSVDataLoader(Dataset):
         "param end_stamp int: Optional if you want to only use part of a CSV for training, validation, or testing supply these
         """
         super().__init__()
-        self.forecast_history = history_length
+        self.forecast_history = forecast_history
         self.forecast_length = forecast_length 
         # TODO allow other filling methods 
         if interpolate_param: 
@@ -106,7 +106,7 @@ class CSVTestLoader(CSVDataLoader):
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [the_column[self.forecast_length*i:self.forecast_length*(i+1)] for i in range(len(the_column)//self.forecast_length + 1)]
         return chunks
-        
+
     def __len__(self):
         return len(self.df.index)-self.forecast_history-self.forecast_total-1
             
