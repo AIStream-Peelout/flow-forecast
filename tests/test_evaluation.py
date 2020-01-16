@@ -18,10 +18,10 @@ class EvaluationTest(unittest.TestCase):
     
     def test_infer_on_torch(self):
         df, end_tensor, idx = infer_on_torch_model(self.model, os.path.join(self.test_path, "keag_small.csv"), datetime_start=datetime.datetime(2014,6,2,0), dataset_params=self.data_base_params)
-        self.assertEqual(end_tensor.shape, 356)
+        self.assertEqual(end_tensor.shape, 336)
         self.assertEqual(df.iloc[0]['preds'], 0)
         self.assertNotEqual(df.iloc[22]['preds'], 0)
-        self.assertEqual(idx, 760)
+        self.assertEqual(idx, 761)
 
 if __name__ == '__main__':
     unittest.main()

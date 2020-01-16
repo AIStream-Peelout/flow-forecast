@@ -79,7 +79,9 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
             temp_df = pd.DataFrame(intial_numpy.T, columns=['cfs', 'precip', 'temp'])
             revised_np = temp_df[model.params["dataset_params"]["relevant_cols"]].to_numpy()
             full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
-    end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()
+    remainder = forecast_length - hours_to_forecast % forecast_length
+    # Subtract remainder from array
+    end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
     print(end_tensor.shape)
     print(len(df))
     df['preds'] = 0
