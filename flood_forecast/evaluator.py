@@ -81,7 +81,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     print(end_tensor.shape)
     print(len(df))
     df['preds'] = 0
-    df['pred'][history_length:] = end_tensor
+    df['preds'][history_length:] = end_tensor
     return df, end_tensor, forecast_start_idx
     
         
