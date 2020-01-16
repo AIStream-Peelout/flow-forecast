@@ -2,6 +2,7 @@ import numpy as np
 import torch.nn as nn
 from typing import List, Dict
 import torch.nn.functional as F
+import torch
 
 def initial_layer(layer_type:str, layer_params:Dict, layer_number:int = 1): 
     layer_map = {"1DConv":nn.Conv1d, "Linear":nn.Linear}
@@ -43,3 +44,6 @@ class AR(nn.Module):
         x = self.linear(x)
         x = torch.transpose(x, 1, 2)
         return x
+
+class MetaEmbedding(nn.Module):
+    pass
