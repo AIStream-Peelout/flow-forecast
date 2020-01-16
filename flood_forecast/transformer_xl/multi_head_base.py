@@ -15,7 +15,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
     def forward(self, x:torch.Tensor, mask=None):
         """
         :param x torch.Tensor: of shape (B, L, M)
-        Where B is the batch size, L is the sequenc length and M is the number
+        Where B is the batch size, L is the sequence length and M is the number 
         :param mask torch.Tensor: A mask to cover subsequent attention positions
         """
         x = self.dense_shape(x)

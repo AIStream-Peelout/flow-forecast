@@ -8,7 +8,7 @@ def initial_layer(layer_type:str, layer_params:Dict, layer_number:int = 1):
     return layer_map[layer_type](**layer_params)
 
 def variable_forecast_layer(forecast_length, layer_type):
-    final_layer_map = {"Linear":nn.Linear}
+    final_layer_map = {"Linear":nn.Linear, "PositionWiseFeedForward":PositionwiseFeedForward}
 
 class PositionwiseFeedForward(nn.Module):
     ''' A two-feed-forward-layer module
@@ -29,7 +29,7 @@ class PositionwiseFeedForward(nn.Module):
         output = self.dropout(output)
         output = self.layer_norm(output + residual)
         return output
-        
+
 class AR(nn.Module):
 
     def __init__(self, window):

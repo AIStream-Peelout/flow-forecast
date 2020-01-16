@@ -61,7 +61,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     if test_data.use_real_temp:
         temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
 
-    for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
+    for i in range(0, int(np.floor(hours_to_forecast/forecast_length).item())):
         print("stacked tensor below")
         print(full_history[i])
         output = model.model(full_history[i])
