@@ -54,7 +54,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         test_data = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params)
     model.model.eval()
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
-    all_tensor = [history]
+    all_tensor = []
     full_history = [history.unsqueeze(0)]
     if test_data.use_real_precip:
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
