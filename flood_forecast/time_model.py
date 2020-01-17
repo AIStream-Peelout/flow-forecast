@@ -91,10 +91,10 @@ class PyTorchForecast(TimeSeriesModel):
             if weight_path:
                 checkpoint = torch.load(weight_path, map_location=self.device)
                 model.load_state_dict(checkpoint)
-                model.to(self.device)
                 print("Weights sucessfully loaded")
-            else:
-                model.to(self.device)
+            model.to(self.device)
+            if hasattr(model, "mask"):
+                model.mask.to(self.device)
         else: 
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model

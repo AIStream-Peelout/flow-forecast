@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import torch 
 from datetime import datetime
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Dict, List
 import sklearn.metrics
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
@@ -42,6 +42,12 @@ def get_value():
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
 
+def evaluate_model(model, model_type, evaluation_metrics:List, inference_params:Dict):
+    if model_type == "PyTorch":
+        df, end_tensor, forecast_start_idx = infer_on_torch_model(model, **inference_params)
+    for evaluation_metric in evaluation_metrics:
+        evaluation_metric(df["preds"][forecast_start_idx:])
+
 def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params={}): 
     """
     Function to handle both test evaluation and inference on a test dataframe 
@@ -71,10 +77,6 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         if test_data.use_real_precip and test_data.use_real_temp:
             # Order here should match order of original tensor... But what is the best way todo that...? 
             # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
-            print("output shape")
-            print(output.shape)
-            print("precip shape")
-            print(precip_cols[i].shape)
             intial_numpy = torch.stack([output.view(-1).float(), precip_cols[i].float(), temp_cols[i].float()]).to('cpu').detach().numpy()
             temp_df = pd.DataFrame(intial_numpy.T, columns=['cfs', 'precip', 'temp'])
             revised_np = temp_df[model.params["dataset_params"]["relevant_cols"]].to_numpy()
