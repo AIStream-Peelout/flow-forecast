@@ -17,7 +17,7 @@ class EvaluationTest(unittest.TestCase):
         self.data_base_params = {"file_path":os.path.join(self.test_path, "keag_small.csv"), "forecast_history": 20, "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate_param": False}
     
     def test_evaluator(self):
-        inference_params = {"datetime_start":datetime.datetime(2017, 8, 21, 0), "hours_to_forecast":336 , "dataset_params":self.data_base_params, "test_csv_path":os.path.join(self.test_path, "keag_small.csv")}
+        inference_params = {"datetime_start":datetime.datetime(2016, 5, 31, 0), "hours_to_forecast":336 , "dataset_params":self.data_base_params, "test_csv_path":os.path.join(self.test_path, "keag_small.csv")}
         evaluate_model(self.model, "PyTorch", "cfs", ["MSE", "L1"], inference_params)
     
     def test_infer_on_torch(self):
