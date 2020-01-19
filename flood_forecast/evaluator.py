@@ -60,6 +60,8 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
+    print("Datetime start below")
+    print(datetime_start)
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     # If the test dataframe is none use default one supplied in params
