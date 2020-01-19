@@ -93,8 +93,11 @@ class PyTorchForecast(TimeSeriesModel):
                 model.load_state_dict(checkpoint)
                 print("Weights sucessfully loaded")
             model.to(self.device)
+            # TODO create a general loop to convert all model tensor params to device
             if hasattr(model, "mask"):
                 model.mask.to(self.device)
+            if hasattr(model, "tgt_mask"):
+                model.tgt_mask.to(self.device)
         else: 
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model
@@ -118,6 +121,7 @@ class PyTorchForecast(TimeSeriesModel):
     
     def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str):
         start_end_params = {}
+        # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
@@ -130,7 +134,7 @@ class PyTorchForecast(TimeSeriesModel):
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
         else:
-            # TODO support custom Daa Loader
+            # TODO support custom DataLoader
             l = None
         return l
                         

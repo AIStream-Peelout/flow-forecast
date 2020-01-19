@@ -3,6 +3,7 @@ import re
 import uuid
 import os
 import argparse
+import traceback
 from flood_forecast.trainer import train_function
 
 def split_on_letter(s):
@@ -42,6 +43,8 @@ def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start
     try:
         train_function("PyTorch", config)
     except Exception as e:
+        print("An exception occured for: " + file_name_json)
+        traceback.print_exc()
         print(e)
     
 def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
