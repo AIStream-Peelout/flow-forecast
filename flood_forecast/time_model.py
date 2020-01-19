@@ -95,9 +95,9 @@ class PyTorchForecast(TimeSeriesModel):
             model.to(self.device)
             # TODO create a general loop to convert all model tensor params to device
             if hasattr(model, "mask"):
-                model.mask.to(self.device)
+                model.mask = model.mask.to(self.device)
             if hasattr(model, "tgt_mask"):
-                model.tgt_mask.to(self.device)
+                model.tgt_mask = model.tgt_mask.to(self.device)
         else: 
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model
