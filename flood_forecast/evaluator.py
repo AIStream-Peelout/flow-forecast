@@ -64,7 +64,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     forecast_length = model.params["dataset_params"]["forecast_length"]
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
-        test_data = model.test
+        test_data = model.test_data
     else:
         test_data = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params)
     model.model.eval()
