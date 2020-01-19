@@ -43,16 +43,17 @@ def get_value():
     print(get_r2_value(0.120, res[1]))
 
 def metric_dict(metric:str):
-    {"MSE": torch.nn.MSELoss(), "L1": torch.nn.L1Loss()}
+    dic = {"MSE": torch.nn.MSELoss(), "L1": torch.nn.L1Loss()}
+    return dic[metric]
 
 
-def evaluate_model(model, model_type, target_col:str, evaluation_metrics:List, inference_params:Dict):
+def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:List, inference_params:Dict):
     """
     """
     if model_type == "PyTorch":
         df, end_tensor, forecast_start_idx = infer_on_torch_model(model, **inference_params)
     for evaluation_metric in evaluation_metrics:
-        evaluation_metric_function = metric_dict[evaluation_metric]
+        evaluation_metric_function = metric_dict(evaluation_metric)
         evaluation_metric_function(df[target_col][forecast_start_idx:], df["preds"][forecast_start_idx:])
 
 def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params={}): 

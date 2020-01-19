@@ -42,6 +42,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           # Convert to CPU/GPU/TPU 
           src = src.to(model.device)
           trg = trg.to(model.device)
+          print(trg.device)
           # TODO figure how to avoid
           if takes_target:
             forward_params["t"] = trg 
