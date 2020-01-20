@@ -87,6 +87,10 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df['original_index'] = self.original_df.index
 
     def get_from_start_date(self, forecast_start):
+        print("The original length")
+        print(len(self.original_df))
+        print("DF type")
+        print(self.original_df.dtypes)
         dt_row = self.original_df[self.original_df['datetime'] == forecast_start]
         print("DT row below")
         print(self.original_df.head())
