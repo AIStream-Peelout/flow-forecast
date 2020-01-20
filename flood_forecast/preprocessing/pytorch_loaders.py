@@ -90,7 +90,7 @@ class CSVTestLoader(CSVDataLoader):
         print("The original length")
         print(len(self.original_df))
         print("DF type")
-        print(self.original_df.dtypes)
+        print(list(self.original_df.datetime.unique())[:10])
         dt_row = self.original_df[self.original_df['datetime'] == forecast_start]
         print("DT row below")
         print(self.original_df.head())
