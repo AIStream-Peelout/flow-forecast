@@ -16,10 +16,6 @@ class EvaluationTest(unittest.TestCase):
         self.model = PyTorchForecast("MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params)
         self.data_base_params = {"file_path":os.path.join(self.test_path, "keag_small.csv"), "forecast_history": 20, "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate_param": False}
     
-    def test_evaluator(self):
-        inference_params = {"datetime_start":datetime.datetime(2014, 5, 1, 0), "hours_to_forecast":336 , "dataset_params":self.data_base_params, "test_csv_path":os.path.join(self.test_path, "keag_small.csv")}
-        evaluate_model(self.model, "PyTorch", "cfs", ["MSE", "L1"], inference_params)
-    
     def test_infer_on_torch(self):
         df, end_tensor, idx = infer_on_torch_model(self.model, os.path.join(self.test_path, "keag_small.csv"), datetime_start=datetime.datetime(2014,6,2,0), dataset_params=self.data_base_params)
         self.assertEqual(end_tensor.shape[0], 336)
