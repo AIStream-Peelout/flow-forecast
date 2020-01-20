@@ -25,7 +25,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(idx, 759)
     
     def test_evaluator(self):
-        inference_params = {"datetime_start":datetime.datetime(2016, 5, 21, 0), "hours_to_forecast":336 , "dataset_params":self.data_base_params, "test_csv_path":os.path.join(self.test_path, "keag_small.csv")}
+        inference_params = {"datetime_start":datetime.datetime(2016, 5, 21, 0), "hours_to_forecast":336 , "dataset_params":self.data_base_params, "test_csv_path":os.path.join(self.test_path2, "keag_small.csv")}
         evaluate_model(self.model, "PyTorch", "cfs", ["MSE", "L1"], inference_params)
 
 if __name__ == '__main__':

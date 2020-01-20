@@ -42,7 +42,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           # Convert to CPU/GPU/TPU 
           src = src.to(model.device)
           trg = trg.to(model.device)
-          print(trg.device)
           # TODO figure how to avoid
           if takes_target:
             forward_params["t"] = trg 
@@ -58,10 +57,10 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           i+=1
           if torch.isnan(loss) or loss==float('inf'):
               raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
-      print("The loss for epoch " + str(epoch) )
+      print("The loss for epoch " + str(epoch))
       print(loss)
       use_decoder = False
-      if "use_decoder" in  model.params["model_params"]:
+      if "use_decoder" in model.params:
         use_decoder = True
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=use_decoder, use_wandb=use_wandb)
       if use_wandb:
