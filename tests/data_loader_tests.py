@@ -6,6 +6,10 @@ from datetime import datetime
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 class DataLoaderTests(unittest.TestCase):
+    """
+    Class to test data loader functionality for the code.
+    Specifically, reuturn types and indexing to make sure.
+    """
     def setUp(self):
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"test_data")
         data_base_params = {"file_path":os.path.join(self.test_data_path, "keag_small.csv"), "forecast_history": 20, "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate_param": False}
