@@ -76,6 +76,8 @@ class CSVTestLoader(CSVDataLoader):
         """
         super().__init__(**kwargs)
         self.original_df = pd.read_csv(df_path)
+        print("CSV Path below")
+        print(df_path)
         self.forecast_total = forecast_total
         self.use_real_temp = use_real_temp
         self.use_real_precip = use_real_precip
