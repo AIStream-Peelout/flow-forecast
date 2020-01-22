@@ -26,7 +26,8 @@ class EvaluationTest(unittest.TestCase):
     
     def test_evaluator(self):
         inference_params = {"datetime_start":datetime.datetime(2016, 5, 31, 0), "hours_to_forecast":336 , "dataset_params":self.data_base_params, "test_csv_path":os.path.join(self.test_path2, "keag_small.csv")}
-        evaluate_model(self.model, "PyTorch", "cfs", ["MSE", "L1"], inference_params)
+        model_result = evaluate_model(self.model, "PyTorch", "cfs", ["MSE", "L1"], inference_params, {})
+        self.assertGreater(model_result["L1"], 0)
 
 if __name__ == '__main__':
     unittest.main()

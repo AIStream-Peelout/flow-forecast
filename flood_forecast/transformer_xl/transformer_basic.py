@@ -104,7 +104,7 @@ def greedy_decode(model, src, max_len, real_target, start_symbol, unsqueeze_dim=
         with torch.no_grad():
             out = model.decode_seq(memory, 
                                Variable(ys), 
-                              Variable(mask), i+1)
+                              Variable(mask))
             real_target[:, i, 0] = out[:, i]
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
     return ys
