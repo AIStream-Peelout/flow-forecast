@@ -74,7 +74,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
 
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, device, decoder_structure=False, use_wandb=False):
   model.eval()
-  # TODO move all masking to the model itself
   # MASK SHOULD NOT be generated here anyways 
   # param mask = generate_square_subsequent_mask(sequence_size)
   loop_loss = 0.0
@@ -86,7 +85,6 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
       targ = targ.to(device)
       i+=1
       if decoder_structure:
-        # TODO move mask  to model itself
         output = greedy_decode(model, src, sequence_size, targ, src)[:, :, 0]
 
       # To do implement greedy decoding

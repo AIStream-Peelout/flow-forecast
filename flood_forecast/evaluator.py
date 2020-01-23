@@ -64,15 +64,12 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
-    print("Datetime start below")
-    print(datetime_start)s
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         test_data = model.test_data
     else:
-        print(dataset_params)
         test_data = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params)
     model.model.eval()
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
