@@ -86,7 +86,6 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
       i+=1
       if decoder_structure:
         output = greedy_decode(model, src, sequence_size, targ, src)[:, :, 0]
-
       # To do implement greedy decoding
       # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
       else:

@@ -29,6 +29,7 @@ class EvaluationTest(unittest.TestCase):
         model_result = evaluate_model(self.model, "PyTorch", "cfs", ["MSE", "L1"], inference_params, {})
         print(model_result)
         self.assertGreater(model_result["L1"], 0)
+        self.assertGreater(model_result["MSE"],1)
 
 if __name__ == '__main__':
     unittest.main()

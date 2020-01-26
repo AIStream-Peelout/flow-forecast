@@ -51,15 +51,14 @@ def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:Lis
     """
     A function to evaluate a model
     """
+    forecast_history = ["dataset_params"]["forecast_history"] +1
     if model_type == "PyTorch":
         df, end_tensor, forecast_start_idx = infer_on_torch_model(model, **inference_params)
     for evaluation_metric in evaluation_metrics:
         evaluation_metric_function = metric_dict(evaluation_metric)
         print('frame data')
-        print(df[target_col][forecast_start_idx:])
-        print(forecast_start_idx)
-        print(df)
-        s = evaluation_metric_function(torch.from_numpy(df[target_col][forecast_start_idx:].to_numpy()), torch.from_numpy(df["preds"][forecast_start_idx:].to_numpy()))
+        print(df[target_col][forecast_history:])
+        s = evaluation_metric_function(torch.from_numpy(df[target_col][forecast_history:].to_numpy()), torch.from_numpy(df["preds"][forecast_history:].to_numpy()))
         eval_log[evaluation_metric] = s
     return eval_log
 
