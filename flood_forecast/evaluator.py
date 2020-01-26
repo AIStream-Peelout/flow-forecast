@@ -51,7 +51,7 @@ def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:Lis
     """
     A function to evaluate a model
     """
-    forecast_history = ["dataset_params"]["forecast_history"] +1
+    forecast_history = model.params["dataset_params"]["forecast_history"] + 1
     if model_type == "PyTorch":
         df, end_tensor, forecast_start_idx = infer_on_torch_model(model, **inference_params)
     for evaluation_metric in evaluation_metrics:
@@ -98,7 +98,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor
-    return df, end_tensor, forecast_start_idx
+    return df, end_tensor, history_length
     
         
     
