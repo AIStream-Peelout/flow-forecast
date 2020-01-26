@@ -36,7 +36,7 @@ class SimpleTransformer(torch.nn.Module):
         return x
     
     def decode_seq(self, mem, t, tgt_mask=None):
-        if tgt_mask == None:
+        if tgt_mask is None:
             tgt_mask = self.tgt_mask
         t = self.basic_feature(t)
         x = self.transformer.decoder(t, mem, tgt_mask=tgt_mask)
