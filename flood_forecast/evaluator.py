@@ -57,6 +57,8 @@ def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:Lis
         evaluation_metric_function = metric_dict(evaluation_metric)
         print('frame data')
         print(df[target_col][forecast_start_idx:])
+        print(forecast_start_idx)
+        print(df)
         s = evaluation_metric_function(torch.from_numpy(df[target_col][forecast_start_idx:].to_numpy()), torch.from_numpy(df["preds"][forecast_start_idx:].to_numpy()))
         eval_log[evaluation_metric] = s
     return eval_log
