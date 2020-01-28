@@ -16,6 +16,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   :model The initialized PyTorchForecastModel
   :training_params_dict A dictionary of the parameters 
   :takes_target boolean: 
+  :forward_params: A dictionary for additional forward
   """
   use_wandb = model.wandb
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters(), **training_params["optim_params"])
@@ -85,7 +86,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
       targ = targ.to(device)
       i+=1
       if decoder_structure:
-        output = greedy_decode(model, src, sequence_size, targ, src, device=model.device)[:, :, 0]
+        output = greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
       # To do implement greedy decoding
       # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
       else:
