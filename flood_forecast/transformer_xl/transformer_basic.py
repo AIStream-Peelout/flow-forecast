@@ -102,6 +102,9 @@ def greedy_decode(model, src, max_len, real_target, start_symbol, unsqueeze_dim=
     for i in range(max_len-1):
         mask = generate_square_subsequent_mask(i+1).to(device)
         with torch.no_grad():
+            print(memory.shape)
+            print(ys.shape)
+            print(mask.shape)
             out = model.decode_seq(memory, 
                                Variable(ys), 
                               Variable(mask))
