@@ -37,12 +37,12 @@ def get_model_r2_score(river_flow_df, model_evaluate_function:Callable, forecast
 def get_r2_value(model_mse, baseline_mse):
     return 1-model_mse/baseline_mse
 
-def get_value():
-    df = pd.read_csv("final_keag.csv")
+def get_value(the_path:str):
+    df = pd.read_csv(the_path)
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
 
-def metric_dict(metric:str):
+def metric_dict(metric:str) -> Callable:
     dic = {"MSE": torch.nn.MSELoss(), "L1": torch.nn.L1Loss()}
     return dic[metric]
 
