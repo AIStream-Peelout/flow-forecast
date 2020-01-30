@@ -8,3 +8,4 @@ wandb
 pandas_gbq
 google-cloud
 google-cloud-storage
+pyyaml

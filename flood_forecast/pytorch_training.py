@@ -16,7 +16,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   :model The initialized PyTorchForecastModel
   :training_params_dict A dictionary of the parameters 
   :takes_target boolean: 
-  :forward_params: A dictionary for additional forward
+  :forward_params: A dictionary for additional forward params
   """
   use_wandb = model.wandb
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters(), **training_params["optim_params"])
@@ -91,7 +91,7 @@ def compute_validation(validation_loader, model, epoch, sequence_size, criterion
       # https://github.com/budzianowski/PyTorch-Beam-Search-Decoding/blob/master/decode_beam.py
       else:
         output = model(src.float())
-        labels = targ[:, :, 0]
+      labels = targ[:, :, 0]
       validation_dataset = validation_loader.dataset
       if validation_dataset.scale:
         unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())

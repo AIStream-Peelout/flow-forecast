@@ -50,6 +50,7 @@ def metric_dict(metric:str):
 def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
     """
     A function to evaluate a model
+    Requires a model of type
     """
     if model_type == "PyTorch":
         df, end_tensor, forecast_history, junk = infer_on_torch_model(model, **inference_params)
@@ -61,7 +62,7 @@ def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:Lis
         eval_log[evaluation_metric] = s
     return eval_log
 
-def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params={}): 
+def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params:Dict={}): 
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
