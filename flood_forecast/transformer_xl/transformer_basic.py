@@ -35,13 +35,15 @@ class SimpleTransformer(torch.nn.Module):
         x = self.transformer.encoder(x, src_mask)
         return x
     
-    def decode_seq(self, mem, t, tgt_mask=None):
+    def decode_seq(self, mem, t, tgt_mask=None, view_number=None):
+        if view_number is None:
+            view_number = self.out_seq_len
         if tgt_mask is None:
             tgt_mask = self.tgt_mask
         t = self.basic_feature(t)
         x = self.transformer.decoder(t, mem, tgt_mask=tgt_mask)
         x = self.final_layer(x)
-        return x.view(-1, self.out_seq_len)
+        return x.view(-1, view_number)
     
 class CustomTransformer(torch.nn.Module):
     def __init__(self, n_time_series, d_model=128):
@@ -107,7 +109,7 @@ def greedy_decode(model, src, max_len, real_target, start_symbol, unsqueeze_dim=
             print(mask.shape)
             out = model.decode_seq(memory, 
                                Variable(ys), 
-                              Variable(mask))
+                              Variable(mask), i+1)
             real_target[:, i, 0] = out[:, i]
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
     return ys
