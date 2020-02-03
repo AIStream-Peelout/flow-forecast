@@ -60,7 +60,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           if torch.isnan(loss) or loss==float('inf'):
               raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
       print("The loss for epoch " + str(epoch))
-      print(loss)
+      print(running_loss)
       use_decoder = False
       if "use_decoder" in model.params:
         use_decoder = True
