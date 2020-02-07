@@ -56,7 +56,11 @@ jobs:
             python tests/pytorc_train_tests.py
             python tests/model_config_tests.py
             python tests/data_loader_tests.py
-
+      - run: 
+          name: Decoder tests
+          when: always 
+          command: 
+            python tests/test_decoder.py
       - run: 
           name: Trainer tests
           when: always

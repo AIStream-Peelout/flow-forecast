@@ -1,13 +1,15 @@
 import unittest
 import os
 import torch
+from torch.utils.data import DataLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, greedy_decode, generate_square_subsequent_mask
 
 class TestDecoding(unittest.TestCase):
     def setUp(self):
         self.model = SimpleTransformer(3, 48)
         self.data_test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init", "keag.csv")
-        self.validation_loader = CSVDataLoader(self.data_test_path, batch_size=8, shuffle=False, sampler=None,
+        self.validation_loader = DataLoader(CSVDataLoader(self.data_test_path, forecast_history=30, forecast_length=20, target_col=['cfs'], relevant_cols=['cfs','temp','precip']), shuffle=False, sampler=None,
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)
@@ -29,7 +31,7 @@ class TestDecoding(unittest.TestCase):
         leak during validation.
         """
         src_mask = generate_square_subsequent_mask(self.sequence_size)
-        src, trg = next(iter(self.validation_data_loader))
+        src, trg = next(iter(self.validation_loader))
         trg_mem = trg.clone().detach()
         result = greedy_decode(self.model, src, src_mask, self.sequence_size, trg, src)
         self.assertNotEqual(result[0, 2, 0], trg_mem[0, 1, 0])
