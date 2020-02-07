@@ -34,6 +34,8 @@ class PyTorchTrainTests(unittest.TestCase):
         pre_loaded_model.eval()
         self.assertFalse(torch.allclose(pre_loaded_model(data), basic_model(data)))
         self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
-
+        
+    def test_train_loss(self):
+        pass
 if __name__ == '__main__':
     unittest.main()
