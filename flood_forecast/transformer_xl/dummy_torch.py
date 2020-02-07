@@ -8,7 +8,7 @@ class DummyTorchModel(nn.Module):
     def __init__(self, forecast_length:int):
         self.out_len = forecast_length
 
-    def forward(self, x:torch.Tensor):
+    def forward(self, x:torch.Tensor, mask=None):
         batch_sz = x.size(0)
         result = torch.ones(batch_sz, self.out_len)
         return result
