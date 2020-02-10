@@ -72,6 +72,8 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
 
+def inner_train_loop(model, number_epochs:int, data_loader:DataLoader):
+  pass 
 
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, device, decoder_structure=False, use_wandb=False):
   model.eval()
