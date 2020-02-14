@@ -72,8 +72,30 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
 
-def inner_train_loop(model, number_epochs:int, data_loader:DataLoader):
-  pass 
+def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, data_loader:DataLoader, takes_target:bool, forward_params:Dict={})->float:
+  i = 0
+  running_loss = 0.0
+  for src, trg in data_loader:
+    opt.zero_grad()
+    # Convert to CPU/GPU/TPU 
+    src = src.to(model.device)
+    trg = trg.to(model.device)
+    # TODO figure how to avoid
+    if takes_target:
+      forward_params["t"] = trg 
+    output = model.model(src, **forward_params)
+    labels = trg[:, :, 0] 
+    loss = criterion(output, labels.float())
+    if loss > 100:
+      print("Warning: high loss detected")
+    loss.backward()
+    opt.step()
+    if torch.isnan(loss) or loss==float('inf'):
+        raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
+    running_loss += loss.item()
+    i+=1
+  total_loss = running_loss/float(i)
+  return total_loss
 
 def compute_validation(validation_loader, model, epoch, sequence_size, criterion, device, decoder_structure=False, use_wandb=False):
   model.eval()
