@@ -11,7 +11,7 @@ import torch
 Utility dictionaries to map a string to a class
 """
 pytorch_model_dict = {"MultiAttnHeadSimple":MultiAttnHeadSimple, "SimpleTransformer":SimpleTransformer, 
-"TransformerXL":TransformerXL, "DummyTorchModel":DummyTorchModel, "SimpleLinearModel":SimpleLinearModel)
+"TransformerXL":TransformerXL, "DummyTorchModel":DummyTorchModel, "SimpleLinearModel":SimpleLinearModel
 }
 
 pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
