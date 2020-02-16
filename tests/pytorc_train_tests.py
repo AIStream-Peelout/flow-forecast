@@ -16,7 +16,7 @@ class PyTorchTrainTests(unittest.TestCase):
                             "wandb":False}
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
-        self.dummy_model = PyTorchForecast("DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {"forecast_length":3} )
+        self.dummy_model = PyTorchForecast("DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {"model_params":{"forecast_length":3}})
 
     def test_pytorch_train_base(self):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
