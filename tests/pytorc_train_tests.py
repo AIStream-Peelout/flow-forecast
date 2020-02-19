@@ -21,7 +21,7 @@ class PyTorchTrainTests(unittest.TestCase):
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False},
         "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
                             "wandb":False})
-        self.opt = torch.opt.optim.Adam(self.dummy_model.model.parameters(), lr=0.0001)
+        self.opt = torch.optim.Adam(self.dummy_model.model.parameters(), lr=0.0001)
         self.criterion = torch.nn.modules.loss.MSELoss()
 
     def test_pytorch_train_base(self):
