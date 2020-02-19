@@ -7,6 +7,7 @@ from flood_forecast.pytorch_training import torch_single_train
 import unittest
 from flood_forecast.pytorch_training import train_transformer_style
 
+
 class PyTorchTrainTests(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
@@ -20,6 +21,8 @@ class PyTorchTrainTests(unittest.TestCase):
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False},
         "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
                             "wandb":False})
+        self.opt = torch.opt.optim.Adam(self.dummy_model.model.parameters(), lr=0.0001)
+        self.criterion = torch.nn.modules.loss.MSELoss()
 
     def test_pytorch_train_base(self):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
@@ -41,6 +44,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
 
     def test_train_loss(self):
-        pass
+        total_loss = torch_single_train(self.dummy_model, self.opt, self.criterion, self.dummy_model.training, False)
+        self.assertGreater(total_loss, 100)
 if __name__ == '__main__':
     unittest.main()

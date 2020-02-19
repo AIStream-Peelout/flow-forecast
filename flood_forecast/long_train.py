@@ -98,7 +98,7 @@ def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
   return the_config
 
 def main():
-    parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
+    parser = argparse.ArgumentParser(description="Argument parsing for training and evaluation")
     parser.add_argument("-p", "--path", help="Data path")
 
 if __name__ == "__main__":

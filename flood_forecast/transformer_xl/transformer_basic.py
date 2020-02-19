@@ -4,7 +4,7 @@ import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
 from torch.autograd import Variable 
 class SimpleTransformer(torch.nn.Module):
-    def __init__(self, number_time_series, seq_length=48, output_seq_len = None, d_model=128, n_heads=8):
+    def __init__(self, number_time_series:int, seq_length:int=48, output_seq_len:int = None, d_model:int=128, n_heads:int=8):
         super().__init__()
         if output_seq_len is None:
             output_seq_len = seq_length
@@ -17,7 +17,7 @@ class SimpleTransformer(torch.nn.Module):
         self.sequence_size = seq_length
         self.tgt_mask = generate_square_subsequent_mask(output_seq_len)
 
-    def forward(self, x, t, tgt_mask=None, src_mask=None):
+    def forward(self, x:torch.Tensor, t:torch.Tensor, tgt_mask=None, src_mask=None):
         if src_mask:
             x = self.encode_sequence(x, src_mask)
         else: 
@@ -73,7 +73,6 @@ class SimplePositionalEncoding(torch.nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=5000):
         super(SimplePositionalEncoding, self).__init__()
         self.dropout = torch.nn.Dropout(p=dropout)
-
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
@@ -83,6 +82,7 @@ class SimplePositionalEncoding(torch.nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
+        """Creates a basic positional encoding"""
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
     
@@ -94,7 +94,7 @@ def generate_square_subsequent_mask(sz):
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
     
-def greedy_decode(model, src, max_len, real_target, start_symbol, unsqueeze_dim=1, device='cpu'):
+def greedy_decode(model, src:torch.Tensor, max_len, real_target, start_symbol, unsqueeze_dim=1, device='cpu'):
     """
     Mechanism to sequentially decode the model
     """
