@@ -6,7 +6,7 @@ from torch import nn
 from typing import Optional, Dict, List
 class DummyTorchModel(nn.Module):
     def __init__(self, forecast_length:int):
-        super.__init__()
+        super(DummyTorchModel, self).__init__()
         self.out_len = forecast_length
 
     def forward(self, x:torch.Tensor, mask=None):
