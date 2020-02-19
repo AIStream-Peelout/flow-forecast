@@ -17,13 +17,13 @@ class TestDecoding(unittest.TestCase):
     
     def test_full_forward_method(self):
         test_data = torch.rand(1, 30, 3)
-        result = self.model(test_data, t=torch.rand(1,20,1))
+        result = self.model(test_data, t=torch.rand(1,20,3))
         self.assertEqual(result.shape, torch.Size([1, 20]))
     
     def test_encoder_seq(self):
         test_data = torch.rand(1, 30, 3)
         result = self.model.encode_sequence(test_data)
-        self.assertEqual(result.shape, torch.Size([1, 30, 128]))
+        self.assertEqual(result.shape, torch.Size([30, 1, 128]))
 
     def test_for_leakage(self):
         """
