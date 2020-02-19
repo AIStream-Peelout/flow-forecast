@@ -16,12 +16,12 @@ class TestDecoding(unittest.TestCase):
         self.sequence_size = 48
     
     def test_full_forward_method(self):
-        test_data = torch.rand(1, 48, 3)
-        result = self.model(test_data)
+        test_data = torch.rand(1, 30, 3)
+        result = self.model(test_data, t=torch.rand(1,20,1))
         self.assertEqual(result.shape, torch.Size([1, 48]))
     
     def test_encoder_seq(self):
-        test_data = torch.rand(1, 3, 48)
+        test_data = torch.rand(1, 3, 30)
         result = self.model.encode_sequence(test_data)
         self.assertEqual(result.shape, torch.Size([1, 48, 128]))
 

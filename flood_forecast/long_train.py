@@ -10,7 +10,7 @@ def split_on_letter(s):
     match = re.compile("[^\W\d]").search(s)
     return [s[:match.start()], s[match.start():]]
 
-def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start_index=0, end_index=25): 
+def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start_index=0, end_index=25)->None: 
   """
   Function that makes and executes a set of config files
   This is since we have over 9k files.

@@ -9,7 +9,7 @@ from flood_forecast.evaluator import evaluate_model
 
 def train_function(model_type: str, params: Dict):
     """
-    Function to train a Model(TimeSeriesModel) or da_rnn will return the trained model
+    Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
@@ -26,6 +26,9 @@ def train_function(model_type: str, params: Dict):
     return trained_model 
 
 def main():
+    """
+    Main function which is called from the command line. Entrypoint for all models.
+    """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")
     args = parser.parse_args()
