@@ -1,6 +1,7 @@
 
 import os
 import torch
+from torch.utils.data import DataLoader
 from flood_forecast.model_dict_function import pytorch_model_dict as pytorch_model_dict1
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.pytorch_training import torch_single_train
@@ -23,6 +24,11 @@ class PyTorchTrainTests(unittest.TestCase):
                             "wandb":False})
         self.opt = torch.optim.Adam(self.dummy_model.model.parameters(), lr=0.0001)
         self.criterion = torch.nn.modules.loss.MSELoss()
+        self.data_loader = DataLoader(self.dummy_model.training, batch_size=2, shuffle=False, sampler=None,
+           batch_sampler=None, num_workers=0, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None)
+
 
     def test_pytorch_train_base(self):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
@@ -44,7 +50,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
 
     def test_train_loss(self):
-        total_loss = torch_single_train(self.dummy_model, self.opt, self.criterion, self.dummy_model.training, False)
+        total_loss = torch_single_train(self.dummy_model, self.opt, self.criterion, self.data_loader, False)
         self.assertGreater(total_loss, 100)
 if __name__ == '__main__':
     unittest.main()

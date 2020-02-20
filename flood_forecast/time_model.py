@@ -137,4 +137,5 @@ class PyTorchForecast(TimeSeriesModel):
             # TODO support custom DataLoader
             l = None
         return l
-                        
+
+  
