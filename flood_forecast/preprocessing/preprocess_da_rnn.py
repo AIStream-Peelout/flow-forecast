@@ -7,6 +7,7 @@ from typing import List
 from flood_forecast.da_rnn.custom_types import TrainData
     
 def format_data(dat, targ_column:List[str]) -> TrainData:
+    print(type(dat))
     proc_dat = dat.as_matrix()
     mask = np.ones(proc_dat.shape[1], dtype=bool)
     dat_cols = list(dat.columns)
