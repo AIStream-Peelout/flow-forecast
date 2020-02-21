@@ -37,37 +37,16 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
     wandb.watch(model.model)
   session_params = []
   for epoch in range(max_epochs):
-      i = 0
-      running_loss = 0.0
-      for src, trg in data_loader:
-          opt.zero_grad()
-          # Convert to CPU/GPU/TPU 
-          src = src.to(model.device)
-          trg = trg.to(model.device)
-          # TODO figure how to avoid
-          if takes_target:
-            forward_params["t"] = trg 
-          output = model.model(src, **forward_params)
-          labels = trg[:, :, 0] 
-          loss = criterion(output, labels.float())
-          if loss > 100:
-              print("Warning: high loss detected")
-          loss.backward()
-          #torch.nn.utils.clip_grad_norm_(s.parameters(), 0.5)
-          opt.step()
-          running_loss += loss.item()
-          i+=1
-          if torch.isnan(loss) or loss==float('inf'):
-              raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
+      total_loss = torch_single_train(model, opt, criterion, data_loader, takes_target, forward_params)
       print("The loss for epoch " + str(epoch))
-      print(running_loss)
+      print(total_loss)
       use_decoder = False
       if "use_decoder" in model.params:
         use_decoder = True
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=use_decoder, use_wandb=use_wandb)
       if use_wandb:
-        wandb.log({'epoch': epoch, 'loss': running_loss/i})
-      epoch_params = {"epoch":epoch, "train_loss":str(running_loss/i), "validation_loss":str(valid)} 
+        wandb.log({'epoch': epoch, 'loss': total_loss})
+      epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
       session_params.append(epoch_params)
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
