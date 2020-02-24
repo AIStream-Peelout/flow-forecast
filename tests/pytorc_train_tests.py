@@ -52,5 +52,6 @@ class PyTorchTrainTests(unittest.TestCase):
     def test_train_loss(self):
         total_loss = torch_single_train(self.dummy_model, self.opt, self.criterion, self.data_loader, False)
         self.assertGreater(total_loss, 100)
+        self.assertEqual(total_loss, 2499523.32)
 if __name__ == '__main__':
     unittest.main()
