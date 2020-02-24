@@ -72,6 +72,8 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, da
     if torch.isnan(loss) or loss==float('inf'):
         raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
     running_loss += loss.item()
+    print("The running loss for " + str(i))
+    print(running_loss)
     i+=1
   print("The running loss is:")
   print(running_loss)
@@ -80,7 +82,7 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, da
   total_loss = running_loss/float(i)
   return total_loss
 
-def compute_validation(validation_loader, model, epoch, sequence_size, criterion, device, decoder_structure=False, use_wandb=False)->float:
+def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_size:int, criterion, device, decoder_structure=False, use_wandb:bool=False)->float:
   model.eval()
   loop_loss = 0.0
   with torch.no_grad():
