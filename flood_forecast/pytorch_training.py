@@ -55,6 +55,8 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, da
   i = 0
   running_loss = 0.0
   for src, trg in data_loader:
+    print("targ below stuff")
+    print(trg)
     opt.zero_grad()
     # Convert to CPU/GPU/TPU 
     src = src.to(model.device)
