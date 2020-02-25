@@ -55,8 +55,6 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, da
   i = 0
   running_loss = 0.0
   for src, trg in data_loader:
-    print("targ below stuff")
-    print(trg)
     opt.zero_grad()
     # Convert to CPU/GPU/TPU 
     src = src.to(model.device)
@@ -74,8 +72,6 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, da
     if torch.isnan(loss) or loss==float('inf'):
         raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
     running_loss += loss.item()
-    print("The running loss for " + str(i))
-    print(running_loss)
     i+=1
   print("The running loss is:")
   print(running_loss)
