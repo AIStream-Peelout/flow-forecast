@@ -23,7 +23,8 @@ class PyTorchTrainTests(unittest.TestCase):
         "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
                             "wandb":False})
         self.full_transformer_params = {"use_decoder":True, "model_params":{"number_time_series":3, "seq_length":20, "output_seq_len":15}, 
-        "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":15, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False, "train_end":50},
+        "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":15, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False, "train_end":50, 
+        "valid_end":100},
         "training_params": {"optimizer":"Adam", "lr":.01, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
                             "wandb":False}
         self.transformer = PyTorchForecast("SimpleTransformer", self.keag_file, self.keag_file, self.keag_file, self.full_transformer_params)
@@ -56,7 +57,7 @@ class PyTorchTrainTests(unittest.TestCase):
         print("passed model stuff")
         self.assertFalse(torch.allclose(pre_loaded_model(data), basic_model(data)))
         print("first test good")
-       #self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
+        self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
 
     def test_train_loss(self):
         print("Now begining train loss test")
