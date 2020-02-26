@@ -14,9 +14,9 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
-  :training_params_dict A dictionary of the parameters 
-  :takes_target boolean: 
-  :forward_params: A dictionary for additional forward params
+  :training_params_dict A dictionary of the parameters needed to train model
+  :takes_target boolean: Determines whether to pass target during training
+  :forward_params: A dictionary for additional forward parameters (for instance target)
   """
   use_wandb = model.wandb
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters(), **training_params["optim_params"])

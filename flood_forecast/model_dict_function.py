@@ -16,7 +16,7 @@ pytorch_model_dict = {"MultiAttnHeadSimple":MultiAttnHeadSimple, "SimpleTransfor
 
 pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
 
-evaluation_functions = {"NSE":"", "MSE":""}
+evaluation_functions_dict = {"NSE":"", "MSE":""}
 
 pytorch_opt_dict = {"Adam":Adam, "SGD":SGD}
 
