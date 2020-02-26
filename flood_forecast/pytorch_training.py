@@ -10,7 +10,7 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 
-def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params = {})->None:
+def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params:Dict = {})->None:
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
