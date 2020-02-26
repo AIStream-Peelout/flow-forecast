@@ -55,6 +55,7 @@ class PyTorchTrainTests(unittest.TestCase):
         pre_loaded_model.eval()
         print("passed model stuff")
         self.assertFalse(torch.allclose(pre_loaded_model(data), basic_model(data)))
+        print("first test good")
         self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
 
     def test_train_loss(self):
