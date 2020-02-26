@@ -24,7 +24,7 @@ class SimpleTransformer(torch.nn.Module):
             x = self.encode_sequence(x, src_mask)
         return self.decode_seq(x, t, tgt_mask)
     
-    def basic_feature(self, x):
+    def basic_feature(self, x:torch.Tensor):
         x = self.dense_shape(x)
         x = self.pe(x)
         x = x.permute(1, 0, 2)

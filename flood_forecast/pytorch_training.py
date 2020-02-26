@@ -51,7 +51,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
 
-def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, data_loader:DataLoader, takes_target:bool, forward_params:Dict={})->float:
+def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Type[torch.nn.modules.loss._Loss], data_loader:DataLoader, takes_target:bool, forward_params:Dict={})->float:
   i = 0
   running_loss = 0.0
   for src, trg in data_loader:
@@ -80,7 +80,7 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion, da
   total_loss = running_loss/float(i)
   return total_loss
 
-def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_size:int, criterion, device, decoder_structure=False, use_wandb:bool=False)->float:
+def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_size:int, criterion:Type[torch.nn.modules.loss._Loss], device:torch.device, decoder_structure=False, use_wandb:bool=False)->float:
   model.eval()
   loop_loss = 0.0
   with torch.no_grad():
