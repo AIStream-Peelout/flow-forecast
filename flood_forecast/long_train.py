@@ -10,7 +10,7 @@ def split_on_letter(s):
     match = re.compile("[^\W\d]").search(s)
     return [s[:match.start()], s[match.start():]]
 
-def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start_index=0, end_index=25): 
+def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start_index=0, end_index=25)->None: 
   """
   Function that makes and executes a set of config files
   This is since we have over 9k files.
@@ -98,7 +98,7 @@ def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
   return the_config
 
 def main():
-    parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
+    parser = argparse.ArgumentParser(description="Argument parsing for training and evaluation")
     parser.add_argument("-p", "--path", help="Data path")
 
 if __name__ == "__main__":

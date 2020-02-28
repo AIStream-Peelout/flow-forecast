@@ -6,4 +6,6 @@ flood_forecast.egg-info
 tests/runs
 .ipynb_checkpoints
 data
+mypy
+.mypy_cache
 *.png

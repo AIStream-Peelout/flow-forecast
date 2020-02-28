@@ -10,13 +10,13 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 
-def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params = {}):
+def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params:Dict = {})->None:
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
-  :training_params_dict A dictionary of the parameters 
-  :takes_target boolean: 
-  :forward_params: A dictionary for additional forward params
+  :training_params_dict A dictionary of the parameters needed to train model
+  :takes_target boolean: Determines whether to pass target during training
+  :forward_params: A dictionary for additional forward parameters (for instance target)
   """
   use_wandb = model.wandb
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters(), **training_params["optim_params"])
@@ -37,43 +37,50 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
     wandb.watch(model.model)
   session_params = []
   for epoch in range(max_epochs):
-      i = 0
-      running_loss = 0.0
-      for src, trg in data_loader:
-          opt.zero_grad()
-          # Convert to CPU/GPU/TPU 
-          src = src.to(model.device)
-          trg = trg.to(model.device)
-          # TODO figure how to avoid
-          if takes_target:
-            forward_params["t"] = trg 
-          output = model.model(src, **forward_params)
-          labels = trg[:, :, 0] 
-          loss = criterion(output, labels.float())
-          if loss > 100:
-              print("Warning: high loss detected")
-          loss.backward()
-          #torch.nn.utils.clip_grad_norm_(s.parameters(), 0.5)
-          opt.step()
-          running_loss += loss.item()
-          i+=1
-          if torch.isnan(loss) or loss==float('inf'):
-              raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
+      total_loss = torch_single_train(model, opt, criterion, data_loader, takes_target, forward_params)
       print("The loss for epoch " + str(epoch))
-      print(running_loss)
+      print(total_loss)
       use_decoder = False
       if "use_decoder" in model.params:
         use_decoder = True
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=use_decoder, use_wandb=use_wandb)
       if use_wandb:
-        wandb.log({'epoch': epoch, 'loss': running_loss/i})
-      epoch_params = {"epoch":epoch, "train_loss":str(running_loss/i), "validation_loss":str(valid)} 
+        wandb.log({'epoch': epoch, 'loss': total_loss})
+      epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
       session_params.append(epoch_params)
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
 
+def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Type[torch.nn.modules.loss._Loss], data_loader:DataLoader, takes_target:bool, forward_params:Dict={})->float:
+  i = 0
+  running_loss = 0.0
+  for src, trg in data_loader:
+    opt.zero_grad()
+    # Convert to CPU/GPU/TPU 
+    src = src.to(model.device)
+    trg = trg.to(model.device)
+    # TODO figure how to avoid
+    if takes_target:
+      forward_params["t"] = trg 
+    output = model.model(src, **forward_params)
+    labels = trg[:, :, 0] 
+    loss = criterion(output, labels.float())
+    if loss > 100:
+      print("Warning: high loss detected")
+    loss.backward()
+    opt.step()
+    if torch.isnan(loss) or loss==float('inf'):
+        raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
+    running_loss += loss.item()
+    i+=1
+  print("The running loss is:")
+  print(running_loss)
+  print("The number of items in train is:")
+  print(i)
+  total_loss = running_loss/float(i)
+  return total_loss
 
-def compute_validation(validation_loader, model, epoch, sequence_size, criterion, device, decoder_structure=False, use_wandb=False):
+def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_size:int, criterion:Type[torch.nn.modules.loss._Loss], device:torch.device, decoder_structure=False, use_wandb:bool=False)->float:
   model.eval()
   loop_loss = 0.0
   with torch.no_grad():
