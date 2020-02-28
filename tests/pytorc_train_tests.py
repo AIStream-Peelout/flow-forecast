@@ -64,6 +64,7 @@ class PyTorchTrainTests(unittest.TestCase):
         total_loss = torch_single_train(self.dummy_model, self.opt, self.criterion, self.data_loader, False)
         self.assertGreater(total_loss, 100)
         self.assertGreater(total_loss, 752, 000)
+        self.assertLess(total_loss, 802000)
 
     def test_train_full_transformer(self):
         print("Now begining transformer tests")
