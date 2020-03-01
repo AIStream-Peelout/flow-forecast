@@ -18,9 +18,10 @@ class NaiveBase(torch.nn.Module):
     def forward(self, x:torch.Tensor):
         return self.metric_function(3, x).view(-1, self.output_seq_len)
 
-def the_last(index_in_tensor:int, the_tensor:torch.Tensor):
+def the_last(index_in_tensor:int, the_tensor:torch.Tensor)->torch.Tensor:
     """
     Warning this assumes that target is the last column
+    Will return a torch tensor
     """
     for batch_num in range(0, the_tensor.shape[0]):
         value = the_tensor[batch_num, -1, -1] 
