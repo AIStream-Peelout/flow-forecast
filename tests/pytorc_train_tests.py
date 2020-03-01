@@ -27,13 +27,13 @@ class PyTorchTrainTests(unittest.TestCase):
         "valid_end":100},
         "training_params": {"optimizer":"Adam", "lr":.01, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
                             "wandb":False}
-        self.simple_param = {"use_decoder":True, "model_params":{"n_time_series":3, "seq_length":80, "output_seq_len":20, 
+        self.simple_param = {"use_decoder":True, "model_params":{"n_time_series":3, "seq_length":80, "output_seq_len":20}, 
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":15, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False, "train_end":50, 
         "valid_end":100},
         "training_params": {"optimizer":"Adam", "lr":.01, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
-                            "wandb":False}}
-        self.transformer = PyTorchForecast("SimpleTransformer", self.keag_file, self.keag_file, self.keag_file, self.full_transformer_params["model_params"])
-        self.simple_linear_model = PyTorchForecast("SimpleLinearModel", self.keag_file, self.keag_file, self.keag_file, self.simple_param["model_params"])
+                            "wandb":False}
+        self.transformer = PyTorchForecast("SimpleTransformer", self.keag_file, self.keag_file, self.keag_file, self.full_transformer_params)
+        self.simple_linear_model = PyTorchForecast("SimpleLinearModel", self.keag_file, self.keag_file, self.keag_file, self.simple_param)
         self.opt = torch.optim.Adam(self.dummy_model.model.parameters(), lr=0.0001)
         self.criterion = torch.nn.modules.loss.MSELoss()
         self.data_loader = DataLoader(self.dummy_model.training, batch_size=2, shuffle=False, sampler=None,
