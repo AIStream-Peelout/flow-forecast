@@ -21,7 +21,7 @@ class NaiveBase(torch.nn.Module):
 def the_last(index_in_tensor:int, the_tensor:torch.Tensor)->torch.Tensor:
     """
     Warning this assumes that target is the last column
-    Will return a torch tensor
+    Will return a torch tensor of the proper dim
     """
     for batch_num in range(0, the_tensor.shape[0]):
         value = the_tensor[batch_num, -1, -1] 

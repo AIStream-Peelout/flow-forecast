@@ -17,7 +17,6 @@ class SimpleLinearModel(torch.nn.Module):
         """
         x: A tensor of dimension (B, L, M) where 
         B is the batch size, L is the length of the 
-
         """
         x = self.initial_layer(x)
         x = x.permute(0,2,1)
@@ -25,13 +24,14 @@ class SimpleLinearModel(torch.nn.Module):
         return x.view(-1, self.output_len)
 
 def simple_decode(model, src, max_seq_len, real_target, output_len, unsqueeze_dim=1):
+    real_target2 = real_target.clone()
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
     for i in range(0, max_seq_len):
         with torch.no_grad():
             out = model(src)
-            real_target[:, i, 0] = out[:, 0]
-            src = torch.cat((src[:, 1:, :], real_target[:, i, :].unsqueeze(1)), 1)
-            ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1 )
+            real_target2[:, i, 0] = out[:, 0]
+            src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
+            ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1 )
     return ys[:, 1:, :]
 
 
