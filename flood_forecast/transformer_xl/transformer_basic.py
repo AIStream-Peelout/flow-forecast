@@ -97,7 +97,7 @@ def generate_square_subsequent_mask(sz):
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
     
-def greedy_decode(model, src:torch.Tensor, max_len, real_target, start_symbol, unsqueeze_dim=1, device='cpu'):
+def greedy_decode(model, src:torch.Tensor, max_len:int, real_target, start_symbol, unsqueeze_dim=1, device='cpu'):
     """
     Mechanism to sequentially decode the model
     """
