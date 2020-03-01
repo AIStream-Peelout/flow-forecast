@@ -5,6 +5,7 @@ from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
 from torch.optim import Adam, SGD
 from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss
+from flood_forecast.custom.custom_opt import BertAdam
 import torch
 
 """
@@ -18,7 +19,7 @@ pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "Pois
 
 evaluation_functions_dict = {"NSE":"", "MSE":""}
 
-pytorch_opt_dict = {"Adam":Adam, "SGD":SGD}
+pytorch_opt_dict = {"Adam":Adam, "SGD":SGD, "BertAdam":BertAdam}
 
 scikit_dict = {}
 
