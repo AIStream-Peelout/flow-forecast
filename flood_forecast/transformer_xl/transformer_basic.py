@@ -5,6 +5,9 @@ from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder
 from torch.autograd import Variable 
 class SimpleTransformer(torch.nn.Module):
     def __init__(self, number_time_series:int, seq_length:int=48, output_seq_len:int = None, d_model:int=128, n_heads:int=8):
+        """
+        Full
+        """
         super().__init__()
         if output_seq_len is None:
             output_seq_len = seq_length
