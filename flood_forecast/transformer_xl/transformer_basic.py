@@ -101,7 +101,8 @@ def greedy_decode(model, src:torch.Tensor, max_len, real_target, start_symbol, u
     """
     Mechanism to sequentially decode the model
     """
-    src_mask = model.mask
+    if hasattr(model, "mask"):
+        src_mask = model.mask
     memory = model.encode_sequence(src, src_mask)
     ys = start_symbol[:, -1, :].unsqueeze(unsqueeze_dim)
     for i in range(max_len-1):

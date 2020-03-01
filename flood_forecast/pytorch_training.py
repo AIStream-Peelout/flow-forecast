@@ -9,6 +9,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
+from flood_forecast.basic.linear_regression import simple_decode
 
 def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params:Dict = {})->None:
   """
@@ -91,7 +92,10 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
       targ = targ.to(device)
       i+=1
       if decoder_structure:
-        output = greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
+        if hasattr(model, "mask"):
+          output = greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
+        else:
+          output = simple_decode(model, src, sequence_size, targ, 1)
       else:
         output = model(src.float())
       labels = targ[:, :, 0]
