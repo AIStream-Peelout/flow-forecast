@@ -96,6 +96,7 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
           output = greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
         else:
           output = simple_decode(model, src, sequence_size, targ, 1)[:,:, 0]
+          print(output.shape)
       else:
         output = model(src.float())
       labels = targ[:, :, 0]
