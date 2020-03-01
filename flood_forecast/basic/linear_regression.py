@@ -26,14 +26,12 @@ class SimpleLinearModel(torch.nn.Module):
 
 def simple_decode(model, src, max_seq_len, real_target, output_len, unsqueeze_dim=1):
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
-    print(ys.shape)
     for i in range(0, max_seq_len):
         with torch.no_grad():
             out = model(src)
             real_target[:, i, 0] = out[:, 0]
             src = torch.cat((src[:, 1:, :], real_target[:, i, :].unsqueeze(1)), 1)
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1 )
-            print(i)
     return ys[:, 1:, :]
 
 
