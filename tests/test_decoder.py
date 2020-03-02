@@ -34,9 +34,9 @@ class TestDecoding(unittest.TestCase):
         src, trg = next(iter(self.validation_loader))
         trg_mem = trg.clone().detach()
         result = greedy_decode(self.model, src, 20, trg, src)
-        self.assertNotEqual(result[0, 2, 0], trg_mem[0, 1, 0])
-        self.assertEqual(result[0, 2, 1], trg_mem[0, 1, 1])
-        self.assertEqual(result[0, 2, 2], trg_mem[0, 1, 2])
+        self.assertNotEqual(result[0, 1, 0], trg_mem[0, 1, 0])
+        self.assertEqual(result[0, 1, 1], trg_mem[0, 1, 1])
+        self.assertEqual(result[0, 1, 2], trg_mem[0, 1, 2])
         
     def test_make_function(self):
         self.assertEqual(1,1)
