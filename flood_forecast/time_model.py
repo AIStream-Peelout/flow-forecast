@@ -119,7 +119,7 @@ class PyTorchForecast(TimeSeriesModel):
             import wandb
             wandb.config.save_path = model_save_path
     
-    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str):
+    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str, the_class="default"):
         start_end_params = {}
         # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
@@ -130,7 +130,7 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]] 
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        if dataset_params["class"] == "default":
+        if the_class == "default":
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
         else:
