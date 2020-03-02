@@ -22,7 +22,8 @@ def train_function(model_type: str, params: Dict):
     elif model_type == "PyTorch":
         trained_model = PyTorchForecast(params["model_name"], dataset_params["training_path"], dataset_params["validation_path"], dataset_params["test_path"], params)
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
-        #evaluate_model(trained_model, model_type, params["data"], params["evaluation"]["metric"],)
+        params["inference_params"]["dataset_params"] = dataset_params
+        evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
     else: 
         print("Please supply valid model type")
     return trained_model 
