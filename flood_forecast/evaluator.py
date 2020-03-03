@@ -6,6 +6,7 @@ from typing import Callable, Tuple, Dict, List
 import sklearn.metrics
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
+
 def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forecast=336)->(pd.DataFrame, float):
     """
     Function to compute the baseline MSE 

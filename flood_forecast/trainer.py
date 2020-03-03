@@ -6,6 +6,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
+from flood_forecast.pre_dict import scaler_dict
 
 def train_function(model_type: str, params: Dict):
     """
@@ -22,6 +23,7 @@ def train_function(model_type: str, params: Dict):
     elif model_type == "PyTorch":
         trained_model = PyTorchForecast(params["model_name"], dataset_params["training_path"], dataset_params["validation_path"], dataset_params["test_path"], params)
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
+        params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
         evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
     else: 
         print("Please supply valid model type")
