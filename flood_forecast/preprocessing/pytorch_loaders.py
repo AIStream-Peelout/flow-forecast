@@ -24,7 +24,9 @@ class CSVDataLoader(Dataset):
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length 
         # TODO allow other filling methods 
+        print("interpolate should be below")
         if interpolate_param: 
+            print("now filling missing values")
             df = fix_timezones(file_path)
             df = interpolate_missing_values(df)
         else:

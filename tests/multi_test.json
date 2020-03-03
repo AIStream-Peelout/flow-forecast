@@ -40,7 +40,23 @@
        "name": "flood_forecast_circleci",
        "tags": ["dummy_run", "circleci"]
     },
-    "forward_params":{}
-    
-    }
+    "forward_params":{},
+   "metrics":["MSE"],
+   "inference_params":
+   {     
+         "datetime_start":"2019-05-31",
+          "hours_to_forecast":336, 
+          "test_csv_path":"tests/test_data/keag_small.csv",
+          "dataset_params":{
+             "file_path": "tests/test_data/keag_small.csv",
+             "forecast_history":20,
+             "forecast_length":20,
+             "relevant_cols": ["cfs", "precip", "temp"],
+             "target_col": ["cfs"],
+             "interpolate_param": false
+          }
+   }
+       
+   
+   }
     
