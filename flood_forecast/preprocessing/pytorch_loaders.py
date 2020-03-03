@@ -71,7 +71,7 @@ class CSVDataLoader(Dataset):
         
 
 class CSVTestLoader(CSVDataLoader):
-    def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, interpolate=True, **kwargs):
+    def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, interpolate=False, **kwargs):
         """
         :param str df_path:
         A data loader for the test data.
