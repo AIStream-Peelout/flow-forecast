@@ -71,13 +71,16 @@ class CSVDataLoader(Dataset):
         
 
 class CSVTestLoader(CSVDataLoader):
-    def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, **kwargs):
+    def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, interpolate=True, **kwargs):
         """
         :param str df_path:
         A data loader for the test data.
         """
         super().__init__(**kwargs)
         self.original_df = pd.read_csv(df_path)
+        if interpolate:
+            self.original_df = fix_timezones(df_path)
+            self.original_df = interpolate_missing_values(self.original_df)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
