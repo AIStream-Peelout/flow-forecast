@@ -63,10 +63,11 @@ def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:Lis
         eval_log[evaluation_metric] = s
     return eval_log
 
-def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params:Dict={}): 
+def infer_on_torch_model(model, device, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params:Dict={}): 
     """
     Function to handle both test evaluation and inference on a test dataframe 
     """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if type(datetime_start) == str:
         datetime_start = datetime.strptime(datetime_start, '%Y-%m-%d')
     history_length = model.params["dataset_params"]["forecast_history"]
@@ -85,7 +86,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     if test_data.use_real_temp:
         temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
     for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
-        output = model.model(full_history[i])
+        output = model.model(full_history[i].to(model.device))
         all_tensor.append(output.view(-1))
         if i==int(np.ceil(hours_to_forecast/forecast_length).item())-1:
             break
