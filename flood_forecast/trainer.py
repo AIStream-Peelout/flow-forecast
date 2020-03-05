@@ -31,7 +31,7 @@ def train_function(model_type: str, params: Dict):
 
 def main():
     """
-    Main function which is called from the command line. Entrypoint for all models.
+    Main function which is called from the command line. Entrypoint for all ML models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")

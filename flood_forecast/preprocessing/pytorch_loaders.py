@@ -91,7 +91,7 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df['datetime'] = self.original_df['datetime'].astype('datetime64[ns]')
         self.original_df['original_index'] = self.original_df.index
 
-    def get_from_start_date(self, forecast_start):
+    def get_from_start_date(self, forecast_start:int):
         dt_row = self.original_df[self.original_df['datetime'] == forecast_start]
         revised_index = dt_row.index[0]
         return self.__getitem__(revised_index-self.forecast_history)
@@ -105,7 +105,7 @@ class CSVTestLoader(CSVDataLoader):
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start
 
-    def convert_real_batches(self, the_col, rows_to_convert):
+    def convert_real_batches(self, the_col:str, rows_to_convert):
         """
         A helper function to return properly divided precip and temp 
         values to be stacked with forecasted cfs.
