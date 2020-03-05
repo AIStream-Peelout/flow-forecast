@@ -1,4 +1,6 @@
 import torch
+
+
 class NaiveBase(torch.nn.Module):
     """
     A very simple baseline model that returns 

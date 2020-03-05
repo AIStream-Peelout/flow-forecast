@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import torch 
 from datetime import datetime
-from typing import Callable, Tuple, Dict, List
+from typing import Callable, Tuple, Dict, List, Type
+from flood_forecast.time_model import TimeSeriesModel
 import sklearn.metrics
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
@@ -48,7 +49,7 @@ def metric_dict(metric:str) -> Callable:
     return dic[metric]
 
 
-def evaluate_model(model:Type, model_type:str, target_col:str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
+def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col:str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
     """
     A function to evaluate a model
     Requires a model of type
