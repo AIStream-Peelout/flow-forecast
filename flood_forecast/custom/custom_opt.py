@@ -5,6 +5,7 @@ from torch.optim import Optimizer
 from torch.optim.optimizer import required
 from torch.nn.utils import clip_grad_norm_
 import logging
+from typing import List
 # BERTAdam from https://github.com/huggingface/transformers/blob/694e2117f33d752ae89542e70b84533c52cb9142/pytorch_pretrained_bert/optimization.py
 logger = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ class BertAdam(Optimizer):
                         max_grad_norm=max_grad_norm)
         super(BertAdam, self).__init__(params, defaults)
 
-    def get_lr(self):
+    def get_lr(self)->List:
         lr = []
         for group in self.param_groups:
             for p in group['params']:

@@ -28,7 +28,7 @@ def plot_r2(river_flow_preds:pd.DataFrame)->float:
     """
     pass
 
-def get_model_r2_score(river_flow_df, model_evaluate_function:Callable, forecast_column:str, hours_forecast=336):
+def get_model_r2_score(river_flow_df:pd.DataFrame, model_evaluate_function:Callable, forecast_column:str, hours_forecast=336):
     """
 
     model_evaluate_function should call any necessary preprocessing
@@ -48,7 +48,7 @@ def metric_dict(metric:str) -> Callable:
     return dic[metric]
 
 
-def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
+def evaluate_model(model:Type, model_type:str, target_col:str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
     """
     A function to evaluate a model
     Requires a model of type
@@ -65,7 +65,7 @@ def evaluate_model(model, model_type:str, target_col:str, evaluation_metrics:Lis
 
 def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params:Dict={}): 
     """
-    Function to handle both test evaluation and inference on a test dataframe 
+    Function to handle both test evaluation and inference on a test dataframe. 
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if type(datetime_start) == str:
