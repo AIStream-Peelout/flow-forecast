@@ -10,7 +10,7 @@ def split_on_letter(s):
     match = re.compile("[^\W\d]").search(s)
     return [s[:match.start()], s[match.start():]]
 
-def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start_index=0, end_index=25)->None: 
+def loop_through(data_dir:str, interrmittent_gcs:bool=False, use_transfer:bool=True, start_index:int=0, end_index:int=25)->None: 
   """
   Function that makes and executes a set of config files
   This is since we have over 9k files.
@@ -47,7 +47,7 @@ def loop_through(data_dir:str, interrmittent_gcs=False, use_transfer=True, start
         traceback.print_exc()
         print(e)
     
-def make_config_file(flow_file_path, gage_id, station_id, weight_path=None):
+def make_config_file(flow_file_path:str, gage_id, station_id, weight_path=None):
   the_config = {                 
       "model_name": "MultiAttnHeadSimple",
       "model_type": "PyTorch",
