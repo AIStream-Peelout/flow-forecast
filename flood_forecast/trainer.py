@@ -8,7 +8,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
 from flood_forecast.pre_dict import scaler_dict
 
-def train_function(model_type: str, params: Dict[Dict]):
+def train_function(model_type: str, params:Dict):
     """
     Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
     model_type str: Type of the model either
