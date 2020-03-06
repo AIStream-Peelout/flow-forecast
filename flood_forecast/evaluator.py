@@ -91,12 +91,13 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         all_tensor.append(output.view(-1))
         if i==int(np.ceil(hours_to_forecast/forecast_length).item())-1:
             break
+        rel_cols = model.params["dataset_params"]["relevant_cols"]
         if test_data.use_real_precip and test_data.use_real_temp:
             # Order here should match order of original tensor... But what is the best way todo that...? 
             # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
             intial_numpy = torch.stack([output.view(-1).float().to(model.device), precip_cols[i].float().to(model.device), temp_cols[i].float().to(model.device)]).to('cpu').detach().numpy()
-            temp_df = pd.DataFrame(intial_numpy.T, columns=['cfs', 'precip', 'temp'])
-            revised_np = temp_df[model.params["dataset_params"]["relevant_cols"]].to_numpy()
+            temp_df = pd.DataFrame(intial_numpy.T, columns=rel_cols)
+            revised_np = temp_df[rel_cols].to_numpy()
             full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
     remainder = forecast_length - hours_to_forecast % forecast_length
     # Subtract remainder from array
