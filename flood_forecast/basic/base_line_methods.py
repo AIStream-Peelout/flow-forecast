@@ -17,7 +17,7 @@ class NaiveBase(torch.nn.Module):
         self.output_seq_len = output_seq_len
         self.metric_function = self.metric_dict[metric]
 
-    def forward(self, x:torch.Tensor):
+    def forward(self, x:torch.Tensor)->torch.Tensor:
         return self.metric_function(3, x).view(-1, self.output_seq_len)
 
 def the_last(index_in_tensor:int, the_tensor:torch.Tensor)->torch.Tensor:

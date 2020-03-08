@@ -64,7 +64,8 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col:str, 
         eval_log[evaluation_metric] = s
     return eval_log
 
-def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, dataset_params:Dict={}): 
+
+def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, decoder_params = None, dataset_params:Dict={}): 
     """
     Function to handle both test evaluation and inference on a test dataframe. 
     """
@@ -86,27 +87,25 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
     if test_data.use_real_temp:
         temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
-    for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
-        output = model.model(full_history[i].to(model.device))
-        all_tensor.append(output.view(-1))
-        if i==int(np.ceil(hours_to_forecast/forecast_length).item())-1:
-            break
-        rel_cols = model.params["dataset_params"]["relevant_cols"]
-        if test_data.use_real_precip and test_data.use_real_temp:
-            # Order here should match order of original tensor... But what is the best way todo that...? 
-            # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
-            intial_numpy = torch.stack([output.view(-1).float().to(model.device), precip_cols[i].float().to(model.device), temp_cols[i].float().to(model.device)]).to('cpu').detach().numpy()
-            temp_df = pd.DataFrame(intial_numpy.T, columns=rel_cols)
-            revised_np = temp_df[rel_cols].to_numpy()
-            full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
-    remainder = forecast_length - hours_to_forecast % forecast_length
+    if decoder_params is None:
+        for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
+            output = model.model(full_history[i].to(model.device))
+            all_tensor.append(output.view(-1))
+            if i==int(np.ceil(hours_to_forecast/forecast_length).item())-1:
+                break
+            rel_cols = model.params["dataset_params"]["relevant_cols"]
+            if test_data.use_real_precip and test_data.use_real_temp:
+                # Order here should match order of original tensor... But what is the best way todo that...? 
+                # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
+                intial_numpy = torch.stack([output.view(-1).float().to(model.device), precip_cols[i].float().to(model.device), temp_cols[i].float().to(model.device)]).to('cpu').detach().numpy()
+                temp_df = pd.DataFrame(intial_numpy.T, columns=rel_cols)
+                revised_np = temp_df[rel_cols].to_numpy()
+                full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
+        remainder = forecast_length - hours_to_forecast % forecast_length
     # Subtract remainder from array
-    end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
+        end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
+    else:
+        decoder_params["decoder_function"](model, **decoder_params["decoder_function_params"])
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor
     return df, end_tensor, history_length, forecast_start_idx
-    
-        
-    
-    
-
