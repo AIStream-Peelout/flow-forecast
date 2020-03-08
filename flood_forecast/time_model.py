@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict
-import torch 
+import torch
 import json, os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
@@ -31,7 +31,7 @@ class TimeSeriesModel(ABC):
         self.wandb = self.wandb_init()
             
     @abstractmethod
-    def load_model(self, model_base:str, model_params, weight_path=None) -> object:
+    def load_model(self, model_base: str, model_params, weight_path=None) -> object:
         """
         This function should load and return the model 
         this will vary based on the underlying framework used
