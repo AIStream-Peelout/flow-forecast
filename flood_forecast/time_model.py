@@ -8,6 +8,7 @@ from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 
+
 class TimeSeriesModel(ABC):
     """
     An abstract class used to handle different configurations 

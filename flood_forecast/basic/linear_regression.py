@@ -13,7 +13,7 @@ class SimpleLinearModel(torch.nn.Module):
         self.output_layer = torch.nn.Linear(seq_length, output_seq_len)
         self.output_len = output_seq_len
 
-    def forward(self, x:torch.Tensor): 
+    def forward(self, x: torch.Tensor):
         """
         x: A tensor of dimension (B, L, M) where 
         B is the batch size, L is the length of the 

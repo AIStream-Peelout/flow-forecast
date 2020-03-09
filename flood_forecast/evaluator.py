@@ -105,7 +105,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     # Subtract remainder from array
         end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
     else:
-        decoder_params["decoder_function"](model, **decoder_params["decoder_function_params"])
+        end_tensor = decoder_params["decoder_function"](model, **decoder_params["decoder_function_params"])
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor
     return df, end_tensor, history_length, forecast_start_idx
