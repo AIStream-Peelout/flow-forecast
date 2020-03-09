@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Callable, Tuple, Dict, List, Type
 from flood_forecast.time_model import TimeSeriesModel
 import sklearn.metrics
+from model_dict_function import decoding_functions
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 
@@ -82,7 +83,9 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     model.model.eval()
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = []
-    full_history = [history.unsqueeze(0)]
+    history_dim = history.unsqueeze(0)
+    real_target_tensor = torch.from_numpy(df[forecast_start_idx:].to_numpy()).to(device)
+    full_history = [history_dim]
     if test_data.use_real_precip:
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
     if test_data.use_real_temp:
@@ -91,7 +94,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
             output = model.model(full_history[i].to(model.device))
             all_tensor.append(output.view(-1))
-            if i==int(np.ceil(hours_to_forecast/forecast_length).item())-1:
+            if i == int(np.ceil(hours_to_forecast/forecast_length).item())-1:
                 break
             rel_cols = model.params["dataset_params"]["relevant_cols"]
             if test_data.use_real_precip and test_data.use_real_temp:
@@ -105,7 +108,9 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     # Subtract remainder from array
         end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
     else:
-        end_tensor = decoder_params["decoder_function"](model, **decoder_params["decoder_function_params"])
+        #model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
+        #greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
+        end_tensor = decoding_functions[decoder_params["decoder_function"]](model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"])
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor
     return df, end_tensor, history_length, forecast_start_idx

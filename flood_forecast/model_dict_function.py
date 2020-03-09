@@ -6,6 +6,8 @@ from flood_forecast.basic.linear_regression import SimpleLinearModel
 from torch.optim import Adam, SGD
 from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss
 from flood_forecast.custom.custom_opt import BertAdam
+from flood_forecast.basic.linear_regression import simple_decode
+from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 import torch
 
 """
@@ -18,6 +20,8 @@ pytorch_model_dict = {"MultiAttnHeadSimple":MultiAttnHeadSimple, "SimpleTransfor
 pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
 
 evaluation_functions_dict = {"NSE":"", "MSE":""}
+
+decoding_functions = {"greedy_decode":greedy_decode, "simple_linear":simple_decode}
 
 pytorch_opt_dict = {"Adam":Adam, "SGD":SGD, "BertAdam":BertAdam}
 
