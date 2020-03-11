@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Callable, Tuple, Dict, List, Type
 from flood_forecast.time_model import TimeSeriesModel
 import sklearn.metrics
-from model_dict_function import decoding_functions
+from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 
@@ -45,12 +45,12 @@ def get_value(the_path:str):
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
 
-def metric_dict(metric:str) -> Callable:
+def metric_dict(metric: str) -> Callable:
     dic = {"MSE": torch.nn.MSELoss(), "L1": torch.nn.L1Loss()}
     return dic[metric]
 
 
-def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col:str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
+def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
     """
     A function to evaluate a model
     Requires a model of type
@@ -108,8 +108,8 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     # Subtract remainder from array
         end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
     else:
-        #model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
-        #greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
+        # model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
+        # greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
         end_tensor = decoding_functions[decoder_params["decoder_function"]](model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"])
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor

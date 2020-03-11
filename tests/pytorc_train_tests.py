@@ -14,7 +14,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {"model_params":{"number_time_series":3, "seq_len":20}, 
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False},
-        "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
+            "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
                             "wandb":False}
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
@@ -29,7 +29,7 @@ class PyTorchTrainTests(unittest.TestCase):
                             "wandb":False}
         self.simple_param = {"use_decoder":True, "model_params":{"n_time_series":3, "seq_length":80, "output_seq_len":20}, 
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":15, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False, "train_end":50, 
-        "valid_end":100},
+            "valid_end":100},
         "training_params": {"optimizer":"Adam", "lr":.01, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
                             "wandb":False}
         self.transformer = PyTorchForecast("SimpleTransformer", self.keag_file, self.keag_file, self.keag_file, self.full_transformer_params)
