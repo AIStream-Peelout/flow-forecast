@@ -84,6 +84,9 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = []
     history_dim = history.unsqueeze(0)
+    print("Add debugging crap  below")
+    print(df[forecast_start_idx:].to_numpy())
+    print(df[forecast_start_idx:].to_numpy())
     real_target_tensor = torch.from_numpy(df[forecast_start_idx:].to_numpy().float()).to(device)
     full_history = [history_dim]
     if test_data.use_real_precip:
