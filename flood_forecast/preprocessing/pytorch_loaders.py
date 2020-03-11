@@ -116,9 +116,3 @@ class CSVTestLoader(CSVDataLoader):
 
     def __len__(self):
         return len(self.df.index)-self.forecast_history-self.forecast_total-1
-            
-
-
-        
-    
-        

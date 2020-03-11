@@ -48,6 +48,7 @@ class SimpleTransformer(torch.nn.Module):
         x = self.final_layer(x)
         return x.view(-1, view_number)
     
+
 class CustomTransformer(torch.nn.Module):
     def __init__(self, n_time_series, d_model=128):
         super().__init__()
@@ -84,19 +85,21 @@ class SimplePositionalEncoding(torch.nn.Module):
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer('pe', pe)
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor)->torch.Tensor:
         """Creates a basic positional encoding"""
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
-    
-def generate_square_subsequent_mask(sz:int):
+
+
+def generate_square_subsequent_mask(sz:int)->torch.Tensor:
         r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
             Unmasked positions are filled with float(0.0).
         """
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
-    
+
+
 def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu'):
     """
     Mechanism to sequentially decode the model
