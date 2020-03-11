@@ -66,7 +66,7 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: str,
     return eval_log
 
 
-def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018,9,22,0), hours_to_forecast:int = 336, decoder_params = None, dataset_params:Dict={}): 
+def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018, 9, 22, 0), hours_to_forecast: int = 336, decoder_params=None, dataset_params:Dict={}): 
     """
     Function to handle both test evaluation and inference on a test dataframe. 
     """
@@ -84,7 +84,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = []
     history_dim = history.unsqueeze(0)
-    real_target_tensor = torch.from_numpy(df[forecast_start_idx:].to_numpy()).to(device)
+    real_target_tensor = torch.from_numpy(df[forecast_start_idx:].to_numpy().float()).to(device)
     full_history = [history_dim]
     if test_data.use_real_precip:
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
