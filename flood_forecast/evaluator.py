@@ -84,9 +84,8 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
     all_tensor = []
     history_dim = history.unsqueeze(0)
-    print("Add debugging crap  below")
-    print(test_data.df[forecast_start_idx:].to_numpy())
-    print(test_data.df[forecast_start_idx:].to_numpy())
+    print(history_dim.shape)
+    print("Add debugging crap below")
     real_target_tensor = torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy()).to(device)
     full_history = [history_dim]
     if test_data.use_real_precip:
@@ -101,7 +100,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
                 break
             rel_cols = model.params["dataset_params"]["relevant_cols"]
             if test_data.use_real_precip and test_data.use_real_temp:
-                # Order here should match order of original tensor... But what is the best way todo that...? 
+                # Order here should match order of original tensor... But what is the best way todo that...?
                 # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
                 intial_numpy = torch.stack([output.view(-1).float().to(model.device), precip_cols[i].float().to(model.device), temp_cols[i].float().to(model.device)]).to('cpu').detach().numpy()
                 temp_df = pd.DataFrame(intial_numpy.T, columns=rel_cols)
