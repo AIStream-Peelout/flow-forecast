@@ -27,8 +27,8 @@ class SimpleLinearModel(torch.nn.Module):
 def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len:int, real_target:torch.Tensor, start_symbol=None, output_len=1, device='cpu', unsqueeze_dim=1):
     """
     :model a PyTorch model to be used for decoding
-    :src the source tensor 
-    :the max length sequence to return 
+    :src the source tensor
+    :the max length sequence to return
     :real_target the actual target values we want to forecast (don't worry they are masked) 
     :start_symbol used to match the function signature of greedy_decode not ever used here though. 
     :output_len potentially used to forecast multiple steps at once. Not implemented yet though.

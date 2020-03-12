@@ -19,11 +19,11 @@ pytorch_model_dict = {"MultiAttnHeadSimple":MultiAttnHeadSimple, "SimpleTransfor
 
 pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
 
-evaluation_functions_dict = {"NSE":"", "MSE":""}
+evaluation_functions_dict = {"NSE": "", "MSE": ""}
 
-decoding_functions = {"greedy_decode":greedy_decode, "simple_linear":simple_decode}
+decoding_functions = {"greedy_decode": greedy_decode, "simple_linear": simple_decode}
 
-pytorch_opt_dict = {"Adam":Adam, "SGD":SGD, "BertAdam":BertAdam}
+pytorch_opt_dict = {"Adam": Adam, "SGD": SGD, "BertAdam": BertAdam}
 
 scikit_dict = {}
 
@@ -34,3 +34,4 @@ def generate_square_subsequent_mask(sz):
     mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
     mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
     return mask
+   
