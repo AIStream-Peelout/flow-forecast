@@ -109,11 +109,11 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
                 full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
         remainder = forecast_length - hours_to_forecast % forecast_length
     # Subtract remainder from array
-        end_tensor = torch.cat(all_tensor, axis = 0).to('cpu').detach().numpy()[:-remainder]
+        end_tensor = torch.cat(all_tensor, axis=0).to('cpu').detach().numpy()[:-remainder]
     else:
         # model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
         # greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
-        end_tensor = decoding_functions[decoder_params["decoder_function"]](model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"])
+        end_tensor = decoding_functions[decoder_params["decoder_function"]](model.model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"])
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor
     return df, end_tensor, history_length, forecast_start_idx
