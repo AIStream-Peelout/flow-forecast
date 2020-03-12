@@ -10,7 +10,7 @@ class EvaluationTest(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.test_path2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
-        self.model_params = {"model_params":{"number_time_series":3, "seq_len":20}, 
+        self.model_params = {"model_params":{"number_time_series": 3, "seq_len":20}, 
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length": 20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate":False},
                             "wandb":False}
         self.model_linear_params = {"use_decoder":True, "model_params":{"n_time_series":3, "seq_length":100, "output_seq_len":20}, 
