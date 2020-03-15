@@ -45,7 +45,6 @@ def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: 
             real_target2[:, i, 0] = out[:, 0]
             src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
             ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1 )
-    print(ys.shape)
     return ys[:, 1:, :]
 
 def linear_dummy():

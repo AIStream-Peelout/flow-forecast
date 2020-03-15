@@ -115,7 +115,5 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         end_tensor = decoding_functions[decoder_params["decoder_function"]](model.model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"])
         end_tensor = end_tensor[:, :, 0].to('cpu').numpy()
     df['preds'] = 0
-    print(len(df))
-    print(history_length)
     df['preds'][history_length:] = end_tensor
     return df, end_tensor, history_length, forecast_start_idx
