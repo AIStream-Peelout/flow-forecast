@@ -33,7 +33,7 @@ def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: 
     :real_target the actual target values we want to forecast (don't worry they are masked) 
     :start_symbol used to match the function signature of greedy_decode not ever used here though. 
     :output_len potentially used to forecast multiple steps at once. Not implemented yet though.
-    :device used to to match function signature 
+    :device used to to match function signature
     :returns a torch.Tensor of dimension (B, L, M)
     """
     real_target = real_target.float()

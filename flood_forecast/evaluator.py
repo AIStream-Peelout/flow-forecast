@@ -92,6 +92,8 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
     if test_data.use_real_temp:
         temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
+    print("Decoder params")
+    print(hours_to_forecast)
     if decoder_params is None:
         for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
             output = model.model(full_history[i].to(model.device))
@@ -111,7 +113,9 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         end_tensor = torch.cat(all_tensor, axis=0).to('cpu').detach().numpy()[:-remainder]
     else:
         # model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
+        # hours_to_forecast 336 
         # greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
+        
         end_tensor = decoding_functions[decoder_params["decoder_function"]](model.model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"])
         end_tensor = end_tensor[:, :, 0].to('cpu').numpy()
     df['preds'] = 0
