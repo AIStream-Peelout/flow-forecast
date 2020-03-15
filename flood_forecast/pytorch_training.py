@@ -95,7 +95,7 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
         if hasattr(model, "mask"):
           output = greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
         else:
-          output = simple_decode(model, src, sequence_size, targ, 1)[:,:, 0]
+          output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
       else:
         output = model(src.float())
       labels = targ[:, :, 0]

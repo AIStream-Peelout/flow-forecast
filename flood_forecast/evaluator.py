@@ -114,11 +114,10 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         # model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
         # hours_to_forecast 336 
         # greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
-        
         end_tensor = decoding_functions[decoder_params["decoder_function"]](model.model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"])
         end_tensor = end_tensor[:, :, 0].to('cpu').numpy()
     df['preds'] = 0
     print(len(df))
     print(history_length)
-    df['preds'][history_length-1:] = end_tensor
+    df['preds'][history_length:] = end_tensor
     return df, end_tensor, history_length, forecast_start_idx
