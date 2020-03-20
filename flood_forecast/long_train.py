@@ -5,8 +5,9 @@ import os
 import argparse
 import traceback
 from flood_forecast.trainer import train_function
+from typing import List
 
-def split_on_letter(s):
+def split_on_letter(s:str)->List:
     match = re.compile("[^\W\d]").search(s)
     return [s[:match.start()], s[match.start():]]
 

@@ -6,7 +6,7 @@ from torch.optim.optimizer import required
 from torch.nn.utils import clip_grad_norm_
 import logging
 from typing import List
-# BERTAdam from https://github.com/huggingface/transformers/blob/694e2117f33d752ae89542e70b84533c52cb9142/pytorch_pretrained_bert/optimization.py
+# BERTAdam see https://github.com/huggingface/transformers/blob/694e2117f33d752ae89542e70b84533c52cb9142/pytorch_pretrained_bert/optimization.py
 logger = logging.getLogger(__name__)
 
 def warmup_cosine(x, warmup=0.002):
