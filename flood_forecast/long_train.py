@@ -48,7 +48,7 @@ def loop_through(data_dir:str, interrmittent_gcs:bool=False, use_transfer:bool=T
         traceback.print_exc()
         print(e)
     
-def make_config_file(flow_file_path:str, gage_id, station_id, weight_path=None):
+def make_config_file(flow_file_path:str, gage_id:str, station_id:str, weight_path=None):
   the_config = {                 
       "model_name": "MultiAttnHeadSimple",
       "model_type": "PyTorch",

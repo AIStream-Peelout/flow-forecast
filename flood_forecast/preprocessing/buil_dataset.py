@@ -34,7 +34,7 @@ def create_visited():
   with open("visited_gages.json", "w+") as f:
     json.dump(visited_gages,f)
 
-def get_eco_netset(directory_path):
+def get_eco_netset(directory_path:str)->set:
   """
   Econet data was supplied to us by the NC State climate office. They gave
   us a directory of CSV files in following format `LastName_First_station_id_Hourly.txt`
@@ -50,7 +50,7 @@ def get_eco_netset(directory_path):
         print(filename)
   return eco_gage_set
 
-def combine_data(flow_df, precip_df):
+def combine_data(flow_df:pd.DataFrame, precip_df:pd.DataFrame):
   tz = pytz.timezone("UTC")
   precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
   precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: tz.localize(x))
