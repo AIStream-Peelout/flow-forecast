@@ -57,13 +57,13 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: str,
     """
     if model_type == "PyTorch":
         df, end_tensor, forecast_history, junk = infer_on_torch_model(model, **inference_params)
+        print("Current historical dataframe")
+        print(df)
     for evaluation_metric in evaluation_metrics:
         evaluation_metric_function = metric_dict(evaluation_metric)
-        print('frame data')
-        print(df[target_col][forecast_history:])
-        s = evaluation_metric_function(torch.from_numpy(df[target_col][forecast_history:].to_numpy()), torch.from_numpy(df["preds"][forecast_history:].to_numpy()))
+        s = evaluation_metric_function(torch.from_numpy(df[target_col][forecast_history:].to_numpy()), end_tensor)
         eval_log[evaluation_metric] = s
-    return eval_log
+    return eval_log, df
 
 
 def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018, 9, 22, 0), hours_to_forecast: int = 336, decoder_params=None, dataset_params:Dict={}): 
@@ -115,9 +115,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         # hours_to_forecast 336 
         # greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
         end_tensor = decoding_functions[decoder_params["decoder_function"]](model.model, history_dim, hours_to_forecast, real_target_tensor, decoder_params["decoder_function_params"], device=model.device)
-        end_tensor = end_tensor[:, :, 0].view(-1).to('cpu').numpy().tolist()
+        end_tensor = end_tensor[:, :, 0].view(-1).to('cpu')
     df['preds'] = 0
-    print(len(df))
-    print(history_length)
-    df['preds'][history_length:] = end_tensor
+    df['preds'][history_length:] = end_tensor.numpy().tolist()
     return df, end_tensor, history_length, forecast_start_idx

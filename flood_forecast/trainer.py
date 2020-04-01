@@ -28,7 +28,8 @@ def train_function(model_type: str, params:Dict):
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
         params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
         test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
-        wandb.run.summary["test_accuracy"] = test_acc
+        wandb.run.summary["test_accuracy"] = test_acc[0]
+        wandb.run.summary["test_df"] = test_acc[1]
     else: 
         print("Please supply valid model type")
     return trained_model 
