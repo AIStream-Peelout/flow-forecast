@@ -12,8 +12,8 @@ from flood_forecast.pre_dict import scaler_dict
 def train_function(model_type: str, params:Dict):
     """
     Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
-    model_type str: Type of the model either
-    params Dict: Dictionary containing all the parameters needed to run the model
+    model_type str: Type of the model (for now) must be da_rnn or 
+    :params dict: Dictionary containing all the parameters needed to run the model
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
@@ -43,7 +43,7 @@ def main():
     args = parser.parse_args()
     with open(args.params) as f: 
         training_config = json.load(f)
-    trained_model = train_function(training_config["model_type"], training_config)
+    train_function(training_config["model_type"], training_config)
     # evaluate_model(trained_model)
     print("Process complete")
 if __name__ == "__main__":
