@@ -31,8 +31,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)
-  #criterion = torch.nn.MSELoss()
-  #optimizer = torch.optim.Adam(a.parameters())
   if use_wandb:
     import wandb
     wandb.watch(model.model)

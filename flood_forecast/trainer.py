@@ -1,6 +1,7 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 import json
+import wandb
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import interpolate_dict
@@ -26,7 +27,8 @@ def train_function(model_type: str, params:Dict):
         trained_model = PyTorchForecast(params["model_name"], dataset_params["training_path"], dataset_params["validation_path"], dataset_params["test_path"], params)
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
         params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
-        evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
+        test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
+        wandb.run.summary["test_accuracy"] = test_acc
     else: 
         print("Please supply valid model type")
     return trained_model 

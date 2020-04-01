@@ -34,10 +34,8 @@ def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: 
     :start_symbol used to match the function signature of greedy_decode not ever used here though. 
     :output_len potentially used to forecast multiple steps at once. Not implemented yet though.
     :device used to to match function signature
-    :returns a torch.Tensor of dimension (B, L, M)
+    :returns a torch.Tensor of dimension (B, max_seq_len, M)
     """
-    print('below hours')
-    print(max_seq_len)
     real_target = real_target.float()
     real_target2 = real_target.clone()
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
@@ -47,8 +45,4 @@ def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: 
             real_target2[:, i, 0] = out[:, 0]
             src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
             ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
-    print(ys[:, 1:, 0].shape)
     return ys[:, 1:, :]
-
-def linear_dummy():
-    pass
