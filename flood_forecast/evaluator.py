@@ -63,7 +63,7 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
         for target in target_col:
             evaluation_metric_function = metric_dict(evaluation_metric)
             s = evaluation_metric_function(torch.from_numpy(df[target][forecast_history:].to_numpy()), end_tensor)
-            eval_log[evaluation_metric+"_"+target] = s
+            eval_log[target + "_" + evaluation_metric] = s
     return eval_log, df
 
 
