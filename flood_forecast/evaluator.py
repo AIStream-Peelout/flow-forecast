@@ -53,7 +53,7 @@ def metric_dict(metric: str) -> Callable:
 def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
     """
     A function to evaluate a model
-    Requires a model of type
+    Requires a model of type TimeSeriesModel
     """
     if model_type == "PyTorch":
         df, end_tensor, forecast_history, junk = infer_on_torch_model(model, **inference_params)
@@ -92,7 +92,6 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
     if test_data.use_real_temp:
         temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
-    print("Decoder params")
     if decoder_params is None:
         for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
             output = model.model(full_history[i].to(model.device))
