@@ -118,4 +118,5 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         end_tensor = end_tensor[:, :, 0].view(-1).to('cpu').detach()
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor.numpy().tolist()
+    print(end_tensor.shape)
     return df, end_tensor, history_length, forecast_start_idx

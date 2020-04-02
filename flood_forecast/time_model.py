@@ -104,6 +104,9 @@ class PyTorchForecast(TimeSeriesModel):
         return model
     
     def save_model(self, final_path: str, epoch)->None:
+        """
+        Function to save a model to a given file path
+        """
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
