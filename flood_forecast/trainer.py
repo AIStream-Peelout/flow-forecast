@@ -29,7 +29,7 @@ def train_function(model_type: str, params:Dict):
         params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
         test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
         wandb.run.summary["test_accuracy"] = test_acc[0]
-        test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot_line()
+        test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
         wandb.run.summary["test_df"] = test_plot
 
     else: 

@@ -50,7 +50,7 @@ def metric_dict(metric: str) -> Callable:
     return dic[metric]
 
 
-def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: str, evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
+def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List[str], evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
     """
     A function to evaluate a model
     Requires a model of type TimeSeriesModel
@@ -60,9 +60,10 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: str,
         print("Current historical dataframe")
         print(df)
     for evaluation_metric in evaluation_metrics:
-        evaluation_metric_function = metric_dict(evaluation_metric)
-        s = evaluation_metric_function(torch.from_numpy(df[target_col][forecast_history:].to_numpy()).squeeze(1), end_tensor)
-        eval_log[evaluation_metric] = s
+        for target in target_col:
+            evaluation_metric_function = metric_dict(evaluation_metric)
+            s = evaluation_metric_function(torch.from_numpy(df[target][forecast_history:].to_numpy()), end_tensor)
+            eval_log[evaluation_metric+"_"+target] = s
     return eval_log, df
 
 
