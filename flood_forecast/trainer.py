@@ -29,7 +29,9 @@ def train_function(model_type: str, params:Dict):
         params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
         test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
         wandb.run.summary["test_accuracy"] = test_acc[0]
-        wandb.run.summary["test_df"] = test_acc[1].to_json()
+        test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"]]].plot_line()
+        wandb.run.summary["test_df"] = test_plot
+
     else: 
         print("Please supply valid model type")
     return trained_model 
