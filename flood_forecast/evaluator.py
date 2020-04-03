@@ -56,7 +56,11 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
     Requires a model of type TimeSeriesModel
     """
     if model_type == "PyTorch":
-        df, end_tensor, forecast_history, junk = infer_on_torch_model(model, **inference_params)
+        df, end_tensor, forecast_history, junk, test_data = infer_on_torch_model(model, **inference_params)
+        # Unscale test data if scaler was applied
+        if test_data.scale:
+            end_tensor = torch.from_numpy(test_data.scale.inverse_transform(end_tensor.detach().numpy()))
+
         print("Current historical dataframe")
         print(df)
     for evaluation_metric in evaluation_metrics:
@@ -119,4 +123,4 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     df['preds'] = 0
     df['preds'][history_length:] = end_tensor.numpy().tolist()
     print(end_tensor.shape)
-    return df, end_tensor, history_length, forecast_start_idx
+    return df, end_tensor, history_length, forecast_start_idx, test_data
