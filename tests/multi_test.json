@@ -53,7 +53,7 @@
              "forecast_length":5,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
-             "scaler": "StandardScaler",
+             "scaling": "StandardScaler",
              "interpolate_param": false
           }
    }
