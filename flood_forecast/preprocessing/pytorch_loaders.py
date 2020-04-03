@@ -61,7 +61,7 @@ class CSVDataLoader(Dataset):
         trg_dat = torch.from_numpy(trg_dat).float()
         return src_data, trg_dat
     
-    def __len__(self):
+    def __len__(self)->int:
         return len(self.df.index)-self.forecast_history-self.forecast_length-1
     
     def inverse_scale(self, result_data)->torch.Tensor:
@@ -114,5 +114,5 @@ class CSVTestLoader(CSVDataLoader):
         chunks = [the_column[self.forecast_length*i:self.forecast_length*(i+1)] for i in range(len(the_column)//self.forecast_length + 1)]
         return chunks
 
-    def __len__(self):
+    def __len__(self)->int:
         return len(self.df.index)-self.forecast_history-self.forecast_total-1
