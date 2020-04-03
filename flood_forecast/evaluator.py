@@ -62,7 +62,9 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
         if test_data.scale:
             print("Un-transforming data")
             end_tensor = test_data.inverse_scale(end_tensor.detach())
-
+            history_length = model.params["dataset_params"]["forecast_history"]
+            df['preds'][history_length:] = end_tensor.numpy().tolist()
+            
         print("Current historical dataframe")
         print(df)
     for evaluation_metric in evaluation_metrics:

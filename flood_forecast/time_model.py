@@ -32,7 +32,7 @@ class TimeSeriesModel(ABC):
         self.wandb = self.wandb_init()
             
     @abstractmethod
-    def load_model(self, model_base: str, model_params, weight_path=None) -> object:
+    def load_model(self, model_base: str, model_params:Dict, weight_path=None) -> object:
         """
         This function should load and return the model 
         this will vary based on the underlying framework used
@@ -103,7 +103,7 @@ class PyTorchForecast(TimeSeriesModel):
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model
     
-    def save_model(self, final_path: str, epoch)->None:
+    def save_model(self, final_path: str, epoch:int)->None:
         """
         Function to save a model to a given file path
         """
