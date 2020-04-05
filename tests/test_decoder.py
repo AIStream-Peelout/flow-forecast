@@ -33,7 +33,7 @@ class TestDecoding(unittest.TestCase):
         src_mask = generate_square_subsequent_mask(self.sequence_size)
         src, trg = next(iter(self.validation_loader))
         trg_mem = trg.clone().detach()
-        result = greedy_decode(self.model, src, 20, trg, src)
+        result = greedy_decode(self.model, src, 20, trg)
         self.assertNotEqual(result[0, 1, 0], trg_mem[0, 1, 0])
         self.assertEqual(result[0, 1, 1], trg_mem[0, 1, 1])
         self.assertEqual(result[0, 1, 2], trg_mem[0, 1, 2])

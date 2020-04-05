@@ -6,7 +6,7 @@ from torch.autograd import Variable
 class SimpleTransformer(torch.nn.Module):
     def __init__(self, number_time_series:int, seq_length:int=48, output_seq_len:int = None, d_model:int=128, n_heads:int=8):
         """
-        Full
+        Full transformer model
         """
         super().__init__()
         if output_seq_len is None:
@@ -100,10 +100,11 @@ def generate_square_subsequent_mask(sz:int)->torch.Tensor:
         return mask
 
 
-def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, unsqueeze_dim=1, device='cpu'):
+def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, unsqueeze_dim=1, device='cpu')->torch.Tensor:
     """
     Mechanism to sequentially decode the model
     :src Historical time series values
+    :real_target The real values (they should be masked), however if want can include known real values.
     """
     print("Now using greedy decoder")
     if hasattr(model, "mask"):
