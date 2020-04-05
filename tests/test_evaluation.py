@@ -37,7 +37,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertGreater(model_result[0]["cfs_MSE"], 1)
 
     def test_linear_decoder(self):
-        decoder_params = {"decoder_function": "simple_decode", "decoder_function_params": {"unsqueeze_dim": 1}} 
+        decoder_params = {"decoder_function": "simple_decode", "unsqueeze_dim": 1} 
         self.data_base_params["forecast_history"] = 100
         inference_params = {"datetime_start": datetime.datetime(2016, 5, 31, 0), "hours_to_forecast": 336, "dataset_params": self.data_base_params, 
         "test_csv_path": os.path.join(self.test_path2, "keag_small.csv"), "decoder_params": decoder_params}
