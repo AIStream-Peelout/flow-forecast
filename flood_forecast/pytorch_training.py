@@ -108,7 +108,11 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
           import wandb
           wandb.log({"source":unscaled_src, "trg":unscaled_labels, "model_pred":unscaled_out})
       loss = criterion(output, labels.float())
+      print("validation loss is")
+      print(loss)
       loop_loss += len(labels.float())*loss.item()
+  print("Checking loop loss")
+  assert loop_loss > 0.0
   if use_wandb:
     import wandb
     if loss_unscaled_full:

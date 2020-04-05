@@ -66,6 +66,7 @@ jobs:
           when: always
           command:
             python flood_forecast/trainer.py -p tests/multi_test.json
+            python flood_forecast/trainer.py  -p tests/full_transformer.json
           
       - store_artifacts:
           path: test-reports
