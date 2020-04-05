@@ -107,6 +107,8 @@ def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor
     :real_target The real values (they should be masked), however if want can include known real values.
     :returns tensor
     """
+    src = src.float()
+    real_target = real_target.float()
     if hasattr(model, "mask"):
         src_mask = model.mask
     memory = model.encode_sequence(src, src_mask)
