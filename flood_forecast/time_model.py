@@ -80,7 +80,7 @@ class TimeSeriesModel(ABC):
     
         
 class PyTorchForecast(TimeSeriesModel):
-    def __init__(self, model_base, training_data, validation_data, test_data, params_dict:Dict):
+    def __init__(self, model_base:str, training_data, validation_data, test_data, params_dict:Dict):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
         print("Torch is using " + str(self.device)) 

@@ -100,7 +100,7 @@ def generate_square_subsequent_mask(sz:int)->torch.Tensor:
         return mask
 
 
-def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, unsqueeze_dim=1, device='cpu')
+def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, unsqueeze_dim=1, device='cpu'):
     """
     Mechanism to sequentially decode the model
     :src Historical time series values
