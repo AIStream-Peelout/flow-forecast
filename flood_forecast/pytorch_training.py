@@ -91,7 +91,7 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
       i+=1
       if decoder_structure:
         if hasattr(model, "mask"):
-          output = greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
+          output = greedy_decode(model, src, sequence_size, targ, device=device)[:, :, 0]
         else:
           output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
       else:

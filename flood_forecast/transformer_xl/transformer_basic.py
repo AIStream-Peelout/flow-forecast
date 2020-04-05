@@ -100,11 +100,12 @@ def generate_square_subsequent_mask(sz:int)->torch.Tensor:
         return mask
 
 
-def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, unsqueeze_dim=1, device='cpu')->torch.Tensor:
+def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, unsqueeze_dim=1, device='cpu')
     """
     Mechanism to sequentially decode the model
     :src Historical time series values
     :real_target The real values (they should be masked), however if want can include known real values.
+    :returns tensor
     """
     print("Now using greedy decoder")
     if hasattr(model, "mask"):
