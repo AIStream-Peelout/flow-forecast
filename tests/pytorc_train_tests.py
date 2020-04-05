@@ -77,6 +77,10 @@ class PyTorchTrainTests(unittest.TestCase):
         train_transformer_style(self.transformer, self.full_transformer_params["training_params"], True)
         self.assertEqual(1,1)
     
+    def test_transfom_validation(self):
+        # TODO add
+        pass
+    
     def linear_model_test(self):
         train_transformer_style(self.simple_linear_model, self.simple_param["training_params"], True)
 

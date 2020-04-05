@@ -3,6 +3,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
+from flood_forecast.model_dict_function import pytorch_criterion_dict
 from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, greedy_decode, generate_square_subsequent_mask
 
 class TestDecoding(unittest.TestCase):
@@ -37,7 +38,8 @@ class TestDecoding(unittest.TestCase):
         self.assertNotEqual(result[0, 1, 0], trg_mem[0, 1, 0])
         self.assertEqual(result[0, 1, 1], trg_mem[0, 1, 1])
         self.assertEqual(result[0, 1, 2], trg_mem[0, 1, 2])
-        
+        loss = pytorch_criterion_dict["MSE"](trg, trg_mem))
+        self.assertGreater(loss, 0)
     def test_make_function(self):
         self.assertEqual(1,1)
 

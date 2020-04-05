@@ -43,6 +43,8 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
       if "use_decoder" in model.params:
         use_decoder = True
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=use_decoder, use_wandb=use_wandb)
+      if valid <0.01:
+        raise "Error validation loss is zero there is a problem with the validator."
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': total_loss})
       epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
@@ -91,7 +93,8 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
       i+=1
       if decoder_structure:
         if hasattr(model, "mask"):
-          output = greedy_decode(model, src, sequence_size, targ, device=device)[:, :, 0]
+          targ_clone = targ.detach().clone()
+          output = greedy_decode(model, src, sequence_size, targ_clone, device=device)[:, :, 0]
         else:
           output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
       else:
@@ -108,8 +111,6 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
           import wandb
           wandb.log({"source":unscaled_src, "trg":unscaled_labels, "model_pred":unscaled_out})
       loss = criterion(output, labels.float())
-      print("validation loss is")
-      print(loss)
       loop_loss += len(labels.float())*loss.item()
   if use_wandb:
     import wandb
