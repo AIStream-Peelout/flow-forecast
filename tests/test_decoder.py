@@ -39,6 +39,8 @@ class TestDecoding(unittest.TestCase):
         self.assertEqual(result[0, 1, 1], trg_mem[0, 1, 1])
         self.assertEqual(result[0, 1, 2], trg_mem[0, 1, 2])
         loss = pytorch_criterion_dict["MSE"](trg, trg_mem)
+        self.assertNotAlmostEqual(result[0, 1, 0], result[0, 1, 2])
+        self.assertNotEqual(result[0,1,0], result[0, 1, 3])
         self.assertGreater(loss, 0)
     def test_make_function(self):
         self.assertEqual(1,1)

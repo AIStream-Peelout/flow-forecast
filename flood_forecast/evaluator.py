@@ -50,7 +50,7 @@ def metric_dict(metric: str) -> Callable:
     return dic[metric]
 
 
-def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List[str], evaluation_metrics:List, inference_params:Dict, eval_log:Dict):
+def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List[str], evaluation_metrics:List, inference_params:Dict, eval_log:Dict)->Tuple:
     """
     A function to evaluate a model
     Requires a model of type TimeSeriesModel
