@@ -95,6 +95,7 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
         if hasattr(model, "mask"):
           targ_clone = targ.detach().clone()
           output = greedy_decode(model, src, sequence_size, targ_clone, device=device)[:, :, 0]
+          print(output)
         else:
           output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
       else:
