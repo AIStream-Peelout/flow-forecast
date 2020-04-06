@@ -89,9 +89,7 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
     loss_unscaled_full = 0.0
     for src, targ in validation_loader:
       src = src.to(device)
-      print(src)
       targ = targ.to(device)
-      print(targ)
       i+=1
       if decoder_structure:
         if hasattr(model, "mask"):
