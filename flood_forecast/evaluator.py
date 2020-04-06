@@ -116,6 +116,8 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
                 revised_np = temp_df[rel_cols].to_numpy()
                 full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))
         remainder = forecast_length - hours_to_forecast % forecast_length
+        if remainder == forecast_length:
+            remainder = 0
     # Subtract remainder from array
         end_tensor = torch.cat(all_tensor, axis=0).to('cpu').detach()[:-remainder]
     else:

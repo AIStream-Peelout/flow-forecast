@@ -48,7 +48,7 @@ def main():
         training_config = json.load(f)
     train_function(training_config["model_type"], training_config)
     # evaluate_model(trained_model)
-    print("Process complete")
+    print("Process is now complete")
 if __name__ == "__main__":
     main()
 

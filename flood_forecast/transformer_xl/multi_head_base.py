@@ -3,7 +3,7 @@ from torch.nn.modules.activation import MultiheadAttention
 from flood_forecast.transformer_xl.transformer_basic import SimplePositionalEncoding
 class MultiAttnHeadSimple(torch.nn.Module):
     """A simple multi-head attention model inspired by Vaswani et al"""
-    def __init__(self, number_time_series:int, seq_len=10, d_model=128, num_heads=8, forecast_length=None, dropout=0.1):
+    def __init__(self, number_time_series:int, seq_len=10, out_seq_len=None, d_model=128, num_heads=8, forecast_length=None, dropout=0.1):
         super().__init__()
         self.dense_shape = torch.nn.Linear(number_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
@@ -11,6 +11,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.length_data = seq_len
         self.forecast_length = forecast_length
+        self.output_length = out_seq_len
         if self.forecast_length:
             self.last_layer = torch.nn.Linear(seq_len, forecast_length)
             
@@ -34,5 +35,9 @@ class MultiAttnHeadSimple(torch.nn.Module):
             x = x.permute(1,2,0)
             x = self.last_layer(x)
         # Remove extra dimension
+        if self.output_length:
+            x = self.last_layer(x)
+            return x.view(-1, self.output_length)
+
         return x.view(-1, self.length_data)
 
