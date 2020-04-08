@@ -24,7 +24,9 @@ class CSVDataLoader(Dataset):
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length 
         # TODO allow other filling methods 
+        print("interpolate should be below")
         if interpolate_param: 
+            print("now filling missing values")
             df = fix_timezones(file_path)
             df = interpolate_missing_values(df)
         else:
@@ -59,23 +61,26 @@ class CSVDataLoader(Dataset):
         trg_dat = torch.from_numpy(trg_dat).float()
         return src_data, trg_dat
     
-    def __len__(self):
+    def __len__(self)->int:
         return len(self.df.index)-self.forecast_history-self.forecast_length-1
     
-    def inverse_scale(self, result_data):
+    def inverse_scale(self, result_data)->torch.Tensor:
         result_data_np = result_data.numpy()
         return torch.from_numpy(self.targ_scaler.inverse_transform(result_data_np))
         
         
 
 class CSVTestLoader(CSVDataLoader):
-    def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, **kwargs):
+    def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, interpolate=False, **kwargs):
         """
         :param str df_path:
         A data loader for the test data.
         """
         super().__init__(**kwargs)
         self.original_df = pd.read_csv(df_path)
+        if interpolate:
+            self.original_df = fix_timezones(df_path)
+            self.original_df = interpolate_missing_values(self.original_df)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
@@ -86,7 +91,7 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df['datetime'] = self.original_df['datetime'].astype('datetime64[ns]')
         self.original_df['original_index'] = self.original_df.index
 
-    def get_from_start_date(self, forecast_start):
+    def get_from_start_date(self, forecast_start:int):
         dt_row = self.original_df[self.original_df['datetime'] == forecast_start]
         revised_index = dt_row.index[0]
         return self.__getitem__(revised_index-self.forecast_history)
@@ -100,7 +105,7 @@ class CSVTestLoader(CSVDataLoader):
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start
 
-    def convert_real_batches(self, the_col, rows_to_convert):
+    def convert_real_batches(self, the_col:str, rows_to_convert):
         """
         A helper function to return properly divided precip and temp 
         values to be stacked with forecasted cfs.
@@ -109,11 +114,5 @@ class CSVTestLoader(CSVDataLoader):
         chunks = [the_column[self.forecast_length*i:self.forecast_length*(i+1)] for i in range(len(the_column)//self.forecast_length + 1)]
         return chunks
 
-    def __len__(self):
+    def __len__(self)->int:
         return len(self.df.index)-self.forecast_history-self.forecast_total-1
-            
-
-
-        
-    
-        

@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Dict
-import torch 
+import torch
 import json, os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
+
 
 class TimeSeriesModel(ABC):
     """
@@ -31,7 +32,7 @@ class TimeSeriesModel(ABC):
         self.wandb = self.wandb_init()
             
     @abstractmethod
-    def load_model(self, model_base:str, model_params, weight_path=None) -> object:
+    def load_model(self, model_base: str, model_params:Dict, weight_path=None) -> object:
         """
         This function should load and return the model 
         this will vary based on the underlying framework used
@@ -79,7 +80,7 @@ class TimeSeriesModel(ABC):
     
         
 class PyTorchForecast(TimeSeriesModel):
-    def __init__(self, model_base, training_data, validation_data, test_data, params_dict:Dict):
+    def __init__(self, model_base:str, training_data, validation_data, test_data, params_dict:Dict):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
         print("Torch is using " + str(self.device)) 
@@ -102,7 +103,10 @@ class PyTorchForecast(TimeSeriesModel):
             raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
         return model
     
-    def save_model(self, final_path: str, epoch):
+    def save_model(self, final_path: str, epoch:int)->None:
+        """
+        Function to save a model to a given file path
+        """
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
@@ -119,7 +123,7 @@ class PyTorchForecast(TimeSeriesModel):
             import wandb
             wandb.config.save_path = model_save_path
     
-    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str):
+    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str, the_class="default"):
         start_end_params = {}
         # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
@@ -130,7 +134,7 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]] 
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        if dataset_params["class"] == "default":
+        if the_class == "default":
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
         else:

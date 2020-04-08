@@ -9,6 +9,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
+from flood_forecast.basic.linear_regression import simple_decode
 
 def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params:Dict = {})->None:
   """
@@ -30,8 +31,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)
-  #criterion = torch.nn.MSELoss()
-  #optimizer = torch.optim.Adam(a.parameters())
   if use_wandb:
     import wandb
     wandb.watch(model.model)
@@ -44,6 +43,8 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
       if "use_decoder" in model.params:
         use_decoder = True
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=use_decoder, use_wandb=use_wandb)
+      if valid <0.01:
+        raise "Error validation loss is zero there is a problem with the validator."
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': total_loss})
       epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
@@ -91,7 +92,12 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
       targ = targ.to(device)
       i+=1
       if decoder_structure:
-        output = greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
+        if hasattr(model, "mask"):
+          targ_clone = targ.detach().clone()
+          output = greedy_decode(model, src, sequence_size, targ_clone, device=device)[:, :, 0]
+          print(output)
+        else:
+          output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
       else:
         output = model(src.float())
       labels = targ[:, :, 0]

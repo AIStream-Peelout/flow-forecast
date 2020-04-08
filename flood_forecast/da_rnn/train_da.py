@@ -10,7 +10,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.externals import joblib
 # TODO disable for non mac systems 
 import matplotlib
-matplotlib.use('TkAgg')  
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -27,7 +26,7 @@ logger.info(f"Using computation device: {device}")
 
 
 def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
-           T=10, learning_rate=0.01, batch_size=128, param_output_path="", save_path:str=None)->Tuple[dict, DaRnnNet]:
+           T=10, learning_rate=0.01, batch_size=128, param_output_path="", save_path: str=None)->Tuple[dict, DaRnnNet]:
     """
     n_targs: The number of target columns (not steps)
     T: The number timesteps in the window

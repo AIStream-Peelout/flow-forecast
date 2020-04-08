@@ -5,6 +5,9 @@ from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder
 from torch.autograd import Variable 
 class SimpleTransformer(torch.nn.Module):
     def __init__(self, number_time_series:int, seq_length:int=48, output_seq_len:int = None, d_model:int=128, n_heads:int=8):
+        """
+        Full transformer model
+        """
         super().__init__()
         if output_seq_len is None:
             output_seq_len = seq_length
@@ -45,6 +48,7 @@ class SimpleTransformer(torch.nn.Module):
         x = self.final_layer(x)
         return x.view(-1, view_number)
     
+
 class CustomTransformer(torch.nn.Module):
     def __init__(self, n_time_series, d_model=128):
         super().__init__()
@@ -81,27 +85,35 @@ class SimplePositionalEncoding(torch.nn.Module):
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer('pe', pe)
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor)->torch.Tensor:
         """Creates a basic positional encoding"""
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
-    
-def generate_square_subsequent_mask(sz):
+
+
+def generate_square_subsequent_mask(sz:int)->torch.Tensor:
         r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
             Unmasked positions are filled with float(0.0).
         """
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
-    
-def greedy_decode(model, src:torch.Tensor, max_len, real_target, start_symbol, unsqueeze_dim=1, device='cpu'):
+
+
+def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, unsqueeze_dim=1, device='cpu'):
     """
     Mechanism to sequentially decode the model
+    :src Historical time series values
+    :real_target The real values (they should be masked), however if want can include known real values.
+    :returns tensor
     """
-    src_mask = model.mask
+    src = src.float()
+    real_target = real_target.float()
+    if hasattr(model, "mask"):
+        src_mask = model.mask
     memory = model.encode_sequence(src, src_mask)
-    ys = start_symbol[:, -1, :].unsqueeze(unsqueeze_dim)
-    for i in range(max_len-1):
+    ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
+    for i in range(max_len):
         mask = generate_square_subsequent_mask(i+1).to(device)
         with torch.no_grad():
             out = model.decode_seq(memory, 
@@ -109,4 +121,4 @@ def greedy_decode(model, src:torch.Tensor, max_len, real_target, start_symbol, u
                               Variable(mask), i+1)
             real_target[:, i, 0] = out[:, i]
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
-    return ys
+    return ys[:, 1:, :]
