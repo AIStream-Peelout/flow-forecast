@@ -15,7 +15,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
         if self.forecast_length:
             self.last_layer = torch.nn.Linear(seq_len, forecast_length)
             
-    def forward(self, x:torch.Tensor, mask=None):
+    def forward(self, x:torch.Tensor, mask=None)->torch.Tensor:
         """
         :param x torch.Tensor: of shape (B, L, M)
         Where B is the batch size, L is the sequence length and M is the number of 
