@@ -10,7 +10,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.multi_attn = MultiheadAttention(embed_dim=d_model, num_heads=num_heads, dropout=dropout)
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.length_data = seq_len
-        self.forecast_length = self.output_seq_len
+        self.forecast_length = output_seq_len
         if self.forecast_length:
             self.last_layer = torch.nn.Linear(seq_len, forecast_length)
             
