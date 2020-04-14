@@ -18,7 +18,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
         """
         :param x torch.Tensor: of shape (B, L, M)
         Where B is the batch size, L is the sequence length and M is the number of 
-        :returns a tensor of dimension 
+        :returns a tensor of dimension (B, forecast_length)
         """
         x = self.dense_shape(x)
         x = self.pe(x)

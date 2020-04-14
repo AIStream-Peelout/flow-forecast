@@ -31,7 +31,7 @@ def train_function(model_type: str, params:Dict):
         wandb.run.summary["test_accuracy"] = test_acc[0]
         test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
         wandb.log({"test_plot":test_plot})
-        wandb.log({"test_plot_all": test_acc[1].plot.line()})
+        wandb.log({"test_plot_all": test_acc[1][params["dataset_params"]["relevant_cols"]].plot.line()})
     else: 
         print("Please supply valid model type")
     return trained_model 
