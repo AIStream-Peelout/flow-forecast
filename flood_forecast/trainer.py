@@ -32,6 +32,7 @@ def train_function(model_type: str, params:Dict):
         test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
         #wandb.run.summary["test_df"] = test_plot
         wandb.log({"test_plot":test_plot})
+        wandb.log({"test_plot_all": test_acc[1]})
 
     else: 
         print("Please supply valid model type")

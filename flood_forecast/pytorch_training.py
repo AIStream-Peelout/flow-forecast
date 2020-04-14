@@ -76,7 +76,7 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Typ
     i+=1
   print("The running loss is:")
   print(running_loss)
-  print("The number of items in train is:")
+  print("The number of items in train is: ")
   print(i)
   total_loss = running_loss/float(i)
   return total_loss
@@ -95,7 +95,6 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
         if hasattr(model, "mask"):
           targ_clone = targ.detach().clone()
           output = greedy_decode(model, src, sequence_size, targ_clone, device=device)[:, :, 0]
-          print(output)
         else:
           output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
       else:

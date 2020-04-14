@@ -62,6 +62,7 @@ class CustomTransformer(torch.nn.Module):
         self.transformer_decoder = TransformerDecoder(decoder_layer, 6, decoder_norm)
         self.final_layer = torch.nn.Linear(d_model, 1)
     def forward(self, x, t, tgt_mask):
+        """"""
         x = self.dense_shape(x)
         x = self.pe(x)
         t = self.dense_shape(t)
