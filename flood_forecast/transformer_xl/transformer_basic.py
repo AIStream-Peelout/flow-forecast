@@ -112,6 +112,7 @@ def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor
     if hasattr(model, "mask"):
         src_mask = model.mask
     memory = model.encode_sequence(src, src_mask)
+    # Get last element of src array to forecast from
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
     for i in range(max_len):
         mask = generate_square_subsequent_mask(i+1).to(device)
@@ -120,5 +121,7 @@ def greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor
                                Variable(ys), 
                               Variable(mask), i+1)
             real_target[:, i, 0] = out[:, i]
+            src = torch.cat((src, real_target[:, i, :].unsqueeze(1)), 1)
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
+        memory = model.encode_sequence(src[:, i+1:, :], src_mask)
     return ys[:, 1:, :]

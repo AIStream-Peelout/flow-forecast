@@ -40,7 +40,7 @@ def get_model_r2_score(river_flow_df:pd.DataFrame, model_evaluate_function:Calla
 def get_r2_value(model_mse, baseline_mse):
     return 1-model_mse/baseline_mse
 
-def get_value(the_path:str):
+def get_value(the_path:str)->None:
     df = pd.read_csv(the_path)
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
@@ -52,7 +52,7 @@ def metric_dict(metric: str) -> Callable:
 
 def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List[str], evaluation_metrics:List, inference_params:Dict, eval_log:Dict)->Tuple:
     """
-    A function to evaluate a model
+    A function to evaluate a model.
     Requires a model of type TimeSeriesModel
     """
     if model_type == "PyTorch":
@@ -121,7 +121,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
             end_tensor = torch.cat(all_tensor, axis=0).to('cpu').detach()[:-remainder]
         else:
             end_tensor = torch.cat(all_tensor, axis=0).to('cpu').detach()
-            
+
         print(end_tensor.shape)
     else:
         # model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
