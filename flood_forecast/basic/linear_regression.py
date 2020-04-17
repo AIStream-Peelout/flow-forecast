@@ -25,7 +25,8 @@ class SimpleLinearModel(torch.nn.Module):
         x = self.output_layer(x)
         return x.view(-1, self.output_len)
 
-def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: int, real_target: torch.Tensor, start_symbol=None, output_len=1, device='cpu', unsqueeze_dim=1) -> torch.Tensor:
+def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: int, real_target: torch.Tensor, 
+                        start_symbol=None, output_len=1, device='cpu', unsqueeze_dim=1, use_real_target:bool=True) -> torch.Tensor:
     """
     :model a PyTorch model to be used for decoding
     :src the source tensor

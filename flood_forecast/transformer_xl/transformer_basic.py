@@ -47,9 +47,8 @@ class SimpleTransformer(torch.nn.Module):
         x = self.transformer.decoder(t, mem, tgt_mask=tgt_mask)
         x = self.final_layer(x)
         return x.view(-1, view_number)
-    
 
-class CustomTransformer(torch.nn.Module):
+class CustomTransformerDecoder(torch.nn.Module):
     def __init__(self, seq_length, output_seq_length, n_time_series, d_model=128, output_dim=1):
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
@@ -58,18 +57,18 @@ class CustomTransformer(torch.nn.Module):
         encoder_norm = LayerNorm(d_model)
         self.transformer_enc = TransformerEncoder(encoder_layer, 6, encoder_norm)
         self.output_dim_layer = torch.nn.Linear(d_model, output_dim)
+        self.output_seq_length = output_seq_length
         self.out_length_lay  = torch.nn.Linear(seq_length, output_seq_length)
-    def forward(self, x, t, tgt_mask):
+    def forward(self, x, tgt_mask):
         """"""
         x = self.dense_shape(x)
         x = self.pe(x)
-        t = self.dense_shape(t)
-        t = self.pe(t)
         x = x.permute(1,0,2)
-        t = t.permute(1,0,2)
         x = self.transformer_enc(x, tgt_mask)
         x = self.final_layer(x)
-        return x
+        x = x.permute(1, 2, 0)
+        x = self.out_length_lay(x)
+        return x.view(-1, self.output_seq_len)
     
 class SimplePositionalEncoding(torch.nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=5000):
