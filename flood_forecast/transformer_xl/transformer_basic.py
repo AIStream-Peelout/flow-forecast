@@ -4,7 +4,7 @@ import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
 from torch.autograd import Variable 
 class SimpleTransformer(torch.nn.Module):
-    def __init__(self, number_time_series:int, seq_length:int=48, output_seq_len:int = None, d_model:int=128, n_heads:int=8):
+    def __init__(self, number_time_series:int, seq_length:int=48, output_seq_len:int = None, d_model:int=128, n_heads:int=8, sigmoid=False):
         """
         Full transformer model
         """
@@ -19,6 +19,8 @@ class SimpleTransformer(torch.nn.Module):
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.sequence_size = seq_length
         self.tgt_mask = generate_square_subsequent_mask(output_seq_len)
+        if sigmoid:
+            self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, x:torch.Tensor, t:torch.Tensor, tgt_mask=None, src_mask=None):
         if src_mask:
@@ -46,6 +48,8 @@ class SimpleTransformer(torch.nn.Module):
         t = self.basic_feature(t)
         x = self.transformer.decoder(t, mem, tgt_mask=tgt_mask)
         x = self.final_layer(x)
+        if self.sigmoid:
+            x = self.sigmoid(x)
         return x.view(-1, view_number)
 
 class CustomTransformerDecoder(torch.nn.Module):
