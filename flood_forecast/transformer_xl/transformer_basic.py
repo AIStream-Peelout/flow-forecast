@@ -19,6 +19,7 @@ class SimpleTransformer(torch.nn.Module):
         self.final_layer = torch.nn.Linear(d_model, 1)
         self.sequence_size = seq_length
         self.tgt_mask = generate_square_subsequent_mask(output_seq_len)
+        self.sigmoid = None
         if sigmoid:
             self.sigmoid = torch.nn.Sigmoid()
 

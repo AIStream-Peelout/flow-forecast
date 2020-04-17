@@ -30,6 +30,7 @@ def train_function(model_type: str, params:Dict):
         test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
         wandb.run.summary["test_accuracy"] = test_acc[0]
         test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
+        # Log plots
         wandb.log({"test_plot":test_plot})
         wandb.log({"test_plot_all": test_acc[1][params["dataset_params"]["relevant_cols"]].plot.line()})
     else: 
@@ -47,7 +48,7 @@ def main():
         training_config = json.load(f)
     train_function(training_config["model_type"], training_config)
     # evaluate_model(trained_model)
-    print("Process is now complete")
+    print("Process is now complete.")
 if __name__ == "__main__":
     main()
 
