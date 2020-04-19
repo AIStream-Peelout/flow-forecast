@@ -61,18 +61,16 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
-            end_tensor = end_tensor.reshape(-1,1)
-            end_tensor = test_data.inverse_scale(end_tensor.detach())
-            end_tensor = flatten_list_function(end_tensor.numpy().tolist())
+            end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1,1))
+            end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
             history_length = model.params["dataset_params"]["forecast_history"]
-            df['preds'][history_length:] = end_tensor
-
+            df['preds'][history_length:] = end_tensor_list
         print("Current historical dataframe")
         print(df)
     for evaluation_metric in evaluation_metrics:
         for target in target_col:
             evaluation_metric_function = metric_dict(evaluation_metric)
-            s = evaluation_metric_function(torch.from_numpy(df[target][forecast_history:].to_numpy()), end_tensor)
+            s = evaluation_metric_function(torch.from_numpy(df[target][forecast_history:].to_numpy()), end_tensor.squeeze(1))
             eval_log[target + "_" + evaluation_metric] = s
     return eval_log, df
 
