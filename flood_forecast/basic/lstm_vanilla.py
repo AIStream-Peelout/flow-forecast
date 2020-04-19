@@ -12,5 +12,9 @@ class LSTMForecast(torch.nn.Module):
         self.n_time_series = n_time_series
         self.lstm = torch.nn.LSTM(n_time_series, hidden_states, num_layers, bias, batch_first=True)
         self.final_layer = torch.nn.Linear(n_time_series*hidden_states, output_seq_len)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.metric_function(3, x).view(-1, self.output_seq_len)
+        batch_size, seq_len , = x.size()
+        out_x, hidden_states = self.lstm(x)
+        
+        self.final_layer(out_x.contiguous())
