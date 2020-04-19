@@ -7,7 +7,7 @@ from flood_forecast.time_model import TimeSeriesModel
 import sklearn.metrics
 from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
-
+from flood_forecast.utils import flatten_list_function
 
 def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forecast=336)->(pd.DataFrame, float):
     """
@@ -57,14 +57,15 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
     """
     if model_type == "PyTorch":
         df, end_tensor, forecast_history, junk, test_data = infer_on_torch_model(model, **inference_params)
-        end_tensor = end_tensor.reshape(-1,1)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
+            end_tensor = end_tensor.reshape(-1,1)
             end_tensor = test_data.inverse_scale(end_tensor.detach())
+            end_tensor = flatten_list_function(end_tensor.numpy().tolist())
             history_length = model.params["dataset_params"]["forecast_history"]
-            df['preds'][history_length:] = end_tensor.numpy().tolist()
+            df['preds'][history_length:] = end_tensor
 
         print("Current historical dataframe")
         print(df)
