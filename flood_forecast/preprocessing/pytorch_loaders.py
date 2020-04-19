@@ -65,7 +65,6 @@ class CSVDataLoader(Dataset):
         return len(self.df.index)-self.forecast_history-self.forecast_length-1
     
     def inverse_scale(self, result_data)->torch.Tensor:
-        print("Now preforming inverse scaling")
         result_data_np = result_data.numpy()
         return torch.from_numpy(self.targ_scaler.inverse_transform(result_data_np))
         

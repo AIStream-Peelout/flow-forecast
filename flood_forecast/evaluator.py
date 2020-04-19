@@ -57,6 +57,7 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
     """
     if model_type == "PyTorch":
         df, end_tensor, forecast_history, junk, test_data = infer_on_torch_model(model, **inference_params)
+        end_tensor = end_tensor.reshape(-1,1)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:
