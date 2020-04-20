@@ -11,14 +11,13 @@ def format_data(dat, targ_column:List[str]) -> TrainData:
     proc_dat = dat.to_numpy()
     mask = np.ones(proc_dat.shape[1], dtype=bool)
     dat_cols = list(dat.columns)
-    print(dat_cols)
     for col_name in targ_column:
         mask[dat_cols.index(col_name)] = False
     feats = proc_dat[:, mask].astype(float)
     targs = proc_dat[:, ~mask].astype(float)
     return TrainData(feats, targs)
 
-def make_data(csv_path:str, target_col:List[str], test_length:int)->TrainData:
+def make_data(csv_path:str, target_col:List[str], test_length:int, relevant_cols=["cfs", "temp", "precip"])->TrainData:
     """
     Returns full preprocessed data. 
     Does not split train/test that must be done later.
@@ -31,8 +30,7 @@ def make_data(csv_path:str, target_col:List[str], test_length:int)->TrainData:
         height_df = final_df[[target_col[0], target_col[1], 'precip', 'temp']]
         height_df.columns = [target_col[0], target_col[1], 'precip', 'temp']
     else:
-         height_df = final_df[[target_col[0], 'precip', 'temp']]
-         height_df.columns = [target_col[0], 'precip', 'temp']
+         height_df = final_df[relevant_cols]
     preprocessed_data2 = format_data(height_df, target_col)
     return preprocessed_data2
 
