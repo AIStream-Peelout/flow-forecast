@@ -37,6 +37,7 @@ def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: 
     :device used to to match function signature
     :returns a torch.Tensor of dimension (B, max_seq_len, M)
     """
+    # FIx this function
     real_target = real_target.float()
     real_target2 = real_target.clone()
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
