@@ -54,7 +54,8 @@ class SimpleTransformer(torch.nn.Module):
         return x.view(-1, view_number)
 
 class CustomTransformerDecoder(torch.nn.Module):
-    def __init__(self, seq_length:int, output_seq_length:int, n_time_series:int, d_model=128, output_dim=1, n_encoder=6, use_mask=False):
+    def __init__(self, seq_length:int, output_seq_length:int, n_time_series:int, d_model=128, output_dim=1, 
+                    n_layers_encoder=6, use_mask=False, n_heads=8):
         """
         Uses a number of encoder layers with simple linear decoder layer
         """
@@ -63,14 +64,17 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.pe = SimplePositionalEncoding(d_model)
         encoder_layer = TransformerEncoderLayer(d_model, 8)
         encoder_norm = LayerNorm(d_model)
-        self.transformer_enc = TransformerEncoder(encoder_layer, 6, encoder_norm)
+        self.transformer_enc = TransformerEncoder(encoder_layer, n_layers_encoder, encoder_norm)
         self.output_dim_layer = torch.nn.Linear(d_model, output_dim)
         self.output_seq_length = output_seq_length
         self.out_length_lay  = torch.nn.Linear(seq_length, output_seq_length)
         self.mask = generate_square_subsequent_mask(seq_length)
         self.mask_it = use_mask
+
     def forward(self, x:torch.Tensor)->torch.Tensor:
         """
+        Performs forward pass on tensor of (batch_size, sequence_length, n_time_series)
+        Return tensor of dim (batch_size, output_seq_length)
         """
         x = self.dense_shape(x)
         x = self.pe(x)
@@ -78,6 +82,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         if self.mask_it:
             x = self.transformer_enc(x, self.mask)
         else:
+            # Allow no mask 
             x = self.transformer_enc(x)
         x = self.output_dim_layer(x)
         x = x.permute(1, 2, 0)
