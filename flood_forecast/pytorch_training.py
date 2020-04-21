@@ -76,7 +76,7 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Typ
     i+=1
   print("The running loss is:")
   print(running_loss)
-  print("The number of items in train is:")
+  print("The number of items in train is: ")
   print(i)
   total_loss = running_loss/float(i)
   return total_loss
@@ -95,7 +95,6 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
         if hasattr(model, "mask"):
           targ_clone = targ.detach().clone()
           output = greedy_decode(model, src, sequence_size, targ_clone, device=device)[:, :, 0]
-          print(output)
         else:
           output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
       else:
@@ -103,14 +102,14 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
       labels = targ[:, :, 0]
       validation_dataset = validation_loader.dataset
       if validation_dataset.scale:
-        unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
+        #unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
         unscaled_out = validation_dataset.inverse_scale(output.cpu())
         unscaled_labels = validation_dataset.inverse_scale(labels.cpu())
         loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
         loss_unscaled_full += len(labels.float())*loss_unscaled.item()
         if i%100 ==0 and use_wandb:
           import wandb
-          wandb.log({"source":unscaled_src, "trg":unscaled_labels, "model_pred":unscaled_out})
+          wandb.log({"trg":unscaled_labels, "model_pred":unscaled_out})
       loss = criterion(output, labels.float())
       loop_loss += len(labels.float())*loss.item()
   if use_wandb:

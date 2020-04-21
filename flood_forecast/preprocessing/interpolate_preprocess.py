@@ -11,7 +11,7 @@ def fix_timezones(csv_path:str)->pd.DataFrame:
   the_count = df[0:2]['cfs'].isna().sum()
   return df[the_count:]
 
-def split_on_na_chunks(df:pd.DataFrame):
+def split_on_na_chunks(df:pd.DataFrame)->None:
   pass 
 
 def interpolate_missing_values(df:pd.DataFrame)->pd.DataFrame:
