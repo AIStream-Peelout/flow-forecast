@@ -12,8 +12,11 @@ class DARNN(nn.Module):
         T: number of time steps (10)
         hidden_size: dimension of the hidden state
         """
+        self.encoder = Encoder(input_size, hidden_size_encoder, T)
+        self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, T, out_feats)
     
-
-    def forward(self, x):
+    def forward(self, x:torch.Tensor, y_history:torch.Tensor):
         """will implement"""
-        pass
+        input_weighted, input_encoded = self.encoder(x)
+        y_pred = self.decoder(input_encoded, y_history)
+        return y_pred
