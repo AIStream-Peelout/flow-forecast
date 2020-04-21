@@ -1,5 +1,5 @@
 from flood_forecast.transformer_xl.multi_head_base import MultiAttnHeadSimple
-from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer
+from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, CustomTransformerDecoder
 from flood_forecast.transformer_xl.transformer_xl import TransformerXL
 from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
@@ -14,7 +14,7 @@ import torch
 Utility dictionaries to map a string to a class
 """
 pytorch_model_dict = {"MultiAttnHeadSimple": MultiAttnHeadSimple, "SimpleTransformer": SimpleTransformer, 
-"TransformerXL": TransformerXL, "DummyTorchModel": DummyTorchModel, "SimpleLinearModel": SimpleLinearModel}
+"TransformerXL": TransformerXL, "DummyTorchModel": DummyTorchModel, "SimpleLinearModel": SimpleLinearModel, "CustomTransformerDecoder":CustomTransformerDecoder}
 
 pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
 
