@@ -6,7 +6,7 @@ class LSTMForecast(torch.nn.Module):
     an output sequence given a multi-dim input seq. Inspired by the StackOverflow link below.
     https://stackoverflow.com/questions/56858924/multivariate-input-lstm-in-pytorch
     """
-    def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, hidden_states=20, num_layers=2, bias=True):
+    def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, hidden_states=20, num_layers=2, bias=True, batch_size=100):
         super().__init__()
         self.forecast_history = seq_length
         self.n_time_series = n_time_series
@@ -14,6 +14,7 @@ class LSTMForecast(torch.nn.Module):
         self.num_layers = num_layers
         self.lstm = torch.nn.LSTM(n_time_series, hidden_states, num_layers, bias, batch_first=True)
         self.final_layer = torch.nn.Linear(seq_length*hidden_states, output_seq_len)
+        self.init_hidden(100)
     
     def init_hidden(self, batch_size)->None:
         # This is what we'll initialise our hidden state as

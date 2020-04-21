@@ -63,7 +63,7 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     return train_cfg, da_rnn_net
 
 
-def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config, n_epochs=10, save_plots=True, wandb=False, tensorboard=False):
+def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config="", n_epochs=10, save_plots=True, wandb=False, tensorboard=False):
     if wandb:
         import wandb
     iter_per_epoch = int(np.ceil(t_cfg.train_size * 1. / t_cfg.batch_size))

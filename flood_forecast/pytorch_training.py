@@ -107,7 +107,7 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
         unscaled_labels = validation_dataset.inverse_scale(labels.cpu())
         loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
         loss_unscaled_full += len(labels.float())*loss_unscaled.item()
-        if i%100 ==0 and use_wandb:
+        if i%10 ==0 and use_wandb:
           import wandb
           wandb.log({"trg":unscaled_labels, "model_pred":unscaled_out})
       loss = criterion(output, labels.float())
