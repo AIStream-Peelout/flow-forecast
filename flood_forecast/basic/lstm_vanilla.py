@@ -3,7 +3,7 @@ import torch
 class LSTMForecast(torch.nn.Module):
     """
     A very simple baseline LSTM model that returns
-    an output sequence given an input seq. Inspired by the StackOverflow link below.
+    an output sequence given a multi-dim input seq. Inspired by the StackOverflow link below.
     https://stackoverflow.com/questions/56858924/multivariate-input-lstm-in-pytorch
     """
     def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, hidden_states=20, num_layers=2, bias=True):
