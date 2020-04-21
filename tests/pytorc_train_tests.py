@@ -40,6 +40,7 @@ class PyTorchTrainTests(unittest.TestCase):
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)
+        # TODO add LSTM test self.lstm = 
 
     def test_pytorch_train_base(self):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)

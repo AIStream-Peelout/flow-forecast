@@ -3,7 +3,7 @@
     "model_type": "PyTorch",
     "model_params": {
       "n_time_series":3,
-      "seq_len":5,
+      "seq_length":5,
       "output_seq_length": 1, 
       "n_layers_encoder": 6
      },

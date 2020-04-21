@@ -26,7 +26,7 @@ pytorch_opt_dict = {"Adam": Adam, "SGD": SGD, "BertAdam": BertAdam}
 
 scikit_dict = {}
 
-def generate_square_subsequent_mask(sz):
+def generate_square_subsequent_mask(sz:int):
     """Generate a square mask for the sequence. The masked positions are filled with float('-inf').
         Unmasked positions are filled with float(0.0).
     """
