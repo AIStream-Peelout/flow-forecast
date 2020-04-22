@@ -14,7 +14,7 @@ class LSTMForecast(torch.nn.Module):
         self.num_layers = num_layers
         self.lstm = torch.nn.LSTM(n_time_series, hidden_states, num_layers, bias, batch_first=True)
         self.final_layer = torch.nn.Linear(seq_length*hidden_states, output_seq_len)
-        self.init_hidden(100)
+        self.init_hidden(batch_size)
     
     def init_hidden(self, batch_size)->None:
         # This is what we'll initialise our hidden state as
