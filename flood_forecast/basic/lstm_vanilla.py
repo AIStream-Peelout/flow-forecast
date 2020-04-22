@@ -22,6 +22,7 @@ class LSTMForecast(torch.nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size()[0]
+        self.init_hidden(batch_size)
         out_x, self.hidden = self.lstm(x, self.hidden)
         x = self.final_layer(out_x.contiguous().view(batch_size, -1))
         return x
