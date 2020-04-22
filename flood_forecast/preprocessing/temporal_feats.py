@@ -11,5 +11,14 @@ def make_temporal_features(features_list:Dict, dt_column:str, df:pd.DataFrame)->
         df[key] = df[dt_column].map(value)
     return df
 
-def get_day(x:datetime):
+def get_day(x:datetime)->int:
     return x.day
+
+def get_month(x:datetime):
+    return x.month
+
+def get_hour(x:datetime):
+    return x.hour
+
+def get_weekeday(x:datetime):
+    return x.weekday()
