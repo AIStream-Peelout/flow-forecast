@@ -41,7 +41,7 @@ class SimpleTransformer(torch.nn.Module):
         x = self.transformer.encoder(x, src_mask)
         return x
     
-    def decode_seq(self, mem, t, tgt_mask=None, view_number=None):
+    def decode_seq(self, mem, t, tgt_mask=None, view_number=None)->torch.Tensor:
         if view_number is None:
             view_number = self.out_seq_len
         if tgt_mask is None:
@@ -101,7 +101,7 @@ class SimplePositionalEncoding(torch.nn.Module):
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer('pe', pe)
 
-    def forward(self, x:torch.Tensor)->torch.Tensor:
+    def forward(self, x:torch.Tensor)-> torch.Tensor:
         """Creates a basic positional encoding"""
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)

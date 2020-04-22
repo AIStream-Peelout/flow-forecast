@@ -101,6 +101,7 @@ class CSVTestLoader(CSVDataLoader):
         if self.target_supplied:
             historical_rows = self.df.iloc[idx:self.forecast_history+idx]
             target_idx_start = self.forecast_history+idx
+            # Why aren't we using these
             targ_rows = self.df.iloc[target_idx_start:self.forecast_total+target_idx_start]
             all_rows_orig = self.original_df.iloc[idx:self.forecast_total+target_idx_start]
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
