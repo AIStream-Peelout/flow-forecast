@@ -41,7 +41,7 @@ jobs:
              python tests/test_evaluation.py
 
       - run:
-          name: Data Tests
+          name: Data Quality Tests
           command: |
             python tests/data_format_tests.py
             python tests/usgs_tests.py
