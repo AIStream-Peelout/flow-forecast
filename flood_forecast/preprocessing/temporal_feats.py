@@ -20,5 +20,5 @@ def get_month(x:datetime):
 def get_hour(x:datetime):
     return x.hour
 
-def get_weekeday(x:datetime):
+def get_weekday(x:datetime):
     return x.weekday()
