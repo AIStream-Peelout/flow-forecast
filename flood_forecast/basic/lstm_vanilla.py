@@ -15,10 +15,11 @@ class LSTMForecast(torch.nn.Module):
         self.lstm = torch.nn.LSTM(n_time_series, hidden_states, num_layers, bias, batch_first=True)
         self.final_layer = torch.nn.Linear(seq_length*hidden_states, output_seq_len)
         self.init_hidden(batch_size)
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     def init_hidden(self, batch_size)->None:
         # This is what we'll initialise our hidden state
-        self.hidden = (torch.zeros(self.num_layers, batch_size, self.hidden_dim), torch.zeros(self.num_layers, batch_size, self.hidden_dim))
+        self.hidden = (torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device), torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size()[0]
