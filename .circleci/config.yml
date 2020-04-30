@@ -41,7 +41,7 @@ jobs:
              python tests/test_evaluation.py
 
       - run:
-          name: Data Tests
+          name: Data Quality Tests
           command: |
             python tests/data_format_tests.py
             python tests/usgs_tests.py
@@ -65,6 +65,7 @@ jobs:
           name: Trainer tests
           when: always
           command: |
+            python flood_forecast/trainer.py -p tests/lstm_test.json
             python flood_forecast/trainer.py -p tests/multi_test.json
             python flood_forecast/trainer.py  -p tests/full_transformer.json
             python flood_forecast/trainer.py -p tests/decoder_test.json

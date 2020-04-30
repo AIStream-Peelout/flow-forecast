@@ -28,7 +28,7 @@ class Encoder(nn.Module):
         self.lstm_layer = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=1)
         self.attn_linear = nn.Linear(in_features=2 * hidden_size + T - 1, out_features=1)
 
-    def forward(self, input_data):
+    def forward(self, input_data:torch.Tensor):
         # input_data: (batch_size, T - 1, input_size)
         input_weighted = Variable(torch.zeros(input_data.size(0), self.T - 1, self.input_size))
         input_encoded = Variable(torch.zeros(input_data.size(0), self.T - 1, self.hidden_size))

@@ -44,7 +44,8 @@ class CSVDataLoader(Dataset):
             # We define a second scaler to scale the end output 
             # back to normal as models might not necessarily predict
             # other present time series values.
-            self.targ_scaler = self.scale 
+            targ_scale_class = self.scale.__class__
+            self.targ_scaler = targ_scale_class()
             self.targ_scaler.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
             self.df = pd.DataFrame(temp_df, index=self.df.index, columns=self.df.columns)
         if (len(self.df) - self.df.count()).max()!= 0:
@@ -100,6 +101,7 @@ class CSVTestLoader(CSVDataLoader):
         if self.target_supplied:
             historical_rows = self.df.iloc[idx:self.forecast_history+idx]
             target_idx_start = self.forecast_history+idx
+            # Why aren't we using these
             targ_rows = self.df.iloc[target_idx_start:self.forecast_total+target_idx_start]
             all_rows_orig = self.original_df.iloc[idx:self.forecast_total+target_idx_start]
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
