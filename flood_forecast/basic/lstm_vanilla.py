@@ -16,7 +16,7 @@ class LSTMForecast(torch.nn.Module):
         self.final_layer = torch.nn.Linear(seq_length*hidden_states, output_seq_len)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.init_hidden(batch_size)
-        
+   
     def init_hidden(self, batch_size)-> None:
         # This is what we'll initialise our hidden state
         self.hidden = (torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device), torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device))

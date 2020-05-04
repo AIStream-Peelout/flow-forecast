@@ -25,8 +25,8 @@ class SimpleLinearModel(torch.nn.Module):
         x = self.output_layer(x)
         return x.view(-1, self.output_len)
 
-def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: int, real_target: torch.Tensor, 
-                        start_symbol=None, output_len=1, device='cpu', unsqueeze_dim=1, use_real_target:bool=True) -> torch.Tensor:
+def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: int, real_target: torch.Tensor, multi=False, 
+                        start_symbol=None, output_len=1, device='cpu', unsqueeze_dim=1, use_real_target:bool=True,) -> torch.Tensor:
     """
     :model a PyTorch model to be used for decoding
     :src the source tensor
@@ -45,7 +45,12 @@ def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: 
     for i in range(0, max_seq_len):
         with torch.no_grad():
             out = model(src)
-            real_target2[:, i, 0] = out[:, 0]
+            # Warning this assumes that the first N columns are the target 
+            # Please ensure this is true. TODO used named columns in torch?
+            if multi:
+                real_target2[:, i, :out.shape[1]] = out
+            else:
+                real_target2[:, i, 0] = out[:, 0]
             src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
             ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
     return ys[:, 1:, :]

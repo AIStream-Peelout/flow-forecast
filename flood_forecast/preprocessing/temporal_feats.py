@@ -22,3 +22,4 @@ def get_hour(x:datetime):
 
 def get_weekday(x:datetime):
     return x.weekday()
+
