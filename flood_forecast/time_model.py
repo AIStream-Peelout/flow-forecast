@@ -76,6 +76,10 @@ class TimeSeriesModel(ABC):
             import wandb
             wandb.init(project=self.params["wandb"]["project"], config=self.params, name=self.params["wandb"]["name"], tags=self.params["wandb"]["tags"])
             return True 
+        elif "sweep" in self.params:
+            print("Using Wandb config:")
+            print(wandb.config) 
+            return True 
         return False
     
         

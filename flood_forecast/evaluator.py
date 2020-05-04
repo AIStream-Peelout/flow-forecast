@@ -98,11 +98,11 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     print("Add debugging crap below")
     real_target_tensor = torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy()).to(device).unsqueeze(0).to(model.device)
     full_history = [history_dim]
-    if test_data.use_real_precip:
-        precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
-    if test_data.use_real_temp:
-        temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
     if decoder_params is None:
+        if test_data.use_real_precip:
+            precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
+        if test_data.use_real_temp:
+            temp_cols = test_data.convert_real_batches('temp', df[forecast_length:])
         for i in range(0, int(np.ceil(hours_to_forecast/forecast_length).item())):
             output = model.model(full_history[i].to(model.device))
             all_tensor.append(output.view(-1))
