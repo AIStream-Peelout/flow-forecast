@@ -73,7 +73,7 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
             evaluation_metric_function = metric_dict(evaluation_metric)
             s = evaluation_metric_function(torch.from_numpy(df[target][forecast_history:].to_numpy()), end_tensor)
             eval_log[target + "_" + evaluation_metric] = s
-    return eval_log, df
+    return eval_log, df, junk
 
 
 def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018, 9, 22, 0), hours_to_forecast: int = 336, decoder_params=None, dataset_params:Dict={}): 
