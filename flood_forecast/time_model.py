@@ -7,7 +7,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
-
+import wandb
 
 class TimeSeriesModel(ABC):
     """
@@ -68,12 +68,10 @@ class TimeSeriesModel(ABC):
             upload_file(bucket_name, os.path.join("experiments", name), save_path, self.gcs_client)
             online_path = os.path.join("gs://", bucket_name, "experiments", name)
             if self.wandb:
-                import wandb
                 wandb.config.update({"gcs_m_path_" + str(epoch) + file_type:online_path})
         
     def wandb_init(self):
         if self.params["wandb"] != False:
-            import wandb
             wandb.init(project=self.params["wandb"]["project"], config=self.params, name=self.params["wandb"]["name"], tags=self.params["wandb"]["tags"])
             return True 
         elif "sweep" in self.params:

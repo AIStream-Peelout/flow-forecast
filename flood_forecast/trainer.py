@@ -36,7 +36,7 @@ def train_function(model_type: str, params:Dict):
         wandb.log({"test_plot":test_plot})
         wandb.log({"test_plot_all": test_acc[1][params["dataset_params"]["relevant_cols"]].plot.line()})
     else: 
-        print("Please supply valid model type")
+        print("Please supply valid model type for forecasting")
     return trained_model 
 
 def main():
