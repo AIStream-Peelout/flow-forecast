@@ -101,6 +101,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     if decoder_params is None:
         # Warning this if statement works solely with stream flow data.
         # TODO refactor to work with other datasets that do not have precip/temp columns. 
+
         if test_data.use_real_precip:
             precip_cols = test_data.convert_real_batches('precip', df[forecast_length:])
         if test_data.use_real_temp:
