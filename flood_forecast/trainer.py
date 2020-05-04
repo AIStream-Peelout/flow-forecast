@@ -31,7 +31,7 @@ def train_function(model_type: str, params:Dict):
         wandb.run.summary["test_accuracy"] = test_acc[0]
         test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
         test_acc[1].index = test_acc[1].index.astype("int")
-        forecast_start = int(test_acc[1].iloc[0].index) + int(params["dataset_params"]["forecast_history"])+1
+        forecast_start = int(test_acc[1].iloc[0].index.item()) + int(params["dataset_params"]["forecast_history"])+1
         test_plot.axvline(x=forecast_start, label="Predictions start")
         # Log plots
         wandb.log({"test_plot":test_plot})
