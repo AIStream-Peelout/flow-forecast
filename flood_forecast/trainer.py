@@ -29,8 +29,9 @@ def train_function(model_type: str, params:Dict):
         params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
         test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
         wandb.run.summary["test_accuracy"] = test_acc[0]
+        print(test_acc[1].iloc[0].index)
         test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
-        forecast_start = test_acc[1].iloc[0].index + params["dataset_params"]["forecast_history"]+1
+        forecast_start = int(test_acc[1].iloc[0].index) + int(params["dataset_params"]["forecast_history"])+1
         test_plot.axvline(x=forecast_start, label="Predictions start")
         # Log plots
         wandb.log({"test_plot":test_plot})
