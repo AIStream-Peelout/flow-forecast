@@ -68,7 +68,7 @@ class PyTorchTrainTests(unittest.TestCase):
     
     def test_transfer_shit(self):
         self.model_params["weight_path"] = os.path.join("model_save", sorted(os.listdir("model_save"))[1])
-        self.model_params["model_params"]["forecast_history"] = 5 
+        self.model_params["model_params"]["out_seq_len"] = 5 
         model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         self.assertEqual(1,1)
 
