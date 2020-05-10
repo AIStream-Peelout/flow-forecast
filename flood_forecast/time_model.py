@@ -17,11 +17,11 @@ class TimeSeriesModel(ABC):
     and validation at this point.
     """
     def __init__(self, model_base: str, training_data: str, validation_data: str, test_data:str, params:Dict):
+        self.params = params
         if "weight_path" in params:
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else: 
             self.model = self.load_model(model_base, params["model_params"])
-        self.params = params
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
@@ -93,9 +93,9 @@ class PyTorchForecast(TimeSeriesModel):
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
                 checkpoint = torch.load(weight_path, map_location=self.device)
-                if "weight_path_add" in model_params:
-                    if "excluded_layers" in model_params["weight_path_add"]:
-                        excluded_layers = model_params["weight_path_add"]["excluded_layers"]
+                if "weight_path_add" in self.params:
+                    if "excluded_layers" in self.params["weight_path_add"]:
+                        excluded_layers = self.params["weight_path_add"]["excluded_layers"]
                         for layer in excluded_layers:
                             del checkpoint[layer] 
                     strict=False

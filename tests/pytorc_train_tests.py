@@ -68,11 +68,13 @@ class PyTorchTrainTests(unittest.TestCase):
     
     def test_transfer_shit(self):
         self.model_params["weight_path"] = os.path.join("model_save", sorted(os.listdir("model_save"))[1])
-        self.model_params["model_params"]["output_seq_len"] = 5 
+        self.model_params["model_params"]["output_seq_len"] = 6
         self.model_params["weight_path_add"] = {}
         model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
-        self.assertEqual(1,1)
-
+        # Assert shape is proper
+        self.assertEqual(2, 2)
+        data = torch.rand(1, 20, 6)
+        self.assertEqual(model3.model(data).shape, torch.Size([1,6]))
     def test_train_loss(self):
         print("Now begining train loss test")
         total_loss = torch_single_train(self.dummy_model, self.opt, self.criterion, self.data_loader, False)

@@ -21,7 +21,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
     def forward(self, x:torch.Tensor, mask=None)->torch.Tensor:
         """
         :param x torch.Tensor: of shape (B, L, M)
-        Where B is the batch size, L is the sequence length and M is the number of 
+        Where B is the batch size, L is the sequence length and M is the number of time
         :returns a tensor of dimension (B, forecast_length)
         """
         x = self.dense_shape(x)
