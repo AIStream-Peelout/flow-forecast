@@ -93,7 +93,12 @@ class PyTorchForecast(TimeSeriesModel):
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
                 checkpoint = torch.load(weight_path, map_location=self.device)
-                model.load_state_dict(checkpoint)
+                if "weigsht_path_add" in model_params:
+                    excluded_layers = model_params["weight_path_add"]["excluded_layers"]
+                    for layer in excluded_layers:
+                        del checkpoint[layer] 
+
+                model.load_state_dict(checkpoint, strict=Falses)
                 print("Weights sucessfully loaded")
             model.to(self.device)
             # TODO create a general loop to convert all model tensor params to device

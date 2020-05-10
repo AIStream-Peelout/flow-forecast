@@ -28,7 +28,6 @@ jobs:
            sudo pip install pipenv
            sudo pip install -r requirements.txt
            sudo python setup.py develop
-
         
       # run tests!
       # this example uses Django's built-in test-runner
