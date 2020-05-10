@@ -14,7 +14,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.forecast_length = output_seq_len
         self.sigmoid = None
         if self.forecast_length:
-            self.last_layer = torch.nn.Linear(seq_len, forecast_length)
+            self.last_layer = torch.nn.Linear(seq_len, output_seq_len)
         if sigmoid:
             self.sigmoid = torch.nn.Sigmoid()
             

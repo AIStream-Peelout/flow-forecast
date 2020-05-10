@@ -75,6 +75,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(2, 2)
         data = torch.rand(1, 20, 6)
         self.assertEqual(model3.model(data).shape, torch.Size([1,6]))
+        
     def test_train_loss(self):
         print("Now begining train loss test")
         total_loss = torch_single_train(self.dummy_model, self.opt, self.criterion, self.data_loader, False)

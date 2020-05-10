@@ -88,7 +88,6 @@ class PyTorchForecast(TimeSeriesModel):
         print("Torch is using " + str(self.device)) 
 
     def load_model(self, model_base: str, model_params: Dict, weight_path:str = None, strict=True):
-        # Load model here 
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
@@ -98,7 +97,7 @@ class PyTorchForecast(TimeSeriesModel):
                         excluded_layers = self.params["weight_path_add"]["excluded_layers"]
                         for layer in excluded_layers:
                             del checkpoint[layer] 
-                strict=False
+                    strict=False
                 model.load_state_dict(checkpoint, strict=strict)
                 print("Weights sucessfully loaded")
             model.to(self.device)
