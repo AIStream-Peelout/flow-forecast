@@ -98,7 +98,7 @@ class PyTorchForecast(TimeSeriesModel):
                     for layer in excluded_layers:
                         del checkpoint[layer] 
 
-                model.load_state_dict(checkpoint, strict=Falses)
+                model.load_state_dict(checkpoint, strict=False)
                 print("Weights sucessfully loaded")
             model.to(self.device)
             # TODO create a general loop to convert all model tensor params to device
