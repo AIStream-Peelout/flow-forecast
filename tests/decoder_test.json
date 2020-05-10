@@ -6,7 +6,7 @@
       "seq_length":5,
       "output_seq_length": 1, 
       "n_layers_encoder": 6
-     },
+     }, 
     "dataset_params":
     {  "class": "default",
        "training_path": "tests/test_data/keag_small.csv",
