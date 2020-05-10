@@ -65,7 +65,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertFalse(torch.allclose(pre_loaded_model(data), basic_model(data)))
         print("first test good")
         self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
-    
+     
     def test_transfer_shit(self):
         self.model_params["weight_path"] = os.path.join("model_save", sorted(os.listdir("model_save"))[1])
         self.model_params["model_params"]["output_seq_len"] = 6
