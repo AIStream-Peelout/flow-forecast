@@ -5,7 +5,8 @@
       "n_time_series":3,
       "seq_length":5,
       "output_seq_length": 1, 
-      "n_layers_encoder": 6
+      "n_layers_encoder": 6,
+      "output_dim_layer":2
      }, 
     "dataset_params":
     {  "class": "default",
@@ -18,7 +19,7 @@
        "train_end": 100,
        "valid_start":301,
        "valid_end": 401,
-       "target_col": ["cfs"],
+       "target_col": ["cfs", "temp"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
        "interpolate": false

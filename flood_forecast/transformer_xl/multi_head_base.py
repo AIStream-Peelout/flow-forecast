@@ -14,14 +14,14 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.forecast_length = output_seq_len
         self.sigmoid = None
         if self.forecast_length:
-            self.last_layer = torch.nn.Linear(seq_len, forecast_length)
+            self.last_layer = torch.nn.Linear(seq_len, output_seq_len)
         if sigmoid:
             self.sigmoid = torch.nn.Sigmoid()
             
     def forward(self, x:torch.Tensor, mask=None)->torch.Tensor:
         """
         :param x torch.Tensor: of shape (B, L, M)
-        Where B is the batch size, L is the sequence length and M is the number of 
+        Where B is the batch size, L is the sequence length and M is the number of time
         :returns a tensor of dimension (B, forecast_length)
         """
         x = self.dense_shape(x)

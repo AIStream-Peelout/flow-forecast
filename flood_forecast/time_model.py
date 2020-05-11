@@ -7,7 +7,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
-
+import wandb
 
 class TimeSeriesModel(ABC):
     """
@@ -17,11 +17,11 @@ class TimeSeriesModel(ABC):
     and validation at this point.
     """
     def __init__(self, model_base: str, training_data: str, validation_data: str, test_data:str, params:Dict):
+        self.params = params
         if "weight_path" in params:
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else: 
             self.model = self.load_model(model_base, params["model_params"])
-        self.params = params
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
@@ -68,13 +68,15 @@ class TimeSeriesModel(ABC):
             upload_file(bucket_name, os.path.join("experiments", name), save_path, self.gcs_client)
             online_path = os.path.join("gs://", bucket_name, "experiments", name)
             if self.wandb:
-                import wandb
                 wandb.config.update({"gcs_m_path_" + str(epoch) + file_type:online_path})
         
     def wandb_init(self):
         if self.params["wandb"] != False:
-            import wandb
             wandb.init(project=self.params["wandb"]["project"], config=self.params, name=self.params["wandb"]["name"], tags=self.params["wandb"]["tags"])
+            return True 
+        elif "sweep" in self.params:
+            print("Using Wandb config:")
+            print(wandb.config) 
             return True 
         return False
     
@@ -85,13 +87,19 @@ class PyTorchForecast(TimeSeriesModel):
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
         print("Torch is using " + str(self.device)) 
 
-    def load_model(self, model_base: str, model_params: Dict, weight_path:str = None):
-        # Load model here 
+    def load_model(self, model_base: str, model_params: Dict, weight_path:str = None, strict=True):
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
                 checkpoint = torch.load(weight_path, map_location=self.device)
-                model.load_state_dict(checkpoint)
+                if "weight_path_add" in self.params:
+                    if "excluded_layers" in self.params["weight_path_add"]:
+                        excluded_layers = self.params["weight_path_add"]["excluded_layers"]
+                        for layer in excluded_layers:
+                            del checkpoint[layer]
+                        print("sucessfully deleted layers") 
+                    strict=False
+                model.load_state_dict(checkpoint, strict=strict)
                 print("Weights sucessfully loaded")
             model.to(self.device)
             # TODO create a general loop to convert all model tensor params to device
