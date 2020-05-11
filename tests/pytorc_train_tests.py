@@ -83,7 +83,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.model_params["weight_path_add"]["excluded_layers"] = ["last_layer.weight", "last_layer.bias"]
         model = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         result = model.model(torch.rand(1,20,3))
-        self.assertEqual(result.shape[1], 7)
+        self.assertEqual(result.shape[1], 7) 
 
     def test_train_loss(self):
         print("Now begining train loss test")
