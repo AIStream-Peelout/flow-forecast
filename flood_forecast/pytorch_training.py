@@ -35,6 +35,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
     import wandb
     wandb.watch(model.model)
   session_params = []
+  prev_valid_loss = 100000000
   for epoch in range(max_epochs):
       total_loss = torch_single_train(model, opt, criterion, data_loader, takes_target, forward_params)
       print("The loss for epoch " + str(epoch))
@@ -47,8 +48,21 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
         raise "Error validation loss is zero there is a problem with the validator."
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': total_loss})
-      epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
+      if "early_stopping" in model.params:
+        stopping_params = model.params["early_stopping"]
+        stop_now = True
+        sorted(session_params)
+        if stop_now:
+          # TODO load model with best validation loss
+          #model.load_model()
+          print("Stopping due to no improvement f")
+          break
+
+        #model.save_model("model_save", epoch)
+
+      epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid), "improved":valid<prev_valid_loss} 
       session_params.append(epoch_params)
+      prev_valid_loss = valid
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
 
