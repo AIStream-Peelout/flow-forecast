@@ -4,10 +4,11 @@ import json
 import os
 
 import torch
+import joblib
 from torch import nn
 from torch import optim
 from sklearn.preprocessing import StandardScaler
-from sklearn.externals import joblib
+
 # TODO disable for non mac systems 
 import matplotlib
 import matplotlib.pyplot as plt
