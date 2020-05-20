@@ -130,6 +130,7 @@ class PyTorchForecast(TimeSeriesModel):
         if self.wandb:
             import wandb
             wandb.config.save_path = model_save_path
+        return model_save_path
     
     def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str, the_class="default"):
         start_end_params = {}

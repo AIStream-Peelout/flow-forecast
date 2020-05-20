@@ -35,6 +35,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
     import wandb
     wandb.watch(model.model)
   session_params = []
+  model_save_path_arr = []
   prev_valid_loss = 100000000
   for epoch in range(max_epochs):
       total_loss = torch_single_train(model, opt, criterion, data_loader, takes_target, forward_params)
@@ -51,14 +52,24 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
       if "early_stopping" in model.params:
         stopping_params = model.params["early_stopping"]
         stop_now = True
-        sorted(session_params)
+        patience = model.params["early_stopping"]["patience"]
+        if len(session_params) > patience:
+          for i in range(0, int(patience)):
+            if session_params[len(session_params)-i]["improved"]:
+              stop_now = False
+          else: 
+            stop_now = False
+        best_val_loss = sorted(session_params, key = lambda x: x["validation_loss"])
         if stop_now:
           # TODO load model with best validation loss
-          #model.load_model()
-          print("Stopping due to no improvement f")
-          break
+          epoch = best_val_loss[0]["epoch"]
 
-        #model.save_model("model_save", epoch)
+          model.load_model(model.params["model_base"], model.params, weight_path=model_save_path_arr[epoch])
+          print("Stopping due to no improvement")
+          print("weights epoch: " + int(epoch))
+          break
+        model_save = model.save_model("model_epoch", epoch)
+        model_save_path_arr.append(model_save)
 
       epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid), "improved":valid<prev_valid_loss} 
       session_params.append(epoch_params)
