@@ -51,14 +51,14 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
         wandb.log({'epoch': epoch, 'loss': total_loss})
       if "early_stopping" in model.params:
         stopping_params = model.params["early_stopping"]
-        stop_now = True
+        stop_now = False
         patience = model.params["early_stopping"]["patience"]
-        best_val_loss = sorted(session_params, key = lambda x: np.long(x["validation_loss"]))[0]
         if len(session_params) > patience:
-          if best_val_loss["epoch"]-epoch<patience:
-            stop_now = False
-          else: 
-            stop_now = False
+          best_val_loss = sorted(session_params, key = lambda x: np.long(x["validation_loss"]))[0]
+          if not best_val_loss["epoch"]-epoch<patience:
+            stop_now = True
+
+
         if stop_now:
           # TODO load model with best validation loss
           epoch = best_val_loss["epoch"]

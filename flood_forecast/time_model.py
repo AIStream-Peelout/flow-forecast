@@ -113,7 +113,7 @@ class PyTorchForecast(TimeSeriesModel):
     
     def save_model(self, final_path: str, epoch:int)->None:
         """
-        Function to save a model to a given file path
+        Function to save a model to a given file path 
         """
         if not os.path.exists(final_path):
             os.mkdir(final_path)

@@ -21,9 +21,11 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
+    
     "early_stopping":{
       "patience":1
     }, 
+
     "training_params":
     {
        "criterion":"MSE",
