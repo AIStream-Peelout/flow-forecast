@@ -21,7 +21,7 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
-    
+     
     "early_stopping":{
       "patience":1
     }, 
@@ -63,7 +63,4 @@
              "interpolate_param": false
           }
    }
-       
-   
 }
-    
