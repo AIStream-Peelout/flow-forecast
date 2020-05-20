@@ -20,6 +20,11 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   :takes_target boolean: Determines whether to pass target during training
   :forward_params: A dictionary for additional forward parameters (for instance target)
   """
+  params = model.params
+  if "early_stopping" in params:
+        early_stopper = EarlyStopping(params["early_stopping"]["patience"])
+  else: 
+    early_stopper = None 
   use_wandb = model.wandb
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters(), **training_params["optim_params"])
   criterion = pytorch_criterion_dict[training_params["criterion"]]
@@ -37,6 +42,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
     wandb.watch(model.model)
   session_params = []
   for epoch in range(max_epochs):
+      
       total_loss = torch_single_train(model, opt, criterion, data_loader, takes_target, forward_params)
       print("The loss for epoch " + str(epoch))
       print(total_loss)
@@ -50,6 +56,13 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
         wandb.log({'epoch': epoch, 'loss': total_loss})
       epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
       session_params.append(epoch_params)
+      if early_stopper:
+        early_stopper(valid, model.model)
+        if early_stopper.early_stop:
+          print("Early stopping now ")
+          break
+  if early_stopper:
+    model.model.load_state_dict(torch.load('checkpoint.pt'))
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
 
