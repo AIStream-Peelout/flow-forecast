@@ -53,16 +53,17 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
         stopping_params = model.params["early_stopping"]
         stop_now = True
         patience = model.params["early_stopping"]["patience"]
+        best_val_loss = sorted(session_params, key = lambda x: np.long(x["validation_loss"]))[0]
         if len(session_params) > patience:
-          for i in range(0, int(patience)):
-            if session_params[len(session_params)-i]["improved"]:
-              stop_now = False
+          if best_val_loss["epoch"]-epoch<patience:
+            stop_now = False
           else: 
             stop_now = False
-        best_val_loss = sorted(session_params, key = lambda x: x["validation_loss"])
+        #todo casting
+        
         if stop_now:
           # TODO load model with best validation loss
-          epoch = best_val_loss[0]["epoch"]
+          epoch = best_val_loss["epoch"]
 
           model.load_model(model.params["model_base"], model.params, weight_path=model_save_path_arr[epoch])
           print("Stopping due to no improvement")
