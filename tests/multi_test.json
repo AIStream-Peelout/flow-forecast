@@ -21,6 +21,9 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
+    "early_stopping":{
+      "patience":1
+    }, 
     "training_params":
     {
        "criterion":"MSE",
@@ -30,7 +33,7 @@
 
        },
        "lr": 0.3,
-       "epochs": 1,
+       "epochs": 2,
        "batch_size":4
     
     },

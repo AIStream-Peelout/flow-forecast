@@ -1,6 +1,7 @@
 import torch
 import torch.optim as optim
 from torch.autograd import Variable
+import wandb
 import numpy as np
 from typing import Type, Dict
 from torch.nn.modules.loss import _Loss
@@ -32,7 +33,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)
   if use_wandb:
-    import wandb
     wandb.watch(model.model)
   session_params = []
   model_save_path_arr = []
@@ -59,8 +59,6 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
             stop_now = False
           else: 
             stop_now = False
-        #todo casting
-        
         if stop_now:
           # TODO load model with best validation loss
           epoch = best_val_loss["epoch"]
