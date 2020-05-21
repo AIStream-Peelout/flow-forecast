@@ -23,8 +23,13 @@ def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forec
     print(mse_baseline)
     return test_river_data, round(mse_baseline, ndigits=3)
 
-def random_start_date():
-    pass 
+def random_start_date(train_end_index, file_length)->int:
+    """
+    Function to randomly get an additional date 
+    to evaluate
+    """
+
+    return 
 
 def plot_r2(river_flow_preds:pd.DataFrame)->float:
     """
