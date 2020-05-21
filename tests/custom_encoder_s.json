@@ -39,7 +39,7 @@
        "epochs": 20,
        "batch_size":4
     
-    },
+    }, 
     "GCS": false,
     
     "wandb": {
