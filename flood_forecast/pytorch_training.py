@@ -54,7 +54,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
       epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
       session_params.append(epoch_params)
       if es:
-        if not es.check_loss(model, valid):
+        if not es.check_loss(model.model, valid):
           print("Stopping model now")
           model.model.load_state_dict(torch.load("checkpoint.pth"))
           break
