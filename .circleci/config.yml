@@ -68,6 +68,7 @@ jobs:
             python flood_forecast/trainer.py -p tests/multi_test.json
             python flood_forecast/trainer.py  -p tests/full_transformer.json
             python flood_forecast/trainer.py -p tests/decoder_test.json
+            python flood_forecast/trainer.py -p tests/custom_encode.json
           
       - store_artifacts:
           path: test-reports
