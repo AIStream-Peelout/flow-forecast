@@ -23,6 +23,9 @@ def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forec
     print(mse_baseline)
     return test_river_data, round(mse_baseline, ndigits=3)
 
+def random_start_date():
+    pass 
+
 def plot_r2(river_flow_preds:pd.DataFrame)->float:
     """
     We assume at this point river_flow_preds already has 
