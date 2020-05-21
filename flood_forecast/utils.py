@@ -52,6 +52,7 @@ class EarlyStopper(object):
         
         if self.best_score is None:
             self.best_score = score
+            torch.save(model.state_dict(), "checkpoint.pth")
         elif score >= self.best_score + self.min_delta:
             if not self.cumulative_delta and score > self.best_score:
                 self.best_score = score
