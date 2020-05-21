@@ -1,21 +1,21 @@
 {                 
-    "model_name": "SimpleTransformer",
-    "use_decoder": true,
+    "model_name": "CustomTransformerDecoder",
     "model_type": "PyTorch",
     "model_params": {
-      "number_time_series":3,
-      "seq_length":10,
-      "output_seq_len": 2
-     },
+      "n_time_series":3,
+      "seq_length":5,
+      "output_seq_length": 1, 
+      "n_layers_encoder": 6
+     }, 
     "dataset_params":
     {  "class": "default",
        "training_path": "tests/test_data/keag_small.csv",
        "validation_path": "tests/test_data/keag_small.csv",
        "test_path": "tests/test_data/keag_small.csv",
        "batch_size":4,
-       "forecast_history":10,
-       "forecast_length":2,
-       "train_end": 300,
+       "forecast_history":5,
+       "forecast_length":1,
+       "train_end": 100,
        "valid_start":301,
        "valid_end": 401,
        "target_col": ["cfs"],
@@ -23,9 +23,8 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
-    "early_stopping":
-    {
-       "patience":2
+    "early_stopping":{
+        "patience":1
 
     },
     "training_params":
@@ -37,7 +36,7 @@
 
        },
        "lr": 0.3,
-       "epochs": 4,
+       "epochs": 20,
        "batch_size":4
     
     },
@@ -45,12 +44,10 @@
     
     "wandb": {
        "name": "flood_forecast_circleci",
-       "tags": ["dummy_run", "circleci"],
-       "project":"repo-flood_forecast"
+       "project": "repo-flood_forecast",
+       "tags": ["dummy_run", "circleci"]
     },
-    "forward_params":{
-        "t":{}
-    },
+    "forward_params":{},
    "metrics":["MSE"],
    "inference_params":
    {     
@@ -58,12 +55,12 @@
           "hours_to_forecast":336, 
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
-            "decoder_function": "greedy_decode", 
+            "decoder_function": "simple_decode", 
             "unsqueeze_dim": 1},
           "dataset_params":{
              "file_path": "tests/test_data/keag_small.csv",
-             "forecast_history":10,
-             "forecast_length":2,
+             "forecast_history":5,
+             "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
@@ -72,5 +69,5 @@
    }
        
    
-   }
+}
     

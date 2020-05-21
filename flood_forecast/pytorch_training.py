@@ -10,6 +10,7 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
+from flood_forecast.utils import EarlyStopper
 
 def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params:Dict = {})->None:
   """
@@ -20,6 +21,9 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
   :forward_params: A dictionary for additional forward parameters (for instance target)
   """
   use_wandb = model.wandb
+  es = None
+  if "early_stopping" in model.params:
+    es = EarlyStopper(model.params["early_stopping"]['patience'])
   opt = pytorch_opt_dict[training_params["optimizer"]](model.model.parameters(), **training_params["optim_params"])
   criterion = pytorch_criterion_dict[training_params["criterion"]]
   max_epochs = training_params["epochs"]
@@ -49,6 +53,11 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
         wandb.log({'epoch': epoch, 'loss': total_loss})
       epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
       session_params.append(epoch_params)
+      if es:
+        if not es.check_loss(model, valid):
+          print("Stopping model now")
+          model.model.load_state_dict(torch.load("checkpoint.pth"))
+          break
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
 
