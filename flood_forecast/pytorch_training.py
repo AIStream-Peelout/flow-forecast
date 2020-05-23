@@ -44,7 +44,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
         use_decoder = True
       valid = compute_validation(validation_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=use_decoder, use_wandb=use_wandb)
       if valid <0.01:
-        raise "Error validation loss is zero there is a problem with the validator."
+        raise("Error validation loss is zero there is a problem with the validator.")
       if use_wandb:
         wandb.log({'epoch': epoch, 'loss': total_loss})
       epoch_params = {"epoch":epoch, "train_loss":str(total_loss), "validation_loss":str(valid)} 
@@ -71,7 +71,7 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Typ
     loss.backward()
     opt.step()
     if torch.isnan(loss) or loss==float('inf'):
-        raise "Error infinite or NaN loss detected. Try normalizing data or performing interpolation"
+        raise("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
     running_loss += loss.item()
     i+=1
   print("The running loss is:")
