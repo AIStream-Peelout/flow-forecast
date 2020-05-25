@@ -50,13 +50,13 @@ def metric_dict(metric: str) -> Callable:
     return dic[metric]
 
 
-def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List[str], evaluation_metrics:List, inference_params:Dict, eval_log:Dict, num_prediction_samples: int = None)->Tuple:
+def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List[str], evaluation_metrics:List, inference_params:Dict, eval_log:Dict)->Tuple:
     """
     A function to evaluate a model.
     Requires a model of type TimeSeriesModel
     """
     if model_type == "PyTorch":
-        df, end_tensor, forecast_history, junk, test_data, prediction_samples = infer_on_torch_model(model, num_prediction_samples=num_prediction_samples, **inference_params)
+        df, end_tensor, forecast_history, junk, test_data, prediction_samples = infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:
