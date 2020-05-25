@@ -3,11 +3,10 @@ from typing import Sequence, List, Tuple, Dict
 import json
 import wandb
 from flood_forecast.pytorch_training import train_transformer_style
-from flood_forecast.model_dict_function import pytorch_model_dict
-from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
 from flood_forecast.pre_dict import scaler_dict
+from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 
 def train_function(model_type: str, params:Dict):
     """
@@ -29,13 +28,20 @@ def train_function(model_type: str, params:Dict):
         params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
         test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
         wandb.run.summary["test_accuracy"] = test_acc[0]
-        test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
-        forecast_index = test_acc[2] 
-        test_plot.axvline(x=forecast_index)
+        df_test = test_acc[1]
+        forecast_start_index = test_acc[2]
+        df_preds = test_acc[3]
+        ax = plot_df_test_with_confidence_interval(
+            df_test,
+            df_preds,
+            forecast_start_index,
+            params,
+            ci=95,
+            alpha=0.25)
         # Log plots
-        wandb.log({"test_plot":test_plot})
-        wandb.log({"test_plot_all": test_acc[1][params["dataset_params"]["relevant_cols"]].plot.line()})
-    else: 
+        wandb.log({"test_plot":ax})
+        wandb.log({"test_plot_all": df_test[params["dataset_params"]["relevant_cols"]].plot.line()})
+    else:
         print("Please supply valid model type for forecasting")
     return trained_model 
 

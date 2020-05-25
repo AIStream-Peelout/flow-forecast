@@ -39,7 +39,7 @@ class EvaluationTest(unittest.TestCase):
     def test_evaluator_generate_prediction_samples(self):
         inference_params = {"datetime_start":datetime.datetime(2016, 5, 31, 0), "hours_to_forecast": 336, "dataset_params":self.data_base_params, "test_csv_path":os.path.join(self.test_path2, "keag_small.csv"), "num_prediction_samples": 100}
         model_result_1 = evaluate_model(self.model, "PyTorch", ["cfs"], ["MSE", "L1"], inference_params, {})
-        self.assertEqual(100, model_result_1[-1].shape[1])
+        self.assertEqual(100, model_result_1[3].shape[1])
 
     def test_linear_decoder(self):
         decoder_params = {"decoder_function": "simple_decode", "unsqueeze_dim": 1} 
