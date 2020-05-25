@@ -22,7 +22,6 @@ from datetime import datetime
 logger = utils.setup_log()
 logger.info(f"Using computation device: {device}")
 
-
 def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
            T=10, learning_rate=0.01, batch_size=128, param_output_path="", save_path: str=None)->Tuple[dict, DaRnnNet]:
     """
