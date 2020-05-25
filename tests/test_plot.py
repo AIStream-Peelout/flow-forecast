@@ -37,3 +37,7 @@ class PlotFunctionsTest(unittest.TestCase):
         params = {'dataset_params': {'target_col': ['target_col']}}
         ax = plot_df_test_with_confidence_interval(self.df_test, self.df_preds_empty, 0, params, 95)
         self.assertIsInstance(ax, plt.Axes)
+
+
+if __name__ == '__main__':
+    unittest.main()
