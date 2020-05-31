@@ -9,6 +9,8 @@ from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss
 from flood_forecast.custom.custom_opt import BertAdam
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
+from flood_forecast.da_rnn.model import DARNN 
+from flood_forecast.transformer_xl.xc_attn import TransformerModel
 import torch
 
 """
