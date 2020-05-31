@@ -24,6 +24,7 @@ def plot_df_test_with_confidence_interval(
     ax.axvline(x=forecast_start_index)
     ci_lower, ci_upper = ((100.0 - ci) / 2.0) / 100.0, ((100.0 - ci) / 2.0 + ci) / 100.0
     df_quantiles = calculate_confidence_intervals(df_prediction_samples, ci_lower, ci_upper)
+    print("plotting with CI now")
     ax.fill_between(
         df_quantiles.index,
         df_quantiles[ci_lower],
