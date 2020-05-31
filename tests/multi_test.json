@@ -1,6 +1,7 @@
 {                 
     "model_name": "MultiAttnHeadSimple",
     "model_type": "PyTorch",
+    "num_predictions":100,
     "model_params": {
       "number_time_series":3,
       "seq_len":5
