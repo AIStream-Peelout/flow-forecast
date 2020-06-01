@@ -66,6 +66,9 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
             history_length = model.params["dataset_params"]["forecast_history"]
             df['preds'][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)
+            df_predictions = pd.DataFrame(
+                test_data.inverse_scale(df_predictions).numpy(),
+                index=df_predictions.index)
         print("Current historical dataframe")
         print(df)
     for evaluation_metric in evaluation_metrics:

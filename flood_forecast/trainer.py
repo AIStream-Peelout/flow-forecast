@@ -39,7 +39,7 @@ def train_function(model_type: str, params:Dict):
             ci=95,
             alpha=0.25)
         # Log plots
-        wandb.log({"test_plot":ax})
+        wandb.log({"test_plot": ax})
         wandb.log({"test_plot_all": df_test[params["dataset_params"]["relevant_cols"]].plot.line()})
     else:
         print("Please supply valid model type for forecasting")
