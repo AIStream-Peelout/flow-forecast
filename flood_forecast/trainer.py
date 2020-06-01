@@ -31,7 +31,7 @@ def train_function(model_type: str, params:Dict):
         df_test = test_acc[1]
         forecast_start_index = test_acc[2]
         df_preds = test_acc[3]
-        ax = plot_df_test_with_confidence_interval(
+        fig = plot_df_test_with_confidence_interval(
             df_test,
             df_preds,
             forecast_start_index,
@@ -39,7 +39,7 @@ def train_function(model_type: str, params:Dict):
             ci=95,
             alpha=0.25)
         # Log plots
-        wandb.log({"test_plot": ax})
+        wandb.log({"test_plot": fig})
         wandb.log({"test_plot_all": df_test[params["dataset_params"]["relevant_cols"]].plot.line()})
     else:
         print("Please supply valid model type for forecasting")

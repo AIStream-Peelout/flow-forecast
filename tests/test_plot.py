@@ -1,6 +1,6 @@
 import unittest
 import pandas as pd
-from matplotlib import pyplot as plt
+import plotly.graph_objects as go
 from flood_forecast.plot_functions import calculate_confidence_intervals, plot_df_test_with_confidence_interval
 
 
@@ -30,13 +30,13 @@ class PlotFunctionsTest(unittest.TestCase):
 
     def test_plot_df_test_with_confidence_interval(self):
         params = {'dataset_params': {'target_col': ['target_col']}}
-        ax = plot_df_test_with_confidence_interval(self.df_test, self.df_preds, 0, params, 95)
-        self.assertIsInstance(ax, plt.Axes)
+        fig = plot_df_test_with_confidence_interval(self.df_test, self.df_preds, 0, params, 95)
+        self.assertIsInstance(fig, go.Figure)
 
     def test_plot_df_test_with_confidence_interval_df_preds_empty(self):
         params = {'dataset_params': {'target_col': ['target_col']}}
-        ax = plot_df_test_with_confidence_interval(self.df_test, self.df_preds_empty, 0, params, 95)
-        self.assertIsInstance(ax, plt.Axes)
+        fig = plot_df_test_with_confidence_interval(self.df_test, self.df_preds_empty, 0, params, 95)
+        self.assertIsInstance(fig, go.Figure)
 
 
 if __name__ == '__main__':

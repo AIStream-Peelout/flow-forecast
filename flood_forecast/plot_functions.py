@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt
+import plotly.graph_objects as go
 import pandas as pd
 from typing import Dict
 
@@ -16,18 +16,24 @@ def plot_df_test_with_confidence_interval(
         forecast_start_index: int,
         params: Dict,
         ci: float = 95.0,
-        alpha=0.25) -> plt.Axes:
+        alpha=0.25) -> go.Figure:
     assert 0.0 <= ci <= 100.0
     assert 0.0 < alpha < 1.0
-    fig, ax = plt.subplots()
-    df_test[["preds", params["dataset_params"]["target_col"][0]]].plot.line(ax=ax)
-    ax.axvline(x=forecast_start_index)
+    fig = go.Figure()
+
+    target_col = params["dataset_params"]["target_col"][0]
+    fig.add_trace(go.Scatter(x=df_test.index, y=df_test['preds'], name='preds'))
+    fig.add_trace(go.Scatter(x=df_test.index, y=df_test[target_col], name=target_col))
+    fig.add_trace(go.Scatter(
+        x=[forecast_start_index, forecast_start_index],
+        y=[df_test['preds'].min(), df_test['preds'].max()],
+        name='pred_start'))
     ci_lower, ci_upper = ((100.0 - ci) / 2.0) / 100.0, ((100.0 - ci) / 2.0 + ci) / 100.0
     df_quantiles = calculate_confidence_intervals(df_prediction_samples, ci_lower, ci_upper)
     print("plotting with CI now")
-    ax.fill_between(
-        df_quantiles.index,
-        df_quantiles[ci_lower],
-        df_quantiles[ci_upper],
-        alpha=alpha)
-    return ax
+    fig.add_trace(go.Scatter(
+        x=df_quantiles.index.tolist() + df_quantiles.index.tolist()[::-1],
+        y=df_quantiles[ci_lower].tolist() + df_quantiles[ci_upper].tolist(),
+        fill='toself',
+        name=f'{int(ci)}% confidence interval'))
+    return fig
