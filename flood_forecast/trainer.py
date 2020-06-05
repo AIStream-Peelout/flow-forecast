@@ -31,6 +31,11 @@ def train_function(model_type: str, params:Dict):
         df_test = test_acc[1]
         forecast_start_index = test_acc[2]
         df_preds = test_acc[3]
+        inverse_mae = 1 / (df_test["pred"] - df_test[params["dataset_params"]["target_col"]]).abs()
+        pred_std = df_preds.std(axis=1)
+        average_prediction_sharpe = (inverse_mae / pred_std).mean()
+        wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
+
         fig = plot_df_test_with_confidence_interval(
             df_test,
             df_preds,
