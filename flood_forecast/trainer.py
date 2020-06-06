@@ -42,7 +42,9 @@ def train_function(model_type: str, params:Dict):
         df_test = test_acc[1]
         forecast_start_index = test_acc[2]
         df_preds = test_acc[3]
-        inverse_mae = 1 / (df_test["preds"] - df_test[params["dataset_params"]["target_col"]]).abs()
+        inverse_mae = 1 / (
+                df_test.loc[forecast_start_index:, "preds"] -
+                df_test.loc[forecast_start_index:, params["dataset_params"]["target_col"][0]]).abs()
         pred_std = df_preds.std(axis=1)
         average_prediction_sharpe = (inverse_mae / pred_std).mean()
         wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
