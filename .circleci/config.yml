@@ -69,7 +69,11 @@ jobs:
             python flood_forecast/trainer.py  -p tests/full_transformer.json
             python flood_forecast/trainer.py -p tests/decoder_test.json
             python flood_forecast/trainer.py -p tests/custom_encode.json
-          
+      - run:
+          name: Plot tests
+          when: always
+          command:
+            python tests/test_plot.py
       - store_artifacts:
           path: test-reports
           destination: test-reports

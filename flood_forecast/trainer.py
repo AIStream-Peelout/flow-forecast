@@ -3,11 +3,10 @@ from typing import Sequence, List, Tuple, Dict
 import json
 import wandb
 from flood_forecast.pytorch_training import train_transformer_style
-from flood_forecast.model_dict_function import pytorch_model_dict
-from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
 from flood_forecast.pre_dict import scaler_dict
+from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 
 def train_function(model_type: str, params:Dict):
     """
@@ -24,20 +23,45 @@ def train_function(model_type: str, params:Dict):
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
     elif model_type == "PyTorch":
-        trained_model = PyTorchForecast(params["model_name"], dataset_params["training_path"], dataset_params["validation_path"], dataset_params["test_path"], params)
+        trained_model = PyTorchForecast(
+            params["model_name"],
+            dataset_params["training_path"],
+            dataset_params["validation_path"],
+            dataset_params["test_path"],
+            params)
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
         params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
-        test_acc = evaluate_model(trained_model, model_type, params["dataset_params"]["target_col"], params["metrics"], params["inference_params"], {})
+        test_acc = evaluate_model(
+            trained_model,
+            model_type,
+            params["dataset_params"]["target_col"],
+            params["metrics"],
+            params["inference_params"],
+            {})
         wandb.run.summary["test_accuracy"] = test_acc[0]
-        test_plot = test_acc[1][["preds", params["dataset_params"]["target_col"][0]]].plot.line()
-        forecast_index = test_acc[2] 
-        test_plot.axvline(x=forecast_index)
+        df_test = test_acc[1]
+        forecast_start_index = test_acc[2]
+        df_preds = test_acc[3]
+        inverse_mae = 1 / (
+                df_test.loc[forecast_start_index:, "preds"] -
+                df_test.loc[forecast_start_index:, params["dataset_params"]["target_col"][0]]).abs()
+        pred_std = df_preds.std(axis=1)
+        average_prediction_sharpe = (inverse_mae / pred_std).mean()
+        wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
+
+        fig = plot_df_test_with_confidence_interval(
+            df_test,
+            df_preds,
+            forecast_start_index,
+            params,
+            ci=95,
+            alpha=0.25)
         # Log plots
-        wandb.log({"test_plot":test_plot})
-        wandb.log({"test_plot_all": test_acc[1][params["dataset_params"]["relevant_cols"]].plot.line()})
-    else: 
-        print("Please supply valid model type for forecasting")
-    return trained_model 
+        wandb.log({"test_plot": fig})
+        wandb.log({"test_plot_all": df_test[params["dataset_params"]["relevant_cols"]].plot.line()})
+    else:
+        raise Exception("Please supply valid model type for forecasting")
+    return trained_model
 
 def main():
     """
