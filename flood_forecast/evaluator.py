@@ -56,7 +56,7 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
     Requires a model of type TimeSeriesModel
     """
     if model_type == "PyTorch":
-        df, end_tensor, forecast_history, junk, test_data, prediction_samples = infer_on_torch_model(model, **inference_params)
+        df, end_tensor, forecast_history, forecast_start_idx, test_data, df_predictions = infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:
@@ -66,6 +66,9 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
             history_length = model.params["dataset_params"]["forecast_history"]
             df['preds'][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)
+            df_predictions = pd.DataFrame(
+                test_data.inverse_scale(df_predictions).numpy(),
+                index=df_predictions.index)
         print("Current historical dataframe")
         print(df)
     for evaluation_metric in evaluation_metrics:
@@ -73,7 +76,7 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
             evaluation_metric_function = metric_dict(evaluation_metric)
             s = evaluation_metric_function(torch.from_numpy(df[target][forecast_history:].to_numpy()), end_tensor)
             eval_log[target + "_" + evaluation_metric] = s
-    return eval_log, df, junk, prediction_samples
+    return eval_log, df, forecast_start_idx, df_predictions
 
 
 def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018, 9, 22, 0), hours_to_forecast: int = 336, decoder_params=None, dataset_params:Dict={}, num_prediction_samples:int=None):
@@ -97,13 +100,13 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     df['preds'][history_length:] = end_tensor.numpy().tolist()
     print(end_tensor.shape)
 
-    prediction_samples = np.array([])
+    df_prediction_samples = pd.DataFrame(index=df['preds'][history_length:].index)
     if num_prediction_samples is not None:
         model.model.train()  # sets mode to train so the dropout layers will be touched
         assert num_prediction_samples > 1
         prediction_samples = generate_prediction_samples(model, df, test_data, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params, num_prediction_samples)
-
-    return df, end_tensor, history_length, forecast_start_idx, test_data, prediction_samples
+        df_prediction_samples = pd.DataFrame(prediction_samples, index=df['preds'][history_length:].index)
+    return df, end_tensor, history_length, forecast_start_idx, test_data, df_prediction_samples
 
 
 def generate_predictions(model: Type[TimeSeriesModel], df: pd.DataFrame, test_data: CSVTestLoader, history: torch.Tensor, device: torch.device, forecast_start_idx: int, forecast_length: int, hours_to_forecast: int, decoder_params: Dict) -> torch.Tensor:

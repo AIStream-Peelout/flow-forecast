@@ -1,7 +1,8 @@
 from torch.utils.data import Dataset
+import numpy as np
 import pandas as pd
 import torch
-from typing import Type, List
+from typing import Type, List, Union
 from flood_forecast.preprocessing.interpolate_preprocess import interpolate_missing_values, fix_timezones
 
 class CSVDataLoader(Dataset):
@@ -49,7 +50,7 @@ class CSVDataLoader(Dataset):
             self.targ_scaler.fit_transform(self.df[target_col[0]].values.reshape(-1,1))
             self.df = pd.DataFrame(temp_df, index=self.df.index, columns=self.df.columns)
         if (len(self.df) - self.df.count()).max()!= 0:
-            raise "Error nan values detected in data. Please run interpolate ffill or bfill on data"
+            raise("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
         
     def __getitem__(self, idx):
@@ -65,11 +66,16 @@ class CSVDataLoader(Dataset):
     def __len__(self)->int:
         return len(self.df.index)-self.forecast_history-self.forecast_length-1
     
-    def inverse_scale(self, result_data)->torch.Tensor:
-        result_data_np = result_data.numpy()
+    def inverse_scale(self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]) -> torch.Tensor:
+
+        if isinstance(result_data, torch.Tensor):
+            result_data_np = result_data.numpy()
+        if isinstance(result_data, pd.Series) or isinstance(result_data, pd.DataFrame):
+            result_data_np = result_data.values
+        if isinstance(result_data, np.ndarray):
+            result_data_np = result_data
         return torch.from_numpy(self.targ_scaler.inverse_transform(result_data_np))
-        
-        
+
 
 class CSVTestLoader(CSVDataLoader):
     def __init__(self, df_path:str, forecast_total:int, use_real_precip=True, use_real_temp=True, target_supplied=True, interpolate=False, **kwargs):
