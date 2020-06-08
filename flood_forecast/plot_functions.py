@@ -12,8 +12,8 @@ def calculate_confidence_intervals(df: pd.DataFrame, df_preds: pd.Series, ci_low
     print("Column names below:")
     print(df_preds.head())
     print(df_quantiles.head())
-    df_quantiles.loc[df_quantiles[ci_lower] > df_preds, ci_lower] = df_preds
-    df_quantiles.loc[df_quantiles[ci_upper] < df_preds, ci_upper] = df_preds
+    df_quantiles.loc[df_quantiles[ci_lower].values > df_preds.values, ci_lower] = df_preds
+    df_quantiles.loc[df_quantiles[ci_upper].values < df_preds.values, ci_upper] = df_preds
     return df_quantiles
 
 def plot_df_test_with_confidence_interval(
