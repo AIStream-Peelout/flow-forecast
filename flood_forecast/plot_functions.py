@@ -7,7 +7,11 @@ def calculate_confidence_intervals(df: pd.DataFrame, df_preds: pd.Series, ci_low
     assert 0.0 <= ci_lower <= 0.5
     assert 0.5 <= ci_upper <= 1.0
     assert ci_lower != ci_upper
+    
     df_quantiles = df.quantile(q=[ci_lower, ci_upper], axis=1).T
+    print("Column names below:")
+    print(df_preds.head())
+    print(df_quantiles.head())
     df_quantiles.loc[df_quantiles[ci_lower] > df_preds, ci_lower] = df_preds
     df_quantiles.loc[df_quantiles[ci_upper] < df_preds, ci_upper] = df_preds
     return df_quantiles
