@@ -1,6 +1,7 @@
 import argparse
 from typing import Sequence, List, Tuple, Dict
 import json
+import plotly.graph_objects as go
 import wandb
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
@@ -49,16 +50,20 @@ def train_function(model_type: str, params:Dict):
         average_prediction_sharpe = (inverse_mae / pred_std).mean()
         wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
 
-        fig = plot_df_test_with_confidence_interval(
+        # Log plots
+        test_plot = plot_df_test_with_confidence_interval(
             df_test,
             df_preds,
             forecast_start_index,
             params,
             ci=95,
             alpha=0.25)
-        # Log plots
-        wandb.log({"test_plot": fig})
-        wandb.log({"test_plot_all": df_test[params["dataset_params"]["relevant_cols"]].plot.line()})
+        wandb.log({"test_plot": test_plot})
+
+        test_plot_all = go.Figure()
+        for relevant_col in params["dataset_params"]["relevant_cols"]:
+            test_plot_all.add_trace(go.Scatter(x=df_test.index, y=df_test[relevant_col], name=relevant_col))
+        wandb.log({"test_plot_all": test_plot_all})
     else:
         raise Exception("Please supply valid model type for forecasting")
     return trained_model
