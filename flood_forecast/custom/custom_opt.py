@@ -6,6 +6,8 @@ from torch.optim.optimizer import required
 from torch.nn.utils import clip_grad_norm_
 import logging
 from typing import List
+import torch.distributions as tdist
+
 # BERTAdam see https://github.com/huggingface/transformers/blob/694e2117f33d752ae89542e70b84533c52cb9142/pytorch_pretrained_bert/optimization.py
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,15 @@ SCHEDULES = {
     'warmup_linear':   warmup_linear,
 }
 
+class GaussianLoss(torch.nn.Module):
+    def __init__(self,mu,sigma):
+        """Compute the negative log likelihood of Gaussian Distribution"""
+        super(GaussianLoss, self).__init__()
+        self.mu = mu
+        self.sigma = sigma
+    def forward(self,x):
+        loss = - tdist.Normal(self.mu,self.sigma).log_prob(x)
+        return torch.sum(loss)/(loss.size(0)*loss.size(1))
 
 class BertAdam(Optimizer):
     """Implements BERT version of Adam algorithm with weight decay fix.
@@ -162,3 +173,4 @@ class BertAdam(Optimizer):
                 # bias_correction2 = 1 - beta2 ** state['step']
 
         return loss
+    

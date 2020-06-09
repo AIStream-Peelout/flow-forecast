@@ -78,7 +78,6 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
             eval_log[target + "_" + evaluation_metric] = s
     return eval_log, df, forecast_start_idx, df_predictions
 
-
 def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018, 9, 22, 0), hours_to_forecast: int = 336, decoder_params=None, dataset_params:Dict={}, num_prediction_samples:int=None):
     """
     Function to handle both test evaluation and inference on a test dataframe. 
