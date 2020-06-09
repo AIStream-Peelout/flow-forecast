@@ -28,7 +28,8 @@ def plot_df_test_with_confidence_interval(
     fig.add_trace(go.Scatter(x=df_test.index, y=df_test[target_col], name=target_col))
     ci_lower, ci_upper = ((100.0 - ci) / 2.0) / 100.0, ((100.0 - ci) / 2.0 + ci) / 100.0
     df_quantiles = calculate_confidence_intervals(
-        df_prediction_samples, df_test.loc[forecast_start_index:, 'preds'],
+        df_prediction_samples,
+        df_test['preds'],
         ci_lower,
         ci_upper)
 
