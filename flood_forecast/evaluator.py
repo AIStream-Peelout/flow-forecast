@@ -105,7 +105,7 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
         model.model.train()  # sets mode to train so the dropout layers will be touched
         assert num_prediction_samples > 1
         prediction_samples = generate_prediction_samples(model, df, test_data, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params, num_prediction_samples)
-        df_prediction_samples = pd.DataFrame(index=df.index, columns=list(range(num_prediction_samples)))
+        df_prediction_samples = pd.DataFrame(index=df.index, columns=list(range(num_prediction_samples)), dtype='float')
         df_prediction_samples.iloc[history_length:] = prediction_samples
     return df, end_tensor, history_length, forecast_start_idx, test_data, df_prediction_samples
 
