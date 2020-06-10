@@ -138,6 +138,8 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
             start_end_params["end_stamp"] = dataset_params[loader_type + "_end"] 
+        if loader_type == "test" and "forecast_test_len" in dataset_params:
+            dataset_params["forecast_length"] = dataset_params["forecast_test_len"]
         if "scaler" in dataset_params:
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]] 
         if "interpolate" in dataset_params:
