@@ -60,6 +60,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           break
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
+  test = compute_validation(model.test_data, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=True, use_wandb=use_wandb, val_or_test="test_loss")
 
 def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Type[torch.nn.modules.loss._Loss], data_loader:DataLoader, takes_target:bool, forward_params:Dict={})->float:
   i = 0
@@ -90,7 +91,11 @@ def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Typ
   total_loss = running_loss/float(i)
   return total_loss
 
-def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_size:int, criterion:Type[torch.nn.modules.loss._Loss], device:torch.device, decoder_structure=False, use_wandb:bool=False)->float:
+def compute_validation(validation_loader:DataLoader, model,  epoch:int, sequence_size:int, criterion:Type[torch.nn.modules.loss._Loss], 
+                          device:torch.device, decoder_structure=False, use_wandb:bool=False, val_or_test="validation_loss")->float:
+  """
+  Function to compute the validation or test loss 
+  """
   model.eval()
   loop_loss = 0.0
   with torch.no_grad():
@@ -119,14 +124,15 @@ def compute_validation(validation_loader:DataLoader, model, epoch:int, sequence_
         if i%10 ==0 and use_wandb:
           import wandb
           wandb.log({"trg":unscaled_labels, "model_pred":unscaled_out})
-      loss = criterion(output, labels.float())
+      loss = criterion(output, labels.float()) 
       loop_loss += len(labels.float())*loss.item()
   if use_wandb:
     import wandb
     if loss_unscaled_full:
       tot_unscaled_loss = loss_unscaled_full/(len(validation_loader.dataset)-1)
-      wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1), "unscaled_loss": tot_unscaled_loss})
+      wandb.log({'epoch': epoch, val_or_test: loop_loss/(len(validation_loader.dataset)-1), "unscaled_" + val_or_test: tot_unscaled_loss})
     else:
-      wandb.log({'epoch': epoch, 'validation_loss': loop_loss/(len(validation_loader.dataset)-1)})
+      wandb.log({'epoch': epoch, val_or_test: loop_loss/(len(validation_loader.dataset)-1)})
   model.train()
   return loop_loss/(len(validation_loader.dataset)-1)
+  

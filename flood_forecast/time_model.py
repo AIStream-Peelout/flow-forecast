@@ -128,7 +128,6 @@ class PyTorchForecast(TimeSeriesModel):
         self.upload_gcs(params_save_path, params_name, "_params", epoch)
         self.upload_gcs(model_save_path, model_name, "_model",  epoch)
         if self.wandb:
-            import wandb
             wandb.config.save_path = model_save_path
     
     def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str, the_class="default"):
