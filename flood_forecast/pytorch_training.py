@@ -58,10 +58,10 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           print("Stopping model now")
           model.model.load_state_dict(torch.load("checkpoint.pth"))
           break
+  test = compute_validation(model.test_data, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=True, use_wandb=use_wandb, val_or_test="test_loss")
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
-  test = compute_validation(model.test_data, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=True, use_wandb=use_wandb, val_or_test="test_loss")
-
+  
 def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Type[torch.nn.modules.loss._Loss], data_loader:DataLoader, takes_target:bool, forward_params:Dict={})->float:
   i = 0
   running_loss = 0.0
