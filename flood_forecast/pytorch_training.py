@@ -35,6 +35,10 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
            batch_sampler=None, num_workers=0, collate_fn=None,
            pin_memory=False, drop_last=False, timeout=0,
            worker_init_fn=None)
+  test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
+           batch_sampler=None, num_workers=0, collate_fn=None,
+           pin_memory=False, drop_last=False, timeout=0,
+           worker_init_fn=None)
   if use_wandb:
     import wandb
     wandb.watch(model.model)
@@ -58,7 +62,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           print("Stopping model now")
           model.model.load_state_dict(torch.load("checkpoint.pth"))
           break
-  test = compute_validation(model.test_data, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=True, use_wandb=use_wandb, val_or_test="test_loss")
+  test = compute_validation(test_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=True, use_wandb=use_wandb, val_or_test="test_loss")
   model.params["run"] = session_params
   model.save_model("model_save", max_epochs)
   
