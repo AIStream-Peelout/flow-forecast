@@ -50,13 +50,19 @@ def metric_dict(metric: str) -> Callable:
     return dic[metric]
 
 
-def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List[str], evaluation_metrics:List, inference_params:Dict, eval_log:Dict)->Tuple:
+def evaluate_model(
+        model: Type[TimeSeriesModel],
+        model_type: str,
+        target_col: List[str],
+        evaluation_metrics: List,
+        inference_params: Dict,
+        eval_log: Dict) -> (Dict, pd.DataFrame, int, pd.DataFrame):
     """
     A function to evaluate a model.
     Requires a model of type TimeSeriesModel
     """
     if model_type == "PyTorch":
-        df, end_tensor, forecast_history, forecast_start_idx, test_data, df_predictions = infer_on_torch_model(model, **inference_params)
+        df_train_and_test, end_tensor, forecast_history, forecast_start_idx, test_data, df_predictions = infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:
@@ -64,24 +70,40 @@ def evaluate_model(model:Type[TimeSeriesModel], model_type:str, target_col: List
             end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1,1))
             end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
             history_length = model.params["dataset_params"]["forecast_history"]
-            df['preds'][history_length:] = end_tensor_list
+            df_train_and_test['preds'][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)
             df_predictions = pd.DataFrame(
                 test_data.inverse_scale(df_predictions).numpy(),
                 index=df_predictions.index)
         print("Current historical dataframe")
-        print(df)
+        print(df_train_and_test)
     for evaluation_metric in evaluation_metrics:
         for target in target_col:
             evaluation_metric_function = metric_dict(evaluation_metric)
-            s = evaluation_metric_function(torch.from_numpy(df[target][forecast_history:].to_numpy()), end_tensor)
+            s = evaluation_metric_function(torch.from_numpy(df_train_and_test[target][forecast_history:].to_numpy()), end_tensor)
             eval_log[target + "_" + evaluation_metric] = s
-    return eval_log, df, forecast_start_idx, df_predictions
+    return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
 
-def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetime(2018, 9, 22, 0), hours_to_forecast: int = 336, decoder_params=None, dataset_params:Dict={}, num_prediction_samples:int=None):
+def infer_on_torch_model(
+        model,
+        test_csv_path: str = None,
+        datetime_start: datetime = datetime(2018, 9, 22, 0),
+        hours_to_forecast: int = 336,
+        decoder_params=None,
+        dataset_params: Dict = {},
+        num_prediction_samples: int = None
+) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, pd.DataFrame):
     """
-    Function to handle both test evaluation and inference on a test dataframe. 
+    Function to handle both test evaluation and inference on a test dataframe.
+    :returns
+        df: df including training and test data
+        end_tensor: the final tensor after the model has finished predictions
+        history_length: num rows to use in training
+        forecast_start_idx: row index to start forecasting
+        test_data: CSVTestLoader instance
+        df_prediction_samples: has same index as df, and num cols equal to num_prediction_samples
+            or no columns if num_prediction_samples is None
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if type(datetime_start) == str:
@@ -90,24 +112,24 @@ def infer_on_torch_model(model, test_csv_path:str = None, datetime_start=datetim
     forecast_length = model.params["dataset_params"]["forecast_length"]
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
-        test_data = model.test_data
+        csv_test_loader = model.test_data
     else:
-        test_data = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params, interpolate=dataset_params["interpolate_param"])
+        csv_test_loader = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params, interpolate=dataset_params["interpolate_param"])
     model.model.eval()
-    history, df, forecast_start_idx = test_data.get_from_start_date(datetime_start)
-    end_tensor = generate_predictions(model, df, test_data, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params)
-    df['preds'] = 0
-    df['preds'][history_length:] = end_tensor.numpy().tolist()
+    history, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    end_tensor = generate_predictions(model, df_train_and_test, csv_test_loader, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params)
+    df_train_and_test['preds'] = 0
+    df_train_and_test['preds'][history_length:] = end_tensor.numpy().tolist()
     print(end_tensor.shape)
 
-    df_prediction_samples = pd.DataFrame(index=df.index)
+    df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
     if num_prediction_samples is not None:
         model.model.train()  # sets mode to train so the dropout layers will be touched
         assert num_prediction_samples > 1
-        prediction_samples = generate_prediction_samples(model, df, test_data, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params, num_prediction_samples)
-        df_prediction_samples = pd.DataFrame(index=df.index, columns=list(range(num_prediction_samples)), dtype='float')
+        prediction_samples = generate_prediction_samples(model, df_train_and_test, csv_test_loader, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params, num_prediction_samples)
+        df_prediction_samples = pd.DataFrame(index=df_train_and_test.index, columns=list(range(num_prediction_samples)), dtype='float')
         df_prediction_samples.iloc[history_length:] = prediction_samples
-    return df, end_tensor, history_length, forecast_start_idx, test_data, df_prediction_samples
+    return df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction_samples
 
 
 def generate_predictions(model: Type[TimeSeriesModel], df: pd.DataFrame, test_data: CSVTestLoader, history: torch.Tensor, device: torch.device, forecast_start_idx: int, forecast_length: int, hours_to_forecast: int, decoder_params: Dict) -> torch.Tensor:
