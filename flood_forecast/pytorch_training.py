@@ -110,7 +110,7 @@ def compute_validation(validation_loader:DataLoader, model,  epoch:int, sequence
       targ = targ.to(device)
       i+=1
       if decoder_structure:
-        if hasattr(model, "mask"):
+        if type(model).__name__ == "SimpleTransformer":
           targ_clone = targ.detach().clone()
           output = greedy_decode(model, src, targ.shape[1], targ_clone, device=device)[:, :, 0]
         else:
