@@ -1,7 +1,7 @@
 import torch
 class TransformerXCBasic(torch.nn.Module):
     """ Transformer model """
-    def __init__(self, seq_len, n_time_series, out_seg_len, device, d_model=128, dropout=.5, n_head=8):
+    def __init__(self, seq_num, seq_len, n_time_series, out_seq_len, device, d_model=128, dropout=.5, n_head=8):
         super(TransformerModel, self).__init__()
         self.input_dim = input_dim
         self.n_head = n_head
@@ -9,8 +9,8 @@ class TransformerXCBasic(torch.nn.Module):
         self.n_embd = n_embd
         self.win_len = win_len
         self.id_embed = torch.nn.Embedding(seq_num,n_embd)
-        self.po_embed = torch.nn.Embedding(win_len,n_embd)
-        self.drop_em = torch.nn.Dropout(args.embd_pdrop)
+        self.po_embed = torch.nn.Embedding(seq_len,n_embd)
+        self.drop_em = torch.nn.Dropout(dropout)
         self.device = device
         self.xc_encoder = TransformerEncoderLayer(d_model,n_head)
         torch.nn.init.normal_(self.id_embed.weight, std=0.02)
