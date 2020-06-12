@@ -137,14 +137,15 @@ class PyTorchForecast(TimeSeriesModel):
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
-            start_end_params["end_stamp"] = dataset_params[loader_type + "_end"] 
-        if loader_type == "test" and "forecast_test_len" in dataset_params:
-            dataset_params["forecast_length"] = dataset_params["forecast_test_len"]
+            start_end_params["end_stamp"] = dataset_params[loader_type + "_end"]
         if "scaler" in dataset_params:
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]] 
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        if the_class == "default":
+        if loader_type == "test" and "forecast_test_len" in dataset_params:
+           l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_test_len"],
+            dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
+        elif the_class == "default":
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
         else:
