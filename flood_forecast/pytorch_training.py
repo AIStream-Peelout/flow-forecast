@@ -112,9 +112,9 @@ def compute_validation(validation_loader:DataLoader, model,  epoch:int, sequence
       if decoder_structure:
         if hasattr(model, "mask"):
           targ_clone = targ.detach().clone()
-          output = greedy_decode(model, src, sequence_size, targ_clone, device=device)[:, :, 0]
+          output = greedy_decode(model, src, targ.shape[1], targ_clone, device=device)[:, :, 0]
         else:
-          output = simple_decode(model, src, sequence_size, targ, 1)[:, :, 0]
+          output = simple_decode(model, src, targ.shape[1], targ, 1)[:, :, 0]
       else:
         output = model(src.float())
       labels = targ[:, :, 0]

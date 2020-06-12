@@ -18,6 +18,8 @@
        "train_end": 200,
        "valid_start":201,
        "valid_end": 220,
+       "test_start": 402,
+       "test_end": 800,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
