@@ -137,9 +137,9 @@ def infer_on_torch_model(
     test_images = images[[11]].to(device)
 
     e = shap.DeepExplainer(model.model, background)
-    shap_values = e.shap_values(test_images)
-    shap.force_plot(e.expected_value[0], shap_values[0], show=True, matplotlib=True, feature_names=csv_test_loader.df.columns)
-    shap.dependence_plot(0, shap_values[0], test_images.cpu().numpy())
+    shap_values = e.shap_values(background)
+    # shap.force_plot(e.expected_value[0], shap_values[0], show=True, matplotlib=True, feature_names=csv_test_loader.df.columns)
+    shap.dependence_plot(0, shap_values[0], background.cpu().numpy(), interaction_index=0)
     # shap.summary_plot(shap_values, test_images, feature_names=csv_test_loader.df.columns)
     print(end_tensor.shape)
 
