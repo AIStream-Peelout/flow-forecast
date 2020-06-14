@@ -16,3 +16,4 @@ setuptools~=46.4.0
 numpy~=1.18.4
 shap~=0.34.0
 requests~=2.23.0
+torchvision~=0.6.0
