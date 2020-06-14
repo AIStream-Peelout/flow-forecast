@@ -1,13 +1,16 @@
-import numpy as np 
+import shap
+import numpy as np
 import pandas as pd
-import torch 
+import torch
+from torchvision import transforms
 from datetime import datetime
-from typing import Callable, Tuple, Dict, List, Type
+from typing import Callable, Dict, List, Type
 from flood_forecast.time_model import TimeSeriesModel
 import sklearn.metrics
 from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.utils import flatten_list_function
+
 
 def stream_baseline(river_flow_df:pd.DataFrame, forecast_column:str, hours_forecast=336)->(pd.DataFrame, float):
     """
@@ -110,16 +113,34 @@ def infer_on_torch_model(
         datetime_start = datetime.strptime(datetime_start, '%Y-%m-%d')
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
+    model.params["dataset_params"]["transform"] = transforms.Compose([transforms.ToTensor()])
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
     else:
-        csv_test_loader = CSVTestLoader(test_csv_path, hours_to_forecast, **dataset_params, interpolate=dataset_params["interpolate_param"])
+        csv_test_loader = CSVTestLoader(
+            test_csv_path,
+            hours_to_forecast,
+            **dataset_params,
+            interpolate=dataset_params["interpolate_param"]
+        )
     model.model.eval()
     history, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     end_tensor = generate_predictions(model, df_train_and_test, csv_test_loader, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params)
     df_train_and_test['preds'] = 0
     df_train_and_test['preds'][history_length:] = end_tensor.numpy().tolist()
+
+    batch = next(iter(csv_test_loader))
+    images, _, _ = batch
+
+    background = images[:10].to(device)
+    test_images = images[[11]].to(device)
+
+    e = shap.DeepExplainer(model.model, background)
+    shap_values = e.shap_values(test_images)
+    shap.force_plot(e.expected_value[0], shap_values[0], show=True, matplotlib=True, feature_names=csv_test_loader.df.columns)
+    shap.dependence_plot(0, shap_values[0], test_images.cpu().numpy())
+    # shap.summary_plot(shap_values, test_images, feature_names=csv_test_loader.df.columns)
     print(end_tensor.shape)
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
@@ -163,8 +184,12 @@ def generate_predictions_non_decoded(model: Type[TimeSeriesModel], df: pd.DataFr
             # Order here should match order of original tensor... But what is the best way todo that...?
             # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
             intial_numpy = torch.stack(
-                [output.view(-1).float().to(model.device), precip_cols[i].float().to(model.device),
-                 temp_cols[i].float().to(model.device)]).to('cpu').detach().numpy()
+                [
+                    output.view(-1).float().to(model.device),
+                    precip_cols[i].float().to(model.device),
+                    temp_cols[i].float().to(model.device)
+                ]
+            ).to('cpu').detach().numpy()
             temp_df = pd.DataFrame(intial_numpy.T, columns=rel_cols)
             revised_np = temp_df[rel_cols].to_numpy()
             full_history.append(torch.from_numpy(revised_np).to(model.device).unsqueeze(0))

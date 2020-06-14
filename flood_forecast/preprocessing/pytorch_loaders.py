@@ -5,9 +5,19 @@ import torch
 from typing import Type, List, Union
 from flood_forecast.preprocessing.interpolate_preprocess import interpolate_missing_values, fix_timezones
 
+
 class CSVDataLoader(Dataset):
-    def __init__(self, file_path:str, forecast_history:int, forecast_length:int, target_col:List, 
-                 relevant_cols:List, scaling=None, start_stamp:int=0, end_stamp:int=None, interpolate_param=True):
+    def __init__(
+            self,
+            file_path: str,
+            forecast_history: int,
+            forecast_length: int,
+            target_col: List,
+            relevant_cols: List,
+            scaling=None,
+            start_stamp: int = 0,
+            end_stamp: int = None,
+            interpolate_param=True):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
         :param file_path: The path to the CSV file you wish to use. 
