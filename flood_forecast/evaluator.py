@@ -88,6 +88,8 @@ def evaluate_model(
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
 
+
+    
 def infer_on_torch_model(
         model,
         test_csv_path: str = None,
@@ -129,18 +131,44 @@ def infer_on_torch_model(
     end_tensor = generate_predictions(model, df_train_and_test, csv_test_loader, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params)
     df_train_and_test['preds'] = 0
     df_train_and_test['preds'][history_length:] = end_tensor.numpy().tolist()
+    
+    csv_test_load_iter = iter(csv_test_loader)
+    batch = next(csv_test_load_iter)
+    inputs, _, _ = batch
+    
+    batch = next(csv_test_load_iter)
+    tests, _, _ = batch
 
-    batch = next(iter(csv_test_loader))
-    images, _, _ = batch
+    # # for kernal explainer
+    # failed testing comment for now
+    # def _f_model(input_array) -> np.array:
+    #     local_device = torch.device('cpu')
+    #     model.model.to(local_device)
+    #     data = torch.from_numpy(input_array).unsqueeze(0)
+    #     output = model.model(data.to(local_device))
+    #     return output.detach().numpy()
 
-    background = images[:10].to(device)
-    test_images = images[[11]].to(device)
+    # input_array = inputs.cpu().numpy()
+    # test_array = tests.cpu().numpy()
+    # e = shap.KernelExplainer(_f_model, input_array)
+    # shap_values = e.shap_values(test_array)
+
+    background = inputs.to(device).unsqueeze(0)
+    tests = tests.to(device).unsqueeze(0)
 
     e = shap.DeepExplainer(model.model, background)
-    shap_values = e.shap_values(background)
-    # shap.force_plot(e.expected_value[0], shap_values[0], show=True, matplotlib=True, feature_names=csv_test_loader.df.columns)
-    shap.dependence_plot(0, shap_values[0], background.cpu().numpy(), interaction_index=0)
-    # shap.summary_plot(shap_values, test_images, feature_names=csv_test_loader.df.columns)
+    shap_values = e.shap_values(tests)
+    # summary plot shows overall feature ranking by average absolute shap values
+    mean_shap_values = np.concatenate(shap_values).mean(axis=0)
+    shap.summary_plot(mean_shap_values, tests.cpu().numpy().reshape(-1, 3), feature_names=csv_test_loader.df.columns, plot_type="bar")
+    # force plot for a simgle sample (in matplotlib)
+    shap.force_plot(e.expected_value[0], shap_values[0].reshape(-1, 3)[6,:], show=True, feature_names=csv_test_loader.df.columns, matplotlib=True)
+    # force plot for multiple time-steps 
+    # can only be generated as html objects
+    # shap.force_plot(e.expected_value[0], shap_values[0].reshape(-1, 3), show=True, feature_names=csv_test_loader.df.columns)
+    # dependece plot shows feature value vs shap value
+    shap.dependence_plot(2, shap_values[0].reshape(-1, 3), tests.cpu().numpy().reshape(-1, 3), interaction_index=0, feature_names=csv_test_loader.df.columns)
+    
     print(end_tensor.shape)
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
