@@ -127,6 +127,7 @@ def infer_on_torch_model(
             interpolate=dataset_params["interpolate_param"]
         )
     model.model.eval()
+    
     history, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     end_tensor = generate_predictions(model, df_train_and_test, csv_test_loader, history, device, forecast_start_idx, forecast_length, hours_to_forecast, decoder_params)
     df_train_and_test['preds'] = 0
@@ -165,10 +166,27 @@ def infer_on_torch_model(
     shap.force_plot(e.expected_value[0], shap_values[0].reshape(-1, 3)[6,:], show=True, feature_names=csv_test_loader.df.columns, matplotlib=True)
     # force plot for multiple time-steps 
     # can only be generated as html objects
-    # shap.force_plot(e.expected_value[0], shap_values[0].reshape(-1, 3), show=True, feature_names=csv_test_loader.df.columns)
+    # history feature shap values for prediction at time-step 0
+    # html = shap.force_plot(e.expected_value[0], shap_values[0].reshape(-1, 3), show=True, feature_names=csv_test_loader.df.columns)
+    # f = open('viz/force_plot.html', 'w')
+    # f.write(html.data)
+    # f.close()
     # dependece plot shows feature value vs shap value
     shap.dependence_plot(2, shap_values[0].reshape(-1, 3), tests.cpu().numpy().reshape(-1, 3), interaction_index=0, feature_names=csv_test_loader.df.columns)
-    
+    # decision plot - single output
+    shap.decision_plot(e.expected_value[0], shap_values[0].reshape(-1, 3), tests.cpu().numpy(), show=True, feature_names=csv_test_loader.df.columns.tolist())
+    # decision plot - multiple output
+    reshaped_shap_values = [a.reshape(-1, 3) for a in shap_values]
+    shap.multioutput_decision_plot(
+        list(e.expected_value),
+        reshaped_shap_values,
+        row_index=1,
+        show=True,
+        feature_names=csv_test_loader.df.columns.tolist(),
+        legend_labels=range(forecast_length),
+        legend_location='lower right'
+        )
+
     print(end_tensor.shape)
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
