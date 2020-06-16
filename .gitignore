@@ -5,6 +5,7 @@ flood_forecast.egg-info
 *.pyc
 tests/runs
 .ipynb_checkpoints
+.pytest_cache/
 data
 mypy
 .mypy_cache

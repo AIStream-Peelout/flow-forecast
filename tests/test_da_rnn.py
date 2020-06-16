@@ -1,7 +1,7 @@
 import torch
 import unittest
-import pathlib
 import os
+import tempfile
 from flood_forecast.preprocessing.preprocess_da_rnn import TrainData, format_data, make_data 
 from flood_forecast.da_rnn.train_da import da_rnn, train
 
@@ -29,11 +29,11 @@ class TestDARNN(unittest.TestCase):
     def test_resume_ckpt(self):
         """ This test is dependent on test_train_model succeding"""
         config, da = da_rnn(self.preprocessed_data, 1, 64)
-        os.mkdir("checkpoint") 
-        torch.save(da.encoder.state_dict(), os.path.join("checkpoint", "encoder.pth"))
-        torch.save(da.decoder.state_dict(), os.path.join("checkpoint", "decoder.pth"))
-        config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path="checkpoint")
-        self.assertTrue(dnn_network)
+        with tempfile.TemporaryDirectory() as checkpoint:
+            torch.save(da.encoder.state_dict(), os.path.join(checkpoint, "encoder.pth"))
+            torch.save(da.decoder.state_dict(), os.path.join(checkpoint, "decoder.pth"))
+            config, dnn_network = da_rnn(self.preprocessed_data, 1, 64, save_path=checkpoint)
+            self.assertTrue(dnn_network)
         
 if __name__ == '__main__':
     unittest.main()
