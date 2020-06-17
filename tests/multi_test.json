@@ -5,7 +5,6 @@
       "number_time_series":3,
       "seq_len":5
      },
-    
     "dataset_params":
     {  "class": "default",
        "training_path": "tests/test_data/keag_small.csv",
@@ -29,7 +28,6 @@
        "optimizer": "Adam",
        "optim_params":
        {
-
        },
        "lr": 0.3,
        "epochs": 1,
