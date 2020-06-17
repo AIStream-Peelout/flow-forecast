@@ -18,8 +18,7 @@ Utility dictionaries to map a string to a class
 """
 pytorch_model_dict = {"MultiAttnHeadSimple": MultiAttnHeadSimple, "SimpleTransformer": SimpleTransformer, 
 "TransformerXL": TransformerXL, "DummyTorchModel": DummyTorchModel,  "LSTM":LSTMForecast, "SimpleLinearModel": SimpleLinearModel, 
-"DARNN":DARNN, "XCTransfo":TransformerXCBasic, 
-"CustomTransformerDecoder":CustomTransformerDecoder}
+"DARNN":DARNN, "XCTransformer":TransformerXCBasic, "CustomTransformerDecoder":CustomTransformerDecoder}
 
 pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
 
