@@ -62,8 +62,6 @@
              "scaling": "StandardScaler",
              "interpolate_param": false
           }
-   }
-       
-   
+   } 
 }
     

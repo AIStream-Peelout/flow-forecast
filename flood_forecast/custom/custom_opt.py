@@ -16,12 +16,14 @@ def warmup_cosine(x, warmup=0.002):
         return x/warmup
     return 0.5 * (1.0 + torch.cos(math.pi * x))
 
+
 def warmup_constant(x, warmup=0.002):
     """ Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
         Learning rate is 1. afterwards. """
     if x < warmup:
         return x/warmup
     return 1.0
+
 
 def warmup_linear(x, warmup=0.002):
     """ Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th (as provided to BertAdam) training step.
@@ -30,11 +32,13 @@ def warmup_linear(x, warmup=0.002):
         return x/warmup
     return max((x-1.)/(warmup-1.), 0)
 
+
 SCHEDULES = {
     'warmup_cosine':   warmup_cosine,
     'warmup_constant': warmup_constant,
     'warmup_linear':   warmup_linear,
 }
+
 
 class RMSELoss(torch.nn.Module):
     '''
@@ -45,10 +49,11 @@ class RMSELoss(torch.nn.Module):
     '''
     def __init__(self):
         super().__init__()
-        self.mse = nn.MSELoss()
+        self.mse = torch.nn.MSELoss()
 
-    def forward(self,target,output):
-        return torch.sqrt(self.mse(target,output))
+    def forward(self, target: torch.Tensor, output: torch.Tensor):
+        return torch.sqrt(self.mse(target, output))
+
 
 class MAPELoss(torch.nn.Module):
     '''
@@ -59,7 +64,7 @@ class MAPELoss(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self,target,output):
+    def forward(self, target: torch.Tensor, output: torch.Tensor):
         return torch.mean(torch.abs((target - output) / target))
     
 # Add custom loss function
