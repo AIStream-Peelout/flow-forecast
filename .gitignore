@@ -4,6 +4,7 @@ flood_forecast.egg-info
 *.DS_STORE
 *.pyc
 tests/runs
+tests/output/
 .ipynb_checkpoints
 .pytest_cache/
 data
