@@ -10,7 +10,7 @@ from flood_forecast.custom.custom_opt import BertAdam
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.da_rnn.model import DARNN 
-from flood_forecast.transformer_xl.xc_attn import TransformerModel
+from flood_forecast.transformer_xl.xc_attn import TransformerXCBasic
 import torch
 
 """
@@ -18,7 +18,7 @@ Utility dictionaries to map a string to a class
 """
 pytorch_model_dict = {"MultiAttnHeadSimple": MultiAttnHeadSimple, "SimpleTransformer": SimpleTransformer, 
 "TransformerXL": TransformerXL, "DummyTorchModel": DummyTorchModel,  "LSTM":LSTMForecast, "SimpleLinearModel": SimpleLinearModel, 
-"DARNN":DARNN, "XCTransfo":TransformerModel, 
+"DARNN":DARNN, "XCTransfo":TransformerXCBasic, 
 "CustomTransformerDecoder":CustomTransformerDecoder}
 
 pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
