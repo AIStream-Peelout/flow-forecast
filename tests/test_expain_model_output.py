@@ -6,7 +6,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.explain_model_output import deep_explain_model_summary_plot
 
 
-class InterperbilityTest(unittest.TestCase):
+class ModelInterpretibilityTest(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "test_init"
@@ -59,7 +59,11 @@ class InterperbilityTest(unittest.TestCase):
         }
         keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model = PyTorchForecast(
-            "MultiAttnHeadSimple", keag_file, keag_file, keag_file, self.model_params
+            "MultiAttnHeadSimple",
+            keag_file,
+            keag_file,
+            keag_file,
+            self.model_params,
         )
         self.linear_model = PyTorchForecast(
             "SimpleLinearModel",
