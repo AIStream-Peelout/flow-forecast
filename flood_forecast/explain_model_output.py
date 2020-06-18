@@ -50,7 +50,6 @@ def deep_explain_model_summary_plot(
 
     # summary plot shows overall feature ranking
     # by average absolute shap values
-    fig, ax = plt.subplots()
     mean_shap_values = np.concatenate(shap_values).mean(axis=0)
     plt.figure(figsize=(12, 8))
     shap.summary_plot(
@@ -61,13 +60,12 @@ def deep_explain_model_summary_plot(
         max_display=10,
         plot_size=(10, num_features * 2),
     )
-    over_feature_ranking_shap_html = mpld3.fig_to_html(fig)
+    over_feature_ranking_shap_html = mpld3.fig_to_html(plt.gcf())
     wandb.log({'Overall feature ranking by shap values': wandb.Html(over_feature_ranking_shap_html)})
     plt.close()
 
     # summary plot for multi-step outputs
     multi_shap_values = list(np.stack(shap_values).mean(axis=1))
-    fig, ax = plt.subplots()
     shap.summary_plot(
         multi_shap_values,
         feature_names=csv_test_loader.df.columns,
@@ -79,7 +77,7 @@ def deep_explain_model_summary_plot(
         plot_size=(10, num_features * 2),
         sort=False,
     )
-    overall_feature_rank_per_time_step_html = mpld3.fig_to_html(fig)
+    overall_feature_rank_per_time_step_html = mpld3.fig_to_html(plt.gcf())
     wandb.log({'Overall feature ranking per prediction time-step': wandb.Html(overall_feature_rank_per_time_step_html)})
     plt.close()
 
@@ -90,7 +88,6 @@ def deep_explain_model_summary_plot(
     to_explain = history.to(device).unsqueeze(0)
     shap_values = deep_explainer.shap_values(to_explain)
     mean_shap_values = np.concatenate(shap_values).mean(axis=0)
-    fig, ax = plt.subplots()
     shap.summary_plot(
         mean_shap_values,
         history.cpu().numpy(),
@@ -100,11 +97,11 @@ def deep_explain_model_summary_plot(
         plot_size=(9, num_features * 2),
         show=False,
     )
-    # feature_ranking_for_prediction_at_timestamp = mpld3.fig_to_html(fig)
-    # wandb.log({
-    #     f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}":
-    #     wandb.Html(feature_ranking_for_prediction_at_timestamp)
-    # })
+    feature_ranking_for_prediction_at_timestamp = mpld3.fig_to_html(plt.gcf())
+    wandb.log({
+        f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}":
+        wandb.Html(feature_ranking_for_prediction_at_timestamp)
+    })
     plt.close()
 
 
