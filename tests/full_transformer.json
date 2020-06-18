@@ -18,7 +18,7 @@
        "train_end": 200,
        "valid_start":201,
        "valid_end": 220,
-       "test_start":10,
+       "test_start":299,
        "test_end": 400,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
