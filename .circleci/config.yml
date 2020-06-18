@@ -72,7 +72,7 @@ jobs:
       - run:
           name: Plot tests
           when: always
-          command:
+          command: |
             python tests/test_plot.py
             python tests/test_explain_model_output.py
       - store_artifacts:
