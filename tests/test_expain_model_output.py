@@ -28,7 +28,11 @@ class ModelInterpretabilityTest(unittest.TestCase):
                 "target_col": ["cfs"],
                 "interpolate": False,
             },
-            "wandb": False,
+            "wandb": {
+               "name": "flood_forecast_circleci",
+               "tags": ["dummy_run", "circleci"],
+               "project": "repo-flood_forecast"
+            },
         }
         self.model_linear_params = {
             "use_decoder": True,

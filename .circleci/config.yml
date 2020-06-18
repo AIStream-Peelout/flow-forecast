@@ -74,6 +74,7 @@ jobs:
           when: always
           command:
             python tests/test_plot.py
+            python tests/test_explain_model_output.py
       - store_artifacts:
           path: test-reports
           destination: test-reports

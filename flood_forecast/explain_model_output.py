@@ -5,7 +5,10 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
+import mpld3
 import random
+import wandb
+
 
 BACKGROUND_SAMPLE_SIZE = 5
 
@@ -47,9 +50,9 @@ def deep_explain_model_summary_plot(
 
     # summary plot shows overall feature ranking
     # by average absolute shap values
+    fig, ax = plt.subplots()
     mean_shap_values = np.concatenate(shap_values).mean(axis=0)
     plt.figure(figsize=(12, 8))
-    plt.title("Overall feature ranking by shap values")
     shap.summary_plot(
         mean_shap_values,
         feature_names=csv_test_loader.df.columns,
@@ -58,12 +61,13 @@ def deep_explain_model_summary_plot(
         max_display=10,
         plot_size=(10, num_features * 2),
     )
-    plt.savefig("overall_feature_rank.jpg")
+    over_feature_ranking_shap_html = mpld3.fig_to_html(fig)
+    wandb.log({'Overall feature ranking by shap values': wandb.Html(over_feature_ranking_shap_html)})
     plt.close()
 
     # summary plot for multi-step outputs
     multi_shap_values = list(np.stack(shap_values).mean(axis=1))
-    plt.title("Overall feature ranking per prediction time-step")
+    fig, ax = plt.subplots()
     shap.summary_plot(
         multi_shap_values,
         feature_names=csv_test_loader.df.columns,
@@ -75,7 +79,8 @@ def deep_explain_model_summary_plot(
         plot_size=(10, num_features * 2),
         sort=False,
     )
-    plt.savefig("overall_feature_rank_per_time_step.jpg")
+    overall_feature_rank_per_time_step_html = mpld3.fig_to_html(fig)
+    wandb.log({'Overall feature ranking per prediction time-step': wandb.Html(overall_feature_rank_per_time_step_html)})
     plt.close()
 
     # summary plot for one prediction at datetime_start
@@ -85,12 +90,7 @@ def deep_explain_model_summary_plot(
     to_explain = history.to(device).unsqueeze(0)
     shap_values = deep_explainer.shap_values(to_explain)
     mean_shap_values = np.concatenate(shap_values).mean(axis=0)
-    plt.title(
-        (
-            "Feature ranking for prediction at"
-            f" {datetime_start.strftime('%Y-%m-%d')}"
-        )
-    )
+    fig, ax = plt.subplots()
     shap.summary_plot(
         mean_shap_values,
         history.cpu().numpy(),
@@ -100,7 +100,11 @@ def deep_explain_model_summary_plot(
         plot_size=(9, num_features * 2),
         show=False,
     )
-    plt.savefig("feature_summary_per_prediction.jpg")
+    # feature_ranking_for_prediction_at_timestamp = mpld3.fig_to_html(fig)
+    # wandb.log({
+    #     f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}":
+    #     wandb.Html(feature_ranking_for_prediction_at_timestamp)
+    # })
     plt.close()
 
 
