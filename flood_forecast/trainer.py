@@ -83,5 +83,3 @@ def main():
     
 if __name__ == "__main__":
     main()
-
-# Example command python flood_forecast/trainer.py -t sample_config.json
