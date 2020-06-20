@@ -27,10 +27,17 @@ jobs:
             sudo pip install --quiet -r requirements.txt
             sudo python setup.py develop
 
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.7.4/site-packages"
+
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
           # taken to be the root directory of the workspace.
-          root: ~
+          root: ~/
           # Must be relative path from root
           paths:
             - repo
@@ -39,7 +46,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: /root/repo
+          at: ~/repo
       - checkout
       - run:
           command: |
@@ -54,7 +61,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: /root/repo
+          at: ~/repo
       - run:
           name: Data Quality Tests
           command: |
