@@ -33,6 +33,10 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.7.4/site-packages"
+      - run:
+          command: |
+            echo list files
+            ls
 
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
@@ -47,7 +51,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - checkout
       - run:
           command: |
             echo list files
@@ -55,7 +58,7 @@ jobs:
       - run:
           name: Evaluator tests
           command:
-            python tests/test_evaluation.py
+            python ~/repo/tests/test_evaluation.py
 
   data_quality_test:
     <<: *defaults
@@ -65,9 +68,9 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
-            python tests/data_format_tests.py
-            python tests/usgs_tests.py
-            python tests/test_join.py
+            python ~/repo/tests/data_format_tests.py
+            python ~/repo/tests/usgs_tests.py
+            python ~/repo/tests/test_join.py
 
   model_basic_test:
     <<: *defaults
