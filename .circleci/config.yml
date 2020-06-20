@@ -27,9 +27,6 @@ jobs:
             sudo pip install --quiet -r requirements.txt
             sudo python setup.py develop
 
-      - persist_to_workspace:
-          root: /root/repo
-
   evaluator_test:
     <<: *defaults
     steps:
