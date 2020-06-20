@@ -56,7 +56,7 @@ jobs:
       - run:
           name: Evaluator tests
           command:
-            python flood_forecast/tests/test_evaluation.py
+            python ./repo/tests/test_evaluation.py
 
   data_quality_test:
     <<: *defaults
@@ -70,9 +70,9 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
-            python flood_forecast/tests/data_format_tests.py
-            python flood_forecast/tests/usgs_tests.py
-            python flood_forecast/tests/test_join.py
+            python ./repo/tests/data_format_tests.py
+            python ./repo/tests/usgs_tests.py
+            python ./repo/tests/test_join.py
 
   model_basic_test:
     <<: *defaults
@@ -81,11 +81,11 @@ jobs:
           name: Model basic tests
           when: always
           command: |
-            python flood_forecast/tests/time_model_test.py
-            python flood_forecast/tests/pytorc_train_tests.py
-            python flood_forecast/tests/model_config_tests.py
-            python flood_forecast/tests/data_loader_tests.py
-            python flood_forecast/tests/test_da_rnn.py
+            python ./repo/tests/time_model_test.py
+            python ./repo/tests/pytorc_train_tests.py
+            python ./repo/tests/model_config_tests.py
+            python ./repo/tests/data_loader_tests.py
+            python ./repo/tests/test_da_rnn.py
 
   decoder_test:
     <<: *defaults
@@ -94,7 +94,7 @@ jobs:
           name: Decoder tests
           when: always
           command:
-            python flood_forecast/tests/test_decoder.py
+            python ./repo/tests/test_decoder.py
 
   trainer_test:
     <<: *defaults
@@ -103,11 +103,11 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            python flood_forecast/trainer.py -p flood_forecast/tests/lstm_test.json
-            python flood_forecast/trainer.py -p flood_forecast/tests/multi_test.json
-            python flood_forecast/trainer.py  -pflood_forecast/ tests/full_transformer.json
-            python flood_forecast/trainer.py -p flood_forecast/tests/decoder_test.json
-            python flood_forecast/trainer.py -p flood_forecast/tests/custom_encode.json
+            python flood_forecast/trainer.py -p ./repo/tests/lstm_test.json
+            python flood_forecast/trainer.py -p ./repo/tests/multi_test.json
+            python flood_forecast/trainer.py  -p ./repo/ tests/full_transformer.json
+            python flood_forecast/trainer.py -p ./repo/tests/decoder_test.json
+            python flood_forecast/trainer.py -p ./repo/tests/custom_encode.json
 
   plot_test:
     <<: *defaults
@@ -116,7 +116,7 @@ jobs:
           name: plot tests
           when: always
           command:
-            python flood_forecast/tests/test_plot.py
+            python ./repo/tests/test_plot.py
 #          - run:
 #              name: Plot tests
 #              when: always
