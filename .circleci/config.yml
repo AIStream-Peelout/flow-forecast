@@ -18,7 +18,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: requirements-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
       - run:
           name: install dependencies
@@ -28,15 +28,16 @@ jobs:
             sudo python setup.py develop
 
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: requirements-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
+            - "~/.cache/pip"
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.7.4/site-packages"
       - run:
           command: |
             echo list files
-            ls
+            ls -R
 
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
@@ -54,7 +55,7 @@ jobs:
       - run:
           command: |
             echo list files
-            ls
+            ls -R
       - run:
           name: Evaluator tests
           command:
@@ -65,6 +66,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
+      - run:
+          command: |
+            echo list files
+            ls -R
       - run:
           name: Data Quality Tests
           command: |
