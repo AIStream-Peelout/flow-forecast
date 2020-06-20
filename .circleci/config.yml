@@ -54,34 +54,34 @@ jobs:
 
   decoder_test:
     executor: python-executor
-      steps:
-        - run:
-            name: Decoder tests
-            when: always
-            command:
-              python tests/test_decoder.py
+    steps:
+      - run:
+          name: Decoder tests
+          when: always
+          command:
+            python tests/test_decoder.py
 
   trainer_test:
     executor: python-executor
-      steps:
-          - run:
-            name: Trainer tests
-            when: always
-            command: |
-              python flood_forecast/trainer.py -p tests/lstm_test.json
-              python flood_forecast/trainer.py -p tests/multi_test.json
-              python flood_forecast/trainer.py  -p tests/full_transformer.json
-              python flood_forecast/trainer.py -p tests/decoder_test.json
-              python flood_forecast/trainer.py -p tests/custom_encode.json
+    steps:
+        - run:
+          name: Trainer tests
+          when: always
+          command: |
+            python flood_forecast/trainer.py -p tests/lstm_test.json
+            python flood_forecast/trainer.py -p tests/multi_test.json
+            python flood_forecast/trainer.py  -p tests/full_transformer.json
+            python flood_forecast/trainer.py -p tests/decoder_test.json
+            python flood_forecast/trainer.py -p tests/custom_encode.json
 
   plot_test:
     executor: python-executor
-      steps:
-          - run:
-            name: plot tests
-            when: always
-            command:
-              python tests/test_plot.py
+    steps:
+        - run:
+          name: plot tests
+          when: always
+          command:
+            python tests/test_plot.py
 #          - run:
 #              name: Plot tests
 #              when: always
