@@ -7,7 +7,7 @@ executors:
     working_directory: ~/repo
 
 jobs:
-  setup:
+  setup_and_install:
     executor: python-executor
     steps:
       - checkout
@@ -97,27 +97,27 @@ jobs:
 #              path: test-reports
 #              destination: test-reports
 
-worksetups:
+workflows:
   version: 2
 
   test_and_build:
     jobs:
-      - setup
+      - setup_and_install
       - evaluator_test:
           requires:
-            - setup
+            - setup_and_install
       - data_quality_test:
           requires:
-            - setup
+            - setup_and_install
       - model_basic_test:
           requires:
-            - setup
+            - setup_and_install
       - decoder_test:
           requires:
-            - setup
+            - setup_and_install
       - trainer_test:
           requires:
-            - setup
+            - setup_and_install
       - plot_test:
           requires:
-            - setup
+            - setup_and_install
