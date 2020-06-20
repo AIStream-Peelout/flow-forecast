@@ -64,7 +64,7 @@ jobs:
   trainer_test:
     executor: python-executor
     steps:
-        - run:
+      - run:
           name: Trainer tests
           when: always
           command: |
@@ -77,7 +77,7 @@ jobs:
   plot_test:
     executor: python-executor
     steps:
-        - run:
+      - run:
           name: plot tests
           when: always
           command:
