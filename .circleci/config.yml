@@ -1,23 +1,14 @@
-# Python CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-#
-version: 2
-jobs:
-  build:
-    paralleism: 2
-    docker:
-      # specify the version you desire here
-      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:3.7.4
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
+version: 2.1
 
+executors:
+  python-executor:
+    docker:
+      - image: circleci/python:3.7.4
     working_directory: ~/repo
 
+jobs:
+  flow:
+    executor: python-executor
     steps:
       - checkout
       - restore_cache:  # ensure this step occurs *before* installing dependencies
@@ -26,29 +17,33 @@ jobs:
       - run:
           name: install dependencies
           command: |
-           sudo pip install pipenv
-           sudo pip install -r requirements.txt
-           sudo python setup.py develop
-        
-      # run tests!
-      # this example uses Django's built-in test-runner
-      # other common Python testing frameworks include pytest and nose
-      # https://pytest.org
-      # https://nose.readthedocs.io
-      - run: 
-          name: Evaluator tests 
-          command: 
-             python tests/test_evaluation.py
+            sudo pip install pipenv
+            sudo pip install -r requirements.txt
+            sudo python setup.py develop
 
+  evaluator_test:
+    executor: python-executor
+    steps:
+      - run:
+          name: Evaluator tests
+          command:
+            python tests/test_evaluation.py
+
+  data_quality_test:
+    executor: python-executor
+    steps:
       - run:
           name: Data Quality Tests
           command: |
             python tests/data_format_tests.py
             python tests/usgs_tests.py
             python tests/test_join.py
-     
+
+  model_basic_test:
+    executor: python-executor
+    steps:
       - run:
-          name: Model basic tests 
+          name: Model basic tests
           when: always
           command: |
             python tests/time_model_test.py
@@ -56,25 +51,67 @@ jobs:
             python tests/model_config_tests.py
             python tests/data_loader_tests.py
             python tests/test_da_rnn.py
-      - run: 
-          name: Decoder tests
-          when: always 
-          command: 
-            python tests/test_decoder.py
-      - run: 
-          name: Trainer tests
-          when: always
-          command: |
-            python flood_forecast/trainer.py -p tests/lstm_test.json
-            python flood_forecast/trainer.py -p tests/multi_test.json
-            python flood_forecast/trainer.py  -p tests/full_transformer.json
-            python flood_forecast/trainer.py -p tests/decoder_test.json
-            python flood_forecast/trainer.py -p tests/custom_encode.json
-      - run:
-          name: Plot tests
-          when: always
-          command:
-            python tests/test_plot.py
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
+
+  decoder_test:
+    executor: python-executor
+      steps:
+        - run:
+            name: Decoder tests
+            when: always
+            command:
+              python tests/test_decoder.py
+
+  trainer_test:
+    executor: python-executor
+      steps:
+          - run:
+            name: Trainer tests
+            when: always
+            command: |
+              python flood_forecast/trainer.py -p tests/lstm_test.json
+              python flood_forecast/trainer.py -p tests/multi_test.json
+              python flood_forecast/trainer.py  -p tests/full_transformer.json
+              python flood_forecast/trainer.py -p tests/decoder_test.json
+              python flood_forecast/trainer.py -p tests/custom_encode.json
+
+  plot_test:
+    executor: python-executor
+      steps:
+          - run:
+            name: plot tests
+            when: always
+            command:
+              python tests/test_plot.py
+#          - run:
+#              name: Plot tests
+#              when: always
+#              command:
+#                python tests/test_plot.py
+#          - store_artifacts:
+#              path: test-reports
+#              destination: test-reports
+
+workflows:
+  version: 2
+
+  test_and_build:
+    jobs:
+      - flow
+      - evaluator_test:
+          requires:
+            - flow
+      - data_quality_test:
+          requires:
+            - flow
+      - model_basic_test:
+          requires:
+            - flow
+      - decoder_test:
+          requires:
+            - flow
+      - trainer_test:
+          requires:
+            - flow
+      - plot_test:
+          requires:
+            - flow
