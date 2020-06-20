@@ -27,11 +27,24 @@ jobs:
             sudo pip install --quiet -r requirements.txt
             sudo python setup.py develop
 
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: /root
+          # Must be relative path from root
+          paths:
+            - repo
+
   evaluator_test:
     <<: *defaults
     steps:
       - attach_workspace:
           at: /root/repo
+      - checkout
+      - run:
+          command: |
+            echo list files
+            ls
       - run:
           name: Evaluator tests
           command:
