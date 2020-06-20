@@ -1,14 +1,20 @@
 version: 2.1
 
+
 executors:
   python-executor:
     docker:
       - image: circleci/python:3.7.4
     working_directory: ~/repo
 
+
+defaults: &defaults
+  executor: python-executor
+  working_directory: ~/repo
+
 jobs:
   setup_and_install:
-    executor: python-executor
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:  # ensure this step occurs *before* installing dependencies
@@ -18,22 +24,27 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install pipenv
-            sudo pip install -r requirements.txt
+            sudo pip install --quiet -r requirements.txt
             sudo python setup.py develop
 
+      - persist_to_workspace:
+          root: /root/repo
+
   evaluator_test:
-    working_directory: ~/repo
-    executor: python-executor
+    <<: *defaults
     steps:
+      - attach_workspace:
+          at: /root/repo
       - run:
           name: Evaluator tests
           command:
             python tests/test_evaluation.py
 
   data_quality_test:
-    working_directory: ~/repo
-    executor: python-executor
+    <<: *defaults
     steps:
+      - attach_workspace:
+          at: /root/repo
       - run:
           name: Data Quality Tests
           command: |
@@ -42,8 +53,7 @@ jobs:
             python tests/test_join.py
 
   model_basic_test:
-    working_directory: ~/repo
-    executor: python-executor
+    <<: *defaults
     steps:
       - run:
           name: Model basic tests
