@@ -7,7 +7,7 @@ executors:
     working_directory: ~/repo
 
 jobs:
-  flow:
+  setup:
     executor: python-executor
     steps:
       - checkout
@@ -22,6 +22,7 @@ jobs:
             sudo python setup.py develop
 
   evaluator_test:
+    working_directory: ~/repo
     executor: python-executor
     steps:
       - run:
@@ -30,6 +31,7 @@ jobs:
             python tests/test_evaluation.py
 
   data_quality_test:
+    working_directory: ~/repo
     executor: python-executor
     steps:
       - run:
@@ -40,6 +42,7 @@ jobs:
             python tests/test_join.py
 
   model_basic_test:
+    working_directory: ~/repo
     executor: python-executor
     steps:
       - run:
@@ -53,6 +56,7 @@ jobs:
             python tests/test_da_rnn.py
 
   decoder_test:
+    working_directory: ~/repo
     executor: python-executor
     steps:
       - run:
@@ -62,6 +66,7 @@ jobs:
             python tests/test_decoder.py
 
   trainer_test:
+    working_directory: ~/repo
     executor: python-executor
     steps:
       - run:
@@ -75,6 +80,7 @@ jobs:
             python flood_forecast/trainer.py -p tests/custom_encode.json
 
   plot_test:
+    working_directory: ~/repo
     executor: python-executor
     steps:
       - run:
@@ -91,27 +97,27 @@ jobs:
 #              path: test-reports
 #              destination: test-reports
 
-workflows:
+worksetups:
   version: 2
 
   test_and_build:
     jobs:
-      - flow
+      - setup
       - evaluator_test:
           requires:
-            - flow
+            - setup
       - data_quality_test:
           requires:
-            - flow
+            - setup
       - model_basic_test:
           requires:
-            - flow
+            - setup
       - decoder_test:
           requires:
-            - flow
+            - setup
       - trainer_test:
           requires:
-            - flow
+            - setup
       - plot_test:
           requires:
-            - flow
+            - setup
