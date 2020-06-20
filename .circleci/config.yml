@@ -5,12 +5,12 @@ executors:
   python-executor:
     docker:
       - image: circleci/python:3.7.4
-    working_directory: ~/repo
+    working_directory: /home/repo
 
 
 defaults: &defaults
   executor: python-executor
-  working_directory: ~/repo
+  working_directory: /home/repo
 
 jobs:
   setup_and_install:
