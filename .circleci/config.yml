@@ -56,8 +56,8 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install pipenv
-            sudo pip install --quiet -r requirements.txt
-            sudo python setup.py
+            sudo pip install --quiet -r repo/requirements.txt
+            sudo python repo/setup.py
 
       - save_cache:
           key: requirements-v2-{{ .Branch }}-{{ checksum "repo/requirements.txt" }}
@@ -85,8 +85,8 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install pipenv
-            sudo pip install --quiet -r requirements.txt
-            sudo python setup.py
+            sudo pip install --quiet -r repo/requirements.txt
+            sudo python repo/setup.py
 
       - save_cache:
           key: requirements-v2-{{ .Branch }}-{{ checksum "repo/requirements.txt" }}
