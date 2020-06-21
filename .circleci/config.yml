@@ -48,6 +48,10 @@ jobs:
           command:
             python -m unittest -v tests/test_evaluation.py
 
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
   data_quality_test:
     <<: *defaults
     steps:
@@ -74,6 +78,10 @@ jobs:
             python -m unittest -v tests/data_format_tests.py
             python -m unittest -v tests/usgs_tests.py
             python -m unittest -v tests/test_join.py
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
 
   model_basic_test:
     <<: *defaults
@@ -105,6 +113,10 @@ jobs:
             python -m unittest -v tests/data_loader_tests.py
             python -m unittest -v tests/test_da_rnn.py
 
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
   decoder_test:
     <<: *defaults
     steps:
@@ -131,6 +143,10 @@ jobs:
           command:
             python -m unittest -v tests/test_decoder.py
 
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
   trainer_test:
     <<: *defaults
     steps:
@@ -155,16 +171,20 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            shell tput setaf 2; echo 'running trainer_lstm_test \n'
+            echo 'running trainer_lstm_test \n'
             python flood_forecast/trainer.py -p tests/lstm_test.json
-            shell tput setaf 2; echo 'running trainer_multi_test \n'
+            echo 'running trainer_multi_test \n'
             python flood_forecast/trainer.py -p tests/multi_test.json
-            shell tput setaf 2; echo 'running trainer_full_transformer_test \n'
+            echo 'running trainer_full_transformer_test \n'
             python flood_forecast/trainer.py -p  tests/full_transformer.json
-            shell tput setaf 2; echo 'running trainer_decoder_test \n'
+            echo 'running trainer_decoder_test \n'
             python flood_forecast/trainer.py -p tests/decoder_test.json
-            shell tput setaf 2; echo 'running trainer_custom_encode \n'
+            echo 'running trainer_custom_encode \n'
             python flood_forecast/trainer.py -p tests/custom_encode.json
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
 
   plot_test:
     <<: *defaults
