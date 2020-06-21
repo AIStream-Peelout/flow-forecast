@@ -46,7 +46,7 @@ jobs:
       - run:
           name: Evaluator tests
           command:
-            python tests/test_evaluation.py
+            python -m unittest -v tests/test_evaluation.py
 
   data_quality_test:
     <<: *defaults
@@ -71,9 +71,9 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
-            python tests/data_format_tests.py
-            python tests/usgs_tests.py
-            python tests/test_join.py
+            python -m unittest -v tests/data_format_tests.py
+            python -m unittest -v tests/usgs_tests.py
+            python -m unittest -v tests/test_join.py
 
   model_basic_test:
     <<: *defaults
@@ -129,7 +129,7 @@ jobs:
           name: Decoder tests
           when: always
           command:
-            python tests/test_decoder.py
+            python -m unittest -v tests/test_decoder.py
 
   trainer_test:
     <<: *defaults
@@ -155,15 +155,15 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            echo running trainer_lstm_test
+            tput setaf 2; echo 'running trainer_lstm_test \n'
             python flood_forecast/trainer.py -p tests/lstm_test.json
-            echo running trainer_multi_test
+            tput setaf 2; echo 'running trainer_multi_test \n'
             python flood_forecast/trainer.py -p tests/multi_test.json
-            echo running trainer_full_transformer_test
+            tput setaf 2; echo 'running trainer_full_transformer_test \n'
             python flood_forecast/trainer.py -p  tests/full_transformer.json
-            echo running trainer_decoder_test
+            tput setaf 2; echo 'running trainer_decoder_test \n'
             python flood_forecast/trainer.py -p tests/decoder_test.json
-            echo running trainer_custom_encode
+            tput setaf 2; echo 'running trainer_custom_encode \n'
             python flood_forecast/trainer.py -p tests/custom_encode.json
 
   plot_test:
@@ -190,7 +190,7 @@ jobs:
           name: plot tests
           when: always
           command:
-            python tests/test_plot.py
+            python -m unittest -v tests/test_plot.py
 
   save_common_artifacts:
     <<: *defaults
