@@ -71,7 +71,7 @@ jobs:
       - run:
           name: Evaluator tests
           command:
-            python ./repo/tests/test_evaluation.py
+            python tests/test_evaluation.py
 
   data_quality_test:
     <<: *defaults
@@ -84,7 +84,6 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            cd repo
             sudo pip install pipenv
             sudo pip install --quiet -r requirements.txt
             sudo python setup.py develop
@@ -104,9 +103,9 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
-            python ./repo/tests/data_format_tests.py
-            python ./repo/tests/usgs_tests.py
-            python ./repo/tests/test_join.py
+            python tests/data_format_tests.py
+            python tests/usgs_tests.py
+            python tests/test_join.py
 
   model_basic_test:
     <<: *defaults
