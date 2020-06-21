@@ -23,8 +23,8 @@ class PyTorchTrainTests(unittest.TestCase):
         "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}}, "inference_params":{"hours_to_forecast":15},
                             "wandb":False})
         self.full_transformer_params = {"use_decoder":True, "model_params":{"number_time_series":3, "seq_length":20, "output_seq_len":15}, 
-        "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":15, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False, "train_end":50, 
-        "valid_end":100},"training_params": {"optimizer":"Adam", "lr":.01, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}}, "inference_params":{"hours_to_forecast":10},
+        "dataset_params":{"forecast_history": 5, "class":"default", "forecast_length":3, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False, "train_end":50,
+        "valid_end":100},"training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}}, "inference_params":{"hours_to_forecast":5},
                             "wandb":False}
         self.simple_param = {"use_decoder":True, "model_params":{"n_time_series":3, "seq_length":80, "output_seq_len":20}, 
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":15, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False, "train_end":50, 

@@ -155,15 +155,15 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            tput setaf 2; echo 'running trainer_lstm_test \n'
+            shell tput setaf 2; echo 'running trainer_lstm_test \n'
             python flood_forecast/trainer.py -p tests/lstm_test.json
-            tput setaf 2; echo 'running trainer_multi_test \n'
+            shell tput setaf 2; echo 'running trainer_multi_test \n'
             python flood_forecast/trainer.py -p tests/multi_test.json
-            tput setaf 2; echo 'running trainer_full_transformer_test \n'
+            shell tput setaf 2; echo 'running trainer_full_transformer_test \n'
             python flood_forecast/trainer.py -p  tests/full_transformer.json
-            tput setaf 2; echo 'running trainer_decoder_test \n'
+            shell tput setaf 2; echo 'running trainer_decoder_test \n'
             python flood_forecast/trainer.py -p tests/decoder_test.json
-            tput setaf 2; echo 'running trainer_custom_encode \n'
+            shell tput setaf 2; echo 'running trainer_custom_encode \n'
             python flood_forecast/trainer.py -p tests/custom_encode.json
 
   plot_test:
