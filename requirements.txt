@@ -4,7 +4,8 @@ torch
 tb-nightly
 seaborn
 future
-wandb 
+wandb
+h5py
 pandas_gbq
 google-cloud
 google-cloud-storage
