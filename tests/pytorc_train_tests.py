@@ -13,9 +13,9 @@ class PyTorchTrainTests(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {"model_params":{"number_time_series":3, "seq_len":20}, 
-        "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length":20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False},
+        "dataset_params":{"forecast_history": 5, "class":"default", "forecast_length":5, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False},
             "training_params": {"optimizer":"Adam", "lr":.1, "criterion": "MSE", "epochs":1, "batch_size":2,  "optim_params":{}},
-                            "wandb":False, "inference_params":{"hours_to_forecast":10}}
+                            "wandb":False, "inference_params":{"hours_to_forecast":5}}
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
         self.dummy_model = PyTorchForecast("DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {"model_params":{"forecast_length": 5},  
