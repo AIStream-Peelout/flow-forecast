@@ -171,15 +171,15 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            echo 'running trainer_lstm_test \n'
+            echo -e 'running trainer_lstm_test \n'
             python flood_forecast/trainer.py -p tests/lstm_test.json
-            echo 'running trainer_multi_test \n'
+            echo -e 'running trainer_multi_test \n'
             python flood_forecast/trainer.py -p tests/multi_test.json
-            echo 'running trainer_full_transformer_test \n'
+            echo -e 'running trainer_full_transformer_test \n'
             python flood_forecast/trainer.py -p  tests/full_transformer.json
-            echo 'running trainer_decoder_test \n'
+            echo -e 'running trainer_decoder_test \n'
             python flood_forecast/trainer.py -p tests/decoder_test.json
-            echo 'running trainer_custom_encode \n'
+            echo -e 'running trainer_custom_encode \n'
             python flood_forecast/trainer.py -p tests/custom_encode.json
 
       - store_artifacts:
@@ -211,15 +211,6 @@ jobs:
           when: always
           command:
             python -m unittest -v tests/test_plot.py
-
-  save_common_artifacts:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/repo
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
 
 workflows:
   version: 2
