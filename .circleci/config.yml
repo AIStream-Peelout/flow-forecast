@@ -55,7 +55,6 @@ jobs:
       - run:
           name: install dependencies
           command: |
-#            cd repo
             sudo pip install pipenv
             sudo pip install --quiet -r requirements.txt
             sudo python setup.py install
