@@ -193,6 +193,7 @@ jobs:
             python tests/test_plot.py
 
   save_common_artifacts:
+    <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
