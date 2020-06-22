@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import wandb
+import seaborn as sns
+
+random.seed(0)
 
 
 BACKGROUND_SAMPLE_SIZE = 5
@@ -74,9 +77,7 @@ def deep_explain_model_summary_plot(
     shap.summary_plot(
         multi_shap_values,
         feature_names=csv_test_loader.df.columns,
-        class_names=[
-            f"time-step-{t}" for t in range(model.model.forecast_length)
-        ],
+        class_names=[f"time-step-{t}" for t in range(model.model.forecast_length)],
         max_display=10,  # max number of features to display
         show=False,
         plot_size=(10, num_features * 2),
@@ -93,9 +94,7 @@ def deep_explain_model_summary_plot(
     plt.close()
 
     # summary plot for one prediction at datetime_start
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
-        datetime_start
-    )
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     to_explain = history.to(device).unsqueeze(0)
     shap_values = deep_explainer.shap_values(to_explain)
     mean_shap_values = np.concatenate(shap_values).mean(axis=0)
@@ -114,6 +113,109 @@ def deep_explain_model_summary_plot(
             "Feature ranking for prediction at "
             f"{datetime_start.strftime('%Y-%m-%d')}": wandb.Image(
                 "feature_ranking_for_prediction_at_timestamp.png"
+            )
+        }
+    )
+    plt.close()
+
+
+def deep_explain_model_heatmap(
+    model,
+    datetime_start: datetime = datetime(2014, 6, 1, 0),
+    test_csv_path: str = None,
+    forecast_total: int = 336,
+    dataset_params: Dict = {},
+    topn_feature: int = 2,
+):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    num_features = len(model.params["dataset_params"]["relevant_cols"])
+    forecast_len = model.params["model_params"]["output_seq_len"]
+    seq_len = model.params["model_params"]["seq_len"]
+    # If the test dataframe is none use default one supplied in params
+    if test_csv_path is None:
+        csv_test_loader = model.test_data
+    else:
+        csv_test_loader = CSVTestLoader(
+            test_csv_path,
+            forecast_total,
+            **dataset_params,
+            interpolate=dataset_params["interpolate_param"],
+        )
+    background_data = csv_test_loader.original_df
+    background_batches = csv_test_loader.convert_real_batches(
+        csv_test_loader.df.columns, background_data
+    )
+    background_tensor = (
+        torch.stack(random.sample(background_batches, BACKGROUND_SAMPLE_SIZE))
+        .float()
+        .to(device)
+    )
+    model.model.eval()
+
+    # background shape (L, N, M)
+    # L - batch size, N - history length, M - feature size
+    deep_explainer = shap.DeepExplainer(model.model, background_tensor)
+    shap_values = deep_explainer.shap_values(background_tensor)
+
+    # heatmap on average shape values
+    # (seq_len*forecast_len) per fop feature
+    shap_values_reshaped = np.stack(shap_values).mean(axis=1)
+    top_feat_idx = (-shap_values_reshaped.reshape(-1, 3).mean(axis=0)).argsort()[
+        :topn_feature
+    ]
+
+    fig, axes = plt.subplots(topn_feature, gridspec_kw={"hspace": 0.5})
+    axes = axes.flatten()
+    for i, idx in enumerate(top_feat_idx):
+        sns.heatmap(
+            shap_values_reshaped[:, :, idx].T,
+            cmap="YlGnBu",
+            ax=axes[i],
+            cbar_kws={"label": "shap values"},
+        )
+        axes[i].set_xlabel(
+            "prediction steps", rotation="horizontal", horizontalalignment="center",
+        )
+        axes[i].set_ylabel("sequence history steps")
+        axes[i].set_title(f"Top{i} feature: {csv_test_loader.df.columns[idx]}")
+
+    plt.savefig("average_prediction_heatmaps.png")
+    wandb.log(
+        {"Average prediction heatmaps ": wandb.Image("average_prediction_heatmaps.png")}
+    )
+    plt.close()
+
+    # heatmap one prediction sequence at datetime_start
+    # (seq_len*forecast_len) per fop feature
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    to_explain = history.to(device).unsqueeze(0)
+    shap_values = deep_explainer.shap_values(to_explain)
+    shap_values_reshaped = np.stack(shap_values).mean(axis=1)
+    top_feat_idx = (-shap_values_reshaped.reshape(-1, 3).mean(axis=0)).argsort()[
+        :topn_feature
+    ]
+
+    fig, axes = plt.subplots(topn_feature, gridspec_kw={"hspace": 0.5})
+    axes = axes.flatten()
+    for i, idx in enumerate(top_feat_idx):
+        sns.heatmap(
+            shap_values_reshaped[:, :, idx].T,
+            cmap="YlGnBu",
+            ax=axes[i],
+            cbar_kws={"label": "shap values"},
+        )
+        axes[i].set_xlabel(
+            "prediction steps", rotation="horizontal", horizontalalignment="center",
+        )
+        axes[i].set_ylabel("sequence history steps")
+        axes[i].set_title(f"Top{i} feature: {csv_test_loader.df.columns[idx]}")
+
+    plt.savefig("heatmap_for_prediction_at_timestamp.png")
+    wandb.log(
+        {
+            "Heatmap for prediction at "
+            f"{datetime_start.strftime('%Y-%m-%d')}": wandb.Image(
+                "heatmap_for_prediction_at_timestamp.png"
             )
         }
     )
