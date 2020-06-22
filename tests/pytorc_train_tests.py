@@ -69,12 +69,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(self.model.model.multi_attn.embed_dim, 128)
 
     def test_train_and_resume(self):
-        device = self.model.device
         train_transformer_style(self.model, self.model_params["training_params"])
         self.assertEqual(len(os.listdir("model_save")), 2)
         print("first test passed")
-        model2 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
-        data = torch.rand(2, 20, 3).to(device)
+        model2 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file,
+                                 self.model_params)
+        data = torch.rand(2, 20, 3)
         self.model_params["weight_path"] = os.path.join("model_save", sorted(os.listdir("model_save"))[1])
         print("Moving to next test")
         model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file,
@@ -94,25 +94,24 @@ class PyTorchTrainTests(unittest.TestCase):
         self.model_params["weight_path"] = os.path.join("model_save", sorted(os.listdir("model_save"))[1])
         self.model_params["model_params"]["output_seq_len"] = 6
         self.model_params["weight_path_add"] = {}
-        model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
-        device = model3.device
+        model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file,
+                                 self.model_params)
         # Assert shape is proper
         self.assertEqual(2, 2)
-        data = torch.rand(1, 20, 3).to(device)
-        self.assertEqual(model3.model(data).shape, torch.Size([1,6]))
-    
+        data = torch.rand(1, 20, 3)
+        self.assertEqual(model3.model(data).shape, torch.Size([1, 6]))
+
     def test_removing_layer_param(self):
         model3 = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file,
                                  self.model_params)
         model3.save_model("output.pth", 2)
-        device = model3.device
         self.model_params["model_params"]["output_seq_len"] = 7
         self.model_params["weight_path_add"] = {}
         self.model_params["weight_path_add"]["excluded_layers"] = ["last_layer.weight", "last_layer.bias"]
-        model = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file, self.model_params)
-        result = model.model(torch.rand(1, 20, 3).to(device))
-        self.assertEqual(result.shape[1], 7) 
-
+        model = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file, self.keag_file,
+                                self.model_params)
+        result = model.model(torch.rand(1, 20, 3))
+        self.assertEqual(result.shape[1], 7)
 
     def test_train_loss(self):
         print("Now begining train loss test")
