@@ -1,0 +1,29 @@
+{
+    "root": "/home/wwymak/coronawhy/github_aistream-peelout_flow-forecast",
+    "program": "/snap/pycharm-professional/201/plugins/python/helpers/pycharm/_jb_pytest_runner.py",
+    "git": {
+        "remote": "git@github.com:wwymak/flow-forecast.git",
+        "commit": "b1e72555820b6cf2767617bbd9b637dba7137e8d"
+    },
+    "email": "wwymak@gmail.com",
+    "startedAt": "2020-06-22T20:39:50.151830",
+    "host": "wwymak-dl-box",
+    "username": "wwymak",
+    "executable": "/home/wwymak/anaconda3/envs/immo-ml/bin/python",
+    "os": "Linux-5.3.0-59-generic-x86_64-with-debian-buster-sid",
+    "python": "3.7.6",
+    "gpu": "GeForce RTX 2080 Ti",
+    "gpu_count": 1,
+    "cpu_count": 16,
+    "cuda": "10.1.243",
+    "args": [
+        "test_explain_model_output.py::ModelInterpretabilityTest"
+    ],
+    "state": "killed",
+    "jobType": null,
+    "mode": "run",
+    "name": "flood_forecast_circleci",
+    "project": "repo-flood_forecast",
+    "heartbeatAt": "2020-06-22T20:40:06.804521",
+    "exitcode": 255
+}

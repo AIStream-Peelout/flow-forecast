@@ -1,0 +1,24 @@
+2020-06-22 21:40:14,080 DEBUG   MainThread:24190 [wandb_config.py:_load_defaults():132] no defaults not found in config-defaults.yaml
+2020-06-22 21:40:14,265 DEBUG   MainThread:24190 [meta.py:_setup_code_git():49] probe for git information
+2020-06-22 21:40:14,277 DEBUG   MainThread:24190 [run_manager.py:__init__():546] Initialized sync for repo-flood_forecast/1eel0zwr
+2020-06-22 21:40:14,279 INFO    MainThread:24190 [run_manager.py:wrap_existing_process():1148] wrapping existing process 24128
+2020-06-22 21:40:14,378 INFO    MainThread:24190 [run_manager.py:init_run():927] system metrics and metadata threads started
+2020-06-22 21:40:14,378 INFO    MainThread:24190 [run_manager.py:init_run():966] upserting run before process can begin, waiting at most 10 seconds
+2020-06-22 21:40:14,589 INFO    Thread-15 :24190 [run_manager.py:_upsert_run():1055] saving pip packages
+2020-06-22 21:40:14,590 INFO    Thread-15 :24190 [run_manager.py:_upsert_run():1057] initializing streaming files api
+2020-06-22 21:40:14,590 INFO    Thread-15 :24190 [run_manager.py:_upsert_run():1064] unblocking file change observer, beginning sync with W&B servers
+2020-06-22 21:40:14,590 INFO    MainThread:24190 [run_manager.py:wrap_existing_process():1165] informing user process we are ready to proceed
+2020-06-22 21:40:14,592 INFO    MainThread:24190 [run_manager.py:_sync_etc():1272] entering loop for messages from user process
+2020-06-22 21:40:14,735 INFO    MainThread:24190 [run_manager.py:_sync_etc():1295] received message from user process: {"exitcode": 1}
+2020-06-22 21:40:14,736 INFO    MainThread:24190 [run_manager.py:_sync_etc():1381] closing log streams and sending exitcode to W&B
+2020-06-22 21:40:14,736 INFO    MainThread:24190 [run_manager.py:shutdown():1071] shutting down system stats and metadata service
+2020-06-22 21:40:15,264 INFO    Thread-4  :24190 [run_manager.py:_on_file_modified():691] file/dir modified: /home/wwymak/coronawhy/github_aistream-peelout_flow-forecast/tests/wandb/run-20200622_204013-1eel0zwr/config.yaml
+2020-06-22 21:40:15,378 INFO    MainThread:24190 [run_manager.py:shutdown():1085] stopping streaming files and file change observer
+2020-06-22 21:40:15,458 INFO    MainThread:24190 [run_manager.py:_on_file_created():680] file/dir created: /home/wwymak/coronawhy/github_aistream-peelout_flow-forecast/tests/wandb/run-20200622_204013-1eel0zwr/wandb-events.jsonl
+2020-06-22 21:40:15,458 INFO    MainThread:24190 [run_manager.py:_on_file_created():680] file/dir created: /home/wwymak/coronawhy/github_aistream-peelout_flow-forecast/tests/wandb/run-20200622_204013-1eel0zwr/wandb-metadata.json
+2020-06-22 21:40:15,459 INFO    MainThread:24190 [run_manager.py:_on_file_created():680] file/dir created: /home/wwymak/coronawhy/github_aistream-peelout_flow-forecast/tests/wandb/run-20200622_204013-1eel0zwr/requirements.txt
+2020-06-22 21:40:15,459 INFO    MainThread:24190 [run_manager.py:_on_file_created():680] file/dir created: /home/wwymak/coronawhy/github_aistream-peelout_flow-forecast/tests/wandb/run-20200622_204013-1eel0zwr/output.log
+2020-06-22 21:40:15,459 INFO    MainThread:24190 [run_manager.py:_on_file_modified():691] file/dir modified: /home/wwymak/coronawhy/github_aistream-peelout_flow-forecast/tests/wandb/run-20200622_204013-1eel0zwr/wandb-metadata.json
+2020-06-22 21:40:16,804 INFO    MainThread:24190 [run_manager.py:_sync_etc():1393] process only ran for 2 seconds, not syncing files
+e_modified():691] file/dir modified: /home/wwymak/coronawhy/github_aistream-peelout_flow-forecast/tests/wandb/run-20200622_204013-1eel0zwr/wandb-metadata.json
+2020-06-22 21:40:16,804 INFO    MainThread:24190 [1eel0zwr:run_manager.py:_sync_etc():1393] process only ran for 2 seconds, not syncing files

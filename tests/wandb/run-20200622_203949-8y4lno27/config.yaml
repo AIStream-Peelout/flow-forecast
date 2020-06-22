@@ -1,0 +1,42 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.8.36
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.7.6
+dataset_params:
+  desc: null
+  value:
+    class: default
+    forecast_history: 20
+    forecast_length: 20
+    forecast_test_len: 50
+    interpolate: false
+    relevant_cols:
+    - cfs
+    - temp
+    - precip
+    target_col:
+    - cfs
+inference_params:
+  desc: null
+  value:
+    hours_to_forecast: 50
+model_params:
+  desc: null
+  value:
+    number_time_series: 3
+    output_seq_len: 10
+    seq_len: 20
+wandb:
+  desc: null
+  value:
+    name: flood_forecast_circleci
+    project: repo-flood_forecast
+    tags:
+    - dummy_run
+    - circleci
