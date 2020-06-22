@@ -208,9 +208,9 @@ jobs:
       - run:
           name: plot tests
           when: always
-          command:
+          command: |
             python -m unittest -v tests/test_plot.py
-            python -m tests/test_explain_model_output.py
+            python -m unittest -v tests/test_explain_model_output.py
 
       - store_test_results:
           path: test-results-plot
