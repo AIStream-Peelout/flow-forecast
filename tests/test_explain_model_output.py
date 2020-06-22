@@ -7,18 +7,10 @@ from flood_forecast.explain_model_output import deep_explain_model_summary_plot
 
 
 class ModelInterpretabilityTest(unittest.TestCase):
-    test_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "test_init"
-    )
-    test_path2 = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "test_data"
-    )
+    test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
+    test_path2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
     model_params = {
-        "model_params": {
-            "number_time_series": 3,
-            "seq_len": 20,
-            "output_seq_len": 10,
-        },
+        "model_params": {"number_time_series": 3, "seq_len": 20, "output_seq_len": 10,},
         "dataset_params": {
             "forecast_history": 20,
             "class": "default",
@@ -28,18 +20,15 @@ class ModelInterpretabilityTest(unittest.TestCase):
             "interpolate": False,
         },
         "wandb": {
-           "name": "flood_forecast_circleci",
-           "tags": ["dummy_run", "circleci"],
-           "project": "repo-flood_forecast"
+            "name": "flood_forecast_circleci",
+            "tags": ["dummy_run", "circleci"],
+            "project": "repo-flood_forecast",
         },
+        "inference_params": {"hours_to_forecast": 15},
     }
     model_linear_params = {
         "use_decoder": True,
-        "model_params": {
-            "n_time_series": 3,
-            "seq_length": 100,
-            "output_seq_len": 20,
-        },
+        "model_params": {"n_time_series": 3, "seq_length": 100, "output_seq_len": 20,},
         "dataset_params": {
             "forecast_history": 100,
             "class": "default",
@@ -62,18 +51,10 @@ class ModelInterpretabilityTest(unittest.TestCase):
     }
     keag_file = os.path.join(test_path, "keag_small.csv")
     model = PyTorchForecast(
-        "MultiAttnHeadSimple",
-        keag_file,
-        keag_file,
-        keag_file,
-        model_params,
+        "MultiAttnHeadSimple", keag_file, keag_file, keag_file, model_params,
     )
     linear_model = PyTorchForecast(
-        "SimpleLinearModel",
-        keag_file,
-        keag_file,
-        keag_file,
-        model_linear_params,
+        "SimpleLinearModel", keag_file, keag_file, keag_file, model_linear_params,
     )
     data_base_params = {
         "file_path": os.path.join(test_path2, "keag_small.csv"),

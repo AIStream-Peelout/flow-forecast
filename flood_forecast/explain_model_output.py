@@ -59,8 +59,14 @@ def deep_explain_model_summary_plot(
         max_display=10,
         plot_size=(10, num_features * 2),
     )
-    plt.savefig('overall_feature_ranking_by_shap_values.png')
-    wandb.log({'Overall feature ranking by shap values': wandb.Image('overall_feature_ranking_by_shap_values.png')})
+    plt.savefig("overall_feature_ranking_by_shap_values.png")
+    wandb.log(
+        {
+            "Overall feature ranking by shap values": wandb.Image(
+                "overall_feature_ranking_by_shap_values.png"
+            )
+        }
+    )
     plt.close()
 
     # summary plot for multi-step outputs
@@ -68,22 +74,24 @@ def deep_explain_model_summary_plot(
     shap.summary_plot(
         multi_shap_values,
         feature_names=csv_test_loader.df.columns,
-        class_names=[
-            f"time-step-{t}" for t in range(model.model.forecast_length)
-        ],
+        class_names=[f"time-step-{t}" for t in range(model.model.forecast_length)],
         max_display=10,  # max number of features to display
         show=False,
         plot_size=(10, num_features * 2),
         sort=False,
     )
-    plt.savefig('overall_feature_rank_per_time_step.png')
-    wandb.log({'Overall feature ranking per prediction time-step': wandb.Image('overall_feature_rank_per_time_step.png')})
+    plt.savefig("overall_feature_rank_per_time_step.png")
+    wandb.log(
+        {
+            "Overall feature ranking per prediction time-step": wandb.Image(
+                "overall_feature_rank_per_time_step.png"
+            )
+        }
+    )
     plt.close()
 
     # summary plot for one prediction at datetime_start
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
-        datetime_start
-    )
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     to_explain = history.to(device).unsqueeze(0)
     shap_values = deep_explainer.shap_values(to_explain)
     mean_shap_values = np.concatenate(shap_values).mean(axis=0)
@@ -96,11 +104,14 @@ def deep_explain_model_summary_plot(
         plot_size=(9, num_features * 2),
         show=False,
     )
-    plt.savefig('feature_ranking_for_prediction_at_timestamp.png')
-    wandb.log({
-        f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}":
-        wandb.Image('feature_ranking_for_prediction_at_timestamp.png')
-    })
+    plt.savefig("feature_ranking_for_prediction_at_timestamp.png")
+    wandb.log(
+        {
+            f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}": wandb.Image(
+                "feature_ranking_for_prediction_at_timestamp.png"
+            )
+        }
+    )
     plt.close()
 
 
