@@ -49,7 +49,11 @@ jobs:
             python -m unittest -v tests/test_evaluation.py
 
       - store_test_results:
-          path: test-results-evaluator
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+          destination: test-results-evaluator
 
 
   data_quality_test:
@@ -80,7 +84,11 @@ jobs:
             python -m unittest -v tests/test_join.py
 
       - store_test_results:
-          path: test-results-data-quality
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+          destination: test-results-data-quality
 
 
   model_basic_test:
@@ -114,8 +122,11 @@ jobs:
             python -m unittest -v tests/test_da_rnn.py
 
       - store_test_results:
-          path: test-results-model-tests
+          path: test-results
 
+      - store_artifacts:
+          path: test-results
+          destination: test-results-model-tests
   decoder_test:
     <<: *defaults
     steps:
@@ -143,7 +154,11 @@ jobs:
             python -m unittest -v tests/test_decoder.py
 
       - store_test_results:
-          path: test-results-decoder
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+          destination: test-results-decoder
 
 
   trainer_test:
@@ -182,8 +197,11 @@ jobs:
             python flood_forecast/trainer.py -p tests/custom_encode.json
 
       - store_test_results:
-          path: test-results-trainer
+          path: test-results
 
+      - store_artifacts:
+          path: test-results
+          destination: test-results-trainer
 
   plot_test:
     <<: *defaults
@@ -213,7 +231,12 @@ jobs:
             python -m unittest -v tests/test_explain_model_output.py
 
       - store_test_results:
-          path: test-results-plot
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+          destination: test-results-plot
+
 
 
 workflows:
