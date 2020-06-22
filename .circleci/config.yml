@@ -211,6 +211,7 @@ jobs:
           when: always
           command:
             python -m unittest -v tests/test_plot.py
+            python -m unittest -v tests/test_explain_model_output.py
 
 workflows:
   version: 2
