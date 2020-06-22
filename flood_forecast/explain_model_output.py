@@ -5,7 +5,6 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-import mpld3
 import random
 import wandb
 
@@ -60,8 +59,8 @@ def deep_explain_model_summary_plot(
         max_display=10,
         plot_size=(10, num_features * 2),
     )
-    over_feature_ranking_shap_html = mpld3.fig_to_html(plt.gcf())
-    wandb.log({'Overall feature ranking by shap values': wandb.Html(over_feature_ranking_shap_html, inject=False)})
+    plt.savefig('overall_feature_ranking_by_shap_values.png')
+    wandb.log({'Overall feature ranking by shap values': wandb.Image('overall_feature_ranking_by_shap_values.png')})
     plt.close()
 
     # summary plot for multi-step outputs
@@ -77,8 +76,8 @@ def deep_explain_model_summary_plot(
         plot_size=(10, num_features * 2),
         sort=False,
     )
-    overall_feature_rank_per_time_step_html = mpld3.fig_to_html(plt.gcf())
-    wandb.log({'Overall feature ranking per prediction time-step': wandb.Html(overall_feature_rank_per_time_step_html, inject=False)})
+    plt.savefig('overall_feature_rank_per_time_step.png')
+    wandb.log({'Overall feature ranking per prediction time-step': wandb.Image('overall_feature_rank_per_time_step.png')})
     plt.close()
 
     # summary plot for one prediction at datetime_start
@@ -97,10 +96,10 @@ def deep_explain_model_summary_plot(
         plot_size=(9, num_features * 2),
         show=False,
     )
-    feature_ranking_for_prediction_at_timestamp = mpld3.fig_to_html(plt.gcf())
+    plt.savefig('feature_ranking_for_prediction_at_timestamp.png')
     wandb.log({
         f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}":
-        wandb.Html(feature_ranking_for_prediction_at_timestamp, inject=False)
+        wandb.Image('feature_ranking_for_prediction_at_timestamp.png')
     })
     plt.close()
 
