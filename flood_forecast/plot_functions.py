@@ -1,6 +1,24 @@
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import numpy as np
 import pandas as pd
-from typing import Dict
+from typing import Dict, List, Iterator
+from flood_forecast.named_dimension_array import NamedDimensionArray
+
+
+def plot_shap_value_heatmaps(shap_values_to_plot: Iterator[NamedDimensionArray], columns: List[str]) -> go.Figure:
+    fig = make_subplots(rows=len(columns), subplot_titles=columns)
+    cbar_locations = np.linspace(0.15, 0.85, len(columns))
+    cbar_len = 1.0 / len(columns)
+    for i, (feature_name, shap_values_features) in enumerate(zip(columns, shap_values_to_plot)):
+        heatmap = go.Heatmap(
+            z=shap_values_features,
+            colorbar={'len': cbar_len, 'y': cbar_locations[i]}
+        )
+        fig.add_trace(heatmap, row=i + 1, col=1)
+        fig.update_xaxes(title_text='sequence history steps', row=i + 1, col=1)
+        fig.update_yaxes(title_text='prediction steps', row=i + 1, col=1)
+    return fig
 
 
 def calculate_confidence_intervals(df: pd.DataFrame, df_preds: pd.Series, ci_lower: float, ci_upper) -> pd.DataFrame:
