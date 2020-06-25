@@ -22,6 +22,7 @@ class TimeSeriesModel(ABC):
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else: 
             self.model = self.load_model(model_base, params["model_params"])
+        params["dataset_params"]["forecast_test_len"]=params["inference_params"]["hours_to_forecast"]
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
@@ -128,7 +129,6 @@ class PyTorchForecast(TimeSeriesModel):
         self.upload_gcs(params_save_path, params_name, "_params", epoch)
         self.upload_gcs(model_save_path, model_name, "_model",  epoch)
         if self.wandb:
-            import wandb
             wandb.config.save_path = model_save_path
     
     def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str, the_class="default"):
@@ -137,12 +137,15 @@ class PyTorchForecast(TimeSeriesModel):
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
-            start_end_params["end_stamp"] = dataset_params[loader_type + "_end"] 
+            start_end_params["end_stamp"] = dataset_params[loader_type + "_end"]
         if "scaler" in dataset_params:
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]] 
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        if the_class == "default":
+        if loader_type == "test" and "forecast_test_len" in dataset_params:
+           l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_test_len"],
+            dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
+        elif the_class == "default":
             l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
             dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
         else:
