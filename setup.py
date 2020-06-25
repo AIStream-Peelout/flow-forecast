@@ -1,4 +1,12 @@
 from setuptools import setup
+import os
+
+library_folder = os.path.dirname(os.path.realpath(__file__))
+requirementPath = f'{library_folder}/requirements.txt'
+install_requires = []
+if os.path.isfile(requirementPath):
+    with open(requirementPath) as f:
+        install_requires = f.read().splitlines()
 
 setup(
     name='flood_forecast',
@@ -6,5 +14,5 @@ setup(
     packages=['flood_forecast', 'flood_forecast.transformer_xl', 'flood_forecast.preprocessing', 'flood_forecast.da_rnn', "flood_forecast.basic", "flood_forecast.custom"],
     license='Public',
     long_description='A public package for forecasting river flows and flash flood severity',
-    install_requires=['scikit-learn', 'torch', 'tensorflow', 'pandas', 'google-cloud']
+    install_requires=install_requires
 )
