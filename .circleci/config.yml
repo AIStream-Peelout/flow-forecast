@@ -5,6 +5,7 @@
 version: 2
 jobs:
   build:
+    paralleism: 2
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
@@ -72,8 +73,9 @@ jobs:
       - run:
           name: Plot tests
           when: always
-          command:
+          command: |
             python tests/test_plot.py
+            python tests/test_explain_model_output.py
       - store_artifacts:
           path: test-reports
           destination: test-reports

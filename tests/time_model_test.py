@@ -3,11 +3,10 @@ from flood_forecast.model_dict_function import pytorch_model_dict as pytorch_mod
 from flood_forecast.time_model import PyTorchForecast
 import os
 import torch
-
 class TimeSeriesModelTest(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
-        self.model_params = {"model_params":{"number_time_series":3}, 
+        self.model_params = {"model_params":{"number_time_series":3}, "inference_params":{"hours_to_forecast":15},
         "dataset_params":{"forecast_history": 20, "class":"default", "forecast_length": 20, "relevant_cols":["cfs", "temp", "precip"], "target_col":["cfs"], "interpolate": False},
                             "wandb":False}
                             
