@@ -5,6 +5,7 @@ torch
 tb-nightly
 seaborn
 future
+h5py
 wandb~=0.8.36
 pandas_gbq
 google-cloud
