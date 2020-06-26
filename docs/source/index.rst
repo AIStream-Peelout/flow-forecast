@@ -5,10 +5,14 @@
 
 Welcome to Flow Forecast's documentation!
 =========================================
+.. automodule:: flow_forecast
+
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents:
 
+   utils
    license
    help
 
