@@ -12,7 +12,7 @@ from flood_forecast.plot_functions import (
     plot_shap_value_heatmaps,
     plot_summary_shap_values,
     plot_summary_shap_values_over_time_series,
-    plot_shap_values_from_history
+    plot_shap_values_from_history,
 )
 
 random.seed(0)
@@ -56,7 +56,9 @@ def deep_explain_model_summary_plot(
     deep_explainer = shap.DeepExplainer(model.model, background_tensor)
     shap_values = deep_explainer.shap_values(background_tensor)
     shap_values = np.stack(shap_values)
-    shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
+    shap_values = NamedDimensionArray(
+        shap_values, ["preds", "batches", "observations", "features"]
+    )
 
     # summary plot shows overall feature ranking
     # by average absolute shap values
@@ -66,20 +68,32 @@ def deep_explain_model_summary_plot(
 
     # summary plot for multi-step outputs
     # multi_shap_values = shap_values.apply_along_axis(np.mean, 'batches')
-    fig = plot_summary_shap_values_over_time_series(shap_values, csv_test_loader.df.columns)
+    fig = plot_summary_shap_values_over_time_series(
+        shap_values, csv_test_loader.df.columns
+    )
     wandb.log({"Overall feature ranking per prediction time-step": fig})
 
     # summary plot for one prediction at datetime_start
     history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     history = history.to(device).unsqueeze(0)
-    history_numpy = NamedDimensionArray(history.cpu().numpy(), ['batches', 'observations', 'features'])
+    history_numpy = NamedDimensionArray(
+        history.cpu().numpy(), ["batches", "observations", "features"]
+    )
 
     shap_values = deep_explainer.shap_values(history)
     shap_values = np.stack(shap_values)
-    shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
+    shap_values = NamedDimensionArray(
+        shap_values, ["preds", "batches", "observations", "features"]
+    )
 
-    fig = plot_shap_values_from_history(shap_values, history_numpy, csv_test_loader.df.columns)
-    wandb.log({f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}": fig})
+    fig = plot_shap_values_from_history(
+        shap_values, history_numpy, csv_test_loader.df.columns
+    )
+    wandb.log(
+        {
+            f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}": fig
+        }
+    )
     plt.close()
 
 
@@ -119,12 +133,16 @@ def deep_explain_model_heatmap(
     # L - batch size, N - history length, M - feature size
     # for each element in each N x M batch in L, attribute to each prediction in forecast len
     deep_explainer = shap.DeepExplainer(model.model, background_tensor)
-    shap_values = deep_explainer.shap_values(background_tensor)  # forecast_len x N x L x M
+    shap_values = deep_explainer.shap_values(
+        background_tensor
+    )  # forecast_len x N x L x M
     shap_values = np.stack(shap_values)
-    shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
+    shap_values = NamedDimensionArray(
+        shap_values, ["preds", "batches", "observations", "features"]
+    )
 
     fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
-    wandb.log({'Average prediction heatmaps': fig})
+    wandb.log({"Average prediction heatmaps": fig})
 
     # heatmap one prediction sequence at datetime_start
     # (seq_len*forecast_len) per fop feature
@@ -132,10 +150,13 @@ def deep_explain_model_heatmap(
     to_explain = history.to(device).unsqueeze(0)
     shap_values = deep_explainer.shap_values(to_explain)
     shap_values = np.stack(shap_values)
-    shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
+    shap_values = NamedDimensionArray(
+        shap_values, ["preds", "batches", "observations", "features"]
+    )
 
     fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     wandb.log({f"Heatmap for prediction at {datetime_start.strftime('%Y-%m-%d')}": fig})
+
 
 def deep_explain_model_sample():
     pass
