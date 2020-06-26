@@ -1,19 +1,20 @@
 import unittest
 import os
-import pandas as pd 
+import pandas as pd
 from flood_forecast.preprocessing.process_usgs import process_intermediate_csv, create_csv
 from flood_forecast.preprocessing.interpolate_preprocess import fix_timezones, interpolate_missing_values
 
+
 class DataQualityTests(unittest.TestCase):
     def setUp(self):
-        self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"test_data")
+        self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
 
-    def test_intermediate_csv(self): 
+    def test_intermediate_csv(self):
         df = pd.read_csv(os.path.join(self.test_data_path, "big_black_test_small.csv"), sep="\t")
         result_df, max_flow, min_flow = process_intermediate_csv(df)
         self.assertEqual(result_df.iloc[1]['datetime'].hour, 6)
         self.assertGreater(max_flow, 2640)
-        self.assertLess(min_flow,  1600)
+        self.assertLess(min_flow, 1600)
 
     def test_tz_interpolate_fix(self):
         """
@@ -28,8 +29,7 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(0, sum(pd.isnull(revised_df['precip'])))
 
     def test_chunking(self):
-        self.assertEqual(1,1)
+        self.assertEqual(1, 1)
 
 if __name__ == '__main__':
     unittest.main()
-

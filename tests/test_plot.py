@@ -17,7 +17,8 @@ class PlotFunctionsTest(unittest.TestCase):
 
     def test_calculate_confidence_intervals(self):
         ci_lower, ci_upper = 0.025, 0.975
-        df_quantiles = calculate_confidence_intervals(self.df_preds, self.df_test['preds'], ci_lower, ci_upper)
+        df_quantiles = calculate_confidence_intervals(
+            self.df_preds, self.df_test['preds'], ci_lower, ci_upper)
         df_preds_mean = self.df_preds.mean(axis=1)
         self.assertTrue((df_quantiles[ci_lower] < df_preds_mean).all())
         self.assertTrue((df_quantiles[ci_upper] > df_preds_mean).all())
@@ -26,7 +27,8 @@ class PlotFunctionsTest(unittest.TestCase):
 
     def test_calculate_confidence_intervals_df_preds_empty(self):
         ci_lower, ci_upper = 0.025, 0.975
-        df_quantiles = calculate_confidence_intervals(self.df_preds_empty, self.df_test['preds'], ci_lower, ci_upper)
+        df_quantiles = calculate_confidence_intervals(
+            self.df_preds_empty, self.df_test['preds'], ci_lower, ci_upper)
         self.assertTrue(df_quantiles[ci_lower].isna().all())
         self.assertTrue(df_quantiles[ci_upper].isna().all())
 
@@ -37,7 +39,8 @@ class PlotFunctionsTest(unittest.TestCase):
 
     def test_plot_df_test_with_confidence_interval_df_preds_empty(self):
         params = {'dataset_params': {'target_col': ['target_col']}}
-        fig = plot_df_test_with_confidence_interval(self.df_test, self.df_preds_empty, 0, params, 95)
+        fig = plot_df_test_with_confidence_interval(
+            self.df_test, self.df_preds_empty, 0, params, 95)
         self.assertIsInstance(fig, go.Figure)
 
 

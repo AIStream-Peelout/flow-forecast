@@ -1,5 +1,9 @@
 import torch
-flatten_list_function = lambda l: [item for sublist in l for item in sublist]
+
+
+def flatten_list_function(l): return [item for sublist in l for item in sublist]
+
+
 class EarlyStopper(object):
     """EarlyStopping handler can be used to stop the training if no improvement after a given number of events.
     Args:
@@ -48,8 +52,8 @@ class EarlyStopper(object):
         self.best_score = None
 
     def check_loss(self, model, validation_loss) -> bool:
-        score = validation_loss 
-        
+        score = validation_loss
+
         if self.best_score is None:
             self.best_score = score
             torch.save(model.state_dict(), "checkpoint.pth")
@@ -59,11 +63,12 @@ class EarlyStopper(object):
             self.counter += 1
             print(self.counter)
             if self.counter >= self.patience:
-              return False
+                return False
         else:
             self.save_model_checkpoint(model)
             self.best_score = score
             self.counter = 0
         return True
+
     def save_model_checkpoint(self, model):
-      torch.save(model.state_dict(), "checkpoint.pth")
+        torch.save(model.state_dict(), "checkpoint.pth")

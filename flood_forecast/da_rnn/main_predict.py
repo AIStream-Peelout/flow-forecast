@@ -75,6 +75,6 @@ final_y_pred = predict(enc, dec, data, **da_rnn_kwargs)
 
 plt.figure()
 plt.plot(final_y_pred, label='Predicted')
-plt.plot(data.targs[(da_rnn_kwargs["T"]-1):], label="True")
+plt.plot(data.targs[(da_rnn_kwargs["T"] - 1):], label="True")
 plt.legend(loc='upper left')
 utils.save_or_show_plot("final_predicted_reloaded.png", save_plots)
