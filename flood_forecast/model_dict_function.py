@@ -22,7 +22,7 @@ pytorch_model_dict = {"MultiAttnHeadSimple": MultiAttnHeadSimple, "SimpleTransfo
 "TransformerXL": TransformerXL, "DummyTorchModel": DummyTorchModel,  "LSTM":LSTMForecast, "SimpleLinearModel": SimpleLinearModel, 
 "CustomTransformerDecoder":CustomTransformerDecoder}
 
-pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss": PoissonNLLLoss(), "RMSELoss": RMSE, "MAPE": MAPELoss()}
+pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss": PoissonNLLLoss(), "RMSELoss": RMSELoss(), "MAPE": MAPELoss()}
 
 evaluation_functions_dict = {"NSE": "", "MSE": ""}
 
