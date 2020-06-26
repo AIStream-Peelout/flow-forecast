@@ -8,7 +8,12 @@ import matplotlib.pyplot as plt
 import random
 import wandb
 from flood_forecast.named_dimension_array import NamedDimensionArray
-from flood_forecast.plot_functions import plot_shap_value_heatmaps
+from flood_forecast.plot_functions import (
+    plot_shap_value_heatmaps,
+    plot_summary_shap_values,
+    plot_summary_shap_values_over_time_series,
+    plot_shap_values_from_history
+)
 
 random.seed(0)
 
@@ -51,74 +56,30 @@ def deep_explain_model_summary_plot(
     deep_explainer = shap.DeepExplainer(model.model, background_tensor)
     shap_values = deep_explainer.shap_values(background_tensor)
     shap_values = np.stack(shap_values)
-    shap_values = NamedDimensionArray(shap_values)
+    shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
 
     # summary plot shows overall feature ranking
     # by average absolute shap values
-    mean_shap_values = np.concatenate(shap_values).mean(axis=0)
-    plt.figure(figsize=(12, 8))
-    shap.summary_plot(
-        mean_shap_values,
-        feature_names=csv_test_loader.df.columns,
-        plot_type="bar",
-        show=False,
-        max_display=10,
-        plot_size=(10, num_features * 2),
-    )
-    plt.savefig("overall_feature_ranking_by_shap_values.png")
-    wandb.log(
-        {
-            "Overall feature ranking by shap values": wandb.Image(
-                "overall_feature_ranking_by_shap_values.png"
-            )
-        }
-    )
-    plt.close()
+
+    fig = plot_summary_shap_values(shap_values, csv_test_loader.df.columns)
+    wandb.log({"Overall feature ranking by shap values": fig})
 
     # summary plot for multi-step outputs
-    multi_shap_values = list(np.stack(shap_values).mean(axis=1))
-    shap.summary_plot(
-        multi_shap_values,
-        feature_names=csv_test_loader.df.columns,
-        class_names=[f"time-step-{t}" for t in range(model.model.forecast_length)],
-        max_display=10,  # max number of features to display
-        show=False,
-        plot_size=(10, num_features * 2),
-        sort=False,
-    )
-    plt.savefig("overall_feature_rank_per_time_step.png")
-    wandb.log(
-        {
-            "Overall feature ranking per prediction time-step": wandb.Image(
-                "overall_feature_rank_per_time_step.png"
-            )
-        }
-    )
-    plt.close()
+    # multi_shap_values = shap_values.apply_along_axis(np.mean, 'batches')
+    fig = plot_summary_shap_values_over_time_series(shap_values, csv_test_loader.df.columns)
+    wandb.log({"Overall feature ranking per prediction time-step": fig})
 
     # summary plot for one prediction at datetime_start
     history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
-    to_explain = history.to(device).unsqueeze(0)
-    shap_values = deep_explainer.shap_values(to_explain)
-    mean_shap_values = np.concatenate(shap_values).mean(axis=0)
-    shap.summary_plot(
-        mean_shap_values,
-        history.cpu().numpy(),
-        feature_names=csv_test_loader.df.columns,
-        plot_type="dot",
-        max_display=10,
-        plot_size=(9, num_features * 2),
-        show=False,
-    )
-    plt.savefig("feature_ranking_for_prediction_at_timestamp.png")
-    wandb.log(
-        {
-            "Feature ranking for prediction at "
-            f"{datetime_start.strftime('%Y-%m-%d')}": wandb.Image(
-                "feature_ranking_for_prediction_at_timestamp.png"
-            )
-        }
-    )
+    history = history.to(device).unsqueeze(0)
+    history_numpy = NamedDimensionArray(history.cpu().numpy(), ['batches', 'observations', 'features'])
+
+    shap_values = deep_explainer.shap_values(history)
+    shap_values = np.stack(shap_values)
+    shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
+
+    fig = plot_shap_values_from_history(shap_values, history_numpy, csv_test_loader.df.columns)
+    wandb.log({f"Feature ranking for prediction at {datetime_start.strftime('%Y-%m-%d')}": fig})
     plt.close()
 
 
@@ -161,11 +122,8 @@ def deep_explain_model_heatmap(
     shap_values = deep_explainer.shap_values(background_tensor)  # forecast_len x N x L x M
     shap_values = np.stack(shap_values)
     shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
-    average_shap_value_over_batches = shap_values.apply_along_axis(np.mean, 'batches')
 
-    fig = plot_shap_value_heatmaps(
-        average_shap_value_over_batches.iterate_over_axis('features'),
-        csv_test_loader.df.columns)
+    fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     wandb.log({'Average prediction heatmaps': fig})
 
     # heatmap one prediction sequence at datetime_start
@@ -175,11 +133,8 @@ def deep_explain_model_heatmap(
     shap_values = deep_explainer.shap_values(to_explain)
     shap_values = np.stack(shap_values)
     shap_values = NamedDimensionArray(shap_values, ['preds', 'batches', 'observations', 'features'])
-    average_shap_value_over_batches = shap_values.apply_along_axis(np.mean, 'batches')
 
-    fig = plot_shap_value_heatmaps(
-        average_shap_value_over_batches.iterate_over_axis('features'),
-        csv_test_loader.df.columns)
+    fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     wandb.log({f"Heatmap for prediction at {datetime_start.strftime('%Y-%m-%d')}": fig})
 
 def deep_explain_model_sample():

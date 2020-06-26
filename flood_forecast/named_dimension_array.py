@@ -4,7 +4,7 @@ import typing
 
 
 class NamedDimensionArray(np.ndarray):
-    def __new__(cls, input_array, dimension_names: typing.List[str] = None):
+    def __new__(cls, input_array, dimension_names: typing.List[str] = None) -> NamedDimensionArray:
         obj = np.asarray(input_array).view(cls)
         dims = obj.shape
         if dimension_names is None:
