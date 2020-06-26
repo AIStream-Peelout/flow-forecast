@@ -1,0 +1,43 @@
+[metadata]
+name = iter_together
+version = 0.0.1-dev
+description = A package that helps you iterate through parallel files
+long_description = file: README.md
+
+url = https://github.com/kritim13/flow-forecast/tree/readthedocs
+
+
+# Google "Python Trove Classifiers"
+classifiers =
+    Development Status :: 4 - Beta
+    License :: OSI Approved :: MIT License
+    Programming Language :: Python
+    Programming Language :: Python :: 3.8
+    Programming Language :: Python :: 3.7
+    Programming Language :: Python :: 3.6
+keywords =
+    iteration
+    file utilities
+
+[options]
+install_required =
+    requests
+    click
+    numpy
+    pandas
+    pybel
+
+packages = find:
+package_dir =
+    = src
+
+[options.packages.find]
+where = src
+
+[options.extras_require]
+docs =
+    sphinx
+    sphinx-rtd-theme
+    sphinx-autodoc-typehints
+testing =
+    pytest
