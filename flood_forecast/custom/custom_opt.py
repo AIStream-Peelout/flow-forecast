@@ -26,7 +26,8 @@ def warmup_constant(x, warmup=0.002):
 
 
 def warmup_linear(x, warmup=0.002):
-    """ Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th (as provided to BertAdam) training step.
+    """ Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th
+        (as provided to BertAdam) training step.
         After `t_total`-th training step, learning rate is zero. """
     if x < warmup:
         return x / warmup

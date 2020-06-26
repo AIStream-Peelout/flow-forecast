@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import torch
 from datetime import datetime
-from typing import Callable, Tuple, Dict, List, Type
+from typing import Callable, Dict, List, Type
 from flood_forecast.time_model import TimeSeriesModel
 import sklearn.metrics
 from flood_forecast.model_dict_function import decoding_functions
@@ -75,8 +75,8 @@ def evaluate_model(
     Requires a model of type TimeSeriesModel
     """
     if model_type == "PyTorch":
-        df_train_and_test, end_tensor, forecast_history, forecast_start_idx, test_data, df_predictions = infer_on_torch_model(
-            model, **inference_params)
+        df_train_and_test, end_tensor, forecast_history, forecast_start_idx, test_data, df_predictions = \
+            infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:

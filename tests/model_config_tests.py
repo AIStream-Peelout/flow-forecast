@@ -1,5 +1,3 @@
-from flood_forecast.trainer import train_function
-from datetime import datetime
 import unittest
 import os
 

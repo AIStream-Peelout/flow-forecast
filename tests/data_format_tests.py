@@ -1,4 +1,5 @@
-from flood_forecast.preprocessing.closest_station import get_weather_data, get_closest_gage, format_dt, convert_temp, process_asos_csv, process_asos_data
+from flood_forecast.preprocessing.closest_station import get_weather_data, format_dt, convert_temp,\
+    process_asos_csv, process_asos_data
 from datetime import datetime
 import unittest
 import os
@@ -40,13 +41,21 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(df.iloc[2]['p01m'], 23)
 
     def test_get_weather_data(self):
-        url = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station={}&data=tmpf&data=p01m&year1=2019&month1=1&day1=1&year2=2019&month2=1&day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
+        url = """
+        https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?
+        station={}&data=tmpf&data=p01m&year1=2019&month1=1&day1=1&year2=2019&month2=1&
+        day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2
+        """
         print(url)
         get_weather_data(os.path.join(self.test_data_path, "full_out.json"), {}, url)
         self.assertEqual(1, 1)
 
     def test_process_asos_data(self):
-        full_data_url = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station={}&data=tmpf&data=p01m&year1=2014&month1=1&day1=1&year2=2019&month2=1&day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
+        full_data_url = """
+        https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?
+        station={}&data=tmpf&data=p01m&year1=2014&month1=1&day1=1&year2=2019&month2=1&day2=2
+        &tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
+        """
         river_result = process_asos_data(
             os.path.join(
                 self.test_data_path,

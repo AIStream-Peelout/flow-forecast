@@ -21,6 +21,7 @@ class JoinTest(unittest.TestCase):
             datetime.strptime(x, "%Y-%m-%d %H:%M")).astimezone(new_timezone))
         with open(os.path.join(self.test_data_path, "big_black_md.json")) as a:
             meta_data = json.load(a)
+            self.assertEqual(meta_data['gage_id'], 1010070)
         result_df, nan_f, nan_p = combine_data(df, asos_df)
         self.assertEqual(result_df.iloc[0]['p01m'], 0)
         self.assertEqual(result_df.iloc[0]['cfs'], 2210)

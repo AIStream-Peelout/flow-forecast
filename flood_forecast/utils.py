@@ -1,7 +1,8 @@
 import torch
 
 
-def flatten_list_function(l): return [item for sublist in l for item in sublist]
+def flatten_list_function(l):
+    return [item for sublist in l for item in sublist]
 
 
 class EarlyStopper(object):

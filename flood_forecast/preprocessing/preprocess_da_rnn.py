@@ -1,6 +1,3 @@
-from typing import Tuple
-import typing
-from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 from typing import List
@@ -33,7 +30,6 @@ def make_data(
     """
     final_df = pd.read_csv(csv_path)
     print(final_df.shape[0])
-    total = len(final_df.index) - test_length
     if len(target_col) > 1:
         # Restrict target columns to height and cfs. Alternatively could replace this with loop
         height_df = final_df[[target_col[0], target_col[1], 'precip', 'temp']]

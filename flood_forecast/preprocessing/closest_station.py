@@ -2,7 +2,7 @@ from math import radians, cos, sin, asin, sqrt
 import pandas as pd
 import os
 import json
-from typing import Set, Tuple, Dict
+from typing import Set, Dict
 import requests
 from datetime import datetime, timedelta
 
@@ -32,6 +32,7 @@ def get_closest_gage(
         # indices later on (i.e [-20:])
         gage_info["stations"] = sorted(gage_info['stations'], key=lambda i: i["dist"], reverse=True)
         with open(os.path.join(path_dir, str(gage_info["river_id"]) + "stations.json"), 'w') as w:
+            count = 0
             json.dump(gage_info, w)
             if count % 100 == 0:
                 print("Currently at " + str(count))
@@ -136,7 +137,7 @@ def process_asos_csv(path: str):
     # replace missing values with an average of the two closest values
     # But since ASOS stations record at different intervals this could
     # actually cause an overestimation of precip. Instead for now we are replacing with 0
-    #df['p01m']=(df['p01m'].fillna(method='ffill') + df['p01m'].fillna(method='bfill'))/2
+    # df['p01m']=(df['p01m'].fillna(method='ffill') + df['p01m'].fillna(method='bfill'))/2
     df['p01m'] = df['p01m'].fillna(0)
     df['tmpf'] = (df['tmpf'].fillna(method='ffill') + df['tmpf'].fillna(method='bfill')) / 2
     df = df.groupby(by=['hour_updated'], as_index=False).agg(

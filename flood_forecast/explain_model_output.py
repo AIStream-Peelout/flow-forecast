@@ -156,7 +156,8 @@ def deep_explain_model_sample():
     # )
     # # force plot for multiple time-steps
     # # can only be generated as html objects
-    # # shap.force_plot(e.expected_value[0], shap_values[0].reshape(-1, 3), show=True, feature_names=csv_test_loader.df.columns)
+    # # shap.force_plot(e.expected_value[0], shap_values[0].reshape(-1, 3), show=True,
+    # feature_names=csv_test_loader.df.columns)
     # # dependece plot shows feature value vs shap value
     # shap.dependence_plot(
     #     2,

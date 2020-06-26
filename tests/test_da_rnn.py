@@ -2,7 +2,7 @@ import torch
 import unittest
 import os
 import tempfile
-from flood_forecast.preprocessing.preprocess_da_rnn import TrainData, format_data, make_data
+from flood_forecast.preprocessing.preprocess_da_rnn import make_data
 from flood_forecast.da_rnn.train_da import da_rnn, train
 
 

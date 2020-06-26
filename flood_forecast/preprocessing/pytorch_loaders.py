@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import Type, List, Union
+from typing import List, Union
 from flood_forecast.preprocessing.interpolate_preprocess import interpolate_missing_values, fix_timezones
 
 
@@ -22,14 +22,17 @@ class CSVDataLoader(Dataset):
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
         :param file_path: The path to the CSV file you wish to use.
         :param forecast_history: This is the length of the historical time series data you wish to utilize for forecasting
-        :param forecast_length: The number of time steps to forecast ahead (for transformer this must equal history_length)
+        :param forecast_length: The number of time steps to forecast ahead (for transformer this must
+                                equal history_length)
         :param relevant_cols: Supply column names you wish to predict in the forecast (others will not be used)
         :param target_col: The target column or columns you to predict. If you only have one still use a list ['cfs']
         :param scaling: (highly reccomended) If provided should be a subclass of sklearn.base.BaseEstimator
         and sklearn.base.TransformerMixin) i.e StandardScaler,  MaxAbsScaler, MinMaxScaler, etc) Note without
         a scaler the loss is likely to explode and cause infinite loss which will corrupt weights
-        :param start_stamp int: Optional if you want to only use part of a CSV for training, validation or testing supply these
-        "param end_stamp int: Optional if you want to only use part of a CSV for training, validation, or testing supply these
+        :param start_stamp int: Optional if you want to only use part of a CSV for training, validation
+                                or testing supply these
+        :param end_stamp int: Optional if you want to only use part of a CSV for training, validation,
+                            or testing supply these
         """
         super().__init__()
         self.forecast_history = forecast_history
@@ -142,8 +145,8 @@ class CSVTestLoader(CSVDataLoader):
         values to be stacked with forecasted cfs.
         """
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
-        chunks = [the_column[self.forecast_length * i:self.forecast_length *
-                             (i + 1)] for i in range(len(the_column) // self.forecast_length + 1)]
+        chunks = [the_column[self.forecast_length * i:self.forecast_length * (i + 1)]
+                  for i in range(len(the_column) // self.forecast_length + 1)]
         return chunks
 
     def __len__(self) -> int:

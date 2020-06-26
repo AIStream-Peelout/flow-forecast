@@ -1,5 +1,5 @@
 import argparse
-from typing import Sequence, List, Tuple, Dict
+from typing import Dict
 import json
 import plotly.graph_objects as go
 import wandb
@@ -47,9 +47,9 @@ def train_function(model_type: str, params: Dict):
         df_train_and_test = test_acc[1]
         forecast_start_idx = test_acc[2]
         df_prediction_samples = test_acc[3]
-        inverse_mae = 1 / (df_train_and_test.loc[forecast_start_idx:,
-                                                 "preds"] - df_train_and_test.loc[forecast_start_idx:,
-                                                                                  params["dataset_params"]["target_col"][0]]).abs()
+        mae = (df_train_and_test.loc[forecast_start_idx:, "preds"] -
+               df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
+        inverse_mae = 1 / mae
         pred_std = df_prediction_samples.std(axis=1)
         average_prediction_sharpe = (inverse_mae / pred_std).mean()
         wandb.log({'average_prediction_sharpe': average_prediction_sharpe})

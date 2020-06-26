@@ -1,9 +1,8 @@
 import os
-from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_csv
+from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_data
 from flood_forecast.preprocessing.process_usgs import make_usgs_data, process_intermediate_csv
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 from flood_forecast.preprocessing.eco_gage_set import eco_gage_set
-from typing import Set
 import json
 from datetime import datetime
 import pytz
@@ -32,14 +31,14 @@ def build_weather_csv(
             visited_gages_path)
         process_asos_data(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
 
-
-def make_usgs(meta_data_path: str, start, end_index: int):
-    meta_directory = os.fsencode(meta_data_path)
-    sorted_list = sorted(os.listdir(directory))
-    for i in range(start, end_index):
-        with open(i) as d:
-            data = json.loads(d)
-        #make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), data["gage_id"])
+# todo fix this function so it does more than open files
+# def make_usgs(meta_data_path: str, start, end_index: int):
+#     meta_directory = os.fsencode(meta_data_path)
+#     sorted_list = sorted(os.listdir(meta_directory))
+#     for i in range(start, end_index):
+#         with open(sorted_list[i]) as d:
+#             data = json.loads(d)
+#         # make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), data["gage_id"])
 
 
 def join_data(weather_csv, meta_json_file, flow_csv):

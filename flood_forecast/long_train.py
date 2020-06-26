@@ -1,6 +1,5 @@
 import json
 import re
-import uuid
 import os
 import argparse
 import traceback
@@ -26,7 +25,7 @@ def loop_through(
     if not os.path.exists("model_save"):
         os.mkdir("model_save")
     sorted_dir_list = sorted(os.listdir(data_dir))
-    #total = len(sorted_dir_list)
+    # total = len(sorted_dir_list)
     for i in range(start_index, end_index):
         file_name = sorted_dir_list[i]
         station_id_gage = file_name.split("_flow.csv")[0]
