@@ -6,6 +6,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.pytorch_training import torch_single_train
 import unittest
 from flood_forecast.pytorch_training import train_transformer_style
+from datetime import datetime
 
 
 class PyTorchTrainTests(unittest.TestCase):
@@ -62,7 +63,12 @@ class PyTorchTrainTests(unittest.TestCase):
                                       batch_sampler=None, num_workers=0, collate_fn=None,
                                       pin_memory=False, drop_last=False, timeout=0,
                                       worker_init_fn=None)
+        self.start_time = datetime.now()
         # TODO add LSTM test self.lstm =
+
+    def tearDown(self):
+        end_time = datetime.now()
+        print((end_time - self.start_time).seconds)
 
     def test_pytorch_train_base(self):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
