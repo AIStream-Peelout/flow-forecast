@@ -1,7 +1,6 @@
 import os
 import torch
 from torch.utils.data import DataLoader
-from flood_forecast.model_dict_function import pytorch_model_dict as pytorch_model_dict1
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.pytorch_training import torch_single_train
 import unittest
@@ -42,17 +41,28 @@ class PyTorchTrainTests(unittest.TestCase):
             self.keag_file,
             self.keag_file,
             self.model_params)
-        self.dummy_model = PyTorchForecast("DummyTorchModel", self.keag_file, self.keag_file, self.keag_file,
-                                           {"model_params": {"forecast_length": 5},
-                                            "dataset_params": {"forecast_history": 5, "class": "default",
-                                                               "forecast_length": 5,
-                                                               "relevant_cols": ["cfs", "temp", "precip"],
-                                                               "target_col": ["cfs"], "interpolate": False,
-                                                               "train_end": 100},
-                                            "training_params": {"optimizer": "Adam", "lr": .1, "criterion": "MSE",
-                                                                "epochs": 1, "batch_size": 2, "optim_params": {}},
-                                            "inference_params": {"hours_to_forecast": 15},
-                                            "wandb": False})
+        self.dummy_model = PyTorchForecast(
+            "DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {
+                "model_params": {"forecast_length": 5},
+                "dataset_params": {
+                    "forecast_history": 5,
+                    "class": "default",
+                    "forecast_length": 5,
+                    "relevant_cols": ["cfs", "temp", "precip"],
+                    "target_col": ["cfs"], "interpolate": False,
+                    "train_end": 100
+                },
+                "training_params": {
+                    "optimizer": "Adam",
+                    "lr": .1,
+                    "criterion": "MSE",
+                    "epochs": 1,
+                    "batch_size": 2,
+                    "optim_params": {}
+                },
+                "inference_params": {"hours_to_forecast": 15},
+                "wandb": False}
+        )
         self.full_transformer_params = {
             "use_decoder": True,
             "model_params": {
