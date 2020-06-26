@@ -1,10 +1,15 @@
 [metadata]
-name = iter_together
-version = 0.0.1-dev
-description = A package that helps you iterate through parallel files
+name = flow_forecast
+version = 0.0.1
+description = This repository provides open source benchmark and codes for flash flood and river flow forecasting.
 long_description = file: README.md
 
 url = https://github.com/kritim13/flow-forecast/tree/readthedocs
+
+author = Isaac Godfried
+author_email = xxx
+maintainer = Kriti Mahajan
+maintainer_email = xxxx
 
 
 # Google "Python Trove Classifiers"
@@ -15,8 +20,9 @@ classifiers =
     Programming Language :: Python :: 3.8
     Programming Language :: Python :: 3.7
     Programming Language :: Python :: 3.6
+
 keywords =
-    iteration
+    forecast
     file utilities
 
 [options]
@@ -25,7 +31,6 @@ install_required =
     click
     numpy
     pandas
-    pybel
 
 packages = find:
 package_dir =
