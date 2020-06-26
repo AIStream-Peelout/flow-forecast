@@ -146,8 +146,8 @@ class PositionwiseFF(nn.Module):
         )
         self.layer_norm = nn.LayerNorm(d_input)
 
-    def forward(self, input_: torch.FloatTensor, # (cur_seq, bs, d_input)
-               ) -> torch.FloatTensor: # (cur_seq, bs, d_input)
+    def forward(self, input_: torch.FloatTensor,  # (cur_seq, bs, d_input)
+                ) -> torch.FloatTensor:  # (cur_seq, bs, d_input)
         ff_out = self.ff(input_)
         output = self.layer_norm(input_ + ff_out)
         return output
@@ -191,8 +191,7 @@ class PositionalEmbedding(nn.Module):
 
 
 class StandardWordEmbedding(nn.Module):
-    def __init__(self, num_embeddings, embedding_dim,
-                div_val=1, sample_softmax=False):
+    def __init__(self, num_embeddings, embedding_dim, div_val=1, sample_softmax=False):
         super().__init__()
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
