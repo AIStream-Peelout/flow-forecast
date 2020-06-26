@@ -1,6 +1,5 @@
 from google.cloud import storage
 import os
-import json
 
 
 def get_storage_client() -> storage.Client:

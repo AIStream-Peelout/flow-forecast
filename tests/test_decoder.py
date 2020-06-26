@@ -4,8 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flood_forecast.model_dict_function import pytorch_criterion_dict
-from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, greedy_decode, \
-    generate_square_subsequent_mask
+from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, greedy_decode
 
 
 class TestDecoding(unittest.TestCase):

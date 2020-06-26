@@ -1,6 +1,6 @@
 from datetime import datetime
 import pandas as pd
-from typing import List, Dict
+from typing import Dict
 
 
 def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame) -> pd.DataFrame:

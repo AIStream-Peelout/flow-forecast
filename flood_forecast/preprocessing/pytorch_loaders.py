@@ -21,7 +21,8 @@ class CSVDataLoader(Dataset):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
         :param file_path: The path to the CSV file you wish to use.
-        :param forecast_history: This is the length of the historical time series data you wish to utilize for forecasting
+        :param forecast_history: This is the length of the historical time series data you wish to
+                                utilize for forecasting
         :param forecast_length: The number of time steps to forecast ahead (for transformer this must
                                 equal history_length)
         :param relevant_cols: Supply column names you wish to predict in the forecast (others will not be used)
@@ -134,7 +135,7 @@ class CSVTestLoader(CSVDataLoader):
             historical_rows = self.df.iloc[idx:self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
-            targ_rows = self.df.iloc[target_idx_start:self.forecast_total + target_idx_start]
+            # targ_rows = self.df.iloc[target_idx_start:self.forecast_total + target_idx_start]
             all_rows_orig = self.original_df.iloc[idx:self.forecast_total + target_idx_start]
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start

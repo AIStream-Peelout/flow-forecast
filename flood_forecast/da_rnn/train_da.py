@@ -1,15 +1,13 @@
 import typing
-from typing import Tuple, List
+from typing import Tuple
 import json
 import os
 
 import torch
 from torch import nn
 from torch import optim
-from sklearn.preprocessing import StandardScaler
-import matplotlib
 import matplotlib.pyplot as plt
-import pandas as pd
+
 import numpy as np
 from flood_forecast.da_rnn import utils
 from flood_forecast.da_rnn.constants import device
@@ -17,7 +15,7 @@ from flood_forecast.da_rnn.modules import Encoder, Decoder
 from flood_forecast.da_rnn.custom_types import DaRnnNet, TrainData, TrainConfig
 from flood_forecast.da_rnn.utils import numpy_to_tvar
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
+
 
 logger = utils.setup_log()
 logger.info(f"Using computation device: {device}")
@@ -31,8 +29,7 @@ def da_rnn(train_data: TrainData,
            learning_rate=0.01,
            batch_size=128,
            param_output_path="",
-           save_path: str = None) -> Tuple[dict,
-                                           DaRnnNet]:
+           save_path: str = None) -> Tuple[dict, DaRnnNet]:
     """
     n_targs: The number of target columns (not steps)
     T: The number timesteps in the window
@@ -57,7 +54,7 @@ def da_rnn(train_data: TrainData,
     with open(os.path.join(param_output_path, "dec_kwargs.json"), "w+") as fi:
         json.dump(dec_kwargs, fi, indent=4)
     if save_path:
-        #dir_path = os.path.dirname(os.path.realpath(__file__))
+        # dir_path = os.path.dirname(os.path.realpath(__file__))
         print("Resuming training from " + os.path.join(save_path, "encoder.pth"))
         encoder.load_state_dict(
             torch.load(
@@ -128,7 +125,7 @@ def train(
                                    t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
                                    on_train=True)
 
-            #train_mse = np.mean((y_train_pred-train_data.targs[:t_cfg.train_size])**2)
+            # train_mse = np.mean((y_train_pred-train_data.targs[:t_cfg.train_size])**2)
             mse = np.mean((y_test_pred - train_data.targs[t_cfg.train_size:])**2)
             if wandb:
                 wandb.log({"epoch": n_epochs, "validation_loss": val_loss, "validation_mse": mse})
@@ -142,10 +139,10 @@ def train(
             plt.legend(loc='upper left')
             utils.save_or_show_plot(f"pred_{e_i}.png", save_plots)
             if tensorboard:
-                #writer.add_scalar('Loss/Validation', val_loss, e_i)
+                # writer.add_scalar('Loss/Validation', val_loss, e_i)
                 writer.add_scalar('Validation/MSE', mse, e_i)  # Check MSE CALC
-                #writer.add_scalar("Train/MSE", train_mse, e_i )
-            #
+                # writer.add_scalar("Train/MSE", train_mse, e_i )
+
     dir_path = os.path.dirname(os.path.realpath(__file__))
     if not os.path.exists("checkpoint"):
         os.makedirs("checkpoint")

@@ -1,13 +1,10 @@
 import torch
 import torch.optim as optim
-from torch.autograd import Variable
-import numpy as np
 from typing import Type, Dict
-from torch.nn.modules.loss import _Loss
 from torch.utils.data import DataLoader
+
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
-from flood_forecast.model_dict_function import generate_square_subsequent_mask
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
@@ -112,6 +109,7 @@ def train_transformer_style(
         decoder_structure=True,
         use_wandb=use_wandb,
         val_or_test="test_loss")
+    print("test loss:", test)
     model.params["run"] = session_params
     model.save_model(model_filepath, max_epochs)
 
@@ -191,7 +189,7 @@ def compute_validation(validation_loader: DataLoader,
             labels = targ[:, :, 0]
             validation_dataset = validation_loader.dataset
             if validation_dataset.scale:
-                #unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
+                # unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
                 unscaled_out = validation_dataset.inverse_scale(output.cpu())
                 unscaled_labels = validation_dataset.inverse_scale(labels.cpu())
                 loss_unscaled = criterion(unscaled_out, unscaled_labels.float())

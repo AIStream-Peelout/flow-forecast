@@ -3,7 +3,6 @@ A dummy model specifically for unit and integration testing purposes
 """
 import torch
 from torch import nn
-from typing import Optional, Dict, List
 
 
 class DummyTorchModel(nn.Module):

@@ -1,7 +1,6 @@
-from torch import nn
 import torch
 import math
-from torch.nn.modules import Transformer, TransformerEncoder, TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm
+from torch.nn.modules import Transformer, TransformerEncoder, TransformerEncoderLayer, LayerNorm
 from torch.autograd import Variable
 
 

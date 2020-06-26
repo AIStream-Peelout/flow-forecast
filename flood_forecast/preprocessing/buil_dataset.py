@@ -104,11 +104,7 @@ def create_usgs(meta_data_dir: str, precip_path: str, start: int, end: int):
             data["time_zone_code"] = df["tz_cd"].iloc[0]
             data["max_flow"] = max_flow
             data["min_flow"] = min_flow
-            precip_df = pd.read_csv(
-                os.path.join(
-                    precip_path,
-                    data["stations"][0]["station_id"] +
-                    ".csv"))
+            precip_df = pd.read_csv(os.path.join(precip_path, data["stations"][0]["station_id"] + ".csv"))
             fixed_df, nan_flow, nan_precip = combine_data(df, precip_df)
             data["nan_flow"] = nan_flow
             data["nan_precip"] = nan_precip

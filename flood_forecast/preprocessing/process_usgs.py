@@ -36,8 +36,7 @@ def process_response_text(file_name: str) -> Tuple[str, Dict]:
                 if len(the_split_line) < 2:
                     params = False
                 else:
-                    extractive_params[the_split_line[0] + "_" +
-                                      the_split_line[1]] = df_label(the_split_line[2])
+                    extractive_params[the_split_line[0] + "_" + the_split_line[1]] = df_label(the_split_line[2])
             if len(the_split_line) > 2:
                 if the_split_line[0] == "TS":
                     params = True
@@ -95,4 +94,5 @@ def process_intermediate_csv(df: pd.DataFrame) -> (pd.DataFrame, int, int, int):
     max_flow = df["cfs"].max()
     min_flow = df["cfs"].min()
     count_nan = len(df["cfs"]) - df["cfs"].count()
+    print(f"there are {count_nan} nan values")
     return df[df.datetime.dt.minute == 0], max_flow, min_flow

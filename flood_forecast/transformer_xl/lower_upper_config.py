@@ -1,6 +1,5 @@
-import numpy as np
 import torch.nn as nn
-from typing import List, Dict
+from typing import Dict
 import torch.nn.functional as F
 import torch
 

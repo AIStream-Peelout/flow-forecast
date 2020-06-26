@@ -170,7 +170,7 @@ class PyTorchForecast(TimeSeriesModel):
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
         if loader_type == "test" and "forecast_test_len" in dataset_params:
-            l = CSVDataLoader(
+            loader = CSVDataLoader(
                 data_path,
                 dataset_params["forecast_history"],
                 dataset_params["forecast_test_len"],
@@ -178,7 +178,7 @@ class PyTorchForecast(TimeSeriesModel):
                 dataset_params["relevant_cols"],
                 **start_end_params)
         elif the_class == "default":
-            l = CSVDataLoader(
+            loader = CSVDataLoader(
                 data_path,
                 dataset_params["forecast_history"],
                 dataset_params["forecast_length"],
@@ -187,5 +187,5 @@ class PyTorchForecast(TimeSeriesModel):
                 **start_end_params)
         else:
             # TODO support custom DataLoader
-            l = None
-        return l
+            loader = None
+        return loader
