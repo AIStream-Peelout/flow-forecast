@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 import shap
@@ -9,14 +9,48 @@ import torch
 import wandb
 from flood_forecast.named_dimension_array import NamedDimensionArray
 from flood_forecast.plot_functions import (
-    plot_shap_value_heatmaps,
-    plot_shap_values_from_history,
-    plot_summary_shap_values,
-    plot_summary_shap_values_over_time_series,
-)
+    plot_shap_value_heatmaps, plot_shap_values_from_history,
+    plot_summary_shap_values, plot_summary_shap_values_over_time_series)
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
-BACKGROUND_SIZE = 5
+BACKGROUND_BATCH_SIZE = 5
+
+
+def _prepare_background_batches(
+    model,
+    csv_test_loader: CSVTestLoader,
+    forecast_start_idx: int,
+    backgound_batch_size: int = BACKGROUND_BATCH_SIZE,
+) -> List[torch.Tensor]:
+    """Generate background batches for deep explainer.
+    Choose batches prior to forecast_start_idx as background data.
+    Each batch is of size (seq_len, num_feature)
+
+    Args:
+        model ([type]): trained model
+        csv_test_loader (CSVTestLoader): test data loader
+        forecast_start_idx (int): forecast start index
+        backgound_batch_size (int): number of batches used as background data 
+        for deep explainer. Default to BACKGROUND_BATCH_SIZE.
+
+    Returns:
+        List[torch.Tensor]: List of tensors of backgound_batch_size length
+    """
+    # select most recent 5 batches prior to forcast starte time as background
+    history_len = model.params["model_params"]["seq_len"]
+    if history_len is None:
+        history_len = model.params["dataset_params"]["forecast_history"]
+
+    background_start_idx = forecast_start_idx - history_len * backgound_batch_size
+    background_data = csv_test_loader.original_df.iloc[
+        background_start_idx:forecast_start_idx
+    ]
+    # return batch size = BACKGROUND_SIZE+1
+    # remove last empty tensor
+    background_batches = csv_test_loader.convert_real_batches(
+        csv_test_loader.df.columns, background_data
+    )[:-1]
+    return background_batches
 
 
 def deep_explain_model_summary_plot(
@@ -36,18 +70,9 @@ def deep_explain_model_summary_plot(
         datetime_start = model.params["inference_params"]["datetime_start"]
 
     history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
-    # select most recent 5 batches prior to forcast starte time as background
-    background_start_idx = (
-        forecast_start_idx - model.params["model_params"]["seq_len"] * BACKGROUND_SIZE
+    background_batches = _prepare_background_batches(
+        model, csv_test_loader, forecast_start_idx
     )
-    background_data = csv_test_loader.original_df.iloc[
-        background_start_idx:forecast_start_idx
-    ]
-    # return batch size = BACKGROUND_SIZE+1
-    # remove last empty tensor
-    background_batches = csv_test_loader.convert_real_batches(
-        csv_test_loader.df.columns, background_data
-    )[:-1]
     background_tensor = torch.stack(background_batches).float().to(device)
     model.model.eval()
 
@@ -119,18 +144,9 @@ def deep_explain_model_heatmap(
         datetime_start = model.params["inference_params"]["datetime_start"]
 
     history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
-    # select most recent 5 batches prior to forcast starte time as background
-    background_start_idx = (
-        forecast_start_idx - model.params["model_params"]["seq_len"] * BACKGROUND_SIZE
+    background_batches = _prepare_background_batches(
+        model, csv_test_loader, forecast_start_idx
     )
-    background_data = csv_test_loader.original_df.iloc[
-        background_start_idx:forecast_start_idx
-    ]
-    # return batch size = BACKGROUND_SIZE+1
-    # remove last empty tensor
-    background_batches = csv_test_loader.convert_real_batches(
-        csv_test_loader.df.columns, background_data
-    )[:-1]
     background_tensor = torch.stack(background_batches).float().to(device)
     model.model.eval()
 

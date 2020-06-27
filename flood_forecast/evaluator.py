@@ -7,7 +7,9 @@ import sklearn.metrics
 import torch
 
 from flood_forecast.explain_model_output import (
-    deep_explain_model_heatmap, deep_explain_model_summary_plot)
+    deep_explain_model_heatmap,
+    deep_explain_model_summary_plot,
+)
 from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
@@ -51,7 +53,9 @@ def get_model_r2_score(
 
     model_evaluate_function should call any necessary preprocessing
     """
-    test_river_data, baseline_mse = stream_baseline(river_flow_df, forecast_column)
+    test_river_data, baseline_mse = stream_baseline(
+        river_flow_df, forecast_column
+    )
 
 
 def get_r2_value(model_mse, baseline_mse):
@@ -89,14 +93,17 @@ def evaluate_model(
             forecast_start_idx,
             test_data,
             df_predictions,
-            history,
         ) = infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
-            end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
-            end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
+            end_tensor = test_data.inverse_scale(
+                end_tensor.detach().reshape(-1, 1)
+            )
+            end_tensor_list = flatten_list_function(
+                end_tensor.numpy().tolist()
+            )
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)
@@ -121,7 +128,9 @@ def evaluate_model(
     deep_explain_model_summary_plot(
         model, test_data, inference_params["datetime_start"]
     )
-    deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
+    deep_explain_model_heatmap(
+        model, test_data, inference_params["datetime_start"]
+    )
 
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
@@ -211,7 +220,6 @@ def infer_on_torch_model(
         forecast_start_idx,
         csv_test_loader,
         df_prediction_samples,
-        history,
     )
 
 
@@ -231,7 +239,12 @@ def generate_predictions(
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
-            model, df, test_data, history_dim, forecast_length, hours_to_forecast
+            model,
+            df,
+            test_data,
+            history_dim,
+            forecast_length,
+            hours_to_forecast,
         )
     else:
         # model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
@@ -261,10 +274,16 @@ def generate_predictions_non_decoded(
     full_history = [history_dim]
     all_tensor = []
     if test_data.use_real_precip:
-        precip_cols = test_data.convert_real_batches("precip", df[forecast_length:])
+        precip_cols = test_data.convert_real_batches(
+            "precip", df[forecast_length:]
+        )
     if test_data.use_real_temp:
-        temp_cols = test_data.convert_real_batches("temp", df[forecast_length:])
-    for i in range(0, int(np.ceil(hours_to_forecast / forecast_length).item())):
+        temp_cols = test_data.convert_real_batches(
+            "temp", df[forecast_length:]
+        )
+    for i in range(
+        0, int(np.ceil(hours_to_forecast / forecast_length).item())
+    ):
         output = model.model(full_history[i].to(model.device))
         all_tensor.append(output.view(-1))
         if i == int(np.ceil(hours_to_forecast / forecast_length).item()) - 1:
@@ -293,7 +312,9 @@ def generate_predictions_non_decoded(
     remainder = forecast_length - hours_to_forecast % forecast_length
     if remainder != forecast_length:
         # Subtract remainder from array
-        end_tensor = torch.cat(all_tensor, axis=0).to("cpu").detach()[:-remainder]
+        end_tensor = (
+            torch.cat(all_tensor, axis=0).to("cpu").detach()[:-remainder]
+        )
     else:
         end_tensor = torch.cat(all_tensor, axis=0).to("cpu").detach()
 
