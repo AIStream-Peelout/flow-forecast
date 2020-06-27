@@ -12,7 +12,7 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 
-def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params:Dict = {})->None:
+def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes_target=False, forward_params:Dict = {}, model_filepath:str ="model_save")->None:
   """
   Function to train any PyTorchForecast model  
   :model The initialized PyTorchForecastModel
@@ -64,7 +64,7 @@ def train_transformer_style(model: PyTorchForecast, training_params: Dict, takes
           break
   test = compute_validation(test_data_loader, model.model, epoch, model.params["dataset_params"]["forecast_length"], criterion, model.device, decoder_structure=True, use_wandb=use_wandb, val_or_test="test_loss")
   model.params["run"] = session_params
-  model.save_model("model_save", max_epochs)
+  model.save_model(model_filepath, max_epochs)
   
 def torch_single_train(model:PyTorchForecast, opt:optim.Optimizer, criterion:Type[torch.nn.modules.loss._Loss], data_loader:DataLoader, takes_target:bool, forward_params:Dict={})->float:
   i = 0
