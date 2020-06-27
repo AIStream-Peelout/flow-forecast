@@ -9,8 +9,11 @@ import torch
 import wandb
 from flood_forecast.named_dimension_array import NamedDimensionArray
 from flood_forecast.plot_functions import (
-    plot_shap_value_heatmaps, plot_shap_values_from_history,
-    plot_summary_shap_values, plot_summary_shap_values_over_time_series)
+    plot_shap_value_heatmaps,
+    plot_shap_values_from_history,
+    plot_summary_shap_values,
+    plot_summary_shap_values_over_time_series,
+)
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 BACKGROUND_BATCH_SIZE = 5
@@ -37,11 +40,13 @@ def _prepare_background_batches(
         List[torch.Tensor]: List of tensors of backgound_batch_size length
     """
     # select most recent 5 batches prior to forcast starte time as background
-    history_len = model.params["model_params"]["seq_len"]
+    history_len = model.params["model_params"].get("seq_len")
     if history_len is None:
         history_len = model.params["dataset_params"]["forecast_history"]
 
-    background_start_idx = forecast_start_idx - history_len * backgound_batch_size
+    background_start_idx = (
+        forecast_start_idx - history_len * backgound_batch_size
+    )
     background_data = csv_test_loader.original_df.iloc[
         background_start_idx:forecast_start_idx
     ]
@@ -54,7 +59,9 @@ def _prepare_background_batches(
 
 
 def deep_explain_model_summary_plot(
-    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
+    model,
+    csv_test_loader: CSVTestLoader,
+    datetime_start: Optional[datetime] = None,
 ) -> None:
     """Generate feature summary plot for trained deep learning models
 
@@ -69,7 +76,9 @@ def deep_explain_model_summary_plot(
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
+        datetime_start
+    )
     background_batches = _prepare_background_batches(
         model, csv_test_loader, forecast_start_idx
     )
@@ -125,7 +134,9 @@ def deep_explain_model_summary_plot(
 
 
 def deep_explain_model_heatmap(
-    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
+    model,
+    csv_test_loader: CSVTestLoader,
+    datetime_start: Optional[datetime] = None,
 ) -> None:
     """Generate feature heatmap for prediction at a start time
 
@@ -143,7 +154,9 @@ def deep_explain_model_heatmap(
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
+        datetime_start
+    )
     background_batches = _prepare_background_batches(
         model, csv_test_loader, forecast_start_idx
     )
@@ -179,5 +192,8 @@ def deep_explain_model_heatmap(
     fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     if use_wandb:
         wandb.log(
-            {"Heatmap for prediction " f"at {datetime_start.strftime('%Y-%m-%d')}": fig}
+            {
+                "Heatmap for prediction "
+                f"at {datetime_start.strftime('%Y-%m-%d')}": fig
+            }
         )
