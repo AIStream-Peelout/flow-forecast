@@ -9,8 +9,11 @@ import torch
 import wandb
 from flood_forecast.named_dimension_array import NamedDimensionArray
 from flood_forecast.plot_functions import (
-    plot_shap_value_heatmaps, plot_shap_values_from_history,
-    plot_summary_shap_values, plot_summary_shap_values_over_time_series)
+    plot_shap_value_heatmaps,
+    plot_shap_values_from_history,
+    plot_summary_shap_values,
+    plot_summary_shap_values_over_time_series,
+)
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 BACKGROUND_SIZE = 5
@@ -23,13 +26,9 @@ def deep_explain_model_summary_plot(
 
     Args:
         model (object): trained model
-        csv_test_loader (CSVTestLoader): test data
-        forecast_start_idx (int): test prediction start index
-        history (torch.Tensor): history length tensor of dimension
-            (seq_len, num_features)
+        csv_test_loader (CSVTestLoader): test data loader
         datetime_start (datetime, optional): start date of the test prediction,
-        this should match forecast_start_idx to refer to the same time stamp
-        Defaults to datetime(2018, 9, 22, 0).
+            Defaults to None, i.e. using model inference parameters.
     """
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -101,8 +100,19 @@ def deep_explain_model_summary_plot(
 
 
 def deep_explain_model_heatmap(
-    model, csv_test_loader, datetime_start: Optional[datetime] = None
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
 ) -> None:
+    """Generate feature heatmap for prediction at a start time
+
+    Args:
+        model ([type]): trained model
+        csv_test_loader ([CSVTestLoader]): test data loader
+        datetime_start (Optional[datetime], optional): start date of the test prediction,
+            Defaults to None, i.e. using model inference parameters.
+
+    Returns:
+        None
+    """
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if datetime_start is None:
