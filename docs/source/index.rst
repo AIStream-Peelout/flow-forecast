@@ -7,7 +7,6 @@ Welcome to Flow Forecast's documentation!
 =========================================
 .. automodule:: flow_forecast
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -16,8 +15,21 @@ Welcome to Flow Forecast's documentation!
    license
    help
 
+.. automodule:: flow_forecast.preprocessing
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Preprocessing:
 
+   interpolate_preprocess
+
+.. automodule:: flow_forecast.custom
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Custom:
+
+   custom_opt
 
 Indices and tables
 ==================

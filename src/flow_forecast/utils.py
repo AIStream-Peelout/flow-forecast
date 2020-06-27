@@ -1,6 +1,6 @@
 import torch
 flatten_list_function = lambda l: [item for sublist in l for item in sublist]
-"""does this print"""
+
 class EarlyStopper(object):
     """EarlyStopping handler can be used to stop the training if no improvement after a given number of events.
     Args:
