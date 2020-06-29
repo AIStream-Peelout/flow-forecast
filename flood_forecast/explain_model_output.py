@@ -19,49 +19,33 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 BACKGROUND_BATCH_SIZE = 5
 
 
-def _prepare_background_batches(
-    model,
-    csv_test_loader: CSVTestLoader,
-    forecast_start_idx: int,
-    backgound_batch_size: int = BACKGROUND_BATCH_SIZE,
-) -> List[torch.Tensor]:
+def _prepare_background_tensor(
+    csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE,
+) -> torch.Tensor:
     """Generate background batches for deep explainer.
-    Choose batches prior to forecast_start_idx as background data.
-    Each batch is of size (seq_len, num_feature)
+    Random sample batches as background data
+    background tensor of size (batch_size, history_len, num_feature)
 
     Args:
-        model ([type]): trained model
         csv_test_loader (CSVTestLoader): test data loader
-        forecast_start_idx (int): forecast start index
-        backgound_batch_size (int): number of batches used as background data 
+        backgound_batch_size (int): number of batches used as background data
         for deep explainer. Default to BACKGROUND_BATCH_SIZE.
 
     Returns:
-        List[torch.Tensor]: List of tensors of backgound_batch_size length
+        torch.Tensor: background tensor of size (batch_size, history_len, num_feature)
     """
-    # select most recent 5 batches prior to forcast starte time as background
-    history_len = model.params["model_params"].get("seq_len")
-    if history_len is None:
-        history_len = model.params["dataset_params"]["forecast_history"]
-
-    background_start_idx = (
-        forecast_start_idx - history_len * backgound_batch_size
-    )
-    background_data = csv_test_loader.original_df.iloc[
-        background_start_idx:forecast_start_idx
-    ]
-    # return batch size = BACKGROUND_SIZE+1
-    # remove last empty tensor
+    background_data = csv_test_loader.original_df
     background_batches = csv_test_loader.convert_real_batches(
         csv_test_loader.df.columns, background_data
-    )[:-1]
-    return background_batches
+    )
+    background_tensor = torch.stack(
+        random.sample(background_batches, backgound_batch_size)
+    ).float()
+    return background_tensor
 
 
 def deep_explain_model_summary_plot(
-    model,
-    csv_test_loader: CSVTestLoader,
-    datetime_start: Optional[datetime] = None,
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
 ) -> None:
     """Generate feature summary plot for trained deep learning models
 
@@ -76,13 +60,9 @@ def deep_explain_model_summary_plot(
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
-        datetime_start
-    )
-    background_batches = _prepare_background_batches(
-        model, csv_test_loader, forecast_start_idx
-    )
-    background_tensor = torch.stack(background_batches).float().to(device)
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    background_tensor = _prepare_background_tensor(csv_test_loader)
+    background_tensor = background_tensor.to(device)
     model.model.eval()
 
     # background shape (L, N, M)
@@ -134,9 +114,7 @@ def deep_explain_model_summary_plot(
 
 
 def deep_explain_model_heatmap(
-    model,
-    csv_test_loader: CSVTestLoader,
-    datetime_start: Optional[datetime] = None,
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
 ) -> None:
     """Generate feature heatmap for prediction at a start time
 
@@ -154,13 +132,9 @@ def deep_explain_model_heatmap(
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
-        datetime_start
-    )
-    background_batches = _prepare_background_batches(
-        model, csv_test_loader, forecast_start_idx
-    )
-    background_tensor = torch.stack(background_batches).float().to(device)
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    background_tensor = _prepare_background_tensor(csv_test_loader)
+    background_tensor = background_tensor.to(device)
     model.model.eval()
 
     # background shape (L, N, M)
@@ -192,8 +166,5 @@ def deep_explain_model_heatmap(
     fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     if use_wandb:
         wandb.log(
-            {
-                "Heatmap for prediction "
-                f"at {datetime_start.strftime('%Y-%m-%d')}": fig
-            }
+            {"Heatmap for prediction " f"at {datetime_start.strftime('%Y-%m-%d')}": fig}
         )
