@@ -1,6 +1,6 @@
-shap~=0.35.0
-scikit-learn~=0.23.0
-pandas~=1.0.3
+shap
+scikit-learn
+pandas
 torch
 tb-nightly
 seaborn
@@ -11,10 +11,10 @@ pandas_gbq
 google-cloud
 google-cloud-storage
 pyyaml
-plotly~=4.7.1
-pytz~=2020.1
-setuptools~=46.4.0
-numpy~=1.18.4
-requests~=2.23.0
-torchvision~=0.6.0
-mpld3~=0.3
+plotly
+pytz
+setuptools
+numpy
+requests
+torchvision
+mpld3
