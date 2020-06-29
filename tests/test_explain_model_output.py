@@ -53,11 +53,47 @@ class ModelInterpretabilityTest(unittest.TestCase):
             "datetime_start": datetime(2014, 6, 2, 0),
         },
     }
-
+    simple_param = {
+        "use_decoder": True,
+        "model_params": {"n_time_series": 3, "seq_length": 20, "output_seq_len": 10,},
+        "dataset_params": {
+            "forecast_history": 20,
+            "class": "default",
+            "forecast_length": 10,
+            "relevant_cols": ["cfs", "temp", "precip"],
+            "target_col": ["cfs"],
+            "interpolate": False,
+            "train_end": 50,
+            "valid_end": 100,
+        },
+        "inference_params": {
+            "hours_to_forecast": 30,
+            "datetime_start": datetime(2014, 6, 2, 0),
+        },
+        "training_params": {
+            "optimizer": "Adam",
+            "lr": 0.01,
+            "criterion": "MSE",
+            "epochs": 1,
+            "batch_size": 2,
+            "optim_params": {},
+        },
+        "wandb": False,
+    }
+    keag_file = os.path.join(test_path, "keag_small.csv")
+    model = PyTorchForecast(
+        "MultiAttnHeadSimple", keag_file, keag_file, keag_file, model_params
+    )
+    lstm_model = PyTorchForecast(
+        "LSTM", keag_file, keag_file, keag_file, lstm_model_params
+    )
+    simple_linear_model = PyTorchForecast(
+        "SimpleLinearModel", keag_file, keag_file, keag_file, simple_param
+    )
     data_base_params = {
         "file_path": os.path.join(test_path2, "keag_small.csv"),
         "forecast_history": 20,
-        "forecast_length": 20,
+        "forecast_length": 10,
         "relevant_cols": ["cfs", "temp", "precip"],
         "target_col": ["cfs"],
         "interpolate_param": False,
@@ -67,13 +103,6 @@ class ModelInterpretabilityTest(unittest.TestCase):
         forecast_total=model_params["inference_params"]["hours_to_forecast"],
         **data_base_params
     )
-    keag_file = os.path.join(test_path, "keag_small.csv")
-    model = PyTorchForecast(
-        "MultiAttnHeadSimple", keag_file, keag_file, keag_file, model_params
-    )
-    lstm_model = PyTorchForecast(
-        "LSTM", keag_file, keag_file, keag_file, lstm_model_params
-    )
 
     def test_deep_explain_model_summary_plot(self):
         deep_explain_model_summary_plot(
@@ -82,12 +111,21 @@ class ModelInterpretabilityTest(unittest.TestCase):
         deep_explain_model_summary_plot(
             model=self.lstm_model, csv_test_loader=self.csv_test_loader
         )
+        deep_explain_model_summary_plot(
+            model=self.simple_linear_model, csv_test_loader=self.csv_test_loader,
+        )
         # dummy assert
         self.assertEqual(1, 1)
 
     def test_deep_explain_model_heatmap(self):
         deep_explain_model_heatmap(
             model=self.model, csv_test_loader=self.csv_test_loader
+        )
+        deep_explain_model_heatmap(
+            model=self.lstm_model, csv_test_loader=self.csv_test_loader
+        )
+        deep_explain_model_heatmap(
+            model=self.simple_linear_model, csv_test_loader=self.csv_test_loader,
         )
         # dummy assert
         self.assertEqual(1, 1)

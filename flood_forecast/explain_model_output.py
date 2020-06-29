@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 import shap
@@ -32,10 +32,11 @@ def _prepare_background_tensor(
         for deep explainer. Default to BACKGROUND_BATCH_SIZE.
 
     Returns:
-        torch.Tensor: background tensor of size (batch_size, history_len, num_feature)
+        torch.Tensor: background tensor of size
+        (batch_size, history_len, num_feature)
     """
     background_data = csv_test_loader.original_df
-    background_batches = csv_test_loader.convert_real_batches(
+    background_batches = csv_test_loader.convert_history_batches(
         csv_test_loader.df.columns, background_data
     )
     background_tensor = torch.stack(
