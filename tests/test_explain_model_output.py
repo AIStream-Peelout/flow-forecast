@@ -14,6 +14,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
     test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
     test_path2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
     model_params: dict = {
+        "model_name": "MultiAttnHeadSimple",
         "model_params": {"number_time_series": 3, "seq_len": 20, "output_seq_len": 10},
         "dataset_params": {
             "forecast_history": 20,
@@ -34,6 +35,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
         },
     }
     lstm_model_params: dict = {
+        "model_name": "LSTM",
         "model_params": {"seq_length": 20, "n_time_series": 3, "output_seq_len": 10},
         "dataset_params": {
             "forecast_history": 20,
@@ -54,6 +56,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
         },
     }
     simple_param = {
+        "model_name": "SimpleLinearModel",
         "use_decoder": True,
         "model_params": {"n_time_series": 3, "seq_length": 20, "output_seq_len": 10},
         "dataset_params": {
@@ -112,7 +115,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
             model=self.lstm_model, csv_test_loader=self.csv_test_loader
         )
         deep_explain_model_summary_plot(
-            model=self.simple_linear_model, csv_test_loader=self.csv_test_loader,
+            model=self.simple_linear_model, csv_test_loader=self.csv_test_loader
         )
         # dummy assert
         self.assertEqual(1, 1)
@@ -125,7 +128,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
             model=self.lstm_model, csv_test_loader=self.csv_test_loader
         )
         deep_explain_model_heatmap(
-            model=self.simple_linear_model, csv_test_loader=self.csv_test_loader,
+            model=self.simple_linear_model, csv_test_loader=self.csv_test_loader
         )
         # dummy assert
         self.assertEqual(1, 1)
