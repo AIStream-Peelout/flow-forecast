@@ -20,7 +20,7 @@ BACKGROUND_BATCH_SIZE = 5
 
 
 def _prepare_background_tensor(
-    csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE,
+    csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE
 ) -> torch.Tensor:
     """Generate background batches for deep explainer.
     Random sample batches as background data
@@ -46,7 +46,7 @@ def _prepare_background_tensor(
 
 
 def deep_explain_model_summary_plot(
-    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature summary plot for trained deep learning models
 
@@ -71,6 +71,9 @@ def deep_explain_model_summary_plot(
     deep_explainer = shap.DeepExplainer(model.model, background_tensor)
     shap_values = deep_explainer.shap_values(background_tensor)
     shap_values = np.stack(shap_values)
+    # shap_values needs to be 4-dimensional
+    if len(shap_values.shape) != 4:
+        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = NamedDimensionArray(
         shap_values, ["preds", "batches", "observations", "features"]
     )
@@ -115,7 +118,7 @@ def deep_explain_model_summary_plot(
 
 
 def deep_explain_model_heatmap(
-    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature heatmap for prediction at a start time
 
