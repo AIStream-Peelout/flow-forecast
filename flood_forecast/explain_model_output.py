@@ -20,8 +20,7 @@ BACKGROUND_BATCH_SIZE = 5
 
 
 def _prepare_background_tensor(
-    csv_test_loader: CSVTestLoader,
-    backgound_batch_size: int = BACKGROUND_BATCH_SIZE,
+    csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE
 ) -> torch.Tensor:
     """Generate background batches for deep explainer.
     Random sample batches as background data
@@ -47,9 +46,7 @@ def _prepare_background_tensor(
 
 
 def deep_explain_model_summary_plot(
-    model,
-    csv_test_loader: CSVTestLoader,
-    datetime_start: Optional[datetime] = None,
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature summary plot for trained deep learning models
 
@@ -59,14 +56,15 @@ def deep_explain_model_summary_plot(
         datetime_start (datetime, optional): start date of the test prediction,
             Defaults to None, i.e. using model inference parameters.
     """
+    if model.params["model_name"] == "SimpleTransformer":
+        print("SimpleTransformer currently not supported.")
+        return
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
-        datetime_start
-    )
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
@@ -116,15 +114,11 @@ def deep_explain_model_summary_plot(
         shap_values, history_numpy, csv_test_loader.df.columns
     )
     if use_wandb:
-        wandb.log(
-            {"Feature ranking for prediction" f" at {datetime_start}": fig}
-        )
+        wandb.log({"Feature ranking for prediction" f" at {datetime_start}": fig})
 
 
 def deep_explain_model_heatmap(
-    model,
-    csv_test_loader: CSVTestLoader,
-    datetime_start: Optional[datetime] = None,
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature heatmap for prediction at a start time
 
@@ -137,14 +131,15 @@ def deep_explain_model_heatmap(
     Returns:
         None
     """
+    if model.params["model_name"] == "SimpleTransformer":
+        print("SimpleTransformer currently not supported.")
+        return
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(
-        datetime_start
-    )
+    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
