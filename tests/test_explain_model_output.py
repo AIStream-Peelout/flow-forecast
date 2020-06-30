@@ -14,7 +14,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
     test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
     test_path2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
     model_params: dict = {
-        "model_params": {"number_time_series": 3, "seq_len": 20, "output_seq_len": 10,},
+        "model_params": {"number_time_series": 3, "seq_len": 20, "output_seq_len": 10},
         "dataset_params": {
             "forecast_history": 20,
             "class": "default",
@@ -34,7 +34,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
         },
     }
     lstm_model_params: dict = {
-        "model_params": {"seq_length": 20, "n_time_series": 3, "output_seq_len": 10,},
+        "model_params": {"seq_length": 20, "n_time_series": 3, "output_seq_len": 10},
         "dataset_params": {
             "forecast_history": 20,
             "class": "default",
@@ -55,7 +55,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
     }
     simple_param = {
         "use_decoder": True,
-        "model_params": {"n_time_series": 3, "seq_length": 20, "output_seq_len": 10,},
+        "model_params": {"n_time_series": 3, "seq_length": 20, "output_seq_len": 10},
         "dataset_params": {
             "forecast_history": 20,
             "class": "default",
