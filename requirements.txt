@@ -6,7 +6,7 @@ tb-nightly
 seaborn
 future
 h5py
-wandb~=0.8.36
+wandb
 pandas_gbq
 google-cloud
 google-cloud-storage

@@ -1,8 +1,9 @@
 """
-A set of function aimed at making it easy 
-to convert other time series datasets to our 
-format for transfer learning purposes 
+A set of function aimed at making it easy
+to convert other time series datasets to our
+format for transfer learning purposes
 """
+
 
 def make_column_names(df):
     num_cols = len(list(df))
