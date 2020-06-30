@@ -20,7 +20,7 @@ BACKGROUND_BATCH_SIZE = 5
 
 
 def _prepare_background_tensor(
-    csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE
+    csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE,
 ) -> torch.Tensor:
     """Generate background batches for deep explainer.
     Random sample batches as background data
@@ -46,7 +46,7 @@ def _prepare_background_tensor(
 
 
 def deep_explain_model_summary_plot(
-    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
 ) -> None:
     """Generate feature summary plot for trained deep learning models
 
@@ -101,6 +101,8 @@ def deep_explain_model_summary_plot(
 
     shap_values = deep_explainer.shap_values(history)
     shap_values = np.stack(shap_values)
+    if len(shap_values.shape) != 4:
+        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = NamedDimensionArray(
         shap_values, ["preds", "batches", "observations", "features"]
     )
@@ -109,16 +111,11 @@ def deep_explain_model_summary_plot(
         shap_values, history_numpy, csv_test_loader.df.columns
     )
     if use_wandb:
-        wandb.log(
-            {
-                "Feature ranking for prediction"
-                f" at {datetime_start.strftime('%Y-%m-%d')}": fig
-            }
-        )
+        wandb.log({"Feature ranking for prediction" f" at {datetime_start}": fig})
 
 
 def deep_explain_model_heatmap(
-    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
+    model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None,
 ) -> None:
     """Generate feature heatmap for prediction at a start time
 
@@ -150,6 +147,8 @@ def deep_explain_model_heatmap(
         background_tensor
     )  # forecast_len x N x L x M
     shap_values = np.stack(shap_values)
+    if len(shap_values.shape) != 4:
+        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = NamedDimensionArray(
         shap_values, ["preds", "batches", "observations", "features"]
     )
@@ -163,12 +162,12 @@ def deep_explain_model_heatmap(
     to_explain = history.to(device).unsqueeze(0)
     shap_values = deep_explainer.shap_values(to_explain)
     shap_values = np.stack(shap_values)
+    if len(shap_values.shape) != 4:
+        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = NamedDimensionArray(
         shap_values, ["preds", "batches", "observations", "features"]
     )
 
     fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     if use_wandb:
-        wandb.log(
-            {"Heatmap for prediction " f"at {datetime_start.strftime('%Y-%m-%d')}": fig}
-        )
+        wandb.log({"Heatmap for prediction " f"at {datetime_start}": fig})
