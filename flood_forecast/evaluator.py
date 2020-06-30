@@ -25,7 +25,7 @@ def stream_baseline(
     """
     total_length = len(river_flow_df.index)
     train_river_data = river_flow_df[: total_length - hours_forecast]
-    test_river_data = river_flow_df[total_length - hours_forecast :]
+    test_river_data = river_flow_df[total_length - hours_forecast:]
     mean_value = train_river_data[[forecast_column]].median()[0]
     test_river_data["predicted_baseline"] = mean_value
     mse_baseline = sklearn.metrics.mean_squared_error(
@@ -53,9 +53,7 @@ def get_model_r2_score(
 
     model_evaluate_function should call any necessary preprocessing
     """
-    test_river_data, baseline_mse = stream_baseline(
-        river_flow_df, forecast_column
-    )
+    test_river_data, baseline_mse = stream_baseline(river_flow_df, forecast_column)
 
 
 def get_r2_value(model_mse, baseline_mse):
@@ -98,12 +96,8 @@ def evaluate_model(
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
-            end_tensor = test_data.inverse_scale(
-                end_tensor.detach().reshape(-1, 1)
-            )
-            end_tensor_list = flatten_list_function(
-                end_tensor.numpy().tolist()
-            )
+            end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
+            end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)
@@ -128,9 +122,7 @@ def evaluate_model(
     deep_explain_model_summary_plot(
         model, test_data, inference_params["datetime_start"]
     )
-    deep_explain_model_heatmap(
-        model, test_data, inference_params["datetime_start"]
-    )
+    deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
 
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
@@ -239,18 +231,15 @@ def generate_predictions(
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
-            model,
-            df,
-            test_data,
-            history_dim,
-            forecast_length,
-            hours_to_forecast,
+            model, df, test_data, history_dim, forecast_length, hours_to_forecast,
         )
     else:
         # model, src, max_seq_len, real_target, output_len=1, unsqueeze_dim=1
         # hours_to_forecast 336
         # greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
-        # greedy_decode(model, src:torch.Tensor, max_len:int, real_target:torch.Tensor, start_symbol:torch.Tensor, unsqueeze_dim=1, device='cpu')
+        # greedy_decode(model, src:torch.Tensor, max_len:int,
+        # real_target:torch.Tensor, start_symbol:torch.Tensor,
+        # unsqueeze_dim=1, device='cpu')
         end_tensor = generate_decoded_predictions(
             model,
             test_data,
@@ -274,16 +263,10 @@ def generate_predictions_non_decoded(
     full_history = [history_dim]
     all_tensor = []
     if test_data.use_real_precip:
-        precip_cols = test_data.convert_real_batches(
-            "precip", df[forecast_length:]
-        )
+        precip_cols = test_data.convert_real_batches("precip", df[forecast_length:])
     if test_data.use_real_temp:
-        temp_cols = test_data.convert_real_batches(
-            "temp", df[forecast_length:]
-        )
-    for i in range(
-        0, int(np.ceil(hours_to_forecast / forecast_length).item())
-    ):
+        temp_cols = test_data.convert_real_batches("temp", df[forecast_length:])
+    for i in range(0, int(np.ceil(hours_to_forecast / forecast_length).item())):
         output = model.model(full_history[i].to(model.device))
         all_tensor.append(output.view(-1))
         if i == int(np.ceil(hours_to_forecast / forecast_length).item()) - 1:
@@ -312,9 +295,7 @@ def generate_predictions_non_decoded(
     remainder = forecast_length - hours_to_forecast % forecast_length
     if remainder != forecast_length:
         # Subtract remainder from array
-        end_tensor = (
-            torch.cat(all_tensor, axis=0).to("cpu").detach()[:-remainder]
-        )
+        end_tensor = torch.cat(all_tensor, axis=0).to("cpu").detach()[:-remainder]
     else:
         end_tensor = torch.cat(all_tensor, axis=0).to("cpu").detach()
 
