@@ -7,6 +7,11 @@ from typing import Dict, List
 from flood_forecast.named_dimension_array import NamedDimensionArray
 
 
+def jitter(points: List[float]):
+    stdev = .01 * (max(points) - min(points))
+    return np.random.randn(len(points)) * stdev
+
+
 def plot_shap_value_heatmaps(
     shap_values: NamedDimensionArray, columns: List[str]
 ) -> go.Figure:
@@ -18,7 +23,9 @@ def plot_shap_value_heatmaps(
         average_shap_value_over_batches.iterate_over_axis("features")
     ):
         heatmap = go.Heatmap(
-            z=shap_values_features, colorbar={"len": cbar_len, "y": cbar_locations[i]},
+            z=shap_values_features,
+            colorbar=dict(len=cbar_len, y=cbar_locations[i]),
+            colorscale=px.colors.sequential.Bluered,
         )
         fig.add_trace(heatmap, row=i + 1, col=1)
         fig.update_xaxes(title_text="sequence history steps", row=i + 1, col=1)
@@ -79,7 +86,6 @@ def plot_shap_values_from_history(
         np.mean, "batches"
     )
     mean_history_values = history.apply_along_axis(np.mean, "batches")
-    history_len = len(mean_history_values)
 
     for i, (feature_history, feature_shap_values) in enumerate(
         zip(
@@ -88,22 +94,25 @@ def plot_shap_values_from_history(
         )
     ):
         scatter = go.Scatter(
-            y=[0.0] * history_len,
+            y=jitter(feature_shap_values),
             x=feature_shap_values,
             mode="markers",
-            marker={
-                "color": feature_history,
-                "colorbar": {
-                    "len": cbar_len,
-                    "y": cbar_locations[-(i + 1)],
-                    "title": {"side": "right", "text": "feature values"},
-                },
-                "colorscale": px.colors.sequential.Bluered,
-            },
+            marker=dict(
+                color=feature_history,
+                colorbar=dict(
+                    len=cbar_len,
+                    y=cbar_locations[-(i + 1)],
+                    title=dict(
+                        side='right',
+                        text='feature values'
+                    )
+                ),
+                colorscale=px.colors.sequential.Bluered,
+            )
         )
         fig.add_trace(scatter, row=i + 1, col=1)
+        fig.update_yaxes(range=[-0.05, 0.05], row=i + 1, col=1)
         fig.update_xaxes(title_text="shap value", row=i + 1, col=1)
-
     fig.update_layout(showlegend=False)
     return fig
 
