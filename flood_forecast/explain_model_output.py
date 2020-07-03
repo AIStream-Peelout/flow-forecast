@@ -39,8 +39,10 @@ def _prepare_background_tensor(
     background_batches = csv_test_loader.convert_history_batches(
         csv_test_loader.df.columns, background_data
     )
+    # remove last batch in the list because it may not be of
+    # size (history_len, num_feature) due to length of original df
     background_tensor = torch.stack(
-        random.sample(background_batches, backgound_batch_size)
+        random.sample(background_batches[:-1], backgound_batch_size)
     ).float()
     return background_tensor
 
