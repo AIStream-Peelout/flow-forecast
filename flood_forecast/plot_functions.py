@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import torch
 from typing import Dict, List
-from flood_forecast.named_dimension_array import NamedDimensionArray
 
 
 def jitter(points: List[float]):
