@@ -7,8 +7,8 @@ import torch
 from typing import Dict, List
 
 
-def jitter(points: List[float]):
-    stdev = .01 * (max(points) - min(points))
+def jitter(points: torch.tensor):
+    stdev = float(.01 * (max(points) - min(points)))
     return np.random.randn(len(points)) * stdev
 
 
