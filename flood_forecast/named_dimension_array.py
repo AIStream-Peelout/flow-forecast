@@ -1,10 +1,9 @@
-from __future__ import annotations
 import numpy as np
 import typing
 
 
 class NamedDimensionArray(np.ndarray):
-    def __new__(cls, input_array, dimension_names: typing.List[str] = None) -> NamedDimensionArray:
+    def __new__(cls, input_array, dimension_names: typing.List[str] = None):
         obj = np.asarray(input_array).view(cls)
         dims = obj.shape
         if dimension_names is None:
@@ -17,7 +16,7 @@ class NamedDimensionArray(np.ndarray):
             return
         self.dimension_names = getattr(obj, 'dimension_names', None)
 
-    def iterate_over_axis(self, axis_name: str) -> typing.Generator[NamedDimensionArray]:
+    def iterate_over_axis(self, axis_name: str) -> typing.Generator:
         assert axis_name in self.dimension_names
         axis_i = self.dimension_names.index(axis_name)
         remaining_dimension_names = [
@@ -26,7 +25,7 @@ class NamedDimensionArray(np.ndarray):
         for sub_array in sub_arrays:
             yield NamedDimensionArray(sub_array, remaining_dimension_names)
 
-    def apply_along_axis(self, func1d: typing.Any, axis_name: str) -> NamedDimensionArray:
+    def apply_along_axis(self, func1d: typing.Any, axis_name: str):
         assert axis_name in self.dimension_names
         axis_i = self.dimension_names.index(axis_name)
         remaining_dimension_names = [
