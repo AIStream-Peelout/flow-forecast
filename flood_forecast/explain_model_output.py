@@ -7,7 +7,6 @@ import shap
 import torch
 
 import wandb
-from flood_forecast.named_dimension_array import NamedDimensionArray
 from flood_forecast.plot_functions import (
     plot_shap_value_heatmaps,
     plot_shap_values_from_history,
@@ -79,9 +78,7 @@ def deep_explain_model_summary_plot(
     # shap_values needs to be 4-dimensional
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = NamedDimensionArray(
-        shap_values, ["preds", "batches", "observations", "features"]
-    )
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
 
     # summary plot shows overall feature ranking
     # by average absolute shap values
@@ -100,17 +97,13 @@ def deep_explain_model_summary_plot(
     # summary plot for one prediction at datetime_start
 
     history = history.to(device).unsqueeze(0)
-    history_numpy = NamedDimensionArray(
-        history.cpu().numpy(), ["batches", "observations", "features"]
-    )
+    history_numpy = torch.tensor(history.cpu().numpy(), names=['batches', 'observations', 'features'])
 
     shap_values = deep_explainer.shap_values(history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = NamedDimensionArray(
-        shap_values, ["preds", "batches", "observations", "features"]
-    )
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
 
     fig = plot_shap_values_from_history(
         shap_values, history_numpy, csv_test_loader.df.columns
@@ -157,10 +150,7 @@ def deep_explain_model_heatmap(
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = NamedDimensionArray(
-        shap_values, ["preds", "batches", "observations", "features"]
-    )
-
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
     fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     if use_wandb:
         wandb.log({"Average prediction heatmaps": fig})
@@ -172,9 +162,7 @@ def deep_explain_model_heatmap(
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = NamedDimensionArray(
-        shap_values, ["preds", "batches", "observations", "features"]
-    )
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
 
     fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     if use_wandb:

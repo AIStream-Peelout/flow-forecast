@@ -3,6 +3,7 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 import numpy as np
 import pandas as pd
+import torch
 from typing import Dict, List
 from flood_forecast.named_dimension_array import NamedDimensionArray
 
@@ -13,15 +14,13 @@ def jitter(points: List[float]):
 
 
 def plot_shap_value_heatmaps(
-    shap_values: NamedDimensionArray, columns: List[str]
+    shap_values: torch.tensor, columns: List[str]
 ) -> go.Figure:
     fig = make_subplots(rows=len(columns), subplot_titles=columns)
     cbar_locations = np.linspace(0.15, 0.85, len(columns))
     cbar_len = 1.0 / len(columns)
-    average_shap_value_over_batches = shap_values.apply_along_axis(np.mean, "batches")
-    for i, (shap_values_features) in enumerate(
-        average_shap_value_over_batches.iterate_over_axis("features")
-    ):
+    average_shap_value_over_batches = shap_values.mean(axis='batches')
+    for i, shap_values_features in enumerate(average_shap_value_over_batches.align_to('features', ...)):
         heatmap = go.Heatmap(
             z=shap_values_features,
             colorbar=dict(len=cbar_len, y=cbar_locations[i]),
@@ -34,16 +33,14 @@ def plot_shap_value_heatmaps(
 
 
 def plot_summary_shap_values(
-    shap_values: NamedDimensionArray, columns: List[str]
+    shap_values: torch.tensor, columns: List[str]
 ) -> go.Figure:
-    mean_shap_values = shap_values.apply_along_axis(np.mean, "preds").apply_along_axis(
-        np.mean, "batches"
-    )
+    mean_shap_values = shap_values.mean(axis=['preds', 'batches'])
 
     fig = go.Figure()
     bar_plot = go.Bar(
         y=columns,
-        x=np.abs(mean_shap_values).apply_along_axis(np.mean, "observations"),
+        x=mean_shap_values.abs().mean(axis='observations'),
         orientation="h",
     )
     fig.add_trace(bar_plot)
@@ -53,15 +50,13 @@ def plot_summary_shap_values(
 
 
 def plot_summary_shap_values_over_time_series(
-    shap_values: NamedDimensionArray, columns: List[str]
+    shap_values: torch.tensor, columns: List[str]
 ) -> go.Figure:
-    abs_mean_shap_values = np.abs(shap_values.apply_along_axis(np.mean, "batches"))
-    multi_shap_values = np.abs(abs_mean_shap_values).apply_along_axis(
-        np.mean, "observations"
-    )
+    abs_mean_shap_values = shap_values.mean(axis=['batches']).abs()
+    multi_shap_values = abs_mean_shap_values.mean(axis='observations')
 
     fig = go.Figure()
-    for i, pred_shap_values in enumerate(multi_shap_values.iterate_over_axis("preds")):
+    for i, pred_shap_values in enumerate(multi_shap_values.align_to('preds', ...)):
         fig.add_trace(
             go.Bar(
                 y=columns, x=pred_shap_values, name=f"time-step {i}", orientation="h",
@@ -75,22 +70,20 @@ def plot_summary_shap_values_over_time_series(
 
 
 def plot_shap_values_from_history(
-    shap_values: NamedDimensionArray, history: NamedDimensionArray, columns: List[str],
+    shap_values: torch.tensor, history: torch.tensor, columns: List[str],
 ) -> go.Figure:
 
     fig = make_subplots(rows=len(columns), subplot_titles=columns, shared_xaxes=True)
     cbar_locations = np.linspace(0.15, 0.85, len(columns))
     cbar_len = 1.0 / len(columns)
 
-    mean_shap_values = shap_values.apply_along_axis(np.mean, "preds").apply_along_axis(
-        np.mean, "batches"
-    )
-    mean_history_values = history.apply_along_axis(np.mean, "batches")
+    mean_shap_values = shap_values.mean(axis=['preds', 'batches'])
+    mean_history_values = history.mean(axis='batches')
 
     for i, (feature_history, feature_shap_values) in enumerate(
         zip(
-            mean_history_values.iterate_over_axis("features"),
-            mean_shap_values.iterate_over_axis("features"),
+            mean_history_values.align_to("features", ...),
+            mean_shap_values.align_to("features", ...),
         )
     ):
         scatter = go.Scatter(
