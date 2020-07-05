@@ -3,7 +3,11 @@ import pandas as pd
 from typing import Dict
 
 
-def calculate_confidence_intervals(df: pd.DataFrame, df_preds: pd.Series, ci_lower: float, ci_upper) -> pd.DataFrame:
+def calculate_confidence_intervals(
+        df: pd.DataFrame,
+        df_preds: pd.Series,
+        ci_lower: float,
+        ci_upper) -> pd.DataFrame:
     assert 0.0 <= ci_lower <= 0.5
     assert 0.5 <= ci_upper <= 1.0
     assert ci_lower != ci_upper
@@ -11,6 +15,7 @@ def calculate_confidence_intervals(df: pd.DataFrame, df_preds: pd.Series, ci_low
     df_quantiles.loc[df_quantiles[ci_lower] > df_preds, ci_lower] = df_preds
     df_quantiles.loc[df_quantiles[ci_upper] < df_preds, ci_upper] = df_preds
     return df_quantiles
+
 
 def plot_df_test_with_confidence_interval(
         df_test: pd.DataFrame,
