@@ -9,19 +9,36 @@ Welcome to Flow Forecast's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: General:
 
    utils
+   evaluator
+   long_train
+   model_dict_function
+   plot_functions
+   pre_dict
+   pytorch_training
+   time_model
+   trainer
+   training_utils
    license
    help
 
 .. automodule:: flow_forecast.preprocessing
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Preprocessing:
 
    interpolate_preprocess
+   buil_dataset
+   closest_station
+   data_converter
+   preprocess_da_rnn
+   preprocess_metadata
+   process_usgs
+   pytorch_loaders
+   temporal_feats
 
 .. automodule:: flow_forecast.custom
 
@@ -30,6 +47,31 @@ Welcome to Flow Forecast's documentation!
    :caption: Custom:
 
    custom_opt
+
+.. automodule:: flow_forecast.transformer_xl
+
+.. toctree::
+  :maxdepth: 2
+  :caption: TransformerXL:
+
+  dummy_torch
+  lower_upper_config
+  multi_head_base
+  transformer_basic
+  transformer_xl
+
+
+
+.. automodule:: flow_forecast.gcp_integration
+
+.. toctree::
+  :maxdepth: 3
+  :caption: GCP Integration:
+
+  basic_utils
+
+
+
 
 Indices and tables
 ==================
