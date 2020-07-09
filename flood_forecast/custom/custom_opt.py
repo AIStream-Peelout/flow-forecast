@@ -71,26 +71,29 @@ class MAPELoss(torch.nn.Module):
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
         return torch.mean(torch.abs((target - output) / target))
-    
+   
+  
 # Add custom loss function
 class GaussianLoss(torch.nn.Module):
-    def __init__(self,mu,sigma):
+    def __init__(self, mu, sigma):
         """Compute the negative log likelihood of Gaussian Distribution
         From https://arxiv.org/abs/1907.00235
         """
         super(GaussianLoss, self).__init__()
         self.mu = mu
         self.sigma = sigma
-    def forward(self,x):
-        loss = - tdist.Normal(self.mu,self.sigma).log_prob(x)
-        return torch.sum(loss)/(loss.size(0)*loss.size(1))
+ 
+    def forward(self, x):
+        loss = - tdist.Normal(self.mu, self.sigma).log_prob(x)
+        return torch.sum(loss) / (loss.size(0) * loss.size(1))
+
 
 class QuantileLoss(torch.nn.Module):
     """From https://medium.com/the-artificial-impostor/quantile-regression-part-2-6fdbc26b2629"""
     def __init__(self, quantiles):
         super().__init__()
         self.quantiles = quantiles
-        
+
     def forward(self, preds, target):
         assert not target.requires_grad
         assert preds.size(0) == target.size(0)
@@ -105,6 +108,7 @@ class QuantileLoss(torch.nn.Module):
         loss = torch.mean(
             torch.sum(torch.cat(losses, dim=1), dim=1))
         return loss
+
 
 class BertAdam(Optimizer):
     """Implements BERT version of Adam algorithm with weight decay fix.
