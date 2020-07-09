@@ -27,11 +27,11 @@ pytorch_model_dict = {
     "SimpleLinearModel": SimpleLinearModel,
     "CustomTransformerDecoder": CustomTransformerDecoder}
 pytorch_criterion_dict = {
-  "MSE": MSELoss(), 
-  "SmoothL1Loss":SmoothL1Loss(), 
-  "PoissonNLLLoss": PoissonNLLLoss(),
-  "RMSE": RMSELoss(), 
-  "MAPE": MAPELoss()}
+    "MSE": MSELoss(),
+    "SmoothL1Loss": SmoothL1Loss(),
+    "PoissonNLLLoss": PoissonNLLLoss(),
+    "RMSE": RMSELoss(),
+    "MAPE": MAPELoss()}
 
 
 evaluation_functions_dict = {"NSE": "", "MSE": ""}
@@ -50,4 +50,3 @@ def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
     mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
     mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
     return mask
-
