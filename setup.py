@@ -24,6 +24,7 @@ setup(
         "flood_forecast.basic",
         "flood_forecast.custom"],
     license='Public',
+    description="A general time series forecasting package to enable code",
     long_description='A public package for forecasting river flows and flash flood severity',
     install_requires=install_requires,
     extras_require={
