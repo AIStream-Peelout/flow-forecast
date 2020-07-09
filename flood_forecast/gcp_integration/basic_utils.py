@@ -24,17 +24,13 @@ def upload_file(bucket_name: str, file_name: str, upload_name: str, client: stor
     blob.upload_from_filename(upload_name)
 
 
-def create_file_environ():
-    # TODO FIX
-    from oauthlib.service_account import ServiceAccountCredentials
-    credentials_dict = {
-        'type': 'service_account',
-        'client_id': os.environ['BACKUP_CLIENT_ID'],
-        'client_email': os.environ['BACKUP_CLIENT_EMAIL'],
-        'private_key_id': os.environ['BACKUP_PRIVATE_KEY_ID'],
-        'private_key': os.environ['BACKUP_PRIVATE_KEY'],
-    }
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-        credentials_dict
-    )
-    return credentials
+def download_file(bucket_name, file_name, client, destination_file_name):
+    bucket = client.get_bucket(bucket_name)
+    #Create a blob object from the filepath
+    blob = bucket.blob(file_name)
+    # Download the file to a destination
+    blob.download_to_filename(destination_file_name)
+    print("File sucessfully downloaded")
+
+def load_dataverse_file():
+    pass
