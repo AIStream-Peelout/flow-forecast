@@ -52,6 +52,7 @@ class RMSELoss(torch.nn.Module):
     output -> Predtion by model
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
+
     def __init__(self):
         super().__init__()
         self.mse = torch.nn.MSELoss()
@@ -66,13 +67,14 @@ class MAPELoss(torch.nn.Module):
     target -> True y
     output -> Predtion by model
     '''
+
     def __init__(self):
         super().__init__()
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
         return torch.mean(torch.abs((target - output) / target))
-   
-  
+
+
 # Add custom loss function
 class GaussianLoss(torch.nn.Module):
     def __init__(self, mu, sigma):
@@ -82,7 +84,7 @@ class GaussianLoss(torch.nn.Module):
         super(GaussianLoss, self).__init__()
         self.mu = mu
         self.sigma = sigma
- 
+
     def forward(self, x):
         loss = - tdist.Normal(self.mu, self.sigma).log_prob(x)
         return torch.sum(loss) / (loss.size(0) * loss.size(1))
@@ -90,6 +92,7 @@ class GaussianLoss(torch.nn.Module):
 
 class QuantileLoss(torch.nn.Module):
     """From https://medium.com/the-artificial-impostor/quantile-regression-part-2-6fdbc26b2629"""
+
     def __init__(self, quantiles):
         super().__init__()
         self.quantiles = quantiles
@@ -102,9 +105,9 @@ class QuantileLoss(torch.nn.Module):
             errors = target - preds[:, i]
             losses.append(
                 torch.max(
-                   (q-1) * errors, 
-                   q * errors
-            ).unsqueeze(1))
+                    (q - 1) * errors,
+                    q * errors
+                ).unsqueeze(1))
         loss = torch.mean(
             torch.sum(torch.cat(losses, dim=1), dim=1))
         return loss
