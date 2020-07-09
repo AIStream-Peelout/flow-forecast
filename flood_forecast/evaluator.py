@@ -126,6 +126,7 @@ def evaluate_model(
 
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
+
 def infer_on_torch_model(
     model,
     test_csv_path: str = None,
