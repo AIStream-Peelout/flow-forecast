@@ -7,11 +7,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.externals import joblib
 
-from modules import Encoder, Decoder
-from utils import numpy_to_tvar
-import utils
-from custom_types import TrainData
-from constants import device
+from flow_forecast.da_rnn.modules import Encoder, Decoder
+from flow_forecast.da_rnn.utils import numpy_to_tvar
+import flow_forecast.da_rnn.utils
+from flow_forecast.da_rnn.custom_types import TrainData
+from flow_forecast.da_rnn.constants import device
 
 
 def preprocess_data(dat, col_names, scale) -> TrainData:

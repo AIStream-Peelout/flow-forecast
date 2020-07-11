@@ -11,13 +11,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from flood_forecast.da_rnn import utils
-from flood_forecast.da_rnn.constants import device
-from flood_forecast.da_rnn.modules import Encoder, Decoder
-from flood_forecast.da_rnn.custom_types import DaRnnNet, TrainData, TrainConfig
-from flood_forecast.da_rnn.utils import numpy_to_tvar
+from flow_forecast.da_rnn import utils
+from flow_forecast.da_rnn.constants import device
+from flow_forecast.da_rnn.modules import Encoder, Decoder
+from flow_forecast.da_rnn.custom_types import DaRnnNet, TrainData, TrainConfig
+from flow_forecast.da_rnn.utils import numpy_to_tvar
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime 
+from datetime import datetime
 
 logger = utils.setup_log()
 logger.info(f"Using computation device: {device}")
@@ -83,7 +83,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config
                 adjust_learning_rate(net, n_iter)
 
         epoch_losses[e_i] = np.mean(iter_losses[range(e_i * iter_per_epoch, (e_i + 1) * iter_per_epoch)])
-            
+
         if e_i % 1 == 0:
             y_test_pred = predict(net, train_data,
                                   t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
@@ -94,7 +94,7 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config
             y_train_pred = predict(net, train_data,
                                    t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
                                    on_train=True)
-            
+
             #train_mse = np.mean((y_train_pred-train_data.targs[:t_cfg.train_size])**2)
             mse = np.mean((y_test_pred-train_data.targs[t_cfg.train_size:])**2)
             if wandb:
@@ -112,14 +112,14 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config
                 #writer.add_scalar('Loss/Validation', val_loss, e_i)
                 writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
                 #writer.add_scalar("Train/MSE", train_mse, e_i )
-            #     
+            #
     dir_path = os.path.dirname(os.path.realpath(__file__))
     if not os.path.exists("checkpoint"):
         os.makedirs("checkpoint")
     print(os.path.join(dir_path, "checkpoint", "encoder.pth"))
     torch.save(net.encoder.state_dict(), os.path.join(dir_path, "checkpoint", "encoder.pth"))
     torch.save(net.decoder.state_dict(), os.path.join(dir_path, "checkpoint", "decoder.pth"))
-    
+
     return [iter_losses, epoch_losses], net
 
 

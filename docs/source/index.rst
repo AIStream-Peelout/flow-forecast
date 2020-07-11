@@ -71,6 +71,19 @@ Welcome to Flow Forecast's documentation!
   basic_utils
 
 
+.. automodule:: flow_forecast.da_rnn
+
+
+.. toctree::
+  :maxdepth: 3
+  :caption: DA RNN:
+
+  train_da
+  utils_da
+  custom_types
+  model
+  modules_da
+  main_predict
 
 
 Indices and tables
