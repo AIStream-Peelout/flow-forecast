@@ -1,13 +1,14 @@
-# Flow and flash flood forecasting benchmark
-This repository provides open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contains baseline methods for forecasting stream flows around the United States. Task two focuses on forecasting the severity of the flood based on the forecast and the surrounding area. Additionally, some of the pre-processing scripts used to form the dataset are included for reproduciblity purposes and to facilitate appending new gages and weather stations.
+# Flow forecasting and deep learning library
+This repository is an DL library for time series. Historically, it provided open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contained baseline methods for forecasting stream flows around the United States. The repository was remade to serve as an all around deep learning library for time series prediction package. It is currently maintained by the [CoronaWhy Task-TS Team](https://github.com/CoronaWhy/task-ts/wiki) and serves as the source for all of our models. Our repo contains a wide variety of models from simple linear regression models to full transformer for time series forecasting purposes.
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
+| PyPI | ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)
 
 Using the library
 1. Run `pip install flood-forecast`
-2. Download the data from GCS into the `data` folder
+2. Please see our [wiki pages for directions on training models](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models)
 
 For instructions on contributing please se Wiki/Issue Board.
 
