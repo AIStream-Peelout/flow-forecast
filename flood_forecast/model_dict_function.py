@@ -10,6 +10,7 @@ from flood_forecast.custom.custom_opt import BertAdam
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.custom.custom_opt import RMSELoss, MAPELoss
+from flood_forecast.metadata_model.ae_basic import AE
 # criterion_params
 # { "quantile:""
 #  }
@@ -25,7 +26,8 @@ pytorch_model_dict = {
     "DummyTorchModel": DummyTorchModel,
     "LSTM": LSTMForecast,
     "SimpleLinearModel": SimpleLinearModel,
-    "CustomTransformerDecoder": CustomTransformerDecoder}
+    "CustomTransformerDecoder": CustomTransformerDecoder,
+    "AE":AE}
 pytorch_criterion_dict = {
     "MSE": MSELoss(),
     "SmoothL1Loss": SmoothL1Loss(),
