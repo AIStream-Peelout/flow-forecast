@@ -12,7 +12,7 @@ class AE(nn.Module):
             in_features=128, out_features=128
         )
         self.decoder_output_layer = nn.Linear(
-            in_features=128, out_features=input_feature
+            in_features=128, out_features=input_feature_dim
         )
 
     def forward(self, features):
