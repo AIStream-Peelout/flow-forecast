@@ -3,6 +3,8 @@ from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, C
 from flood_forecast.transformer_xl.transformer_xl import TransformerXL
 from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
+from flood_forecast.meta.autoencoder import AE
+
 from flood_forecast.basic.lstm_vanilla import LSTMForecast
 from torch.optim import Adam, SGD
 from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss
@@ -25,7 +27,8 @@ pytorch_model_dict = {
     "DummyTorchModel": DummyTorchModel,
     "LSTM": LSTMForecast,
     "SimpleLinearModel": SimpleLinearModel,
-    "CustomTransformerDecoder": CustomTransformerDecoder}
+    "CustomTransformerDecoder": CustomTransformerDecoder,
+    "AutoEncoder":AE}
 pytorch_criterion_dict = {
     "MSE": MSELoss(),
     "SmoothL1Loss": SmoothL1Loss(),
