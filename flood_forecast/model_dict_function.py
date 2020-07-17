@@ -27,7 +27,7 @@ pytorch_model_dict = {
     "LSTM": LSTMForecast,
     "SimpleLinearModel": SimpleLinearModel,
     "CustomTransformerDecoder": CustomTransformerDecoder,
-    "AE":AE }
+    "AE":AE}
 pytorch_criterion_dict = {
     "MSE": MSELoss(),
     "SmoothL1Loss": SmoothL1Loss(),
