@@ -1,9 +1,9 @@
 from torch import nn
 class AE(nn.Module):
-    def __init__(self, **kwargs):
+    def __init__(self, input_feature_dim):
         super().__init__()
         self.encoder_hidden_layer = nn.Linear(
-            in_features=kwargs["input_shape"], out_features=128
+            in_features=input_feature_dim, out_features=128
         )
         self.encoder_output_layer = nn.Linear(
             in_features=128, out_features=128
@@ -12,7 +12,7 @@ class AE(nn.Module):
             in_features=128, out_features=128
         )
         self.decoder_output_layer = nn.Linear(
-            in_features=128, out_features=kwargs["input_shape"]
+            in_features=128, out_features=input_feature
         )
 
     def forward(self, features):
