@@ -18,6 +18,7 @@
        "train_end": 100,
        "valid_start":301,
        "valid_end": 401,
+       "test_end":400,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
@@ -25,7 +26,7 @@
     },
     "training_params":
     {
-       "criterion":"MSE",
+       "criterion":"RMSE",
        "optimizer": "Adam",
        "optim_params":
        {
@@ -62,8 +63,6 @@
              "scaling": "StandardScaler",
              "interpolate_param": false
           }
-   }
-       
-   
+   } 
 }
     
