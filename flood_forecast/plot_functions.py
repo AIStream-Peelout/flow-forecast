@@ -156,3 +156,4 @@ def plot_df_test_with_confidence_interval(
         )
     )
     return fig
+    
