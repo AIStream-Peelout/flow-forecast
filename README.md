@@ -1,9 +1,10 @@
-# Flow and flash flood forecasting benchmark
-This repository provides open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contains baseline methods for forecasting stream flows around the United States. Task two focuses on forecasting the severity of the flood based on the forecast and the surrounding area. Additionally, some of the pre-processing scripts used to form the dataset are included for reproduciblity purposes and to facilitate appending new gages and weather stations.
+# Deep learning for time series forecasting
+This repository is an open-source DL for time series library. Currently Task-TS on CoronaWhy maintains our repo. However, we welcome all. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contained baseline methods for forecasting stream flows around the United States. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
+| Build PY| |
 
 Using the library
 1. Run `pip install flood-forecast`
