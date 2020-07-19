@@ -12,6 +12,12 @@ from flood_forecast.plot_functions import (
     plot_summary_shap_values,
     plot_summary_shap_values_over_time_series,
 )
+from flood_forecast.plot_functions import (
+    plot_shap_value_heatmaps,
+    plot_shap_values_from_history,
+    plot_summary_shap_values,
+    plot_summary_shap_values_over_time_series,
+)
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 BACKGROUND_BATCH_SIZE = 5
@@ -23,12 +29,10 @@ def _prepare_background_tensor(
     """Generate background batches for deep explainer.
     Random sample batches as background data
     background tensor of size (batch_size, history_len, num_feature)
-
     Args:
         csv_test_loader (CSVTestLoader): test data loader
         backgound_batch_size (int): number of batches used as background data
         for deep explainer. Default to BACKGROUND_BATCH_SIZE.
-
     Returns:
         torch.Tensor: background tensor of size
         (batch_size, history_len, num_feature)
@@ -49,7 +53,6 @@ def deep_explain_model_summary_plot(
     model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature summary plot for trained deep learning models
-
     Args:
         model (object): trained model
         csv_test_loader (CSVTestLoader): test data loader
@@ -77,7 +80,9 @@ def deep_explain_model_summary_plot(
     # shap_values needs to be 4-dimensional
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
+    shap_values = torch.tensor(
+        shap_values, names=["preds", "batches", "observations", "features"]
+    )
 
     # summary plot shows overall feature ranking
     # by average absolute shap values
@@ -96,32 +101,38 @@ def deep_explain_model_summary_plot(
     # summary plot for one prediction at datetime_start
 
     history = history.to(device).unsqueeze(0)
-    history_numpy = torch.tensor(history.cpu().numpy(), names=['batches', 'observations', 'features'])
+    history_numpy = torch.tensor(
+        history.cpu().numpy(), names=["batches", "observations", "features"]
+    )
 
     shap_values = deep_explainer.shap_values(history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
-
-    fig = plot_shap_values_from_history(
-        shap_values, history_numpy, csv_test_loader.df.columns
+    shap_values = torch.tensor(
+        shap_values, names=["preds", "batches", "observations", "features"]
     )
+
+    figs = plot_shap_values_from_history(shap_values, history_numpy)
     if use_wandb:
-        wandb.log({"Feature ranking for prediction" f" at {datetime_start}": fig})
+        for fig, feature in zip(figs, csv_test_loader.df.columns.tolist()):
+            wandb.log(
+                {
+                    "Feature ranking for prediction"
+                    f" at {datetime_start} - {feature}": fig
+                }
+            )
 
 
 def deep_explain_model_heatmap(
     model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature heatmap for prediction at a start time
-
     Args:
         model ([type]): trained model
         csv_test_loader ([CSVTestLoader]): test data loader
         datetime_start (Optional[datetime], optional): start date of the test prediction,
             Defaults to None, i.e. using model inference parameters.
-
     Returns:
         None
     """
@@ -149,10 +160,13 @@ def deep_explain_model_heatmap(
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
-    fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
+    shap_values = torch.tensor(
+        shap_values, names=["preds", "batches", "observations", "features"]
+    )
+    figs = plot_shap_value_heatmaps(shap_values)
     if use_wandb:
-        wandb.log({"Average prediction heatmaps": fig})
+        for fig, feature in zip(figs, csv_test_loader.df.columns):
+            wandb.log({f"Average prediction heatmaps - {feature}": fig})
 
     # heatmap one prediction sequence at datetime_start
     # (seq_len*forecast_len) per fop feature
@@ -161,8 +175,13 @@ def deep_explain_model_heatmap(
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
+    shap_values = torch.tensor(
+        shap_values, names=["preds", "batches", "observations", "features"]
+    )
 
-    fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
+    figs = plot_shap_value_heatmaps(shap_values)
     if use_wandb:
-        wandb.log({"Heatmap for prediction " f"at {datetime_start}": fig})
+        for fig, feature in zip(figs, csv_test_loader.df.columns):
+            wandb.log(
+                {"Heatmap for prediction " f"at {datetime_start} - {feature}": fig}
+            )
