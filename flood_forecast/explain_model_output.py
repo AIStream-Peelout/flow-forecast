@@ -77,9 +77,7 @@ def deep_explain_model_summary_plot(
     # shap_values needs to be 4-dimensional
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(
-        shap_values, names=["preds", "batches", "observations", "features"]
-    )
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
 
     # summary plot shows overall feature ranking
     # by average absolute shap values
@@ -98,27 +96,19 @@ def deep_explain_model_summary_plot(
     # summary plot for one prediction at datetime_start
 
     history = history.to(device).unsqueeze(0)
-    history_numpy = torch.tensor(
-        history.cpu().numpy(), names=["batches", "observations", "features"]
-    )
+    history_numpy = torch.tensor(history.cpu().numpy(), names=['batches', 'observations', 'features'])
 
     shap_values = deep_explainer.shap_values(history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(
-        shap_values, names=["preds", "batches", "observations", "features"]
-    )
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
 
-    figs = plot_shap_values_from_history(shap_values, history_numpy)
+    fig = plot_shap_values_from_history(
+        shap_values, history_numpy, csv_test_loader.df.columns
+    )
     if use_wandb:
-        for fig, feature in zip(figs, csv_test_loader.df.columns.tolist()):
-            wandb.log(
-                {
-                    "Feature ranking for prediction"
-                    f" at {datetime_start} - {feature}": fig
-                }
-            )
+        wandb.log({"Feature ranking for prediction" f" at {datetime_start}": fig})
 
 
 def deep_explain_model_heatmap(
@@ -159,13 +149,10 @@ def deep_explain_model_heatmap(
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(
-        shap_values, names=["preds", "batches", "observations", "features"]
-    )
-    figs = plot_shap_value_heatmaps(shap_values)
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
+    fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     if use_wandb:
-        for fig, feature in zip(figs, csv_test_loader.df.columns):
-            wandb.log({f"Average prediction heatmaps - {feature}": fig})
+        wandb.log({"Average prediction heatmaps": fig})
 
     # heatmap one prediction sequence at datetime_start
     # (seq_len*forecast_len) per fop feature
@@ -174,13 +161,8 @@ def deep_explain_model_heatmap(
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
-    shap_values = torch.tensor(
-        shap_values, names=["preds", "batches", "observations", "features"]
-    )
+    shap_values = torch.tensor(shap_values, names=['preds', 'batches', 'observations', 'features'])
 
-    figs = plot_shap_value_heatmaps(shap_values)
+    fig = plot_shap_value_heatmaps(shap_values, csv_test_loader.df.columns)
     if use_wandb:
-        for fig, feature in zip(figs, csv_test_loader.df.columns):
-            wandb.log(
-                {"Heatmap for prediction " f"at {datetime_start} - {feature}": fig}
-            )
+        wandb.log({"Heatmap for prediction " f"at {datetime_start}": fig})
