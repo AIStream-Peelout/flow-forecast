@@ -12,12 +12,6 @@ from flood_forecast.plot_functions import (
     plot_summary_shap_values,
     plot_summary_shap_values_over_time_series,
 )
-from flood_forecast.plot_functions import (
-    plot_shap_value_heatmaps,
-    plot_shap_values_from_history,
-    plot_summary_shap_values,
-    plot_summary_shap_values_over_time_series,
-)
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 BACKGROUND_BATCH_SIZE = 5
