@@ -179,4 +179,3 @@ def deep_explain_model_heatmap(
             wandb.log(
                 {"Heatmap for prediction " f"at {datetime_start} - {feature}": fig}
             )
-            

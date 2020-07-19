@@ -1,5 +1,5 @@
 # Deep learning for time series forecasting
-This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contained baseline methods for forecasting stream flows around the United States. 
+This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contained baseline methods for forecasting stream flows around the United States. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
@@ -8,7 +8,7 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 
 Using the library
 1. Run `pip install flood-forecast`
-2. Download the data from GCS into the `data` folder
+2. See documentation in wiki .
 
 For instructions on contributing please se Wiki/Issue Board.
 
