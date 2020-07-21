@@ -12,6 +12,7 @@ class SimpleTransformer(torch.nn.Module):
             output_seq_len: int = None,
             d_model: int = 128,
             n_heads: int = 8,
+            dropout=0.2,
             sigmoid=False):
         """
         Full transformer model
@@ -71,6 +72,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             d_model=128,
             output_dim=1,
             n_layers_encoder=6,
+            dropout=0.2,
             use_mask=False,
             n_heads=8):
         """
@@ -79,7 +81,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
-        encoder_layer = TransformerEncoderLayer(d_model, 8)
+        encoder_layer = TransformerEncoderLayer(d_model, 8,dropout=dropout)
         encoder_norm = LayerNorm(d_model)
         self.transformer_enc = TransformerEncoder(encoder_layer, n_layers_encoder, encoder_norm)
         self.output_dim_layer = torch.nn.Linear(d_model, output_dim)
