@@ -1,15 +1,13 @@
 import typing
-from typing import Tuple, List
+from typing import Tuple
 import json
 import os
 
 import torch
 from torch import nn
 from torch import optim
-from sklearn.preprocessing import StandardScaler
-import matplotlib
 import matplotlib.pyplot as plt
-import pandas as pd
+
 import numpy as np
 from flow_forecast.da_rnn import utils
 from flow_forecast.da_rnn.constants import device
@@ -17,24 +15,34 @@ from flow_forecast.da_rnn.modules import Encoder, Decoder
 from flow_forecast.da_rnn.custom_types import DaRnnNet, TrainData, TrainConfig
 from flow_forecast.da_rnn.utils import numpy_to_tvar
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
+
 
 logger = utils.setup_log()
 logger.info(f"Using computation device: {device}")
 
-def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_hidden_size=64,
-           T=10, learning_rate=0.01, batch_size=128, param_output_path="", save_path: str=None)->Tuple[dict, DaRnnNet]:
+
+def da_rnn(train_data: TrainData,
+           n_targs: int,
+           encoder_hidden_size=64,
+           decoder_hidden_size=64,
+           T=10,
+           learning_rate=0.01,
+           batch_size=128,
+           param_output_path="",
+           save_path: str = None) -> Tuple[dict, DaRnnNet]:
     """
     n_targs: The number of target columns (not steps)
     T: The number timesteps in the window
-
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Using device: " + str(device))
     train_cfg = TrainConfig(T, int(train_data.feats.shape[0] * 0.7), batch_size, nn.MSELoss())
     logger.info(f"Training size: {train_cfg.train_size:d}.")
 
-    enc_kwargs = {"input_size": train_data.feats.shape[1], "hidden_size": encoder_hidden_size, "T": T}
+    enc_kwargs = {
+        "input_size": train_data.feats.shape[1],
+        "hidden_size": encoder_hidden_size,
+        "T": T}
     encoder = Encoder(**enc_kwargs).to(device)
     with open(os.path.join(param_output_path, "enc_kwargs.json"), "w+") as fi:
         json.dump(enc_kwargs, fi, indent=4)
@@ -45,10 +53,20 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     with open(os.path.join(param_output_path, "dec_kwargs.json"), "w+") as fi:
         json.dump(dec_kwargs, fi, indent=4)
     if save_path:
-        #dir_path = os.path.dirname(os.path.realpath(__file__))
+        # dir_path = os.path.dirname(os.path.realpath(__file__))
         print("Resuming training from " + os.path.join(save_path, "encoder.pth"))
-        encoder.load_state_dict(torch.load(os.path.join(save_path, "encoder.pth"), map_location=device))
-        decoder.load_state_dict(torch.load(os.path.join(save_path, "decoder.pth"), map_location=device))
+        encoder.load_state_dict(
+            torch.load(
+                os.path.join(
+                    save_path,
+                    "encoder.pth"),
+                map_location=device))
+        decoder.load_state_dict(
+            torch.load(
+                os.path.join(
+                    save_path,
+                    "decoder.pth"),
+                map_location=device))
 
     encoder_optimizer = optim.Adam(
         params=[p for p in encoder.parameters() if p.requires_grad],
@@ -60,13 +78,22 @@ def da_rnn(train_data: TrainData, n_targs: int, encoder_hidden_size=64, decoder_
     return train_cfg, da_rnn_net
 
 
-def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config="", n_epochs=10, save_plots=True, wandb=False, tensorboard=False):
+def train(
+        net: DaRnnNet,
+        train_data: TrainData,
+        t_cfg: TrainConfig,
+        train_config="",
+        n_epochs=10,
+        save_plots=True,
+        wandb=False,
+        tensorboard=False):
     if wandb:
         import wandb
     iter_per_epoch = int(np.ceil(t_cfg.train_size * 1. / t_cfg.batch_size))
     iter_losses = np.zeros(n_epochs * iter_per_epoch)
     epoch_losses = np.zeros(n_epochs)
-    logger.info(f"Iterations per epoch: {t_cfg.train_size * 1. / t_cfg.batch_size:3.3f} ~ {iter_per_epoch:d}.")
+    logger.info(
+        f"Iterations per epoch: {t_cfg.train_size * 1. / t_cfg.batch_size:3.3f} ~ {iter_per_epoch:d}.")
     n_iter = 0
     if tensorboard:
         writer = SummaryWriter()
@@ -76,13 +103,14 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config
         for t_i in range(0, t_cfg.train_size, t_cfg.batch_size):
             batch_idx = perm_idx[t_i:(t_i + t_cfg.batch_size)]
             feats, y_history, y_target = prep_train_data(batch_idx, t_cfg, train_data)
-            if len(feats)>0 and len(y_target)>0 and len(y_history)>0:
+            if len(feats) > 0 and len(y_target) > 0 and len(y_history) > 0:
                 loss = train_iteration(net, t_cfg.loss_func, feats, y_history, y_target)
                 iter_losses[e_i * iter_per_epoch + t_i // t_cfg.batch_size] = loss
                 n_iter += 1
                 adjust_learning_rate(net, n_iter)
 
-        epoch_losses[e_i] = np.mean(iter_losses[range(e_i * iter_per_epoch, (e_i + 1) * iter_per_epoch)])
+        epoch_losses[e_i] = np.mean(
+            iter_losses[range(e_i * iter_per_epoch, (e_i + 1) * iter_per_epoch)])
 
         if e_i % 1 == 0:
             y_test_pred = predict(net, train_data,
@@ -90,15 +118,16 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config
                                   on_train=False)
             # TODO: make this MSE and make it work for multiple inputs
             val_loss = y_test_pred - train_data.targs[t_cfg.train_size:]
-            logger.info(f"Epoch {e_i:d}, train loss: {epoch_losses[e_i]:3.3f}, val loss: {np.mean(np.abs(val_loss))}.")
+            logger.info(
+                f"Epoch {e_i:d}, train loss: {epoch_losses[e_i]:3.3f}, val loss: {np.mean(np.abs(val_loss))}.")
             y_train_pred = predict(net, train_data,
                                    t_cfg.train_size, t_cfg.batch_size, t_cfg.T,
                                    on_train=True)
 
-            #train_mse = np.mean((y_train_pred-train_data.targs[:t_cfg.train_size])**2)
-            mse = np.mean((y_test_pred-train_data.targs[t_cfg.train_size:])**2)
+            # train_mse = np.mean((y_train_pred-train_data.targs[:t_cfg.train_size])**2)
+            mse = np.mean((y_test_pred - train_data.targs[t_cfg.train_size:])**2)
             if wandb:
-                wandb.log({"epoch":n_epochs, "validation_loss":val_loss, "validation_mse":mse})
+                wandb.log({"epoch": n_epochs, "validation_loss": val_loss, "validation_mse": mse})
             plt.figure()
             plt.plot(range(1, 1 + len(train_data.targs)), train_data.targs,
                      label="True")
@@ -109,10 +138,10 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config
             plt.legend(loc='upper left')
             utils.save_or_show_plot(f"pred_{e_i}.png", save_plots)
             if tensorboard:
-                #writer.add_scalar('Loss/Validation', val_loss, e_i)
-                writer.add_scalar('Validation/MSE', mse, e_i) # Check MSE CALC
-                #writer.add_scalar("Train/MSE", train_mse, e_i )
-            #
+                # writer.add_scalar('Loss/Validation', val_loss, e_i)
+                writer.add_scalar('Validation/MSE', mse, e_i)  # Check MSE CALC
+                # writer.add_scalar("Train/MSE", train_mse, e_i )
+
     dir_path = os.path.dirname(os.path.realpath(__file__))
     if not os.path.exists("checkpoint"):
         os.makedirs("checkpoint")
@@ -123,22 +152,23 @@ def train(net: DaRnnNet, train_data: TrainData, t_cfg: TrainConfig, train_config
     return [iter_losses, epoch_losses], net
 
 
-def prep_train_data(batch_idx: np.ndarray, t_cfg: TrainConfig, train_data: TrainData)->Tuple:
-    feats = np.zeros((len(batch_idx), t_cfg.T-1, train_data.feats.shape[1]))
-    y_history = np.zeros((len(batch_idx), t_cfg.T-1, train_data.targs.shape[1]))
+def prep_train_data(batch_idx: np.ndarray, t_cfg: TrainConfig, train_data: TrainData) -> Tuple:
+    feats = np.zeros((len(batch_idx), t_cfg.T - 1, train_data.feats.shape[1]))
+    y_history = np.zeros((len(batch_idx), t_cfg.T - 1, train_data.targs.shape[1]))
     y_target = train_data.targs[batch_idx + t_cfg.T]
 
     for b_i, b_idx in enumerate(batch_idx):
-        b_slc = slice(b_idx, b_idx + t_cfg.T-1)
+        b_slc = slice(b_idx, b_idx + t_cfg.T - 1)
         feats[b_i, :, :] = train_data.feats[b_slc, :]
         y_history[b_i, :] = train_data.targs[b_slc]
 
     return feats, y_history, y_target
 
 
-def adjust_learning_rate(net: DaRnnNet, n_iter: int)->None:
+def adjust_learning_rate(net: DaRnnNet, n_iter: int) -> None:
     # TODO: Where did this Learning Rate adjustment schedule come from?
-    # Should be modified to use Cosine Annealing with warm restarts https://www.jeremyjordan.me/nn-learning-rate/
+    # Should be modified to use Cosine Annealing with warm restarts
+    # https://www.jeremyjordan.me/nn-learning-rate/
     if n_iter % 10000 == 0 and n_iter > 0:
         for enc_params, dec_params in zip(net.enc_opt.param_groups, net.dec_opt.param_groups):
             enc_params['lr'] = enc_params['lr'] * 0.9
@@ -161,7 +191,13 @@ def train_iteration(t_net: DaRnnNet, loss_func: typing.Callable, X, y_history, y
     return loss.item()
 
 
-def predict(t_net: DaRnnNet, t_dat: TrainData, train_size: int, batch_size: int, T: int, on_train=False):
+def predict(
+        t_net: DaRnnNet,
+        t_dat: TrainData,
+        train_size: int,
+        batch_size: int,
+        T: int,
+        on_train=False):
     out_size = t_dat.targs.shape[1]
     if on_train:
         y_pred = np.zeros((train_size - T + 1, out_size))

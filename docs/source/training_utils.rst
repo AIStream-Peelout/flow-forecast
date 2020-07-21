@@ -1,4 +1,5 @@
 Training Utils
 ==============
 
-.. autofunction:: flow_forecast.training_utils.EarlyStopper
+.. automodule:: flow_forecast.training_utils.EarlyStopper
+    :members:

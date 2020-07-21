@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 import torch
-import json, os
+import json
+import os
 from datetime import datetime
 from flow_forecast.model_dict_function import pytorch_model_dict
 from flow_forecast.pre_dict import scaler_dict
 from flow_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 from flow_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 import wandb
+
 
 class TimeSeriesModel(ABC):
     """
@@ -16,23 +18,31 @@ class TimeSeriesModel(ABC):
     This class assumes that data is already split into test train
     and validation at this point.
     """
-    def __init__(self, model_base: str, training_data: str, validation_data: str, test_data:str, params:Dict):
+
+    def __init__(
+            self,
+            model_base: str,
+            training_data: str,
+            validation_data: str,
+            test_data: str,
+            params: Dict):
         self.params = params
         if "weight_path" in params:
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
             self.model = self.load_model(model_base, params["model_params"])
+        params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
-        if "GCS" in self.params and self.params["GCS"]!=False:
+        if "GCS" in self.params and self.params["GCS"]:
             self.gcs_client = get_storage_client()
         else:
             self.gcs_client = None
         self.wandb = self.wandb_init()
 
     @abstractmethod
-    def load_model(self, model_base: str, model_params:Dict, weight_path=None) -> object:
+    def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:
         """
         This function should load and return the model
         this will vary based on the underlying framework used
@@ -40,7 +50,7 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def make_data_load(self, data_path, params:Dict, loader_type:str) -> object:
+    def make_data_load(self, data_path, params: Dict, loader_type: str) -> object:
         """
         Intializes a data loader based on the provided data_path.
         This may be as simple as a pandas dataframe or as complex as
@@ -49,14 +59,14 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def save_model(self, output_path:str):
+    def save_model(self, output_path: str):
         """
         Saves a model to a specific path along with a configuration report
         of the parameters and data info.
         """
         raise NotImplementedError
 
-    def upload_gcs(self, save_path:str, name:str, file_type:str, epoch=0, bucket_name=None):
+    def upload_gcs(self, save_path: str, name: str, file_type: str, epoch=0, bucket_name=None):
         """
         Function to upload model checkpoints to GCS
         """
@@ -68,11 +78,15 @@ class TimeSeriesModel(ABC):
             upload_file(bucket_name, os.path.join("experiments", name), save_path, self.gcs_client)
             online_path = os.path.join("gs://", bucket_name, "experiments", name)
             if self.wandb:
-                wandb.config.update({"gcs_m_path_" + str(epoch) + file_type:online_path})
+                wandb.config.update({"gcs_m_path_" + str(epoch) + file_type: online_path})
 
     def wandb_init(self):
-        if self.params["wandb"] != False:
-            wandb.init(project=self.params["wandb"]["project"], config=self.params, name=self.params["wandb"]["name"], tags=self.params["wandb"]["tags"])
+        if self.params["wandb"]:
+            wandb.init(
+                project=self.params["wandb"]["project"],
+                config=self.params,
+                name=self.params["wandb"]["name"],
+                tags=self.params["wandb"]["tags"])
             return True
         elif "sweep" in self.params:
             print("Using Wandb config:")
@@ -82,12 +96,18 @@ class TimeSeriesModel(ABC):
 
 
 class PyTorchForecast(TimeSeriesModel):
-    def __init__(self, model_base:str, training_data, validation_data, test_data, params_dict:Dict):
+    def __init__(
+            self,
+            model_base: str,
+            training_data,
+            validation_data,
+            test_data,
+            params_dict: Dict):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
         print("Torch is using " + str(self.device))
 
-    def load_model(self, model_base: str, model_params: Dict, weight_path:str = None, strict=True):
+    def load_model(self, model_base: str, model_params: Dict, weight_path: str = None, strict=True):
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
@@ -98,7 +118,7 @@ class PyTorchForecast(TimeSeriesModel):
                         for layer in excluded_layers:
                             del checkpoint[layer]
                         print("sucessfully deleted layers")
-                    strict=False
+                    strict = False
                 model.load_state_dict(checkpoint, strict=strict)
                 print("Weights sucessfully loaded")
             model.to(self.device)
@@ -108,10 +128,13 @@ class PyTorchForecast(TimeSeriesModel):
             if hasattr(model, "tgt_mask"):
                 model.tgt_mask = model.tgt_mask.to(self.device)
         else:
-            raise Exception("Error the model " + model_base + " was not found in the model dict. Please add it.")
+            raise Exception(
+                "Error the model " +
+                model_base +
+                " was not found in the model dict. Please add it.")
         return model
 
-    def save_model(self, final_path: str, epoch:int)->None:
+    def save_model(self, final_path: str, epoch: int) -> None:
         """
         Function to save a model to a given file path
         """
@@ -126,12 +149,16 @@ class PyTorchForecast(TimeSeriesModel):
         with open(params_save_path, "w+") as p:
             json.dump(self.params, p)
         self.upload_gcs(params_save_path, params_name, "_params", epoch)
-        self.upload_gcs(model_save_path, model_name, "_model",  epoch)
+        self.upload_gcs(model_save_path, model_name, "_model", epoch)
         if self.wandb:
-            import wandb
             wandb.config.save_path = model_save_path
 
-    def make_data_load(self, data_path: str, dataset_params: Dict, loader_type:str, the_class="default"):
+    def make_data_load(
+            self,
+            data_path: str,
+            dataset_params: Dict,
+            loader_type: str,
+            the_class="default"):
         start_end_params = {}
         # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
@@ -142,10 +169,23 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]]
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        if the_class == "default":
-            l = CSVDataLoader(data_path, dataset_params["forecast_history"], dataset_params["forecast_length"],
-            dataset_params["target_col"], dataset_params["relevant_cols"], **start_end_params)
+        if loader_type == "test" and "forecast_test_len" in dataset_params:
+            loader = CSVDataLoader(
+                data_path,
+                dataset_params["forecast_history"],
+                dataset_params["forecast_test_len"],
+                dataset_params["target_col"],
+                dataset_params["relevant_cols"],
+                **start_end_params)
+        elif the_class == "default":
+            loader = CSVDataLoader(
+                data_path,
+                dataset_params["forecast_history"],
+                dataset_params["forecast_length"],
+                dataset_params["target_col"],
+                dataset_params["relevant_cols"],
+                **start_end_params)
         else:
             # TODO support custom DataLoader
-            l = None
-        return l
+            loader = None
+        return loader

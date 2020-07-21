@@ -1,4 +1,8 @@
 Simple Multi Attention Head Model
 ==================================
 
-.. autofunction:: flow_forecast.transformer_xl.multi_head_base.MultiAttnHeadSimple
+.. automodule:: flow_forecast.transformer_xl.multi_head_base
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

@@ -1,6 +1,8 @@
 Time Model
 ============
 
-.. autofunction:: flow_forecast.time_model.TimeSeriesModel
-
-.. autofunction:: flow_forecast.time_model.PyTorchForecast
+.. automodule:: flow_forecast.time_model
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

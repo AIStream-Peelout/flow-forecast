@@ -20,7 +20,6 @@ Welcome to Flow Forecast's documentation!
    pytorch_training
    time_model
    trainer
-   training_utils
    license
    help
 
@@ -82,7 +81,7 @@ Welcome to Flow Forecast's documentation!
   utils_da
   custom_types
   model
-  modules_da
+  modules
   main_predict
 
 

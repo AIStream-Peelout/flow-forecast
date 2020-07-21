@@ -1,4 +1,8 @@
 Trainer
 ========
 
-.. autofunction:: flow_forecast.trainer.train_function
+.. automodule:: flow_forecast.trainer
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

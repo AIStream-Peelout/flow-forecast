@@ -47,7 +47,7 @@ class EarlyStopper(object):
         self.best_score = None
 
     def check_loss(self, model, validation_loss) -> bool:
-        score = validation_loss 
+        score = validation_loss
         if self.best_score is None:
             self.save_model_checkpoint(model)
             self.best_score = score

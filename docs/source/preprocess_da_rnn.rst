@@ -1,6 +1,8 @@
 Preprocess DA RNN
 ==================
 
-.. autofunction:: flow_forecast.preprocessing.preprocess_da_rnn.format_data
-
-.. autofunction:: flow_forecast.preprocessing.preprocess_da_rnn.make_data
+.. automodule:: flow_forecast.preprocessing.preprocess_da_rnn
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

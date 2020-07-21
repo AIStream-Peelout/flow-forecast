@@ -1,12 +1,14 @@
 import torch
 from typing import Type
 
+
 class SimpleLinearModel(torch.nn.Module):
     """
     A very simple baseline model to resolve some of the
-    difficulties with bugs in the various train/validation loops 
-    in code.
+    difficulties with bugs in the various train/validation loops
+    in  code.
     """
+
     def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1):
         super().__init__()
         self.forecast_history = seq_length
@@ -17,22 +19,30 @@ class SimpleLinearModel(torch.nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        x: A tensor of dimension (B, L, M) where 
-        B is the batch size, L is the length of the 
+        x: A tensor of dimension (B, L, M) where
+        B is the batch size, L is the length of the
         """
         x = self.initial_layer(x)
         x = x.permute(0, 2, 1)
         x = self.output_layer(x)
         return x.view(-1, self.output_len)
 
-def simple_decode(model: Type[torch.nn.Module], src: torch.Tensor, max_seq_len: int, real_target: torch.Tensor, 
-                        start_symbol=None, output_len=1, device='cpu', unsqueeze_dim=1, use_real_target:bool=True) -> torch.Tensor:
+
+def simple_decode(model: Type[torch.nn.Module],
+                  src: torch.Tensor,
+                  max_seq_len: int,
+                  real_target: torch.Tensor,
+                  start_symbol=None,
+                  output_len=1,
+                  device='cpu',
+                  unsqueeze_dim=1,
+                  use_real_target: bool = True) -> torch.Tensor:
     """
     :model a PyTorch model to be used for decoding
     :src the source tensor
     :the max length sequence to return
-    :real_target the actual target values we want to forecast (don't worry they are masked) 
-    :start_symbol used to match the function signature of greedy_decode not ever used here though. 
+    :real_target the actual target values we want to forecast (don't worry they are masked)
+    :start_symbol used to match the function signature of greedy_decode not ever used here though.
     :output_len potentially used to forecast multiple steps at once. Not implemented yet though.
     :device used to to match function signature
     :returns a torch.Tensor of dimension (B, max_seq_len, M)

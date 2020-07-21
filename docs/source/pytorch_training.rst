@@ -1,8 +1,8 @@
 PyTorch Training
 ==================
 
-.. autofunction:: flow_forecast.pytorch_training.train_transformer_style
-
-.. autofunction:: flow_forecast.pytorch_training.torch_single_train
-
-.. autofunction:: flow_forecast.pytorch_training.compute_validation
+.. automodule:: flow_forecast.pytorch_training
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

@@ -1,6 +1,8 @@
 Pre Dictionaries
 =================
 
-.. autofunction:: flow_forecast.pre_dict.scaler_dict
-
-.. autofunction:: flow_forecast.pre_dict.interpolate_dict
+.. automodule:: flow_forecast.pre_dict
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

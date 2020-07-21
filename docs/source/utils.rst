@@ -1,6 +1,8 @@
 Utilities
 =========
 
-.. autofunction:: flow_forecast.utils.flatten_list_function
-
-.. autofunction:: flow_forecast.utils.EarlyStopper
+.. automodule:: flow_forecast.utils
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

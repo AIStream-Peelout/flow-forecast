@@ -1,4 +1,8 @@
 Data Converter
 ==============
 
-.. autofunction:: flow_forecast.preprocessing.data_converter.make_column_names
+.. automodule:: flow_forecast.preprocessing.data_converter
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

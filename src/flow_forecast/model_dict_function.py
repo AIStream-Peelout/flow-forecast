@@ -14,11 +14,19 @@ import torch
 """
 Utility dictionaries to map a string to a class
 """
-pytorch_model_dict = {"MultiAttnHeadSimple": MultiAttnHeadSimple, "SimpleTransformer": SimpleTransformer,
-"TransformerXL": TransformerXL, "DummyTorchModel": DummyTorchModel,  "LSTM":LSTMForecast, "SimpleLinearModel": SimpleLinearModel,
-"CustomTransformerDecoder":CustomTransformerDecoder}
+pytorch_model_dict = {
+    "MultiAttnHeadSimple": MultiAttnHeadSimple,
+    "SimpleTransformer": SimpleTransformer,
+    "TransformerXL": TransformerXL,
+    "DummyTorchModel": DummyTorchModel,
+    "LSTM": LSTMForecast,
+    "SimpleLinearModel": SimpleLinearModel,
+    "CustomTransformerDecoder": CustomTransformerDecoder}
+pytorch_criterion_dict = {
+    "MSE": MSELoss(),
+    "SmoothL1Loss": SmoothL1Loss(),
+    "PoissonNLLLoss": PoissonNLLLoss()}
 
-pytorch_criterion_dict = {"MSE": MSELoss(), "SmoothL1Loss":SmoothL1Loss(), "PoissonNLLLoss":PoissonNLLLoss()}
 
 evaluation_functions_dict = {"NSE": "", "MSE": ""}
 
@@ -28,9 +36,9 @@ pytorch_opt_dict = {"Adam": Adam, "SGD": SGD, "BertAdam": BertAdam}
 
 scikit_dict = {}
 
-def generate_square_subsequent_mask(sz:int)->torch.Tensor:
-    """
-    Generate a square mask for the sequence. The masked positions are filled with float('-inf').
+
+def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
+    """Generate a square mask for the sequence. The masked positions are filled with float('-inf').
         Unmasked positions are filled with float(0.0).
     """
     mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)

@@ -1,8 +1,8 @@
 Custom Optimizations
 ====================
 
-.. autofunction:: flow_forecast.custom.warmup_cosine
-
-.. autofunction:: flow_forecast.custom.warmup_constant
-
-.. autofunction:: flow_forecast.custom.warmup_linear
+.. automodule:: flow_forecast.custom.custom_opt
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
