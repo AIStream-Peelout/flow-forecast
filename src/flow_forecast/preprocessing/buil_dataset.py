@@ -29,7 +29,7 @@ def build_weather_csv(
             econet_data,
             asos_base_url,
             visited_gages_path)
-        process_asos_data(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
+        process_asos_csv(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
 
 # todo fix this function so it does more than open files
 # def make_usgs(meta_data_path: str, start, end_index: int):

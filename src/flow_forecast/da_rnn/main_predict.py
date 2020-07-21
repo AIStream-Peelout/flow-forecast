@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import joblib
 
 from flow_forecast.da_rnn.modules import Encoder, Decoder
-from flow_forecast.da_rnn.utils import numpy_to_tvar
+from flow_forecast.da_rnn.utils import numpy_to_tvar, save_or_show_plot
 from flow_forecast.da_rnn.custom_types import TrainData
 from flow_forecast.da_rnn.constants import device
 
@@ -77,4 +77,4 @@ plt.figure()
 plt.plot(final_y_pred, label='Predicted')
 plt.plot(data.targs[(da_rnn_kwargs["T"] - 1):], label="True")
 plt.legend(loc='upper left')
-utils.save_or_show_plot("final_predicted_reloaded.png", save_plots)
+save_or_show_plot("final_predicted_reloaded.png", save_plots)

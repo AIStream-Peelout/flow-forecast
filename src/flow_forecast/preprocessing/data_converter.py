@@ -4,9 +4,10 @@ to convert other time series datasets to our
 format for transfer learning purposes
 """
 
+
 def make_column_names(df):
     num_cols = len(list(df))
-    #generate range of ints for suffixes
+    # generate range of ints for suffixes
     # with length exactly half that of num_cols;
     # if num_cols is even, truncate concatenated list later
     # to get to original list length
