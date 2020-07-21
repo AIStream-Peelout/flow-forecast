@@ -12,8 +12,8 @@ class SimpleTransformer(torch.nn.Module):
             output_seq_len: int = None,
             d_model: int = 128,
             n_heads: int = 8,
+            dropout = 0.1,
             forward_dim = 2048,
-            dropout=0.1,
             sigmoid=False):
         """
         Full transformer model
@@ -73,7 +73,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             d_model=128,
             output_dim=1,
             n_layers_encoder=6,
-            foward_dim=2048
+            foward_dim=2048,
             dropout=0.1,
             use_mask=False,
             n_heads=8):
