@@ -73,7 +73,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             d_model=128,
             output_dim=1,
             n_layers_encoder=6,
-            foward_dim=2048,
+            forward_dim=2048,
             dropout=0.1,
             use_mask=False,
             n_heads=8):
