@@ -34,7 +34,9 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            sudo pip install flake8
+            sudo pip install flake8 black autopep8
+            autopep8 -ir .
+            black .
             flake8 .
 
   evaluator_test:
