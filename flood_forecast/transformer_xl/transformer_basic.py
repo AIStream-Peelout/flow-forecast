@@ -12,8 +12,8 @@ class SimpleTransformer(torch.nn.Module):
             output_seq_len: int = None,
             d_model: int = 128,
             n_heads: int = 8,
-            dropout = 0.1,
-            forward_dim = 2048,
+            dropout=0.1,
+            forward_dim=2048,
             sigmoid=False):
         """
         Full transformer model
@@ -169,3 +169,4 @@ def greedy_decode(
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
         memory = model.encode_sequence(src[:, i + 1:, :], src_mask)
     return ys[:, 1:, :]
+
