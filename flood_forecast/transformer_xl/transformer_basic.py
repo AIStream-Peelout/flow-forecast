@@ -169,4 +169,3 @@ def greedy_decode(
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
         memory = model.encode_sequence(src[:, i + 1:, :], src_mask)
     return ys[:, 1:, :]
-
