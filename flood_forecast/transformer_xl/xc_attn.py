@@ -4,7 +4,7 @@ import torch
 class TransformerXCBasic(torch.nn.Module):
     """ Transformer model """
     def __init__(self, seq_num, seq_len, n_time_series, out_seq_len, device, d_model=128, dropout=.5, n_head=8):
-        super(TransformerModel, self).__init__()
+        super(TransformerXCBasic, self).__init__()
         self.input_dim = input_dim
         self.n_head = n_head
         self.seq_num = seq_num
