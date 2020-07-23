@@ -1,4 +1,6 @@
 import torch
+
+
 class TransformerXCBasic(torch.nn.Module):
     """ Transformer model """
     def __init__(self, seq_num, seq_len, n_time_series, out_seq_len, device, d_model=128, dropout=.5, n_head=8):
@@ -16,7 +18,7 @@ class TransformerXCBasic(torch.nn.Module):
         torch.nn.init.normal_(self.id_embed.weight, std=0.02)
         torch.nn.init.normal_(self.po_embed.weight, std=0.02)
 
-    def forward(self,series_id, x):
+    def forward(self, series_id, x):
         id_embedding = self.id_embed(series_id)
         length = x.size(1) # (Batch_size,length,input_dim)
         position = torch.tensor(torch.arange(length),dtype=torch.long).to(self.device)
@@ -28,4 +30,4 @@ class TransformerXCBasic(torch.nn.Module):
         x = torch.cat((x,embedding_sum),dim=2)
         print(x.shape)
         return x
-
+    
