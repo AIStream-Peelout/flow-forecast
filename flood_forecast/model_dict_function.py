@@ -23,7 +23,10 @@ pytorch_model_dict = {
     "DummyTorchModel": DummyTorchModel,
     "LSTM": LSTMForecast,
     "SimpleLinearModel": SimpleLinearModel,
-    "CustomTransformerDecoder": CustomTransformerDecoder}
+    "CustomTransformerDecoder": CustomTransformerDecoder,
+    "DARNN":DARNN, 
+    "XCTransformer":TransformerXCBasic
+    }
 
 pytorch_criterion_dict = {
     "MSE": MSELoss(),
