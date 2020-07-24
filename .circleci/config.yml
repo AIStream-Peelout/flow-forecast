@@ -35,7 +35,7 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install flake8 black autopep8
-            autopep8 -ira .
+            autopep8 -ir -aaa .
             black .
             flake8 .
 
