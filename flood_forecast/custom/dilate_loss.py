@@ -22,6 +22,8 @@ class DilateLoss(torch.nn.Module):
         :returns a tuple of dimension (torch.Tensor)
         """
         # outputs, targets: shape (batch_size, N_output, 1)
+        outputs = outputs.squeeze(2)
+        targets = targets.squeeez(2)
         batch_size, N_output = outputs.shape[0:2]
         loss_shape = 0
         softdtw_batch = SoftDTWBatch.apply
