@@ -18,4 +18,4 @@ numpy~=1.18.4
 requests~=2.23.0
 torchvision~=0.6.0
 mpld3~=0.3
-numba >= 0.50
+numba >= 0.49
