@@ -37,7 +37,7 @@ class DilateLoss(torch.nn.Module):
         Omega = pairwise_distances(torch.range(1, N_output).view(N_output, 1)).to(self.device)
         loss_temporal = torch.sum(path * Omega) / (N_output * N_output)
         loss = self.alpha * loss_shape + (1 - self.alpha) * loss_temporal
-        return loss, loss_shape, loss_temporal
+        return loss
 
 
 def pairwise_distances(x, y=None):
