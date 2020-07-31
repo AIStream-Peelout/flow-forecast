@@ -22,7 +22,7 @@ class DilateLoss(torch.nn.Module):
         :returns a tuple of dimension (torch.Tensor)
         """
         # outputs, targets: shape (batch_size, N_output, 1)
-        print("The shape of targets is:")
+        print("The shape of targets is :")
         print(targets.shape) 
         if len(targets.size()) < 2:
             print("begin fixed loss func")
