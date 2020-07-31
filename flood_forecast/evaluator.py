@@ -10,7 +10,7 @@ from flood_forecast.explain_model_output import (
     deep_explain_model_heatmap,
     deep_explain_model_summary_plot,
 )
-from flood_forecast.model_dict_function import decoding_functions
+from flood_forecast.model_dict_function import decoding_functions, pytorch_criterion_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
@@ -66,11 +66,6 @@ def get_value(the_path: str) -> None:
     print(get_r2_value(0.120, res[1]))
 
 
-def metric_dict(metric: str) -> Callable:
-    dic = {"MSE": torch.nn.MSELoss(), "L1": torch.nn.L1Loss()}
-    return dic[metric]
-
-
 def evaluate_model(
     model: Type[TimeSeriesModel],
     model_type: str,
@@ -109,7 +104,8 @@ def evaluate_model(
         print(df_train_and_test)
     for evaluation_metric in evaluation_metrics:
         for target in target_col:
-            evaluation_metric_function = metric_dict(evaluation_metric)
+            eval_params = {}
+            evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
             s = evaluation_metric_function(
                 torch.from_numpy(
                     df_train_and_test[target][forecast_history:].to_numpy()
