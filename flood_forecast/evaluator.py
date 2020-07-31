@@ -95,7 +95,7 @@ def evaluate_model(
             end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
-            end_tensor = end_tensor.squeeze(1)
+            end_tensor = end_tensor.squeeze(1) ## Removing extra dim from reshape?
             df_predictions = pd.DataFrame(
                 test_data.inverse_scale(df_predictions).numpy(),
                 index=df_predictions.index,
@@ -295,7 +295,7 @@ def generate_predictions_non_decoded(
     else:
         end_tensor = torch.cat(all_tensor, axis=0).to("cpu").detach()
 
-    print(end_tensor.shape)
+    print(end_tensor.shape) # Dimension now is (n_time_steps_to_forecast_steps)!! i.e [16]
     return end_tensor
 
 

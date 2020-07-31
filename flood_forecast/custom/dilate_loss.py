@@ -22,6 +22,9 @@ class DilateLoss(torch.nn.Module):
         :returns a tuple of dimension (torch.Tensor)
         """
         # outputs, targets: shape (batch_size, N_output, 1)
+        if len(targets.size()) < 2:
+            targets.unsqueeze(0)
+            outputs.unsqueeze(0)
         outputs = outputs.unsqueeze(2)
         target = targets.unsqueeze(2)
         batch_size, N_output = outputs.shape[0:2]
