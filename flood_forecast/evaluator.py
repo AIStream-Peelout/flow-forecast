@@ -14,6 +14,8 @@ from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
+from flood_forecast.custom.dilate_loss import DilateLoss
+
 
 
 def stream_baseline(
@@ -67,7 +69,7 @@ def get_value(the_path: str) -> None:
 
 
 def metric_dict(metric: str) -> Callable:
-    dic = {"MSE": torch.nn.MSELoss(), "L1": torch.nn.L1Loss()}
+    dic = {"MSE": torch.nn.MSELoss(), "L1": torch.nn.L1Loss(), "DilateLoss":DilateLoss()}
     return dic[metric]
 
 
