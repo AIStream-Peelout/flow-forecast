@@ -26,7 +26,7 @@ class TimeSeriesModel(ABC):
             validation_data: str,
             test_data: str,
             params: Dict):
-        self.params = params 
+        self.params = params
         if "weight_path" in params:
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
