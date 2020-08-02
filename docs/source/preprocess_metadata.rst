@@ -1,7 +1,7 @@
 Preprocess Metadata
 ====================
 
-.. automodule:: flow_forecast.preprocessing.preprocess_metadata
+.. automodule:: flood_forecast.preprocessing.preprocess_metadata
     :members:
     :undoc-members:
     :inherited-members:

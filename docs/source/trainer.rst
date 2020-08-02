@@ -1,7 +1,7 @@
 Trainer
 ========
 
-.. automodule:: flow_forecast.trainer
+.. automodule:: flood_forecast.trainer
     :members:
     :undoc-members:
     :inherited-members:

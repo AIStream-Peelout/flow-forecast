@@ -1,7 +1,7 @@
 Data Converter
 ==============
 
-.. automodule:: flow_forecast.preprocessing.data_converter
+.. automodule:: flood_forecast.preprocessing.data_converter
     :members:
     :undoc-members:
     :inherited-members:

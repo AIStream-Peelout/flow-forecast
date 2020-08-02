@@ -1,7 +1,7 @@
 Utilities
 =========
 
-.. automodule:: flow_forecast.utils
+.. automodule:: flood_forecast.utils
     :members:
     :undoc-members:
     :inherited-members:

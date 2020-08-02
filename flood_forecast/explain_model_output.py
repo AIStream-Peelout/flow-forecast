@@ -23,12 +23,10 @@ def _prepare_background_tensor(
     """Generate background batches for deep explainer.
     Random sample batches as background data
     background tensor of size (batch_size, history_len, num_feature)
-
     Args:
         csv_test_loader (CSVTestLoader): test data loader
         backgound_batch_size (int): number of batches used as background data
         for deep explainer. Default to BACKGROUND_BATCH_SIZE.
-
     Returns:
         torch.Tensor: background tensor of size
         (batch_size, history_len, num_feature)
@@ -49,7 +47,6 @@ def deep_explain_model_summary_plot(
     model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature summary plot for trained deep learning models
-
     Args:
         model (object): trained model
         csv_test_loader (CSVTestLoader): test data loader
@@ -125,13 +122,11 @@ def deep_explain_model_heatmap(
     model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
     """Generate feature heatmap for prediction at a start time
-
     Args:
         model ([type]): trained model
         csv_test_loader ([CSVTestLoader]): test data loader
         datetime_start (Optional[datetime], optional): start date of the test prediction,
             Defaults to None, i.e. using model inference parameters.
-
     Returns:
         None
     """

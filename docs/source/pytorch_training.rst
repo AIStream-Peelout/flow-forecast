@@ -1,7 +1,7 @@
 PyTorch Training
 ==================
 
-.. automodule:: flow_forecast.pytorch_training
+.. automodule:: flood_forecast.pytorch_training
     :members:
     :undoc-members:
     :inherited-members:

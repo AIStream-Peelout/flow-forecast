@@ -1,7 +1,7 @@
 PyTorch Loaders
 ================
 
-.. automodule:: flow_forecast.preprocessing.pytorch_loaders
+.. automodule:: flood_forecast.preprocessing.pytorch_loaders
     :members:
     :undoc-members:
     :inherited-members:

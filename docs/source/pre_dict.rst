@@ -1,7 +1,7 @@
 Pre Dictionaries
 =================
 
-.. automodule:: flow_forecast.pre_dict
+.. automodule:: flood_forecast.pre_dict
     :members:
     :undoc-members:
     :inherited-members:

@@ -1,7 +1,7 @@
 Model Evaluation
 =================
 
-.. automodule:: flow_forecast.evaluator
+.. automodule:: flood_forecast.evaluator
     :members:
     :undoc-members:
     :inherited-members:
