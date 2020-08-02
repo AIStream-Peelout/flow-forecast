@@ -37,7 +37,7 @@ Welcome to Flow Forecast's documentation!
   pytorch_loaders
   temporal_feats
 
-.. automodule:: flow_forecast.custom
+.. automodule:: flood_forecast.custom
 
 .. toctree::
   :maxdepth: 2
@@ -45,7 +45,7 @@ Welcome to Flow Forecast's documentation!
 
   custom_opt
 
-.. automodule:: flow_forecast.transformer_xl
+.. automodule:: flood_forecast.transformer_xl
 
 .. toctree::
   :maxdepth: 2
@@ -53,7 +53,6 @@ Welcome to Flow Forecast's documentation!
 
   dummy_torch
   lower_upper_config
-  multi_head_base
 
 Indices and tables
 ==================
