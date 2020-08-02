@@ -26,16 +26,6 @@ author = 'Issac Godfried'
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
 
-# The short X.Y version.
-parsed_version = re.match(
-    '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?',
-    release
-)
-version = parsed_version.expand('\g<major>.\g<minor>.\g<patch>')
-
-if parsed_version.group('release'):
-    tags.add('prerelease')
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
