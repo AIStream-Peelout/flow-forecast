@@ -12,7 +12,6 @@
 #
 import os
 import sys
-import re
 
 # sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../'))
@@ -71,8 +70,8 @@ intersphinx_mapping = {
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
 
-if os.environ.get('READTHEDOCS', None):
-    tags.add('readthedocs')
+# if os.environ.get('READTHEDOCS', None):
+#    tags.add('readthedocs')
 
 # if 'READTHEDOCS' not in os.environ:
 #    import cython_generated_ext
