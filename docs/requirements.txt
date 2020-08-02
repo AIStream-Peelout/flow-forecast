@@ -8,3 +8,4 @@ plotly
 google-cloud-storage
 sklearn
 wandb
+shap
