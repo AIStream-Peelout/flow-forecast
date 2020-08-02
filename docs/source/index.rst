@@ -40,12 +40,20 @@ Welcome to Flow Forecast's documentation!
 .. automodule:: flow_forecast.custom
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Custom:
+  :maxdepth: 2
+  :caption: Custom:
 
-   custom_opt
+  custom_opt
 
+.. automodule:: flow_forecast.transformer_xl
 
+.. toctree::
+  :maxdepth: 2
+  :caption: TransformerXL:
+
+  dummy_torch
+  lower_upper_config
+  multi_head_base
 
 Indices and tables
 ==================
