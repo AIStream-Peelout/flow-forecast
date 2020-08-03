@@ -21,6 +21,8 @@ class DilateLoss(torch.nn.Module):
         :outputs: tensor of dimension (batch_size, out_seq_len, 1)
         :returns a tuple of dimension (torch.Tensor)
         """
+        outputs = outputs.float()
+        targets = targets.float()
         # outputs, targets: shape (batch_size, N_output, 1)
         print("The shape of targets is :")
         print(targets.shape) 
