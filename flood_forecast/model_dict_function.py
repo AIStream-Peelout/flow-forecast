@@ -5,7 +5,7 @@ from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
 from flood_forecast.basic.lstm_vanilla import LSTMForecast
 from torch.optim import Adam, SGD
-from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1
+from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1Loss
 from flood_forecast.custom.custom_opt import BertAdam
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
@@ -34,7 +34,7 @@ pytorch_criterion_dict = {
     "RMSE": RMSELoss,
     "MAPE": MAPELoss,
     "DilateLoss": DilateLoss,
-    "L1": L1}
+    "L1": L1Loss}
 
 
 evaluation_functions_dict = {"NSE": "", "MSE": ""}
