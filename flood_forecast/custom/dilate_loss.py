@@ -25,7 +25,7 @@ class DilateLoss(torch.nn.Module):
         targets = targets.float()
         # outputs, targets: shape (batch_size, N_output, 1)
         print("The shape of targets is :")
-        print(targets.shape) 
+        print(targets.shape)
         if len(targets.size()) < 2:
             print("begin fixed loss func")
             targets = targets.unsqueeze(0)
