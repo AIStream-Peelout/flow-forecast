@@ -53,6 +53,30 @@ Welcome to Flow Forecast's documentation!
 
   dummy_torch
   lower_upper_config
+  multi_head_base
+  transformer_basic
+  transformer_xl
+
+.. automodule:: flood_forecast.gcp_integration
+
+.. toctree::
+  :maxdepth: 3
+  :caption: GCP Integration:
+
+  basic_utils
+
+.. automodule:: flood_forecast.da_rnn
+
+.. toctree::
+  :maxdepth: 3
+  :caption: DA RNN:
+
+  train_da
+  utils_da
+  custom_types
+  model
+  modules
+
 
 Indices and tables
 ==================
