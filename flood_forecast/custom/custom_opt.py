@@ -113,6 +113,17 @@ class QuantileLoss(torch.nn.Module):
         return loss
 
 
+class NegativeLogLikelihood(torch.nn.Module):
+    """
+    target -> True y
+    output -> n (>1) dimensional prediction by model
+    """
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, target: torch.Tensor, output: torch.distributions):
+        return -output.log_prob(target).sum()
+
 class BertAdam(Optimizer):
     """Implements BERT version of Adam algorithm with weight decay fix.
     Params:
