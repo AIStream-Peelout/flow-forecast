@@ -124,6 +124,7 @@ class NegativeLogLikelihood(torch.nn.Module):
     def forward(self, target: torch.Tensor, output: torch.distributions):
         return -output.log_prob(target).sum()
 
+
 class BertAdam(Optimizer):
     """Implements BERT version of Adam algorithm with weight decay fix.
     Params:
