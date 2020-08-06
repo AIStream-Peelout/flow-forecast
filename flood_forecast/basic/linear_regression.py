@@ -47,7 +47,6 @@ def simple_decode(model: Type[torch.nn.Module],
     :device used to to match function signature
     :returns a torch.Tensor of dimension (B, max_seq_len, M)
     """
-    # FIx this function
     real_target = real_target.float()
     real_target2 = real_target.clone()
     # Use last value
@@ -55,7 +54,14 @@ def simple_decode(model: Type[torch.nn.Module],
     for i in range(0, max_seq_len):
         with torch.no_grad():
             out = model(src)
-            real_target2[:, i, 0] = out[:, 0]
-            src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
-            ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
+            if output_len == 1:
+                real_target2[:, i, 0] = out[:, 0]
+                src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
+                ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
+            else:
+                residual = output_len if max_seq_len-output_len-i > 0 else: max_seq_len%output_len 
+                real_target2[:, i:i+residual, 0] = out[:, :residual]
+                src = torch.cat((src[:, residual:, :], real_target2[:, i:i+residual, :].unsqueeze(1)), 1)
+                ys = torch.cat((ys, real_target2[:, i:i+residual, :].unsqueeze(1)), 1)
+                
     return ys[:, 1:, :]
