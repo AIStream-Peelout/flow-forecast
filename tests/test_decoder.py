@@ -50,7 +50,7 @@ class TestDecoding(unittest.TestCase):
     def test_for_leakage(self):
         """
         Simple test to check that raw target data does NOT
-        leak during validation steps.
+        leak during validation.
         """
         src, trg = next(iter(self.validation_loader))
         trg_mem = trg.clone().detach()
@@ -58,7 +58,7 @@ class TestDecoding(unittest.TestCase):
         self.assertNotEqual(result[0, 1, 0], trg_mem[0, 1, 0])
         self.assertEqual(result[0, 1, 1], trg_mem[0, 1, 1])
         self.assertEqual(result[0, 1, 2], trg_mem[0, 1, 2])
-        loss = pytorch_criterion_dict["MSE"]()(trg, trg_mem)
+        loss = pytorch_criterion_dict["MSE"](trg, trg_mem)
 
         self.assertNotEqual(result[0, 1, 0], result[0, 4, 0])
         self.assertGreater(loss, 0)
