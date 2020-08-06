@@ -186,7 +186,7 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         0]
                 else:
-                    output = simple_decode(model, src, targ.shape[1], targ, output_len=sequence_size)[:, :, 0]
+                    output = simple_decode(model, src, targ.shape[1], targ, 1)[:, :, 0]
             else:
                 output = model(src.float())
             labels = targ[:, :, 0]
