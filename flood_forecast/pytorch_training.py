@@ -29,10 +29,7 @@ def train_transformer_style(
         es = EarlyStopper(model.params["early_stopping"]['patience'])
     opt = pytorch_opt_dict[training_params["optimizer"]](
         model.model.parameters(), **training_params["optim_params"])
-    criterion_init_params = {}
-    if "criterion_params" in training_params:
-        criterion_init_params = training_params["criterion_params"]
-    criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
+    criterion = pytorch_criterion_dict[training_params["criterion"]]
     max_epochs = training_params["epochs"]
     data_loader = DataLoader(
         model.training,
