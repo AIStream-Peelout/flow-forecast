@@ -139,7 +139,7 @@ class Decoder(nn.Module):
         self.fc.weight.data.normal_()
 
     def forward(self, input_encoded, y_history):
-        #y_history = input_encoded[:, :, 0]
+        # y_history = input_encoded[:, :, 0]
         # input_encoded: (batch_size, T - 1, encoder_hidden_size)
         # y_history: (batch_size, (T-1))
         # Initialize hidden and cell, (1, batch_size, decoder_hidden_size)
