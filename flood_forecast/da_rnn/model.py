@@ -3,6 +3,7 @@ from torch import nn
 from torch.autograd import Variable
 from torch.nn import functional as tf
 
+
 class DARNN(nn.Module):
 
     def __init__(
@@ -19,12 +20,12 @@ class DARNN(nn.Module):
         hidden_size: dimension of the hidden state
         """
         super().__init__()
-        self.encoder = Encoder(n_time_series-1, hidden_size_encoder, forecast_history, gru_lstm)
+        self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
 
     def forward(self, x: torch.Tensor):
         """will implement"""
-        i=0
+        i = 0
         print(i)
         input_weighted, input_encoded = self.encoder(x[:, :, 1:])
         y_pred = self.decoder(input_encoded, x[:, :, 0].unsqueeze(2))
@@ -53,9 +54,9 @@ class Encoder(nn.Module):
         self.T = T
         self.gru_lstm = gru_lstm
         if gru_lstm:
-          self.lstm_layer = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=1)
+            self.lstm_layer = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=1)
         else:
-          self.gru_layer = nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=1)
+            self.gru_layer = nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=1)
         self.attn_linear = nn.Linear(in_features=2 * hidden_size + T - 1, out_features=1)
 
     def forward(self, input_data: torch.Tensor):
@@ -96,17 +97,16 @@ class Encoder(nn.Module):
             # Fix the warning about non-contiguous memory
             # see https://discuss.pytorch.org/t/dataparallel-issue-with-flatten-parameter/8282
             if self.gru_lstm:
-              self.lstm_layer.flatten_parameters()
-              _, generic_states = self.lstm_layer(weighted_input.unsqueeze(0), (hidden, cell))
-              cell = generic_states[1]
-              hidden = generic_states[0]
-            else: 
-              self.gru_layer.flatten_parameters()
-              print(weighted_input.shape)
-              __, generic_states = self.gru_layer(weighted_input.unsqueeze(0), hidden)
-              hidden = generic_states[0].unsqueeze(0)
+                self.lstm_layer.flatten_parameters()
+                _, generic_states = self.lstm_layer(weighted_input.unsqueeze(0), (hidden, cell))
+                cell = generic_states[1]
+                hidden = generic_states[0]
+            else:
+                self.gru_layer.flatten_parameters()
+                print(weighted_input.shape)
+                __, generic_states = self.gru_layer(weighted_input.unsqueeze(0), hidden)
+                hidden = generic_states[0].unsqueeze(0)
 
-            
             # Save output
             input_weighted[:, t, :] = weighted_input
             input_encoded[:, t, :] = hidden
@@ -129,11 +129,10 @@ class Decoder(nn.Module):
                                         nn.Linear(encoder_hidden_size, 1))
         self.gru_lstm = gru_lstm
         if gru_lstm:
-           self.lstm_layer = nn.LSTM(input_size=out_feats, hidden_size=decoder_hidden_size)
-        else: 
-          self.gru_layer = nn.GRU(input_size=out_feats, hidden_size=decoder_hidden_size) 
-        
-        
+            self.lstm_layer = nn.LSTM(input_size=out_feats, hidden_size=decoder_hidden_size)
+        else:
+            self.gru_layer = nn.GRU(input_size=out_feats, hidden_size=decoder_hidden_size)
+
         self.fc = nn.Linear(encoder_hidden_size + out_feats, out_feats)
         self.fc_final = nn.Linear(decoder_hidden_size + encoder_hidden_size, out_feats)
 
@@ -169,14 +168,14 @@ class Decoder(nn.Module):
             y_tilde = self.fc(torch.cat((context, y_history[:, t]), dim=1))
             # Eqn. 16: LSTM
             if self.gru_lstm:
-              self.lstm_layer.flatten_parameters()
-              _, lstm_output = self.lstm_layer(y_tilde.unsqueeze(0), (hidden, cell))
-              hidden = lstm_output[0]  # 1 * batch_size * decoder_hidden_size
-              cell = lstm_output[1]  # 1 * batch_size * decoder_hidden_size
+                self.lstm_layer.flatten_parameters()
+                _, lstm_output = self.lstm_layer(y_tilde.unsqueeze(0), (hidden, cell))
+                hidden = lstm_output[0]  # 1 * batch_size * decoder_hidden_size
+                cell = lstm_output[1]  # 1 * batch_size * decoder_hidden_size
             else:
-              self.gru_layer.flatten_parameters()
-              __, generic_states = self.gru_layer(y_tilde.unsqueeze(0), hidden)
-              hidden = generic_states[0].unsqueeze(0)
+                self.gru_layer.flatten_parameters()
+                __, generic_states = self.gru_layer(y_tilde.unsqueeze(0), hidden)
+                hidden = generic_states[0].unsqueeze(0)
 
         # Eqn. 22: final output
         return self.fc_final(torch.cat((hidden[0], context), dim=1))
