@@ -68,7 +68,7 @@ def pairwise_distances(x, y=None):
     return torch.clamp(dist, 0.0, float('inf'))
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def compute_softdtw(D, gamma):
 
     N = D.shape[0]
@@ -87,7 +87,7 @@ def compute_softdtw(D, gamma):
     return R
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def compute_softdtw_backward(D_, R, gamma):
     N = D_.shape[0]
     M = D_.shape[1]
@@ -145,7 +145,7 @@ class SoftDTWBatch(Function):
         return grad_output * E, None
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def my_max(x, gamma):
     # use the log-sum-exp trick
     max_x = np.max(x)
@@ -154,23 +154,23 @@ def my_max(x, gamma):
     return gamma * np.log(Z) + max_x, exp_x / Z
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def my_min(x, gamma):
     min_x, argmax_x = my_max(-x, gamma)
     return - min_x, argmax_x
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def my_max_hessian_product(p, z, gamma):
     return (p * z - p * np.sum(p * z)) / gamma
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def my_min_hessian_product(p, z, gamma):
     return - my_max_hessian_product(p, z, gamma)
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def dtw_grad(theta, gamma):
     m = theta.shape[0]
     n = theta.shape[1]
