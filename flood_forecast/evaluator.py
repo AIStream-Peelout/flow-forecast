@@ -320,10 +320,10 @@ def generate_decoded_predictions(
         hours_to_forecast,
         real_target_tensor,
         decoder_params["unsqueeze_dim"],
-        output_len=model.params["forecast_length"],
+        output_len=model.params["dataset_params"]["forecast_length"],
         device=model.device,
-        unsqueeze_dim = 1,
-        use_real_target = True
+        unsqueeze_dim=1,
+        use_real_target=True
     )
     end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
     return end_tensor
