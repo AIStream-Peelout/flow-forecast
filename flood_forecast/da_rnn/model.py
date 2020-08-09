@@ -5,7 +5,6 @@ from torch.nn import functional as tf
 from typing import Tuple
 
 
-
 class DARNN(nn.Module):
 
     def __init__(
@@ -29,8 +28,7 @@ class DARNN(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """will implement"""
-        i = 0
-        input_weighted, input_encoded = self.encoder(x[:, :, 1:])
+        _, input_encoded = self.encoder(x[:, :, 1:])
         y_pred = self.decoder(input_encoded, x[:, :, 0].unsqueeze(2))
         return y_pred
 
