@@ -32,7 +32,7 @@ class DARNN(nn.Module):
         return y_pred
 
 
-def init_hidden(x, hidden_size: int) -> torch.Variable:
+def init_hidden(x, hidden_size: int) -> torch.autograd.Variable:
     """
     Train the initial value of the hidden state:
     https://r2rt.com/non-zero-initial-states-for-recurrent-neural-networks.html
@@ -118,7 +118,6 @@ class Decoder(nn.Module):
 
     def __init__(self, encoder_hidden_size: int, decoder_hidden_size: int, T: int, out_feats=1, gru_lstm=True):
         super(Decoder, self).__init__()
-
         self.T = T
         self.encoder_hidden_size = encoder_hidden_size
         self.decoder_hidden_size = decoder_hidden_size
