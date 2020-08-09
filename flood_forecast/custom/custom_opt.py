@@ -6,8 +6,12 @@ from torch.optim.optimizer import required
 from torch.nn.utils import clip_grad_norm_
 import logging
 from typing import List
+
+import torch.distributions as tdist
+
 # BERTAdam see
 # https://github.com/huggingface/transformers/blob/694e2117f33d752ae89542e70b84533c52cb9142/pytorch_pretrained_bert/optimization.py
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,11 +37,80 @@ def warmup_linear(x, warmup=0.002):
         return x / warmup
     return max((x - 1.) / (warmup - 1.), 0)
 
+
 SCHEDULES = {
     'warmup_cosine': warmup_cosine,
     'warmup_constant': warmup_constant,
     'warmup_linear': warmup_linear,
 }
+
+
+class RMSELoss(torch.nn.Module):
+    '''
+    Returns RMSE using:
+    target -> True y
+    output -> Predtion by model
+    source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
+    '''
+
+    def __init__(self):
+        super().__init__()
+        self.mse = torch.nn.MSELoss()
+
+    def forward(self, target: torch.Tensor, output: torch.Tensor):
+        return torch.sqrt(self.mse(target, output))
+
+
+class MAPELoss(torch.nn.Module):
+    '''
+    Returns MAPE using:
+    target -> True y
+    output -> Predtion by model
+    '''
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, target: torch.Tensor, output: torch.Tensor):
+        return torch.mean(torch.abs((target - output) / target))
+
+
+# Add custom loss function
+class GaussianLoss(torch.nn.Module):
+    def __init__(self, mu, sigma):
+        """Compute the negative log likelihood of Gaussian Distribution
+        From https://arxiv.org/abs/1907.00235
+        """
+        super(GaussianLoss, self).__init__()
+        self.mu = mu
+        self.sigma = sigma
+
+    def forward(self, x):
+        loss = - tdist.Normal(self.mu, self.sigma).log_prob(x)
+        return torch.sum(loss) / (loss.size(0) * loss.size(1))
+
+
+class QuantileLoss(torch.nn.Module):
+    """From https://medium.com/the-artificial-impostor/quantile-regression-part-2-6fdbc26b2629"""
+
+    def __init__(self, quantiles):
+        super().__init__()
+        self.quantiles = quantiles
+
+    def forward(self, preds, target):
+        assert not target.requires_grad
+        assert preds.size(0) == target.size(0)
+        losses = []
+        for i, q in enumerate(self.quantiles):
+            errors = target - preds[:, i]
+            losses.append(
+                torch.max(
+                    (q - 1) * errors,
+                    q * errors
+                ).unsqueeze(1))
+        loss = torch.mean(
+            torch.sum(torch.cat(losses, dim=1), dim=1))
+        return loss
 
 
 class BertAdam(Optimizer):

@@ -1,5 +1,4 @@
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import plotly.express as px
 import numpy as np
 import pandas as pd
@@ -8,39 +7,43 @@ from typing import Dict, List
 
 
 def jitter(points: torch.tensor):
-    stdev = float(.01 * (max(points) - min(points)))
+    stdev = float(0.01 * (max(points) - min(points)))
     return np.random.randn(len(points)) * stdev
 
 
-def plot_shap_value_heatmaps(
-    shap_values: torch.tensor, columns: List[str]
-) -> go.Figure:
-    fig = make_subplots(rows=len(columns), subplot_titles=columns)
-    cbar_locations = np.linspace(0.15, 0.85, len(columns))
-    cbar_len = 1.0 / len(columns)
-    average_shap_value_over_batches = shap_values.mean(axis='batches')
-    for i, shap_values_features in enumerate(average_shap_value_over_batches.align_to('features', ...)):
+def plot_shap_value_heatmaps(shap_values: torch.tensor,) -> List[go.Figure]:
+    average_shap_value_over_batches = shap_values.mean(axis="batches")
+
+    x = [i for i in range(shap_values.align_to("observations", ...).shape[0])]
+    y = [i for i in range(shap_values.align_to("preds", ...).shape[0])]
+
+    figs: List[go.Figure] = []
+    for shap_values_features in average_shap_value_over_batches.align_to(
+        "features", ...
+    ):
+        fig = go.Figure()
         heatmap = go.Heatmap(
             z=shap_values_features,
-            colorbar=dict(len=cbar_len, y=cbar_locations[i]),
+            x=x,
+            y=y,
+            colorbar=dict(title=dict(side="right", text="feature values")),
             colorscale=px.colors.sequential.Bluered,
         )
-        fig.add_trace(heatmap, row=i + 1, col=1)
-        fig.update_xaxes(title_text="sequence history steps", row=i + 1, col=1)
-        fig.update_yaxes(title_text="prediction steps", row=i + 1, col=1)
-    return fig
+        fig.add_trace(heatmap)
+        fig.update_xaxes(title_text="sequence history steps")
+        fig.update_yaxes(title_text="prediction steps")
+        figs.append(fig)
+    return figs
 
 
 def plot_summary_shap_values(
     shap_values: torch.tensor, columns: List[str]
 ) -> go.Figure:
-    mean_shap_values = shap_values.mean(axis=['preds', 'batches'])
+    mean_shap_values = shap_values.mean(axis=["preds", "batches"])
 
     fig = go.Figure()
     bar_plot = go.Bar(
-        y=columns,
-        x=mean_shap_values.abs().mean(axis='observations'),
-        orientation="h",
+        y=columns, x=mean_shap_values.abs().mean(axis="observations"), orientation="h"
     )
     fig.add_trace(bar_plot)
     fig.update_layout(yaxis={"categoryorder": "array", "categoryarray": columns[::-1]})
@@ -51,14 +54,14 @@ def plot_summary_shap_values(
 def plot_summary_shap_values_over_time_series(
     shap_values: torch.tensor, columns: List[str]
 ) -> go.Figure:
-    abs_mean_shap_values = shap_values.mean(axis=['batches']).abs()
-    multi_shap_values = abs_mean_shap_values.mean(axis='observations')
+    abs_mean_shap_values = shap_values.mean(axis=["batches"]).abs()
+    multi_shap_values = abs_mean_shap_values.mean(axis="observations")
 
     fig = go.Figure()
-    for i, pred_shap_values in enumerate(multi_shap_values.align_to('preds', ...)):
+    for i, pred_shap_values in enumerate(multi_shap_values.align_to("preds", ...)):
         fig.add_trace(
             go.Bar(
-                y=columns, x=pred_shap_values, name=f"time-step {i}", orientation="h",
+                y=columns, x=pred_shap_values, name=f"time-step {i}", orientation="h"
             )
         )
     fig.update_layout(
@@ -69,44 +72,33 @@ def plot_summary_shap_values_over_time_series(
 
 
 def plot_shap_values_from_history(
-    shap_values: torch.tensor, history: torch.tensor, columns: List[str],
-) -> go.Figure:
+    shap_values: torch.tensor, history: torch.tensor
+) -> List[go.Figure]:
+    mean_shap_values = shap_values.mean(axis=["preds", "batches"])
+    mean_history_values = history.mean(axis="batches")
 
-    fig = make_subplots(rows=len(columns), subplot_titles=columns, shared_xaxes=True)
-    cbar_locations = np.linspace(0.15, 0.85, len(columns))
-    cbar_len = 1.0 / len(columns)
-
-    mean_shap_values = shap_values.mean(axis=['preds', 'batches'])
-    mean_history_values = history.mean(axis='batches')
-
-    for i, (feature_history, feature_shap_values) in enumerate(
-        zip(
-            mean_history_values.align_to("features", ...),
-            mean_shap_values.align_to("features", ...),
-        )
+    figs: List[go.Figure] = []
+    for feature_history, feature_shap_values in zip(
+        mean_history_values.align_to("features", ...),
+        mean_shap_values.align_to("features", ...),
     ):
+        fig = go.Figure()
         scatter = go.Scatter(
             y=jitter(feature_shap_values),
             x=feature_shap_values,
             mode="markers",
             marker=dict(
                 color=feature_history,
-                colorbar=dict(
-                    len=cbar_len,
-                    y=cbar_locations[-(i + 1)],
-                    title=dict(
-                        side='right',
-                        text='feature values'
-                    )
-                ),
+                colorbar=dict(title=dict(side="right", text="feature values")),
                 colorscale=px.colors.sequential.Bluered,
-            )
+            ),
         )
-        fig.add_trace(scatter, row=i + 1, col=1)
-        fig.update_yaxes(range=[-0.05, 0.05], row=i + 1, col=1)
-        fig.update_xaxes(title_text="shap value", row=i + 1, col=1)
-    fig.update_layout(showlegend=False)
-    return fig
+        fig.add_trace(scatter)
+        fig.update_yaxes(range=[-0.05, 0.05])
+        fig.update_xaxes(title_text="shap value")
+        fig.update_layout(showlegend=False)
+        figs.append(fig)
+    return figs
 
 
 def calculate_confidence_intervals(

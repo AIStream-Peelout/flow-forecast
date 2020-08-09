@@ -26,7 +26,7 @@
     },
     "training_params":
     {
-       "criterion":"MSE",
+       "criterion":"RMSE",
        "optimizer": "Adam",
        "optim_params":
        {
@@ -63,8 +63,6 @@
              "scaling": "StandardScaler",
              "interpolate_param": false
           }
-   }
-       
-   
+   } 
 }
     
