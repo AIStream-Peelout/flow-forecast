@@ -204,7 +204,7 @@ def dtw_grad(theta, gamma):
     return V[m, n], E[1:m + 1, 1:n + 1], Q, E
 
 
-@jit(nopython=True)
+@jit(nopython=True, debug=False)
 def dtw_hessian_prod(theta, Z, Q, E, gamma):
     m = Z.shape[0]
     n = Z.shape[1]
