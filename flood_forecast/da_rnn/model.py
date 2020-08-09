@@ -2,6 +2,8 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from torch.nn import functional as tf
+from typing import Tuple
+
 
 
 class DARNN(nn.Module):
@@ -15,18 +17,19 @@ class DARNN(nn.Module):
             out_feats=1,
             gru_lstm=True):
         """
-        input size: number of underlying factors (81)
-        T: number of time steps (10)
-        hidden_size: dimension of the hidden state
+        n_time_series: Number of time series present
+        forecast_history: How many time steps to use for forecasting (add one to this number)
+        hidden_size_encoder: dimension of the hidden state
+        decoder_hidden_size = dimension of hidden size of decoder
+
         """
         super().__init__()
         self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """will implement"""
         i = 0
-        print(i)
         input_weighted, input_encoded = self.encoder(x[:, :, 1:])
         y_pred = self.decoder(input_encoded, x[:, :, 0].unsqueeze(2))
         return y_pred
@@ -59,7 +62,7 @@ class Encoder(nn.Module):
             self.gru_layer = nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=1)
         self.attn_linear = nn.Linear(in_features=2 * hidden_size + T - 1, out_features=1)
 
-    def forward(self, input_data: torch.Tensor):
+    def forward(self, input_data: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         # input_data: (batch_size, T - 1, input_size)
         device = input_data.device
         input_weighted = Variable(
@@ -138,7 +141,7 @@ class Decoder(nn.Module):
 
         self.fc.weight.data.normal_()
 
-    def forward(self, input_encoded, y_history):
+    def forward(self, input_encoded: torch.Tensor, y_history: torch.Tensor) -> torch.Tensor:
         # y_history = input_encoded[:, :, 0]
         # input_encoded: (batch_size, T - 1, encoder_hidden_size)
         # y_history: (batch_size, (T-1))
