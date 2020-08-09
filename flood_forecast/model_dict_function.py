@@ -26,8 +26,7 @@ pytorch_model_dict = {
     "LSTM": LSTMForecast,
     "SimpleLinearModel": SimpleLinearModel,
     "CustomTransformerDecoder": CustomTransformerDecoder,
-    "DARNN": DARNN,
-    "XCTransformer": TransformerXCBasic
+    "DARNN": DARNN
 }
 
 pytorch_criterion_dict = {
