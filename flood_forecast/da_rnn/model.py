@@ -27,13 +27,12 @@ class DARNN(nn.Module):
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """will implement"""
         _, input_encoded = self.encoder(x[:, :, 1:])
         y_pred = self.decoder(input_encoded, x[:, :, 0].unsqueeze(2))
         return y_pred
 
 
-def init_hidden(x, hidden_size: int):
+def init_hidden(x, hidden_size: int) -> torch.Variable:
     """
     Train the initial value of the hidden state:
     https://r2rt.com/non-zero-initial-states-for-recurrent-neural-networks.html

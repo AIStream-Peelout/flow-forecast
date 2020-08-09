@@ -3,12 +3,13 @@
     "model_type": "PyTorch",
     "model_params": {
       "n_time_series":3,
-      "hidden_size_decoder":128,
+      "hidden_size_encoder":128,
       "decoder_hidden_size":128,
       "out_feats":1,
       "forecast_history":5,
       "gru_lstm": false 
      },
+
     "dataset_params":
     {  "class": "default",
        "training_path": "tests/test_data/keag_small.csv",
@@ -26,6 +27,7 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
+
     "training_params":
     {
        "criterion":"MSE",
@@ -45,6 +47,7 @@
        "tags": ["dummy_run", "circleci", "da_revised"],
        "project": "repo-flood_forecast"
     },
+    
     "forward_params":{},
    "metrics":["MSE"],
    "inference_params":
