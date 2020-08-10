@@ -6,7 +6,7 @@
       "hidden_size_encoder":128,
       "decoder_hidden_size":128,
       "out_feats":1,
-      "forecast_history":5,
+      "forecast_history":6,
       "gru_lstm": false 
      },
 
@@ -47,7 +47,7 @@
        "tags": ["dummy_run", "circleci", "da_revised"],
        "project": "repo-flood_forecast"
     },
-    
+
     "forward_params":{},
    "metrics":["MSE"],
    "inference_params":
