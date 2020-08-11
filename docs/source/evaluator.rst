@@ -1,4 +1,4 @@
-Model Evaluation
+Model Evaluator
 =================
 
 .. automodule:: flood_forecast.evaluator
