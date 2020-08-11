@@ -51,6 +51,8 @@ class Encoder(nn.Module):
         self.hidden_size = hidden_size
         self.T = T
         self.gru_lstm = gru_lstm
+        # Softmax fix
+        self.softmax = nn.Softmax(dim=1)
         if gru_lstm:
             self.lstm_layer = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=1)
         else:
@@ -88,7 +90,7 @@ class Encoder(nn.Module):
                                  )  # (batch_size * input_size) * 1
             # Eqn. 9: Softmax the attention weights
             # Had to replace functional with generic Softmax
-            attn_weights = nn.Softmax(x.view(-1, self.input_size),
+            attn_weights = self.softmax(x.view(-1, self.input_size),
                                       dim=1)  # (batch_size, input_size)
             # Eqn. 10: LSTM
             # (batch_size, input_size)
@@ -124,6 +126,8 @@ class Decoder(nn.Module):
                                                   encoder_hidden_size),
                                         nn.Tanh(),
                                         nn.Linear(encoder_hidden_size, 1))
+        # Softmax fix
+        self.softmax = nn.Softmax(dim=1)
         self.gru_lstm = gru_lstm
         if gru_lstm:
             self.lstm_layer = nn.LSTM(input_size=out_feats, hidden_size=decoder_hidden_size)
@@ -151,7 +155,7 @@ class Decoder(nn.Module):
                            input_encoded), dim=2)
             # Eqn. 12 & 13: softmax on the computed attention weights
             # Had to replace functional with generic Softmax
-            x = nn.Softmax(
+            x = self.softmax(
                 self.attn_layer(
                     x.view(-1, 2 * self.decoder_hidden_size + self.encoder_hidden_size)
                 ).view(-1, self.T - 1),
