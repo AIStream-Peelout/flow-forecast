@@ -40,11 +40,12 @@ def init_hidden(x, hidden_size: int) -> torch.autograd.Variable:
 
 class Encoder(nn.Module):
 
-    def __init__(self, input_size: int, hidden_size: int, T: int, gru_lstm=True):
+    def __init__(self, input_size: int, hidden_size: int, T: int, gru_lstm: bool = True):
         """
         input size: number of underlying factors (81)
         T: number of time steps (10)
-        hidden_size: dimension of the hidden state
+        hidden_size: dimension of the hidden stats
+
         """
         super(Encoder, self).__init__()
         self.input_size = input_size
@@ -90,8 +91,8 @@ class Encoder(nn.Module):
                                  )  # (batch_size * input_size) * 1
             # Eqn. 9: Softmax the attention weights
             # Had to replace functional with generic Softmax
-            attn_weights = self.softmax(x.view(-1, self.input_size),
-                                      dim=1)  # (batch_size, input_size)
+            # (batch_size, input_size)
+            attn_weights = self.softmax(x.view(-1, self.input_size), dim=1)
             # Eqn. 10: LSTM
             # (batch_size, input_size)
             weighted_input = torch.mul(attn_weights, input_data[:, t, :])
@@ -116,7 +117,7 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
 
-    def __init__(self, encoder_hidden_size: int, decoder_hidden_size: int, T: int, out_feats=1, gru_lstm=True):
+    def __init__(self, encoder_hidden_size: int, decoder_hidden_size: int, T: int, out_feats=1, gru_lstm: bool = True):
         super(Decoder, self).__init__()
         self.T = T
         self.encoder_hidden_size = encoder_hidden_size
