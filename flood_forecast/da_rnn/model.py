@@ -1,12 +1,10 @@
 import torch
 from torch import nn
 from torch.autograd import Variable
-from torch.nn import functional as tf
 from typing import Tuple
 
 
 class DARNN(nn.Module):
-
     def __init__(
             self,
             n_time_series: int,
