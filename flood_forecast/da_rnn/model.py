@@ -89,7 +89,7 @@ class Encoder(nn.Module):
             x = self.attn_linear(x.view(-1, self.hidden_size * 2 + self.T - 1)
                                  )  # (batch_size * input_size) * 1
             # Eqn. 9: Softmax the attention weights
-            attn_weights = tf.softmax(x.view(-1, self.input_size),
+            attn_weights = nn.Softmax(x.view(-1, self.input_size),
                                       dim=1)  # (batch_size, input_size)
             # Eqn. 10: LSTM
             # (batch_size, input_size)
@@ -103,7 +103,6 @@ class Encoder(nn.Module):
                 hidden = generic_states[0]
             else:
                 self.gru_layer.flatten_parameters()
-                print(weighted_input.shape)
                 __, generic_states = self.gru_layer(weighted_input.unsqueeze(0), hidden)
                 hidden = generic_states[0].unsqueeze(0)
 
@@ -152,7 +151,7 @@ class Decoder(nn.Module):
                            cell.repeat(self.T - 1, 1, 1).permute(1, 0, 2),
                            input_encoded), dim=2)
             # Eqn. 12 & 13: softmax on the computed attention weights
-            x = tf.softmax(
+            x = nn.Softmax(
                 self.attn_layer(
                     x.view(-1, 2 * self.decoder_hidden_size + self.encoder_hidden_size)
                 ).view(-1, self.T - 1),
