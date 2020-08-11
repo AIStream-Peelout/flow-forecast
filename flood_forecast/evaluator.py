@@ -256,6 +256,7 @@ def generate_predictions_non_decoded(
     forecast_length: int,
     hours_to_forecast: int,
 ) -> torch.Tensor:
+    # There are problems with this function that need to be fixed.
     full_history = [history_dim]
     all_tensor = []
     if test_data.use_real_precip:
