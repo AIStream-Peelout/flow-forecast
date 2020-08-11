@@ -5,12 +5,12 @@ import torch
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import joblib
+# import joblib
 from sklearn.externals import joblib
 
 from modules import Encoder, Decoder
-from utils import numpy_to_tvar
-import utils
+from utils import numpy_to_tvar, save_or_show_plot
+# import utils
 from custom_types import TrainData
 from constants import device
 
