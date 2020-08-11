@@ -62,11 +62,10 @@
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
              "interpolate_param": false
-          },
-          "decoder_params":{
-            "decoder_function": "simple_decode", "unsqueeze_dim": 1}
+            },
+         "decoder_params":{
+         "decoder_function": "simple_decode", "unsqueeze_dim": 1}
    }
-       
    
 }
     

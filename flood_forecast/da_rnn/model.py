@@ -16,9 +16,9 @@ class DARNN(nn.Module):
         """
         WARNING WILL NOT RUN ON GPU AT PRESENT
         n_time_series: Number of time series present in input
-        forecast_history: How many time steps to use for forecasting (add one to this number)
-        hidden_size_encoder: dimension of the hidden state
-        decoder_hidden_size: dimension of hidden size of decoder
+        forecast_history: How many historic time steps to use for forecasting (add one to this number)
+        hidden_size_encoder: dimension of the hidden state encoder
+        decoder_hidden_size: dimension of hidden size of the decoder
         """
         super().__init__()
         self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm)
