@@ -87,6 +87,7 @@ class Encoder(nn.Module):
             x = self.attn_linear(x.view(-1, self.hidden_size * 2 + self.T - 1)
                                  )  # (batch_size * input_size) * 1
             # Eqn. 9: Softmax the attention weights
+            # Had to replace functional with generic Softmax
             attn_weights = nn.Softmax(x.view(-1, self.input_size),
                                       dim=1)  # (batch_size, input_size)
             # Eqn. 10: LSTM
@@ -149,6 +150,7 @@ class Decoder(nn.Module):
                            cell.repeat(self.T - 1, 1, 1).permute(1, 0, 2),
                            input_encoded), dim=2)
             # Eqn. 12 & 13: softmax on the computed attention weights
+            # Had to replace functional with generic Softmax
             x = nn.Softmax(
                 self.attn_layer(
                     x.view(-1, 2 * self.decoder_hidden_size + self.encoder_hidden_size)
