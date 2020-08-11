@@ -63,5 +63,4 @@ def simple_decode(model: Type[torch.nn.Module],
                 real_target2[:, i:i + residual, 0] = out[:, :residual]
                 src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
-
     return ys[:, 1:, :]

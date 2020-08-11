@@ -1,11 +1,9 @@
 from datetime import datetime
 from typing import Callable, Dict, List, Tuple, Type
-
 import numpy as np
 import pandas as pd
 import sklearn.metrics
 import torch
-
 from flood_forecast.explain_model_output import (
     deep_explain_model_heatmap,
     deep_explain_model_summary_plot,
@@ -256,6 +254,7 @@ def generate_predictions_non_decoded(
     forecast_length: int,
     hours_to_forecast: int,
 ) -> torch.Tensor:
+    # There are problems with this function that need to be fixed.
     full_history = [history_dim]
     all_tensor = []
     if test_data.use_real_precip:
