@@ -92,7 +92,7 @@ class Encoder(nn.Module):
             # Eqn. 9: Softmax the attention weights
             # Had to replace functional with generic Softmax
             # (batch_size, input_size)
-            attn_weights = self.softmax(x.view(-1, self.input_size), dim=1)
+            attn_weights = self.softmax(x.view(-1, self.input_size))
             # Eqn. 10: LSTM
             # (batch_size, input_size)
             weighted_input = torch.mul(attn_weights, input_data[:, t, :])
@@ -159,8 +159,7 @@ class Decoder(nn.Module):
             x = self.softmax(
                 self.attn_layer(
                     x.view(-1, 2 * self.decoder_hidden_size + self.encoder_hidden_size)
-                ).view(-1, self.T - 1),
-                dim=1)  # (batch_size, T - 1)
+                ).view(-1, self.T - 1))  # (batch_size, T - 1)
 
             # Eqn. 14: compute context vector
             context = torch.bmm(x.unsqueeze(1), input_encoded)[
