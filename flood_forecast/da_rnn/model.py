@@ -12,6 +12,7 @@ class DARNN(nn.Module):
             forecast_history: int,
             decoder_hidden_size: int,
             out_feats=1,
+            dropout=.01, 
             gru_lstm=True):
         """
         WARNING WILL NOT RUN ON GPU AT PRESENT
@@ -22,11 +23,13 @@ class DARNN(nn.Module):
         """
         super().__init__()
         self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm)
+        self.dropout = nn.Dropout(dropout)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         _, input_encoded = self.encoder(x[:, :, 1:])
-        y_pred = self.decoder(input_encoded, x[:, :, 0].unsqueeze(2))
+        dropped_input = self.dropout(input_encoded)
+        y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
         return y_pred
 
 
