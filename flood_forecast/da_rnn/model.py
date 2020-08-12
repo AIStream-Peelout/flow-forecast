@@ -12,7 +12,7 @@ class DARNN(nn.Module):
             forecast_history: int,
             decoder_hidden_size: int,
             out_feats=1,
-            dropout=.01, 
+            dropout=.01,
             gru_lstm=True):
         """
         WARNING WILL NOT RUN ON GPU AT PRESENT
