@@ -56,6 +56,6 @@ class LSTMForecast(torch.nn.Module):
         x = self.final_layer(out_x.contiguous().view(batch_size, -1))
         if self.probabalistic:
             mean = x[..., 0][..., None]
-            std = x[..., 1][..., None]
+            std = torch.clamp(x[..., 1][..., None], min=0.01)
             x = torch.distributions.Normal(mean, std)
         return x
