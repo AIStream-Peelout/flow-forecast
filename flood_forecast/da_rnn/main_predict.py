@@ -5,11 +5,12 @@ import torch
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+# import joblib
 from sklearn.externals import joblib
 
 from modules import Encoder, Decoder
-from utils import numpy_to_tvar
-import utils
+from utils import numpy_to_tvar, save_or_show_plot
+# import utils
 from custom_types import TrainData
 from constants import device
 
@@ -77,4 +78,4 @@ plt.figure()
 plt.plot(final_y_pred, label='Predicted')
 plt.plot(data.targs[(da_rnn_kwargs["T"] - 1):], label="True")
 plt.legend(loc='upper left')
-utils.save_or_show_plot("final_predicted_reloaded.png", save_plots)
+save_or_show_plot("final_predicted_reloaded.png", save_plots)
