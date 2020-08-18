@@ -223,8 +223,8 @@ class AEDataloader(CSVDataLoader):
         Same parameters as before.
         """
         super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
-                       target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
-                       end_stamp=end_stamp, interpolate_param=False)
+                         target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
+                         end_stamp=end_stamp, interpolate_param=False)
 
     def __len__(self):
         return len(self.df.index) - 1
