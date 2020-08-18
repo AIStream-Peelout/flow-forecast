@@ -160,6 +160,7 @@ class PyTorchForecast(TimeSeriesModel):
             loader_type: str,
             the_class="default"):
         start_end_params = {}
+        the_class = dataset_params["class"]
         # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
