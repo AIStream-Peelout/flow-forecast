@@ -47,7 +47,7 @@ class DataLoaderTests(unittest.TestCase):
 
     def test_ae(self):
         x, y = self.ae_loader[0]
-        self.assertEqual(x, y)
+        self.assertEqual(x.shape, y.shape)
 
     def test_trainer(self):
         x, y = self.train_loader[0]
@@ -55,7 +55,7 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(x.shape[1], 3)
         self.assertEqual(y.shape[0], 20)
         # Check first and last dim
-        self.assertNotEqual(x[29, 0], y[0])
+        self.assertFalse(torch.eq(x[29, 0], y[0]))
 
 if __name__ == '__main__':
     unittest.main()
