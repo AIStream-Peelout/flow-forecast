@@ -54,7 +54,8 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(x.shape[0], 30)
         self.assertEqual(x.shape[1], 3)
         self.assertEqual(y.shape[0], 20)
-        self.assertNotEqual(x[0, 29], y[0])
+        # Check first and last dim
+        self.assertNotEqual(x[29, 0], y[0])
 
 if __name__ == '__main__':
     unittest.main()
