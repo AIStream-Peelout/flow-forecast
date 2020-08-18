@@ -12,6 +12,7 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.da_rnn.model import DARNN
 from flood_forecast.custom.custom_opt import RMSELoss, MAPELoss
 from flood_forecast.custom.dilate_loss import DilateLoss
+from meta_embed.ae_basic import AE
 import torch
 
 """
@@ -25,7 +26,8 @@ pytorch_model_dict = {
     "LSTM": LSTMForecast,
     "SimpleLinearModel": SimpleLinearModel,
     "CustomTransformerDecoder": CustomTransformerDecoder,
-    "DARNN": DARNN
+    "DARNN": DARNN,
+    "BasicAE": AE
 }
 
 pytorch_criterion_dict = {
