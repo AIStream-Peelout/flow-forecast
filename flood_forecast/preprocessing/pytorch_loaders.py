@@ -204,3 +204,23 @@ class CSVTestLoader(CSVDataLoader):
         return (
             len(self.df.index) - self.forecast_history - self.forecast_total - 1
         )
+
+class AEDataloader(CSVDataLoader):
+    def __init__(
+        self,
+        file_path: str,
+        relevant_cols: List,
+        scaling=None,
+        start_stamp: int = 0,
+        target_col: List = None,
+        end_stamp: int = None,
+        interpolate_param=False):
+        super.__init__(self, file_path=file_path, forecast_history=1, forecast_length=1, 
+                       target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
+                       end_stamp=end_stamp, interpolate_param=False)
+
+    def __len__(self):
+        return len(self.df.index) - 1 
+
+    def __getitem__(self, idx):
+        return torch.from_numpy(self.df.iloc[idx].numpy()), torch.from_numpy(self.df.iloc[idx].numpy())
