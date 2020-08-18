@@ -1,0 +1,11 @@
+sphinx
+sphinx-rtd-theme
+sphinx-autodoc-typehints
+pandas
+numpy
+torch
+plotly
+google-cloud-storage
+sklearn
+wandb
+shap
