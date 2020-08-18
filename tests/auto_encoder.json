@@ -1,5 +1,5 @@
 {                 
-    "model_name": "AEBasic",
+    "model_name": "BasicAE",
     "model_type": "PyTorch",
     "model_params": {
        "input_shape":3,
