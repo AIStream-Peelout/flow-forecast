@@ -24,7 +24,7 @@ class DataLoaderTests(unittest.TestCase):
             "target_col": ["cfs"],
             "interpolate_param": False
         }
-
+        self.train_loader = CSVDataLoader(os.path.join(self.test_data_path, "keag_small.csv"), 30, 20, target_col=['cfs'], relevant_cols=['cfs', 'precip', 'temp'])
         self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
         self.ae_loader = AEDataloader("keag_small.csv", relevant_cols=["cfs", "temp", "precip"])
 
@@ -43,9 +43,15 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(df.iloc[0]['datetime'].day, datetime(2014, 6, 2, 4).day)
 
     def test_ae(self):
-        x, y = self.ae_loader.__getitem__(0)
+        x, y = self.ae_loader[0]
         self.assertEqual(x, y)
 
+    def test_trainer(self):
+        x, y = self.train_loader[0]
+        self.assertEqual(x.shape[0], 30)
+        self.assertEqual(x.shape[1], 3)
+        self.assertEqual(y.shape[0], 20)
+        self.assertNotEqual(x[0, 29], y[0])
 
 if __name__ == '__main__':
     unittest.main()
