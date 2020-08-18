@@ -7,6 +7,7 @@ from flood_forecast.preprocessing.interpolate_preprocess import (
     interpolate_missing_values,
     fix_timezones,
 )
+from flood_forecast.preprocessing.buil_dataset import get_data
 
 
 class CSVDataLoader(Dataset):
@@ -44,13 +45,15 @@ class CSVDataLoader(Dataset):
         self.forecast_length = forecast_length
         # TODO allow other filling methods
         print("interpolate should be below")
+
+        self.local_file_path = get_data(file_path)
         if interpolate_param:
             print("now filling missing values")
-            df = fix_timezones(file_path)
+            df = fix_timezones(self.local_file_path)
             df = interpolate_missing_values(df)
         else:
-            df = pd.read_csv(file_path)
-        print("Now loading and scaling " + file_path)
+            df = pd.read_csv(self.local_file_path)
+        print("Now loading and scaling " + self.local_file_path)
         self.df = df.sort_values(by="datetime")[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
@@ -129,12 +132,13 @@ class CSVTestLoader(CSVDataLoader):
         A data loader for the test data.
         """
         super().__init__(**kwargs)
-        self.original_df = pd.read_csv(df_path)
+        local_file_path = get_data(df_path)
+        self.original_df = pd.read_csv(local_file_path)
         if interpolate:
-            self.original_df = fix_timezones(df_path)
+            self.original_df = fix_timezones(local_file_path)
             self.original_df = interpolate_missing_values(self.original_df)
         print("CSV Path below")
-        print(df_path)
+        print(local_file_path)
         self.forecast_total = forecast_total
         self.use_real_temp = use_real_temp
         self.use_real_precip = use_real_precip

@@ -1,8 +1,20 @@
 import os
-from flood_forecast.preprocessing.closest_station import get_weather_data, process_asos_data
-from flood_forecast.preprocessing.process_usgs import make_usgs_data, process_intermediate_csv
-from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
+import re
+from flood_forecast.preprocessing.closest_station import (
+    get_weather_data,
+    process_asos_data,
+)
+from flood_forecast.preprocessing.process_usgs import (
+    make_usgs_data,
+    process_intermediate_csv,
+)
+from flood_forecast.gcp_integration.basic_utils import (
+    get_storage_client,
+    upload_file,
+    download_file,
+)
 from flood_forecast.preprocessing.eco_gage_set import eco_gage_set
+from flood_forecast.utils import ROOT_DIR
 import json
 from datetime import datetime
 import pytz
@@ -10,26 +22,31 @@ import pandas as pd
 
 
 def build_weather_csv(
-        json_full_path,
-        asos_base_url,
-        base_url_2,
-        econet_data,
-        visited_gages_path,
-        start=0,
-        end_index=100):
+    json_full_path,
+    asos_base_url,
+    base_url_2,
+    econet_data,
+    visited_gages_path,
+    start=0,
+    end_index=100,
+):
     directory = os.fsencode(json_full_path)
     sorted_list = sorted(os.listdir(directory))
     for i in range(start, end_index):
         file = sorted_list[i]
         filename = os.fsdecode(file)
         get_weather_data(
-            os.path.join(
-                json_full_path,
-                filename),
+            os.path.join(json_full_path, filename),
             econet_data,
             asos_base_url,
-            visited_gages_path)
-        process_asos_data(os.path.join(json_full_path, filename), base_url_2, visited_gages_path)
+            visited_gages_path,
+        )
+        process_asos_data(
+            os.path.join(json_full_path, filename),
+            base_url_2,
+            visited_gages_path,
+        )
+
 
 # todo fix this function so it does more than open files
 # def make_usgs(meta_data_path: str, start, end_index: int):
@@ -70,17 +87,17 @@ def get_eco_netset(directory_path: str) -> set:
 
 def combine_data(flow_df: pd.DataFrame, precip_df: pd.DataFrame):
     tz = pytz.timezone("UTC")
-    precip_df['hour_updated'] = precip_df['hour_updated'].map(
-        lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
-    precip_df['hour_updated'] = precip_df['hour_updated'].map(lambda x: tz.localize(x))
+    precip_df["hour_updated"] = precip_df["hour_updated"].map(
+        lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+    )
+    precip_df["hour_updated"] = precip_df["hour_updated"].map(
+        lambda x: tz.localize(x)
+    )
     joined_df = precip_df.merge(
-        flow_df,
-        left_on='hour_updated',
-        right_on='datetime',
-        how='outer')[
-        4:-4]
-    nan_precip = sum(pd.isnull(joined_df['p01m']))
-    nan_flow = sum(pd.isnull(joined_df['cfs']))
+        flow_df, left_on="hour_updated", right_on="datetime", how="outer"
+    )[4:-4]
+    nan_precip = sum(pd.isnull(joined_df["p01m"]))
+    nan_flow = sum(pd.isnull(joined_df["cfs"]))
     return joined_df, nan_flow, nan_precip
 
 
@@ -97,23 +114,33 @@ def create_usgs(meta_data_dir: str, precip_path: str, start: int, end: int):
                 data = json.load(f)
             if len(gage_id) == 7:
                 gage_id = "0" + gage_id
-                raw_df = make_usgs_data(datetime(2014, 1, 1), datetime(2019, 1, 1), gage_id)
+                raw_df = make_usgs_data(
+                    datetime(2014, 1, 1), datetime(2019, 1, 1), gage_id
+                )
             else:
-                raw_df = make_usgs_data(datetime(2014, 1, 1), datetime(2019, 1, 1), gage_id)
+                raw_df = make_usgs_data(
+                    datetime(2014, 1, 1), datetime(2019, 1, 1), gage_id
+                )
             df, max_flow, min_flow = process_intermediate_csv(raw_df)
             data["time_zone_code"] = df["tz_cd"].iloc[0]
             data["max_flow"] = max_flow
             data["min_flow"] = min_flow
-            precip_df = pd.read_csv(os.path.join(precip_path, data["stations"][0]["station_id"] + ".csv"))
+            precip_df = pd.read_csv(
+                os.path.join(
+                    precip_path, data["stations"][0]["station_id"] + ".csv"
+                )
+            )
             fixed_df, nan_flow, nan_precip = combine_data(df, precip_df)
             data["nan_flow"] = nan_flow
             data["nan_precip"] = nan_precip
-            joined_name = str(gage_id) + data["stations"][0]["station_id"] + "_flow.csv"
+            joined_name = (
+                str(gage_id) + data["stations"][0]["station_id"] + "_flow.csv"
+            )
             joined_upload = "joined/" + joined_name
             meta_path = os.path.join(meta_data_dir, file_name)
             data["files"] = [joined_name]
             fixed_df.to_csv(joined_name)
-            with open(meta_path, 'w') as f:
+            with open(meta_path, "w") as f:
                 json.dump(data, f)
             upload_file("predict_cfs", "meta2/" + file_name, meta_path, client)
             upload_file("predict_cfs", joined_upload, joined_name, client)
@@ -122,4 +149,41 @@ def create_usgs(meta_data_dir: str, precip_path: str, start: int, end: int):
             with open("exceptions.json", "w+") as a:
                 json.dump(exceptions, a)
             print("exception")
-            upload_file("predict_cfs", "meta2/" + "exceptions.json", "exceptions.json", client)
+            upload_file(
+                "predict_cfs",
+                "meta2/" + "exceptions.json",
+                "exceptions.json",
+                client,
+            )
+
+
+def get_data(file_path: str) -> str:
+    """Extract bucket name and storage object name from file_path
+    Args:
+        file_path (str): [description]
+
+        Example, 
+        file_path = "gs://task_ts_data/2020-08-17/Afghanistan____.csv"
+        bucket_name = "task_ts_data"
+        object_name = "2020-08-17/Afghanistan____.csv"
+        loal_temp_filepath = "//data/2020-08-17/Afghanistan____.csv"
+
+    Returns:
+        str: local file name
+    """
+    if file_path.startswith("gs://"):
+        # doanload data from gcs to local
+        regex = r"(?<=gs:\/\/)[a-zA-Z\-\_]*(?=\/)"
+        bucket_name = re.search(regex, file_path).group()
+        object_name = re.search(rf"(?<={bucket_name}\/).*", file_path).group()
+        local_temp_filepath = str(
+            ROOT_DIR / "data" / bucket_name / object_name
+        )
+        download_file(
+            bucket_name=bucket_name,
+            source_blob_name=object_name,
+            destination_file_name=local_temp_filepath,
+        )
+        return local_temp_filepath
+    else:
+        return file_path

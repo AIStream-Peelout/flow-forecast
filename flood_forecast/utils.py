@@ -1,4 +1,10 @@
 import torch
+from pathlib import Path
+
+
+def get_project_root() -> Path:
+    return Path(__file__).parent
+ROOT_DIR = get_project_root()
 
 
 def flatten_list_function(input_list):
@@ -73,3 +79,4 @@ class EarlyStopper(object):
 
     def save_model_checkpoint(self, model):
         torch.save(model.state_dict(), "checkpoint.pth")
+
