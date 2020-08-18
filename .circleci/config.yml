@@ -200,18 +200,22 @@ jobs:
           name: Trainer tests
           when: always
           command: |
+            
             echo -e 'running da_rnn_test \n'
             python flood_forecast/trainer.py -p tests/da_rnn.json
             echo -e 'running trainer_lstm_test \n'
             python flood_forecast/trainer.py -p tests/lstm_test.json
             echo -e 'running trainer_multi_test \n'
             python flood_forecast/trainer.py -p tests/multi_test.json
+            echo -e 'running auto_encoder tests \n'
+            python flood_forecast/trainer.py -p tests/ae.json
             echo -e 'running trainer_full_transformer_test \n'
             python flood_forecast/trainer.py -p  tests/full_transformer.json
             echo -e 'running trainer_decoder_test \n'
             python flood_forecast/trainer.py -p tests/decoder_test.json
             echo -e 'running trainer_custom_encode \n'
             python flood_forecast/trainer.py -p tests/custom_encode.json
+            
             
 
       - store_test_results:
