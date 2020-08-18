@@ -28,7 +28,8 @@ class DataLoaderTests(unittest.TestCase):
                                           target_col=['cfs'], relevant_cols=['cfs', 'precip', 'temp'],
                                           interpolate_param=False)
         self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
-        self.ae_loader = AEDataloader("keag_small.csv", relevant_cols=["cfs", "temp", "precip"])
+        self.ae_loader = AEDataloader(os.path.join(self.test_data_path, "keag_small.csv"), 
+                                      relevant_cols=["cfs", "temp", "precip"])
 
     def test_loader2_get_item(self):
         src, df, forecast_start_index = self.test_loader[0]

@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
-from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 import wandb
 
@@ -185,6 +185,12 @@ class PyTorchForecast(TimeSeriesModel):
                 dataset_params["target_col"],
                 dataset_params["relevant_cols"],
                 **start_end_params)
+        elif the_class == "AutoEncoder":
+            loader = AEDataloader(
+                data_path,
+                dataset_params["relevant_cols"],
+                **start_end_params
+            )
         else:
             # TODO support custom DataLoader
             loader = None
