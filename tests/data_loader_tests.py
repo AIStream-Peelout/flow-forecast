@@ -24,7 +24,8 @@ class DataLoaderTests(unittest.TestCase):
             "target_col": ["cfs"],
             "interpolate_param": False
         }
-        self.train_loader = CSVDataLoader(os.path.join(self.test_data_path, "keag_small.csv"), 30, 20, target_col=['cfs'], relevant_cols=['cfs', 'precip', 'temp'])
+        self.train_loader = CSVDataLoader(os.path.join(self.test_data_path, "keag_small.csv"), 30, 20, target_col=['cfs'], 
+                                          relevant_cols=['cfs', 'precip', 'temp'])
         self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
         self.ae_loader = AEDataloader("keag_small.csv", relevant_cols=["cfs", "temp", "precip"])
 
