@@ -216,7 +216,13 @@ class AEDataloader(CSVDataLoader):
             target_col: List = None,
             end_stamp: int = None,
             interpolate_param=False):
-        super.__init__(self, file_path=file_path, forecast_history=1, forecast_length=1,
+        """
+        A data loader class for autoencoders.
+        Overrides __len__ and __getitem__ from generic dataloader.
+        Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
+        Same parameters as before.
+        """
+        super.__init__(file_path=file_path, forecast_history=1, forecast_length=1,
                        target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
                        end_stamp=end_stamp, interpolate_param=False)
 
