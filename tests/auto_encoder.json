@@ -34,6 +34,11 @@
        "project": "repo-flood_forecast",
        "tags": ["dummy_run", "circleci"]
     },
-   "metrics":["MSE"]
+   "metrics":["MSE"],
+
+   "inference_params":{
+      "hours_to_forecast":1
+
+   }
 }
     
