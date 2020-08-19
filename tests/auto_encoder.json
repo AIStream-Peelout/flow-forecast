@@ -25,17 +25,13 @@
        "lr": 0.3,
        "epochs": 1,
        "batch_size":4,
-       "optim_params":
-       {
-   
-         
-       }
+       "optim_params":{}
     },
     "GCS": false,
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
-       "tags": ["dummy_run", "circleci"]
+       "tags": ["dummy_run", "circleci", "auto"]
     },
    "metrics":["MSE"],
 

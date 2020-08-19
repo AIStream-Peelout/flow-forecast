@@ -128,8 +128,8 @@ def torch_single_train(model: PyTorchForecast,
     for src, trg in data_loader:
         opt.zero_grad()
         # Convert to CPU/GPU/TPU
-        src = src.to(model.device)
-        trg = trg.to(model.device)
+        src = src.to(model.device).float()
+        trg = trg.to(model.device).float()
         # TODO figure how to avoid
         if takes_target:
             forward_params["t"] = trg
