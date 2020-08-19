@@ -24,15 +24,14 @@
        "optimizer": "Adam",
        "lr": 0.3,
        "epochs": 1,
-       "batch_size":4
-    
-    },
-    "optim_params":
-    {
-
+       "batch_size":4,
+       "optim_params":
+       {
+   
+         
+       }
     },
     "GCS": false,
-    
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",

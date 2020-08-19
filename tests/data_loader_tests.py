@@ -50,6 +50,7 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(x.shape, y.shape)
 
     def test_trainer(self):
+        """ Test trainer function """
         x, y = self.train_loader[0]
         self.assertEqual(x.shape[0], 30)
         self.assertEqual(x.shape[1], 3)
