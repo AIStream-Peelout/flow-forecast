@@ -134,7 +134,10 @@ def torch_single_train(model: PyTorchForecast,
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
-        labels = trg[:, :, 0]
+        if model.params["dataset_params"]["class"] != "default":
+            labels = trg
+        else:
+            labels = trg[:, :, 0]
         loss = criterion(output, labels.float())
         if loss > 100:
             print("Warning: high loss detected")
