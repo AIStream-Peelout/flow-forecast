@@ -19,3 +19,6 @@ requests~=2.23.0
 torchvision~=0.6.0
 mpld3~=0.3
 numba>=0.50
+sphinx
+sphinx-rtd-theme
+sphinx-autodoc-typehints
