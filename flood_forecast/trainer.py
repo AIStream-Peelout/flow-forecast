@@ -16,6 +16,8 @@ def train_function(model_type: str, params: Dict):
     model_type str: Type of the model (for now) must be da_rnn or
     :params dict: Dictionary containing all the parameters needed to run the model
     """
+    if "forward_params" not in params:
+        params["forward_params"] = {}
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
         from flood_forecast.da_rnn.train_da import da_rnn, train
