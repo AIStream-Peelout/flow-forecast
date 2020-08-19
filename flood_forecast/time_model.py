@@ -170,7 +170,9 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]]
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        if loader_type == "test" and "forecast_test_len" in dataset_params:
+        # TODO fix this very bad if statement
+        true_data = loader_type == "test" and the_class == "default"
+        if true_data and "forecast_test_len" in dataset_params:
             loader = CSVDataLoader(
                 data_path,
                 dataset_params["forecast_history"],
