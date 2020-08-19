@@ -134,7 +134,7 @@ def torch_single_train(model: PyTorchForecast,
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
-        labels = trg[:, :, 0]
+        labels = trg
         loss = criterion(output, labels.float())
         if loss > 100:
             print("Warning: high loss detected")
@@ -189,7 +189,7 @@ def compute_validation(validation_loader: DataLoader,
                     output = simple_decode(model, src, targ.shape[1], targ, 1)[:, :, 0]
             else:
                 output = model(src.float())
-            labels = targ[:, :, 0]
+            labels = targ
             validation_dataset = validation_loader.dataset
             if validation_dataset.scale:
                 # unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
