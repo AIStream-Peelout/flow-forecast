@@ -47,7 +47,7 @@ class DataLoaderTests(unittest.TestCase):
 
     def test_ae(self):
         x, y = self.ae_loader[0]
-        self.assertEqual(x.shape, y.shape)
+        self.assertEqual(x.shape, y.squeeze(1).shape)
 
     def test_trainer(self):
         x, y = self.train_loader[0]
