@@ -14,7 +14,7 @@ def make_gage_data_csv(file_path: str):
 #     core_columns = econet[['Station', 'Name', 'Latitude', 'Longitude',
 #                            'Elevation', 'First Ob', 'Supported By', 'Time Interval(s)', 'Precip']]
 
-# todo define this function properly (haversine not defined)
+# todo define this function properly (haversine is not defined)
 # def get_closest_gage_list(station_df: pd.DataFrame, gage_df: pd.DataFrame):
 #     for row in gage_df.iterrows():
 #         gage_info = {}

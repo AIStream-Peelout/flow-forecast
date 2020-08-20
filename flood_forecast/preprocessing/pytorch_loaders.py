@@ -215,6 +215,7 @@ class AEDataloader(CSVDataLoader):
             start_stamp: int = 0,
             target_col: List = None,
             end_stamp: int = None,
+            unsqueeze_dim: int = 1,
             interpolate_param=False):
         """
         A data loader class for autoencoders.
@@ -225,10 +226,12 @@ class AEDataloader(CSVDataLoader):
         super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
                          end_stamp=end_stamp, interpolate_param=False)
+        self.unsqueeze_dim = unsqueeze_dim
 
     def __len__(self):
         return len(self.df.index) - 1
 
     def __getitem__(self, idx):
-        target = torch.from_numpy(self.df.iloc[idx].to_numpy().float().unsqueeze(1))
+        # Warning this assumes that data is
+        target = torch.from_numpy(self.df.iloc[idx].to_numpy().float().unsqueeze(self.unsqueeze_dim))
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
