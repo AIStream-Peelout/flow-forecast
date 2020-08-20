@@ -233,5 +233,5 @@ class AEDataloader(CSVDataLoader):
 
     def __getitem__(self, idx):
         # Warning this assumes that data is
-        target = torch.from_numpy(self.df.iloc[idx].to_numpy().float().unsqueeze(self.unsqueeze_dim))
+        target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
