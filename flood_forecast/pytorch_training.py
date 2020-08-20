@@ -25,6 +25,8 @@ def train_transformer_style(
     """
     use_wandb = model.wandb
     es = None
+    if "forecast_length" not in model.params:
+        model.params["forecast_length"] = 1
     if "early_stopping" in model.params:
         es = EarlyStopper(model.params["early_stopping"]['patience'])
     opt = pytorch_opt_dict[training_params["optimizer"]](
