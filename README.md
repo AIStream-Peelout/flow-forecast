@@ -8,9 +8,9 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 
 Using the library
 1. Run `pip install flood-forecast`
-2. To train models please see the [Wiki page](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+2. To train models please see the [guide to training models](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models)
 
-For instructions on [contributing please see the Wiki page] and Issue Boards.
+For instructions on contributing please our [contributions page]() and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
 
 
 ## Historical Repository Information 
