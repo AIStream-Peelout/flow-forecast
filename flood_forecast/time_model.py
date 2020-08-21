@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
-from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 import wandb
 
@@ -160,6 +160,7 @@ class PyTorchForecast(TimeSeriesModel):
             loader_type: str,
             the_class="default"):
         start_end_params = {}
+        the_class = dataset_params["class"]
         # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
@@ -169,7 +170,8 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]]
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        if loader_type == "test" and "forecast_test_len" in dataset_params:
+        is_proper_dataloader = loader_type == "test" and the_class == "deault"
+        if is_proper_dataloader and "forecast_test_len" in dataset_params:
             loader = CSVDataLoader(
                 data_path,
                 dataset_params["forecast_history"],
@@ -185,6 +187,12 @@ class PyTorchForecast(TimeSeriesModel):
                 dataset_params["target_col"],
                 dataset_params["relevant_cols"],
                 **start_end_params)
+        elif the_class == "AutoEncoder":
+            loader = AEDataloader(
+                data_path,
+                dataset_params["relevant_cols"],
+                **start_end_params
+            )
         else:
             # TODO support custom DataLoader
             loader = None

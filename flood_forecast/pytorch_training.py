@@ -102,6 +102,9 @@ def train_transformer_style(
                 print("Stopping model now")
                 model.model.load_state_dict(torch.load("checkpoint.pth"))
                 break
+    decoder_structure = True
+    if model.params["dataset_params"]["class"] != "default":
+        decoder_structure = False
     test = compute_validation(
         test_data_loader,
         model.model,
@@ -109,7 +112,7 @@ def train_transformer_style(
         model.params["dataset_params"]["forecast_length"],
         criterion,
         model.device,
-        decoder_structure=True,
+        decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss")
     print("test loss:", test)
