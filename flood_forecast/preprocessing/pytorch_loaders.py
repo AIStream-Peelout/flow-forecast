@@ -21,8 +21,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         interpolate_param=True,
-        sort_column="datetime",
-        dropna=True
+        sort_column="datetime"
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -56,7 +55,7 @@ class CSVDataLoader(Dataset):
         print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)[relevant_cols]
-        self.df = df[relevant_cols]
+        self.df = df
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
@@ -83,8 +82,6 @@ class CSVDataLoader(Dataset):
                 "Error nan values detected in data. Please run interpolate ffill or bfill on data"
             )
         self.targ_col = target_col
-        if dropna:
-            self.df = self.df.dropna
 
     def __getitem__(self, idx):
         rows = self.df.iloc[idx: self.forecast_history + idx]
