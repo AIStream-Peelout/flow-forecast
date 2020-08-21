@@ -39,6 +39,8 @@ class CSVDataLoader(Dataset):
                                 or testing supply these
         :param end_stamp int: Optional if you want to only use part of a CSV for training, validation,
                             or testing supply these
+        :param interpolate_param boolean: Determines whether to use inter
+        :param sort_col str: The column to sort time series values by
         """
         super().__init__()
         self.forecast_history = forecast_history
@@ -52,7 +54,8 @@ class CSVDataLoader(Dataset):
         else:
             df = pd.read_csv(file_path)
         print("Now loading and scaling " + file_path)
-        self.df = df.sort_values(by=sort_col)[relevant_cols]
+        if sort_col:
+            self.df = df.sort_values(by=sort_col)[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
