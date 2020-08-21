@@ -10,10 +10,10 @@ Using the library
 1. Run `pip install flood-forecast`
 2. To train models please see the [guide to training models](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models)
 
-For instructions on contributing please our [contributions page]() and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
+For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
 
 
-## Historical Repository Information 
+## Historical Tasks 
 
 ### Task 1 Stream Flow Forecasting 
 This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index. 
