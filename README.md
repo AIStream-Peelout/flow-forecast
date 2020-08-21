@@ -1,16 +1,21 @@
 # Deep learning for time series forecasting
-This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contained baseline methods for forecasting stream flows around the United States. 
+This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
+| Docs |
+## Getting Started 
 
 Using the library
 1. Run `pip install flood-forecast`
-2. See documentation in wiki .
+2. From training model see the page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
 
-For instructions on contributing please se Wiki/Issue Board.
+## Contributing 
+
+For instructions on contributing please see the Wiki/Issue Board.
+
 
 ## Task 1 Stream Flow Forecasting 
 This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index. 
