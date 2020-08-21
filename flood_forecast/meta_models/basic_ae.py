@@ -27,4 +27,4 @@ class AE(nn.Module):
         activation = torch.relu(activation)
         activation = self.decoder_output_layer(activation)
         reconstructed = torch.relu(activation)
-        return reconstructed.unsqueeze(1)
+        return reconstructed
