@@ -55,7 +55,7 @@ class CSVDataLoader(Dataset):
         print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)[relevant_cols]
-        self.df = df 
+        self.df = df
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
