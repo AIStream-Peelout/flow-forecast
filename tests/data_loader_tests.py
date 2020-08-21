@@ -54,8 +54,8 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(x.shape[0], 30)
         self.assertEqual(x.shape[1], 3)
         self.assertEqual(y.shape[0], 20)
-        # Check first and last dim
+        # Check first and last dim are not overlap
         self.assertFalse(torch.eq(x[29, 0], y[0, 0]))
-
+        # Need more checks here
 if __name__ == '__main__':
     unittest.main()

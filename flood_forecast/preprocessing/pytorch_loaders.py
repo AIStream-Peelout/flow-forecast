@@ -5,7 +5,7 @@ import torch
 from typing import List, Union
 from flood_forecast.preprocessing.interpolate_preprocess import (
     interpolate_missing_values,
-    fix_timezones,
+    fix_timezones
 )
 
 
@@ -21,6 +21,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         interpolate_param=True,
+        sort_col="datetime"
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -51,7 +52,7 @@ class CSVDataLoader(Dataset):
         else:
             df = pd.read_csv(file_path)
         print("Now loading and scaling " + file_path)
-        self.df = df.sort_values(by="datetime")[relevant_cols]
+        self.df = df.sort_values(by=sort_col)[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
@@ -216,7 +217,8 @@ class AEDataloader(CSVDataLoader):
             target_col: List = None,
             end_stamp: int = None,
             unsqueeze_dim: int = 1,
-            interpolate_param=False):
+            interpolate_param=False,
+            sort_column=None):
         """
         A data loader class for autoencoders.
         Overrides __len__ and __getitem__ from generic dataloader.
@@ -225,7 +227,7 @@ class AEDataloader(CSVDataLoader):
         """
         super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
-                         end_stamp=end_stamp, interpolate_param=False)
+                         end_stamp=end_stamp, sort_col=sort_column, interpolate_param=False)
         self.unsqueeze_dim = unsqueeze_dim
 
     def __len__(self):
