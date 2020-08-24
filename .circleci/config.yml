@@ -202,6 +202,8 @@ jobs:
           command: |
             echo -e 'running da_rnn_test \n'
             python flood_forecast/trainer.py -p tests/da_rnn.json
+            echo -e 'running auto test \n'
+            python flood_forecast/meta_train.py -p tests/auto_encoder.json
             echo -e 'running trainer_lstm_test \n'
             python flood_forecast/trainer.py -p tests/lstm_test.json
             echo -e 'running trainer_multi_test \n'
@@ -212,6 +214,7 @@ jobs:
             python flood_forecast/trainer.py -p tests/decoder_test.json
             echo -e 'running trainer_custom_encode \n'
             python flood_forecast/trainer.py -p tests/custom_encode.json
+            
             
 
       - store_test_results:

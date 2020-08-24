@@ -2,16 +2,20 @@ import unittest
 import os
 import torch
 from datetime import datetime
+<<<<<<< HEAD
 from flood_forecast.preprocessing.pytorch_loaders import (
     CSVTestLoader,
     CSVDataLoader,
 )
+=======
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, CSVDataLoader, AEDataloader
+>>>>>>> master
 
 
 class DataLoaderTests(unittest.TestCase):
     """
     Class to test data loader functionality for the code.
-    Specifically, reuturn types and indexing to make sure.
+    Specifically, reuturn types and indexing to make sure there is no overlap.
     """
 
     def setUp(self):
@@ -24,13 +28,14 @@ class DataLoaderTests(unittest.TestCase):
             "forecast_length": 20,
             "relevant_cols": ["cfs", "temp", "precip"],
             "target_col": ["cfs"],
-            "interpolate_param": False,
+            "interpolate_param": False
         }
-        self.test_loader = CSVTestLoader(
-            os.path.join(self.test_data_path, "keag_small.csv"),
-            336,
-            **data_base_params
-        )
+        self.train_loader = CSVDataLoader(os.path.join(self.test_data_path, "keag_small.csv"), 30, 20,
+                                          target_col=['cfs'], relevant_cols=['cfs', 'precip', 'temp'],
+                                          interpolate_param=False)
+        self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
+        self.ae_loader = AEDataloader(os.path.join(self.test_data_path, "keag_small.csv"),
+                                      relevant_cols=["cfs", "temp", "precip"])
 
     def test_loader2_get_item(self):
         src, df, forecast_start_index = self.test_loader[0]
@@ -56,7 +61,7 @@ class DataLoaderTests(unittest.TestCase):
             forecast_length=14,
             target_col=["cases"],
             relevant_cols=["cases", "recovered", "active", "deaths"],
-            sort_values_by="date",
+            sort_column="date",
             interpolate_param=False,
             gcp_service_key=None,  # for CircleCI tests, local test needs key.json
         )
@@ -68,4 +73,15 @@ class DataLoaderTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    def test_ae(self):
+        x, y = self.ae_loader[0]
+        self.assertEqual(x.shape, y.squeeze(1).shape)
+
+    def test_trainer(self):
+        x, y = self.train_loader[0]
+        self.assertEqual(x.shape[0], 30)
+        self.assertEqual(x.shape[1], 3)
+        self.assertEqual(y.shape[0], 20)
+        # Check first and last dim are not overlap
+        self.assertFalse(torch.eq(x[29, 0], y[0, 0]))
+        # Need more checks here
