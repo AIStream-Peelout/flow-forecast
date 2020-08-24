@@ -1,5 +1,4 @@
 import torch
-from pathlib import Path
 
 
 def flatten_list_function(input_list):
@@ -74,4 +73,3 @@ class EarlyStopper(object):
 
     def save_model_checkpoint(self, model):
         torch.save(model.state_dict(), "checkpoint.pth")
-
