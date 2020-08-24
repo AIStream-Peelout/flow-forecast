@@ -2,8 +2,10 @@ import unittest
 import os
 import torch
 from datetime import datetime
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, CSVDataLoader
-from flood_forecast.utils import ROOT_DIR
+from flood_forecast.preprocessing.pytorch_loaders import (
+    CSVTestLoader,
+    CSVDataLoader,
+)
 
 
 class DataLoaderTests(unittest.TestCase):
@@ -53,15 +55,15 @@ class DataLoaderTests(unittest.TestCase):
             forecast_history=14,
             forecast_length=14,
             target_col=["cases"],
-            relevant_cols=["cases", "recovered", "active", "death"],
+            relevant_cols=["cases", "recovered", "active", "deaths"],
+            sort_values_by="date",
+            interpolate_param=False,
+            gcp_service_key=None,  # for CircleCI tests, local test needs key.json
         )
+
         self.assertEqual(
             test_loader.local_file_path,
-            str(
-                ROOT_DIR
-                / "data"
-                / "task_ts_data/2020-08-17/Afghanistan____.csv"
-            ),
+            "data/task_ts_data/2020-08-17/Afghanistan____.csv",
         )
 
 

@@ -1,5 +1,7 @@
 import os
 import re
+from typing import Optional
+from pathlib import Path
 from flood_forecast.preprocessing.closest_station import (
     get_weather_data,
     process_asos_data,
@@ -14,7 +16,7 @@ from flood_forecast.gcp_integration.basic_utils import (
     download_file,
 )
 from flood_forecast.preprocessing.eco_gage_set import eco_gage_set
-from flood_forecast.utils import ROOT_DIR
+
 import json
 from datetime import datetime
 import pytz
@@ -157,7 +159,7 @@ def create_usgs(meta_data_dir: str, precip_path: str, start: int, end: int):
             )
 
 
-def get_data(file_path: str) -> str:
+def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
     """Extract bucket name and storage object name from file_path
     Args:
         file_path (str): [description]
@@ -176,14 +178,16 @@ def get_data(file_path: str) -> str:
         regex = r"(?<=gs:\/\/)[a-zA-Z\-\_]*(?=\/)"
         bucket_name = re.search(regex, file_path).group()
         object_name = re.search(rf"(?<={bucket_name}\/).*", file_path).group()
-        local_temp_filepath = str(
-            ROOT_DIR / "data" / bucket_name / object_name
-        )
+        local_temp_filepath = Path("data") / bucket_name / object_name
+        if not local_temp_filepath.parent.exists():
+            os.mkdir(local_temp_filepath.parent)
+
         download_file(
             bucket_name=bucket_name,
             source_blob_name=object_name,
             destination_file_name=local_temp_filepath,
+            service_key_path=gcp_service_key,
         )
-        return local_temp_filepath
+        return str(local_temp_filepath)
     else:
         return file_path

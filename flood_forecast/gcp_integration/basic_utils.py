@@ -1,23 +1,26 @@
+from typing import Optional
 from google.cloud import storage
 import os
 
 
-def get_storage_client() -> storage.Client:
+def get_storage_client(
+    service_key_path: Optional[str] = None,
+) -> storage.Client:
     """
     Utility function to return a properly authenticated GCS
     storage client whether working in Colab, CircleCI, or other environment.
     """
-    try:
+    if service_key_path:
         # GOOGLE_APPLICATION_CREDENTIALS must be set
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = service_key_path
         return storage.Client()
-    except BaseException:
-        if os.environ["ENVIRONMENT_GCP"] == "CircleCI":
-            creds = create_file_environ()
-            return storage.Client(
-                credentials=creds, project=os.environ["GCP_PROJECT"]
-            )
-        elif os.environ["ENVIRONMENT_GCP"] == "Colab":
-            return storage.Client(project=os.environ["GCP_PROJECT"])
+    elif os.environ["ENVIRONMENT_GCP"] == "CircleCI":
+        creds = create_file_environ()
+        return storage.Client(
+            credentials=creds, project=os.environ["GCP_PROJECT"]
+        )
+    elif os.environ["ENVIRONMENT_GCP"] == "Colab":
+        return storage.Client(project=os.environ["GCP_PROJECT"])
 
 
 def upload_file(
@@ -46,7 +49,10 @@ def create_file_environ():
 
 
 def download_file(
-    bucket_name: str, source_blob_name: str, destination_file_name: str
+    bucket_name: str,
+    source_blob_name: str,
+    destination_file_name: str,
+    service_key_path: Optional[str] = None,
 ):
     """Download data file from GCS.
 
@@ -55,7 +61,7 @@ def download_file(
         source_blob_name ([str]): storage object name
         destination_file_name ([str]): filepath to save to local
     """
-    storage_client = get_storage_client()
+    storage_client = get_storage_client(service_key_path)
 
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(source_blob_name)

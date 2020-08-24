@@ -1,3 +1,4 @@
+from typing import Optional
 from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
@@ -22,6 +23,8 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         interpolate_param=True,
+        gcp_service_key: Optional[str] = None,
+        sort_values_by:str ="datetime"
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -46,7 +49,7 @@ class CSVDataLoader(Dataset):
         # TODO allow other filling methods
         print("interpolate should be below")
 
-        self.local_file_path = get_data(file_path)
+        self.local_file_path = get_data(file_path, gcp_service_key)
         if interpolate_param:
             print("now filling missing values")
             df = fix_timezones(self.local_file_path)
@@ -54,7 +57,7 @@ class CSVDataLoader(Dataset):
         else:
             df = pd.read_csv(self.local_file_path)
         print("Now loading and scaling " + self.local_file_path)
-        self.df = df.sort_values(by="datetime")[relevant_cols]
+        self.df = df.sort_values(by=sort_values_by)[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]

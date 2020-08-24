@@ -2,11 +2,6 @@ import torch
 from pathlib import Path
 
 
-def get_project_root() -> Path:
-    return Path(__file__).parent
-ROOT_DIR = get_project_root()
-
-
 def flatten_list_function(input_list):
     return [item for sublist in input_list for item in sublist]
 
