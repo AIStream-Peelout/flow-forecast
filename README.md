@@ -1,5 +1,5 @@
 # Deep learning for time series forecasting
-This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
+This repository is an open-source DL for time series library. Currently [Task Time Series from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
@@ -8,22 +8,26 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 | Docs | [Link](https://flow-forecast.readthedocs.io/en/readthedocs/)|
 ## Getting Started 
 
-Using the library
+Using the library:
 1. Run `pip install flood-forecast`
-2. From training model see the training models page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+2. See the training models page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+3. Deployment is still a work in progress but high priority in the road-map.
 
 **Models currently supported**
 
-1. Vanilla LSTM 
-2. Full transformer
-3. Simple Multi-Head Attention
-4. Transformer w/ a linear decoder
-5. DA-RNN (CPU only for now)
+1. Vanilla LSTM: A basic multivariate LSTM with an optional embedding layer. 
+2. Full transformer: The full transformer model (based on the PyTorch implementation). This requires using a specialized decoder and supplying the target.  
+3. Simple Multi-Head Attention: A single multi-head attention mechanism followed by linear embedding layers. Suitable for transfer learning of uneven shapes. 
+4. Transformer w/ a linear decoder: Linear embedding layers followed by n-stacks of the transformer blocks. Suitable for transfer learning of uneven shapes.
+5. DA-RNN (CPU only for now): A good all around time series forecasting model.
 
 **Integrations**
 
-Google Cloud Platform 
-Weights and Biases 
+[Google Cloud Platform]() 
+
+[Weights and Biases]() 
+
+Dataverse
 
 ## Contributing 
 
