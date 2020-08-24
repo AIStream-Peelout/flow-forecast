@@ -12,18 +12,22 @@ Using the library
 1. Run `pip install flood-forecast`
 2. From training model see the training models page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
 
-** Models currently available**
+**Models currently supported**
 
 1. Vanilla LSTM 
 2. Full transformer
 3. Simple Multi-Head Attention
 4. Transformer w/ a linear decoder
-5. DA-RNN (CPU only)
+5. DA-RNN (CPU only for now)
 
+**Integrations**
+
+Google Cloud Platform 
+Weights and Biases 
 
 ## Contributing 
 
-For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
+For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines) and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
 
 
 ## Historical Tasks 
