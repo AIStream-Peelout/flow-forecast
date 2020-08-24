@@ -1,16 +1,33 @@
 # Deep learning for time series forecasting
-This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. Specifically, it contained baseline methods for forecasting stream flows around the United States. 
+This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
+| Docs | [Link](https://flow-forecast.readthedocs.io/en/readthedocs/)|
+## Getting Started 
 
 Using the library
 1. Run `pip install flood-forecast`
-2. To train models please see the [guide to training models](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models)
+2. From training model see the training models page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
 
-For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
+**Models currently supported**
+
+1. Vanilla LSTM 
+2. Full transformer
+3. Simple Multi-Head Attention
+4. Transformer w/ a linear decoder
+5. DA-RNN (CPU only for now)
+
+**Integrations**
+
+Google Cloud Platform 
+Weights and Biases 
+
+## Contributing 
+
+For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines) and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
 
 
 ## Historical Tasks 
