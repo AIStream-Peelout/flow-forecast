@@ -6,7 +6,7 @@ import torch
 from typing import List, Union
 from flood_forecast.preprocessing.interpolate_preprocess import (
     interpolate_missing_values,
-    fix_timezones
+    fix_timezones,
 )
 from flood_forecast.preprocessing.buil_dataset import get_data
 
@@ -24,7 +24,7 @@ class CSVDataLoader(Dataset):
         end_stamp: int = None,
         interpolate_param=True,
         gcp_service_key: Optional[str] = None,
-        sort_column:str="datetime"
+        sort_column: str = "datetime",
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -89,10 +89,10 @@ class CSVDataLoader(Dataset):
         self.targ_col = target_col
 
     def __getitem__(self, idx):
-        rows = self.df.iloc[idx: self.forecast_history + idx]
+        rows = self.df.iloc[idx : self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
         targ_rows = self.df.iloc[
-            targs_idx_start: self.forecast_length + targs_idx_start
+            targs_idx_start : self.forecast_length + targs_idx_start
         ]
         src_data = rows.to_numpy()
         src_data = torch.from_numpy(src_data).float()
@@ -102,7 +102,10 @@ class CSVDataLoader(Dataset):
 
     def __len__(self) -> int:
         return (
-            len(self.df.index) - self.forecast_history - self.forecast_length - 1
+            len(self.df.index)
+            - self.forecast_history
+            - self.forecast_length
+            - 1
         )
 
     def inverse_scale(
@@ -164,14 +167,14 @@ class CSVTestLoader(CSVDataLoader):
 
     def __getitem__(self, idx):
         if self.target_supplied:
-            historical_rows = self.df.iloc[idx: self.forecast_history + idx]
+            historical_rows = self.df.iloc[idx : self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
             # targ_rows = self.df.iloc[
             #     target_idx_start : self.forecast_total + target_idx_start
             # ]
             all_rows_orig = self.original_df.iloc[
-                idx: self.forecast_total + target_idx_start
+                idx : self.forecast_total + target_idx_start
             ]
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start
@@ -184,7 +187,7 @@ class CSVTestLoader(CSVDataLoader):
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
             the_column[
-                self.forecast_length * i: self.forecast_length * (i + 1)
+                self.forecast_length * i : self.forecast_length * (i + 1)
             ]
             for i in range(len(the_column) // self.forecast_length + 1)
         ]
@@ -204,7 +207,7 @@ class CSVTestLoader(CSVDataLoader):
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
             the_column[
-                self.forecast_history * i: self.forecast_history * (i + 1)
+                self.forecast_history * i : self.forecast_history * (i + 1)
             ]
             for i in range(len(the_column) // self.forecast_history + 1)
         ]
@@ -212,31 +215,43 @@ class CSVTestLoader(CSVDataLoader):
 
     def __len__(self) -> int:
         return (
-            len(self.df.index) - self.forecast_history - self.forecast_total - 1
+            len(self.df.index)
+            - self.forecast_history
+            - self.forecast_total
+            - 1
         )
 
 
 class AEDataloader(CSVDataLoader):
     def __init__(
-            self,
-            file_path: str,
-            relevant_cols: List,
-            scaling=None,
-            start_stamp: int = 0,
-            target_col: List = None,
-            end_stamp: int = None,
-            unsqueeze_dim: int = 1,
-            interpolate_param=False,
-            sort_column=None):
+        self,
+        file_path: str,
+        relevant_cols: List,
+        scaling=None,
+        start_stamp: int = 0,
+        target_col: List = None,
+        end_stamp: int = None,
+        unsqueeze_dim: int = 1,
+        interpolate_param=False,
+        sort_column=None,
+    ):
         """
         A data loader class for autoencoders.
         Overrides __len__ and __getitem__ from generic dataloader.
         Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
         Same parameters as before.
         """
-        super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
-                         target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
-                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False)
+        super().__init__(
+            file_path=file_path,
+            forecast_history=1,
+            forecast_length=1,
+            target_col=target_col,
+            relevant_cols=relevant_cols,
+            start_stamp=start_stamp,
+            end_stamp=end_stamp,
+            sort_column=sort_column,
+            interpolate_param=False,
+        )
         self.unsqueeze_dim = unsqueeze_dim
 
     def __len__(self):
@@ -244,5 +259,9 @@ class AEDataloader(CSVDataLoader):
 
     def __getitem__(self, idx):
         # Warning this assumes that data is
-        target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
+        target = (
+            torch.from_numpy(self.df.iloc[idx].to_numpy())
+            .float()
+            .unsqueeze(self.unsqueeze_dim)
+        )
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target

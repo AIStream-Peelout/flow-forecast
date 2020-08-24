@@ -164,7 +164,7 @@ def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
     Args:
         file_path (str): [description]
 
-        Example, 
+        Example,
         file_path = "gs://task_ts_data/2020-08-17/Afghanistan____.csv"
         bucket_name = "task_ts_data"
         object_name = "2020-08-17/Afghanistan____.csv"
