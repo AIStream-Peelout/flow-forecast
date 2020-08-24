@@ -10,17 +10,28 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 
 Using the library
 1. Run `pip install flood-forecast`
-2. From training model see the page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+2. From training model see the training models page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+
+** Models currently available**
+
+1. Vanilla LSTM 
+2. Full transformer
+3. Simple Multi-Head Attention
+4. Transformer w/ a linear decoder
+5. DA-RNN (CPU only)
+
 
 ## Contributing 
 
-For instructions on contributing please see the Wiki/Issue Board.
+For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
 
 
-## Task 1 Stream Flow Forecasting 
+## Historical Tasks 
+
+### Task 1 Stream Flow Forecasting 
 This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index. 
 
-## Task 2 Flood severity forecasting
+### Task 2 Flood severity forecasting
 Task two focuses on predicting the severity of the flood based on the flood forecast, population information, and topography. Flood severity is defined based on several factors including the number of injuires, property damage, and crop damage.
 
 If you use either the data or code from this repository please cite as
