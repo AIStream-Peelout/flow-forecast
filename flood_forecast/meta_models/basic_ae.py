@@ -28,3 +28,10 @@ class AE(nn.Module):
         activation = self.decoder_output_layer(activation)
         reconstructed = torch.relu(activation)
         return reconstructed
+
+    def generate_representation(self, features):
+        activation = self.encoder_hidden_layer(features)
+        activation = torch.relu(activation)
+        code = self.encoder_output_layer(activation)
+        code = torch.relu(code)
+        return code
