@@ -1,15 +1,12 @@
-import unittest
-import os
-import torch
-from datetime import datetime
-<<<<<<< HEAD
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, CSVDataLoader, AEDataloader
 from flood_forecast.preprocessing.pytorch_loaders import (
     CSVTestLoader,
     CSVDataLoader,
 )
-=======
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, CSVDataLoader, AEDataloader
->>>>>>> master
+import unittest
+import os
+import torch
+from datetime import datetime
 
 
 class DataLoaderTests(unittest.TestCase):
