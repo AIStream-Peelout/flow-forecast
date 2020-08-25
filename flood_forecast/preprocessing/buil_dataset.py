@@ -180,7 +180,7 @@ def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
         object_name = re.search(rf"(?<={bucket_name}\/).*", file_path).group()
         local_temp_filepath = Path("data") / bucket_name / object_name
         if not local_temp_filepath.parent.exists():
-            os.mkdir(local_temp_filepath.parent)
+            local_temp_filepath.parent.mkdir(parents=True, exist_ok=True)
 
         download_file(
             bucket_name=bucket_name,
