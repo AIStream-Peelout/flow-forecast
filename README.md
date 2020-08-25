@@ -5,24 +5,25 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
-| Docs | [Link](https://flow-forecast.readthedocs.io/en/readthedocs/)|
+| ReadTheDocs|[![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=readthedocs)](https://flow-forecast.readthedocs.io/en/readthedocs/?badge=readthedocs)|
 ## Getting Started 
 
 Using the library
 1. Run `pip install flood-forecast`
-2. From training model see the training models page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+2. For training models see the relevant page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
 
 **Models currently supported**
 
-1. Vanilla LSTM 
-2. Full transformer
-3. Simple Multi-Head Attention
-4. Transformer w/ a linear decoder
-5. DA-RNN (CPU only for now)
+1. Vanilla LSTM: Generic LSTM model for multivariate time series. 
+2. Full transformer: The complete original Transformer (i.e. 8 encoder blocks + 8 decoder blocks)
+3. Simple Multi-Head Attention: A single multi-head attention module + severa linear embedding models. Suitable for transfer learning. 
+4. Transformer w/ a linear decoder: N-stacks of transformer blocks and a simple linear decoder.
+5. DA-RNN (CPU only for now): A classic time series model that utilizes LSTM + attention. 
 
 **Integrations**
 
 Google Cloud Platform 
+
 Weights and Biases 
 
 ## Contributing 
