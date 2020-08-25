@@ -1,7 +1,7 @@
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, CSVDataLoader, AEDataloader
 from flood_forecast.preprocessing.pytorch_loaders import (
     CSVTestLoader,
     CSVDataLoader,
+    AEDataloader,
 )
 import unittest
 import os
@@ -25,14 +25,25 @@ class DataLoaderTests(unittest.TestCase):
             "forecast_length": 20,
             "relevant_cols": ["cfs", "temp", "precip"],
             "target_col": ["cfs"],
-            "interpolate_param": False
+            "interpolate_param": False,
         }
-        self.train_loader = CSVDataLoader(os.path.join(self.test_data_path, "keag_small.csv"), 30, 20,
-                                          target_col=['cfs'], relevant_cols=['cfs', 'precip', 'temp'],
-                                          interpolate_param=False)
-        self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
-        self.ae_loader = AEDataloader(os.path.join(self.test_data_path, "keag_small.csv"),
-                                      relevant_cols=["cfs", "temp", "precip"])
+        self.train_loader = CSVDataLoader(
+            os.path.join(self.test_data_path, "keag_small.csv"),
+            30,
+            20,
+            target_col=["cfs"],
+            relevant_cols=["cfs", "precip", "temp"],
+            interpolate_param=False,
+        )
+        self.test_loader = CSVTestLoader(
+            os.path.join(self.test_data_path, "keag_small.csv"),
+            336,
+            **data_base_params
+        )
+        self.ae_loader = AEDataloader(
+            os.path.join(self.test_data_path, "keag_small.csv"),
+            relevant_cols=["cfs", "temp", "precip"],
+        )
 
     def test_loader2_get_item(self):
         src, df, forecast_start_index = self.test_loader[0]
@@ -70,6 +81,7 @@ class DataLoaderTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
+
     def test_ae(self):
         x, y = self.ae_loader[0]
         self.assertEqual(x.shape, y.squeeze(1).shape)
