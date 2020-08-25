@@ -10,15 +10,23 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 
 Using the library
 1. Run `pip install flood-forecast`
-2. From training model see the training models page in the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+2. Detailed info on training models can be found on the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
 
 **Models currently supported**
 
 1. Vanilla LSTM: A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
 2. Full transformer: The full transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
 3. Simple Multi-Head Attention: A simple multi-head attention block/embedding layers. Suitable for transfer learning.
-4. Transformer w/ a linear decoder: A transformer with n-encoder blocks (this is tunable) and linear decoder. 
-5. DA-RNN (CPU only for now): A well rounded model with a LSTM + attention.  
+4. Transformer w/a linear decoder: A transformer with n-encoder blocks (this is tunable) and linear decoder. 
+5. DA-RNN (CPU only for now): A well rounded model with which utilizes LSTM + attention.
+
+**Forthcoming Models**
+
+1. Vanilla GRU
+
+2. Dual stage attention:
+
+3. 
 
 **Integrations**
 
