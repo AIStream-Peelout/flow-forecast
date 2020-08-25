@@ -33,7 +33,7 @@ release = '0.0.1'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
+    # 'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
@@ -63,13 +63,13 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = []  # '_static'
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'setuptools': ('https://setuptools.readthedocs.io/en/latest/', None),
-}
+# intersphinx_mapping = {
+#    'python': ('https://docs.python.org/3', None),
+#    'setuptools': ('https://setuptools.readthedocs.io/en/latest/', None),
+# }
 
-autodoc_member_order = 'bysource'
-autoclass_content = 'both'
+# autodoc_member_order = 'bysource'
+# autoclass_content = 'both'
 
 # if os.environ.get('READTHEDOCS', None):
 #    tags.add('readthedocs')
