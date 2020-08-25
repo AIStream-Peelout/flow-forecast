@@ -102,10 +102,10 @@ class CSVDataLoader(Dataset):
 
     def __len__(self) -> int:
         return (
-            len(self.df.index)
-            - self.forecast_history
-            - self.forecast_length
-            - 1
+            len(self.df.index) -
+            self.forecast_history -
+            self.forecast_length -
+            1
         )
 
     def inverse_scale(
@@ -215,10 +215,10 @@ class CSVTestLoader(CSVDataLoader):
 
     def __len__(self) -> int:
         return (
-            len(self.df.index)
-            - self.forecast_history
-            - self.forecast_total
-            - 1
+            len(self.df.index) -
+            self.forecast_history -
+            self.forecast_total -
+            1
         )
 
 
