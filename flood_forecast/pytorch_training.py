@@ -61,7 +61,12 @@ def train_transformer_style(
     test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
                                   batch_sampler=None, num_workers=0, collate_fn=None,
                                   pin_memory=False, drop_last=False, timeout=0,
-                                  worker_init_fn=None)
+                                 worker_init_fn=None)
+    use_metadata = False 
+    if "meta_data" in model.params:
+        use_metadata = True
+        
+                
     if use_wandb:
         import wandb
         wandb.watch(model.model)
