@@ -11,16 +11,13 @@ def get_storage_client(
     Utility function to return a properly authenticated GCS
     storage client whether working in Colab, CircleCI, or other environment.
     """
-    if service_key_path is None:
-        # CircleCI
-        credentials = Credentials.from_service_account_info(
-            {"private_key": os.environ["ENVIRONMENT_GCP"]}
-        )
-        return storage.Client(credentials=credentials)
-    else:
+    if service_key_path is not None:
         return storage.Client.from_service_account_json(service_key_path)
-
-
+    else:
+        # CircleCI - authenticate through config
+        return storage.Client()
+        
+        
 def upload_file(
     bucket_name: str, file_name: str, upload_name: str, client: storage.Client
 ):
