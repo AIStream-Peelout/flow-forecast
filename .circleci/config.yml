@@ -24,7 +24,7 @@ jobs:
   
   deploy:
     docker:
-      - image: circleci/python:3.7.4
+      - image: google/cloud-sdk
         auth:
           username: _json_key
           password: $ENVIRONMENT_GCP
