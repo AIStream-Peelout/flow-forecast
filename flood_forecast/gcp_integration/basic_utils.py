@@ -20,7 +20,6 @@ def get_storage_client(
         return storage.Client.from_service_account_json(service_key_path)
 
 
-
 def upload_file(
     bucket_name: str, file_name: str, upload_name: str, client: storage.Client
 ):
