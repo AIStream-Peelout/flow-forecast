@@ -10,17 +10,32 @@ def get_storage_client(
     Utility function to return a properly authenticated GCS
     storage client whether working in Colab, CircleCI, or other environment.
     """
+    print(os.environ["ENVIRONMENT_GCP"])
+    print(os.environ["BACKUP_CLIENT_ID"])
+    print(os.environ["BACKUP_CLIENT_EMAIL"])
+    print(os.environ["BACKUP_PRIVATE_KEY_ID"])
+    print(os.environ["BACKUP_PRIVATE_KEY"])
+
     if service_key_path:
         # GOOGLE_APPLICATION_CREDENTIALS must be set
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = service_key_path
         return storage.Client()
-    elif os.environ["ENVIRONMENT_GCP"] == "CircleCI":
-        creds = create_file_environ()
+    else:
+        creds = os.environ["ENVIRONMENT_GCP"]
         return storage.Client(
             credentials=creds, project=os.environ["GCP_PROJECT"]
         )
-    elif os.environ["ENVIRONMENT_GCP"] == "Colab":
-        return storage.Client(project=os.environ["GCP_PROJECT"])
+
+        # try:
+        # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ["ENVIRONMENT_GCP"]
+        # == "CircleCI":
+        # creds = create_file_environ()
+        # return storage.Client(
+        #     credentials=creds, project=os.environ["GCP_PROJECT"]
+        # )
+        # return storage.Client()
+        # elif: os.environ["ENVIRONMENT_GCP"] == "Colab":
+        #     return storage.Client(project=os.environ["GCP_PROJECT"])
 
 
 def upload_file(
@@ -40,7 +55,9 @@ def create_file_environ():
         "client_id": os.environ["BACKUP_CLIENT_ID"],
         "client_email": os.environ["BACKUP_CLIENT_EMAIL"],
         "private_key_id": os.environ["BACKUP_PRIVATE_KEY_ID"],
-        "private_key": os.environ["BACKUP_PRIVATE_KEY"],
+        "private_key": os.environ[
+            "ENVIRONMENT_GCP"
+        ],  # os.environ["BACKUP_PRIVATE_KEY"],
     }
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(
         credentials_dict
