@@ -1,7 +1,7 @@
 from typing import Optional
 from google.cloud import storage
 import os
-from oauthlib.service_account import ServiceAccountCredentials
+# from oauthlib.service_account import ServiceAccountCredentials
 
 
 def get_storage_client(
@@ -16,14 +16,15 @@ def get_storage_client(
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = service_key_path
         return storage.Client()
     else:
-        # credentials = os.environ["ENVIRONMENT_GCP"]
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-            os.environ["ENVIRONMENT_GCP"]
-        )
-        return storage.Client(credentials=credentials)
+        # # credentials = os.environ["ENVIRONMENT_GCP"]
+        # credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+        #     os.environ["ENVIRONMENT_GCP"]
+        # )
+        # return storage.Client(credentials=credentials)
 
         # try:
-        # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ["ENVIRONMENT_GCP"]
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ["ENVIRONMENT_GCP"]
+        return storage.client()
         # == "CircleCI":
         # creds = create_file_environ()
         # return storage.Client(
