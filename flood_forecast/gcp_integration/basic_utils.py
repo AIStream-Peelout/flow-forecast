@@ -10,12 +10,6 @@ def get_storage_client(
     Utility function to return a properly authenticated GCS
     storage client whether working in Colab, CircleCI, or other environment.
     """
-    print(os.environ["ENVIRONMENT_GCP"])
-    print(os.environ["BACKUP_CLIENT_ID"])
-    print(os.environ["BACKUP_CLIENT_EMAIL"])
-    print(os.environ["BACKUP_PRIVATE_KEY_ID"])
-    print(os.environ["BACKUP_PRIVATE_KEY"])
-
     if service_key_path:
         # GOOGLE_APPLICATION_CREDENTIALS must be set
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = service_key_path
