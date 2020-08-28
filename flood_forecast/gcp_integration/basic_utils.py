@@ -24,7 +24,7 @@ def get_storage_client(
 
         # try:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ["ENVIRONMENT_GCP"]
-        return storage.client()
+        return storage.Client()
         # == "CircleCI":
         # creds = create_file_environ()
         # return storage.Client(
