@@ -266,7 +266,6 @@ workflows:
   test_and_build:
     jobs:
       - setup_and_install
-      - deploy
       - linting:
           requires:
             - setup_and_install
