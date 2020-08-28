@@ -63,8 +63,10 @@ def train_transformer_style(
                                   pin_memory=False, drop_last=False, timeout=0,
                                  worker_init_fn=None)
     use_metadata = False
+    meta_model = None
     if "meta_data" in model.params:
         use_metadata = True
+        meta_model = PyTorchForecast(**model.params["meta_data"]["meta_param"])
     if use_wandb:
         import wandb
         wandb.watch(model.model)
@@ -76,6 +78,7 @@ def train_transformer_style(
             criterion,
             data_loader,
             takes_target,
+            meta_model,
             forward_params)
         print("The loss for epoch " + str(epoch))
         print(total_loss)
@@ -128,17 +131,17 @@ def torch_single_train(model: PyTorchForecast,
                        criterion: Type[torch.nn.modules.loss._Loss],
                        data_loader: DataLoader,
                        takes_target: bool,
-                       meta_data_model = None,
+                       meta_data_model=None,
                        forward_params: Dict = {}) -> float:
     i = 0
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
-        if meta_data_model:
-                pass
         # Convert to CPU/GPU/TPU
         src = src.to(model.device)
         trg = trg.to(model.device)
+        if meta_data_model:
+                meta_data_model.training.__get_item__(0, "shit")
         # TODO figure how to avoid
         if takes_target:
             forward_params["t"] = trg
