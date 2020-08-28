@@ -13,20 +13,18 @@ def get_storage_client(
     Utility function to return a properly authenticated GCS
     storage client whether working in Colab, CircleCI, or other environment.
     """
-    if service_key_path is not None:
-        return storage.Client.from_service_account_json(service_key_path)
-    else:
-        credentials = Credentials.from_service_account_info(
-            os.environ["ENVIRONMENT_GCP"]
-        )
+    # if service_key_path is None:
+    #     # use default os.envron['GOOGLE_APPLICATION_CREDENTIALS']
+    #     return storage.Client()
+    # else:
+    #     return storage.Client.from_service_account_json(service_key_path)
+    if service_key_path is None:
+        import ast
+        cred_dict = ast.literal_eval(os.environ["ENVIRONMENT_GCP"])
+        credentials = Credentials.from_service_account_info(cred_dict)
         return storage.Client(credentials=credentials)
-        # return storage.Client.from_service_account_json(
-        #     os.environ["ENVIRONMENT_GCP"]
-        # )
-
-        # == "CircleCI":
-        # elif: os.environ["ENVIRONMENT_GCP"] == "Colab":
-        #     return storage.Client(project=os.environ["GCP_PROJECT"])
+    else:
+        return storage.Client.from_service_account_json(service_key_path)
 
 
 def upload_file(
@@ -35,25 +33,6 @@ def upload_file(
     bucket = client.get_bucket(bucket_name)
     blob = bucket.blob(file_name)
     blob.upload_from_filename(upload_name)
-
-
-def create_file_environ():
-    # TODO FIX
-    from oauthlib.service_account import ServiceAccountCredentials
-
-    credentials_dict = {
-        "type": "service_account",
-        "client_id": os.environ["BACKUP_CLIENT_ID"],
-        "client_email": os.environ["BACKUP_CLIENT_EMAIL"],
-        "private_key_id": os.environ["BACKUP_PRIVATE_KEY_ID"],
-        "private_key": os.environ[
-            "ENVIRONMENT_GCP"
-        ],  # os.environ["BACKUP_PRIVATE_KEY"],
-    }
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-        credentials_dict
-    )
-    return credentials
 
 
 def download_file(
