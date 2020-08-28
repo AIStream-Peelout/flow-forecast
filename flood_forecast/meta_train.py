@@ -10,6 +10,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     dataset_params = params["dataset_params"]
     dataset_params["forecast_history"] = 1
     dataset_params["forecast_length"] = 1
+    dataset_params["forecast_something_or"] = 1
     trained_model = PyTorchForecast(
         params["model_name"],
         dataset_params["training_path"],
