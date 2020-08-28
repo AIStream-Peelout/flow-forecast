@@ -1,7 +1,5 @@
 from typing import Optional
 from google.cloud import storage
-from google.oauth2.service_account import Credentials
-import os
 
 
 def get_storage_client(
@@ -16,8 +14,8 @@ def get_storage_client(
     else:
         # CircleCI - authenticate through config
         return storage.Client()
-        
-        
+
+
 def upload_file(
     bucket_name: str, file_name: str, upload_name: str, client: storage.Client
 ):
