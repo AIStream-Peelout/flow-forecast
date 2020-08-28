@@ -3,6 +3,7 @@ from google.cloud import storage
 from google.oauth2.service_account import Credentials
 import os
 
+
 def get_storage_client(
     service_key_path: Optional[str] = None,
 ) -> storage.Client:
@@ -17,6 +18,7 @@ def get_storage_client(
         return storage.Client(credentials=credentials, project=credentials.project_id)
     else:
         return storage.Client.from_service_account_json(service_key_path)
+
 
 
 def upload_file(
