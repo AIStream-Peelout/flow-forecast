@@ -133,7 +133,7 @@ def torch_single_train(model: PyTorchForecast,
                        forward_params: Dict = {}) -> float:
     i = 0
     running_loss = 0.0
-    for src, trg in data_loader:
+    for src, trg, idx in data_loader:
         opt.zero_grad()
         # Convert to CPU/GPU/TPU
         src = src.to(model.device)

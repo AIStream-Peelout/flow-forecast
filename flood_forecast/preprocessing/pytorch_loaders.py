@@ -93,7 +93,7 @@ class CSVDataLoader(Dataset):
         src_data = torch.from_numpy(src_data).float()
         trg_dat = targ_rows.to_numpy()
         trg_dat = torch.from_numpy(trg_dat).float()
-        return src_data, trg_dat
+        return src_data, trg_dat, idx
 
     def __len__(self) -> int:
         return (
@@ -241,4 +241,4 @@ class AEDataloader(CSVDataLoader):
         if uuid:
             idx = uuid
         target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
-        return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
+        return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target, idx
