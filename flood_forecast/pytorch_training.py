@@ -62,11 +62,9 @@ def train_transformer_style(
                                   batch_sampler=None, num_workers=0, collate_fn=None,
                                   pin_memory=False, drop_last=False, timeout=0,
                                  worker_init_fn=None)
-    use_metadata = False 
+    use_metadata = False
     if "meta_data" in model.params:
         use_metadata = True
-        
-                
     if use_wandb:
         import wandb
         wandb.watch(model.model)
@@ -130,11 +128,14 @@ def torch_single_train(model: PyTorchForecast,
                        criterion: Type[torch.nn.modules.loss._Loss],
                        data_loader: DataLoader,
                        takes_target: bool,
+                       meta_data_model = None,
                        forward_params: Dict = {}) -> float:
     i = 0
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
+        if meta_data_model:
+                pass
         # Convert to CPU/GPU/TPU
         src = src.to(model.device)
         trg = trg.to(model.device)
