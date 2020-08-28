@@ -1,6 +1,8 @@
 from typing import Optional
 from google.cloud import storage
+from google.oauth2.service_account import Credentials
 import os
+
 # from oauthlib.service_account import ServiceAccountCredentials
 
 
@@ -11,26 +13,18 @@ def get_storage_client(
     Utility function to return a properly authenticated GCS
     storage client whether working in Colab, CircleCI, or other environment.
     """
-    if service_key_path:
-        # GOOGLE_APPLICATION_CREDENTIALS must be set
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = service_key_path
-        return storage.Client()
+    if service_key_path is not None:
+        return storage.Client.from_service_account_json(service_key_path)
     else:
-        # # credentials = os.environ["ENVIRONMENT_GCP"]
-        # credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+        credentials = Credentials.from_service_account_info(
+            os.environ["ENVIRONMENT_GCP"]
+        )
+        return storage.Client(credentials=credentials)
+        # return storage.Client.from_service_account_json(
         #     os.environ["ENVIRONMENT_GCP"]
         # )
-        # return storage.Client(credentials=credentials)
 
-        # try:
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ["ENVIRONMENT_GCP"]
-        return storage.Client()
         # == "CircleCI":
-        # creds = create_file_environ()
-        # return storage.Client(
-        #     credentials=creds, project=os.environ["GCP_PROJECT"]
-        # )
-        # return storage.Client()
         # elif: os.environ["ENVIRONMENT_GCP"] == "Colab":
         #     return storage.Client(project=os.environ["GCP_PROJECT"])
 
