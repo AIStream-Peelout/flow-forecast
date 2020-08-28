@@ -61,11 +61,9 @@ def train_transformer_style(
     test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
                                   batch_sampler=None, num_workers=0, collate_fn=None,
                                   pin_memory=False, drop_last=False, timeout=0,
-                                 worker_init_fn=None)
-    use_metadata = False
+                                  worker_init_fn=None)
     meta_model = None
     if "meta_data" in model.params:
-        use_metadata = True
         meta_model = PyTorchForecast(**model.params["meta_data"]["meta_param"])
     if use_wandb:
         import wandb
@@ -141,7 +139,7 @@ def torch_single_train(model: PyTorchForecast,
         src = src.to(model.device)
         trg = trg.to(model.device)
         if meta_data_model:
-                meta_data_model.training.__get_item__(0, "shit")
+            meta_data_model.training.__get_item__(0, "shit")
         # TODO figure how to avoid
         if takes_target:
             forward_params["t"] = trg
