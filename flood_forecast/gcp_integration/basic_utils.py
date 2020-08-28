@@ -16,9 +16,7 @@ def get_storage_client(
         return storage.Client()
     else:
         creds = os.environ["ENVIRONMENT_GCP"]
-        return storage.Client(
-            credentials=creds, project=os.environ["GCP_PROJECT"]
-        )
+        return storage.Client(credentials=creds)
 
         # try:
         # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ["ENVIRONMENT_GCP"]
