@@ -236,11 +236,9 @@ class AEDataloader(CSVDataLoader):
     def __len__(self):
         return len(self.df.index) - 1
 
-    def __getitem__(self, idx, uuid=None):
+    def __getitem__(self, idx, uuid: int = None):
         # Warning this assumes that data is
         if uuid:
-            # Do something
-            pass
-        else:
-            target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
-            return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
+            idx = uuid
+        target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
+        return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
