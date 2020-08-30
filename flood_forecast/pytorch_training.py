@@ -2,7 +2,7 @@ import torch
 import torch.optim as optim
 from typing import Type, Dict
 from torch.utils.data import DataLoader
-
+import json
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
@@ -63,10 +63,10 @@ def train_transformer_style(
                                   pin_memory=False, drop_last=False, timeout=0,
                                   worker_init_fn=None)
     meta_model = None
-    uuid = None
-    meta_column = None 
+    meta_representation = None
     if "meta_data" in model.params:
-        meta_model = PyTorchForecast(**model.params["meta_data"]["meta_param"])
+        json_data = json.load(model.params["meta_data"]["path"])
+        meta_model = PyTorchForecast(**json_data)
         meta_representation = get_meta_representation(meta_model, model.params["meta_data"]["column_id"],
                                                       model.params["meta_data"]["uuid"])
     if use_wandb:

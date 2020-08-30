@@ -76,6 +76,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             forward_dim=2048,
             dropout=0.1,
             use_mask=False,
+            meta_data=None,
             n_heads=8):
         """
         Uses a number of encoder layers with simple linear decoder layer
@@ -91,13 +92,17 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.out_length_lay = torch.nn.Linear(seq_length, output_seq_length)
         self.mask = generate_square_subsequent_mask(seq_length)
         self.mask_it = use_mask
+        if meta_data:
+            self.bilinear_layer = torch.nn.Bilinear(meta_data["embedding_size"], d_model, meta_data["ouput_size"])
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
         Performs forward pass on tensor of (batch_size, sequence_length, n_time_series)
         Return tensor of dim (batch_size, output_seq_length)
         """
         x = self.dense_shape(x)
+        if meta_data:
+            x = self.bilinear_layer(x, meta_data)
         x = self.pe(x)
         x = x.permute(1, 0, 2)
         if self.mask_it:
