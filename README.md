@@ -5,7 +5,7 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
-| Docs | [Link](https://flow-forecast.readthedocs.io/en/readthedocs/)|
+| Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=readthedocs)](https://flow-forecast.readthedocs.io/en/readthedocs/?badge=readthedocs)|
 ## Getting Started 
 
 Using the library
@@ -17,29 +17,25 @@ Using the library
 1. Vanilla LSTM: A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
 2. Full transformer: The full transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
 3. Simple Multi-Head Attention: A simple multi-head attention block/embedding layers. Suitable for transfer learning.
-4. Transformer w/a linear decoder: A transformer with n-encoder blocks (this is tunable) and linear decoder. 
-5. DA-RNN (CPU only for now): A well rounded model with which utilizes LSTM + attention.
+4. Transformer w/a linear decoder: A transformer with n-encoder blocks (this is tunable) and linear decoder. Suitable for transfer learning.
+5. DA-RNN (CPU only for now): A well rounded model with which utilizes a LSTM + attention. 
 
 **Forthcoming Models**
 
-1. Vanilla GRU
-
-2. Dual stage attention:
-
-3. 
+We have a number of models we are planning on releasing soon. Please check our project board.
 
 **Integrations**
 
-Google Cloud Platform 
+[Google Cloud Platform]() 
 
-Weights and Biases 
+[Weights and Biases]()
 
 ## Contributing 
 
 For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines) and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
 
 
-## Historical Tasks 
+## Historical River Flow Data  
 
 ### Task 1 Stream Flow Forecasting 
 This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index. 
