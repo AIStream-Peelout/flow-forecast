@@ -241,4 +241,4 @@ class AEDataloader(CSVDataLoader):
         if uuid:
             idx = uuid
         target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
-        return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target, idx
+        return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
