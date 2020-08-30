@@ -93,7 +93,7 @@ class CSVDataLoader(Dataset):
         src_data = torch.from_numpy(src_data).float()
         trg_dat = targ_rows.to_numpy()
         trg_dat = torch.from_numpy(trg_dat).float()
-        return src_data, trg_dat, idx
+        return src_data, trg_dat
 
     def __len__(self) -> int:
         return (

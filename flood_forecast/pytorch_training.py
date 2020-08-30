@@ -133,14 +133,15 @@ def torch_single_train(model: PyTorchForecast,
                        forward_params: Dict = {}) -> float:
     i = 0
     running_loss = 0.0
-    for src, trg, idx in data_loader:
+    for src, trg in data_loader:
         opt.zero_grad()
         # Convert to CPU/GPU/TPU
         src = src.to(model.device)
         trg = trg.to(model.device)
         if meta_data_model:
-            #model.training
-            meta_data_model.training.__get_item__(0, "shit")
+            src, trg = meta_data_model.training.__get_item__(0, meta_data_model["uuid_column_name"])
+            representation = meta_data_model.model.generate_representation(src)
+            forward_params["representation"] = representation
         # TODO figure how to avoid
         if takes_target:
             forward_params["t"] = trg
@@ -170,6 +171,7 @@ def compute_validation(validation_loader: DataLoader,
                        criterion: Type[torch.nn.modules.loss._Loss],
                        device: torch.device,
                        decoder_structure=False,
+                       meta_data_model=None,
                        use_wandb: bool = False,
                        val_or_test="validation_loss") -> float:
     """
