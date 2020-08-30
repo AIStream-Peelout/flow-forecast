@@ -22,13 +22,13 @@ Using the library
 
 **Forthcoming Models**
 
-We have a number of models we are planning on releasing soon. Please check our project board.
+We have a number of models we are planning on releasing soon. [Please check our project board](https://github.com/AIStream-Peelout/flow-forecast/projects/5)
 
 **Integrations**
 
 [Google Cloud Platform]() 
 
-[Weights and Biases]()
+[Weights and Biases](https://www.wandb.com/)
 
 ## Contributing 
 
