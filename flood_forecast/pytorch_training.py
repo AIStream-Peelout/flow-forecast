@@ -63,8 +63,12 @@ def train_transformer_style(
                                   pin_memory=False, drop_last=False, timeout=0,
                                   worker_init_fn=None)
     meta_model = None
+    uuid = None
+    meta_column = None 
     if "meta_data" in model.params:
         meta_model = PyTorchForecast(**model.params["meta_data"]["meta_param"])
+        meta_representation = get_meta_representation(meta_model, model.params["meta_data"]["column_id"],
+                                                      model.params["meta_data"]["uuid"])
     if use_wandb:
         import wandb
         wandb.watch(model.model)
@@ -77,6 +81,7 @@ def train_transformer_style(
             data_loader,
             takes_target,
             meta_model,
+            meta_representation,
             forward_params)
         print("The loss for epoch " + str(epoch))
         print(total_loss)
@@ -124,12 +129,17 @@ def train_transformer_style(
     model.save_model(model_filepath, max_epochs)
 
 
+def get_meta_representation(uuid, column_id, meta_model):
+    return meta_model.__get_item__(uuid, column_id)
+
+
 def torch_single_train(model: PyTorchForecast,
                        opt: optim.Optimizer,
                        criterion: Type[torch.nn.modules.loss._Loss],
                        data_loader: DataLoader,
                        takes_target: bool,
-                       meta_data_model=None,
+                       meta_data_model: PyTorchForecast,
+                       meta_data_model_representation: torch.Tensor,
                        forward_params: Dict = {}) -> float:
     i = 0
     running_loss = 0.0
@@ -138,11 +148,10 @@ def torch_single_train(model: PyTorchForecast,
         # Convert to CPU/GPU/TPU
         src = src.to(model.device)
         trg = trg.to(model.device)
-        if meta_data_model:
-            src, trg = meta_data_model.training.__get_item__(0, meta_data_model["uuid_column_name"])
-            representation = meta_data_model.model.generate_representation(src)
-            forward_params["representation"] = representation
         # TODO figure how to avoid
+        if meta_data_model_representation:
+            representation = meta_data_model.model(meta_data_model_representation)
+            forward_params["representation"] = representation
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
