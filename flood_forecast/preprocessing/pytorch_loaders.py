@@ -239,6 +239,6 @@ class AEDataloader(CSVDataLoader):
     def __getitem__(self, idx, uuid: int = None, column_relevant: str = None):
         # Warning this assumes that data is
         if uuid:
-            idx = self.df[self.df[column_relevant] == uuid].index
+            idx = self.df[self.df[column_relevant] == uuid].index[0]
         target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
