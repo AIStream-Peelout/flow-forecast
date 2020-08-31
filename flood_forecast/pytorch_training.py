@@ -137,7 +137,7 @@ def train_transformer_style(
 
 
 def get_meta_representation(column_id: str, uuid: str, meta_model):
-    return meta_model.training.__getitem__(0, uuid, column_id)[0]
+    return meta_model.test.__getitem__(0, uuid, column_id)[0]
 
 
 def torch_single_train(model: PyTorchForecast,

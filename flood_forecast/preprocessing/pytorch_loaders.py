@@ -55,6 +55,7 @@ class CSVDataLoader(Dataset):
         print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)
+        self.original_df = df
         self.df = df[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
@@ -239,6 +240,6 @@ class AEDataloader(CSVDataLoader):
     def __getitem__(self, idx, uuid: int = None, column_relevant: str = None):
         # Warning this assumes that data is
         if uuid:
-            idx = self.df[self.df[column_relevant] == uuid].index
+            idx = self.original_df[self.df[column_relevant] == uuid].index
         target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
