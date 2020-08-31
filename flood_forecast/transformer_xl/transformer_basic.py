@@ -93,7 +93,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.mask = generate_square_subsequent_mask(seq_length)
         self.mask_it = use_mask
         if meta_data:
-            self.bilinear_layer = torch.nn.Bilinear(meta_data["embedding_size"], d_model, meta_data["output_size"])
+            self.bilinear_layer = torch.nn.Bilinear(seq_length, 1, seq_length)
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
@@ -103,7 +103,10 @@ class CustomTransformerDecoder(torch.nn.Module):
         """
         x = self.dense_shape(x)
         if type(meta_data) == torch.Tensor:
+            x = x.permute(0, 2, 1).contiguous()
             x = self.bilinear_layer(x, meta_data)
+            x = x.permute(0, 2, 1)
+            print(x.shape)
         x = self.pe(x)
         x = x.permute(1, 0, 2)
         if self.mask_it:
@@ -133,15 +136,6 @@ class SimplePositionalEncoding(torch.nn.Module):
         """Creates a basic positional encoding"""
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
-
-
-def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
-    r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
-        Unmasked positions are filled with float(0.0).
-    """
-    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-    return mask
 
 
 def greedy_decode(
@@ -175,3 +169,12 @@ def greedy_decode(
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
         memory = model.encode_sequence(src[:, i + 1:, :], src_mask)
     return ys[:, 1:, :]
+
+
+def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
+    r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
+        Unmasked positions are filled with float(0.0).
+    """
+    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+    return mask
