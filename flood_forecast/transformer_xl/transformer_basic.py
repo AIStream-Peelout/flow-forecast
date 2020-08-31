@@ -103,6 +103,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         """
         x = self.dense_shape(x)
         if type(meta_data) == torch.Tensor:
+            meta_data = meta_data.unsqueeze(2)
             x = x.permute(0, 2, 1).contiguous()
             x = self.bilinear_layer(x, meta_data)
             x = x.permute(0, 2, 1)
