@@ -8,7 +8,7 @@
       "n_layers_encoder": 6,
       "meta_data": {
           "embedding_size":128,
-          "output_size":128
+          "output_size":10
       }
      }, 
     "meta_data":{
