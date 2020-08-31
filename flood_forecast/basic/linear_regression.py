@@ -36,6 +36,7 @@ def simple_decode(model: Type[torch.nn.Module],
                   output_len=1,
                   device='cpu',
                   unsqueeze_dim=1,
+                  meta_data=None,
                   use_real_target: bool = True) -> torch.Tensor:
     """
     :model a PyTorch model to be used for decoding
@@ -53,7 +54,10 @@ def simple_decode(model: Type[torch.nn.Module],
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
     for i in range(0, max_seq_len, output_len):
         with torch.no_grad():
-            out = model(src)
+            if meta_data:
+                out = model(src, meta_data)
+            else:
+                out = model(src)
             if output_len == 1:
                 real_target2[:, i, 0] = out[:, 0]
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
