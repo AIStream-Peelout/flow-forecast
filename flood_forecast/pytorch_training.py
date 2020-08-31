@@ -180,7 +180,7 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
-def compute_validation(validation_loader: DataLoader,
+def compute_validation(validation_loader: DataLoader, # s
                        model,
                        epoch: int,
                        sequence_size: int,
