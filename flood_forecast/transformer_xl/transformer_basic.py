@@ -106,9 +106,9 @@ class CustomTransformerDecoder(torch.nn.Module):
             batch_size = x.shape[0]
             meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
             x = x.permute(0, 2, 1).contiguous()
+            print(meta_data).shape()
             x = self.bilinear_layer(x, meta_data)
             x = x.permute(0, 2, 1)
-            print(x.shape)
         x = self.pe(x)
         x = x.permute(1, 0, 2)
         if self.mask_it:
