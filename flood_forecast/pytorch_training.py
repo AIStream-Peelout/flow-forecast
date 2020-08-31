@@ -68,7 +68,11 @@ def train_transformer_style(
     if "meta_data" in model.params:
         with open(model.params["meta_data"]["path"]) as f:
             json_data = json.load(f)
-        meta_model = PyTorchForecast(**json_data)
+        dataset_params2 = json_data["dataset_params"]
+        training_path = dataset_params2["training_path"]
+        valid_path = dataset_params2["validation_path"]
+        name = json_data["model_name"]
+        meta_model = PyTorchForecast(name, training_path, valid_path, dataset_params2["test_path"], json_data)
         meta_representation = get_meta_representation(meta_model, model.params["meta_data"]["column_id"],
                                                       model.params["meta_data"]["uuid"])
     if use_wandb:
@@ -96,6 +100,7 @@ def train_transformer_style(
             model.params["dataset_params"]["forecast_length"],
             criterion,
             model.device,
+            meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb)
         if valid < 0.01:
@@ -122,6 +127,7 @@ def train_transformer_style(
         model.params["dataset_params"]["forecast_length"],
         criterion,
         model.device,
+        meta_model=meta_model,
         decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss")
@@ -183,6 +189,7 @@ def compute_validation(validation_loader: DataLoader,
                        decoder_structure=False,
                        meta_data_model=None,
                        use_wandb: bool = False,
+                       meta_model=None,
                        val_or_test="validation_loss") -> float:
     """
     Function to compute the validation or test loss
