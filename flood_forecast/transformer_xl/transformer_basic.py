@@ -101,7 +101,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         Return tensor of dim (batch_size, output_seq_length)
         """
         x = self.dense_shape(x)
-        if meta_data:
+        if type(meta_data) == torch.Tensor:
             x = self.bilinear_layer(x, meta_data)
         x = self.pe(x)
         x = x.permute(1, 0, 2)
