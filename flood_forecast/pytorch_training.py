@@ -156,9 +156,9 @@ def torch_single_train(model: PyTorchForecast,
         src = src.to(model.device)
         trg = trg.to(model.device)
         # TODO figure how to avoid
-        if type(meta_data_model_representation) is not None:
+        if type(meta_data_model_representation) != type(None):
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
-            forward_params["representation"] = representation
+            forward_params["meta_data"] = representation
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
