@@ -93,7 +93,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.mask = generate_square_subsequent_mask(seq_length)
         self.mask_it = use_mask
         if meta_data:
-            self.bilinear_layer = torch.nn.Bilinear(meta_data["embedding_size"], d_model, meta_data["ouput_size"])
+            self.bilinear_layer = torch.nn.Bilinear(meta_data["embedding_size"], d_model, meta_data["output_size"])
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
