@@ -5,7 +5,11 @@
       "n_time_series":3,
       "seq_length":5,
       "output_seq_length": 1, 
-      "n_layers_encoder": 6
+      "n_layers_encoder": 6,
+      "meta_data": {
+          "embedding_size":128,
+          "output_size":128
+      }
      }, 
     "meta_data":{
         "path":"tests/auto_encoder.json",

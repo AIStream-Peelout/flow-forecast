@@ -97,6 +97,7 @@ class CustomTransformerDecoder(torch.nn.Module):
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
+                    # might have to permute
         Performs forward pass on tensor of (batch_size, sequence_length, n_time_series)
         Return tensor of dim (batch_size, output_seq_length)
         """
