@@ -137,7 +137,7 @@ def train_transformer_style(
 
 
 def get_meta_representation(column_id: str, uuid: str, meta_model):
-    return meta_model.training.__getitem__(0, uuid, column_id)
+    return meta_model.training.__getitem__(0, uuid, column_id)[0]
 
 
 def torch_single_train(model: PyTorchForecast,
@@ -157,7 +157,7 @@ def torch_single_train(model: PyTorchForecast,
         trg = trg.to(model.device)
         # TODO figure how to avoid
         if meta_data_model_representation:
-            representation = meta_data_model.model(meta_data_model_representation)
+            representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["representation"] = representation
         if takes_target:
             forward_params["t"] = trg
