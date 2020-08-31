@@ -73,8 +73,8 @@ def train_transformer_style(
         valid_path = dataset_params2["validation_path"]
         name = json_data["model_name"]
         meta_model = PyTorchForecast(name, training_path, valid_path, dataset_params2["test_path"], json_data)
-        meta_representation = get_meta_representation(meta_model, model.params["meta_data"]["column_id"],
-                                                      model.params["meta_data"]["uuid"])
+        meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
+                                                      model.params["meta_data"]["uuid"], meta_model,)
     if use_wandb:
         wandb.watch(model.model)
     session_params = []
@@ -136,7 +136,7 @@ def train_transformer_style(
     model.save_model(model_filepath, max_epochs)
 
 
-def get_meta_representation(uuid, column_id, meta_model):
+def get_meta_representation(column_id: str, uuid: str, meta_model):
     return meta_model.training.__get_item__(uuid, column_id)
 
 
