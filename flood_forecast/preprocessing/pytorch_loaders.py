@@ -245,4 +245,3 @@ class AEDataloader(CSVDataLoader):
         if target.shape[0] == 0:
             raise ValueError("The item was not found in the index please try again")
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
- 
