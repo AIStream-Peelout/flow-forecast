@@ -12,16 +12,18 @@ dev_requirements = [
     'autopep8',
     'flake8'
 ]
-
+# Change version to .09
 setup(
     name='flood_forecast',
-    version='0.1dev',
+    version=0.82,
     packages=[
         'flood_forecast',
         'flood_forecast.transformer_xl',
         'flood_forecast.preprocessing',
         'flood_forecast.da_rnn',
         "flood_forecast.basic",
+        "flood_forecast.meta_models",
+        "flood_forecast.gcp_integration",
         "flood_forecast.custom"],
     license='Public',
     long_description='A public package for forecasting river flows and flash flood severity',
