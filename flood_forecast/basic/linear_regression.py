@@ -2,7 +2,6 @@ import torch
 from typing import Type
 
 
-# TODO move decode example
 class SimpleLinearModel(torch.nn.Module):
     """
     A very simple baseline model to resolve some of the
