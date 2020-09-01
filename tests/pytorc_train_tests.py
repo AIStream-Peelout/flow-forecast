@@ -226,6 +226,8 @@ class PyTorchTrainTests(unittest.TestCase):
             self.opt,
             self.criterion,
             self.data_loader,
+            None,
+            None,
             False)
         self.assertGreater(total_loss, 100)
         self.assertGreater(total_loss, 752, 000)
