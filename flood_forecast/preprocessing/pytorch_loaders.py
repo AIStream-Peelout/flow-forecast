@@ -1,4 +1,3 @@
-from typing import Optional
 from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
@@ -6,9 +5,8 @@ import torch
 from typing import List, Union
 from flood_forecast.preprocessing.interpolate_preprocess import (
     interpolate_missing_values,
-    fix_timezones,
+    fix_timezones
 )
-from flood_forecast.preprocessing.buil_dataset import get_data
 
 
 class CSVDataLoader(Dataset):
@@ -23,8 +21,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         interpolate_param=True,
-        gcp_service_key: Optional[str] = None,
-        sort_column: str = "datetime",
+        sort_column="datetime"
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -49,17 +46,16 @@ class CSVDataLoader(Dataset):
         self.forecast_length = forecast_length
         # TODO allow other filling methods
         print("interpolate should be below")
-
-        self.local_file_path = get_data(file_path, gcp_service_key)
         if interpolate_param:
             print("now filling missing values")
-            df = fix_timezones(self.local_file_path)
+            df = fix_timezones(file_path)
             df = interpolate_missing_values(df)
         else:
-            df = pd.read_csv(self.local_file_path)
-        print("Now loading and scaling " + self.local_file_path)
+            df = pd.read_csv(file_path)
+        print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)
+        self.original_df = df
         self.df = df[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
@@ -102,10 +98,7 @@ class CSVDataLoader(Dataset):
 
     def __len__(self) -> int:
         return (
-            len(self.df.index) -
-            self.forecast_history -
-            self.forecast_length -
-            1
+            len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
 
     def inverse_scale(
@@ -141,13 +134,12 @@ class CSVTestLoader(CSVDataLoader):
         A data loader for the test data.
         """
         super().__init__(**kwargs)
-        local_file_path = get_data(df_path)
-        self.original_df = pd.read_csv(local_file_path)
+        self.original_df = pd.read_csv(df_path)
         if interpolate:
-            self.original_df = fix_timezones(local_file_path)
+            self.original_df = fix_timezones(df_path)
             self.original_df = interpolate_missing_values(self.original_df)
         print("CSV Path below")
-        print(local_file_path)
+        print(df_path)
         self.forecast_total = forecast_total
         self.use_real_temp = use_real_temp
         self.use_real_precip = use_real_precip
@@ -215,53 +207,42 @@ class CSVTestLoader(CSVDataLoader):
 
     def __len__(self) -> int:
         return (
-            len(self.df.index) -
-            self.forecast_history -
-            self.forecast_total -
-            1
+            len(self.df.index) - self.forecast_history - self.forecast_total - 1
         )
 
 
 class AEDataloader(CSVDataLoader):
     def __init__(
-        self,
-        file_path: str,
-        relevant_cols: List,
-        scaling=None,
-        start_stamp: int = 0,
-        target_col: List = None,
-        end_stamp: int = None,
-        unsqueeze_dim: int = 1,
-        interpolate_param=False,
-        sort_column=None,
-    ):
+            self,
+            file_path: str,
+            relevant_cols: List,
+            scaling=None,
+            start_stamp: int = 0,
+            target_col: List = None,
+            end_stamp: int = None,
+            unsqueeze_dim: int = 1,
+            interpolate_param=False,
+            sort_column=None):
         """
         A data loader class for autoencoders.
         Overrides __len__ and __getitem__ from generic dataloader.
         Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
         Same parameters as before.
         """
-        super().__init__(
-            file_path=file_path,
-            forecast_history=1,
-            forecast_length=1,
-            target_col=target_col,
-            relevant_cols=relevant_cols,
-            start_stamp=start_stamp,
-            end_stamp=end_stamp,
-            sort_column=sort_column,
-            interpolate_param=False,
-        )
+        super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
+                         target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
+                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False)
         self.unsqueeze_dim = unsqueeze_dim
 
     def __len__(self):
         return len(self.df.index) - 1
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx, uuid: int = None, column_relevant: str = None):
         # Warning this assumes that data is
-        target = (
-            torch.from_numpy(self.df.iloc[idx].to_numpy())
-            .float()
-            .unsqueeze(self.unsqueeze_dim)
-        )
+        if uuid:
+            idx = self.original_df[self.original_df[column_relevant] == uuid].index
+        target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
+        if target.shape[0] == 0:
+            raise ValueError("The item was not found in the index please try again")
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
+ 
