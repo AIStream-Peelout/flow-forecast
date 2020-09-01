@@ -147,8 +147,7 @@ def greedy_decode(
         max_len: int,
         real_target: torch.Tensor,
         unsqueeze_dim=1,
-        device='cpu',
-        output_len=None):
+        device='cpu'):
     """
     Mechanism to sequentially decode the model
     :src Historical time series values
@@ -161,7 +160,6 @@ def greedy_decode(
         src_mask = model.mask
     memory = model.encode_sequence(src, src_mask)
     # Get last element of src array to forecast from
-    # TODO implement output_len stuff
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
     for i in range(max_len):
         mask = generate_square_subsequent_mask(i + 1).to(device)
