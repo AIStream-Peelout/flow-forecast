@@ -20,8 +20,8 @@ class CSVDataLoader(Dataset):
         scaling=None,
         start_stamp: int = 0,
         end_stamp: int = None,
-        gcp_service_key: Optional[str] = None
-        interpolate_param=True,
+        gcp_service_key: Optional[str] = None,
+        interpolate_param = True,
         sort_column="datetime"
     ):
         """
