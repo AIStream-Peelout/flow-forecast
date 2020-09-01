@@ -1,8 +1,12 @@
+from flood_forecast.preprocessing.pytorch_loaders import (
+    CSVTestLoader,
+    CSVDataLoader,
+    AEDataloader,
+)
 import unittest
 import os
 import torch
 from datetime import datetime
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, CSVDataLoader, AEDataloader
 
 
 class DataLoaderTests(unittest.TestCase):
@@ -12,38 +16,71 @@ class DataLoaderTests(unittest.TestCase):
     """
 
     def setUp(self):
-        self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
+        self.test_data_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "test_data"
+        )
         data_base_params = {
             "file_path": os.path.join(self.test_data_path, "keag_small.csv"),
             "forecast_history": 20,
             "forecast_length": 20,
-            "relevant_cols": [
-                "cfs",
-                "temp",
-                "precip"],
+            "relevant_cols": ["cfs", "temp", "precip"],
             "target_col": ["cfs"],
-            "interpolate_param": False
+            "interpolate_param": False,
         }
-        self.train_loader = CSVDataLoader(os.path.join(self.test_data_path, "keag_small.csv"), 30, 20,
-                                          target_col=['cfs'], relevant_cols=['cfs', 'precip', 'temp'],
-                                          interpolate_param=False)
-        self.test_loader = CSVTestLoader(os.path.join(self.test_data_path, "keag_small.csv"), 336, **data_base_params)
-        self.ae_loader = AEDataloader(os.path.join(self.test_data_path, "keag_small.csv"),
-                                      relevant_cols=["cfs", "temp", "precip"])
+        self.train_loader = CSVDataLoader(
+            os.path.join(self.test_data_path, "keag_small.csv"),
+            30,
+            20,
+            target_col=["cfs"],
+            relevant_cols=["cfs", "precip", "temp"],
+            interpolate_param=False,
+        )
+        self.test_loader = CSVTestLoader(
+            os.path.join(self.test_data_path, "keag_small.csv"),
+            336,
+            **data_base_params
+        )
+        self.ae_loader = AEDataloader(
+            os.path.join(self.test_data_path, "keag_small.csv"),
+            relevant_cols=["cfs", "temp", "precip"],
+        )
 
     def test_loader2_get_item(self):
         src, df, forecast_start_index = self.test_loader[0]
         self.assertEqual(type(src), torch.Tensor)
         self.assertEqual(forecast_start_index, 20)
-        self.assertEqual(df.iloc[2]['cfs'], 445)
+        self.assertEqual(df.iloc[2]["cfs"], 445)
         self.assertEqual(len(df), 356)
 
     def test_loader2_get_date(self):
         src, df, forecast_start_index, = self.test_loader.get_from_start_date(
-            datetime(2014, 6, 3, 0))
+            datetime(2014, 6, 3, 0)
+        )
         self.assertEqual(type(src), torch.Tensor)
         self.assertEqual(forecast_start_index, 783)
-        self.assertEqual(df.iloc[0]['datetime'].day, datetime(2014, 6, 2, 4).day)
+        self.assertEqual(
+            df.iloc[0]["datetime"].day, datetime(2014, 6, 2, 4).day
+        )
+
+    def test_loader_get_gcs_data(self):
+        test_loader = CSVDataLoader(
+            file_path="gs://task_ts_data/2020-08-17/Afghanistan____.csv",
+            forecast_history=14,
+            forecast_length=14,
+            target_col=["cases"],
+            relevant_cols=["cases", "recovered", "active", "deaths"],
+            sort_column="date",
+            interpolate_param=False,
+            gcp_service_key=None,  # for CircleCI tests, local test needs key.json
+        )
+
+        self.assertEqual(
+            test_loader.local_file_path,
+            "data/task_ts_data/2020-08-17/Afghanistan____.csv",
+        )
+
+
+if __name__ == "__main__":
 
     def test_ae(self):
         x, y = self.ae_loader[0]
@@ -57,5 +94,3 @@ class DataLoaderTests(unittest.TestCase):
         # Check first and last dim are not overlap
         self.assertFalse(torch.eq(x[29, 0], y[0, 0]))
         # Need more checks here
-if __name__ == '__main__':
-    unittest.main()
