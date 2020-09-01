@@ -147,6 +147,7 @@ def greedy_decode(
         max_len: int,
         real_target: torch.Tensor,
         unsqueeze_dim=1,
+        output_len=1,
         device='cpu'):
     """
     Mechanism to sequentially decode the model
