@@ -33,7 +33,7 @@ def download_file(
     source_blob_name: str,
     destination_file_name: str,
     service_key_path: Optional[str] = None,
-):
+) -> None:
     """Download data file from GCS.
 
     Args:

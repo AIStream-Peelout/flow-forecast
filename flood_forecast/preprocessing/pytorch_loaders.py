@@ -2,11 +2,12 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import List, Union
+from typing import List, Union, Optional
 from flood_forecast.preprocessing.interpolate_preprocess import (
     interpolate_missing_values,
     fix_timezones
 )
+from flood_forecast.preprocessing.buil_dataset import get_data
 
 
 class CSVDataLoader(Dataset):
@@ -21,7 +22,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
-        interpolate_param = True,
+        interpolate_param: bool = True,
         sort_column="datetime"
     ):
         """
