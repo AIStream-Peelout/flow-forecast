@@ -14,7 +14,7 @@
     "meta_data":{
         "path":"tests/auto_encoder.json",
         "column_id": "cfs",
-        "uuid": "445"
+        "uuid": 445
 
     },
     "dataset_params":
