@@ -2,7 +2,8 @@ import torch
 import torch.optim as optim
 from typing import Type, Dict
 from torch.utils.data import DataLoader
-
+import json
+import wandb
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
@@ -63,10 +64,18 @@ def train_transformer_style(
                                   pin_memory=False, drop_last=False, timeout=0,
                                   worker_init_fn=None)
     meta_model = None
+    meta_representation = None
     if "meta_data" in model.params:
-        meta_model = PyTorchForecast(**model.params["meta_data"]["meta_param"])
+        with open(model.params["meta_data"]["path"]) as f:
+            json_data = json.load(f)
+        dataset_params2 = json_data["dataset_params"]
+        training_path = dataset_params2["training_path"]
+        valid_path = dataset_params2["validation_path"]
+        name = json_data["model_name"]
+        meta_model = PyTorchForecast(name, training_path, valid_path, dataset_params2["test_path"], json_data)
+        meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
+                                                      model.params["meta_data"]["uuid"], meta_model)
     if use_wandb:
-        import wandb
         wandb.watch(model.model)
     session_params = []
     for epoch in range(max_epochs):
@@ -77,6 +86,7 @@ def train_transformer_style(
             data_loader,
             takes_target,
             meta_model,
+            meta_representation,
             forward_params)
         print("The loss for epoch " + str(epoch))
         print(total_loss)
@@ -90,6 +100,7 @@ def train_transformer_style(
             model.params["dataset_params"]["forecast_length"],
             criterion,
             model.device,
+            meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb)
         if valid < 0.01:
@@ -116,6 +127,7 @@ def train_transformer_style(
         model.params["dataset_params"]["forecast_length"],
         criterion,
         model.device,
+        meta_model=meta_model,
         decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss")
@@ -124,12 +136,17 @@ def train_transformer_style(
     model.save_model(model_filepath, max_epochs)
 
 
+def get_meta_representation(column_id: str, uuid: str, meta_model):
+    return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
+
+
 def torch_single_train(model: PyTorchForecast,
                        opt: optim.Optimizer,
                        criterion: Type[torch.nn.modules.loss._Loss],
                        data_loader: DataLoader,
                        takes_target: bool,
-                       meta_data_model=None,
+                       meta_data_model: PyTorchForecast,
+                       meta_data_model_representation: torch.Tensor,
                        forward_params: Dict = {}) -> float:
     i = 0
     running_loss = 0.0
@@ -138,11 +155,10 @@ def torch_single_train(model: PyTorchForecast,
         # Convert to CPU/GPU/TPU
         src = src.to(model.device)
         trg = trg.to(model.device)
-        if meta_data_model:
-            src, trg = meta_data_model.training.__get_item__(0, meta_data_model["uuid_column_name"])
-            representation = meta_data_model.model.generate_representation(src)
-            forward_params["representation"] = representation
         # TODO figure how to avoid
+        if meta_data_model:
+            representation = meta_data_model.model.generate_representation(meta_data_model_representation)
+            forward_params["meta_data"] = representation
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
@@ -164,7 +180,7 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
-def compute_validation(validation_loader: DataLoader,
+def compute_validation(validation_loader: DataLoader,  # s lint
                        model,
                        epoch: int,
                        sequence_size: int,
@@ -173,6 +189,7 @@ def compute_validation(validation_loader: DataLoader,
                        decoder_structure=False,
                        meta_data_model=None,
                        use_wandb: bool = False,
+                       meta_model=None,
                        val_or_test="validation_loss") -> float:
     """
     Function to compute the validation or test loss
