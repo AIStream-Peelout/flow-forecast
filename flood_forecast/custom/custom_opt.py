@@ -244,3 +244,17 @@ class BertAdam(Optimizer):
                 # bias_correction2 = 1 - beta2 ** state['step']
 
         return loss
+
+class NegativeLogLikelihood(torch.nn.Module):
+    """
+    target -> True y
+    output -> predicted distribution
+    """
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, output: torch.distributions, target: torch.Tensor):
+        """
+        calculates NegativeLogLikelihood
+        """
+        return -output.log_prob(target).sum()
