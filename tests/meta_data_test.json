@@ -12,6 +12,7 @@
       }
      }, 
     "meta_data":{
+        "use": true,
         "path":"tests/auto_encoder.json",
         "column_id": "datetime",
         "uuid": "2014-05-01 01:00:00"
