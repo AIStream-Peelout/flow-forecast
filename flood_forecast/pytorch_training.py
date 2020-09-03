@@ -65,7 +65,9 @@ def train_transformer_style(
                                   worker_init_fn=None)
     meta_model = None
     meta_representation = None
-    if "meta_data" in model.params:
+    if model.parm.get("meta_data") is None:
+        model.params["meta_data"] = False
+    if model.params["meta_data"]:
         with open(model.params["meta_data"]["path"]) as f:
             json_data = json.load(f)
         dataset_params2 = json_data["dataset_params"]
