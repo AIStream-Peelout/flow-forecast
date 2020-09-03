@@ -66,15 +66,16 @@ def train_transformer_style(
     meta_model = None
     meta_representation = None
     if "meta_data" in model.params:
-        with open(model.params["meta_data"]["path"]) as f:
-            json_data = json.load(f)
-        dataset_params2 = json_data["dataset_params"]
-        training_path = dataset_params2["training_path"]
-        valid_path = dataset_params2["validation_path"]
-        name = json_data["model_name"]
-        meta_model = PyTorchForecast(name, training_path, valid_path, dataset_params2["test_path"], json_data)
-        meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
-                                                      model.params["meta_data"]["uuid"], meta_model)
+        if "uuid" in model.params["meta_data"]:
+            with open(model.params["meta_data"]["path"]) as f:
+                json_data = json.load(f)
+            dataset_params2 = json_data["dataset_params"]
+            training_path = dataset_params2["training_path"]
+            valid_path = dataset_params2["validation_path"]
+            name = json_data["model_name"]
+            meta_model = PyTorchForecast(name, training_path, valid_path, dataset_params2["test_path"], json_data)
+            meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
+                                                        model.params["meta_data"]["uuid"], meta_model)
     if use_wandb:
         wandb.watch(model.model)
     session_params = []
@@ -216,7 +217,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                         :,
                         0]
                 else:
-                    output = simple_decode(model, src, targ.shape[1], targ, 1)[:, :, 0]
+                    output = simple_decode(model, src, targ.shape[1], targ, 1, output_len=sequence_size)[:, :, 0]
             else:
                 output = model(src.float())
             labels = targ[:, :, 0]
