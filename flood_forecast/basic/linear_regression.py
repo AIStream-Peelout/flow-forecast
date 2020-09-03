@@ -38,7 +38,8 @@ def simple_decode(model: Type[torch.nn.Module],
                   device='cpu',
                   unsqueeze_dim=1,
                   meta_data=None,
-                  use_real_target: bool = True) -> torch.Tensor:
+                  use_real_target: bool = True,
+                  probabilistic: bool = False) -> torch.Tensor:
     """
     :model a PyTorch model to be used for decoding
     :src the source tensor
@@ -53,12 +54,19 @@ def simple_decode(model: Type[torch.nn.Module],
     real_target2 = real_target.clone()
     # Use last value
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
+    ys_std_dev = []
     for i in range(0, max_seq_len, output_len):
         with torch.no_grad():
             if meta_data:
                 out = model(src, meta_data)
             else:
-                out = model(src)
+                if probabilistic:
+                    output_dist = model(src.float())
+                    out = output_dist.mean.detach()
+                    out_std = output_dist.stddev.detach()
+                    ys_std_dev.append(out_std[:, 0].unsqueeze(0))
+                else:
+                    out = model(src)
             if output_len == 1:
                 real_target2[:, i, 0] = out[:, 0]
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
@@ -68,4 +76,8 @@ def simple_decode(model: Type[torch.nn.Module],
                 real_target2[:, i:i + residual, 0] = out[:, :residual]
                 src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
-    return ys[:, 1:, :]
+    if probabilistic:
+        ys_std_dev = torch.cat(ys_std_dev, dim=1)
+        return ys[:, 1:, :], ys_std_dev
+    else:
+        return ys[:, 1:, :]

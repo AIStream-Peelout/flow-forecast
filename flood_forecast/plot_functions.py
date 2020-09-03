@@ -156,3 +156,31 @@ def plot_df_test_with_confidence_interval(
         )
     )
     return fig
+
+
+def plot_df_test_with_probabilistic_confidence_interval(
+    df_test: pd.DataFrame,
+    forecast_start_index: int,
+    params: Dict,
+) -> go.Figure:
+
+    fig = go.Figure()
+
+    target_col = params["dataset_params"]["target_col"][0]
+    fig.add_trace(go.Scatter(x=df_test.index, y=df_test["preds"], name="preds"))
+    fig.add_trace(go.Scatter(x=df_test.index, y=df_test[target_col], name=target_col))
+
+    print("plotting with CI now")
+    fig.add_trace(go.Scatter(x=df_test.index, y=df_test["preds"] + 2*df_test["std_dev"], name="upper bound"))
+    fig.add_trace(go.Scatter(x=df_test.index, y=df_test["preds"] - 2*df_test["std_dev"], name="lower bound"))
+    fig.add_trace(
+        go.Scatter(
+            x=[forecast_start_index, forecast_start_index],
+            y=[
+                min((df_test["preds"] - df_test["std_dev"]).min(), df_test[target_col].min()),
+                max((df_test["preds"] + df_test["std_dev"]).max(), df_test[target_col].max()),
+            ],
+            name="pred_start",
+        )
+    )
+    return fig

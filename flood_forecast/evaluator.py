@@ -91,8 +91,12 @@ def evaluate_model(
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
-            end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
-            end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
+            if inference_params["probabilistic"]:
+                end_tensor_mean = test_data.inverse_scale(end_tensor[0].detach().reshape(-1, 1))
+                end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
+            else:
+                end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
+                end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
@@ -106,12 +110,20 @@ def evaluate_model(
         for target in target_col:
             eval_params = {}
             evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
-            s = evaluation_metric_function(
-                torch.from_numpy(
-                    df_train_and_test[target][forecast_history:].to_numpy()
-                ),
-                end_tensor,
-            )
+            if inference_params["probabilistic"]:
+                s = evaluation_metric_function(
+                    torch.distributions.Normal(end_tensor[0], end_tensor[1][0]),
+                    torch.from_numpy(
+                        df_train_and_test[target][forecast_history:].to_numpy()
+                    ),
+                )
+            else:
+                s = evaluation_metric_function(
+                    torch.from_numpy(
+                        df_train_and_test[target][forecast_history:].to_numpy()
+                    ),
+                    end_tensor,
+                )
             eval_log[target + "_" + evaluation_metric] = s
 
     # Explain model behaviour using shap
@@ -176,10 +188,16 @@ def infer_on_torch_model(
         decoder_params,
     )
     df_train_and_test["preds"] = 0
-    df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
-    print(end_tensor.shape)
+    if decoder_params['probabilistic']:
+        df_train_and_test["preds"][history_length:] = end_tensor[0].numpy().tolist()
+        df_train_and_test["std_dev"] = 0
+        df_train_and_test["std_dev"][history_length:] = end_tensor[1][0].numpy().tolist()
+    else:
+        df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
+        print(end_tensor.shape)
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
+    df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
     if num_prediction_samples is not None:
         model.model.train()  # sets mode to train so the dropout layers will be touched
         assert num_prediction_samples > 1
@@ -200,7 +218,12 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
-        df_prediction_samples.iloc[history_length:] = prediction_samples
+        if decoder_params['probabilistic']:
+            df_prediction_samples.iloc[history_length:] = prediction_samples[0]
+            df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
+        else:
+            df_prediction_samples.iloc[history_length:] = prediction_samples
+
     return (
         df_train_and_test,
         end_tensor,
@@ -208,6 +231,7 @@ def infer_on_torch_model(
         forecast_start_idx,
         csv_test_loader,
         df_prediction_samples,
+        df_prediction_samples_std_dev
     )
 
 
@@ -322,7 +346,11 @@ def generate_decoded_predictions(
         decoder_params["unsqueeze_dim"],
         output_len=model.params["dataset_params"]["forecast_length"],
         device=model.device,
+        probabilistic=decoder_params["probabilistic"],
     )
+    if decoder_params["probabilistic"]:
+        end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
+        return end_tensor_mean, end_tensor[1]
     end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
     return end_tensor
 
@@ -340,6 +368,7 @@ def generate_prediction_samples(
     num_prediction_samples: int,
 ) -> np.ndarray:
     pred_samples = []
+    std_dev_samples = []
     for _ in range(num_prediction_samples):
         end_tensor = generate_predictions(
             model,
@@ -352,5 +381,13 @@ def generate_prediction_samples(
             hours_to_forecast,
             decoder_params,
         )
-        pred_samples.append(end_tensor.numpy())
-    return np.array(pred_samples).T  # each column is 1 array of predictions
+        if decoder_params['probabilistic']:
+            pred_samples.append(end_tensor[0].numpy())
+            std_dev_samples.append(end_tensor[1].numpy())
+        else:
+            pred_samples.append(end_tensor.numpy())
+
+    if decoder_params['probabilistic']:
+        return np.array(pred_samples).T, np.array(std_dev_samples).T
+    else:
+        return np.array(pred_samples).T  # each column is 1 array of predictions

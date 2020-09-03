@@ -13,7 +13,8 @@ class DARNN(nn.Module):
             decoder_hidden_size: int,
             out_feats=1,
             dropout=.01,
-            gru_lstm=True):
+            gru_lstm=True,
+            probabilistic=False):
         """
         WARNING WILL NOT RUN ON GPU AT PRESENT
         n_time_series: Number of time series present in input
@@ -22,9 +23,11 @@ class DARNN(nn.Module):
         decoder_hidden_size: dimension of hidden size of the decoder
         """
         super().__init__()
+        self.probabilistic = probabilistic
         self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm)
         self.dropout = nn.Dropout(dropout)
-        self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
+        self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm,
+                               self.probabilistic)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         _, input_encoded = self.encoder(x[:, :, 1:])
@@ -120,9 +123,11 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
 
-    def __init__(self, encoder_hidden_size: int, decoder_hidden_size: int, T: int, out_feats=1, gru_lstm: bool = True):
+    def __init__(self, encoder_hidden_size: int, decoder_hidden_size: int, T: int, out_feats=1, gru_lstm: bool = True,
+                 probabilistic: bool = True):
         super(Decoder, self).__init__()
         self.T = T
+        self.probabalistic = probabilistic
         self.encoder_hidden_size = encoder_hidden_size
         self.decoder_hidden_size = decoder_hidden_size
 
@@ -139,7 +144,11 @@ class Decoder(nn.Module):
             self.gru_layer = nn.GRU(input_size=out_feats, hidden_size=decoder_hidden_size)
 
         self.fc = nn.Linear(encoder_hidden_size + out_feats, out_feats)
-        self.fc_final = nn.Linear(decoder_hidden_size + encoder_hidden_size, out_feats)
+        if self.probabalistic:
+            fc_final_out_feats = 2
+        else:
+            fc_final_out_feats = out_feats
+        self.fc_final = nn.Linear(decoder_hidden_size + encoder_hidden_size, fc_final_out_feats)
 
         self.fc.weight.data.normal_()
 
@@ -183,5 +192,11 @@ class Decoder(nn.Module):
                 hidden = generic_states[0].unsqueeze(0)
 
         # Eqn. 22: final output
-        return self.fc_final(torch.cat((hidden[0], context), dim=1))
+        if self.probabalistic:
+            y_pred = self.fc_final(torch.cat((hidden[0], context), dim=1))
+            mean = y_pred[..., 0][..., None]
+            std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
+            return torch.distributions.Normal(mean, std)
+        else:
+            return self.fc_final(torch.cat((hidden[0], context), dim=1))
         #
