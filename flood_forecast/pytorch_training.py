@@ -241,7 +241,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                     unscaled_out = validation_dataset.inverse_scale(output)
                     try:
                         output_std = numpy_to_tvar(output_std)
-                    except Exception as e:
+                    except Exception:
                         pass
                     unscaled_dist = torch.distributions.Normal(unscaled_out, output_std)
                     loss_unscaled = -unscaled_dist.log_prob(unscaled_labels.float()).sum()  # FIX THIS

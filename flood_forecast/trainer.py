@@ -49,7 +49,6 @@ def train_function(model_type: str, params: Dict):
         df_train_and_test = test_acc[1]
         forecast_start_idx = test_acc[2]
         df_prediction_samples = test_acc[3]
-        df_prediction_samples_std_dev = test_acc[4]
         mae = (df_train_and_test.loc[forecast_start_idx:, "preds"] -
                df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
         inverse_mae = 1 / mae
