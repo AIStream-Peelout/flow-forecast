@@ -81,9 +81,11 @@ class MAPELoss(torch.nn.Module):
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
         if (self.variance_penalty_type == 'absolute') | (self.variance_penalty_type == 'abs'):
-            return torch.mean(torch.abs((target - output) / target)) + self.variance_penalty * torch.std(torch.abs(target - output))
+            return torch.mean(torch.abs((target - output) / target)) + \
+                self.variance_penalty * torch.std(torch.abs(target - output))
         elif (self.variance_penalty_type == 'squared') | (self.variance_penalty_type == 'sqrt'):
-            return torch.mean(torch.abs((target - output) / target)) + self.variance_penalty * torch.std(torch.sqrt(target - output))
+            return torch.mean(torch.abs((target - output) / target)) + \
+                self.variance_penalty * torch.std(torch.sqrt(target - output))
         elif (self.variance_penalty_type is None):
             return torch.mean(torch.abs((target - output) / target))
 
