@@ -82,9 +82,11 @@ class MAPELoss(torch.nn.Module):
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
         if (self.variance_penalty_type == 'absolute') | (self.variance_penalty_type == 'abs'):
-            return torch.mean(torch.abs((target - output) / target)) + self.variance_penalty * torch.std(torch.abs(target - output))
+            return torch.mean(torch.abs((target - output) / target)) + \
+            self.variance_penalty * torch.std(torch.abs(target - output))
         elif (self.variance_penalty_type == 'squared') | (self.variance_penalty_type == 'sqrt'):
-            return torch.mean(torch.abs((target - output) / target)) + self.variance_penalty * torch.std(torch.sqrt(target - output))
+            return torch.mean(torch.abs((target - output) / target)) + \
+            self.variance_penalty * torch.std(torch.sqrt(target - output))
         elif (self.variance_penalty_type is None):
             return torch.mean(torch.abs((target - output) / target))
 
@@ -110,6 +112,7 @@ class PenalizedMSELoss(torch.nn.Module):
             return self.mse(target, output) + self.variance_penalty * torch.std(torch.sqrt(target - output))
         elif (self.variance_penalty_type is None):
             return self.mse(target, output)
+
 
 # Add custom loss function
 class GaussianLoss(torch.nn.Module):
@@ -280,6 +283,7 @@ class BertAdam(Optimizer):
                 # bias_correction2 = 1 - beta2 ** state['step']
 
         return loss
+
 
 class NegativeLogLikelihood(torch.nn.Module):
     """
