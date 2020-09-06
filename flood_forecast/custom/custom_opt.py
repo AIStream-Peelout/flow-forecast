@@ -245,6 +245,7 @@ class BertAdam(Optimizer):
 
         return loss
 
+
 class NegativeLogLikelihood(torch.nn.Module):
     """
     target -> True y
