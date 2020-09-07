@@ -188,7 +188,7 @@ def infer_on_torch_model(
         decoder_params,
     )
     df_train_and_test["preds"] = 0
-    if "probabilistic" in decoder_params:
+    if (decoder_params is not None) & ("probabilistic" in decoder_params):
         df_train_and_test["preds"][history_length:] = end_tensor[0].numpy().tolist()
         df_train_and_test["std_dev"] = 0
         df_train_and_test["std_dev"][history_length:] = end_tensor[1][0].numpy().tolist()
@@ -218,7 +218,7 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
-        if "probabilistic" in decoder_params:
+        if (decoder_params is not None) & ("probabilistic" in decoder_params):
             df_prediction_samples.iloc[history_length:] = prediction_samples[0]
             df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
