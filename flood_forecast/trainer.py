@@ -57,7 +57,7 @@ def train_function(model_type: str, params: Dict):
         wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
 
         # Log plots
-        if params["inference_params"]["probabilistic"]:
+        if "probabilistic" in params["inference_params"]:
             test_plot = plot_df_test_with_probabilistic_confidence_interval(
                 df_train_and_test,
                 forecast_start_idx,

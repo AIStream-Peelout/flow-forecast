@@ -35,6 +35,8 @@ def train_transformer_style(
     if "criterion_params" in training_params:
         criterion_init_params = training_params["criterion_params"]
     criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
+    if "probabilistic" in training_params:
+        probabilistic = True
     max_epochs = training_params["epochs"]
     data_loader = DataLoader(
         model.training,
@@ -104,7 +106,7 @@ def train_transformer_style(
             meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb,
-            probabilistic=training_params["probabilistic"])
+            probabilistic=probabilistic)
         if valid < 0.01:
             raise("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
@@ -133,7 +135,7 @@ def train_transformer_style(
         decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss",
-        probabilistic=training_params["probabilistic"])
+        probabilistic=probabilistic)
     print("test loss:", test)
     model.params["run"] = session_params
     model.save_model(model_filepath, max_epochs)

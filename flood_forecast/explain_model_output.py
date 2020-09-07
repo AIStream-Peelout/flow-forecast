@@ -56,7 +56,7 @@ def deep_explain_model_summary_plot(
     if model.params["model_name"] == "SimpleTransformer":
         print("SimpleTransformer currently not supported.")
         return
-    elif model.params["probabilistic"]:
+    elif "probabilistic" in model.params:
         print("Probabilistic currently not supported.")
         return
     use_wandb = model.wandb
@@ -136,7 +136,7 @@ def deep_explain_model_heatmap(
     if model.params["model_name"] == "SimpleTransformer":
         print("SimpleTransformer currently not supported.")
         return
-    elif model.params["probabilistic"]:
+    elif "probabilistic" in model.params:
         print("Probabilistic currently not supported.")
         return
     use_wandb = model.wandb

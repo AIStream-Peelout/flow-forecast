@@ -91,7 +91,7 @@ def evaluate_model(
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
-            if inference_params["probabilistic"]:
+            if "probabilistic" in inference_params:
                 end_tensor_mean = test_data.inverse_scale(end_tensor[0].detach().reshape(-1, 1))
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
             else:
@@ -110,7 +110,7 @@ def evaluate_model(
         for target in target_col:
             eval_params = {}
             evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
-            if inference_params["probabilistic"]:
+            if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
                     torch.distributions.Normal(end_tensor[0], end_tensor[1][0]),
                     torch.from_numpy(
@@ -188,7 +188,7 @@ def infer_on_torch_model(
         decoder_params,
     )
     df_train_and_test["preds"] = 0
-    if decoder_params['probabilistic']:
+    if "probabilistic" in decoder_params:
         df_train_and_test["preds"][history_length:] = end_tensor[0].numpy().tolist()
         df_train_and_test["std_dev"] = 0
         df_train_and_test["std_dev"][history_length:] = end_tensor[1][0].numpy().tolist()
@@ -218,7 +218,7 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
-        if decoder_params['probabilistic']:
+        if "probabilistic" in decoder_params:
             df_prediction_samples.iloc[history_length:] = prediction_samples[0]
             df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
@@ -332,6 +332,8 @@ def generate_decoded_predictions(
     hours_to_forecast: int,
     decoder_params: Dict,
 ) -> torch.Tensor:
+    if "probabilistic" in decoder_params:
+        probabilistic = True
     real_target_tensor = (
         torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
         .to(device)
@@ -346,9 +348,9 @@ def generate_decoded_predictions(
         decoder_params["unsqueeze_dim"],
         output_len=model.params["dataset_params"]["forecast_length"],
         device=model.device,
-        probabilistic=decoder_params["probabilistic"],
+        probabilistic=probabilistic,
     )
-    if decoder_params["probabilistic"]:
+    if probabilistic:
         end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
         return end_tensor_mean, end_tensor[1]
     end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
@@ -369,6 +371,8 @@ def generate_prediction_samples(
 ) -> np.ndarray:
     pred_samples = []
     std_dev_samples = []
+    if "probabilistic" in decoder_params:
+        probabilistic = True
     for _ in range(num_prediction_samples):
         end_tensor = generate_predictions(
             model,
@@ -381,13 +385,14 @@ def generate_prediction_samples(
             hours_to_forecast,
             decoder_params,
         )
-        if decoder_params['probabilistic']:
+
+        if probabilistic:
             pred_samples.append(end_tensor[0].numpy())
             std_dev_samples.append(end_tensor[1].numpy())
         else:
             pred_samples.append(end_tensor.numpy())
 
-    if decoder_params['probabilistic']:
+    if probabilistic:
         return np.array(pred_samples).T, np.array(std_dev_samples).T
     else:
         return np.array(pred_samples).T  # each column is 1 array of predictions
