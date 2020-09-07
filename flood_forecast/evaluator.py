@@ -334,6 +334,8 @@ def generate_decoded_predictions(
 ) -> torch.Tensor:
     if "probabilistic" in decoder_params:
         probabilistic = True
+    else:
+        probabilistic = False
     real_target_tensor = (
         torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
         .to(device)
@@ -373,6 +375,8 @@ def generate_prediction_samples(
     std_dev_samples = []
     if "probabilistic" in decoder_params:
         probabilistic = True
+    else:
+        probabilistic = False
     for _ in range(num_prediction_samples):
         end_tensor = generate_predictions(
             model,

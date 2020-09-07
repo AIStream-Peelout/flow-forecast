@@ -37,6 +37,8 @@ def train_transformer_style(
     criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
     if "probabilistic" in training_params:
         probabilistic = True
+    else:
+        probabilistic = False
     max_epochs = training_params["epochs"]
     data_loader = DataLoader(
         model.training,
