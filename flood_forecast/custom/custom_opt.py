@@ -244,3 +244,28 @@ class BertAdam(Optimizer):
                 # bias_correction2 = 1 - beta2 ** state['step']
 
         return loss
+
+
+def l1_regularizer(model, lambda_l1=0.01):
+    """
+    source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
+    """
+    lossl1 = 0
+    for model_param_name, model_param_value in model.named_parameters():
+            if model_param_name.endswith('weight'):
+                lossl1 += lambda_l1 * model_param_value.abs().sum()
+    return lossl1
+
+
+def orth_regularizer(model, lambda_orth=0.01):
+    """
+    source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
+    """
+    lossorth = 0
+    for model_param_name, model_param_value in model.named_parameters():
+            if model_param_name.endswith('weight'):
+                param_flat = model_param_value.view(model_param_value.shape[0], -1)
+                sym = torch.mm(param_flat, torch.t(param_flat))
+                sym -= torch.eye(param_flat.shape[0])
+                lossorth += lambda_orth * sym.sum()
+    return lossorth
