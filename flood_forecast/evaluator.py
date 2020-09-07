@@ -334,10 +334,11 @@ def generate_decoded_predictions(
     hours_to_forecast: int,
     decoder_params: Dict,
 ) -> torch.Tensor:
-    if "probabilistic" in decoder_params:
-        probabilistic = True
-    else:
-        probabilistic = False
+    probabilistic = False
+    if decoder_params is not None:
+        if "probabilistic" in decoder_params:
+            probabilistic = True
+
     real_target_tensor = (
         torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
         .to(device)
@@ -375,10 +376,11 @@ def generate_prediction_samples(
 ) -> np.ndarray:
     pred_samples = []
     std_dev_samples = []
-    if "probabilistic" in decoder_params:
-        probabilistic = True
-    else:
-        probabilistic = False
+    probabilistic = False
+    if decoder_params is not None:
+        if "probabilistic" in decoder_params:
+            probabilistic = True
+
     for _ in range(num_prediction_samples):
         end_tensor = generate_predictions(
             model,
