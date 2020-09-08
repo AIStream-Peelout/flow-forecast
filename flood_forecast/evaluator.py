@@ -86,7 +86,7 @@ def evaluate_model(
             forecast_start_idx,
             test_data,
             df_predictions,
-            df_prediction_samples_std_dev,
+            # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
@@ -199,7 +199,7 @@ def infer_on_torch_model(
         print(end_tensor.shape)
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
-    df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
+    # df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
     if num_prediction_samples is not None:
         model.model.train()  # sets mode to train so the dropout layers will be touched
         assert num_prediction_samples > 1
@@ -223,7 +223,7 @@ def infer_on_torch_model(
         if decoder_params is not None:
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
-                df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
+                # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
             df_prediction_samples.iloc[history_length:] = prediction_samples
 
@@ -234,7 +234,7 @@ def infer_on_torch_model(
         forecast_start_idx,
         csv_test_loader,
         df_prediction_samples,
-        df_prediction_samples_std_dev
+        # df_prediction_samples_std_dev
     )
 
 
