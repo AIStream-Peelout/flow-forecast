@@ -148,7 +148,8 @@ def greedy_decode(
         real_target: torch.Tensor,
         unsqueeze_dim=1,
         output_len=1,
-        device='cpu'):
+        device='cpu',
+        probabilistic=False):
     """
     Mechanism to sequentially decode the model
     :src Historical time series values
