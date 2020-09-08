@@ -86,6 +86,7 @@ def evaluate_model(
             forecast_start_idx,
             test_data,
             df_predictions,
+            df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
