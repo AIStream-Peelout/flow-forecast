@@ -169,7 +169,7 @@ def torch_single_train(model: PyTorchForecast,
         loss.backward()
         opt.step()
         if torch.isnan(loss) or loss == float('inf'):
-            raise("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
+            raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
         running_loss += loss.item()
         i += 1
     print("The running loss is:")
