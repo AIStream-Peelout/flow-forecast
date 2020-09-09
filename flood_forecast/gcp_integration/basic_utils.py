@@ -13,9 +13,12 @@ def get_storage_client(
     """
     if service_key_path is None:
         import ast
-        cred_dict = ast.literal_eval(os.environ["ENVIRONMENT_GCP"])
-        credentials = Credentials.from_service_account_info(cred_dict)
-        return storage.Client(credentials=credentials, project=credentials.project_id)
+        if os.environ["ENVIRONMENT_GCP"] == "GCP":
+            return storage.Client()
+        else:
+            cred_dict = ast.literal_eval(os.environ["ENVIRONMENT_GCP"])
+            credentials = Credentials.from_service_account_info(cred_dict)
+            return storage.Client(credentials=credentials, project=credentials.project_id)
     else:
         return storage.Client.from_service_account_json(service_key_path)
 
