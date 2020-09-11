@@ -22,7 +22,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
-        interpolate: bool = True,
+        interpolate_param: bool = True,
         sort_column="datetime"
     ):
         """
