@@ -25,7 +25,7 @@ class TestDecoding(unittest.TestCase):
                     'cfs',
                     'temp',
                     'precip'],
-                interpolate=False),
+                interpolate_param=False),
             shuffle=False,
             sampler=None,
             batch_sampler=None,

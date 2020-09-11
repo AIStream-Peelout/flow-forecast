@@ -175,7 +175,7 @@ jobs:
           path: test-results
           destination: test-results-decoder
 
-#
+
   trainer_test:
     <<: *defaults
     steps:

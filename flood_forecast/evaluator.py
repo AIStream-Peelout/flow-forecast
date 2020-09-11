@@ -156,7 +156,7 @@ def infer_on_torch_model(
             test_csv_path,
             hours_to_forecast,
             **dataset_params,
-            interpolate=dataset_params["interpolate"]
+            interpolate=dataset_params["interpolate_param"]
         )
     model.model.eval()
     (
