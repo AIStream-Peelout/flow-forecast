@@ -291,3 +291,7 @@ workflows:
       - plot_test:
           requires:
             - linting
+    code_cov:
+       steps:
+         - codecov/upload:
+             file: {{ coverage_report_filepath }}
