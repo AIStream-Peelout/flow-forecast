@@ -22,7 +22,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
-        interpolate: bool = True,
+        interpolate_param: bool = True,
         sort_column="datetime"
     ):
         """
@@ -50,7 +50,7 @@ class CSVDataLoader(Dataset):
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
-        if interpolate:
+        if interpolate_param:
             df = fix_timezones(self.local_file_path)
             df = interpolate_missing_values(df)
         print("Now loading and scaling " + file_path)
@@ -222,7 +222,7 @@ class AEDataloader(CSVDataLoader):
             target_col: List = None,
             end_stamp: int = None,
             unsqueeze_dim: int = 1,
-            interpolate=False,
+            interpolate_param=False,
             sort_column=None):
         """
         A data loader class for autoencoders.
@@ -232,7 +232,7 @@ class AEDataloader(CSVDataLoader):
         """
         super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
-                         end_stamp=end_stamp, sort_column=sort_column, interpolate=False)
+                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False)
         self.unsqueeze_dim = unsqueeze_dim
 
     def __len__(self):
