@@ -228,6 +228,7 @@ jobs:
       - store_artifacts:
           path: test-results
           destination: test-results-trainer
+          
   code_cov:
     steps:
       - codecov/upload:
@@ -235,8 +236,6 @@ jobs:
           name: codecov
           command: bash <(curl -s https://codecov.io/bash) -cF python
           
-
-        
         
   plot_test:
     <<: *defaults
@@ -301,3 +300,6 @@ workflows:
       - plot_test:
           requires:
             - linting
+      - code_cov:
+          requires:
+            - plot_test 
