@@ -227,7 +227,11 @@ jobs:
       - store_artifacts:
           path: test-results
           destination: test-results-trainer
-
+  code_cov:
+    steps:
+      - codecov/upload:
+        file: {{ coverage_report_filepath }}
+        
   plot_test:
     <<: *defaults
     steps:
@@ -291,7 +295,3 @@ workflows:
       - plot_test:
           requires:
             - linting
-    code_cov:
-       steps:
-         - codecov/upload:
-             file: {{ coverage_report_filepath }}
