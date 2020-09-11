@@ -55,7 +55,7 @@
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
-             "interpolate_param": false
+             "interpolate": false
           }
    }
        

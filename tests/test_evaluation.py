@@ -74,7 +74,7 @@ class EvaluationTest(unittest.TestCase):
             "forecast_length": 20,
             "relevant_cols": ["cfs", "temp", "precip"],
             "target_col": ["cfs"],
-            "interpolate_param": False,
+            "interpolate": False,
         }
         self.data_base_params_with_scaling = {
             "file_path": os.path.join(self.test_path2, "keag_small.csv"),
@@ -82,7 +82,7 @@ class EvaluationTest(unittest.TestCase):
             "forecast_length": 20,
             "relevant_cols": ["cfs", "temp", "precip"],
             "target_col": ["cfs"],
-            "interpolate_param": False,
+            "interpolate": False,
             "scaling": StandardScaler(),
         }
 

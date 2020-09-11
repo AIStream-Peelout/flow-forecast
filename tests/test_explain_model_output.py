@@ -99,7 +99,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
         "forecast_length": 10,
         "relevant_cols": ["cfs", "temp", "precip"],
         "target_col": ["cfs"],
-        "interpolate_param": False,
+        "interpolate": False,
     }
     csv_test_loader = CSVTestLoader(
         df_path=os.path.join(test_path2, "keag_small.csv"),

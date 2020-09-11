@@ -61,7 +61,7 @@
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
-             "interpolate_param": false
+             "interpolate": false
             },
          "decoder_params":{
          "decoder_function": "simple_decode", "unsqueeze_dim": 1}

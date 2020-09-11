@@ -25,7 +25,7 @@ class DataLoaderTests(unittest.TestCase):
             "forecast_length": 20,
             "relevant_cols": ["cfs", "temp", "precip"],
             "target_col": ["cfs"],
-            "interpolate_param": False,
+            "interpolate": False,
         }
         self.train_loader = CSVDataLoader(
             os.path.join(self.test_data_path, "keag_small.csv"),
@@ -33,7 +33,7 @@ class DataLoaderTests(unittest.TestCase):
             20,
             target_col=["cfs"],
             relevant_cols=["cfs", "precip", "temp"],
-            interpolate_param=False,
+            interpolate=False,
         )
         self.test_loader = CSVTestLoader(
             os.path.join(self.test_data_path, "keag_small.csv"),
@@ -70,7 +70,7 @@ class DataLoaderTests(unittest.TestCase):
             target_col=["cases"],
             relevant_cols=["cases", "recovered", "active", "deaths"],
             sort_column="date",
-            interpolate_param=False,
+            interpolate=False,
             gcp_service_key=None,  # for CircleCI tests, local test needs key.json
         )
 
