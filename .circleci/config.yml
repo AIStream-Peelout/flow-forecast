@@ -51,8 +51,8 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            sudo pip install coverage
             sudo pip install pipenv
+            sudo pip install coverage
             sudo pip install --quiet -r requirements.txt
             sudo python setup.py develop --no-deps
             
