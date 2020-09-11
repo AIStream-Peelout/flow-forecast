@@ -12,7 +12,7 @@ def get_storage_client(
     storage client whether working in Colab, CircleCI, Dataverse, or other environment.
     """
     if service_key_path is None:
-        if os.environ["ENVIRONMENT_GCP"] == "GCP":
+        if os.environ["ENVIRONMENT_GCP"] == "Colab":
             return storage.Client(project=os.environ["GCP_PROJECT"])
         else:
             import ast
