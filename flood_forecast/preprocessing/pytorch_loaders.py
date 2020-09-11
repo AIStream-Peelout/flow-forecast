@@ -222,7 +222,7 @@ class AEDataloader(CSVDataLoader):
             target_col: List = None,
             end_stamp: int = None,
             unsqueeze_dim: int = 1,
-            interpolate_param=False,
+            interpolate=False,
             sort_column=None):
         """
         A data loader class for autoencoders.
@@ -232,7 +232,7 @@ class AEDataloader(CSVDataLoader):
         """
         super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
-                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False)
+                         end_stamp=end_stamp, sort_column=sort_column, interpolate=False)
         self.unsqueeze_dim = unsqueeze_dim
 
     def __len__(self):
