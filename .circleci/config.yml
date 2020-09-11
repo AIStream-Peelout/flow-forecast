@@ -105,8 +105,7 @@ jobs:
             python -m unittest -v tests/data_format_tests.py
             python -m unittest -v tests/usgs_tests.py
             python -m unittest -v tests/test_join.py
-
-      - run: 
+       - run: 
           name: upload_coverage
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
