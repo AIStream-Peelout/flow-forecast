@@ -5,7 +5,7 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
-| Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=readthedocs)](https://flow-forecast.readthedocs.io/en/readthedocs/?badge=readthedocs)|
+| Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=readthedocs)](https://flow-forecast.readthedocs.io/en/latest/?badge=latest)|
 ## Getting Started 
 
 Using the library
