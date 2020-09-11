@@ -64,8 +64,7 @@ jobs:
 
       - run:
           name: Evaluator tests
-          command:
-            python -m unittest -v tests/test_evaluation.py
+          command: python -m unittest -v tests/test_evaluation.py
 
       - run: 
           name: upload_coverage
