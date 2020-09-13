@@ -46,4 +46,9 @@ class LSTMForecast(torch.nn.Module):
         self.init_hidden(batch_size)
         out_x, self.hidden = self.lstm(x, self.hidden)
         x = self.final_layer(out_x.contiguous().view(batch_size, -1))
+
+        if self.probabalistic:
+            mean = x[..., 0][..., None].to('cpu')
+            std = x[..., 1][..., None].to('cpu')
+            x = torch.distributions.Normal(mean, std)
         return x
