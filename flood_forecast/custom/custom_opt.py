@@ -259,8 +259,8 @@ class NegativeLogLikelihood(torch.nn.Module):
         calculates NegativeLogLikelihood
         """
         return -output.log_prob(target).sum()
-  
-  
+
+
 def l1_regularizer(model, lambda_l1=0.01):
     """
     source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
@@ -284,4 +284,3 @@ def orth_regularizer(model, lambda_orth=0.01):
             sym -= torch.eye(param_flat.shape[0])
             lossorth += lambda_orth * sym.sum()
     return lossorth
-

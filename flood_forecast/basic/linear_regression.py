@@ -85,7 +85,6 @@ def simple_decode(model: Type[torch.nn.Module],
                 real_target2[:, i:i + residual, 0] = out[:, :residual]
                 src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
-                
     if probabilistic:
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
         return ys[:, 1:, :], ys_std_dev
