@@ -220,14 +220,13 @@ class Block(nn.Module):
 
 class TransformerModel(nn.Module):
     """ Transformer model """
-    def __init__(self,args,input_dim, n_head, seq_num, layer, n_embd, win_len):
+    def __init__(self, input_dim, n_head, seq_num, layer, n_embd, win_len):
         super(TransformerModel, self).__init__()
         self.input_dim = input_dim
         self.n_head = n_head
         self.seq_num = seq_num
         self.n_embd = n_embd
         self.win_len = win_len
-        self.dataset = args.dataset
         self.id_embed = nn.Embedding(seq_num,n_embd)
         self.po_embed = nn.Embedding(win_len,n_embd)
         self.drop_em = nn.Dropout(args.embd_pdrop)
