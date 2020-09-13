@@ -1,3 +1,6 @@
+import torch
+
+
 class MergingModel(torch.nn.Module):
   def __init__(self, method, other_params):
     super().__init__()
