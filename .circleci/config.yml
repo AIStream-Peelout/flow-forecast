@@ -65,11 +65,6 @@ jobs:
           name: Evaluator tests
           when: always
           command: coverage -m unittest -v tests/test_evaluation.py
-          
-      - run: 
-          name: upload stuff 
-          when: always
-          commmand: bash <(curl -s https://codecov.io/bash) -cF python
 
       - store_test_results:
           path: test-results
