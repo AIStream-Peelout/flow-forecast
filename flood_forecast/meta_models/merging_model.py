@@ -9,7 +9,11 @@ class MergingModel(torch.nn.Module):
         self.method_layer = self.method_dict[method](**other_params)
         self.method = method
 
-    def forward(self, temporal_data, meta_data):
+    def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor):
+        """
+        Args:
+            temporal_data: 
+        """
         if self.method == "Bilinear":
             batch_size = temporal_data.shape[0]
             meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
