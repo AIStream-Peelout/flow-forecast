@@ -2,7 +2,7 @@ import torch
 import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerEncoderLayer, LayerNorm
 from torch.autograd import Variable
-from flood_forecast.meta_models.merging_model import MergingModel
+
 
 class SimpleTransformer(torch.nn.Module):
     def __init__(
@@ -93,7 +93,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.mask = generate_square_subsequent_mask(seq_length)
         self.mask_it = use_mask
         if meta_data:
-            self.meta_layer = MergingModel(meta_data["method"], meta_data["params"])
+            self.bilinear_layer = torch.nn.Bilinear(seq_length, 1, seq_length)
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
