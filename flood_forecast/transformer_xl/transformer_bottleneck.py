@@ -27,10 +27,7 @@ SOFTWARE.
 """
 import numpy as np
 import torch
-import random
 import torch.nn as nn
-import torch.nn.functional as F
-import time
 import math
 from torch.distributions.normal import Normal
 import copy
@@ -223,7 +220,7 @@ class Block(nn.Module):
 class TransformerModel(nn.Module):
     """ Transformer model """
 
-    def __init__(self, input_dim, n_head, seq_num, layer, n_embd, win_len):
+    def __init__(self, args_dict, input_dim, n_head, seq_num, layer, n_embd, win_len, dropout, scale_att, q_len):
         super(TransformerModel, self).__init__()
         self.input_dim = input_dim
         self.n_head = n_head
@@ -232,8 +229,8 @@ class TransformerModel(nn.Module):
         self.win_len = win_len
         self.id_embed = nn.Embedding(seq_num, n_embd)
         self.po_embed = nn.Embedding(win_len, n_embd)
-        self.drop_em = nn.Dropout(args.embd_pdrop)
-        block = Block(args, n_head, win_len, n_embd + input_dim, scale=args.scale_att, q_len=args.q_len)
+        self.drop_em = nn.Dropout(dropout)
+        block = Block(args_dict, n_head, win_len, n_embd + input_dim, scale=scale_att, q_len=q_len)
         self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(layer)])
 
         nn.init.normal_(self.id_embed.weight, std=0.02)
