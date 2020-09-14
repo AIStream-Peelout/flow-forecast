@@ -275,15 +275,3 @@ class DecoderTransformer(nn.Module):
         mu = self.mu(h)
         sigma = self.softplus(self.sigma(h))
         return mu, sigma
-
-
-class GaussianLoss(nn.Module):
-    def __init__(self, mu, sigma):
-        """Compute the negative log likelihood of Gaussian Distribution"""
-        super(GaussianLoss, self).__init__()
-        self.mu = mu
-        self.sigma = sigma
-
-    def forward(self, x):
-        loss = - Normal(self.mu, self.sigma).log_prob(x)
-        return torch.sum(loss) / (loss.size(0) * loss.size(1))
