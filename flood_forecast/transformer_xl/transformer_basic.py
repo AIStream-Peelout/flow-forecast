@@ -104,13 +104,11 @@ class CustomTransformerDecoder(torch.nn.Module):
         """
         x = self.dense_shape(x)
         if type(meta_data) == torch.Tensor:
-            batch_size = x.shape[0]
-            meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
-            x = x.permute(0, 2, 1).contiguous()
-            print(x.shape[0])
-            print(meta_data.shape)
+            # batch_size = x.shape[0]
+            # meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
+            # x = x.permute(0, 2, 1).contiguous()
             x = self.meta_merger(x, meta_data)
-            x = x.permute(0, 2, 1)
+            # x = x.permute(0, 2, 1)
         x = self.pe(x)
         x = x.permute(1, 0, 2)
         if self.mask_it:
