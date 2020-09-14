@@ -6,6 +6,7 @@ class MergingModel(torch.nn.Module):
         super().__init__()
         self.method_dict = {"Bilinear": torch.nn.Bilinear}
         self.method_layer = self.method_dict[method](**other_params)
+        self.method = method
 
     def forward(self, x):
         x = self.method_layer(x)
