@@ -38,6 +38,7 @@ class Concatenation(torch.nn.Module):
         Args:
             temporal_data: (batch_size, seq_len, d_model)
             meta_data (batch_size, d_embedding)
+            returns a torch.Tensor of dimension (batch_size, seq_len, out_shape)
         """
         if self.repeat:
             meta_data = meta_data.unsqueeze(1).repeat(1, temporal_data.shape[1], 1)
