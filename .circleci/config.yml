@@ -139,16 +139,11 @@ jobs:
           name: Model basic tests
           when: always
           command: |
-            coverage -m unittest -v tests/time_model_test.py
-            coverage -m unittest -v tests/pytorc_train_tests.py
+            python -m unittest -v tests/time_model_test.py
+            python -m unittest -v tests/pytorc_train_tests.py
             python -m unittest -v tests/model_config_tests.py
             python -m unittest -v tests/data_loader_tests.py
             python -m unittest -v tests/test_da_rnn.py
-            
-       - run:
-          name: upload
-          when: always 
-          command: bash <(curl -s https://codecov.io/bash)
 
       - store_test_results:
           path: test-results
@@ -182,12 +177,7 @@ jobs:
           name: Decoder tests
           when: always
           command:
-            coverage -m unittest -v tests/test_decoder.py
-            
-       - run:
-          name: upload
-          when: always 
-          command: bash <(curl -s https://codecov.io/bash)
+            python -m unittest -v tests/test_decoder.py
 
       - store_test_results:
           path: test-results
@@ -209,7 +199,6 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install pipenv
-            sudo pip install coverage
             sudo pip install --force-reinstall --upgrade --quiet -r requirements.txt
             sudo python setup.py develop --no-deps
 
@@ -223,26 +212,23 @@ jobs:
           when: always
           command: |
             echo -e 'running meta-data fusion'
-            coverage flood_forecast/trainer.py -p tests/meta_data_test.json
+            python flood_forecast/trainer.py -p tests/meta_data_test.json
             echo -e 'running da_rnn_test \n'
-            coverage flood_forecast/trainer.py -p tests/da_rnn.json
+            python flood_forecast/trainer.py -p tests/da_rnn.json
             echo -e 'running auto test \n'
-            coverage flood_forecast/meta_train.py -p tests/auto_encoder.json
+            python flood_forecast/meta_train.py -p tests/auto_encoder.json
             echo -e 'running trainer_lstm_test \n'
-            coverage flood_forecast/trainer.py -p tests/lstm_test.json
+            python flood_forecast/trainer.py -p tests/lstm_test.json
             echo -e 'running trainer_multi_test \n'
-            coverage flood_forecast/trainer.py -p tests/multi_test.json
+            python flood_forecast/trainer.py -p tests/multi_test.json
             echo -e 'running trainer_full_transformer_test \n'
-            coverage flood_forecast/trainer.py -p  tests/full_transformer.json
+            python flood_forecast/trainer.py -p  tests/full_transformer.json
             echo -e 'running trainer_decoder_test \n'
-            coverage flood_forecast/trainer.py -p tests/decoder_test.json
+            python flood_forecast/trainer.py -p tests/decoder_test.json
             echo -e 'running trainer_custom_encode \n'
-            coverage flood_forecast/trainer.py -p tests/custom_encode.json
+            python flood_forecast/trainer.py -p tests/custom_encode.json
             
-      - run:
-          name: upload results
-          when: always
-          command: bash <(curl -s https://codecov.io/bash)
+            
 
       - store_test_results:
           path: test-results
