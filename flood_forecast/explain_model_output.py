@@ -65,7 +65,8 @@ def deep_explain_model_summary_plot(
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
-
+    if model.params["model_name"] == "DARNN" and device == "cpu":
+        model.model.train()
     # background shape (L, N, M)
     # L - batch size, N - history length, M - feature size
     deep_explainer = shap.DeepExplainer(model.model, background_tensor)
