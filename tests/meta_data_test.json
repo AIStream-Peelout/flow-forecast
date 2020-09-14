@@ -13,7 +13,6 @@
             "in2_features":128, 
             "out_features":10}
          
-          }
       }
      }, 
     "meta_data":{
