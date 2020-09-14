@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   codecov: codecov/codecov@1.0.2
-  
+
 executors:
   python-executor:
     docker:
@@ -23,7 +23,7 @@ jobs:
           root: .
           paths:
             - .
-                
+
   linting:
     <<: *defaults
     steps:
@@ -65,8 +65,8 @@ jobs:
           name: Evaluator tests
           when: always
           command: coverage run -m unittest -v tests/test_evaluation.py
-      - run: 
-          name: upload 
+      - run:
+          name: upload
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
 
@@ -106,7 +106,7 @@ jobs:
             coverage run -m unittest -v tests/usgs_tests.py
             coverage run -m unittest -v tests/test_join.py
 
-      - run: 
+      - run:
           name: upload_stuff
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
@@ -149,8 +149,8 @@ jobs:
             python -m unittest -v tests/model_config_tests.py
             python -m unittest -v tests/data_loader_tests.py
             python -m unittest -v tests/test_da_rnn.py
-            
-      - run: 
+
+      - run:
           name: upload_stuff
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
@@ -188,7 +188,7 @@ jobs:
           when: always
           command: coverage run -m unittest -v tests/test_decoder.py
 
-      - run: 
+      - run:
           name: upload_stuff
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
@@ -242,12 +242,14 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/decoder_test.json
             echo -e 'running trainer_custom_encode \n'
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
+            echo -e 'running da_rnn probabilistic test'
+            coverage run flood_forecast/trainer.py -p tests/da_rnn_probabilistic.json
 
-      - run: 
+      - run:
           name: upload results
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
-            
+
 
       - store_test_results:
           path: test-results
@@ -255,7 +257,7 @@ jobs:
       - store_artifacts:
           path: test-results
           destination: test-results-trainer
-            
+
   plot_test:
     <<: *defaults
     steps:
@@ -283,7 +285,7 @@ jobs:
           command: |
             coverage run -m unittest -v tests/test_plot.py
             coverage run -m unittest -v tests/test_explain_model_output.py
-      - run: 
+      - run:
           name: upload_stuff
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
@@ -324,4 +326,3 @@ workflows:
       - plot_test:
           requires:
             - linting
-
