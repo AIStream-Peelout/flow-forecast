@@ -23,7 +23,7 @@ class MergingModel(torch.nn.Module):
 
 # A class to handle concatenation
 class Concatenation(torch.nn.Module):
-    def __init__(self, combined_shape: int, out_shape: int, cat_dim, repeat=True, use_layer=False):
+    def __init__(self, combined_shape: int, out_shape: int, cat_dim: int, repeat: bool = True, use_layer: bool = False):
         super().__init__()
         self.combined_shape = combined_shape
         self.out_shape = out_shape
