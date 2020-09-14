@@ -164,7 +164,7 @@ def torch_single_train(model: PyTorchForecast,
         output = model.model(src, **forward_params)
         labels = trg[:, :, 0]
         loss = criterion(output, labels.float())
-        print(criterion, loss)
+        print('crit', criterion, loss)
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
