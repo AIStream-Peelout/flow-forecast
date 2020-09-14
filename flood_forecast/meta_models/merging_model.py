@@ -12,7 +12,7 @@ class MergingModel(torch.nn.Module):
     def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor):
         """
         Args:
-            temporal_data: 
+            temporal_data:
         """
         if self.method == "Bilinear":
             batch_size = temporal_data.shape[0]
