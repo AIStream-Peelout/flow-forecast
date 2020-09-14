@@ -1,8 +1,9 @@
 import torch
+from typing import Dict
 
 
 class MergingModel(torch.nn.Module):
-    def __init__(self, method, other_params):
+    def __init__(self, method: str, other_params: Dict):
         super().__init__()
         self.method_dict = {"Bilinear": torch.nn.Bilinear}
         self.method_layer = self.method_dict[method](**other_params)
@@ -20,9 +21,9 @@ class MergingModel(torch.nn.Module):
         return x
 
 
-# S
+# A class to handle concatenation
 class Concatenation(torch.nn.Module):
-    def __init__(self, combined_shape, out_shape, cat_dim, repeat=True, use_layer=False):
+    def __init__(self, combined_shape: int, out_shape: int, cat_dim, repeat=True, use_layer=False):
         super().__init__()
         self.combined_shape = combined_shape
         self.out_shape = out_shape

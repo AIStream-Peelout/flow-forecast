@@ -64,7 +64,10 @@ jobs:
       - run:
           name: Evaluator tests
           command:
-            python -m unittest -v tests/test_evaluation.py
+            coverage -m unittest -v tests/test_evaluation.py
+      - run: 
+          name: upload stuff 
+          commmand: bash <(curl -s https://codecov.io/bash) -cF python
 
       - store_test_results:
           path: test-results
@@ -98,9 +101,10 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
-            python -m unittest -v tests/data_format_tests.py
-            python -m unittest -v tests/usgs_tests.py
-            python -m unittest -v tests/test_join.py
+            coverage -m unittest -v tests/data_format_tests.py
+            coverage -m unittest -v tests/usgs_tests.py
+            coverage -m unittest -v tests/test_join.py
+            bash <(curl -s https://codecov.io/bash) -cF python
       - run: 
           name: upload_stuff
           when: always
@@ -144,6 +148,7 @@ jobs:
             python -m unittest -v tests/model_config_tests.py
             python -m unittest -v tests/data_loader_tests.py
             python -m unittest -v tests/test_da_rnn.py
+            bash <(curl -s https://codecov.io/bash) -cF python
 
       - store_test_results:
           path: test-results
@@ -177,7 +182,7 @@ jobs:
           name: Decoder tests
           when: always
           command:
-            python -m unittest -v tests/test_decoder.py
+            coverage -m unittest -v tests/test_decoder.py
 
       - store_test_results:
           path: test-results
@@ -200,6 +205,7 @@ jobs:
           command: |
             sudo pip install pipenv
             sudo pip install --force-reinstall --upgrade --quiet -r requirements.txt
+            sudo pip install coverage
             sudo python setup.py develop --no-deps
 
       - save_cache:
@@ -212,22 +218,26 @@ jobs:
           when: always
           command: |
             echo -e 'running meta-data fusion'
-            python flood_forecast/trainer.py -p tests/meta_data_test.json
+            coverage flood_forecast/trainer.py -p tests/meta_data_test.json
             echo -e 'running da_rnn_test \n'
-            python flood_forecast/trainer.py -p tests/da_rnn.json
+            coverage flood_forecast/trainer.py -p tests/da_rnn.json
             echo -e 'running auto test \n'
-            python flood_forecast/meta_train.py -p tests/auto_encoder.json
+            coverage flood_forecast/meta_train.py -p tests/auto_encoder.json
             echo -e 'running trainer_lstm_test \n'
-            python flood_forecast/trainer.py -p tests/lstm_test.json
+            coverage flood_forecast/trainer.py -p tests/lstm_test.json
             echo -e 'running trainer_multi_test \n'
-            python flood_forecast/trainer.py -p tests/multi_test.json
+            coverage flood_forecast/trainer.py -p tests/multi_test.json
             echo -e 'running trainer_full_transformer_test \n'
-            python flood_forecast/trainer.py -p  tests/full_transformer.json
+            coverage flood_forecast/trainer.py -p  tests/full_transformer.json
             echo -e 'running trainer_decoder_test \n'
-            python flood_forecast/trainer.py -p tests/decoder_test.json
+            coverage flood_forecast/trainer.py -p tests/decoder_test.json
             echo -e 'running trainer_custom_encode \n'
-            python flood_forecast/trainer.py -p tests/custom_encode.json
-            
+            coverage flood_forecast/trainer.py -p tests/custom_encode.json
+
+      - run: 
+          name: upload results
+          when: always
+          command: bash <(curl -s https://codecov.io/bash) -cF python
             
 
       - store_test_results:
