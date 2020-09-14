@@ -11,7 +11,7 @@
           "params":
           {"in1_features":5, 
             "in2_features":1, 
-            "out_features":10}
+            "out_features":5}
          
       }
      }, 
