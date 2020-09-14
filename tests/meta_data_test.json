@@ -7,8 +7,13 @@
       "output_seq_length": 1, 
       "n_layers_encoder": 6,
       "meta_data": {
-          "embedding_size":128,
-          "output_size":10
+          "method": "Bilinear",
+          "params":
+          {"in1_features":128, 
+            "in2_features":128, 
+            "out_features":10}
+         
+          }
       }
      }, 
     "meta_data":{
