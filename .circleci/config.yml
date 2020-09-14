@@ -63,6 +63,7 @@ jobs:
 
       - run:
           name: Evaluator tests
+          when: always
           command:
             coverage -m unittest -v tests/test_evaluation.py
 

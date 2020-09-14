@@ -6,6 +6,7 @@ from flood_forecast.time_model import PyTorchForecast
 
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
+    """"""
     params["forward_params"] = {}
     dataset_params = params["dataset_params"]
     dataset_params["forecast_history"] = 1
