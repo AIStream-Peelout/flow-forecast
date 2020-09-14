@@ -17,7 +17,7 @@ class SimpleTransformer(torch.nn.Module):
             forward_dim=2048,
             sigmoid=False):
         """
-        Full transformer model currently doesn't work.
+        Full transformer model
         """
         super().__init__()
         if output_seq_len is None:
