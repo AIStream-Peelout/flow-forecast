@@ -34,6 +34,7 @@ class DARNN(nn.Module):
         dropped_input = self.dropout(input_encoded)
         print('error in forward', x[:, :, 0].unsqueeze(2))
         y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
+        print('error in y_pred', y_pred)
         return y_pred
 
 
@@ -198,6 +199,7 @@ class Decoder(nn.Module):
             print('error in decoder', y_pred[..., 0][..., None])
             mean = y_pred[..., 0][..., None]
             std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
+            print('error in dist', torch.distributions.Normal(mean, std))
             return torch.distributions.Normal(mean, std)
 
         else:
