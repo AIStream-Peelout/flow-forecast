@@ -195,7 +195,7 @@ class Decoder(nn.Module):
         # Eqn. 22: final output
         if self.probabalistic:
             y_pred = self.fc_final(torch.cat((hidden[0], context), dim=1))
-            print('error in decoder',y_pred[..., 0][..., None])
+            print('error in decoder', y_pred[..., 0][..., None])
             mean = y_pred[..., 0][..., None]
             std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
             return torch.distributions.Normal(mean, std)
