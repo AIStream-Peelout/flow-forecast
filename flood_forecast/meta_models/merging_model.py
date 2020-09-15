@@ -5,7 +5,7 @@ from typing import Dict
 class MergingModel(torch.nn.Module):
     def __init__(self, method: str, other_params: Dict):
         super().__init__()
-        self.method_dict = {"Bilinear": torch.nn.Bilinear}
+        self.method_dict = {"Bilinear": torch.nn.Bilinear, "concat": Concatenation}
         self.method_layer = self.method_dict[method](**other_params)
         self.method = method
 
