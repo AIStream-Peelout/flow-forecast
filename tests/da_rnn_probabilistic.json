@@ -8,7 +8,7 @@
       "out_feats":1,
       "forecast_history":6,
       "gru_lstm": true,
-      "probabilistic": true,
+      "probabilistic": true
      },
 
     "dataset_params":
