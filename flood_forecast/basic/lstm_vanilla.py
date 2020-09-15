@@ -16,13 +16,15 @@ class LSTMForecast(torch.nn.Module):
             hidden_states: int = 20,
             num_layers=2,
             bias=True,
-            batch_size=100):
+            batch_size=100,
+            probabilistic=False):
         super().__init__()
         self.forecast_history = seq_length
         self.n_time_series = n_time_series
         self.hidden_dim = hidden_states
         self.num_layers = num_layers
         self.lstm = torch.nn.LSTM(n_time_series, hidden_states, num_layers, bias, batch_first=True)
+        self.probabilistic = probabilistic
         if self.probabilistic:
             output_seq_len = 2
         self.final_layer = torch.nn.Linear(seq_length * hidden_states, output_seq_len)
