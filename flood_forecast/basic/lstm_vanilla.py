@@ -23,6 +23,8 @@ class LSTMForecast(torch.nn.Module):
         self.hidden_dim = hidden_states
         self.num_layers = num_layers
         self.lstm = torch.nn.LSTM(n_time_series, hidden_states, num_layers, bias, batch_first=True)
+        if self.probabilistic:
+            output_seq_len = 2
         self.final_layer = torch.nn.Linear(seq_length * hidden_states, output_seq_len)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.init_hidden(batch_size)
@@ -47,7 +49,7 @@ class LSTMForecast(torch.nn.Module):
         out_x, self.hidden = self.lstm(x, self.hidden)
         x = self.final_layer(out_x.contiguous().view(batch_size, -1))
 
-        if self.probabalistic:
+        if self.probabilistic:
             mean = x[..., 0][..., None].to('cpu')
             std = x[..., 1][..., None].to('cpu')
             x = torch.distributions.Normal(mean, std)
