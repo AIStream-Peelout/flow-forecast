@@ -7,15 +7,18 @@
       "output_seq_length": 1, 
       "n_layers_encoder": 6,
       "meta_data": {
-          "embedding_size":128,
-          "output_size":10
+          "method": "Bilinear",
+          "params":
+          {"in1_features":5, 
+            "in2_features":1, 
+            "out_features":5}
+         
       }
      }, 
     "meta_data":{
         "path":"tests/auto_encoder.json",
         "column_id": "datetime",
         "uuid": "2014-05-01 01:00:00"
-
     },
     "dataset_params":
     {  "class": "default",

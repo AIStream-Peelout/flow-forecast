@@ -50,6 +50,9 @@ class CSVDataLoader(Dataset):
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
+        if interpolate_param:
+            df = fix_timezones(self.local_file_path)
+            df = interpolate_missing_values(df)
         print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)
