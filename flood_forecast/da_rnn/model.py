@@ -32,7 +32,7 @@ class DARNN(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         _, input_encoded = self.encoder(x[:, :, 1:])
         dropped_input = self.dropout(input_encoded)
-        print('error in forward', x[:, :, 0])
+        print('error in forward', x[:, :, 0].unsqueeze(2))
         y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
         return y_pred
 
