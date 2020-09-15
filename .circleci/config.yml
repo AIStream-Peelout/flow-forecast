@@ -226,22 +226,6 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            echo -e 'running meta-data fusion'
-            coverage run flood_forecast/trainer.py -p tests/meta_data_test.json
-            echo -e 'running da_rnn_test \n'
-            coverage run flood_forecast/trainer.py -p tests/da_rnn.json
-            echo -e 'running auto test \n'
-            coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
-            echo -e 'running trainer_lstm_test \n'
-            coverage run flood_forecast/trainer.py -p tests/lstm_test.json
-            echo -e 'running trainer_multi_test \n'
-            coverage run flood_forecast/trainer.py -p tests/multi_test.json
-            echo -e 'running trainer_full_transformer_test \n'
-            coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
-            echo -e 'running trainer_decoder_test \n'
-            coverage run flood_forecast/trainer.py -p tests/decoder_test.json
-            echo -e 'running trainer_custom_encode \n'
-            python flood_forecast/trainer.py -p tests/custom_encode.json
             echo -e 'running da_rnn probabilistic test'
             coverage run flood_forecast/trainer.py -p tests/da_rnn_probabilistic.json
 
