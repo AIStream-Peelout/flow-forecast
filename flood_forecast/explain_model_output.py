@@ -66,6 +66,7 @@ def deep_explain_model_summary_plot(
     background_tensor = background_tensor.to(device)
     model.model.eval()
     if model.params["model_name"] == "DARNN" and device == "cuda":
+        print("Putting model in train mode to avoid bug")
         model.model.train()
     # background shape (L, N, M)
     # L - batch size, N - history length, M - feature size
