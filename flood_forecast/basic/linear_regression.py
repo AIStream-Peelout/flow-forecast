@@ -16,7 +16,7 @@ class SimpleLinearModel(torch.nn.Module):
         self.n_time_series = n_time_series
         self.initial_layer = torch.nn.Linear(n_time_series, 1)
         self.probabilistic = probabilistic
-        if self.probabalistic:
+        if self.probabilistic:
             self.output_len = 2
         else:
             self.output_len = output_seq_len
