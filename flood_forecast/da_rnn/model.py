@@ -32,6 +32,7 @@ class DARNN(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         _, input_encoded = self.encoder(x[:, :, 1:])
         dropped_input = self.dropout(input_encoded)
+        print('error in forward', x[:, :, 0])
         y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
         return y_pred
 
@@ -197,6 +198,7 @@ class Decoder(nn.Module):
             mean = y_pred[..., 0][..., None]
             std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
             return torch.distributions.Normal(mean, std)
+            print('error in decoder')
         else:
             return self.fc_final(torch.cat((hidden[0], context), dim=1))
         #
