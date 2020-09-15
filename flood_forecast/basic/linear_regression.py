@@ -25,7 +25,7 @@ class SimpleLinearModel(torch.nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         x: A tensor of dimension (B, L, M) where
-        B is the batch size, L is the length of the
+        B is the batch size, L is the length of the sequence
         """
         x = self.initial_layer(x)
         x = x.permute(0, 2, 1)
