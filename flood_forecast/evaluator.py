@@ -131,10 +131,13 @@ def evaluate_model(
             eval_log[target + "_" + evaluation_metric] = s
 
     # Explain model behaviour using shap
-    deep_explain_model_summary_plot(
-        model, test_data, inference_params["datetime_start"]
-    )
-    deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
+    if "probabilistic" in inference_params:
+        print("Probabilistic explainability currently not supported.")
+    else:
+        deep_explain_model_summary_plot(
+            model, test_data, inference_params["datetime_start"]
+        )
+        deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
 
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
