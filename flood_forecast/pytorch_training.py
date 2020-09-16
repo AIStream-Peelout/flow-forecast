@@ -228,7 +228,12 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                         0]
                 else:
                     if probabilistic:
-                        output, output_std = simple_decode(model, src, targ.shape[1], targ, 1, probabilistic)
+                        output, output_std = simple_decode(model,
+                                                           src,
+                                                           targ.shape[1],
+                                                           targ,
+                                                           1,
+                                                           probabilistic=probabilistic)
                         output, output_std = output[:, :, 0], output_std[0]
                         output_dist = torch.distributions.Normal(output, output_std)
                     else:
