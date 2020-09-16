@@ -37,8 +37,6 @@ class DARNN(nn.Module):
             mean = y_pred[..., 0][..., None]
             std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
             y_pred = torch.distributions.Normal(mean, std)
-
-        print('error in y_pred', y_pred)
         return y_pred
 
 

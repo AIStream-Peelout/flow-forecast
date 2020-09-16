@@ -72,7 +72,6 @@ def simple_decode(model: Type[torch.nn.Module],
                 out = model(src)
 
             if probabilistic:
-                print("probabilistic chosen")
                 out_std = out.stddev.detach()
                 out = out.mean.detach()
                 ys_std_dev.append(out_std[:, 0].unsqueeze(0))
