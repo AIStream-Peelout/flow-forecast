@@ -1,7 +1,8 @@
 import torch
 from torch import nn
 from torch.autograd import Variable
-from typing import Tuple
+from typing import Tuple, Dict
+from flood_forecast.meta_models.merging_model import MergingModel
 
 
 class DARNN(nn.Module):
@@ -13,9 +14,10 @@ class DARNN(nn.Module):
             decoder_hidden_size: int,
             out_feats=1,
             dropout=.01,
+            meta_data: Dict = None,
             gru_lstm=True):
         """
-        WARNING WILL NOT RUN ON GPU AT PRESENT
+        WARNING SHAP WILL NOT RUN ON GPU AT PRESENT
         n_time_series: Number of time series present in input
         forecast_history: How many historic time steps to use for forecasting (add one to this number)
         hidden_size_encoder: dimension of the hidden state encoder
@@ -43,12 +45,16 @@ def init_hidden(x, hidden_size: int) -> torch.autograd.Variable:
 
 class Encoder(nn.Module):
 
-    def __init__(self, input_size: int, hidden_size: int, T: int, gru_lstm: bool = True):
+    def __init__(self, input_size: int, hidden_size: int, T: int, gru_lstm: bool = True, meta_data: Dict = None):
         """
-        input size: number of underlying factors (81)
-        T: number of time steps (10)
-        hidden_size: dimension of the hidden stats
-
+        Args:
+            input size: number of underlying factors (81)
+            T: number of time steps (10)
+            hidden_size: dimension of the hidden stats
+            meta_data: if present must contain the following:
+                        method: str: current supported methods are BiLinear and Concatenation
+                        other_params: Dict: A dictionary of the methods parameters see BiLinear and Concat classes
+                        dim_size str: Required for BiLinear at the moment will use a Linear layer to same dim.
         """
         super(Encoder, self).__init__()
         self.input_size = input_size
@@ -62,6 +68,12 @@ class Encoder(nn.Module):
         else:
             self.gru_layer = nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=1)
         self.attn_linear = nn.Linear(in_features=2 * hidden_size + T - 1, out_features=1)
+        if meta_data:
+            self.merging_layer = MergingModel(meta_data["method"], meta_data["params"])
+            if meta_data["method"] == "Bilinear" and "dim_size" in meta_data:
+                # TODO fully implement
+                self.torch.nn.Linear(meta_data[""])
+
 
     def forward(self, input_data: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         # input_data: (batch_size, T - 1, input_size)
