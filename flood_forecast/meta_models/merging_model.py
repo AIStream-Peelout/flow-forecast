@@ -3,11 +3,12 @@ from typing import Dict
 
 
 class MergingModel(torch.nn.Module):
-    def __init__(self, method: str, other_params: Dict):
+    def __init__(self, method: str, other_params: Dict, match_temporal_dim=False):
         super().__init__()
         self.method_dict = {"Bilinear": torch.nn.Bilinear, "concat": Concatenation}
         self.method_layer = self.method_dict[method](**other_params)
         self.method = method
+        self.match_temporal = match_temporal_dim
 
     def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor):
         """
@@ -16,10 +17,16 @@ class MergingModel(torch.nn.Module):
         """
         if self.method == "Bilinear":
             batch_size = temporal_data.shape[0]
-            meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
-            temporal_data = temporal_data.permute(0, 2, 1).contiguous()
-            x = self.method_layer(temporal_data, meta_data)
-            x = x.permute(0, 2, 1)
+            if self.match_temporal:
+                temporal_length = temporal_data.shape[1]
+                meta_data = meta_data.permute(0, 2, 1)
+                meta_data = meta_data.repeat(1, temporal_length, 1)
+                x = self.method_layer(temporal_data, meta_data)
+            else:
+                meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
+                temporal_data = temporal_data.permute(0, 2, 1).contiguous()
+                x = self.method_layer(temporal_data, meta_data)
+                x = x.permute(0, 2, 1)
         else:
             x = self.method_layer(temporal_data, meta_data)
         return x
