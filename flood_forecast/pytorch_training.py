@@ -171,7 +171,7 @@ def torch_single_train(model: PyTorchForecast,
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
-        print('output',output)
+        print('output', output)
         labels = trg[:, :, 0]
         loss = criterion(output, labels.float())
         if loss > 100:
