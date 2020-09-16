@@ -32,8 +32,12 @@ class DARNN(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         _, input_encoded = self.encoder(x[:, :, 1:])
         dropped_input = self.dropout(input_encoded)
-        print('error in forward', x[:, :, 0].unsqueeze(2))
         y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
+        if self.probabilistic:
+            mean = y_pred[..., 0][..., None]
+            std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
+            y_pred = torch.distributions.Normal(mean, std)
+
         print('error in y_pred', y_pred)
         return y_pred
 
@@ -194,14 +198,14 @@ class Decoder(nn.Module):
                 hidden = generic_states[0].unsqueeze(0)
 
         # Eqn. 22: final output
-        if self.probabalistic:
-            y_pred = self.fc_final(torch.cat((hidden[0], context), dim=1))
-            print('error in decoder', y_pred[..., 0][..., None])
-            mean = y_pred[..., 0][..., None]
-            std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
-            print('error in dist', torch.distributions.Normal(mean, std))
-            return torch.distributions.Normal(mean, std)
+        # if self.probabalistic:
+        #    y_pred = self.fc_final(torch.cat((hidden[0], context), dim=1))
+        #    mean = y_pred[..., 0][..., None]
+        #    std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
+        #    print('error in dist', torch.distributions.Normal(mean, std))
+        #    return torch.distributions.Normal(mean, std)
 
-        else:
-            return self.fc_final(torch.cat((hidden[0], context), dim=1))
+        # else:
+
+        return self.fc_final(torch.cat((hidden[0], context), dim=1))
         #
