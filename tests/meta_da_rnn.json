@@ -7,7 +7,15 @@
       "decoder_hidden_size":128,
       "out_feats":1,
       "forecast_history":6, 
-      "gru_lstm": false 
+      "gru_lstm": false,
+      "meta_data": {
+        "method": "Bilinear",
+        "params":
+        { "in1_features":6, 
+          "in2_features":1, 
+          "out_features":6}
+       
+    }
      },
 
     "dataset_params":
@@ -27,7 +35,7 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
-    
+
     "training_params":
     {
        "criterion":"MSE",

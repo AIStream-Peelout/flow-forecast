@@ -72,7 +72,7 @@ class Encoder(nn.Module):
             self.merging_layer = MergingModel(meta_data["method"], meta_data["params"])
             if meta_data["method"] == "Bilinear" and "dim_size" in meta_data:
                 # TODO fully implement
-                self.torch.nn.Linear(meta_data[""])
+                self.torch.nn.Linear(meta_data["params"][""], meta_data[""])
 
 
     def forward(self, input_data: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
