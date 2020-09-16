@@ -105,7 +105,7 @@ def train_transformer_style(
             meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb)
-        if valid < 0.01:
+        if valid < 0.0000001:
             raise("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
             wandb.log({'epoch': epoch, 'loss': total_loss})
@@ -182,7 +182,7 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
-def compute_validation(validation_loader: DataLoader,  # s lint
+def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
                        sequence_size: int,
@@ -218,6 +218,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                         :,
                         0]
                 else:
+                    print("Now engaged in decoding: ")
                     output = simple_decode(model, src, targ.shape[1], targ, 1)[:, :, 0]
             else:
                 output = model(src.float())
