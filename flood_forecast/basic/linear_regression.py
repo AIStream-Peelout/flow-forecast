@@ -22,7 +22,6 @@ class SimpleLinearModel(torch.nn.Module):
         """
         x: A tensor of dimension (B, L, M) where
         B is the batch size, L is the length of the sequence
-        and M is the number of features
         """
         x = self.initial_layer(x)
         x = x.permute(0, 2, 1)

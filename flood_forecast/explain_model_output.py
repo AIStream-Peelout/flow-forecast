@@ -65,10 +65,7 @@ def deep_explain_model_summary_plot(
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
-    if model.params["model_name"] == "DARNN" and device.type == "cuda":
-        print("Putting model in train mode to avoid bug")
-        model.model.train()
-        return
+
     # background shape (L, N, M)
     # L - batch size, N - history length, M - feature size
     deep_explainer = shap.DeepExplainer(model.model, background_tensor)
@@ -133,15 +130,11 @@ def deep_explain_model_heatmap(
     Returns:
         None
     """
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if model.params["model_name"] == "SimpleTransformer":
         print("SimpleTransformer currently not supported.")
         return
-    elif model.params["model_name"] == "DARNN" and device.type == "cuda":
-        print("Bug related to DARNN on GPU")
-        return
-
     use_wandb = model.wandb
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
