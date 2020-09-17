@@ -1,11 +1,13 @@
 import torch
 from typing import Dict
+from torch.nn.modules.activation import MultiheadAttention
 
 
 class MergingModel(torch.nn.Module):
     def __init__(self, method: str, other_params: Dict):
         super().__init__()
-        self.method_dict = {"Bilinear": torch.nn.Bilinear}
+        self.method_dict = {"Bilinear": torch.nn.Bilinear, "MultiAttn": MultiModalSelfAttention,
+                            "Concat": Concatenation, "Other": "other"}
         self.method_layer = self.method_dict[method](**other_params)
         self.method = method
 
@@ -14,9 +16,9 @@ class MergingModel(torch.nn.Module):
         Args:
             temporal_data:
         """
+        batch_size = temporal_data.shape[0]
+        meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
         if self.method == "Bilinear":
-            batch_size = temporal_data.shape[0]
-            meta_data = meta_data.repeat(batch_size, 1).unsqueeze(2)
             temporal_data = temporal_data.permute(0, 2, 1).contiguous()
             x = self.method_layer(temporal_data, meta_data)
             x = x.permute(0, 2, 1)
@@ -44,7 +46,7 @@ class Concatenation(torch.nn.Module):
             meta_data (batch_size, d_embedding)
         """
         if self.repeat:
-            meta_data = meta_data.unsqueeze(1).repeat(1, temporal_data.shape[1], 1)
+            meta_data = meta_data.repeat(1, temporal_data.shape[1], 1)
         else:
             # TODO figure out
             pass
@@ -52,3 +54,14 @@ class Concatenation(torch.nn.Module):
         if self.use_layer:
             x = self.linear(x)
         return x
+
+
+class MultiModalSelfAttention(torch.nn.Module):
+    def __init__(self, d_model, n_heads, dropout):
+        self.main_layer = MultiheadAttention(d_model, n_heads, dropout)
+
+    def forward(self, temporal_data, meta_data):
+        meta_data = meta_data.permute(2, 0, 1)
+        temporal_data = temporal_data.permute(1, 0, 2)
+        x = self.main_layer(temporal_data, meta_data, meta_data)
+        return x.permute(1, 0, 2)

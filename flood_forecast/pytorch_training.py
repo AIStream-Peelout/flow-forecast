@@ -105,7 +105,7 @@ def train_transformer_style(
             meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb)
-        if valid < 0.01:
+        if valid < 0.0001:
             raise("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
             wandb.log({'epoch': epoch, 'loss': total_loss})
