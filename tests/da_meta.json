@@ -6,7 +6,7 @@
       "hidden_size_encoder":128,
       "decoder_hidden_size":128,
       "forecast_history":4,
-      "outp_feats": 1, 
+      "out_feats": 1, 
       "meta_data": {
           "method": "Bilinear",
           "dim": 128,
