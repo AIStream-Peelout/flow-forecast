@@ -5,16 +5,16 @@
       "n_time_series":3,
       "hidden_size_encoder":128,
       "decoder_hidden_size":128,
-      "forecast_history":4,
+      "forecast_history":6,
       "out_feats": 1, 
       "meta_data": {
           "method": "Bilinear",
           "dim": 128,
           "input_method":"downsize",
           "params":
-          {"in1_features":4, 
+          {"in1_features":5, 
             "in2_features":1, 
-            "out_features":4}
+            "out_features":5}
          
       }
      }, 
