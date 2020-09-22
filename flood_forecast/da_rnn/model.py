@@ -2,6 +2,25 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from typing import Tuple
+from flood_forecast.meta_models.merging_model import MergingModel
+
+
+class MetaMerger(nn.Module):
+    def __init__(self, meta_params, meta_method, embed_shape, in_shape):
+        self.method_layer = meta_method
+        if meta_method == "down_sample":
+            self.initial_layer = torch.nn.Linear(embed_shape, in_shape)
+        elif meta_method == "up_sample":
+            self.initial_layer = torch.nn.Linear(in_shape, embed_shape)
+        self.model_merger = MergingModel(meta_params["method"], meta_params["params"])
+
+    def forward(self, temporal_data, meta_data):
+        if self.method_layer == "down_sample":
+            meta_data = self.initial_layer(meta_data)
+        else:
+            print("Other methods not implemented yet")
+            pass
+        return self.model_merger(temporal_data, meta_data)
 
 
 class DARNN(nn.Module):
@@ -13,16 +32,16 @@ class DARNN(nn.Module):
             decoder_hidden_size: int,
             out_feats=1,
             dropout=.01,
+            meta_data=False,
             gru_lstm=True):
         """
-        WARNING WILL NOT RUN ON GPU AT PRESENT
         n_time_series: Number of time series present in input
         forecast_history: How many historic time steps to use for forecasting (add one to this number)
         hidden_size_encoder: dimension of the hidden state encoder
         decoder_hidden_size: dimension of hidden size of the decoder
         """
         super().__init__()
-        self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm)
+        self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm, meta_data)
         self.dropout = nn.Dropout(dropout)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
 
@@ -43,7 +62,7 @@ def init_hidden(x, hidden_size: int) -> torch.autograd.Variable:
 
 class Encoder(nn.Module):
 
-    def __init__(self, input_size: int, hidden_size: int, T: int, gru_lstm: bool = True):
+    def __init__(self, input_size: int, hidden_size: int, T: int, gru_lstm: bool = True, meta_data: bool = False):
         """
         input size: number of underlying factors (81)
         T: number of time steps (10)
@@ -62,8 +81,10 @@ class Encoder(nn.Module):
         else:
             self.gru_layer = nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=1)
         self.attn_linear = nn.Linear(in_features=2 * hidden_size + T - 1, out_features=1)
+        if meta_data:
+            self.meta_layer = MetaMerger(meta_data, meta_data["da_method"], meta_data["meta_dim"], input_size)
 
-    def forward(self, input_data: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, input_data: torch.Tensor, meta_data=None) -> Tuple[torch.Tensor, torch.Tensor]:
         # input_data: (batch_size, T - 1, input_size)
         device = input_data.device
         input_weighted = Variable(
@@ -76,6 +97,8 @@ class Encoder(nn.Module):
                 input_data.size(0),
                 self.T - 1,
                 self.hidden_size)).to(device)
+        if meta_data:
+            input_data = self.meta_layer(input_data, meta_data)
         # hidden, cell: initial states with dimension hidden_size
         hidden = init_hidden(input_data, self.hidden_size)  # 1 * batch_size * hidden_size
         cell = init_hidden(input_data, self.hidden_size)
