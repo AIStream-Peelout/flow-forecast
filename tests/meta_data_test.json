@@ -1,4 +1,4 @@
-{              
+{                 
     "model_name": "CustomTransformerDecoder",
     "model_type": "PyTorch",
     "model_params": {
@@ -9,7 +9,7 @@
       "meta_data": {
           "method": "Bilinear",
           "params":
-          { "in1_features":5, 
+          {"in1_features":5, 
             "in2_features":1, 
             "out_features":5}
          
