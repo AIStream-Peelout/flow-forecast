@@ -47,7 +47,8 @@ class DARNN(nn.Module):
         hidden_size_encoder: dimension of the hidden state encoder
         decoder_hidden_size: dimension of hidden size of the decoder
         gru_lstm boolean: False means use a GRU, true means use LSTM
-        DROPOUT
+        dropout float:
+        s
         """
         super().__init__()
         self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm, meta_data)
