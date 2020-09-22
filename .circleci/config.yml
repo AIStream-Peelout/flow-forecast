@@ -228,8 +228,6 @@ jobs:
           command: |
             echo -e 'running meta-data fusion'
             coverage run flood_forecast/trainer.py -p tests/meta_data_test.json
-            echo -e 'running meta-data da-rnn'
-            coverage run flood_forecast/trainer.py -p tests/da_meta.json
             echo -e 'running da_rnn_test \n'
             coverage run flood_forecast/trainer.py -p tests/da_rnn.json
             echo -e 'running auto test \n'
