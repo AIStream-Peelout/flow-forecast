@@ -226,7 +226,8 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            echo -e 'running meta-data fusion'
+            echo -e 'running meta-data fusion']
+            coverage run flood_forecast/trainer.py -p tests/da_meta.json
             coverage run flood_forecast/trainer.py -p tests/meta_data_test.json
             echo -e 'running da_rnn_test \n'
             coverage run flood_forecast/trainer.py -p tests/da_rnn.json
