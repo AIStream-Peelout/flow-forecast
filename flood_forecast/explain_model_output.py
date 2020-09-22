@@ -56,8 +56,14 @@ def deep_explain_model_summary_plot(
     if model.params["model_name"] == "SimpleTransformer":
         print("SimpleTransformer currently not supported.")
         return
+
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if model.params["model_name"] == "DARNN" and device.type == "GPU":
+        print("DARNN does not work with shap on CUDA")
+        return
+
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
@@ -135,6 +141,11 @@ def deep_explain_model_heatmap(
         return
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if model.params["model_name"] == "DARNN" and device.type == "cuda":
+        print("Currently DARNN doesn't work with shap on CUDA")
+        return
+
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
