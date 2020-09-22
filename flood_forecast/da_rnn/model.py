@@ -55,7 +55,7 @@ class DARNN(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
 
-    def forward(self, x: torch.Tensor, meta_data: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, meta_data: torch.Tensor = None) -> torch.Tensor:
         """
         x: The temporal data with shape (B, L, M)
         meta_data optional: Should have shape (embdding_dim)
