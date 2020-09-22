@@ -7,6 +7,7 @@ from flood_forecast.meta_models.merging_model import MergingModel
 
 class MetaMerger(nn.Module):
     def __init__(self, meta_params, meta_method, embed_shape, in_shape):
+        super().__init__()
         self.method_layer = meta_method
         if meta_method == "down_sample":
             self.initial_layer = torch.nn.Linear(embed_shape, in_shape)

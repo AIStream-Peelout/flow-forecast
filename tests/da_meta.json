@@ -15,11 +15,16 @@
           "meta_dim": 128,
           "params": {
               "in1_features": 128,
-              "in2_features": 2,
-              "out_features": 2
+              "in2_features": 3,
+              "out_features": 3
 
           }
       }
+     },
+     "meta_data":{
+         "path":"tests/auto_encoder.json",
+         "column_id": "datetime",
+         "uuid": "2014-05-02 01:00:00"
      },
 
     "dataset_params":
