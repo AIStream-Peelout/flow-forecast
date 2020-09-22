@@ -1,14 +1,18 @@
 import torch
 from torch import nn
 from torch.autograd import Variable
-from typing import Tuple
+from typing import Tuple, Dict
 from flood_forecast.meta_models.merging_model import MergingModel
 
 
 class DAMetaModel(torch.nn.Module):
-    def __init__(self, meta_data, meta_dim, input_dim, meta_size_method):
+    def __init__(self, meta_data: Dict, meta_dim: int, input_dim: int, meta_size_method: str):
         """
-        
+        meta_data Dict: A dictionary containing the parameters for initialzing MergingModel
+        meta_dim int: The dimension of the meta_data
+        input_dim int: The dimension of the incoming temporal data
+        meta_size_method str: The method to get the sizes properly corresponding. Choices include
+        downsize, upsize, and others to come.
         """
         super().__init__()
         self.merging_da = MergingModel(meta_data["method"], meta_data["params"])
@@ -38,11 +42,12 @@ class DARNN(nn.Module):
             meta_data=None,
             gru_lstm=True):
         """
-        WARNING WILL NOT RUN ON GPU AT PRESENT
         n_time_series: Number of time series present in input
         forecast_history: How many historic time steps to use for forecasting (add one to this number)
         hidden_size_encoder: dimension of the hidden state encoder
         decoder_hidden_size: dimension of hidden size of the decoder
+        gru_lstm boolean: False means use a GRU, true means use LSTM
+        DROPOUT
         """
         super().__init__()
         self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm, meta_data)
