@@ -19,8 +19,7 @@ class MetaMerger(nn.Module):
         if self.method_layer == "down_sample":
             meta_data = self.initial_layer(meta_data)
         else:
-            print("Other methods not implemented yet")
-            pass
+            print("Warning other methods not supported yet")
         return self.model_merger(temporal_data, meta_data)
 
 
@@ -47,7 +46,7 @@ class DARNN(nn.Module):
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm)
 
     def forward(self, x: torch.Tensor, meta_data: torch.Tensor = None) -> torch.Tensor:
-        _, input_encoded = self.encoder(x[:, :, 1:])
+        _, input_encoded = self.encoder(x[:, :, 1:], meta_data)
         dropped_input = self.dropout(input_encoded)
         y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
         return y_pred
@@ -98,7 +97,8 @@ class Encoder(nn.Module):
                 input_data.size(0),
                 self.T - 1,
                 self.hidden_size)).to(device)
-        if meta_data:
+        if type(meta_data) == torch.Tensor:
+            print("Using meta-data")
             input_data = self.meta_layer(input_data, meta_data)
         # hidden, cell: initial states with dimension hidden_size
         hidden = init_hidden(input_data, self.hidden_size)  # 1 * batch_size * hidden_size
