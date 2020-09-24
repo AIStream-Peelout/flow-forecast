@@ -97,7 +97,7 @@ class Encoder(nn.Module):
                 input_data.size(0),
                 self.T - 1,
                 self.hidden_size)).to(device)
-        if meta_data:
+        if type(meta_data) == torch.Tensor:
             print("Using meta-data")
             input_data = self.meta_layer(input_data, meta_data)
         # hidden, cell: initial states with dimension hidden_size

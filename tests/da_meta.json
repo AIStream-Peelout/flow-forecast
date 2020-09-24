@@ -17,7 +17,6 @@
               "in1_features": 128,
               "in2_features": 3,
               "out_features": 3
-
           }
       }
      },
