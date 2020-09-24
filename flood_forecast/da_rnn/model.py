@@ -99,6 +99,7 @@ class Encoder(nn.Module):
                 self.hidden_size)).to(device)
         if meta_data:
             print("Using meta-data")
+            raise ValueError
             input_data = self.meta_layer(input_data, meta_data)
         # hidden, cell: initial states with dimension hidden_size
         hidden = init_hidden(input_data, self.hidden_size)  # 1 * batch_size * hidden_size
