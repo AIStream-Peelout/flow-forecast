@@ -26,7 +26,6 @@
          "column_id": "datetime",
          "uuid": "2014-05-02 01:00:00"
      },
-
     "dataset_params":
     {  "class": "default",
        "training_path": "tests/test_data/keag_small.csv",
