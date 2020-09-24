@@ -14,9 +14,9 @@
           "da_method": "down_sample",
           "meta_dim": 128,
           "params": {
-              "in1_features": 128,
-              "in2_features": 3,
-              "out_features": 3
+              "in1_features": 5,
+              "in2_features": 1,
+              "out_features": 5
           }
       }
      },
