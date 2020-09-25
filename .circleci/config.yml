@@ -228,7 +228,8 @@ jobs:
           command: |
             echo -e 'running da_rnn probabilistic test'
             coverage run flood_forecast/trainer.py -p tests/da_rnn_probabilistic.json
-
+            echo -e 'running lstm probabilistic test'
+            coverage run flood_forecast/trainer.py -p tests/lstm_probabilistic_test.json
 
       - store_test_results:
           path: test-results
