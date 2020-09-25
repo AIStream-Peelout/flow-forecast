@@ -284,9 +284,6 @@ class BertAdam(Optimizer):
         return loss
 
 
-<< << << < HEAD
-
-
 class NegativeLogLikelihood(torch.nn.Module):
     """
     target -> True y
@@ -301,7 +298,6 @@ class NegativeLogLikelihood(torch.nn.Module):
         calculates NegativeLogLikelihood
         """
         return -output.log_prob(target).sum()
-== == == =
 
 
 def l1_regularizer(model, lambda_l1=0.01):
@@ -312,7 +308,7 @@ def l1_regularizer(model, lambda_l1=0.01):
     for model_param_name, model_param_value in model.named_parameters():
         if model_param_name.endswith('weight'):
             lossl1 += lambda_l1 * model_param_value.abs().sum()
-    return lossl1
+        return lossl1
 
 
 def orth_regularizer(model, lambda_orth=0.01):
@@ -326,5 +322,5 @@ def orth_regularizer(model, lambda_orth=0.01):
             sym = torch.mm(param_flat, torch.t(param_flat))
             sym -= torch.eye(param_flat.shape[0])
             lossorth += lambda_orth * sym.sum()
-    return lossorth
->>>>>> > master
+
+        return lossorth
