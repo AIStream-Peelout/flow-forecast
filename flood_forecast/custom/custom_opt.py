@@ -52,7 +52,7 @@ class RMSELoss(torch.nn.Module):
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
-    def __init__(self, variance_penalty=0, variance_penalty_type='abs'):
+    def __init__(self, variance_penalty=0, variance_penalty_type=None):
         super().__init__()
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
@@ -98,7 +98,7 @@ class PenalizedMSELoss(torch.nn.Module):
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
-    def __init__(self, variance_penalty=0, variance_penalty_type='abs'):
+    def __init__(self, variance_penalty=0, variance_penalty_type=None):
         super().__init__()
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
