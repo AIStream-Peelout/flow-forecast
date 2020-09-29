@@ -230,6 +230,8 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/da_rnn_probabilistic.json
             echo -e 'running lstm probabilistic test'
             coverage run flood_forecast/trainer.py -p tests/lstm_probabilistic_test.json
+            echo -e 'running probabilistic lin reg test'
+            coverage run flood_forecast/trainer.py -p tests/probabilistic_linear_regression_test.json
 
       - store_test_results:
           path: test-results
