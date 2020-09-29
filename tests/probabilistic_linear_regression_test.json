@@ -30,7 +30,7 @@
     {
        "criterion":"NegativeLogLikelihood",
        "probabilistic": true,
-       "optimizer": "Adam",
+       "optimizer": "SGD",
        "optim_params":
        {
 
