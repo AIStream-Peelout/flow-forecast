@@ -6,7 +6,7 @@
         "n_time_series":3,
         "output_seq_len":1,
         "batch_size":4,
-        "probabilistic":True
+        "probabilistic": true
      },
     "dataset_params":
     {  "class": "default",
