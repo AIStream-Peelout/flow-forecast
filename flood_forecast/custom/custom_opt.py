@@ -60,10 +60,12 @@ class RMSELoss(torch.nn.Module):
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
         # if (self.variance_penalty_type == 'absolute') | (self.variance_penalty_type == 'abs'):
-        #    return torch.sqrt(self.mse(target, output)) + self.variance_penalty * torch.std(torch.abs(target - output))
-        # elif (self.variance_penalty_type == 'squared') | (self.variance_penalty_type == 'sqrt'):
-        #    return torch.sqrt(self.mse(target, output)) + self.variance_penalty * torch.std(torch.sqrt(target - output))
-        #elif (self.variance_penalty_type is None):
+        #    return torch.sqrt(self.mse(target, output)) + self.variance_penalty \
+        # * torch.std(torch.abs(target - output))
+        # elif (self.variance_penalty_type == 'squared'):
+        #    return torch.sqrt(self.mse(target, output)) + self.variance_penalty \
+        # * torch.std((target - output)**2)
+        # elif (self.variance_penalty_type is None):
         return torch.sqrt(self.mse(target, output))
 
 
