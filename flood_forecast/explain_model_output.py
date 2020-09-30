@@ -60,7 +60,7 @@ def deep_explain_model_summary_plot(
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    if model.params["model_name"] == "DARNN" and device.type == "GPU":
+    if model.params["model_name"] == "DARNN" and device.type == "cuda":
         print("DARNN does not work with shap on CUDA")
         return
 
