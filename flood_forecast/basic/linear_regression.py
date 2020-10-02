@@ -31,8 +31,8 @@ class SimpleLinearModel(torch.nn.Module):
         x = x.permute(0, 2, 1)
         x = self.output_layer(x)
         if self.probabilistic:
-            mean = y_pred[..., 0][..., None]
-            std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
+            mean = x[..., 0][..., None]
+            std = torch.clamp(x[..., 1][..., None], min=0.01)
             return torch.distributions.Normal(mean, std)
         else:
             return x.view(-1, self.output_len)
