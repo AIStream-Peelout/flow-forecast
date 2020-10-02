@@ -205,7 +205,7 @@ def infer_on_torch_model(
                 df_train_and_test["std_dev"][history_length:] = end_tensor[1][0].numpy().tolist()
             except Exception as e:
                 df_train_and_test["std_dev"][history_length:] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
-
+                print(e)
     else:
         df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
         print(end_tensor.shape)
