@@ -200,7 +200,7 @@ def infer_on_torch_model(
         if "probabilistic" in decoder_params:
             df_train_and_test["preds"][history_length:] = end_tensor[0].numpy().tolist()
             df_train_and_test["std_dev"] = 0
-            print('end_tensor[1][0].numpy().tolist()',end_tensor[1][0].numpy().tolist())
+            print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             df_train_and_test["std_dev"][history_length:] = end_tensor[1][0].numpy().tolist()
     else:
         df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
