@@ -7,7 +7,7 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
 | Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=latest)](https://flow-forecast.readthedocs.io/en/latest/?badge=latest)|
 | CodeCov| [![codecov](https://codecov.io/gh/AIStream-Peelout/flow-forecast/branch/master/graph/badge.svg)](https://codecov.io/gh/AIStream-Peelout/flow-forecast)|
-
+| CodeFactor| [![CodeFactor](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast/badge)](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast)|
 ## Getting Started 
 
 Using the library
@@ -34,7 +34,7 @@ We have a number of models we are planning on releasing soon. [Please check our 
 
 ## Contributing 
 
-For instructions on contributing please see our [contributions page](http://github.com/AIStream-Peelout/flow-forecast/wiki/Contribution-Guidelines) and our [project board](https://github.com/AIStream-Peelout/flow-forecast/projects). 
+For instructions on contributing please see our [contributions page](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/11403276/Contributing) and our [project board](https://github.com/AIStream-Peeloutt/flow-forecast/projects). 
 
 
 ## Historical River Flow Data  
