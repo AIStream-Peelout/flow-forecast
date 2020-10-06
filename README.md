@@ -12,7 +12,7 @@ Welcome to flow-forecast an all in one deep learning for time series repository.
 | CodeFactor| [![CodeFactor](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast/badge)](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast)|
 
 
-## Getting Started 
+## Getting Flowing
 
 Using the library
 1. Run `pip install flood-forecast`
@@ -24,7 +24,7 @@ Using the library
 2. Full transformer: The full transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
 3. Simple Multi-Head Attention: A simple multi-head attention block/embedding layers. Suitable for transfer learning.
 4. Transformer w/a linear decoder: A transformer with n-encoder blocks (this is tunable) and linear decoder. Suitable for transfer learning.
-5. DA-RNN (CPU only for now): A well rounded model with which utilizes a LSTM + attention. 
+5. DA-RNN (SHAP not supported on GPU): A well rounded model with which utilizes a LSTM + attention. 
 
 **Forthcoming Models**
 
