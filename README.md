@@ -1,5 +1,7 @@
 # Deep learning for time series forecasting
-This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
+![Example Image](https://raw.githubusercontent.com/AIStream-Peelout/experiment_configs/master/Screen%20Shot%202020-10-06%20at%202.09.46%20AM.png)
+
+Welcome to flow-forecast an all in one deep learning for time series repository. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
@@ -9,7 +11,6 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 | CodeCov| [![codecov](https://codecov.io/gh/AIStream-Peelout/flow-forecast/branch/master/graph/badge.svg)](https://codecov.io/gh/AIStream-Peelout/flow-forecast)|
 | CodeFactor| [![CodeFactor](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast/badge)](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast)|
 
-![Example Image](https://raw.githubusercontent.com/AIStream-Peelout/experiment_configs/master/Screen%20Shot%202020-10-06%20at%202.09.46%20AM.png)
 
 ## Getting Started 
 
