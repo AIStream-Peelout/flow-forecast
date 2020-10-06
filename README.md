@@ -1,7 +1,7 @@
 # Deep learning for time series forecasting
 ![Example Image](https://raw.githubusercontent.com/AIStream-Peelout/experiment_configs/master/Screen%20Shot%202020-10-06%20at%202.09.46%20AM.png)
 
-Welcome to flow-forecast an all in one deep learning for time series repository. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
+Welcome to flow-forecast an all in one deep learning for time series solution. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
