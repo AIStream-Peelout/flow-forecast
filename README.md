@@ -8,6 +8,9 @@ This repository is an open-source DL for time series library. Currently [Task-TS
 | Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=latest)](https://flow-forecast.readthedocs.io/en/latest/?badge=latest)|
 | CodeCov| [![codecov](https://codecov.io/gh/AIStream-Peelout/flow-forecast/branch/master/graph/badge.svg)](https://codecov.io/gh/AIStream-Peelout/flow-forecast)|
 | CodeFactor| [![CodeFactor](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast/badge)](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast)|
+
+![Example Image](https://raw.githubusercontent.com/AIStream-Peelout/experiment_configs/master/Screen%20Shot%202020-10-06%20at%202.09.46%20AM.png)
+
 ## Getting Started 
 
 Using the library
