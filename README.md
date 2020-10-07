@@ -1,5 +1,6 @@
 # Deep learning for time series forecasting
-This repository is an open-source DL for time series library. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) maintains this repo. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
+![Example image](https://raw.githubusercontent.com/CoronaWhy/task-ts/master/images/Picture1.png)
+Flow forecast repository is an open-source deep learning for time series library. It provide all the latest SOTA models and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and serving capabilities. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains this repository. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
