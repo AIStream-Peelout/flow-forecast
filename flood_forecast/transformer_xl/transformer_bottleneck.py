@@ -25,6 +25,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
+# Arxiv Link https://arxiv.org/pdf/1907.00235.pdf
+
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -229,6 +232,13 @@ class TransformerModel(nn.Module):
         self.seq_num = seq_num
         self.n_embd = n_embd
         self.win_len = win_len
+        # The following is the implementation of this paragraph
+        """For positional encoding in Transformer, we use learnable position embedding.
+        For covariates, following [3], we use all or part of year, month, day-of-the-week,
+        hour-of-the-day, minute-of-the-hour, age and time-series-ID according to the granularities of datasets.
+        age is the distance to the first observation in that time series [3]. Each of them except time series
+        ID has only one dimension and is normalized to have zero mean and unit variance (if applicable).
+        """
         self.id_embed = nn.Embedding(seq_num, n_embd)
         self.po_embed = nn.Embedding(win_len, n_embd)
         self.drop_em = nn.Dropout(dropout)
@@ -241,7 +251,7 @@ class TransformerModel(nn.Module):
 
     def forward(self, series_id, x):
         id_embedding = self.id_embed(series_id)
-        length = x.size(1)  # (Batch_size,length,input_dim)
+        length = x.size(1)  # (Batch_size, length, input_dim)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
         po_embedding = self.po_embed(position)
         batch_size = x.size(0)
@@ -255,23 +265,23 @@ class TransformerModel(nn.Module):
 
 
 class DecoderTransformer(nn.Module):
-    def __init__(self, args, n_time_series: int, n_head: int, seq_num, sub_len,
-                 num_layer: int, n_embd, win_len, dropout: float, q_len: int, scale_att: bool, additional_params: Dict):
+    def __init__(self, args, n_time_series: int, n_head: int, seq_num, sub_len, num_layer: int,
+                 n_embd, forecast_history: int, dropout: float, q_len: int, scale_att: bool, additional_params: Dict):
         """
         Args:
             n_time_series: Number of time series present in input
             n_head: Number of heads in the MultiHeadAttention mechanism
-            seq_num:
-            sub_len:
+            seq_num: ??
+            sub_len: sub_len of sparse attention
             num_layer: The number of transformer blocks in the model.
-            n_embd:
-            forecast_history==win_len?: The number of historical steps fed into the time series model
+            n_embd: The dimention of Position embedding and time series ID embedding
+            forecast_history: The number of historical steps fed into the time series model
             dropout: The dropout for the embedding of the model.
             additional_params: Additional params to initalize the model.
         """
         super(DecoderTransformer, self).__init__()
         self.transformer = TransformerModel(n_time_series, n_head, seq_num, sub_len, num_layer, n_embd,
-                                            win_len, dropout, scale_att, q_len, additional_params)
+                                            forecast_history, dropout, scale_att, q_len, additional_params)
         self.softplus = nn.Softplus()
         self.mu = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
