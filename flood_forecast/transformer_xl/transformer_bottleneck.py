@@ -32,7 +32,7 @@ import math
 from torch.distributions.normal import Normal
 import copy
 from torch.nn.parameter import Parameter
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from typing import Dict
 
 
 def gelu(x):
@@ -50,12 +50,12 @@ ACT_FNS = {
 
 
 class Attention(nn.Module):
-    def __init__(self, args, n_head, n_embd, win_len, scale, q_len):
+    def __init__(self, n_head, n_embd, win_len, scale, q_len, sub_len, sparse=None, attn_pdrop=0.1, resid_pdrop=0.1):
         super(Attention, self).__init__()
 
-        if(args.sparse):
+        if(sparse):
             print('Activate log sparse!')
-            mask = self.log_mask(win_len, args.sub_len)
+            mask = self.log_mask(win_len, sub_len)
         else:
             mask = torch.tril(torch.ones(win_len, win_len)).view(1, 1, win_len, win_len)
 
@@ -64,11 +64,11 @@ class Attention(nn.Module):
         self.split_size = n_embd * self.n_head
         self.scale = scale
         self.q_len = q_len
-        self.query_key = nn.Conv1d(n_embd, n_embd * n_head * 2, self.q_len)
+        self.query_key = nn.Conv1d(n_embd, n_embd * n_head * 2, self.q_lefqn)
         self.value = Conv1D(n_embd * n_head, 1, n_embd)
         self.c_proj = Conv1D(n_embd, 1, n_embd * self.n_head)
-        self.attn_dropout = nn.Dropout(args.attn_pdrop)
-        self.resid_dropout = nn.Dropout(args.resid_pdrop)
+        self.attn_dropout = nn.Dropout(attn_pdrop)
+        self.resid_dropout = nn.Dropout(resid_pdrop)
 
     def log_mask(self, win_len, sub_len):
         mask = torch.zeros((win_len, win_len), dtype=torch.float)
@@ -201,10 +201,10 @@ class MLP(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, args, n_head, win_len, n_embd, scale, q_len):
+    def __init__(self, n_head, win_len, n_embd, scale, q_len, sub_len, additional_params: Dict):
         super(Block, self).__init__()
         n_embd = n_embd
-        self.attn = Attention(args, n_head, n_embd, win_len, scale, q_len)
+        self.attn = Attention(n_head, n_embd, win_len, scale, q_len, sub_len, **additional_params)
         self.ln_1 = LayerNorm(n_embd)
         self.mlp = MLP(4 * n_embd, n_embd)
         self.ln_2 = LayerNorm(n_embd)
@@ -220,9 +220,11 @@ class Block(nn.Module):
 class TransformerModel(nn.Module):
     """ Transformer model """
 
-    def __init__(self, args_dict, input_dim, n_head, seq_num, layer, n_embd, win_len, dropout, scale_att, q_len):
+    def __init__(self, n_time_series, n_head, seq_num, sub_len, num_layer, n_embd,
+                 win_len, dropout: float, scale_att, q_len, additional_params: Dict):
         super(TransformerModel, self).__init__()
-        self.input_dim = input_dim
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.input_dim = n_time_series
         self.n_head = n_head
         self.seq_num = seq_num
         self.n_embd = n_embd
@@ -230,8 +232,9 @@ class TransformerModel(nn.Module):
         self.id_embed = nn.Embedding(seq_num, n_embd)
         self.po_embed = nn.Embedding(win_len, n_embd)
         self.drop_em = nn.Dropout(dropout)
-        block = Block(args_dict, n_head, win_len, n_embd + input_dim, scale=scale_att, q_len=q_len)
-        self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(layer)])
+        block = Block(n_head, win_len, n_embd + n_time_series, scale=scale_att,
+                      q_len=q_len, sub_len=sub_len, additional_params=additional_params)
+        self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(num_layer)])
 
         nn.init.normal_(self.id_embed.weight, std=0.02)
         nn.init.normal_(self.po_embed.weight, std=0.02)
@@ -239,10 +242,10 @@ class TransformerModel(nn.Module):
     def forward(self, series_id, x):
         id_embedding = self.id_embed(series_id)
         length = x.size(1)  # (Batch_size,length,input_dim)
-        position = torch.tensor(torch.arange(length), dtype=torch.long).to(device)
+        position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
         po_embedding = self.po_embed(position)
         batch_size = x.size(0)
-        embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(device)
+        embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
         embedding_sum[:] = po_embedding
         embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
         x = torch.cat((x, embedding_sum), dim=2)
@@ -252,12 +255,26 @@ class TransformerModel(nn.Module):
 
 
 class DecoderTransformer(nn.Module):
-    def __init__(self, args, input_dim, n_head, seq_num, layer, n_embd, win_len):
+    def __init__(self, args, n_time_series: int, n_head: int, seq_num, sub_len,
+                 num_layer: int, n_embd, win_len, dropout: float, q_len: int, scale_att: bool, additional_params: Dict):
+        """
+        Args:
+            n_time_series: Number of time series present in input
+            n_head: Number of heads in the MultiHeadAttention mechanism
+            seq_num:
+            sub_len:
+            num_layer: The number of transformer blocks in the model.
+            n_embd:
+            forecast_history==win_len?: The number of historical steps fed into the time series model
+            dropout: The dropout for the embedding of the model.
+            additional_params: Additional params to initalize the model.
+        """
         super(DecoderTransformer, self).__init__()
-        self.transformer = TransformerModel(args, input_dim, n_head, seq_num, layer, n_embd, win_len)
+        self.transformer = TransformerModel(n_time_series, n_head, seq_num, sub_len, num_layer, n_embd,
+                                            win_len, dropout, scale_att, q_len, additional_params)
         self.softplus = nn.Softplus()
-        self.mu = torch.nn.Linear(input_dim + n_embd, 1, bias=True)
-        self.sigma = torch.nn.Linear(input_dim + n_embd, 1, bias=True)
+        self.mu = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
+        self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self._initialize_weights()
 
     def _initialize_weights(self):
