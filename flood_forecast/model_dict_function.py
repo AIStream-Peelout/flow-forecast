@@ -42,9 +42,6 @@ pytorch_criterion_dict = {
     "DilateLoss": DilateLoss,
     "L1": L1Loss}
 
-
-evaluation_functions_dict = {"NSE": "", "MSE": ""}
-
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}
 
 pytorch_opt_dict = {"Adam": Adam, "SGD": SGD, "BertAdam": BertAdam}
