@@ -306,6 +306,6 @@ class DecoderTransformer(nn.Module):
         h = self.transformer(series_id, x)
         mu = self.mu(h)
         sigma = self.softplus(self.sigma(h))
-        if not self.mu_mode:
-            return sigma
-        return mu, sigma
+        if self.mu_mode:
+            return mu, sigma
+        return sigma
