@@ -4,7 +4,6 @@
     "model_params": {
       "n_time_series":3,
       "n_head": 8,
-      "forecast_length": 1,
       "forecast_history":5,
       "n_embd": 1, 
       "num_layer": 5,
@@ -27,7 +26,7 @@
        "test_end":400,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "StandardScaler", 
+       "scaler": "RobustScaler", 
        "interpolate": false
     },
     "training_params":
@@ -64,7 +63,7 @@
              "forecast_length":5,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
-             "scaling": "StandardScaler",
+             "scaling": "RobustScaler",
              "interpolate_param": false
           }
    } 
