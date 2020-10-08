@@ -284,7 +284,7 @@ class DecoderTransformer(nn.Module):
             additional_params: Additional parameters to initalize the model.
         """
         super(DecoderTransformer, self).__init__()
-        self.transformer = TransformerModel(n_time_series, n_head, seq_num, sub_len, num_layer, n_embd,
+        self.transformer = TransformerModel(n_time_series, n_head, sub_len, num_layer, n_embd,
                                             forecast_history, dropout, scale_att, q_len, additional_params)
         self.softplus = nn.Softplus()
         self.mu = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
