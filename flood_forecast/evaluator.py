@@ -94,7 +94,6 @@ def evaluate_model(
             print("View predictions")
             end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
             end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
-            print(end_tensor_list)
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
@@ -203,6 +202,7 @@ def infer_on_torch_model(
             dtype="float",
         )
         df_prediction_samples.iloc[history_length:] = prediction_samples
+        print("predict samples")
         print(prediction_samples)
     return (
         df_train_and_test,
