@@ -223,15 +223,18 @@ class Block(nn.Module):
 class TransformerModel(nn.Module):
     """ Transformer model """
 
-    def __init__(self, n_time_series, n_head, seq_num, sub_len, num_layer, n_embd,
-                 win_len, dropout: float, scale_att, q_len, additional_params: Dict):
+    def __init__(self, n_time_series, n_head, sub_len, num_layer, n_embd,
+                 forecast_history: int, dropout: float, scale_att, q_len, additional_params: Dict, seq_num=None):
         super(TransformerModel, self).__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.input_dim = n_time_series
         self.n_head = n_head
-        self.seq_num = seq_num
+        self.seq_num = None
+        if seq_num:
+            self.seq_num = seq_num
+            self.id_embed = nn.Embedding(seq_num, n_embd)
         self.n_embd = n_embd
-        self.win_len = win_len
+        self.win_len = forecast_history
         # The following is the implementation of this paragraph
         """For positional encoding in Transformer, we use learnable position embedding.
         For covariates, following [3], we use all or part of year, month, day-of-the-week,
@@ -239,7 +242,6 @@ class TransformerModel(nn.Module):
         age is the distance to the first observation in that time series [3]. Each of them except time series
         ID has only one dimension and is normalized to have zero mean and unit variance (if applicable).
         """
-        self.id_embed = nn.Embedding(seq_num, n_embd)
         self.po_embed = nn.Embedding(win_len, n_embd)
         self.drop_em = nn.Dropout(dropout)
         block = Block(n_head, win_len, n_embd + n_time_series, scale=scale_att,
@@ -250,14 +252,15 @@ class TransformerModel(nn.Module):
         nn.init.normal_(self.po_embed.weight, std=0.02)
 
     def forward(self, series_id, x):
-        id_embedding = self.id_embed(series_id)
+        batch_size = x.size(0)
         length = x.size(1)  # (Batch_size, length, input_dim)
+        embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
+        if self.series_id:
+            id_embedding = self.id_embed(series_id)
+            embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
         po_embedding = self.po_embed(position)
-        batch_size = x.size(0)
-        embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
         embedding_sum[:] = po_embedding
-        embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
         x = torch.cat((x, embedding_sum), dim=2)
         for block in self.blocks:
             x = block(x)
@@ -265,13 +268,14 @@ class TransformerModel(nn.Module):
 
 
 class DecoderTransformer(nn.Module):
-    def __init__(self, args, n_time_series: int, n_head: int, seq_num, sub_len, num_layer: int,
-                 n_embd, forecast_history: int, dropout: float, q_len: int, scale_att: bool, additional_params: Dict):
+    def __init__(self, args, n_time_series: int, n_head: int, num_layer: int,
+                 n_embd: int, forecast_history: int, dropout: float, q_len: int, scale_att: bool,
+                 additional_params: Dict, seq_num=None, sub_len=1):
         """
         Args:
             n_time_series: Number of time series present in input
             n_head: Number of heads in the MultiHeadAttention mechanism
-            seq_num: ??
+            seq_num: ?? Not relevant right now.
             sub_len: sub_len of sparse attention
             num_layer: The number of transformer blocks in the model.
             n_embd: The dimention of Position embedding and time series ID embedding
@@ -297,20 +301,8 @@ class DecoderTransformer(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.constant_(m.bias, 0)
 
-    def forward(self, series_id, x):
+    def forward(self, x, series_id=None):
         h = self.transformer(series_id, x)
         mu = self.mu(h)
         sigma = self.softplus(self.sigma(h))
         return mu, sigma
-
-
-class GaussianLoss(nn.Module):
-    def __init__(self, mu, sigma):
-        """Compute the negative log likelihood of Gaussian Distribution"""
-        super(GaussianLoss, self).__init__()
-        self.mu = mu
-        self.sigma = sigma
-
-    def forward(self, x):
-        loss = - Normal(self.mu, self.sigma).log_prob(x)
-        return torch.sum(loss) / (loss.size(0) * loss.size(1))
