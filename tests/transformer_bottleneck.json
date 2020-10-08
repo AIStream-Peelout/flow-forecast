@@ -4,6 +4,7 @@
     "model_params": {
       "n_time_series":3,
       "n_head": 8,
+      "forecast_length": 1,
       "forecast_history":5,
       "n_embd": 1, 
       "num_layer": 5,

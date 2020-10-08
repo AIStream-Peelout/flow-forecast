@@ -268,14 +268,14 @@ class TransformerModel(nn.Module):
 
 class DecoderTransformer(nn.Module):
     def __init__(self, n_time_series: int, n_head: int, num_layer: int,
-                 n_embd: int, forecast_history: int, dropout: float, q_len: int,
+                 n_embd: int, forecast_history: int, dropout: float, q_len: int, forecast_length: int,
                  additional_params: Dict, scale_att: bool = False, seq_num=None, sub_len=1, mu=None):
         """
         Args:
             n_time_series: Number of time series present in input
             n_head: Number of heads in the MultiHeadAttention mechanism
             seq_num: ?? Not relevant right now.
-            sub_len: sub_len of sparse attention
+            sub_len: sub_len of the sparse attention
             num_layer: The number of transformer blocks in the model.
             n_embd: The dimention of Position embedding and time series ID embedding
             forecast_history: The number of historical steps fed into the time series model
@@ -290,6 +290,7 @@ class DecoderTransformer(nn.Module):
         self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self._initialize_weights()
         self.mu_mode = mu
+        self.forecast_len_layer = nn.Linear(forecast_history, forecast_length)
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -307,7 +308,7 @@ class DecoderTransformer(nn.Module):
             x: Tensor of dimension (batch_size, seq_len, number_of_time_series)
             series_id: Optional id of the series in the dataframe. Currently not supported
         Returns:
-            Case 1: tensor of dimension (batch_size, )
+            Case 1: tensor of dimension (batch_size, forecast_length)
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
