@@ -268,8 +268,8 @@ class TransformerModel(nn.Module):
 
 class DecoderTransformer(nn.Module):
     def __init__(self, n_time_series: int, n_head: int, num_layer: int,
-                 n_embd: int, forecast_history: int, dropout: float, q_len: int, forecast_length: int,
-                 additional_params: Dict, scale_att: bool = False, seq_num=None, sub_len=1, mu=None):
+                 n_embd: int, forecast_history: int, dropout: float, q_len: int, additional_params: Dict,
+                 forecast_length: int = None, scale_att: bool = False, seq_num=None, sub_len=1, mu=None):
         """
         Args:
             n_time_series: Number of time series present in input
@@ -290,7 +290,9 @@ class DecoderTransformer(nn.Module):
         self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self._initialize_weights()
         self.mu_mode = mu
-        self.forecast_len_layer = nn.Linear(forecast_history, forecast_length)
+        self.forecast_len_layer = None
+        if forecast_length:
+            self.forecast_len_layer = nn.Linear(forecast_history, forecast_length)
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -315,4 +317,4 @@ class DecoderTransformer(nn.Module):
         sigma = self.softplus(self.sigma(h))
         if self.mu_mode:
             return mu, sigma
-        return sigma
+        return sigma.reshape(x.shape[0], -1)
