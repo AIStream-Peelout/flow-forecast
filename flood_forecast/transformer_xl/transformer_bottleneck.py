@@ -233,6 +233,7 @@ class TransformerModel(nn.Module):
         if seq_num:
             self.seq_num = seq_num
             self.id_embed = nn.Embedding(seq_num, n_embd)
+            nn.init.normal_(self.id_embed.weight, std=0.02)
         self.n_embd = n_embd
         self.win_len = forecast_history
         # The following is the implementation of this paragraph
@@ -247,8 +248,6 @@ class TransformerModel(nn.Module):
         block = Block(n_head, forecast_history, n_embd + n_time_series, scale=scale_att,
                       q_len=q_len, sub_len=sub_len, additional_params=additional_params)
         self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(num_layer)])
-
-        nn.init.normal_(self.id_embed.weight, std=0.02)
         nn.init.normal_(self.po_embed.weight, std=0.02)
 
     def forward(self, series_id, x):
