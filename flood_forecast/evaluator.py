@@ -91,8 +91,7 @@ def evaluate_model(
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
-            print("View tensor shape")
-            print(end_tensor.shape)
+            print("View predictions")
             end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
             end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
             print(end_tensor_list)
@@ -204,6 +203,7 @@ def infer_on_torch_model(
             dtype="float",
         )
         df_prediction_samples.iloc[history_length:] = prediction_samples
+        print(prediction_samples)
     return (
         df_train_and_test,
         end_tensor,
