@@ -26,7 +26,7 @@
        "test_end":400,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "StandardScaler", 
+       "scaler": "RobustScaler", 
        "interpolate": false
     },
     "training_params":
@@ -40,7 +40,6 @@
        "lr": 0.3,
        "epochs": 1,
        "batch_size":4
-    
     },
     "GCS": false,
     
@@ -65,7 +64,7 @@
              "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
-             "scaling": "StandardScaler",
+             "scaling": "RobustScaler",
              "interpolate_param": false
           }
    } 
