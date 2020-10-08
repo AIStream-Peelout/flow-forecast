@@ -254,7 +254,7 @@ class TransformerModel(nn.Module):
         batch_size = x.size(0)
         length = x.size(1)  # (Batch_size, length, input_dim)
         embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
-        if self.series_id:
+        if self.seq_num:
             id_embedding = self.id_embed(series_id)
             embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
