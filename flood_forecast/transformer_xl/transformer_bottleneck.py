@@ -302,6 +302,13 @@ class DecoderTransformer(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x, series_id=None):
+        """
+        Args:
+            x: Tensor of dimension (batch_size, seq_len, number_of_time_series)
+            series_id: Optional id of the series in the dataframe. Currently not supported
+        Returns:
+            Case 1: tensor of dimension (batch_size, )
+        """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
         sigma = self.softplus(self.sigma(h))
