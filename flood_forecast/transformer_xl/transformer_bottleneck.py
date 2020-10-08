@@ -32,7 +32,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import math
-from torch.distributions.normal import Normal
+#from torch.distributions.normal import Normal
 import copy
 from torch.nn.parameter import Parameter
 from typing import Dict
