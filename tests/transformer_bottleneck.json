@@ -1,11 +1,15 @@
 {                 
-    "model_name": "CustomTransformerDecoder",
+    "model_name": "DecoderTransformer",
     "model_type": "PyTorch",
     "model_params": {
       "n_time_series":3,
-      "seq_length":5,
-      "output_seq_length": 1, 
-      "n_layers_encoder": 6
+      "n_head": 8,
+      "forecast_history":5,
+      "n_embd": 1, 
+      "dropout":0.1,
+      "q_len": 1,
+      "scale_att": false,
+      "additional_params":{}
      }, 
     "dataset_params":
     {  "class": "default",

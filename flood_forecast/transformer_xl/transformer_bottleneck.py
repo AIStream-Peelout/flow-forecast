@@ -242,9 +242,9 @@ class TransformerModel(nn.Module):
         age is the distance to the first observation in that time series [3]. Each of them except time series
         ID has only one dimension and is normalized to have zero mean and unit variance (if applicable).
         """
-        self.po_embed = nn.Embedding(win_len, n_embd)
+        self.po_embed = nn.Embedding(forecast_history, n_embd)
         self.drop_em = nn.Dropout(dropout)
-        block = Block(n_head, win_len, n_embd + n_time_series, scale=scale_att,
+        block = Block(n_head, forecast_history, n_embd + n_time_series, scale=scale_att,
                       q_len=q_len, sub_len=sub_len, additional_params=additional_params)
         self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(num_layer)])
 
@@ -268,9 +268,9 @@ class TransformerModel(nn.Module):
 
 
 class DecoderTransformer(nn.Module):
-    def __init__(self, args, n_time_series: int, n_head: int, num_layer: int,
-                 n_embd: int, forecast_history: int, dropout: float, q_len: int, scale_att: bool,
-                 additional_params: Dict, seq_num=None, sub_len=1):
+    def __init__(self, n_time_series: int, n_head: int, num_layer: int,
+                 n_embd: int, forecast_history: int, dropout: float, q_len: int,
+                 additional_params: Dict, scale_att: bool = False, seq_num=None, sub_len=1, mu=None):
         """
         Args:
             n_time_series: Number of time series present in input
@@ -281,7 +281,7 @@ class DecoderTransformer(nn.Module):
             n_embd: The dimention of Position embedding and time series ID embedding
             forecast_history: The number of historical steps fed into the time series model
             dropout: The dropout for the embedding of the model.
-            additional_params: Additional params to initalize the model.
+            additional_params: Additional parameters to initalize the model.
         """
         super(DecoderTransformer, self).__init__()
         self.transformer = TransformerModel(n_time_series, n_head, seq_num, sub_len, num_layer, n_embd,
@@ -290,6 +290,7 @@ class DecoderTransformer(nn.Module):
         self.mu = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self._initialize_weights()
+        self.mu_mode = mu
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -305,4 +306,6 @@ class DecoderTransformer(nn.Module):
         h = self.transformer(series_id, x)
         mu = self.mu(h)
         sigma = self.softplus(self.sigma(h))
+        if not self.mu_mode:
+            return sigma
         return mu, sigma
