@@ -165,8 +165,6 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
         labels = trg[:, :, 0]
-        print(labels.shape)
-        print(output.shape)
         loss = criterion(output, labels.float())
         # TODO fix Guassian loss
         if loss > 100:

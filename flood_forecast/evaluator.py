@@ -91,8 +91,11 @@ def evaluate_model(
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
+            print("View tensor shape")
+            print(end_tensor.shape)
             end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
             end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
+            print(end_tensor_list)
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?

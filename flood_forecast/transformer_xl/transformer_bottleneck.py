@@ -250,7 +250,7 @@ class TransformerModel(nn.Module):
         self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(num_layer)])
         nn.init.normal_(self.po_embed.weight, std=0.02)
 
-    def forward(self, series_id, x):
+    def forward(self, series_id: int, x: torch.Tensor):
         batch_size = x.size(0)
         length = x.size(1)  # (Batch_size, length, input_dim)
         embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
@@ -304,13 +304,14 @@ class DecoderTransformer(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.constant_(m.bias, 0)
 
-    def forward(self, x, series_id=None):
+    def forward(self, x: torch.Tensor, series_id: int = None):
         """
         Args:
             x: Tensor of dimension (batch_size, seq_len, number_of_time_series)
             series_id: Optional id of the series in the dataframe. Currently not supported
         Returns:
             Case 1: tensor of dimension (batch_size, forecast_length)
+            Case 2: Return sigma and mu tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
