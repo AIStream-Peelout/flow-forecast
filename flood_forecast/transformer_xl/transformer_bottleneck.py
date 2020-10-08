@@ -67,7 +67,7 @@ class Attention(nn.Module):
         self.split_size = n_embd * self.n_head
         self.scale = scale
         self.q_len = q_len
-        self.query_key = nn.Conv1d(n_embd, n_embd * n_head * 2, self.q_lefqn)
+        self.query_key = nn.Conv1d(n_embd, n_embd * n_head * 2, self.q_len)
         self.value = Conv1D(n_embd * n_head, 1, n_embd)
         self.c_proj = Conv1D(n_embd, 1, n_embd * self.n_head)
         self.attn_dropout = nn.Dropout(attn_pdrop)
