@@ -39,6 +39,7 @@ class DARNN(nn.Module):
         forecast_history: How many historic time steps to use for forecasting (add one to this number)
         hidden_size_encoder: dimension of the hidden state encoder
         decoder_hidden_size: dimension of hidden size of the decoder
+        forecast_history: The number of historical steps fed into the time series model
         """
         super().__init__()
         self.probabilistic = probabilistic

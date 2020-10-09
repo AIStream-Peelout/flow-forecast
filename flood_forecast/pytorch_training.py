@@ -10,6 +10,7 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
+from flood_forecast.custom.custom_opt import GaussianLoss
 
 
 def train_transformer_style(
@@ -172,7 +173,10 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
         labels = trg[:, :, 0]
+        if isinstance(criterion, GaussianLoss):
+            pass
         loss = criterion(output, labels.float())
+        # TODO fix Guassian loss
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
@@ -202,7 +206,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                        val_or_test="validation_loss",
                        probabilistic=False) -> float:
     """
-    Function to compute the validation or test loss
+    Function to compute the validation or the test loss
     """
     model.eval()
     loop_loss = 0.0

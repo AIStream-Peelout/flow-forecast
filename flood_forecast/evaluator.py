@@ -92,6 +92,18 @@ def evaluate_model(
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
+
+            print("View predictions")
+            end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
+            end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
+            history_length = model.params["dataset_params"]["forecast_history"]
+            df_train_and_test["preds"][history_length:] = end_tensor_list
+            end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
+            if len(df_predictions) > 0:
+                df_predictions = pd.DataFrame(
+                    test_data.inverse_scale(df_predictions).numpy(),
+                    index=df_predictions.index,
+                )
             if "probabilistic" in inference_params:
                 print('probabilistic in infer_on_torch_model')
                 end_tensor_mean = test_data.inverse_scale(end_tensor[0].detach().reshape(-1, 1))
@@ -232,13 +244,15 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
+        df_prediction_samples.iloc[history_length:] = prediction_samples
+        print("predict samples")
+        print(prediction_samples)
         if decoder_params is not None:
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
                 # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
             df_prediction_samples.iloc[history_length:] = prediction_samples
-
     return (
         df_train_and_test,
         end_tensor,
