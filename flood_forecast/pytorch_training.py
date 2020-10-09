@@ -198,7 +198,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                        meta_model=None,
                        val_or_test="validation_loss") -> float:
     """
-    Function to compute the validation or test loss
+    Function to compute the validation or the test loss
     """
     model.eval()
     loop_loss = 0.0

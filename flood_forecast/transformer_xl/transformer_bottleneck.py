@@ -315,9 +315,9 @@ class DecoderTransformer(nn.Module):
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
-        sigma = h
+        sigma = self.sigma(h)
         if self.mu_mode:
-            sigma = self.softplus(self.sigma(sigma))
+            sigma = self.softplus(sigma)
             return mu, sigma
         if self.forecast_len_layer:
             sigma = self.forecast_len_layer(sigma)
