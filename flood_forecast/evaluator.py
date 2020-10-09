@@ -99,7 +99,7 @@ def evaluate_model(
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
             end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
-            if len(df_predictions) > 0:
+            if len(df_predictions) > 1:
                 df_predictions = pd.DataFrame(
                     test_data.inverse_scale(df_predictions).numpy(),
                     index=df_predictions.index,
