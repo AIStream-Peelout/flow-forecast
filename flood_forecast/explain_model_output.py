@@ -139,6 +139,9 @@ def deep_explain_model_heatmap(
     if model.params["model_name"] == "SimpleTransformer":
         print("SimpleTransformer currently not supported.")
         return
+    elif "probabilistic" in model.params:
+        print("Probabilistic currently not supported.")
+        return
     use_wandb = model.wandb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
