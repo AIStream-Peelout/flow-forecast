@@ -174,8 +174,10 @@ def torch_single_train(model: PyTorchForecast,
         output = model.model(src, **forward_params)
         labels = trg[:, :, 0]
         if isinstance(criterion, GaussianLoss):
-            pass
-        loss = criterion(output, labels.float())
+            g_loss = GaussianLoss(output[0], output[1])
+            loss = g_loss(labels)
+        else:
+            loss = criterion(output, labels.float())
         # TODO fix Guassian loss
         if loss > 100:
             print("Warning: high loss detected")
@@ -278,6 +280,9 @@ def compute_validation(validation_loader: DataLoader,  # s lint
             if probabilistic:
                 loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
                 loss = loss.numpy()
+            elif isinstance(criterion, GaussianLoss):
+                g_loss = GaussianLoss(output[0], output[1])
+                loss = g_loss(labels)
             else:
                 loss = criterion(output, labels.float())
             loop_loss += len(labels.float()) * loss.item()

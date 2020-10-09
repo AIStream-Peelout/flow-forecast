@@ -239,7 +239,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/da_rnn.json
             echo -e 'running auto test \n'
             coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
-            echo -e 'running trainer_lstm_test \n'
+            echo -e 'running trainer_lstm_test \n '
             coverage run flood_forecast/trainer.py -p tests/lstm_test.json
             echo -e 'running trainer_multi_test \n'
             coverage run flood_forecast/trainer.py -p tests/multi_test.json
