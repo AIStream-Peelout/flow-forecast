@@ -5,6 +5,7 @@ from torch.nn.modules.activation import MultiheadAttention
 
 class MergingModel(torch.nn.Module):
     def __init__(self, method: str, other_params: Dict):
+        """"""
         super().__init__()
         self.method_dict = {"Bilinear": torch.nn.Bilinear, "Bilinear2": torch.nn.Bilinear,
                             "MultiAttn": MultiModalSelfAttention, "Concat": Concatenation, "Other": "other"}
@@ -15,6 +16,7 @@ class MergingModel(torch.nn.Module):
         """
         Args:
             temporal_data:
+            meta_data: 
         """
         batch_size = temporal_data.shape[0]
         meta_data = meta_data.repeat(batch_size, 1).unsqueeze(1)
@@ -35,6 +37,7 @@ class MergingModel(torch.nn.Module):
 # A class to handle concatenation
 class Concatenation(torch.nn.Module):
     def __init__(self, combined_shape: int, out_shape: int, cat_dim: int, repeat: bool = True, use_layer: bool = False):
+        """"""
         super().__init__()
         self.combined_shape = combined_shape
         self.out_shape = out_shape
