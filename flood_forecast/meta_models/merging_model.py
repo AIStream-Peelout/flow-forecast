@@ -16,7 +16,7 @@ class MergingModel(torch.nn.Module):
         """
         Args:
             temporal_data:
-            meta_data: 
+            meta_data:
         """
         batch_size = temporal_data.shape[0]
         meta_data = meta_data.repeat(batch_size, 1).unsqueeze(1)
