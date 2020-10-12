@@ -280,7 +280,7 @@ class DecoderTransformer(nn.Module):
             n_embd: The dimention of Position embedding and time series ID embedding
             forecast_history: The number of historical steps fed into the time series model
             dropout: The dropout for the embedding of the model.
-            additional_params: Additional parameters to initalize the model.
+            additional_params: Additional parameters used to initalize the attention model. Can inc
         """
         super(DecoderTransformer, self).__init__()
         self.transformer = TransformerModel(n_time_series, n_head, sub_len, num_layer, n_embd,
