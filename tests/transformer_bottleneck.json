@@ -9,6 +9,7 @@
       "num_layer": 5,
       "dropout":0.1,
       "q_len": 1,
+      "mu": true,
       "scale_att": false,
       "additional_params":{}
      }, 
