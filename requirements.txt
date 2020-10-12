@@ -22,3 +22,4 @@ numba>=0.50
 sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
+six>=1.13.0
