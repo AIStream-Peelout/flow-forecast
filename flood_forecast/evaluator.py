@@ -104,7 +104,7 @@ def evaluate_model(
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
             print('end_tensor', end_tensor)
-            if len(df_predictions.columns>0):
+            if len(df_predictions.columns > 0):
                 df_predictions = pd.DataFrame(
                     test_data.inverse_scale(df_predictions).numpy(),
                     index=df_predictions.index,
