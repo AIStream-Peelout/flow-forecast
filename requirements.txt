@@ -1,7 +1,7 @@
 shap~=0.35.0
 scikit-learn~=0.23.0
 pandas~=1.0.3
-torch
+torch==1.5.1
 tb-nightly
 seaborn
 future
@@ -22,3 +22,5 @@ numba>=0.50
 sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
+six>=1.13.0
+certifi>=2020.6.20
