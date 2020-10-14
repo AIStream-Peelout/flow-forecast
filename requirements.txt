@@ -1,12 +1,12 @@
 shap~=0.35.0
 scikit-learn~=0.23.0
-pandas~=1.0.3
+pandas
 torch
 tb-nightly
 seaborn
 future
 h5py
-wandb
+wandb>=0.10.4
 pandas_gbq
 google-cloud
 google-cloud-storage
