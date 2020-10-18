@@ -32,7 +32,7 @@ class DARNN(nn.Module):
             decoder_hidden_size: int,
             out_feats=1,
             dropout=.01,
-            meta_data = False,
+            meta_data=False,
             gru_lstm=True,
             probabilistic=False):
         """
