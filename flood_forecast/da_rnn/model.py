@@ -32,6 +32,7 @@ class DARNN(nn.Module):
             decoder_hidden_size: int,
             out_feats=1,
             dropout=.01,
+            meta_data = False,
             gru_lstm=True,
             probabilistic=False):
         """
@@ -43,7 +44,7 @@ class DARNN(nn.Module):
         """
         super().__init__()
         self.probabilistic = probabilistic
-        self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm)
+        self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm, meta_data)
         self.dropout = nn.Dropout(dropout)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm,
                                self.probabilistic)
