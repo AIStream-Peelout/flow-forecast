@@ -52,21 +52,12 @@ class RMSELoss(torch.nn.Module):
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
-    def __init__(self, variance_penalty=0, variance_penalty_type=None):
+    def __init__(self, variance_penalty=0.0):
         super().__init__()
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
-        self.variance_penalty_type = variance_penalty_type
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-
-        # if (self.variance_penalty_type == 'absolute') | (self.variance_penalty_type == 'abs'):
-        #    rmse_loss = torch.sqrt(self.mse(target, output)) + self.variance_penalty \
-        #                * torch.std(torch.abs(target - output))
-        # elif (self.variance_penalty_type == 'squared'):
-        #    return torch.sqrt(self.mse(target, output)) + self.variance_penalty \
-        # * torch.std((target - output)**2)
-        # elif self.variance_penalty_type is None:
         var_penalty = self.variance_penalty * torch.std(target - output)
         rmse_loss = torch.sqrt(self.mse(target, output)) + var_penalty
         # torch.abs(target - output))
@@ -80,20 +71,13 @@ class MAPELoss(torch.nn.Module):
     output -> Predtion by model
     '''
 
-    def __init__(self, variance_penalty=0, variance_penalty_type='abs'):
+    def __init__(self, variance_penalty=0.0):
         super().__init__()
         self.variance_penalty = variance_penalty
-        self.variance_penalty_type = variance_penalty_type
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-        # if (self.variance_penalty_type == 'absolute') | (self.variance_penalty_type == 'abs'):
-        #    return torch.mean(torch.abs((target - output) / target)) + \
-        #        self.variance_penalty * torch.std(torch.abs(target - output))
-        # elif (self.variance_penalty_type == 'sqrt'):
-        #    return torch.mean(torch.abs((target - output) / target)) + \
-        #        self.variance_penalty * torch.std(torch.sqrt(target - output))
-        # elif (self.variance_penalty_type is None):
-        return torch.mean(torch.abs((target - output) / target))
+        return torch.mean(torch.abs((target - output) / target)) + \
+               self.variance_penalty * torch.std(target - output)
 
 
 class PenalizedMSELoss(torch.nn.Module):
@@ -104,22 +88,14 @@ class PenalizedMSELoss(torch.nn.Module):
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
-    def __init__(self, variance_penalty=0, variance_penalty_type=None):
+    def __init__(self, variance_penalty=0.0):
         super().__init__()
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
-        self.variance_penalty_type = variance_penalty_type
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-        # if (self.variance_penalty_type == 'absolute') | \
-        # (self.variance_penalty_type == 'abs'):
-        #    return self.mse(target, output) + self.variance_penalty * \
-        # torch.std(torch.abs(target - output))
-        # elif (self.variance_penalty_type == 'sqrt'):
-        #    return self.mse(target, output) + self.variance_penalty * \
-        # torch.std(torch.sqrt(target - output))
-        # elif (self.variance_penalty_type is None):
-        return self.mse(target, output)
+        return self.mse(target, output) + \
+               self.variance_penalty * torch.std(target - output)
 
 
 # Add custom loss function
