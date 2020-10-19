@@ -77,7 +77,7 @@ class MAPELoss(torch.nn.Module):
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
         return torch.mean(torch.abs((target - output) / target)) + \
-        self.variance_penalty * torch.std(target - output)
+            self.variance_penalty * torch.std(target - output)
 
 
 class PenalizedMSELoss(torch.nn.Module):
@@ -95,7 +95,7 @@ class PenalizedMSELoss(torch.nn.Module):
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
         return self.mse(target, output) + \
-        self.variance_penalty * torch.std(target - output)
+            self.variance_penalty * torch.std(target - output)
 
 
 # Add custom loss function
