@@ -263,7 +263,6 @@ def generate_predictions(
     decoder_params: Dict,
 ) -> torch.Tensor:
     history_dim = history.unsqueeze(0).to(model.device)
-    print(history_dim.shape)
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
@@ -413,7 +412,7 @@ def generate_prediction_samples(
             std_dev_samples.append(end_tensor[1].numpy())
         else:
             pred_samples.append(end_tensor.numpy())
-
+    print(pred_samples)
     if probabilistic:
         return np.array(pred_samples).T, np.array(std_dev_samples).T
     else:
