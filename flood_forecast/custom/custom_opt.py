@@ -62,6 +62,7 @@ class RMSELoss(torch.nn.Module):
         var_penalty = self.variance_penalty * std_dev
         rmse_loss = torch.sqrt(self.mse(target, output))  # + var_penalty
         # torch.abs(target - output))
+        print('std_dev' , std_dev)
         print('var_penalty', var_penalty)
         print('rmse_loss', rmse_loss)
         return rmse_loss
