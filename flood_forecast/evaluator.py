@@ -417,4 +417,5 @@ def generate_prediction_samples(
         return np.array(pred_samples).T, np.array(std_dev_samples).T
     else:
         print(np.array(pred_samples).T)
+        print(np.array(pred_samples).T.shape)
         return np.array(pred_samples).T  # each column is 1 array of predictions
