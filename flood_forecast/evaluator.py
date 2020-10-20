@@ -209,7 +209,6 @@ def infer_on_torch_model(
                 print(e)
     else:
         df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
-        print(end_tensor.shape)
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
     # df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
@@ -416,6 +415,6 @@ def generate_prediction_samples(
     if probabilistic:
         return np.array(pred_samples).T, np.array(std_dev_samples).T
     else:
-        print(np.array(pred_samples).T)
         print(np.array(pred_samples).T.shape)
+        print(np.array(pred_samples).T)
         return np.array(pred_samples).T  # each column is 1 array of predictions
