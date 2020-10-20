@@ -80,7 +80,7 @@ class MAPELoss(torch.nn.Module):
         self.variance_penalty = variance_penalty
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-        return torch.mean(torch.abs((target - output) / target)) + \
+        return torch.mean(torch.abs(torch.sub(target, output) / target)) + \
             self.variance_penalty * torch.std(torch.sub(target, output))
 
 
