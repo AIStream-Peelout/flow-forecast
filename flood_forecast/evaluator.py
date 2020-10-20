@@ -236,6 +236,8 @@ def infer_on_torch_model(
         if decoder_params is not None:
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
+            else:
+                df_prediction_samples.iloc[history_length:] = prediction_samples
                 # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
             df_prediction_samples.iloc[history_length:] = prediction_samples
