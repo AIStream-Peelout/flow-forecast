@@ -233,6 +233,7 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
+        print("Predict samples")
         if decoder_params is not None:
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
@@ -412,8 +413,8 @@ def generate_prediction_samples(
             std_dev_samples.append(end_tensor[1].numpy())
         else:
             pred_samples.append(end_tensor.numpy())
-    print(pred_samples)
     if probabilistic:
         return np.array(pred_samples).T, np.array(std_dev_samples).T
     else:
+        print(np.array(pred_samples).T)
         return np.array(pred_samples).T  # each column is 1 array of predictions
