@@ -239,7 +239,7 @@ def infer_on_torch_model(
                 # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
             df_prediction_samples.iloc[history_length:] = prediction_samples
-
+        print(df_prediction_samples)
     return (
         df_train_and_test,
         end_tensor,
