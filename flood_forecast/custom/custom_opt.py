@@ -58,7 +58,7 @@ class RMSELoss(torch.nn.Module):
         self.variance_penalty = variance_penalty
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-        if len(output)>1:
+        if len(output) > 1:
 
             diff = torch.sub(target, output)
             std_dev = torch.std(diff)
@@ -68,9 +68,7 @@ class RMSELoss(torch.nn.Module):
             print('diff', diff)
             print('std_dev', std_dev)
             print('var_penalty', var_penalty)
-            print('rmse_loss', rmse_loss)
-            return torch.sqrt(self.mse(target, output))  + var_penalty
-
+            return torch.sqrt(self.mse(target, output)) + var_penalty
         else:
             return torch.sqrt(self.mse(target, output))
 
@@ -87,7 +85,7 @@ class MAPELoss(torch.nn.Module):
         self.variance_penalty = variance_penalty
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-        if len(output)>1:
+        if len(output) > 1:
             return torch.mean(torch.abs(torch.sub(target, output) / target)) + \
                 self.variance_penalty * torch.std(torch.sub(target, output))
         else:
