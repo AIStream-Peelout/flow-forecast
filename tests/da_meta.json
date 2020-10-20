@@ -7,6 +7,7 @@
       "decoder_hidden_size":128,
       "out_feats":1,
       "forecast_history":6, 
+      "dropout": 0.4,
       "gru_lstm": false,
       "meta_data":
       {

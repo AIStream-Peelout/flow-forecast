@@ -209,7 +209,6 @@ def infer_on_torch_model(
                 print(e)
     else:
         df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
-        print(end_tensor.shape)
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
     # df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
@@ -233,13 +232,16 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
+        print("Predict samples")
         if decoder_params is not None:
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
+            else:
+                df_prediction_samples.iloc[history_length:] = prediction_samples
                 # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
             df_prediction_samples.iloc[history_length:] = prediction_samples
-
+        print(df_prediction_samples)
     return (
         df_train_and_test,
         end_tensor,
@@ -263,7 +265,6 @@ def generate_predictions(
     decoder_params: Dict,
 ) -> torch.Tensor:
     history_dim = history.unsqueeze(0).to(model.device)
-    print(history_dim.shape)
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
@@ -413,8 +414,9 @@ def generate_prediction_samples(
             std_dev_samples.append(end_tensor[1].numpy())
         else:
             pred_samples.append(end_tensor.numpy())
-
     if probabilistic:
         return np.array(pred_samples).T, np.array(std_dev_samples).T
     else:
+        print(np.array(pred_samples).T.shape)
+        print(np.array(pred_samples).T)
         return np.array(pred_samples).T  # each column is 1 array of predictions
