@@ -70,10 +70,6 @@ Welcome to Flow Forecast's documentation!
 .. toctree::
   :maxdepth: 3
   :caption: DA RNN:
-
-  train_da
-  utils_da
-  custom_types
   model
   modules
 
