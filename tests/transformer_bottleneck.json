@@ -34,6 +34,7 @@
     {
        "criterion":"GaussianLoss",
        "optimizer": "Adam",
+       "probabilistic": true,
        "optim_params":
        {
        },
