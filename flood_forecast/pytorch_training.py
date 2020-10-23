@@ -274,6 +274,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                     if output == type(tuple):
                         output = output[0]
                         output1 = output[1]
+                        print(output1)
                     unscaled_out = validation_dataset.inverse_scale(output.cpu())
                     unscaled_labels = validation_dataset.inverse_scale(labels.cpu())
                     loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
