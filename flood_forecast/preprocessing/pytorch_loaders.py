@@ -3,10 +3,7 @@ import numpy as np
 import pandas as pd
 import torch
 from typing import List, Union, Optional
-from flood_forecast.preprocessing.interpolate_preprocess import (
-    interpolate_missing_values,
-    fix_timezones
-)
+from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 
 
@@ -44,15 +41,15 @@ class CSVDataLoader(Dataset):
         :param sort_column str: The column to sort the time series on prior to forecast.
         """
         super().__init__()
+        interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
         # TODO allow other filling methods
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
-        if interpolate_param:
-            df = fix_timezones(self.local_file_path)
-            df = interpolate_missing_values(df)
+        if interpolate:
+            self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
         print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)
@@ -137,8 +134,7 @@ class CSVTestLoader(CSVDataLoader):
         super().__init__(**kwargs)
         self.original_df = pd.read_csv(df_path)
         if interpolate:
-            self.original_df = fix_timezones(df_path)
-            self.original_df = interpolate_missing_values(self.original_df)
+            self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
