@@ -11,7 +11,7 @@ class TestInterpolationCode(unittest.TestCase):
 
     def test_back_forward(self):
         df = back_forward_generic(self.df, ["NumberOfAnimals"])
-        self.assertEqual(df.iloc[3]["NumberOfAnimals"], 153)
+        self.assertEqual(df.iloc[3]["NumberOfAnimals"], 165)
 
     def test_make_function(self):
         pass
