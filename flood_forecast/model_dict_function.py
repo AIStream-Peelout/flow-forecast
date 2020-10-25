@@ -10,7 +10,8 @@ from flood_forecast.custom.custom_opt import BertAdam
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.da_rnn.model import DARNN
-from flood_forecast.custom.custom_opt import RMSELoss, MAPELoss
+from flood_forecast.transformer_xl.transformer_bottleneck import DecoderTransformer
+from flood_forecast.custom.custom_opt import RMSELoss, MAPELoss, NegativeLogLikelihood
 from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
 import torch
@@ -27,6 +28,7 @@ pytorch_model_dict = {
     "SimpleLinearModel": SimpleLinearModel,
     "CustomTransformerDecoder": CustomTransformerDecoder,
     "DARNN": DARNN,
+    "DecoderTransformer": DecoderTransformer,
     "BasicAE": AE
 
 }
@@ -38,10 +40,8 @@ pytorch_criterion_dict = {
     "RMSE": RMSELoss,
     "MAPE": MAPELoss,
     "DilateLoss": DilateLoss,
-    "L1": L1Loss}
-
-
-evaluation_functions_dict = {"NSE": "", "MSE": ""}
+    "L1": L1Loss,
+    "NegativeLogLikelihood": NegativeLogLikelihood}
 
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}
 

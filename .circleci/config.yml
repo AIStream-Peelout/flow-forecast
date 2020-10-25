@@ -23,7 +23,6 @@ jobs:
           root: .
           paths:
             - .
-
   linting:
     <<: *defaults
     steps:
@@ -91,7 +90,7 @@ jobs:
           command: |
             sudo pip install pipenv
             sudo pip install coverage
-            sudo pip install --upgrade -r requirements.txt
+            sudo pip install --force-reinstall --upgrade -r requirements.txt
             sudo python setup.py develop --no-deps
 
       - save_cache:
@@ -105,6 +104,7 @@ jobs:
             coverage run -m unittest -v tests/data_format_tests.py
             coverage run -m unittest -v tests/usgs_tests.py
             coverage run -m unittest -v tests/test_join.py
+            coverage run -m unittest -v tests/test_preprocessing.py
 
       - run:
           name: upload_stuff
@@ -175,7 +175,7 @@ jobs:
           command: |
             sudo pip install pipenv
             sudo pip install coverage
-            sudo pip install --upgrade --quiet -r requirements.txt
+            sudo pip install --upgrade --force-reinstall --quiet -r requirements.txt
             sudo python setup.py develop --no-deps
 
       - save_cache:
@@ -226,13 +226,23 @@ jobs:
           name: Trainer tests
           when: always
           command: |
+            echo -e 'running da-meta data unit test'
+            coverage run flood_forecast/trainer.py -p tests/da_meta.json
+            echo -e 'running transformer bottleneck'
+            coverage run flood_forecast/trainer.py -p tests/transformer_bottleneck.json
+            echo -e 'running da_rnn probabilistic test'
+            coverage run flood_forecast/trainer.py -p tests/da_rnn_probabilistic.json
+            echo -e 'running lstm probabilistic test'
+            coverage run flood_forecast/trainer.py -p tests/lstm_probabilistic_test.json
+            echo -e 'running probabilistic lin reg test'
+            coverage run flood_forecast/trainer.py -p tests/probabilistic_linear_regression_test.json
             echo -e 'running meta-data fusion'
             coverage run flood_forecast/trainer.py -p tests/meta_data_test.json
             echo -e 'running da_rnn_test \n'
             coverage run flood_forecast/trainer.py -p tests/da_rnn.json
             echo -e 'running auto test \n'
             coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
-            echo -e 'running trainer_lstm_test \n'
+            echo -e 'running trainer_lstm_test \n '
             coverage run flood_forecast/trainer.py -p tests/lstm_test.json
             echo -e 'running trainer_multi_test \n'
             coverage run flood_forecast/trainer.py -p tests/multi_test.json
@@ -249,7 +259,6 @@ jobs:
           name: upload results
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
-
 
       - store_test_results:
           path: test-results
@@ -296,7 +305,6 @@ jobs:
       - store_artifacts:
           path: test-results
           destination: test-results-plot
-
 
 
 workflows:

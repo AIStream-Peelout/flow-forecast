@@ -25,14 +25,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
+# Arxiv Link https://arxiv.org/pdf/1907.00235.pdf
+
+
 import numpy as np
 import torch
 import torch.nn as nn
 import math
-from torch.distributions.normal import Normal
+# from torch.distributions.normal import Normal
 import copy
 from torch.nn.parameter import Parameter
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from typing import Dict
 
 
 def gelu(x):
@@ -50,12 +53,12 @@ ACT_FNS = {
 
 
 class Attention(nn.Module):
-    def __init__(self, args, n_head, n_embd, win_len, scale, q_len):
+    def __init__(self, n_head, n_embd, win_len, scale, q_len, sub_len, sparse=None, attn_pdrop=0.1, resid_pdrop=0.1):
         super(Attention, self).__init__()
 
-        if(args.sparse):
+        if(sparse):
             print('Activate log sparse!')
-            mask = self.log_mask(win_len, args.sub_len)
+            mask = self.log_mask(win_len, sub_len)
         else:
             mask = torch.tril(torch.ones(win_len, win_len)).view(1, 1, win_len, win_len)
 
@@ -67,8 +70,8 @@ class Attention(nn.Module):
         self.query_key = nn.Conv1d(n_embd, n_embd * n_head * 2, self.q_len)
         self.value = Conv1D(n_embd * n_head, 1, n_embd)
         self.c_proj = Conv1D(n_embd, 1, n_embd * self.n_head)
-        self.attn_dropout = nn.Dropout(args.attn_pdrop)
-        self.resid_dropout = nn.Dropout(args.resid_pdrop)
+        self.attn_dropout = nn.Dropout(attn_pdrop)
+        self.resid_dropout = nn.Dropout(resid_pdrop)
 
     def log_mask(self, win_len, sub_len):
         mask = torch.zeros((win_len, win_len), dtype=torch.float)
@@ -201,10 +204,10 @@ class MLP(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, args, n_head, win_len, n_embd, scale, q_len):
+    def __init__(self, n_head, win_len, n_embd, scale, q_len, sub_len, additional_params: Dict):
         super(Block, self).__init__()
         n_embd = n_embd
-        self.attn = Attention(args, n_head, n_embd, win_len, scale, q_len)
+        self.attn = Attention(n_head, n_embd, win_len, scale, q_len, sub_len, **additional_params)
         self.ln_1 = LayerNorm(n_embd)
         self.mlp = MLP(4 * n_embd, n_embd)
         self.ln_2 = LayerNorm(n_embd)
@@ -220,31 +223,43 @@ class Block(nn.Module):
 class TransformerModel(nn.Module):
     """ Transformer model """
 
-    def __init__(self, args_dict, input_dim, n_head, seq_num, layer, n_embd, win_len, dropout, scale_att, q_len):
+    def __init__(self, n_time_series, n_head, sub_len, num_layer, n_embd,
+                 forecast_history: int, dropout: float, scale_att, q_len, additional_params: Dict, seq_num=None):
         super(TransformerModel, self).__init__()
-        self.input_dim = input_dim
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.input_dim = n_time_series
         self.n_head = n_head
-        self.seq_num = seq_num
+        self.seq_num = None
+        if seq_num:
+            self.seq_num = seq_num
+            self.id_embed = nn.Embedding(seq_num, n_embd)
+            nn.init.normal_(self.id_embed.weight, std=0.02)
         self.n_embd = n_embd
-        self.win_len = win_len
-        self.id_embed = nn.Embedding(seq_num, n_embd)
-        self.po_embed = nn.Embedding(win_len, n_embd)
+        self.win_len = forecast_history
+        # The following is the implementation of this paragraph
+        """For positional encoding in Transformer, we use learnable position embedding.
+        For covariates, following [3], we use all or part of year, month, day-of-the-week,
+        hour-of-the-day, minute-of-the-hour, age and time-series-ID according to the granularities of datasets.
+        age is the distance to the first observation in that time series [3]. Each of them except time series
+        ID has only one dimension and is normalized to have zero mean and unit variance (if applicable).
+        """
+        self.po_embed = nn.Embedding(forecast_history, n_embd)
         self.drop_em = nn.Dropout(dropout)
-        block = Block(args_dict, n_head, win_len, n_embd + input_dim, scale=scale_att, q_len=q_len)
-        self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(layer)])
-
-        nn.init.normal_(self.id_embed.weight, std=0.02)
+        block = Block(n_head, forecast_history, n_embd + n_time_series, scale=scale_att,
+                      q_len=q_len, sub_len=sub_len, additional_params=additional_params)
+        self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(num_layer)])
         nn.init.normal_(self.po_embed.weight, std=0.02)
 
-    def forward(self, series_id, x):
-        id_embedding = self.id_embed(series_id)
-        length = x.size(1)  # (Batch_size,length,input_dim)
-        position = torch.tensor(torch.arange(length), dtype=torch.long).to(device)
-        po_embedding = self.po_embed(position)
+    def forward(self, series_id: int, x: torch.Tensor):
         batch_size = x.size(0)
-        embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(device)
+        length = x.size(1)  # (Batch_size, length, input_dim)
+        embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
+        if self.seq_num:
+            id_embedding = self.id_embed(series_id)
+            embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
+        position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
+        po_embedding = self.po_embed(position)
         embedding_sum[:] = po_embedding
-        embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
         x = torch.cat((x, embedding_sum), dim=2)
         for block in self.blocks:
             x = block(x)
@@ -252,13 +267,32 @@ class TransformerModel(nn.Module):
 
 
 class DecoderTransformer(nn.Module):
-    def __init__(self, args, input_dim, n_head, seq_num, layer, n_embd, win_len):
+    def __init__(self, n_time_series: int, n_head: int, num_layer: int,
+                 n_embd: int, forecast_history: int, dropout: float, q_len: int, additional_params: Dict,
+                 forecast_length: int = None, scale_att: bool = False, seq_num=None, sub_len=1, mu=None):
+        """
+        Args:
+            n_time_series: Number of time series present in input
+            n_head: Number of heads in the MultiHeadAttention mechanism
+            seq_num: ?? Not relevant right now.
+            sub_len: sub_len of the sparse attention
+            num_layer: The number of transformer blocks in the model.
+            n_embd: The dimention of Position embedding and time series ID embedding
+            forecast_history: The number of historical steps fed into the time series model
+            dropout: The dropout for the embedding of the model.
+            additional_params: Additional parameters used to initalize the attention model. Can inc
+        """
         super(DecoderTransformer, self).__init__()
-        self.transformer = TransformerModel(args, input_dim, n_head, seq_num, layer, n_embd, win_len)
+        self.transformer = TransformerModel(n_time_series, n_head, sub_len, num_layer, n_embd,
+                                            forecast_history, dropout, scale_att, q_len, additional_params)
         self.softplus = nn.Softplus()
-        self.mu = torch.nn.Linear(input_dim + n_embd, 1, bias=True)
-        self.sigma = torch.nn.Linear(input_dim + n_embd, 1, bias=True)
+        self.mu = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
+        self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self._initialize_weights()
+        self.mu_mode = mu
+        self.forecast_len_layer = None
+        if forecast_length:
+            self.forecast_len_layer = nn.Linear(forecast_history, forecast_length)
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -270,20 +304,21 @@ class DecoderTransformer(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.constant_(m.bias, 0)
 
-    def forward(self, series_id, x):
+    def forward(self, x: torch.Tensor, series_id: int = None):
+        """
+        Args:
+            x: Tensor of dimension (batch_size, seq_len, number_of_time_series)
+            series_id: Optional id of the series in the dataframe. Currently not supported
+        Returns:
+            Case 1: tensor of dimension (batch_size, forecast_length)
+            Case 2: Return sigma and mu tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
+        """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
-        sigma = self.softplus(self.sigma(h))
-        return mu, sigma
-
-
-class GaussianLoss(nn.Module):
-    def __init__(self, mu, sigma):
-        """Compute the negative log likelihood of Gaussian Distribution"""
-        super(GaussianLoss, self).__init__()
-        self.mu = mu
-        self.sigma = sigma
-
-    def forward(self, x):
-        loss = - Normal(self.mu, self.sigma).log_prob(x)
-        return torch.sum(loss) / (loss.size(0) * loss.size(1))
+        sigma = self.sigma(h)
+        if self.mu_mode:
+            sigma = self.softplus(sigma)
+            return mu, sigma
+        if self.forecast_len_layer:
+            sigma = self.forecast_len_layer(sigma)
+        return sigma.reshape(x.shape[0], -1)

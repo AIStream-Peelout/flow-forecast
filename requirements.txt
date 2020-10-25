@@ -1,6 +1,6 @@
 shap~=0.35.0
 scikit-learn~=0.23.0
-pandas~=1.0.3
+pandas
 torch
 tb-nightly
 seaborn

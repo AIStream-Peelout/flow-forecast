@@ -86,39 +86,59 @@ def evaluate_model(
             forecast_start_idx,
             test_data,
             df_predictions,
+            # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # Unscale test data if scaler was applied
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
-            end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
-            end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
+            if "probabilistic" in inference_params:
+                print('probabilistic in infer_on_torch_model')
+                end_tensor_mean = test_data.inverse_scale(end_tensor[0].detach().reshape(-1, 1))
+                end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
+                end_tensor_mean = end_tensor_mean.squeeze(1)
+            else:
+                end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
+                end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
+                end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
             history_length = model.params["dataset_params"]["forecast_history"]
             df_train_and_test["preds"][history_length:] = end_tensor_list
-            end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
-            df_predictions = pd.DataFrame(
-                test_data.inverse_scale(df_predictions).numpy(),
-                index=df_predictions.index,
-            )
+            print('end_tensor', end_tensor)
+            if len(df_predictions.columns > 0):
+                df_predictions = pd.DataFrame(
+                    test_data.inverse_scale(df_predictions).numpy(),
+                    index=df_predictions.index,
+                )
         print("Current historical dataframe")
         print(df_train_and_test)
     for evaluation_metric in evaluation_metrics:
         for target in target_col:
             eval_params = {}
             evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
-            s = evaluation_metric_function(
-                torch.from_numpy(
-                    df_train_and_test[target][forecast_history:].to_numpy()
-                ),
-                end_tensor,
-            )
+            if "probabilistic" in inference_params:
+                s = evaluation_metric_function(
+                    torch.distributions.Normal(end_tensor[0], end_tensor[1][0]),
+                    torch.from_numpy(
+                        df_train_and_test[target][forecast_history:].to_numpy()
+                    ),
+                )
+            else:
+                s = evaluation_metric_function(
+                    torch.from_numpy(
+                        df_train_and_test[target][forecast_history:].to_numpy()
+                    ),
+                    end_tensor,
+                )
             eval_log[target + "_" + evaluation_metric] = s
 
     # Explain model behaviour using shap
-    deep_explain_model_summary_plot(
-        model, test_data, inference_params["datetime_start"]
-    )
-    deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
+    if "probabilistic" in inference_params:
+        print("Probabilistic explainability currently not supported.")
+    else:
+        deep_explain_model_summary_plot(
+            model, test_data, inference_params["datetime_start"]
+        )
+        deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
 
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
@@ -131,6 +151,7 @@ def infer_on_torch_model(
     decoder_params=None,
     dataset_params: Dict = {},
     num_prediction_samples: int = None,
+    probabilistic: bool = False,
 ) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, pd.DataFrame):
     """
     Function to handle both test evaluation and inference on a test dataframe.
@@ -176,10 +197,21 @@ def infer_on_torch_model(
         decoder_params,
     )
     df_train_and_test["preds"] = 0
-    df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
-    print(end_tensor.shape)
+    if decoder_params is not None:
+        if "probabilistic" in decoder_params:
+            df_train_and_test["preds"][history_length:] = end_tensor[0].numpy().tolist()
+            df_train_and_test["std_dev"] = 0
+            print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
+            try:
+                df_train_and_test["std_dev"][history_length:] = end_tensor[1][0].numpy().tolist()
+            except Exception as e:
+                df_train_and_test["std_dev"][history_length:] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
+                print(e)
+    else:
+        df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
 
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
+    # df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
     if num_prediction_samples is not None:
         model.model.train()  # sets mode to train so the dropout layers will be touched
         assert num_prediction_samples > 1
@@ -200,7 +232,16 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
-        df_prediction_samples.iloc[history_length:] = prediction_samples
+        print("Predict samples")
+        if decoder_params is not None:
+            if "probabilistic" in decoder_params:
+                df_prediction_samples.iloc[history_length:] = prediction_samples[0]
+            else:
+                df_prediction_samples.iloc[history_length:] = prediction_samples
+                # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
+        else:
+            df_prediction_samples.iloc[history_length:] = prediction_samples
+        print(df_prediction_samples)
     return (
         df_train_and_test,
         end_tensor,
@@ -208,6 +249,7 @@ def infer_on_torch_model(
         forecast_start_idx,
         csv_test_loader,
         df_prediction_samples,
+        # df_prediction_samples_std_dev
     )
 
 
@@ -223,7 +265,6 @@ def generate_predictions(
     decoder_params: Dict,
 ) -> torch.Tensor:
     history_dim = history.unsqueeze(0).to(model.device)
-    print(history_dim.shape)
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
@@ -308,6 +349,11 @@ def generate_decoded_predictions(
     hours_to_forecast: int,
     decoder_params: Dict,
 ) -> torch.Tensor:
+    probabilistic = False
+    if decoder_params is not None:
+        if "probabilistic" in decoder_params:
+            probabilistic = True
+
     real_target_tensor = (
         torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
         .to(device)
@@ -322,7 +368,11 @@ def generate_decoded_predictions(
         decoder_params["unsqueeze_dim"],
         output_len=model.params["dataset_params"]["forecast_length"],
         device=model.device,
+        probabilistic=probabilistic,
     )
+    if probabilistic:
+        end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
+        return end_tensor_mean, end_tensor[1]
     end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
     return end_tensor
 
@@ -340,6 +390,12 @@ def generate_prediction_samples(
     num_prediction_samples: int,
 ) -> np.ndarray:
     pred_samples = []
+    std_dev_samples = []
+    probabilistic = False
+    if decoder_params is not None:
+        if "probabilistic" in decoder_params:
+            probabilistic = True
+
     for _ in range(num_prediction_samples):
         end_tensor = generate_predictions(
             model,
@@ -352,5 +408,15 @@ def generate_prediction_samples(
             hours_to_forecast,
             decoder_params,
         )
-        pred_samples.append(end_tensor.numpy())
-    return np.array(pred_samples).T  # each column is 1 array of predictions
+
+        if probabilistic:
+            pred_samples.append(end_tensor[0].numpy())
+            std_dev_samples.append(end_tensor[1].numpy())
+        else:
+            pred_samples.append(end_tensor.numpy())
+    if probabilistic:
+        return np.array(pred_samples).T, np.array(std_dev_samples).T
+    else:
+        print(np.array(pred_samples).T.shape)
+        print(np.array(pred_samples).T)
+        return np.array(pred_samples).T  # each column is 1 array of predictions

@@ -7,7 +7,9 @@ from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
 from flood_forecast.pre_dict import scaler_dict
-from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
+from flood_forecast.plot_functions import (
+    plot_df_test_with_confidence_interval,
+    plot_df_test_with_probabilistic_confidence_interval)
 
 
 def train_function(model_type: str, params: Dict):
@@ -55,13 +57,19 @@ def train_function(model_type: str, params: Dict):
         wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
 
         # Log plots
-        test_plot = plot_df_test_with_confidence_interval(
-            df_train_and_test,
-            df_prediction_samples,
-            forecast_start_idx,
-            params,
-            ci=95,
-            alpha=0.25)
+        if "probabilistic" in params["inference_params"]:
+            test_plot = plot_df_test_with_probabilistic_confidence_interval(
+                df_train_and_test,
+                forecast_start_idx,
+                params,)
+        else:
+            test_plot = plot_df_test_with_confidence_interval(
+                df_train_and_test,
+                df_prediction_samples,
+                forecast_start_idx,
+                params,
+                ci=95,
+                alpha=0.25)
         wandb.log({"test_plot": test_plot})
 
         test_plot_all = go.Figure()

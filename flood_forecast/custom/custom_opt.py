@@ -246,6 +246,21 @@ class BertAdam(Optimizer):
         return loss
 
 
+class NegativeLogLikelihood(torch.nn.Module):
+    """
+    target -> True y
+    output -> predicted distribution
+    """
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, output: torch.distributions, target: torch.Tensor):
+        """
+        calculates NegativeLogLikelihood
+        """
+        return -output.log_prob(target).sum()
+
+
 def l1_regularizer(model, lambda_l1=0.01):
     """
     source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
