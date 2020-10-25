@@ -19,7 +19,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
-        interpolate_param: bool = True,
+        interpolate: bool = True,
         sort_column="datetime"
     ):
         """
@@ -47,9 +47,8 @@ class CSVDataLoader(Dataset):
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
-        if interpolate_param:
-            df = fix_timezones(self.local_file_path)
-            df = interpolate_missing_values(df)
+        if interpolate:
+            self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
         print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)
