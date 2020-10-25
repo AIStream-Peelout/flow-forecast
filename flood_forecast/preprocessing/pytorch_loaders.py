@@ -3,10 +3,7 @@ import numpy as np
 import pandas as pd
 import torch
 from typing import List, Union, Optional
-from flood_forecast.preprocessing.interpolate_preprocess import (
-    interpolate_missing_values,
-    fix_timezones
-)
+from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 
 
@@ -137,8 +134,7 @@ class CSVTestLoader(CSVDataLoader):
         super().__init__(**kwargs)
         self.original_df = pd.read_csv(df_path)
         if interpolate:
-            self.original_df = fix_timezones(df_path)
-            self.original_df = interpolate_missing_values(self.original_df)
+            self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total

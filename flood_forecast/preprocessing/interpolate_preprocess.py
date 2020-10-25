@@ -1,13 +1,13 @@
 import pandas as pd
+from typing import List
 
 
-def fix_timezones(csv_path: str) -> pd.DataFrame:
+def fix_timezones(df: pd.DataFrame) -> pd.DataFrame:
     """
     Basic function to fix intial data bug
     related to NaN values in non-eastern-time zones due
     to UTC conversion.
     """
-    df = pd.read_csv(csv_path)
     the_count = df[0:2]['cfs'].isna().sum()
     return df[the_count:]
 
@@ -22,7 +22,19 @@ def interpolate_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     value. Should be run only after splitting on the NaN
     chunks.
     """
+    df = fix_timezones(df)
     df['cfs1'] = df['cfs'].interpolate(method='nearest').ffill().bfill()
     df['precip'] = df['p01m'].interpolate(method='nearest').ffill().bfill()
     df['temp'] = df['tmpf'].interpolate(method='nearest').ffill().bfill()
+    return df
+
+
+def back_forward_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFrame:
+    """
+    Function to fill missing values with nearest
+    value. Should be run only after splitting on the NaN
+    chunks.
+    """
+    for col in relevant_columns:
+        df[col] = df[col].interpolate(method='nearest').ffill().bfill()
     return df
