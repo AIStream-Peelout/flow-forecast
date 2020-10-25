@@ -104,6 +104,7 @@ jobs:
             coverage run -m unittest -v tests/data_format_tests.py
             coverage run -m unittest -v tests/usgs_tests.py
             coverage run -m unittest -v tests/test_join.py
+            coverage run -m unittest -v tests/test_preprocessing.py
 
       - run:
           name: upload_stuff
