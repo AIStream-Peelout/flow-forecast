@@ -158,6 +158,7 @@ def torch_single_train(model: PyTorchForecast,
                        meta_data_model: PyTorchForecast,
                        meta_data_model_representation: torch.Tensor,
                        forward_params: Dict = {}) -> float:
+    print('torch_single_train')
     i = 0
     running_loss = 0.0
     for src, trg in data_loader:
@@ -179,6 +180,7 @@ def torch_single_train(model: PyTorchForecast,
         else:
             loss = criterion(output, labels.float())
         # TODO fix Guassian loss
+
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
@@ -210,6 +212,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
     """
     Function to compute the validation or the test loss
     """
+    print('compute_validation')
     model.eval()
     loop_loss = 0.0
     with torch.no_grad():

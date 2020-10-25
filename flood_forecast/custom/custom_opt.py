@@ -1,4 +1,3 @@
-
 import math
 import torch
 from torch.optim import Optimizer
@@ -53,12 +52,25 @@ class RMSELoss(torch.nn.Module):
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
-    def __init__(self):
+    def __init__(self, variance_penalty=0.0):
         super().__init__()
         self.mse = torch.nn.MSELoss()
+        self.variance_penalty = variance_penalty
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-        return torch.sqrt(self.mse(target, output))
+        if len(output) > 1:
+
+            diff = torch.sub(target, output)
+            std_dev = torch.std(diff)
+            var_penalty = self.variance_penalty * std_dev
+
+            # torch.abs(target - output))
+            print('diff', diff)
+            print('std_dev', std_dev)
+            print('var_penalty', var_penalty)
+            return torch.sqrt(self.mse(target, output)) + var_penalty
+        else:
+            return torch.sqrt(self.mse(target, output))
 
 
 class MAPELoss(torch.nn.Module):
@@ -68,11 +80,34 @@ class MAPELoss(torch.nn.Module):
     output -> Predtion by model
     '''
 
-    def __init__(self):
+    def __init__(self, variance_penalty=0.0):
         super().__init__()
+        self.variance_penalty = variance_penalty
 
     def forward(self, target: torch.Tensor, output: torch.Tensor):
-        return torch.mean(torch.abs((target - output) / target))
+        if len(output) > 1:
+            return torch.mean(torch.abs(torch.sub(target, output) / target)) + \
+                self.variance_penalty * torch.std(torch.sub(target, output))
+        else:
+            return torch.mean(torch.abs(torch.sub(target, output) / target))
+
+
+class PenalizedMSELoss(torch.nn.Module):
+    '''
+    Returns MSE using:
+    target -> True y
+    output -> Predtion by model
+    source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
+    '''
+
+    def __init__(self, variance_penalty=0.0):
+        super().__init__()
+        self.mse = torch.nn.MSELoss()
+        self.variance_penalty = variance_penalty
+
+    def forward(self, target: torch.Tensor, output: torch.Tensor):
+        return self.mse(target, output) + \
+            self.variance_penalty * torch.std(torch.sub(target, output))
 
 
 # Add custom loss function
@@ -269,7 +304,7 @@ def l1_regularizer(model, lambda_l1=0.01):
     for model_param_name, model_param_value in model.named_parameters():
         if model_param_name.endswith('weight'):
             lossl1 += lambda_l1 * model_param_value.abs().sum()
-    return lossl1
+        return lossl1
 
 
 def orth_regularizer(model, lambda_orth=0.01):
@@ -283,4 +318,5 @@ def orth_regularizer(model, lambda_orth=0.01):
             sym = torch.mm(param_flat, torch.t(param_flat))
             sym -= torch.eye(param_flat.shape[0])
             lossorth += lambda_orth * sym.sum()
-    return lossorth
+
+        return lossorth
