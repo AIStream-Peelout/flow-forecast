@@ -18,9 +18,8 @@ def split_on_na_chunks(df: pd.DataFrame) -> None:
 
 def interpolate_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Function to fill missing values with nearest
-    value. Should be run only after splitting on the NaN
-    chunks.
+    Function to fill missing values with nearest value.
+    Should be run only after splitting on the NaN chunks.
     """
     df = fix_timezones(df)
     df['cfs1'] = df['cfs'].interpolate(method='nearest').ffill().bfill()

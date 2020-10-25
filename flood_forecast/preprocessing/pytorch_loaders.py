@@ -19,7 +19,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
-        interpolate: bool = True,
+        interpolate_param: bool = True,
         sort_column="datetime"
     ):
         """
@@ -41,6 +41,7 @@ class CSVDataLoader(Dataset):
         :param sort_column str: The column to sort the time series on prior to forecast.
         """
         super().__init__()
+        interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
         # TODO allow other filling methods
