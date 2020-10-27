@@ -49,11 +49,12 @@ class CSVDataLoader(Dataset):
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
         if interpolate:
-            self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
+            self.original_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
+        else:
+            self.original_df = df
         print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)
-        self.original_df = df
         self.df = df[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
