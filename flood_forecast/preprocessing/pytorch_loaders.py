@@ -52,7 +52,7 @@ class CSVDataLoader(Dataset):
             df = df.sort_values(by=sort_column)
         if interpolate:
             interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
-            self.df = interpolated_df
+            self.df = interpolated_df[relevant_cols]
         else:
             self.df = df[relevant_cols]
         print("Now loading and scaling " + file_path)

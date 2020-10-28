@@ -24,12 +24,11 @@
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler",
-       "interpolate": { 
+       "interpolate": {
           "method":"back_forward_generic",
           "params":{
              "relevant_columns":["cfs"]
           }
-          
        }
     },
     "training_params":
