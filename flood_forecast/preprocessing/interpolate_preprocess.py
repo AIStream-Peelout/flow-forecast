@@ -28,12 +28,19 @@ def interpolate_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def back_forward_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFrame:
+def forward_back_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFrame:
     """
-    Function to fill missing values with nearest
-    value. Should be run only after splitting on the NaN
-    chunks.
+    Function to fill missing values with nearest value (forward first)
     """
     for col in relevant_columns:
         df[col] = df[col].interpolate(method='nearest').ffill().bfill()
+    return df
+
+
+def back_forward_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFrame:
+    """
+    Function to fill missing values with nearest values (backward first)
+    """
+    for col in relevant_columns:
+        df[col] = df[col].interpolate(method='nearest').bfill().ffill()
     return df

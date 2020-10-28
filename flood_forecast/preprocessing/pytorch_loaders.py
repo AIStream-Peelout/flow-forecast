@@ -48,13 +48,15 @@ class CSVDataLoader(Dataset):
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
-        if interpolate:
-            self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
-        print("Now loading and scaling " + file_path)
         if sort_column:
             df = df.sort_values(by=sort_column)
+        if interpolate:
+            interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
+            self.df = interpolated_df[relevant_cols]
+        else:
+            self.df = df[relevant_cols]
+        print("Now loading and scaling " + file_path)
         self.original_df = df
-        self.df = df[relevant_cols]
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
