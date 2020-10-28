@@ -1,5 +1,5 @@
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler
-from flood_forecast.preprocessing.interpolate_preprocess import interpolate_missing_values, back_forward_generic
+from flood_forecast.preprocessing.interpolate_preprocess import interpolate_missing_values, back_forward_generic, forward_back_generic
 
 scaler_dict = {
     "StandardScaler": StandardScaler(),
@@ -7,4 +7,5 @@ scaler_dict = {
     "MinMaxScaler": MinMaxScaler(),
     "MaxAbsScaler": MaxAbsScaler()}
 
-interpolate_dict = {"back_forward": interpolate_missing_values, "back_forward_generic": back_forward_generic}
+interpolate_dict = {"back_forward": interpolate_missing_values, "back_forward_generic": back_forward_generic,
+                    "forward_back_generic": forward_back_generic}
