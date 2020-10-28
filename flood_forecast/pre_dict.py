@@ -1,5 +1,6 @@
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler
-from flood_forecast.preprocessing.interpolate_preprocess import interpolate_missing_values, back_forward_generic, forward_back_generic
+from flood_forecast.preprocessing.interpolate_preprocess import (interpolate_missing_values,
+                                                                 back_forward_generic, forward_back_generic)
 
 scaler_dict = {
     "StandardScaler": StandardScaler(),
