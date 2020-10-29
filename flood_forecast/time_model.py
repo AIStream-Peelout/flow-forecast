@@ -8,6 +8,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
+from flood_forecast.preprocessing.buil_dataset import get_data
 import wandb
 
 
@@ -111,6 +112,7 @@ class PyTorchForecast(TimeSeriesModel):
         if model_base in pytorch_model_dict:
             model = pytorch_model_dict[model_base](**model_params)
             if weight_path:
+                weight_path = get_data(weight_path)
                 checkpoint = torch.load(weight_path, map_location=self.device)
                 if "weight_path_add" in self.params:
                     if "excluded_layers" in self.params["weight_path_add"]:
