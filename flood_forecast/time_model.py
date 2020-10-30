@@ -8,6 +8,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
+from flood_forecast.preprocessing.buil_dataset import get_data
 import wandb
 
 
@@ -28,6 +29,7 @@ class TimeSeriesModel(ABC):
             params: Dict):
         self.params = params
         if "weight_path" in params:
+            get_data(params["weight_path"])
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
             self.model = self.load_model(model_base, params["model_params"])
