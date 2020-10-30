@@ -17,7 +17,7 @@ class InferenceMode(object):
         infer_on_torch_model(self.model, **self.inference_params)
 
 
-def load_model(model_params_dict, weight_path=None, file_path: str = "") -> PyTorchForecast:
+def load_model(model_params_dict, file_path, weight_path) -> PyTorchForecast:
     if weight_path:
         model_params_dict["weight_path"] = weight_path
     m = PyTorchForecast(model_params_dict["model_name"], file_path, file_path, file_path, model_params_dict)

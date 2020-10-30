@@ -29,7 +29,7 @@ class TimeSeriesModel(ABC):
             params: Dict):
         self.params = params
         if "weight_path" in params:
-            get_data(params["weight_path"])
+            params["weight_path"] = get_data(params["weight_path"])
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
             self.model = self.load_model(model_base, params["model_params"])
