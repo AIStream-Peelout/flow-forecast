@@ -10,11 +10,13 @@ class InferenceMode(object):
         self.inference_params["hours_to_forecast"] = hours_to_forecast
         self.inference_params["num_prediction_samples"] = num_prediction_samples
 
-    def infer_now(self, some_date, csv_path=None):
+    def infer_now(self, some_date, csv_path=None, wandb_proj=None):
         self.inference_params["start_datetime"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
         infer_on_torch_model(self.model, **self.inference_params)
+        if wandb_proj:
+            pass
 
 
 def load_model(model_params_dict, file_path, weight_path) -> PyTorchForecast:
