@@ -16,6 +16,9 @@ class InferenceMode(object):
             self.inference_params["test_csv_path"] = csv_path
         infer_on_torch_model(self.model, **self.inference_params)
 
+    def make_plots(self):
+        pass
+
 
 def load_model(model_params_dict, file_path, weight_path) -> PyTorchForecast:
     if weight_path:

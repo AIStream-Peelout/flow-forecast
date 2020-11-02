@@ -15,5 +15,8 @@ class InferenceTests(unittest.TestCase):
     def test_load_model(self):
         load_model(self.config_test, self.new_csv_path, self.weight_path)
 
+    def test_plot_model(self):
+        pass
+
 if __name__ == "__main__":
     unittest.main()
