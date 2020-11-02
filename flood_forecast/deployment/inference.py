@@ -5,24 +5,18 @@ from flood_forecast.evaluator import infer_on_torch_model
 class InferenceMode(object):
     def __init__(self, hours_to_forecast, num_prediction_samples, model_params, csv_path, weight_path):
         self.hours_to_forecast = hours_to_forecast
-        self.model = load_model(model_params, weight_path, csv_path)
+        self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
         self.inference_params["hours_to_forecast"] = hours_to_forecast
         self.inference_params["num_prediction_samples"] = num_prediction_samples
 
-    def infer_now(self, some_date, csv_path=None):
+    def infer_now(self, some_date, csv_path=None, save_csv=None):
         self.inference_params["start_datetime"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
-        """
-         df_train_and_test,
-        end_tensor,
-        history_length,
-        forecast_start_idx,
-        csv_test_loader,
-        df_prediction_samples,
-        """
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
+        if save_csv:
+            pass
         return df, tensor, history, forecast_start, test, samples
 
     def make_plots(self):

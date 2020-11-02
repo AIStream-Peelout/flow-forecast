@@ -2,6 +2,7 @@ import os
 import json
 from flood_forecast.deployment.inference import load_model, InferenceMode
 import unittest
+from datetime import datetime
 
 
 class InferenceTests(unittest.TestCase):
@@ -14,6 +15,9 @@ class InferenceTests(unittest.TestCase):
 
     def test_load_model(self):
         load_model(self.config_test, self.new_csv_path, self.weight_path)
+
+    def test_infer_mode(self):
+        self.infer_class.infer_now(datetime(2020, 5, 5))
 
     def test_plot_model(self):
         pass
