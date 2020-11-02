@@ -14,7 +14,16 @@ class InferenceMode(object):
         self.inference_params["start_datetime"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
-        infer_on_torch_model(self.model, **self.inference_params)
+        """
+         df_train_and_test,
+        end_tensor,
+        history_length,
+        forecast_start_idx,
+        csv_test_loader,
+        df_prediction_samples,
+        """
+        df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
+        return df, tensor, history, forecast_start, test, samples
 
     def make_plots(self):
         pass
