@@ -11,7 +11,7 @@ class InferenceMode(object):
         self.inference_params["num_prediction_samples"] = num_prediction_samples
 
     def infer_now(self, some_date, csv_path=None, save_csv=None):
-        self.inference_params["start_datetime"] = some_date
+        self.inference_params["datetime_start"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
