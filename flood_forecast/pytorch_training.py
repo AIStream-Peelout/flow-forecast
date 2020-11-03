@@ -278,7 +278,6 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                     loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
                     loss_unscaled_full += len(labels.float()) * loss_unscaled.item()
                 if i % 10 == 0 and use_wandb:
-                    import wandb
                     wandb.log({"trg": unscaled_labels, "model_pred": unscaled_out})
             if probabilistic:
                 loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
