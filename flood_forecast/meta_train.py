@@ -3,6 +3,7 @@ from typing import Dict
 import json
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
+import wandb
 
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
