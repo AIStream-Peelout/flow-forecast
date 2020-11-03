@@ -1,5 +1,6 @@
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
+from flood_forecast.pre_dict import scaler_dict
 
 
 class InferenceMode(object):
@@ -7,6 +8,9 @@ class InferenceMode(object):
         self.hours_to_forecast = hours_to_forecast
         self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
+        # TODO move scaling to actual class
+        s = self.inference_params["dataset_params"]["scaler"]
+        self.inference_params["dataset_params"]["scaling"] = scaler_dict[s]
         self.inference_params["hours_to_forecast"] = hours_to_forecast
         self.inference_params["num_prediction_samples"] = num_prediction_samples
 
