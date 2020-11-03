@@ -7,6 +7,8 @@ class InferenceMode(object):
         self.hours_to_forecast = hours_to_forecast
         self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
+        s = self.inference_params["dataset_params"]["scaling"]
+        self.inference_params["dataset_params"]["scaling"] = s
         self.inference_params["hours_to_forecast"] = hours_to_forecast
         self.inference_params["num_prediction_samples"] = num_prediction_samples
 
