@@ -134,6 +134,7 @@ class CSVTestLoader(CSVDataLoader):
         A data loader for the test data.
         """
         super().__init__(**kwargs)
+        df_path = get_data(df_path)
         self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
