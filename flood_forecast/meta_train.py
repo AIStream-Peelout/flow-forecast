@@ -5,7 +5,6 @@ from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
 
 
-
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """ Function to train meta-models"""
     params["forward_params"] = {}
