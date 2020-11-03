@@ -17,7 +17,7 @@ class InferenceTests(unittest.TestCase):
         load_model(self.config_test, self.new_csv_path, self.weight_path)
 
     def test_infer_mode(self):
-        self.infer_class.infer_now(datetime(2020, 7, 5), self.new_csv_path)
+        self.infer_class.infer_now(datetime(2020, 5, 5), self.new_csv_path)
 
     def test_plot_model(self):
         pass
