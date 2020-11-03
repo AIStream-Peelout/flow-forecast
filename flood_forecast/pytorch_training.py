@@ -290,7 +290,6 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                 loss = criterion(output, labels.float())
             loop_loss += len(labels.float()) * loss.item()
     if use_wandb:
-        import wandb
         if loss_unscaled_full:
             tot_unscaled_loss = loss_unscaled_full / (len(validation_loader.dataset) - 1)
             wandb.log({'epoch': epoch,

@@ -14,6 +14,7 @@ class InferenceMode(object):
         self.inference_params["datetime_start"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
+            self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if save_csv:
             pass
@@ -27,5 +28,6 @@ def load_model(model_params_dict, file_path, weight_path) -> PyTorchForecast:
     if weight_path:
         model_params_dict["weight_path"] = weight_path
     model_params_dict["inference_params"]["test_csv_path"] = file_path
+    model_params_dict["inference_params"]["dataset_params"]["file_path"] = file_path
     m = PyTorchForecast(model_params_dict["model_name"], file_path, file_path, file_path, model_params_dict)
     return m
