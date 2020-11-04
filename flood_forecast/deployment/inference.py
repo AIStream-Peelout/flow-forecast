@@ -1,6 +1,8 @@
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.pre_dict import scaler_dict
+from flood_forecast.gcp_integration.basic_utils import upload_file
+import os
 
 
 class InferenceMode(object):
@@ -13,21 +15,28 @@ class InferenceMode(object):
         self.inference_params["hours_to_forecast"] = hours_to_forecast
         self.inference_params["num_prediction_samples"] = num_prediction_samples
 
-    def infer_now(self, some_date, csv_path=None, save_csv=None):
+    def infer_now(self, some_date: str, csv_path: str = None, save_csv: str = None, gs_name: str = None):
         self.inference_params["datetime_start"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if save_csv:
-            pass
+            if gs_name:
+                save_csv = "temp.csv"
+                df.to_csv(save_csv)
+                bucket_name = os.environ("infer_bucket")
+                upload_file(bucket_name, "temp.csv", gs_name, self.model.gcs_client)
+            else:
+                df.to_csv(save_csv)
+
         return df, tensor, history, forecast_start, test, samples
 
-    def make_plots(self):
+    def make_plots(self, df, forecast_start):
         pass
 
 
-def load_model(model_params_dict, file_path, weight_path) -> PyTorchForecast:
+def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchForecast:
     if weight_path:
         model_params_dict["weight_path"] = weight_path
     model_params_dict["inference_params"]["test_csv_path"] = file_path

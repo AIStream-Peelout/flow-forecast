@@ -12,12 +12,13 @@ class InferenceTests(unittest.TestCase):
         self.new_csv_path = "gs://task_ts_data/Massachusetts_Middlesex_County.csv"
         self.weight_path = "gs://coronaviruspublicdata/experiments/01_July_202009_44PM_model.pth"
         self.infer_class = InferenceMode(20, 30, self.config_test, self.new_csv_path, self.weight_path)
+        os.environ["infer_bucket"] = "task_ts_data"
 
     def test_load_model(self):
         load_model(self.config_test, self.new_csv_path, self.weight_path)
 
     def test_infer_mode(self):
-        self.infer_class.infer_now(datetime(2020, 5, 5), self.new_csv_path)
+        self.infer_class.infer_now(datetime(2020, 5, 5), self.new_csv_path, "temp.csv", "inference_files/new_infer.csv")
 
     def test_plot_model(self):
         pass
