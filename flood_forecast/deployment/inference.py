@@ -25,7 +25,7 @@ class InferenceMode(object):
             if gs_name:
                 save_csv = "temp.csv"
                 df.to_csv(save_csv)
-                bucket_name = os.environ("infer_bucket")
+                bucket_name = "infer_bucket"
                 upload_file(bucket_name, "temp.csv", gs_name, self.model.gcs_client)
             else:
                 df.to_csv(save_csv)
