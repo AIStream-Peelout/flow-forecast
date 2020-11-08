@@ -6,7 +6,8 @@ from flood_forecast.gcp_integration.basic_utils import upload_file
 
 
 class InferenceMode(object):
-    def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path, weight_path):
+    def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path):
+        """""""
         self.hours_to_forecast = hours_to_forecast
         self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
