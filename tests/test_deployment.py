@@ -20,7 +20,7 @@ class InferenceTests(unittest.TestCase):
         self.infer_class.infer_now(datetime(2020, 6, 1), self.new_csv_path)
 
     def test_plot_model(self):
-        pass
+        self.infer_class.make_plots(datetime(5, 5, 20), self.new_csv_path, "coronaviruspublicdata", "test/test.csv")
 
 if __name__ == "__main__":
     unittest.main()
