@@ -24,8 +24,8 @@ class InferenceMode(object):
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if save_buck:
-            df.to_csv("temp.csv")
-            upload_file(save_buck, "temp.csv", save_name, self.model.gcs_client)
+            df.to_csv("temp3.csv")
+            upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
 
     def make_plots(self, date: datetime, csv_path: str, csv_bucket: str = None, save_name=None):
