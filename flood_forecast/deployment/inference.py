@@ -3,11 +3,12 @@ from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.gcp_integration.basic_utils import upload_file
+from datetime import datetime
 
 
 class InferenceMode(object):
     def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path):
-        """""""
+        """"""
         self.hours_to_forecast = hours_to_forecast
         self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
@@ -27,7 +28,7 @@ class InferenceMode(object):
             upload_file(save_buck, "temp.csv", save_name, self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
 
-    def make_plots(self, date, csv_path: str, csv_bucket: str = None, save_name=None):
+    def make_plots(self, date: datetime, csv_path: str, csv_bucket: str = None, save_name=None):
         df, tensor, history, forecast_start, test, samples = self.infer_now(date, csv_path, csv_bucket, save_name)
         plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
         return tensor, history, test
