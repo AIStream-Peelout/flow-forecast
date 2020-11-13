@@ -44,11 +44,25 @@ SCHEDULES = {
 }
 
 
+class MASELoss(torch.nn.Module):
+
+    def __init__(self, baseline_method):
+        super(MASELoss, self).__init__()
+        """"""
+        self.baseline_method = baseline_method
+
+    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor):
+        result_baseline = self.baseline_method(train_data)
+        MAE = torch.nn.L1Loss()
+        mae2 = MAE(target, output)
+        return mae2 / result_baseline
+
+
 class RMSELoss(torch.nn.Module):
     '''
     Returns RMSE using:
     target -> True y
-    output -> Predtion by model
+    output -> Prediction by model
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
