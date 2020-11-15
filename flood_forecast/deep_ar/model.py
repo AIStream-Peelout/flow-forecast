@@ -1,29 +1,42 @@
-import math
-import logging
 
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
 
 
 class DeepAR(nn.Module):
-    def __init__(self, params):
+    def __init__(self,
+                 num_class,
+                 embedding_dim,
+                 lstm_hidden_dim,
+                 lstm_layers,
+                 device,
+                 sample_times,
+                 predict_steps,
+                 predict_start
+                 ):
         '''
         We define a recurrent network that predicts the future values of a time-dependent variable based on
         past inputs and covariates.
         '''
         super(DeepAR, self).__init__()
-        self.params = params
-        self.embedding = nn.Embedding(params["num_class"], params["embedding_dim"])
+        self.params = {}
+        self.params["num_class"] = num_class
+        self.params["embedding_dim"] = embedding_dim
+        self.params["lstm_hidden_dim"] = lstm_hidden_dim
+        self.params["lstm_layers"] = lstm_layers
+        self.params["device"] = device
+        self.params["sample_times"] = sample_times
+        self.params["predict_steps"] = predict_steps
+        self.params["predict_start"] = predict_start
+        # self.params = params
+        self.embedding = nn.Embedding(self.params["num_class"], self.params["embedding_dim"])
 
-        self.lstm = nn.LSTM(input_size=1+params["cov_dim"]+params["embedding_dim"],
-                            hidden_size=params["lstm_hidden_dim"],
-                            num_layers=params["lstm_layers"],
+        self.lstm = nn.LSTM(input_size=1 + self.params["cov_dim"] + self.params["embedding_dim"],
+                            hidden_size=self.params["lstm_hidden_dim"],
+                            num_layers=self.params["lstm_layers"],
                             bias=True,
                             batch_first=False,
-                           dropout=params["lstm_dropout"])
+                            dropout=self.params["lstm_dropout"])
         '''self.lstm = nn.LSTM(input_size=1 + params.cov_dim,
                             hidden_size=params.lstm_hidden_dim,
                             num_layers=params.lstm_layers,
@@ -39,8 +52,8 @@ class DeepAR(nn.Module):
                 bias.data[start:end].fill_(1.)
 
         self.relu = nn.ReLU()
-        self.distribution_mu = nn.Linear(params["lstm_hidden_dim"] * params["lstm_layers"], 1)
-        self.distribution_presigma = nn.Linear(params["lstm_hidden_dim"] * params["lstm_layers"], 1)
+        self.distribution_mu = nn.Linear(self.params["lstm_hidden_dim"] * self.params["lstm_layers"], 1)
+        self.distribution_presigma = nn.Linear(self.params["lstm_hidden_dim"] * self.params["lstm_layers"], 1)
         self.distribution_sigma = nn.Softplus()
 
     def forward(self, x, idx, hidden, cell):
@@ -57,7 +70,7 @@ class DeepAR(nn.Module):
             hidden ([lstm_layers, batch_size, lstm_hidden_dim]): LSTM h from time step t
             cell ([lstm_layers, batch_size, lstm_hidden_dim]): LSTM c from time step t
         '''
-        onehot_embed = self.embedding(idx)  #TODO: is it possible to do this only once per window instead of per step?
+        onehot_embed = self.embedding(idx)  # TODO: is it possible to do this only once per window instead of per step?
         lstm_input = torch.cat((x, onehot_embed), dim=2)
         output, (hidden, cell) = self.lstm(lstm_input, (hidden, cell))
         # use h from all three layers to calculate mu and sigma
@@ -68,27 +81,30 @@ class DeepAR(nn.Module):
         return torch.squeeze(mu), torch.squeeze(sigma), hidden, cell
 
     def init_hidden(self, input_size):
-        return torch.zeros(self.params.lstm_layers, input_size, self.params.lstm_hidden_dim, device=self.params.device)
+        return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"],
+                           device=self.params["device"])
 
     def init_cell(self, input_size):
-        return torch.zeros(self.params.lstm_layers, input_size, self.params.lstm_hidden_dim, device=self.params.device)
+        return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"],
+                           device=self.params["device"])
 
     def test(self, x, v_batch, id_batch, hidden, cell, sampling=False):
         batch_size = x.shape[1]
         if sampling:
-            samples = torch.zeros(self.params.sample_times, batch_size, self.params.predict_steps,
-                                       device=self.params.device)
-            for j in range(self.params.sample_times):
+            samples = torch.zeros(self.params["sample_times"], batch_size, self.params["predict_steps"],
+                                  device=self.params["device"])
+            for j in range(self.params["sample_times"]):
                 decoder_hidden = hidden
                 decoder_cell = cell
-                for t in range(self.params.predict_steps):
-                    mu_de, sigma_de, decoder_hidden, decoder_cell = self(x[self.params.predict_start + t].unsqueeze(0),
-                                                                         id_batch, decoder_hidden, decoder_cell)
+                for t in range(self.params["predict_steps"]):
+                    mu_de, sigma_de, decoder_hidden, decoder_cell = self(
+                        x[self.params["predict_start"] + t].unsqueeze(0),
+                        id_batch, decoder_hidden, decoder_cell)
                     gaussian = torch.distributions.normal.Normal(mu_de, sigma_de)
                     pred = gaussian.sample()  # not scaled
                     samples[j, :, t] = pred * v_batch[:, 0] + v_batch[:, 1]
-                    if t < (self.params.predict_steps - 1):
-                        x[self.params.predict_start + t + 1, :, 0] = pred
+                    if t < (self.params["predict_steps"] - 1):
+                        x[self.params["predict_start"] + t + 1, :, 0] = pred
 
             sample_mu = torch.median(samples, dim=0)[0]
             sample_sigma = samples.std(dim=0)
@@ -97,13 +113,13 @@ class DeepAR(nn.Module):
         else:
             decoder_hidden = hidden
             decoder_cell = cell
-            sample_mu = torch.zeros(batch_size, self.params.predict_steps, device=self.params.device)
-            sample_sigma = torch.zeros(batch_size, self.params.predict_steps, device=self.params.device)
-            for t in range(self.params.predict_steps):
-                mu_de, sigma_de, decoder_hidden, decoder_cell = self(x[self.params.predict_start + t].unsqueeze(0),
+            sample_mu = torch.zeros(batch_size, self.params["predict_steps"], device=self.params["device"])
+            sample_sigma = torch.zeros(batch_size, self.params["predict_steps"], device=self.params["device"])
+            for t in range(self.params["predict_steps"]):
+                mu_de, sigma_de, decoder_hidden, decoder_cell = self(x[self.params["predict_start"] + t].unsqueeze(0),
                                                                      id_batch, decoder_hidden, decoder_cell)
                 sample_mu[:, t] = mu_de * v_batch[:, 0] + v_batch[:, 1]
                 sample_sigma[:, t] = sigma_de * v_batch[:, 0]
-                if t < (self.params.predict_steps - 1):
-                    x[self.params.predict_start + t + 1, :, 0] = mu_de
+                if t < (self.params["predict_steps"] - 1):
+                    x[self.params["predict_start"] + t + 1, :, 0] = mu_de
             return sample_mu, sample_sigma
