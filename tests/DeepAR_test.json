@@ -48,7 +48,7 @@
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
-       "tags": ["dummy_run", "circleci","DeepAR"]
+       "tags": ["dummy_run", "circleci"]
     },
    "metrics":["MSE"],
    "inference_params":
