@@ -15,10 +15,18 @@ class DeepAR(nn.Module):
                  predict_steps: int,
                  predict_start: int
                  ):
-        '''
-        We define a recurrent network that predicts the future values of a time-dependent variable based on
-        past inputs and covariates.
-        '''
+        """Initialize the DeepAR model.
+
+        :param num_class: Number of classes
+        :param cov_dim: Number of covariates
+        :param lstm_dropout: drop out rate
+        :param embedding_dim: dimension of embedding layer
+        :param lstm_hidden_dim: hidden dimension of LSTM
+        :param lstm_layers: Number of LSTM layers
+        :param sample_times: sample time steps
+        :param predict_steps: Number of steps to predict
+        :param predict_start: Step to start prediction at
+        """
         super(DeepAR, self).__init__()
         self.params = {}
         self.params["num_class"] = num_class

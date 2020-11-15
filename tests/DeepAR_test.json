@@ -6,7 +6,7 @@
       "embedding_dim": 1,
       "lstm_dropout": 0.1,
       "lstm_hidden_dim": 40,
-      "lstm_layers": 1,
+      "lstm_layers": 2,
       "num_class": 1,
       "predict_start": 5,
       "predict_steps": 24,
