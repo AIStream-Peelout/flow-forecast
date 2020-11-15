@@ -46,10 +46,10 @@
     "GCS": false,
     
     "wandb": {
-       "name": "flood_forecast_circleci",
-       "project": "repo-flood_forecast",
-       "tags": ["dummy_run", "circleci"]
-    },
+      "name": "flood_forecast_circleci",
+      "tags": ["dummy_run", "circleci", "DeepAR"],
+      "project": "repo-flood_forecast"
+   },
    "metrics":["MSE"],
    "inference_params":
    {     "num_prediction_samples": 10,
