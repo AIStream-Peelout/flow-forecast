@@ -11,7 +11,6 @@
       "predict_start": 5,
       "predict_steps": 24,
       "sample_times": 200
-
      },  
     "dataset_params":
     {  "class": "default",
