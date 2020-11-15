@@ -26,7 +26,8 @@
        "test_predict_start":125,
        "test_end":500,
        "target_col": ["cfs"],
-       "relevant_cols": ["cfs", "precip", "temp"]
+       "relevant_cols": ["cfs", "precip", "temp"],
+       "interpolate_param": false
     },
     "early_stopping":{
         "patience":1
