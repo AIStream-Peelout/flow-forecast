@@ -5,16 +5,16 @@ import torch.nn as nn
 
 class DeepAR(nn.Module):
     def __init__(self,
-                 num_class,
-                 cov_dim,
-                 lstm_dropout,
-                 embedding_dim,
-                 lstm_hidden_dim,
-                 lstm_layers,
-                 device,
-                 sample_times,
-                 predict_steps,
-                 predict_start
+                 num_class: int,
+                 cov_dim: int,
+                 lstm_dropout: float,
+                 embedding_dim: int,
+                 lstm_hidden_dim: int,
+                 lstm_layers: int,
+                 device: str,
+                 sample_times: int,
+                 predict_steps: int,
+                 predict_start: int
                  ):
         '''
         We define a recurrent network that predicts the future values of a time-dependent variable based on

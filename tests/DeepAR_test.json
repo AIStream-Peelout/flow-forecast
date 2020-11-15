@@ -14,7 +14,7 @@
       "predict_start": 5,
       "predict_steps": 24,
       "sample_times": 200,
-      "test_predict_start": 168,
+      "test_predict_start": 5,
       "test_window": 192,
       "train_window": 192
 
@@ -53,7 +53,7 @@
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
-       "tags": ["dummy_run", "circleci"]
+       "tags": ["dummy_run", "circleci","DeepAR"]
     },
    "metrics":["MSE"]
 }
