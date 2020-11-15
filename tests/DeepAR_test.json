@@ -59,11 +59,8 @@
              "forecast_history":5,
              "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
-             "target_col": ["cfs"],
-             "scaling": "StandardScaler",
-             "interpolate_param": false
+             "target_col": ["cfs"]
             }
    }
-   
 }
     
