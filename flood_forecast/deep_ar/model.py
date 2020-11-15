@@ -6,6 +6,8 @@ import torch.nn as nn
 class DeepAR(nn.Module):
     def __init__(self,
                  num_class,
+                 cov_dim,
+                 lstm_dropout,
                  embedding_dim,
                  lstm_hidden_dim,
                  lstm_layers,
@@ -21,6 +23,8 @@ class DeepAR(nn.Module):
         super(DeepAR, self).__init__()
         self.params = {}
         self.params["num_class"] = num_class
+        self.params["cov_dim"] = cov_dim
+        self.params["lstm_dropout"] = lstm_dropout
         self.params["embedding_dim"] = embedding_dim
         self.params["lstm_hidden_dim"] = lstm_hidden_dim
         self.params["lstm_layers"] = lstm_layers

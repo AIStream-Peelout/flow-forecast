@@ -2,6 +2,21 @@
     "model_name": "DeepAR",
     "model_type": "PyTorch",
     "model_params": {
+      "cov_dim": 1,
+      "embedding_dim": 1,
+      "learning_rate": 1e-3,
+      "lstm_dropout": 0.1,
+      "lstm_hidden_dim": 40,
+      "lstm_layers": 1,
+      "num_class": 1,
+      "num_epochs": 1,
+      "predict_batch": 256,
+      "predict_start": 5,
+      "predict_steps": 24,
+      "sample_times": 200,
+      "test_predict_start": 168,
+      "test_window": 192,
+      "train_window": 192
 
      },  
     "dataset_params":
@@ -15,12 +30,10 @@
        "train_end": 100,
        "valid_start":301,
        "valid_end": 401,
-       "test_start":125,
+       "test_predict_start":125,
        "test_end":500,
        "target_col": ["cfs"],
-       "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "StandardScaler", 
-       "interpolate": false
+       "relevant_cols": ["cfs", "precip", "temp"]
     },
     "early_stopping":{
         "patience":1
@@ -30,11 +43,7 @@
     {
        "criterion":"MAPE",
        "optimizer": "Adam",
-       "optim_params":
-       {
-
-       },
-       "lr": 0.3,
+       "lr": 1e-3,
        "epochs": 20,
        "batch_size":4
     
@@ -46,27 +55,6 @@
        "project": "repo-flood_forecast",
        "tags": ["dummy_run", "circleci"]
     },
-    "forward_params":{},
-   "metrics":["MSE"],
-   "inference_params":
-   {     
-         "datetime_start":"2016-05-31",
-          "hours_to_forecast":336, 
-          "test_csv_path":"tests/test_data/keag_small.csv",
-          "decoder_params":{
-            "decoder_function": "simple_decode", 
-            "unsqueeze_dim": 1},
-          "dataset_params":{
-             "file_path": "tests/test_data/keag_small.csv",
-             "forecast_history":5,
-             "forecast_length":1,
-             "relevant_cols": ["cfs", "precip", "temp"],
-             "target_col": ["cfs"],
-             "scaling": "StandardScaler",
-             "interpolate_param": false
-          }
-   }
-       
-   
+   "metrics":["MSE"]
 }
     
