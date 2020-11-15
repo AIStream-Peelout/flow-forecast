@@ -11,7 +11,6 @@ class DeepAR(nn.Module):
                  embedding_dim: int,
                  lstm_hidden_dim: int,
                  lstm_layers: int,
-                 device: str,
                  sample_times: int,
                  predict_steps: int,
                  predict_start: int
@@ -28,7 +27,6 @@ class DeepAR(nn.Module):
         self.params["embedding_dim"] = embedding_dim
         self.params["lstm_hidden_dim"] = lstm_hidden_dim
         self.params["lstm_layers"] = lstm_layers
-        self.params["device"] = device
         self.params["sample_times"] = sample_times
         self.params["predict_steps"] = predict_steps
         self.params["predict_start"] = predict_start
@@ -85,18 +83,15 @@ class DeepAR(nn.Module):
         return torch.squeeze(mu), torch.squeeze(sigma), hidden, cell
 
     def init_hidden(self, input_size):
-        return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"],
-                           device=self.params["device"])
+        return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"])
 
     def init_cell(self, input_size):
-        return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"],
-                           device=self.params["device"])
+        return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"])
 
     def test(self, x, v_batch, id_batch, hidden, cell, sampling=False):
         batch_size = x.shape[1]
         if sampling:
-            samples = torch.zeros(self.params["sample_times"], batch_size, self.params["predict_steps"],
-                                  device=self.params["device"])
+            samples = torch.zeros(self.params["sample_times"], batch_size, self.params["predict_steps"])
             for j in range(self.params["sample_times"]):
                 decoder_hidden = hidden
                 decoder_cell = cell
@@ -117,8 +112,8 @@ class DeepAR(nn.Module):
         else:
             decoder_hidden = hidden
             decoder_cell = cell
-            sample_mu = torch.zeros(batch_size, self.params["predict_steps"], device=self.params["device"])
-            sample_sigma = torch.zeros(batch_size, self.params["predict_steps"], device=self.params["device"])
+            sample_mu = torch.zeros(batch_size, self.params["predict_steps"])
+            sample_sigma = torch.zeros(batch_size, self.params["predict_steps"])
             for t in range(self.params["predict_steps"]):
                 mu_de, sigma_de, decoder_hidden, decoder_cell = self(x[self.params["predict_start"] + t].unsqueeze(0),
                                                                      id_batch, decoder_hidden, decoder_cell)
