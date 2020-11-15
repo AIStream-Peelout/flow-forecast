@@ -27,6 +27,7 @@
        "test_end":500,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
+       "interpolate": false,
        "interpolate_param": false
     },
     "early_stopping":{
@@ -60,7 +61,8 @@
              "forecast_history":5,
              "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
-             "target_col": ["cfs"]
+             "target_col": ["cfs"],
+             "interpolate_param": false
             }
    }
 }
