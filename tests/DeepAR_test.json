@@ -4,19 +4,13 @@
     "model_params": {
       "cov_dim": 1,
       "embedding_dim": 1,
-      "learning_rate": 1e-3,
       "lstm_dropout": 0.1,
       "lstm_hidden_dim": 40,
       "lstm_layers": 1,
       "num_class": 1,
-      "num_epochs": 1,
-      "predict_batch": 256,
       "predict_start": 5,
       "predict_steps": 24,
-      "sample_times": 200,
-      "test_predict_start": 5,
-      "test_window": 192,
-      "train_window": 192
+      "sample_times": 200
 
      },  
     "dataset_params":
