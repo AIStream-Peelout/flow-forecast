@@ -14,6 +14,7 @@ from flood_forecast.custom.custom_opt import RMSELoss, MAPELoss, PenalizedMSELos
 from flood_forecast.transformer_xl.transformer_bottleneck import DecoderTransformer
 from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
+from flood_forecast.deep_ar.model import DeepAR
 import torch
 
 """
@@ -29,7 +30,8 @@ pytorch_model_dict = {
     "CustomTransformerDecoder": CustomTransformerDecoder,
     "DARNN": DARNN,
     "DecoderTransformer": DecoderTransformer,
-    "BasicAE": AE
+    "BasicAE": AE,
+    "DeepAR": DeepAR
 
 }
 
