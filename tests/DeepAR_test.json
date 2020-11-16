@@ -50,6 +50,7 @@
       "tags": ["dummy_run", "circleci", "DeepAR"],
       "project": "repo-flood_forecast"
    },
+   "forward_params":{},
    "metrics":["MSE"],
    "inference_params":
    {     "num_prediction_samples": 10,
