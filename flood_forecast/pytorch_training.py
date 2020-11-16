@@ -153,7 +153,7 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None):
     if output_std:
         output_dist = torch.distributions.Normal(output, output_std)
-    if validation_dataset.scale:
+    if validation_dataset:
         if probabilistic:
             unscaled_out = validation_dataset.inverse_scale(output)
             try:
