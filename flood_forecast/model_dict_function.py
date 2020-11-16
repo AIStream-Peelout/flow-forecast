@@ -30,7 +30,6 @@ pytorch_model_dict = {
     "DARNN": DARNN,
     "DecoderTransformer": DecoderTransformer,
     "BasicAE": AE
-
 }
 
 pytorch_criterion_dict = {

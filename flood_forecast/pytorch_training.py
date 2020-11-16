@@ -166,16 +166,16 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             labels = validation_dataset.inverse_scale(labels.cpu())
             src = validation_dataset.inverse_scale(src.cpu)
 
-        if probabilistic:
-            loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
-            loss = loss.numpy()
-        elif isinstance(criterion, GaussianLoss):
-            g_loss = GaussianLoss(output[0], output[1])
-            loss = g_loss(labels)
-        elif isinstance(criterion, MASELoss):
-            criterion(output, labels.float(), src)
-        else:
-            loss = criterion(output, labels.float())
+    if probabilistic:
+        loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
+        loss = loss.numpy()
+    elif isinstance(criterion, GaussianLoss):
+        g_loss = GaussianLoss(output[0], output[1])
+        loss = g_loss(labels)
+    elif isinstance(criterion, MASELoss):
+        criterion(output, labels.float(), src)
+    else:
+        loss = criterion(output, labels.float())
     return loss
 
 
