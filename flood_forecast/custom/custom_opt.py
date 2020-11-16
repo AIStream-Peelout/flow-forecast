@@ -50,7 +50,7 @@ class MASELoss(torch.nn.Module):
         This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
         """
         super(MASELoss, self).__init__()
-        self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
+        self.method_dict = {"mean": lambda x: torch.mean(x[:, :, 0], 1).unsqueeze(1)}
         self.baseline_method = self.method_dict[baseline_method]
 
     def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor):
