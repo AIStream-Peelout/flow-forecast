@@ -34,15 +34,21 @@
         "patience":1
 
     },
+
     "training_params":
     {
-       "criterion":"MAPE",
+       "criterion":"NegativeLogLikelihood",
+       "probabilistic": true,
        "optimizer": "Adam",
-       "lr": 1e-3,
-       "epochs": 20,
+       "optim_params":
+       {
+       },
+       "lr": 0.3,
+       "epochs": 1,
        "batch_size":4
-    
-    }, 
+
+    },
+
     "GCS": false,
     
     "wandb": {
