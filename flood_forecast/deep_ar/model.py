@@ -29,6 +29,7 @@ class DeepAR(nn.Module):
         """
         super(DeepAR, self).__init__()
         self.params = {}
+
         self.params["num_class"] = num_class
         self.params["cov_dim"] = cov_dim
         self.params["lstm_dropout"] = lstm_dropout
