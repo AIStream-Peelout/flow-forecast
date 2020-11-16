@@ -44,6 +44,22 @@ SCHEDULES = {
 }
 
 
+class MASELoss(torch.nn.Module):
+    def __init__(self, baseline_method):
+        """
+        This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
+        """
+        super(MASELoss, self).__init__()
+        self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
+        self.baseline_method = self.method_dict[baseline_method]
+
+    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor):
+        result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
+        MAE = torch.nn.L1Loss()
+        mae2 = MAE(target, output)
+        return mae2 / MAE(result_baseline, target)
+
+
 class RMSELoss(torch.nn.Module):
     '''
     Returns RMSE using:

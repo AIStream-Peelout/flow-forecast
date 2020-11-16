@@ -179,8 +179,6 @@ def torch_single_train(model: PyTorchForecast,
             loss = g_loss(labels)
         else:
             loss = criterion(output, labels.float())
-        # TODO fix Guassian loss
-
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
@@ -197,7 +195,7 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
-def compute_validation(validation_loader: DataLoader,  # s lint
+def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
                        sequence_size: int,
