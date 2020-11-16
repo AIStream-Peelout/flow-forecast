@@ -160,7 +160,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
                 output_std = numpy_to_tvar(output_std)
             except Exception:
                 pass
-            output_dist = torch.distributions.Normal(unscaled_out, output_std)
+            unscaled_dist = torch.distributions.Normal(unscaled_out, output_std)
+            loss_unscaled = -unscaled_dist.log_prob(unscaled_labels.float()).sum()  # FIX THIS
         else:
             output = validation_dataset.inverse_scale(output.cpu())
             labels = validation_dataset.inverse_scale(labels.cpu())
@@ -203,7 +204,11 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
         labels = trg[:, :, 0]
-        loss = compute_loss(labels, output, src, criterion, None, None, None)
+        if isinstance(criterion, GaussianLoss):
+            g_loss = GaussianLoss(output[0], output[1])
+            loss = g_loss(labels)
+        else:
+            loss = criterion(output, labels.float())
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
