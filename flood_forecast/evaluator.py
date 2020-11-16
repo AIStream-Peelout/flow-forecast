@@ -11,6 +11,7 @@ from flood_forecast.explain_model_output import (
     deep_explain_model_summary_plot,
 )
 from flood_forecast.model_dict_function import decoding_functions, pytorch_criterion_dict
+from flood_forecast.custom.custom_opt import MASELoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
@@ -122,6 +123,17 @@ def evaluate_model(
                         df_train_and_test[target][forecast_history:].to_numpy()
                     ),
                 )
+            elif isinstance(evaluation_metric_function, MASELoss):
+                s = evaluation_metric_function(
+                    torch.from_numpy(
+                        df_train_and_test[target][forecast_history:].to_numpy()
+                    ),
+                    end_tensor,
+                    torch.from_numpy(
+                        df_train_and_test[target][:forecast_history].to_numpy()
+                    )
+                )
+
             else:
                 s = evaluation_metric_function(
                     torch.from_numpy(
