@@ -164,7 +164,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         else:
             output = validation_dataset.inverse_scale(output.cpu())
             labels = validation_dataset.inverse_scale(labels.cpu())
-            src = validation_dataset.inverse_scale(src.cpu)
+            src = validation_dataset.inverse_scale(src.cpu())
 
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
