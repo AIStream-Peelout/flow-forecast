@@ -30,7 +30,7 @@
 
     "training_params":
     {
-       "criterion":"MSE",
+       "criterion":"MASEloss",
        "optimizer": "Adam",
        "optim_params":
        {
@@ -48,7 +48,7 @@
        "project": "repo-flood_forecast"
     },
    "forward_params":{},
-   "metrics":["MSE"],
+   "metrics":["MASELoss"],
    "inference_params":
    {     "num_prediction_samples": 10,
          "datetime_start":"2016-05-31",
