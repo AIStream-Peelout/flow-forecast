@@ -10,7 +10,7 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
-from flood_forecast.custom.custom_opt import GaussianLoss
+from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 
 
 def train_transformer_style(
@@ -150,8 +150,34 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
     return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
 
 
-def compute_loss(labels, target, src, scaling, probablistic, output_dist):
-    pass
+def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None):
+    if output_std:
+        output_dist = torch.distributions.Normal(output, output_std)
+    if validation_dataset.scale:
+        if probabilistic:
+            unscaled_out = validation_dataset.inverse_scale(output)
+            try:
+                output_std = numpy_to_tvar(output_std)
+            except Exception:
+                pass
+            unscaled_dist = torch.distributions.Normal(unscaled_out, output_std)
+            loss_unscaled = -unscaled_dist.log_prob(unscaled_labels.float()).sum()  # FIX THIS
+        else:
+            output = validation_dataset.inverse_scale(output.cpu())
+            labels = validation_dataset.inverse_scale(labels.cpu())
+            src = validation_dataset.inverse_scale(src.cpu)
+
+        if probabilistic:
+            loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
+            loss = loss.numpy()
+        elif isinstance(criterion, GaussianLoss):
+            g_loss = GaussianLoss(output[0], output[1])
+            loss = g_loss(labels)
+        elif isinstance(criterion, MASELoss):
+            criterion(output, labels.float(), src)
+        else:
+            loss = criterion(output, labels.float())
+        return loss
 
 
 def torch_single_train(model: PyTorchForecast,
@@ -217,6 +243,7 @@ def compute_validation(validation_loader: DataLoader,
     print('compute_validation')
     model.eval()
     loop_loss = 0.0
+    output_std = None
     with torch.no_grad():
         i = 0
         loss_unscaled_full = 0.0
@@ -263,32 +290,9 @@ def compute_validation(validation_loader: DataLoader,
             labels = targ[:, :, 0]
             validation_dataset = validation_loader.dataset
             if validation_dataset.scale:
-                unscaled_labels = validation_dataset.inverse_scale(labels)
-                if probabilistic:
-                    unscaled_out = validation_dataset.inverse_scale(output)
-                    try:
-                        output_std = numpy_to_tvar(output_std)
-                    except Exception:
-                        pass
-                    unscaled_dist = torch.distributions.Normal(unscaled_out, output_std)
-                    loss_unscaled = -unscaled_dist.log_prob(unscaled_labels.float()).sum()  # FIX THIS
-                    loss_unscaled_full += len(labels.float()) * loss_unscaled.numpy().item()
-                else:
-                    # unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
-                    unscaled_out = validation_dataset.inverse_scale(output.cpu())
-                    unscaled_labels = validation_dataset.inverse_scale(labels.cpu())
-                    loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
-                    loss_unscaled_full += len(labels.float()) * loss_unscaled.item()
-                if i % 10 == 0 and use_wandb:
-                    wandb.log({"trg": unscaled_labels, "model_pred": unscaled_out})
-            if probabilistic:
-                loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
-                loss = loss.numpy()
-            elif isinstance(criterion, GaussianLoss):
-                g_loss = GaussianLoss(output[0], output[1])
-                loss = g_loss(labels)
-            else:
-                loss = criterion(output, labels.float())
+                loss_unscaled_full += compute_loss(labels, output, src, criterion, validation_dataset,
+                                                   probabilistic, output_std)
+            loss = compute_loss(labels, output, src, criterion, False, probabilistic, output_std)
             loop_loss += len(labels.float()) * loss.item()
     if use_wandb:
         if loss_unscaled_full:
