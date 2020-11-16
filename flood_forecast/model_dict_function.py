@@ -17,7 +17,7 @@ from flood_forecast.meta_models.basic_ae import AE
 import torch
 
 """
-Utility dictionaries to map a string to a class
+Utility dictionaries to map a string to a class please
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,
@@ -48,8 +48,6 @@ pytorch_criterion_dict = {
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}
 
 pytorch_opt_dict = {"Adam": Adam, "SGD": SGD, "BertAdam": BertAdam}
-
-scikit_dict = {}
 
 
 def generate_square_subsequent_mask(sz: int) -> torch.Tensor:

@@ -176,7 +176,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             criterion(output, labels.float(), src)
         else:
             loss = criterion(output, labels.float())
-        return loss
+    return loss
 
 
 def torch_single_train(model: PyTorchForecast,
