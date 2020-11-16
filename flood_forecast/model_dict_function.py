@@ -17,7 +17,7 @@ from flood_forecast.meta_models.basic_ae import AE
 import torch
 
 """
-Utility dictionaries to map a string to a class please
+Utility dictionaries to map a string to a class.
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,
