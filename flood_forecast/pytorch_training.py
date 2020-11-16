@@ -150,6 +150,10 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
     return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
 
 
+def compute_loss(labels, target, src, scaling, probablistic, output_dist):
+    pass
+
+
 def torch_single_train(model: PyTorchForecast,
                        opt: optim.Optimizer,
                        criterion: Type[torch.nn.modules.loss._Loss],
