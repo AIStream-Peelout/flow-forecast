@@ -115,6 +115,8 @@ def evaluate_model(
     for evaluation_metric in evaluation_metrics:
         for target in target_col:
             eval_params = {}
+            if "criterion_params" in inference_params:
+                eval_params = inference_params["criterion_params"]
             evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
