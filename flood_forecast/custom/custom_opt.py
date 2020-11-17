@@ -54,6 +54,8 @@ class MASELoss(torch.nn.Module):
         self.baseline_method = self.method_dict[baseline_method]
 
     def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor):
+        if len(train_data.shape) == 1:
+            train_data = train_data.reshape(1, train_data.shape[0])
         result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
         MAE = torch.nn.L1Loss()
         mae2 = MAE(target, output)
