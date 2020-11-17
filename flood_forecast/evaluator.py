@@ -166,6 +166,7 @@ def infer_on_torch_model(
     dataset_params: Dict = {},
     num_prediction_samples: int = None,
     probabilistic: bool = False,
+    criterion_params: Dict = None
 ) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, pd.DataFrame):
     """
     Function to handle both test evaluation and inference on a test dataframe.
