@@ -8,7 +8,9 @@ from datetime import datetime
 
 class InferenceMode(object):
     def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path):
-        """"""
+        """
+        Class to hadle
+        """
         self.hours_to_forecast = hours_to_forecast
         self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
