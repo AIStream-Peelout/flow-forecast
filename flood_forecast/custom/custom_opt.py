@@ -22,7 +22,7 @@ def warmup_cosine(x, warmup=0.002):
 
 def warmup_constant(x, warmup=0.002):
     """ Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
-        Learning rate is 1. afterwards."""
+        Learning rate is 1. afterwards. """
     if x < warmup:
         return x / warmup
     return 1.0
@@ -45,9 +45,9 @@ SCHEDULES = {
 
 
 class MASELoss(torch.nn.Module):
-    def __init__(self, baseline_method: str):
+    def __init__(self, baseline_method):
         """
-        This implements the MASE loss function (e.g. MASE == MAE_MODEL/MAE_NAIEVE)
+        This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
         """
         super(MASELoss, self).__init__()
         self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
@@ -68,7 +68,7 @@ class RMSELoss(torch.nn.Module):
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
-    def __init__(self, variance_penalty: int = 0.0):
+    def __init__(self, variance_penalty=0.0):
         super().__init__()
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
