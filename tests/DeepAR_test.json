@@ -37,8 +37,8 @@
 
     "training_params":
     {
-       "criterion":"NegativeLogLikelihood",
-       "probabilistic": true,
+       "criterion":"GaussianLoss",
+       "probabilistic": false,
        "optimizer": "Adam",
        "optim_params":
        {

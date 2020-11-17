@@ -1,6 +1,7 @@
 
 import torch
 import torch.nn as nn
+from torch.autograd import Variable
 
 
 class DeepAR(nn.Module):
@@ -67,29 +68,44 @@ class DeepAR(nn.Module):
         self.distribution_presigma = nn.Linear(self.params["lstm_hidden_dim"] * self.params["lstm_layers"], 1)
         self.distribution_sigma = nn.Softplus()
 
-    def forward(self, x, idx, hidden, cell):
+    def forward(self, x: torch.Tensor, y: torch.Tensor):
         '''
         Predict mu and sigma of the distribution for z_t.
         Args:
-            x: ([1, batch_size, 1+cov_dim]): z_{t-1} + x_t, note that z_0 = 0
-            idx ([1, batch_size]): one integer denoting the time series id
-            hidden ([lstm_layers, batch_size, lstm_hidden_dim]): LSTM h from time step t-1
-            cell ([lstm_layers, batch_size, lstm_hidden_dim]): LSTM c from time step t-1
+            x: ([predict_start+predict_steps, batch_size, cov_dim]): z_{t-1} + x_t, note that z_0 = 0
+            y: ([predict_start+predict_steps,batch_size,1]): will use z_{t-1} for predicting z_{t}, note: z_0 = 0
         Returns:
-            mu ([batch_size]): estimated mean of z_t
-            sigma ([batch_size]): estimated standard deviation of z_t
-            hidden ([lstm_layers, batch_size, lstm_hidden_dim]): LSTM h from time step t
-            cell ([lstm_layers, batch_size, lstm_hidden_dim]): LSTM c from time step t
+            mu ([predict_start+predict_steps,batch_size]): estimated mean of z_t for all time steps
+            sigma ([predict_start+predict_steps,batch_size]): estimated standard deviation of z_t for all time steps
         '''
-        onehot_embed = self.embedding(idx)  # TODO: is it possible to do this only once per window instead of per step?
-        lstm_input = torch.cat((x, onehot_embed), dim=2)
-        output, (hidden, cell) = self.lstm(lstm_input, (hidden, cell))
-        # use h from all three layers to calculate mu and sigma
-        hidden_permute = hidden.permute(1, 2, 0).contiguous().view(hidden.shape[1], -1)
-        pre_sigma = self.distribution_presigma(hidden_permute)
-        mu = self.distribution_mu(hidden_permute)
-        sigma = self.distribution_sigma(pre_sigma)  # softplus to make sure standard deviation is positive
-        return torch.squeeze(mu), torch.squeeze(sigma), hidden, cell
+        hidden = self.init_hidden(x.shape[1])  # input batch size
+        cell = self.init_cell(x.shape[1])  # input batch size
+        z_0 = self.init_z0(x.shape[1])
+        mu_concat = torch.Tensor([])
+        mu = torch.Tensor([])
+        sigma_concat = torch.Tensor([])
+        for idx in range(x.shape[0]):
+            # onehot_embed = self.embedding(idx)
+            # lstm_input = torch.cat((x, onehot_embed), dim=2)
+            i = x[idx:idx + 1, :, :]
+            if idx == 0:  # initial step
+                z = z_0
+            elif idx < self.params["predict_start"]:  # training period
+                z = y[idx - 1: idx, :, :]
+            else:  # prediction period
+                z = mu.unsqueeze(0)
+            # print(mu.shape)
+            lstm_input = torch.cat((i, z), dim=2)
+            # print(idx,lstm_input.shape)
+            output, (hidden, cell) = self.lstm(lstm_input, (hidden, cell))
+            # use h from all three layers to calculate mu and sigma
+            hidden_permute = hidden.permute(1, 2, 0).contiguous().view(hidden.shape[1], -1)
+            pre_sigma = self.distribution_presigma(hidden_permute)
+            mu = self.distribution_mu(hidden_permute)
+            sigma = self.distribution_sigma(pre_sigma)  # softplus to make sure standard deviation is positive
+            mu_concat = torch.cat((mu_concat, mu.unsqueeze(0)))
+            sigma_concat = torch.cat((sigma_concat, sigma.unsqueeze(0)))
+        return mu_concat, sigma_concat
 
     def init_hidden(self, input_size):
         return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"])
@@ -131,3 +147,19 @@ class DeepAR(nn.Module):
                 if t < (self.params["predict_steps"] - 1):
                     x[self.params["predict_start"] + t + 1, :, 0] = mu_de
             return sample_mu, sample_sigma
+
+
+def loss_fn(mu: Variable, sigma: Variable, labels: Variable):
+    '''
+    Compute using gaussian the log-likehood which needs to be maximized. Ignore time steps where labels are missing.
+    Args:
+        mu: (Variable) dimension [batch_size] - estimated mean at time step t
+        sigma: (Variable) dimension [batch_size] - estimated standard deviation at time step t
+        labels: (Variable) dimension [batch_size] z_t
+    Returns:
+        loss: (Variable) average log-likelihood loss across the batch
+    '''
+    zero_index = (labels != 0)
+    distribution = torch.distributions.normal.Normal(mu[zero_index], sigma[zero_index])
+    likelihood = distribution.log_prob(labels[zero_index])
+    return -torch.mean(likelihood)
