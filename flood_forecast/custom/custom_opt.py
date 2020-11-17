@@ -64,7 +64,7 @@ class RMSELoss(torch.nn.Module):
     '''
     Returns RMSE using:
     target -> True y
-    output -> Predtion by model
+    output -> Prediction by model
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 

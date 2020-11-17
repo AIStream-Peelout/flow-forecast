@@ -121,7 +121,6 @@ jobs:
           path: test-results
           destination: test-results-data-quality
 
-
   model_basic_test:
     <<: *defaults
     steps:
