@@ -151,6 +151,8 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None):
+    # Warning this assumes src target is 1-D
+    src = src[:, :, 0]
     if probabilistic:
         if type(output_std) != torch.Tensor:
             print("Converted")
@@ -169,7 +171,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         else:
             output = validation_dataset.inverse_scale(output.cpu())
             labels = validation_dataset.inverse_scale(labels.cpu())
-            src = validation_dataset.inverse_scale(src.cpu()[:, :, 0])
+            src = validation_dataset.inverse_scale(src.cpu())
 
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
