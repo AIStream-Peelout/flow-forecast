@@ -152,6 +152,8 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None):
     # Warning this assumes src target is 1-D
+    if len(src.shape) == 2:
+        src = src.unsqueeze(0)
     src = src[:, :, 0]
     if probabilistic:
         if type(output_std) != torch.Tensor:

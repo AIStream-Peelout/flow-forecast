@@ -53,7 +53,8 @@ class MASELoss(torch.nn.Module):
         self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
         self.baseline_method = self.method_dict[baseline_method]
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor):
+    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor) -> torch.Tensor:
+        # Ugh why can't all tensors have batch size...
         if len(train_data.shape) == 1:
             train_data = train_data.reshape(1, train_data.shape[0])
         if len(target.shape) == 1:
@@ -142,7 +143,7 @@ class GaussianLoss(torch.nn.Module):
         self.mu = mu
         self.sigma = sigma
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         loss = - tdist.Normal(self.mu, self.sigma).log_prob(x)
         return torch.sum(loss) / (loss.size(0) * loss.size(1))
 
