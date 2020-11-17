@@ -7,6 +7,8 @@ from datetime import datetime
 
 class InferenceTests(unittest.TestCase):
     def setUp(self):
+        """
+        """
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")) as y:
             self.config_test = json.load(y)
         self.new_csv_path = "gs://task_ts_data/Massachusetts_Middlesex_County.csv"
@@ -17,10 +19,14 @@ class InferenceTests(unittest.TestCase):
         load_model(self.config_test, self.new_csv_path, self.weight_path)
 
     def test_infer_mode(self):
+        # Test inference
         self.infer_class.infer_now(datetime(2020, 6, 1), self.new_csv_path)
 
     def test_plot_model(self):
         self.infer_class.make_plots(datetime(2020, 5, 1), self.new_csv_path, "task_ts_data", "test1/test.csv")
+
+    def test_speed(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,6 +11,7 @@ from flood_forecast.explain_model_output import (
     deep_explain_model_summary_plot,
 )
 from flood_forecast.model_dict_function import decoding_functions, pytorch_criterion_dict
+from flood_forecast.custom.custom_opt import MASELoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
@@ -114,6 +115,8 @@ def evaluate_model(
     for evaluation_metric in evaluation_metrics:
         for target in target_col:
             eval_params = {}
+            if "criterion_params" in inference_params:
+                eval_params = inference_params["criterion_params"]
             evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
@@ -122,6 +125,17 @@ def evaluate_model(
                         df_train_and_test[target][forecast_history:].to_numpy()
                     ),
                 )
+            elif isinstance(evaluation_metric_function, MASELoss):
+                s = evaluation_metric_function(
+                    torch.from_numpy(
+                        df_train_and_test[target][forecast_history:].to_numpy()
+                    ),
+                    end_tensor,
+                    torch.from_numpy(
+                        df_train_and_test[target][:forecast_history].to_numpy()
+                    )
+                )
+
             else:
                 s = evaluation_metric_function(
                     torch.from_numpy(
@@ -152,6 +166,7 @@ def infer_on_torch_model(
     dataset_params: Dict = {},
     num_prediction_samples: int = None,
     probabilistic: bool = False,
+    criterion_params: Dict = None
 ) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, pd.DataFrame):
     """
     Function to handle both test evaluation and inference on a test dataframe.
