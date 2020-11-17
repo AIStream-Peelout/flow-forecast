@@ -28,14 +28,13 @@
        "optim_params":
        {
        }
-    
     },
     "GCS": false,
     
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
-       "tags": ["dummy_run", "circleci"]
+       "tags": ["dummy_run", "circleci", "ae"]
     },
    "metrics":["MSE"],
 

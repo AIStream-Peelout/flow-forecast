@@ -56,6 +56,10 @@ class MASELoss(torch.nn.Module):
     def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor):
         if len(train_data.shape) == 1:
             train_data = train_data.reshape(1, train_data.shape[0])
+        if len(target.shape) == 1:
+            target = target.unsqueeze(0)
+        if len(output.shape) == 1:
+            output = output.unsqueeze(0)
         result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
         MAE = torch.nn.L1Loss()
         mae2 = MAE(target, output)
