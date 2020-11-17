@@ -47,7 +47,7 @@ SCHEDULES = {
 class MASELoss(torch.nn.Module):
     def __init__(self, baseline_method):
         """
-        Implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
+        This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
         """
         super(MASELoss, self).__init__()
         self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
