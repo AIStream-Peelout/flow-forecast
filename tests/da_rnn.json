@@ -30,7 +30,7 @@
 
     "training_params":
     {
-       "criterion":"MASEloss",
+       "criterion":"MASELoss",
        "optimizer": "Adam",
        "optim_params":
        {
