@@ -155,6 +155,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         if type(output_std) != torch.Tensor:
             print("Converted")
             output_std = torch.from_numpy(output_std)
+        if type(output) != torch.Tensor:
+            output = torch.from_numpy(output)
         output_dist = torch.distributions.Normal(output, output_std)
     if validation_dataset:
         if probabilistic:
