@@ -176,7 +176,7 @@ def torch_single_train(model: PyTorchForecast,
         labels = trg[:, :, 0]
         if isinstance(criterion, GaussianLoss):
             g_loss = GaussianLoss(output[0], output[1])
-            loss = g_loss(labels)
+            loss = g_loss(labels.unsqueeze(1))
         else:
             loss = criterion(output, labels.float())
         # TODO fix Guassian loss

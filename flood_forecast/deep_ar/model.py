@@ -43,18 +43,18 @@ class DeepAR(nn.Module):
         # self.params = params
         self.embedding = nn.Embedding(self.params["num_class"], self.params["embedding_dim"])
 
-        self.lstm = nn.LSTM(input_size=1 + self.params["cov_dim"] + self.params["embedding_dim"],
+        # self.lstm = nn.LSTM(input_size=1 + self.params["cov_dim"] + self.params["embedding_dim"],
+        #                     hidden_size=self.params["lstm_hidden_dim"],
+        #                     num_layers=self.params["lstm_layers"],
+        #                     bias=True,
+        #                     batch_first=False,
+        #                     dropout=self.params["lstm_dropout"])
+        self.lstm = nn.LSTM(input_size=1 + self.params["cov_dim"],
                             hidden_size=self.params["lstm_hidden_dim"],
                             num_layers=self.params["lstm_layers"],
                             bias=True,
-                            batch_first=False,
+                            batch_first=True,
                             dropout=self.params["lstm_dropout"])
-        '''self.lstm = nn.LSTM(input_size=1 + params.cov_dim,
-                            hidden_size=params.lstm_hidden_dim,
-                            num_layers=params.lstm_layers,
-                            bias=True,
-                            batch_first=False,
-                            dropout=params.lstm_dropout)'''
         # initialize LSTM forget gate bias to be 1 as recommanded by http://proceedings.mlr.press/v37/jozefowicz15.pdf
         for names in self.lstm._all_weights:
             for name in filter(lambda n: "bias" in n, names):
@@ -68,34 +68,40 @@ class DeepAR(nn.Module):
         self.distribution_presigma = nn.Linear(self.params["lstm_hidden_dim"] * self.params["lstm_layers"], 1)
         self.distribution_sigma = nn.Softplus()
 
-    def forward(self, x: torch.Tensor, meta_data: torch.Tensor = None):
+    def forward(self, input_data: torch.Tensor, t: torch.Tensor):
         '''
         Predict mu and sigma of the distribution for z_t.
         Args:
-            x: ([predict_start+predict_steps, batch_size, cov_dim]): z_{t-1} + x_t, note that z_0 = 0
-            y: ([predict_start+predict_steps,batch_size,1]): will use z_{t-1} for predicting z_{t}, note: z_0 = 0
+            x: ([batch_size, predict_start,1+cov_dim]): z_{t} + x{t}, have to make z_{t-1}+x_{t} to be able to use
+            t: ([batch_size,predict_steps,1+cov_dim]): z_{t} + x{t}, have to make z_{t-1}+x_{t} to be able to use
         Returns:
-            mu ([predict_start+predict_steps,batch_size]): estimated mean of z_t for all time steps
-            sigma ([predict_start+predict_steps,batch_size]): estimated standard deviation of z_t for all time steps
+            mu: ([batch_size, predict_steps,1]): only predict future steps
+            sigma: ([batch_size,predict_steps,1]): only predict future
         '''
-        hidden = self.init_hidden(x.shape[1])  # input batch size
-        cell = self.init_cell(x.shape[1])  # input batch size
-        z_0 = self.init_z0(x.shape[1])
+        hidden = self.init_hidden(input_data.shape[0])  # input batch size
+        cell = self.init_cell(input_data.shape[0])  # input batch size
+        z_0 = self.init_z0(input_data.shape[0])
         mu_concat = torch.Tensor([])
         mu = torch.Tensor([])
         sigma_concat = torch.Tensor([])
-        y = meta_data["t"]
-        for idx in range(x.shape[0]):
+        target = input_data[:, :, 0:1]
+        covariate = input_data[:, :, 1:]
+        future_target = t[:, :, 0:1]
+        future_covariate = t[:, :, 1:]
+        X = torch.cat((covariate, future_covariate), dim=1)
+        y = torch.cat((target, future_target), axis=1)
+        for idx in range(X.shape[1]):
             # onehot_embed = self.embedding(idx)
+            # # TODO: is it possible to do this only once per window instead of per step?
             # lstm_input = torch.cat((x, onehot_embed), dim=2)
-            i = x[idx:idx + 1, :, :]
+            i = X[:, idx:idx + 1, :]
             if idx == 0:  # initial step
                 z = z_0
             elif idx < self.params["predict_start"]:  # training period
-                z = y[idx - 1: idx, :, :]
+                z = y[:, idx - 1:idx, :]  # (batch,idx,1)
             else:  # prediction period
-                z = mu.unsqueeze(0)
-            # print(mu.shape)
+                z = mu.unsqueeze(1)
+                # print(mu.shape)
             lstm_input = torch.cat((i, z), dim=2)
             # print(idx,lstm_input.shape)
             output, (hidden, cell) = self.lstm(lstm_input, (hidden, cell))
@@ -104,15 +110,19 @@ class DeepAR(nn.Module):
             pre_sigma = self.distribution_presigma(hidden_permute)
             mu = self.distribution_mu(hidden_permute)
             sigma = self.distribution_sigma(pre_sigma)  # softplus to make sure standard deviation is positive
-            mu_concat = torch.cat((mu_concat, mu.unsqueeze(0)))
-            sigma_concat = torch.cat((sigma_concat, sigma.unsqueeze(0)))
-        return mu_concat, sigma_concat
+            mu_concat = torch.cat((mu_concat, mu.unsqueeze(0)), dim=1)
+            sigma_concat = torch.cat((sigma_concat, sigma.unsqueeze(0)), dim=1)
+        return (mu_concat[:, self.params["predict_start"]:, :],
+                sigma_concat[:, self.params["predict_start"]:, :])  # (batch_size,predict_steps,1)
 
     def init_hidden(self, input_size):
         return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"])
 
     def init_cell(self, input_size):
         return torch.zeros(self.params["lstm_layers"], input_size, self.params["lstm_hidden_dim"])
+
+    def init_z0(self, batch_size):
+        return torch.zeros(batch_size, 1, 1)
 
     def test(self, x, v_batch, id_batch, hidden, cell, sampling=False):
         batch_size = x.shape[1]

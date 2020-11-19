@@ -2,7 +2,7 @@
     "model_name": "DeepAR",
     "model_type": "PyTorch",
     "model_params": {
-      "cov_dim": 3,
+      "cov_dim": 2,
       "embedding_dim": 10,
       "lstm_dropout": 0.1,
       "lstm_hidden_dim": 40,
@@ -40,7 +40,7 @@
     "training_params":
     {
        "criterion":"GaussianLoss",
-       "probabilistic": false,
+       "probabilistic": true,
        "optimizer": "Adam",
        "optim_params":
        {

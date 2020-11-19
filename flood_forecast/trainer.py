@@ -36,8 +36,9 @@ def train_function(model_type: str, params: Dict):
             dataset_params["validation_path"],
             dataset_params["test_path"],
             params)
+        takes_target = False
         if "takes_target" in trained_model.params:
-            takes_target = trained_model["takes_target"]
+            takes_target = trained_model.params["takes_target"]
         train_transformer_style(model=trained_model,
                                 training_params=params["training_params"],
                                 takes_target=takes_target,
