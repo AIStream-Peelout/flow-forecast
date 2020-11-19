@@ -15,3 +15,5 @@ mypy
 .vscode/*
 .idea
 .idea/
+wandb
+model_save

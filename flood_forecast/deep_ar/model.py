@@ -68,7 +68,7 @@ class DeepAR(nn.Module):
         self.distribution_presigma = nn.Linear(self.params["lstm_hidden_dim"] * self.params["lstm_layers"], 1)
         self.distribution_sigma = nn.Softplus()
 
-    def forward(self, x: torch.Tensor, y: torch.Tensor):
+    def forward(self, x: torch.Tensor, meta_data: torch.Tensor = None):
         '''
         Predict mu and sigma of the distribution for z_t.
         Args:
@@ -84,6 +84,7 @@ class DeepAR(nn.Module):
         mu_concat = torch.Tensor([])
         mu = torch.Tensor([])
         sigma_concat = torch.Tensor([])
+        y = meta_data["t"]
         for idx in range(x.shape[0]):
             # onehot_embed = self.embedding(idx)
             # lstm_input = torch.cat((x, onehot_embed), dim=2)

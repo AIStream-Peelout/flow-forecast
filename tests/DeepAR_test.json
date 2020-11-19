@@ -35,6 +35,8 @@
 
     },
 
+    "takes_target": true,
+
     "training_params":
     {
        "criterion":"GaussianLoss",
