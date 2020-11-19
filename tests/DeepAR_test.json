@@ -9,7 +9,7 @@
       "lstm_layers": 2,
       "num_class": 1,
       "predict_start": 5,
-      "predict_steps": 24,
+      "predict_steps": 1,
       "sample_times": 200
      },
     "dataset_params":
