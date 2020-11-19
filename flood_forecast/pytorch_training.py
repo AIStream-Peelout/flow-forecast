@@ -223,7 +223,9 @@ def compute_validation(validation_loader: DataLoader,  # s lint
             targ = targ.to(device)
             i += 1
             if decoder_structure:
-                if type(model).__name__ == "SimpleTransformer":
+                if type(model).__name__ == "DeepAR":
+                    output = model(src.float(), targ.float())
+                elif type(model).__name__ == "SimpleTransformer":
                     targ_clone = targ.detach().clone()
                     output = greedy_decode(
                         model,
@@ -235,9 +237,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                         :,
                         0]
                 else:
-                    if type(model).__name__ == "DeepAR":
-                        output = model(src.float(), targ.float())
-                    elif probabilistic:
+                    if probabilistic:
                         output, output_std = simple_decode(model,
                                                            src,
                                                            targ.shape[1],
