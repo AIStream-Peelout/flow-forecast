@@ -17,3 +17,4 @@ mypy
 .idea/
 wandb
 model_save
+checkpoint.pth

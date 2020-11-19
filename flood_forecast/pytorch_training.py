@@ -235,7 +235,9 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                         :,
                         0]
                 else:
-                    if probabilistic:
+                    if type(model).__name__ == "DeepAR":
+                        output = model(src.float(), targ.float())
+                    elif probabilistic:
                         output, output_std = simple_decode(model,
                                                            src,
                                                            targ.shape[1],
@@ -252,7 +254,9 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                                                output_len=1,
                                                probabilistic=probabilistic)[:, :, 0]
             else:
-                if probabilistic:
+                if type(model).__name__ == "DeepAR":
+                    output = model(src.float(), targ.float())
+                elif probabilistic:
                     output_dist = model(src.float())
                     output = output_dist.mean.detach().numpy()
                     output_std = output_dist.stddev.detach().numpy()
@@ -284,7 +288,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                 loss = loss.numpy()
             elif isinstance(criterion, GaussianLoss):
                 g_loss = GaussianLoss(output[0], output[1])
-                loss = g_loss(labels)
+                loss = g_loss(labels.unsqueeze(1))
             else:
                 loss = criterion(output, labels.float())
             loop_loss += len(labels.float()) * loss.item()
