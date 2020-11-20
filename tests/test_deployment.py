@@ -23,7 +23,8 @@ class InferenceTests(unittest.TestCase):
         self.infer_class.infer_now(datetime(2020, 6, 1), self.new_csv_path)
 
     def test_plot_model(self):
-        self.infer_class.make_plots(datetime(2020, 5, 1), self.new_csv_path, "task_ts_data", "test1/test.csv", "deploy")
+        self.infer_class.make_plots(datetime(2020, 5, 1), self.new_csv_path, "task_ts_data", "test1/test.csv",
+                                    "deploy", "repo-flood_forecast")
 
     def test_speed(self):
         pass
