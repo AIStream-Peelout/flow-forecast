@@ -38,7 +38,7 @@
     
     "wandb": {
        "name": "flood_forecast_circleci",
-       "tags": ["dummy_run", "circleci", "multi"],
+       "tags": ["dummy_run", "circleci"],
        "project": "repo-flood_forecast"
     },
     "forward_params":{},
