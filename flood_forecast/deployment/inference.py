@@ -35,6 +35,8 @@ class InferenceMode(object):
         df, tensor, history, forecast_start, test, samples = self.infer_now(date, csv_path, csv_bucket, save_name)
         plt = plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
         if wandb_plot_id:
+            wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=self.model.params["wandb"]["project"])
+            wandb.log(self.model.params)
             wandb.log({wandb_plot_id: plt})
         return tensor, history, test, plt
 
