@@ -95,7 +95,7 @@ def train_transformer_style(
             takes_target,
             meta_model,
             meta_representation,
-            forward_params)
+            forward_params.copy())
         print("The loss for epoch " + str(epoch))
         print(total_loss)
         use_decoder = False
