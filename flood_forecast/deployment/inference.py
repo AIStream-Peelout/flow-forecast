@@ -8,10 +8,15 @@ import wandb
 
 
 class InferenceMode(object):
-    def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path):
+    def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
+                 wandb_proj: str = None):
         """
         Class to handle inference
         """
+        if wandb_proj:
+            date = datetime.now()
+            wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
+            wandb.log(model_params)
         self.hours_to_forecast = hours_to_forecast
         self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
@@ -32,12 +37,10 @@ class InferenceMode(object):
         return df, tensor, history, forecast_start, test, samples
 
     def make_plots(self, date: datetime, csv_path: str, csv_bucket: str = None,
-                   save_name=None, wandb_plot_id=None, wandb_proj=None):
+                   save_name=None, wandb_plot_id=None):
         df, tensor, history, forecast_start, test, samples = self.infer_now(date, csv_path, csv_bucket, save_name)
         plt = plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
         if wandb_plot_id:
-            wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
-            wandb.log(self.model.params)
             wandb.log({wandb_plot_id: plt})
         return tensor, history, test, plt
 
