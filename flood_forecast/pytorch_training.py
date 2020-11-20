@@ -210,6 +210,9 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["meta_data"] = representation
         if takes_target:
             forward_params["t"] = trg
+        print("Takes target")
+        print(takes_target)
+        print(forward_params)
         output = model.model(src, **forward_params)
         labels = trg[:, :, 0]
         loss = compute_loss(labels, output, src, criterion, None, None, None)
