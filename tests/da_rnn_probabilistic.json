@@ -28,6 +28,7 @@
        "scaler": "StandardScaler",
        "interpolate": false
     },
+
     "training_params":
     {
        "criterion":"NegativeLogLikelihood",
@@ -41,7 +42,7 @@
        "batch_size":4
 
     },
-    "GCS": false, 
+    "GCS": false,
     "wandb": {
        "name": "flood_forecast_circleci",
        "tags": ["dummy_run", "circleci", "da_revised_probabilistic"],
