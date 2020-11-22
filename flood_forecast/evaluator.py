@@ -89,7 +89,7 @@ def evaluate_model(
             df_predictions,
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
-        # Unscale test data if scaler was applied
+        # To-do turn this into a general function
         print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
