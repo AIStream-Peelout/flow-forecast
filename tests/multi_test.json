@@ -32,7 +32,6 @@
        "lr": 0.3,
        "epochs": 1,
        "batch_size":4
-    
     },
     "GCS": false,
     
@@ -58,7 +57,5 @@
              "interpolate_param": false
           }
    }
-       
-   
 }
     

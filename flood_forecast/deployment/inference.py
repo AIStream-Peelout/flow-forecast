@@ -36,7 +36,7 @@ class InferenceMode(object):
             unscaled = self.model.test_data.inverse_scale(df["preds"].values.reshape(-1, 1).astype('float64'))
             df["preds"] = unscaled
         if len(samples.columns) > 1:
-            samples = pd.DataFrame(self.model.test_data.inverse_scale(samples, index=samples.index))
+            samples = pd.DataFrame(self.model.test_data.inverse_scale(samples), index=samples.index)
         if save_buck:
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
