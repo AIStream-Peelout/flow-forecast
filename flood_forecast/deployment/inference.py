@@ -4,6 +4,7 @@ from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
+import pandas as pd
 import wandb
 
 
@@ -32,8 +33,10 @@ class InferenceMode(object):
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if self.model.test_data.scale:
-            unscaled = self.model.test_data.inverse_scale(df["preds"].numpy())
+            unscaled = self.model.test_data.inverse_scale(df["preds"].numpy().reshape(-1, 1))
             df["preds"] = unscaled
+        if len(samples.columns) > 1:
+            samples = pd.DataFrame(self.model.test_data.inverse_scale(df["preds"].numpy()), index=samples.index)
         if save_buck:
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
