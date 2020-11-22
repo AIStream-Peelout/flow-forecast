@@ -2,7 +2,7 @@
     "model_name": "MultiAttnHeadSimple",
     "model_type": "PyTorch",
     "model_params": {
-      "number_time_series":3,
+      "number_time_series":3, 
       "seq_len":5
      },
     "dataset_params":
