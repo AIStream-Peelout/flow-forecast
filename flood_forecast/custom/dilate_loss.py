@@ -26,12 +26,14 @@ class DilateLoss(torch.nn.Module):
         # outputs, targets: shape (batch_size, N_output, 1)
         print("The shape of targets is :")
         print(targets.shape)
+        print(outputs.shape)
         if len(targets.size()) < 2:
             print("begin fixed loss func")
             targets = targets.unsqueeze(0)
             outputs = outputs.unsqueeze(0)
         outputs = outputs.unsqueeze(2)
         target = targets.unsqueeze(2)
+        print("Got here now")
         batch_size, N_output = outputs.shape[0:2]
         loss_shape = 0
         softdtw_batch = SoftDTWBatch.apply
