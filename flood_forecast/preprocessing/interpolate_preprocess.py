@@ -6,7 +6,7 @@ def fix_timezones(df: pd.DataFrame) -> pd.DataFrame:
     """
     Basic function to fix initil data bug
     related to NaN values in non-eastern-time zones due
-    to UTC conversion.
+    to UTC conversion. Only useful for flow data.
     """
     the_count = df[0:2]['cfs'].isna().sum()
     return df[the_count:]
