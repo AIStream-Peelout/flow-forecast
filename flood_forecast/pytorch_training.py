@@ -182,7 +182,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         g_loss = GaussianLoss(output[0], output[1])
         loss = g_loss(labels)
     elif isinstance(criterion, MASELoss):
-        loss = criterion(output, labels.float(), src)
+        loss = criterion(labels.float(), output, src)
     else:
         loss = criterion(output, labels.float())
     return loss
