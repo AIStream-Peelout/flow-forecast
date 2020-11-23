@@ -8,7 +8,7 @@ from datetime import datetime
 class InferenceTests(unittest.TestCase):
     def setUp(self):
         """
-        Modules to test model inference.
+        Modules to test model inference and efficency...
         """
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")) as y:
             self.config_test = json.load(y)
