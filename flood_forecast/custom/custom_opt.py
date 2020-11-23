@@ -64,6 +64,9 @@ class MASELoss(torch.nn.Module):
         result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
         MAE = torch.nn.L1Loss()
         mae2 = MAE(target, output)
+        print("MASE stuff below")
+        print(MAE(result_baseline, target))
+        print(mae2)
         return mae2 / MAE(result_baseline, target)
 
 
