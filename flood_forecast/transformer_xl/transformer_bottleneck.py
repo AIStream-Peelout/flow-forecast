@@ -321,4 +321,4 @@ class DecoderTransformer(nn.Module):
             return mu, sigma
         if self.forecast_len_layer:
             sigma = self.forecast_len_layer(sigma)
-        return sigma.reshape(x.shape[0], -1)
+        return sigma
