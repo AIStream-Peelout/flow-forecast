@@ -182,7 +182,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         g_loss = GaussianLoss(output[0], output[1])
         loss = g_loss(labels)
     elif isinstance(criterion, MASELoss):
-        loss = criterion(output, labels.float(), src)
+        loss = criterion(labels.float(), output, src)
     else:
         loss = criterion(output, labels.float())
     return loss
@@ -196,7 +196,7 @@ def torch_single_train(model: PyTorchForecast,
                        meta_data_model: PyTorchForecast,
                        meta_data_model_representation: torch.Tensor,
                        forward_params: Dict = {}) -> float:
-    print('torch_single_train')
+    print('running torch_single_train')
     i = 0
     running_loss = 0.0
     for src, trg in data_loader:
