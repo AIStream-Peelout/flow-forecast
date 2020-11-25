@@ -10,6 +10,7 @@
       "dropout":0.1,
       "q_len": 1,
       "scale_att": false,
+      "forecast_length": 1,
       "additional_params":{}
      }, 
     "dataset_params":
