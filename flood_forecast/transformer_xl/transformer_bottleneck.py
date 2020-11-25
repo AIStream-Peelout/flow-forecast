@@ -311,7 +311,7 @@ class DecoderTransformer(nn.Module):
             series_id: Optional id of the series in the dataframe. Currently not supported
         Returns:
             Case 1: tensor of dimension (batch_size, forecast_length)
-            Case 2: Return sigma and mu tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
+            Case 2: Return sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
@@ -320,5 +320,7 @@ class DecoderTransformer(nn.Module):
             sigma = self.softplus(sigma)
             return mu, sigma
         if self.forecast_len_layer:
-            sigma = self.forecast_len_layer(sigma)
-        return sigma.reshape(x.shape[0], -1)
+            # Swap to (batch_size, 1, features) for linear layer
+            sigma = sigma.permute(0, 2, 1)
+            sigma = self.forecast_len_layer(sigma).permute(0, 2, 1)
+        return sigma.squeeze(2)

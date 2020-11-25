@@ -10,6 +10,7 @@
       "dropout":0.1,
       "q_len": 1,
       "scale_att": false,
+      "forecast_length": 1,
       "additional_params":{}
      }, 
     "dataset_params":
@@ -31,7 +32,7 @@
     },
     "training_params":
     {
-       "criterion":"RMSE",
+       "criterion":"DilateLoss",
        "optimizer": "Adam",
        "optim_params":
        {
@@ -48,7 +49,7 @@
        "tags": ["dummy_run", "circleci"]
     },
     "forward_params":{},
-   "metrics":["MSE"],
+   "metrics":["DilateLoss"],
    "inference_params":
    {     
          "datetime_start":"2016-05-31",
