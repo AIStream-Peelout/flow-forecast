@@ -49,7 +49,7 @@
        "tags": ["dummy_run", "circleci"]
     },
     "forward_params":{},
-   "metrics":["MSE"],
+   "metrics":["DilateLoss"],
    "inference_params":
    {     
          "datetime_start":"2016-05-31",

@@ -320,6 +320,7 @@ class DecoderTransformer(nn.Module):
             sigma = self.softplus(sigma)
             return mu, sigma
         if self.forecast_len_layer:
-            print(sigma.shape)
-            sigma = self.forecast_len_layer(sigma)
-        return sigma.reshape(x.shape[0], -1)
+            # Swap to (batch_size, 1, features) for linear layer
+            sigma = sigma.permute(0, 2, 1)
+            sigma = self.forecast_len_layer(sigma).permute(0, 2, 1)
+        return sigma.squeeze(2)
