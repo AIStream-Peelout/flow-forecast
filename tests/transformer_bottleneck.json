@@ -32,7 +32,7 @@
     },
     "training_params":
     {
-       "criterion":"RMSE",
+       "criterion":"DilateLoss",
        "optimizer": "Adam",
        "optim_params":
        {
