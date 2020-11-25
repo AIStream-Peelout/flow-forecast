@@ -311,7 +311,7 @@ class DecoderTransformer(nn.Module):
             series_id: Optional id of the series in the dataframe. Currently not supported
         Returns:
             Case 1: tensor of dimension (batch_size, forecast_length)
-            Case 2: Return sigma and mu tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
+            Case 2: Return sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
