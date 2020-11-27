@@ -2,12 +2,12 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.pre_dict import scaler_dict
-from flood_forecast.preprocessing.buil_dataset import get_data
+# from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
 import pandas as pd
 import wandb
-import json
+# mport json
 
 
 class InferenceMode(object):
@@ -18,11 +18,6 @@ class InferenceMode(object):
         """
         self.hours_to_forecast = hours_to_forecast
         self.csv_path = csv_path
-        if type(model_params) == str:
-            path_to = get_data(model_params)
-            print(path_to)
-            # with open(path_to) as f:
-            #    # model_params = json.loads(f)
         self.model = load_model(model_params, csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
         s = self.inference_params["dataset_params"]["scaling"]
