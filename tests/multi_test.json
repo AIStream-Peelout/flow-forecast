@@ -19,7 +19,6 @@
        "test_end": 500,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "StandardScaler", 
        "interpolate": false
     },
     "training_params":
@@ -53,7 +52,6 @@
              "forecast_length":5,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
-             "scaling": "StandardScaler",
              "interpolate_param": false
           }
    }
