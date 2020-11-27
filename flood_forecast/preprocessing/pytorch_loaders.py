@@ -5,6 +5,7 @@ import torch
 from typing import List, Union, Optional
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
+from datetime import datetime
 
 
 class CSVDataLoader(Dataset):
@@ -150,7 +151,7 @@ class CSVTestLoader(CSVDataLoader):
         )
         self.original_df["original_index"] = self.original_df.index
 
-    def get_from_start_date(self, forecast_start: int):
+    def get_from_start_date(self, forecast_start: datetime):
         dt_row = self.original_df[
             self.original_df["datetime"] == forecast_start
         ]
