@@ -38,6 +38,7 @@ class PlotFunctionsTest(unittest.TestCase):
         self.assertIsInstance(fig, go.Figure)
 
     def test_plot_df_test_with_confidence_interval_df_preds_empty(self):
+        """"""
         params = {'dataset_params': {'target_col': ['target_col']}}
         fig = plot_df_test_with_confidence_interval(
             self.df_test, self.df_preds_empty, 0, params, 95)

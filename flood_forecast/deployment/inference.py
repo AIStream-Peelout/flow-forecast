@@ -50,6 +50,10 @@ class InferenceMode(object):
             wandb.log({wandb_plot_id: plt})
         return tensor, history, test, plt
 
+    def infer_numpy_raw(self, forecast_history):
+        if 1==1:
+            pass
+
 
 def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
     if weight_path:
