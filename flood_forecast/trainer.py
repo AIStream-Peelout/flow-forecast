@@ -14,7 +14,7 @@ from flood_forecast.plot_functions import (
 
 def train_function(model_type: str, params: Dict):
     """
-    Function to train a Model(TimeSeriesModel). Will return the trained model
+    Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
     model_type str: Type of the model (for now) must be da_rnn or
     :params dict: Dictionary containing all the parameters needed to run the model
     """
