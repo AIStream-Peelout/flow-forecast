@@ -18,7 +18,7 @@ class InferenceMode(object):
         """
         self.hours_to_forecast = hours_to_forecast
         self.csv_path = csv_path
-        self.model = load_model(model_params, csv_path, weight_path)
+        self.model = load_model(model_params.copy(), csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
         s = self.inference_params["dataset_params"]["scaling"]
         self.inference_params["dataset_params"]["scaling"] = scaler_dict[s]
@@ -27,7 +27,7 @@ class InferenceMode(object):
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
-            wandb.log(model_params)
+            wandb.config.update(model_params)
 
     def infer_now(self, some_date, csv_path=None, save_buck=None, save_name=None):
         self.inference_params["datetime_start"] = some_date
