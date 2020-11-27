@@ -24,7 +24,7 @@ setup(
         "flood_forecast.basic",
         "flood_forecast.meta_models",
         "flood_forecast.gcp_integration",
-        "flood_forecast.deployment"
+        "flood_forecast.deployment",
         "flood_forecast.custom"],
     license='Public',
     long_description='A public package for forecasting river flows and flash flood severity',
