@@ -21,7 +21,7 @@ class CSVDataLoader(Dataset):
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
         interpolate_param: bool = True,
-        sort_column="datetime"
+        sort_column=None
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -129,7 +129,7 @@ class CSVTestLoader(CSVDataLoader):
         use_real_temp=True,
         target_supplied=True,
         interpolate=False,
-        sort_column="datetime",
+        sort_column=None,
         **kwargs
     ):
         """
