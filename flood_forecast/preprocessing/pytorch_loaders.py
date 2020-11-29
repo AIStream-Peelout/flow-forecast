@@ -56,7 +56,7 @@ class CSVDataLoader(Dataset):
             self.df = interpolated_df[relevant_cols]
         else:
             self.df = df[relevant_cols]
-        print("Now loading and scaling " + file_path)
+        print("Now loading" + file_path)
         self.original_df = df
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
@@ -66,6 +66,7 @@ class CSVDataLoader(Dataset):
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
         if scaling is not None:
+            print("scaling now")
             self.scale = scaling
             temp_df = self.scale.fit_transform(self.df)
             # We define a second scaler to scale the end output
