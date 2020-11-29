@@ -43,9 +43,7 @@ class InferenceMode(object):
         if len(samples.columns) > 1:
             index = samples.index
             if hasattr(test, "targ_scaler"):
-                samples = test.inverse_scale(samples.numpy())
-                samples = pd.DataFrame(samples.numpy(), index=index)
-            else:
+                samples = test.inverse_scale(samples)
                 samples = pd.DataFrame(samples.numpy(), index=index)
             samples[:forecast_history] = 0
         if save_buck:
