@@ -39,12 +39,12 @@ class InferenceMode(object):
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
-            df["preds"][forecast_history:] = unscaled[:, 0]
+            df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
         if len(samples.columns) > 1:
             index = samples.index
             if hasattr(test, "targ_scaler"):
                 samples = test.inverse_scale(samples.numpy())
-                samples = pd.DataFrame(samples, index=index)
+                samples = pd.DataFrame(samples.numpy(), index=index)
             else:
                 samples = pd.DataFrame(samples.numpy(), index=index)
             samples[:forecast_history] = 0
