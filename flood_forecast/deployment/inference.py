@@ -36,16 +36,17 @@ class InferenceMode(object):
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
-        if self.model.test_data.scale:
-            unscaled = test.inverse_scale(df["preds"].values.reshape(-1, 1).astype('float64'))
-            df["preds"] = unscaled[:, 0]
+        if test.scale:
+            unscaled = test.inverse_scale(tensor.numpy())
+            df["preds"] = unscaled[self.inference_params["dataset_params"]["forecast_history"]:, 0]
         if len(samples.columns) > 1:
             index = samples.index
             if hasattr(test, "targ_scaler"):
-                samples = test.inverse_scale(samples)
+                samples = test.inverse_scale(samples.numpy())
                 samples = pd.DataFrame(samples, index=index)
             else:
-                samples = pd.DataFrame(samples, index=index)
+                samples = pd.DataFrame(samples.numpy(), index=index)
+            samples[:self.inference_params["dataset_params"]["forecast_history"]] = 0
         if save_buck:
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
