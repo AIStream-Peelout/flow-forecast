@@ -37,7 +37,7 @@ class InferenceMode(object):
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if test.scale:
-            unscaled = test.inverse_scale(tensor.numpy())
+            unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"] = unscaled[self.inference_params["dataset_params"]["forecast_history"]:, 0]
         if len(samples.columns) > 1:
             index = samples.index
