@@ -116,7 +116,7 @@ class CSVDataLoader(Dataset):
         if isinstance(result_data, np.ndarray):
             result_data_np = result_data
         return torch.from_numpy(
-            result_data_np
+            self.targ_scaler.inverse_transform(result_data_np)
         )
 
 
@@ -129,6 +129,7 @@ class CSVTestLoader(CSVDataLoader):
         use_real_temp=True,
         target_supplied=True,
         interpolate=False,
+        sort_column="datetime",
         **kwargs
     ):
         """
@@ -140,6 +141,8 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
+        if sort_column:
+            self.original_df = self.original_df.sort_values(by=sort_column)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
