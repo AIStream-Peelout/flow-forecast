@@ -31,6 +31,7 @@ class InferenceMode(object):
             wandb.config.update(model_params)
 
     def infer_now(self, some_date, csv_path=None, save_buck=None, save_name=None):
+        forecast_history = self.inference_params["dataset_params"]["forecast_history"]
         self.inference_params["datetime_start"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
@@ -38,7 +39,7 @@ class InferenceMode(object):
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
-            df["preds"] = unscaled[self.inference_params["dataset_params"]["forecast_history"]:, 0]
+            df["preds"][forecast_history:] = unscaled[:, 0]
         if len(samples.columns) > 1:
             index = samples.index
             if hasattr(test, "targ_scaler"):
@@ -46,7 +47,7 @@ class InferenceMode(object):
                 samples = pd.DataFrame(samples, index=index)
             else:
                 samples = pd.DataFrame(samples.numpy(), index=index)
-            samples[:self.inference_params["dataset_params"]["forecast_history"]] = 0
+            samples[:forecast_history] = 0
         if save_buck:
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
