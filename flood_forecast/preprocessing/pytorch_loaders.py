@@ -5,6 +5,7 @@ import torch
 from typing import List, Union, Optional
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
+from datetime import datetime
 
 
 class CSVDataLoader(Dataset):
@@ -20,7 +21,7 @@ class CSVDataLoader(Dataset):
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
         interpolate_param: bool = True,
-        sort_column="datetime"
+        sort_column=None
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -55,7 +56,7 @@ class CSVDataLoader(Dataset):
             self.df = interpolated_df[relevant_cols]
         else:
             self.df = df[relevant_cols]
-        print("Now loading and scaling " + file_path)
+        print("Now loading" + file_path)
         self.original_df = df
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
@@ -65,6 +66,7 @@ class CSVDataLoader(Dataset):
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
         if scaling is not None:
+            print("scaling now")
             self.scale = scaling
             temp_df = self.scale.fit_transform(self.df)
             # We define a second scaler to scale the end output
@@ -127,6 +129,7 @@ class CSVTestLoader(CSVDataLoader):
         use_real_temp=True,
         target_supplied=True,
         interpolate=False,
+        sort_column=None,
         **kwargs
     ):
         """
@@ -138,6 +141,8 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
+        if sort_column:
+            self.original_df = self.original_df.sort_values(by=sort_column)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
@@ -150,7 +155,7 @@ class CSVTestLoader(CSVDataLoader):
         )
         self.original_df["original_index"] = self.original_df.index
 
-    def get_from_start_date(self, forecast_start: int):
+    def get_from_start_date(self, forecast_start: datetime):
         dt_row = self.original_df[
             self.original_df["datetime"] == forecast_start
         ]

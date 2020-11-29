@@ -2,10 +2,12 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.pre_dict import scaler_dict
+# from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
 import pandas as pd
 import wandb
+# mport json
 
 
 class InferenceMode(object):
@@ -14,36 +16,45 @@ class InferenceMode(object):
         """
         Class to handle inference for models.
         """
+        self.hours_to_forecast = hours_to_forecast
+        self.csv_path = csv_path
+        self.model = load_model(model_params.copy(), csv_path, weight_path)
+        self.inference_params = model_params["inference_params"]
+        if "scaling" in self.inference_params["dataset_params"]:
+            s = self.inference_params["dataset_params"]["scaling"]
+            self.inference_params["dataset_params"]["scaling"] = scaler_dict[s]
+        self.inference_params["hours_to_forecast"] = hours_to_forecast
+        self.inference_params["num_prediction_samples"] = num_prediction_samples
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
-            wandb.log(model_params)
-        self.hours_to_forecast = hours_to_forecast
-        self.model = load_model(model_params, csv_path, weight_path)
-        self.inference_params = model_params["inference_params"]
-        s = self.inference_params["dataset_params"]["scaling"]
-        self.inference_params["dataset_params"]["scaling"] = scaler_dict[s]
-        self.inference_params["hours_to_forecast"] = hours_to_forecast
-        self.inference_params["num_prediction_samples"] = num_prediction_samples
+            wandb.config.update(model_params)
 
     def infer_now(self, some_date, csv_path=None, save_buck=None, save_name=None):
+        forecast_history = self.inference_params["dataset_params"]["forecast_history"]
         self.inference_params["datetime_start"] = some_date
         if csv_path:
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
-        if self.model.test_data.scale:
-            unscaled = self.model.test_data.inverse_scale(df["preds"].values.reshape(-1, 1).astype('float64'))
-            df["preds"] = unscaled[:, 0]
+        if test.scale:
+            unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
+            df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
         if len(samples.columns) > 1:
-            samples = pd.DataFrame(self.model.test_data.inverse_scale(samples), index=samples.index)
+            index = samples.index
+            if hasattr(test, "targ_scaler"):
+                samples = test.inverse_scale(samples)
+                samples = pd.DataFrame(samples.numpy(), index=index)
+            samples[:forecast_history] = 0
         if save_buck:
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
 
-    def make_plots(self, date: datetime, csv_path: str, csv_bucket: str = None,
+    def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
                    save_name=None, wandb_plot_id=None):
+        if csv_path is None:
+            csv_path = self.csv_path
         df, tensor, history, forecast_start, test, samples = self.infer_now(date, csv_path, csv_bucket, save_name)
         plt = plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
         if wandb_plot_id:

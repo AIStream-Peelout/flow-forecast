@@ -40,3 +40,12 @@ def back_forward_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFra
     for col in relevant_columns:
         df[col] = df[col].interpolate(method='nearest').bfill().ffill()
     return df
+
+
+def convert_time_var(df, method_list: List[str]):
+    """ Func to convert to datetimes to feats"""
+    method_dict = {
+        "weekeday_raw": lambda x: x.dayofweek()
+
+    }
+    return method_dict

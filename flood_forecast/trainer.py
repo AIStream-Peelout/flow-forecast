@@ -37,7 +37,9 @@ def train_function(model_type: str, params: Dict):
             dataset_params["test_path"],
             params)
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
-        params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
+        # To do delete
+        if "scaler" in dataset_params:
+            params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
         test_acc = evaluate_model(
             trained_model,
             model_type,
