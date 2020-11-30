@@ -10,6 +10,7 @@ import wandb
 class ConsistencyTests(unittest.TestCase):
     def setUp(self):
         self.base_path = os.path.dirname(os.path.realpath(__file__))
+        os.environ["MODEL_BUCKET"] = "task_ts_data"
         with open(os.path.join(self.base_path, "decoder_test.json")) as y:
             config = json.load(y)
         self.model_config = config
@@ -21,8 +22,7 @@ class ConsistencyTests(unittest.TestCase):
         self.assertIn("gcs_m_path_5_model", self.updated_config)
 
     def test_inference_same(self):
-        print(self.updated_config)
-        print(self.updated_config["gcs_m_path_2_params"])
+        print(wandb.config["gcs_m_path_2_params"])
         file_path = os.path.join(self.base_path, "test_data", "keag_small.csv")
         m = inference.InferenceMode(336, 20, self.updated_config["gcs_m_path_2_params"], file_path,
                                     self.updated_config["gcs_m_path_1_model"])
