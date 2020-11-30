@@ -146,9 +146,10 @@ jobs:
           name: Model basic tests
           when: always
           command: |
+            coverage run -m unittest -v tests/consistency_tests.py
             coverage run -m unittest -v tests/time_model_test.py
             coverage run -m unittest -v tests/pytorc_train_tests.py
-            python -m unittest -v tests/model_config_tests.py
+            coverage run run -m unittest -v tests/model_config_tests.py
             python -m unittest -v tests/data_loader_tests.py
             python -m unittest -v tests/test_da_rnn.py
 
