@@ -18,10 +18,12 @@ class ConsistencyTests(unittest.TestCase):
 
     def test_model_consistency(self):
         train_function("PyTorch", self.model_config)
-        self.updated_config = wandb.config.copy()
+        self.updated_config = wandb.config
         self.assertIn("gcs_m_path_2_model", self.updated_config)
 
     def test_inference_same(self):
+        print(self.updated_config)
+        print("updated config above")
         file_path = os.path.join(self.base_path, "test_data", "keag_small.csv")
         m = inference.InferenceMode(336, 20, self.updated_config["gcs_m_path_2_params"], file_path,
                                     self.updated_config["gcs_m_path_2_model"])
