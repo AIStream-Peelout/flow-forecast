@@ -20,6 +20,7 @@ class ConsistencyTests(unittest.TestCase):
         self.assertIn("gcs_m_path_5_model", self.updated_config)
 
     def test_inference_same(self):
+        os
         file_path = ""
         m = inference.InferenceMode(336, 20, self.updated_config["gcs_m_path_5_params"], file_path,
                                     self.updated_config["gcs_m_path_5_model"])
