@@ -84,7 +84,7 @@ def train_function(model_type: str, params: Dict):
         wandb.log({"test_plot_all": test_plot_all})
     else:
         raise Exception("Please supply valid model type for forecasting")
-    return trained_model, config
+    return trained_model
 
 
 def main():
