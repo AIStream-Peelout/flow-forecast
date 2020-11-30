@@ -25,10 +25,11 @@ class ConsistencyTests(unittest.TestCase):
                                     self.updated_config["gcs_m_path_5_model"])
         tensor, history, test, plt = m.make_plots(datetime.datetime(2016, 5, 31))
         wandb.log({"plt_2": plt})
-        print("Shut hte fuck up you stupid linter i will use variables later")
+        print("Shut you stupid linter i will use variables later")
         print(tensor)
         print(history)
         print(test)
+        print("stuff above")
         self.assertEqual(2, 2)
 
 if __name__ == "__main__":
