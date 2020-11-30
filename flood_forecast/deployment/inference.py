@@ -62,7 +62,7 @@ class InferenceMode(object):
         return tensor, history, test, plt
 
 
-def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
+def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchForecast:
     if weight_path:
         model_params_dict["weight_path"] = weight_path
     model_params_dict["inference_params"]["test_csv_path"] = file_path

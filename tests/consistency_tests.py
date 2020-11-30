@@ -14,11 +14,11 @@ class ConsistencyTests(unittest.TestCase):
         with open(os.path.join(self.base_path, "decoder_test.json")) as y:
             config = json.load(y)
         self.model_config = config
-        self.updated_config = wandb.config
+        self.updated_config = wandb.config.as_dict()
 
     def test_model_consistency(self):
         train_function("PyTorch", self.model_config)
-        self.updated_config = wandb.config.copy()
+        self.updated_config = wandb.config.as_dict()
         self.assertIn("gcs_m_path_2_model", self.updated_config)
 
     def test_inference_same(self):
