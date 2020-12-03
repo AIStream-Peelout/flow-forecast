@@ -18,7 +18,8 @@ def train_transformer_style(
         training_params: Dict,
         takes_target=False,
         forward_params: Dict = {},
-        model_filepath: str = "model_save") -> None:
+        model_filepath: str = "model_save",
+        num_workers: int = 1) -> None:
     """
     Function to train any PyTorchForecast model
     :model The initialized PyTorchForecastModel
@@ -47,7 +48,7 @@ def train_transformer_style(
         shuffle=False,
         sampler=None,
         batch_sampler=None,
-        num_workers=0,
+        num_workers=num_workers,
         collate_fn=None,
         pin_memory=False,
         drop_last=False,
@@ -59,14 +60,14 @@ def train_transformer_style(
         shuffle=False,
         sampler=None,
         batch_sampler=None,
-        num_workers=0,
+        num_workers=num_workers,
         collate_fn=None,
         pin_memory=False,
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
     test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
-                                  batch_sampler=None, num_workers=0, collate_fn=None,
+                                  batch_sampler=None, num_workers=num_workers, collate_fn=None,
                                   pin_memory=False, drop_last=False, timeout=0,
                                   worker_init_fn=None)
     meta_model = None
