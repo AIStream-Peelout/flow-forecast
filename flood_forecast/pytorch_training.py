@@ -28,8 +28,8 @@ def train_transformer_style(
     """
     worker_num = 1
     if "num_workers" in model.params["dataset_params"]:
+        print("Using " + str(worker_num))
         worker_num = model.params["dataset_params"]["num_workers"]
-        print("Using " + str(worker_num) + " workers total.")
     use_wandb = model.wandb
     es = None
     if "early_stopping" in model.params:
@@ -206,7 +206,6 @@ def torch_single_train(model: PyTorchForecast,
     for src, trg in data_loader:
         opt.zero_grad()
         # Convert to CPU/GPU/TPU
-        print(model.device)
         src = src.to(model.device)
         trg = trg.to(model.device)
         # TODO figure how to avoid
