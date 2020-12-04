@@ -42,6 +42,9 @@ def train_transformer_style(
     criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
     if "probabilistic" in training_params:
         probabilistic = True
+    pin_memory = False
+    if model.device != "cpu":
+        pin_memory = True
     else:
         probabilistic = False
     max_epochs = training_params["epochs"]
@@ -53,7 +56,7 @@ def train_transformer_style(
         batch_sampler=None,
         num_workers=worker_num,
         collate_fn=None,
-        pin_memory=False,
+        pin_memory=pin_memory,
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
@@ -65,7 +68,7 @@ def train_transformer_style(
         batch_sampler=None,
         num_workers=worker_num,
         collate_fn=None,
-        pin_memory=False,
+        pin_memory=pin_memory,
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
