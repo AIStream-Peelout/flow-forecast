@@ -28,6 +28,7 @@ def train_transformer_style(
     """
     worker_num = 1
     if "num_workers" in model.params["dataset_params"]:
+        print("Using " + str(worker_num))
         worker_num = model.params["dataset_params"]["num_workers"]
     use_wandb = model.wandb
     es = None
