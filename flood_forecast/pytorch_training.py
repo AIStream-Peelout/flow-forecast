@@ -29,7 +29,7 @@ def train_transformer_style(
     worker_num = 1
     if "num_workers" in model.params["dataset_params"]:
         print("Using " + str(worker_num))
-        worker_num = model.params["dataset_params"]["num_worke
+        worker_num = model.params["dataset_params"]["num_workers"]
     use_wandb = model.wandb
     es = None
     if "early_stopping" in model.params:
@@ -44,7 +44,7 @@ def train_transformer_style(
         probabilistic = True
     else:
         probabilistic = False
-    pin_mmemory = False
+    pin_memory = False
     if "pin_memory" in model.params["dataset_params"]:
         pin_memory = True
     max_epochs = training_params["epochs"]

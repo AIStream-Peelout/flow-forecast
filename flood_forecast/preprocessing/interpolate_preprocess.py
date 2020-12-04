@@ -26,7 +26,7 @@ def interpolate_missing_values(df: pd.DataFrame) -> pd.DataFrame:
 
 def forward_back_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFrame:
     """
-    Function to fill missing values with nearest value (forward first)
+    Function to fill missing values with nearest value (forward fill first)
     """
     for col in relevant_columns:
         df[col] = df[col].interpolate(method='nearest').ffill().bfill()
@@ -35,7 +35,7 @@ def forward_back_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFra
 
 def back_forward_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFrame:
     """
-    Function to fill missing values with nearest values (backward first)
+    Function to fill missing values with nearest values (backward fill first)
     """
     for col in relevant_columns:
         df[col] = df[col].interpolate(method='nearest').bfill().ffill()
