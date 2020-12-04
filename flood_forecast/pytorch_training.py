@@ -28,6 +28,14 @@ def train_transformer_style(
     """
     use_wandb = model.wandb
     es = None
+    worker_num = 1
+    pin_memory = False
+    dataset_params = model.params["dataset_params"]
+    if "num_workers" in dataset_params:
+        worker_num = dataset_params["num_workers"]
+    if "pin_memory" in dataset_params:
+        pin_memory = dataset_params["pin_memory"]
+        print("Pin memory set to true")
     if "early_stopping" in model.params:
         es = EarlyStopper(model.params["early_stopping"]['patience'])
     opt = pytorch_opt_dict[training_params["optimizer"]](
@@ -47,9 +55,9 @@ def train_transformer_style(
         shuffle=False,
         sampler=None,
         batch_sampler=None,
-        num_workers=0,
+        num_workers=worker_num,
         collate_fn=None,
-        pin_memory=False,
+        pin_memory=pin_memory,
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
@@ -59,15 +67,15 @@ def train_transformer_style(
         shuffle=False,
         sampler=None,
         batch_sampler=None,
-        num_workers=0,
+        num_workers=worker_num,
         collate_fn=None,
-        pin_memory=False,
+        pin_memory=pin_memory,
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
     test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
-                                  batch_sampler=None, num_workers=0, collate_fn=None,
-                                  pin_memory=False, drop_last=False, timeout=0,
+                                  batch_sampler=None, num_workers=worker_num, collate_fn=None,
+                                  pin_memory=pin_memory, drop_last=False, timeout=0,
                                   worker_init_fn=None)
     meta_model = None
     meta_representation = None
