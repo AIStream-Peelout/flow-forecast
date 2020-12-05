@@ -17,7 +17,7 @@
        "train_end": 300,
        "valid_start":301,
        "valid_end": 401,
-       "test_end": 500,
+       "test_end": 500, 
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "interpolate": false
