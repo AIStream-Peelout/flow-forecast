@@ -73,7 +73,8 @@ def train_transformer_style(
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
-    test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
+    test_data_loader = DataLoader(model.test_data, batch_size=training_params["batch_size"], shuffle=False,
+                                  sampler=None,
                                   batch_sampler=None, num_workers=worker_num, collate_fn=None,
                                   pin_memory=pin_memory, drop_last=False, timeout=0,
                                   worker_init_fn=None)
@@ -248,7 +249,8 @@ def compute_validation(validation_loader: DataLoader,
                        use_wandb: bool = False,
                        meta_model=None,
                        val_or_test="validation_loss",
-                       probabilistic=False) -> float:
+                       probabilistic=False,
+                       threads=1,) -> float:
     """
     Function to compute the validation or the test loss
     """
