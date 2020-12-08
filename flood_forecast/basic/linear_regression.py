@@ -71,18 +71,21 @@ def simple_decode(model: Type[torch.nn.Module],
             else:
                 out = model(src)
 
+            if len(out.shape) < 3:
+                out = out.squeeze(0)
+
             if probabilistic:
                 out_std = out.stddev.detach()
                 out = out.mean.detach()
                 ys_std_dev.append(out_std[:, 0].unsqueeze(0))
 
             if output_len == 1:
-                real_target2[:, i, 0] = out[:, 0]
+                real_target2[:, i, 0] = out[:, :, 0]
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
                 ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
             else:
                 residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
-                real_target2[:, i:i + residual, 0] = out[:, :residual]
+                real_target2[:, i:i + residual, 0] = out[:, :, :residual]
                 src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
     if probabilistic:
