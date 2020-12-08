@@ -71,13 +71,13 @@ def simple_decode(model: Type[torch.nn.Module],
             else:
                 out = model(src)
 
-            if len(out.shape) < 3:
-                out = out.unsqueeze(0)
-
             if probabilistic:
                 out_std = out.stddev.detach()
                 out = out.mean.detach()
                 ys_std_dev.append(out_std[:, 0].unsqueeze(0))
+
+            if len(out.shape) < 3:
+                out = out.unsqueeze(0)
 
             if output_len == 1:
                 real_target2[:, i, 0] = out[:, :, 0]
