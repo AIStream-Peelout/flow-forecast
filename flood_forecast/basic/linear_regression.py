@@ -72,7 +72,7 @@ def simple_decode(model: Type[torch.nn.Module],
                 out = model(src)
 
             if len(out.shape) < 3:
-                out = out.squeeze(0)
+                out = out.unsqueeze(0)
 
             if probabilistic:
                 out_std = out.stddev.detach()

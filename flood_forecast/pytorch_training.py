@@ -73,7 +73,7 @@ def train_transformer_style(
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
-    # We re-worked the testL...
+    # We re-worked the test...
     test_data_loader = DataLoader(model.test_data, batch_size=training_params["batch_size"], shuffle=False,
                                   sampler=None,
                                   batch_sampler=None, num_workers=worker_num, collate_fn=None,
