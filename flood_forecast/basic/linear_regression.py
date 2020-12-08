@@ -82,7 +82,7 @@ def simple_decode(model: Type[torch.nn.Module],
             if output_len == 1:
                 print(out.shape)
                 print(real_target2.shape)
-                real_target2[:, i, 0] = out[:, :, 0]
+                real_target2[:, i, 0] = out[:, :, 0].squeeze(1)
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
                 ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
             else:
