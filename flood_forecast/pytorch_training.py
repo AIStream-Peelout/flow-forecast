@@ -205,7 +205,7 @@ def torch_single_train(model: PyTorchForecast,
                        meta_data_model: PyTorchForecast,
                        meta_data_model_representation: torch.Tensor,
                        forward_params: Dict = {}) -> float:
-    print('running torch_single_train')
+    print('Running torch_single_train')
     i = 0
     running_loss = 0.0
     for src, trg in data_loader:
