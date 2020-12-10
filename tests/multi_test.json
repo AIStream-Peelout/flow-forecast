@@ -20,6 +20,7 @@
        "test_end": 500, 
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
+       "sort_column":"datetime",
        "interpolate": false
     },
     "training_params":

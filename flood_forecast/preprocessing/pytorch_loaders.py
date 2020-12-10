@@ -6,6 +6,7 @@ from typing import List, Union, Optional
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
+from flood_forecast.preprocessing.temporal_feats import feature_fix
 
 
 class CSVDataLoader(Dataset):
@@ -21,7 +22,8 @@ class CSVDataLoader(Dataset):
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
         interpolate_param: bool = True,
-        sort_column=None
+        sort_column=None,
+        feature_params=None
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -45,17 +47,23 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
-        # TODO allow other filling methods
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
+        relevant_cols3 = []
         if sort_column:
+            df[sort_column] = pd.to_datetime(df[sort_column])
             df = df.sort_values(by=sort_column)
+            if feature_params:
+                df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
+                print("Relevant cols are")
+        print(relevant_cols3)
+        self.relevant_cols3 = relevant_cols3
         if interpolate:
             interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
-            self.df = interpolated_df[relevant_cols]
+            self.df = interpolated_df[relevant_cols + relevant_cols3]
         else:
-            self.df = df[relevant_cols]
+            self.df = df[relevant_cols + relevant_cols3]
         print("Now loading" + file_path)
         self.original_df = df
         self.scale = None
@@ -68,7 +76,7 @@ class CSVDataLoader(Dataset):
         if scaling is not None:
             print("scaling now")
             self.scale = scaling
-            temp_df = self.scale.fit_transform(self.df)
+            temp_df = self.scale.fit_transform(self.df[relevant_cols])
             # We define a second scaler to scale the end output
             # back to normal as models might not necessarily predict
             # other present time series values.
@@ -77,9 +85,7 @@ class CSVDataLoader(Dataset):
             self.targ_scaler.fit_transform(
                 self.df[target_col[0]].values.reshape(-1, 1)
             )
-            self.df = pd.DataFrame(
-                temp_df, index=self.df.index, columns=self.df.columns
-            )
+            self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
             raise (
                 "Error nan values detected in data. Please run interpolate ffill or bfill on data"
@@ -129,7 +135,7 @@ class CSVTestLoader(CSVDataLoader):
         use_real_temp=True,
         target_supplied=True,
         interpolate=False,
-        sort_column=None,
+        sort_column_clone=None,
         **kwargs
     ):
         """
@@ -141,8 +147,8 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
-        if sort_column:
-            self.original_df = self.original_df.sort_values(by=sort_column)
+        if sort_column_clone:
+            self.original_df = self.original_df.sort_values(by=sort_column_clone)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
@@ -154,6 +160,8 @@ class CSVTestLoader(CSVDataLoader):
             "datetime64[ns]"
         )
         self.original_df["original_index"] = self.original_df.index
+        if len(self.relevant_cols3) > 0:
+            self.original_df[[self.relevant_cols3]] = self.df[[self.relevant_cols3]]
 
     def get_from_start_date(self, forecast_start: datetime):
         dt_row = self.original_df[
