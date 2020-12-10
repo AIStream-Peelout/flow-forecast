@@ -134,7 +134,7 @@ class CSVTestLoader(CSVDataLoader):
         use_real_temp=True,
         target_supplied=True,
         interpolate=False,
-        sort_column=None,
+        sort_column2=None,
         **kwargs
     ):
         """
@@ -146,8 +146,8 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
-        if sort_column:
-            self.original_df = self.original_df.sort_values(by=sort_column)
+        if sort_column2:
+            self.original_df = self.original_df.sort_values(by=sort_column2)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total

@@ -184,6 +184,7 @@ def infer_on_torch_model(
         datetime_start = datetime.strptime(datetime_start, "%Y-%m-%d")
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
+    sort_column2 = None
     # If the tes t dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
@@ -192,6 +193,7 @@ def infer_on_torch_model(
             test_csv_path,
             hours_to_forecast,
             **dataset_params,
+            sort_column2=sort_column2,
             interpolate=dataset_params["interpolate_param"]
         )
     model.model.eval()
