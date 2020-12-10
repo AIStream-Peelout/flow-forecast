@@ -47,7 +47,6 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
-        print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
         relevant_cols3 = []
@@ -60,6 +59,7 @@ class CSVDataLoader(Dataset):
         print(relevant_cols3)
         self.relevant_cols3 = relevant_cols3
         if interpolate:
+            print("interpolate should be below")
             interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
             self.df = interpolated_df[relevant_cols + relevant_cols3]
         else:
@@ -87,9 +87,7 @@ class CSVDataLoader(Dataset):
             )
             self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
-            raise (
-                "Error nan values detected in data. Please run interpolate ffill or bfill on data"
-            )
+            print("Warning: Nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
 
     def __getitem__(self, idx):
