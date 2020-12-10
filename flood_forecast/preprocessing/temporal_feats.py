@@ -28,9 +28,10 @@ def create_feature(key, value, df, dt_column):
 
 
 def feature_fix(preprocess_params, dt_column, df):
+    print("running feature fix code")
     column_names = []
     if "datetime_params" in preprocess_params:
-        for key, value in preprocess_params.items():
+        for key, value in preprocess_params["datetime_params"].items():
             df = create_feature(key, value, df, dt_column)
             if value == "cyclical":
                 column_names.append("cos_" + key)
