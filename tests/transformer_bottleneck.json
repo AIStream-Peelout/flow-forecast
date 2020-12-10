@@ -73,7 +73,7 @@
              "scaling": "RobustScaler",
              "interpolate_param": false,
              "sort_column":"datetime",
-             "feature_param":{
+             "feature_params":{
                 "datetime_params":{
                    "hour":"cyclical"
                 }
