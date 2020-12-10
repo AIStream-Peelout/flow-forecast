@@ -161,7 +161,7 @@ class CSVTestLoader(CSVDataLoader):
         )
         self.original_df["original_index"] = self.original_df.index
         if len(self.relevant_cols3) > 0:
-            self.original_df[[self.relevant_cols3]] = self.df[self.relevant_cols3]
+            self.original_df[[self.relevant_cols3]] = self.df[[self.relevant_cols3]]
 
     def get_from_start_date(self, forecast_start: datetime):
         dt_row = self.original_df[
