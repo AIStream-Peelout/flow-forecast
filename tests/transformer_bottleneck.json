@@ -2,7 +2,7 @@
     "model_name": "DecoderTransformer",
     "model_type": "PyTorch",
     "model_params": {
-      "n_time_series":3,
+      "n_time_series":4,
       "n_head": 8,
       "forecast_history":5,
       "n_embd": 1, 
@@ -30,6 +30,7 @@
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "RobustScaler", 
        "interpolate": false,
+       "sort_column":"datetime",
        "feature_param":
        {"datetime_params":{
           "hour":"cyclical" 
