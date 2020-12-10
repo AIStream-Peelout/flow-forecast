@@ -2,7 +2,7 @@
     "model_name": "DecoderTransformer",
     "model_type": "PyTorch",
     "model_params": {
-      "n_time_series":4,
+      "n_time_series":5,
       "n_head": 8,
       "forecast_history":5,
       "n_embd": 1, 
