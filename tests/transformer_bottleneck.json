@@ -71,7 +71,13 @@
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
              "scaling": "RobustScaler",
-             "interpolate_param": false
+             "interpolate_param": false,
+             "sort_column":"datetime",
+             "feature_param":{
+                "datetime_params":{
+                   "hour":"cyclical"
+                }
+             }
           }
    } 
 }

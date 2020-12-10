@@ -56,6 +56,8 @@ class CSVDataLoader(Dataset):
             df = df.sort_values(by=sort_column)
             if feature_params:
                 df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
+                print("Relevant cols are")
+        print(relevant_cols3)
         if interpolate:
             interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
             self.df = interpolated_df[relevant_cols + relevant_cols3]
