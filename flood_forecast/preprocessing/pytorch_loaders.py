@@ -50,6 +50,7 @@ class CSVDataLoader(Dataset):
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
         if sort_column:
+            df[sort_column] = pd.to_datetime(df[sort_column])
             df = df.sort_values(by=sort_column)
         if interpolate:
             interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])

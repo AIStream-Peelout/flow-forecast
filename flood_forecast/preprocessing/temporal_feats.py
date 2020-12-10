@@ -1,6 +1,7 @@
 from datetime import datetime
 import pandas as pd
 from typing import Dict
+import numpy as np
 
 
 def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame) -> pd.DataFrame:
@@ -30,7 +31,18 @@ def create_feature(key, value, df, dt_column):
 def preprocess_data(preprocess_params, dt_column, df):
     column_names = []
     if "datetime_params" in preprocess_params:
-        for key, value in preprocess_params:
-            create_feature(key, value, df, dt_column)
-    return keys, df
+        for key, value in preprocess_params.items():
+            df = create_feature(key, value, df, dt_column)
+            if value == "cyclical":
+                column_names.append("cos_" + key)
+                column_names.append("sin_" + key)
+            else:
+                column_names.append(key)
+    return column_names
 
+
+def cyclical(df, feature_column):
+    df["norm"] = 2 * np.pi * df[feature_column] / df[feature_column].max()
+    df['cos_' + feature_column] = np.cos(df['norm'])
+    df['sin_' + feature_column] = np.sin(df['norm'])
+    return df
