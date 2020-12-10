@@ -193,7 +193,7 @@ def infer_on_torch_model(
             test_csv_path,
             hours_to_forecast,
             **dataset_params,
-            sort_column2=sort_column2,
+            sort_column_clone=sort_column2,
             interpolate=dataset_params["interpolate_param"]
         )
     model.model.eval()

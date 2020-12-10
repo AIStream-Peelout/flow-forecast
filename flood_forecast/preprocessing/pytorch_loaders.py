@@ -58,6 +58,7 @@ class CSVDataLoader(Dataset):
                 df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
                 print("Relevant cols are")
         print(relevant_cols3)
+        self.relevant_cols3 = relevant_cols3
         if interpolate:
             interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
             self.df = interpolated_df[relevant_cols + relevant_cols3]
@@ -134,7 +135,7 @@ class CSVTestLoader(CSVDataLoader):
         use_real_temp=True,
         target_supplied=True,
         interpolate=False,
-        sort_column2=None,
+        sort_column_clone=None,
         **kwargs
     ):
         """
@@ -146,8 +147,8 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
-        if sort_column2:
-            self.original_df = self.original_df.sort_values(by=sort_column2)
+        if sort_column_clone:
+            self.original_df = self.original_df.sort_values(by=sort_column_clone)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
@@ -159,6 +160,8 @@ class CSVTestLoader(CSVDataLoader):
             "datetime64[ns]"
         )
         self.original_df["original_index"] = self.original_df.index
+        if len(self.relevant_cols3) > 0:
+            self.original_df[[self.relevant_cols3]] = self.df[self.relevant_cols3]
 
     def get_from_start_date(self, forecast_start: datetime):
         dt_row = self.original_df[
