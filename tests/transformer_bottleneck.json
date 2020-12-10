@@ -29,7 +29,11 @@
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "RobustScaler", 
-       "interpolate": false
+       "interpolate": false,
+       "feature_param":
+       {"datetime_params":{
+          "hour":"cyclical" 
+       }}
     },
     "training_params":
     {
