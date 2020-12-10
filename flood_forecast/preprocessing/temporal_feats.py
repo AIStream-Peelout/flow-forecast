@@ -1,4 +1,3 @@
-from datetime import datetime
 import pandas as pd
 from typing import Dict
 import numpy as np
@@ -28,7 +27,7 @@ def create_feature(key, value, df, dt_column):
     return df
 
 
-def preprocess_data(preprocess_params, dt_column, df):
+def feature_fix(preprocess_params, dt_column, df):
     column_names = []
     if "datetime_params" in preprocess_params:
         for key, value in preprocess_params.items():
@@ -38,7 +37,7 @@ def preprocess_data(preprocess_params, dt_column, df):
                 column_names.append("sin_" + key)
             else:
                 column_names.append(key)
-    return column_names
+    return df, column_names
 
 
 def cyclical(df, feature_column):
