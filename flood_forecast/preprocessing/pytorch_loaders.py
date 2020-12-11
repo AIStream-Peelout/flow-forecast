@@ -87,9 +87,7 @@ class CSVDataLoader(Dataset):
             )
             self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
-            raise (
-                "Error nan values detected in data. Please run interpolate ffill or bfill on data"
-            )
+            print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
 
     def __getitem__(self, idx):
