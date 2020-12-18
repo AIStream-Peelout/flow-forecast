@@ -6,7 +6,7 @@ import wandb
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
-from flood_forecast.pre_dict import scaler_dict
+from flood_forecast.time_model import scaling_function
 from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
@@ -39,7 +39,12 @@ def train_function(model_type: str, params: Dict):
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
         # To do delete
         if "scaler" in dataset_params:
-            params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
+            if "scaler_params" in dataset_params:
+                params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
+                                                                                           dataset_params)["scaling"]
+            else:
+                params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
+                                                                                           dataset_params)["scaling"]
         test_acc = evaluate_model(
             trained_model,
             model_type,
