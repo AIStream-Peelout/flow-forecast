@@ -28,7 +28,7 @@
        "test_end":400,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "MinMaxScaler", 
+       "scaler": "RobustScaler", 
        "interpolate": false,
        "sort_column":"datetime",
        "feature_param":
