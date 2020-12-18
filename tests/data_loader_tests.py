@@ -35,6 +35,7 @@ class DataLoaderTests(unittest.TestCase):
             relevant_cols=["cfs", "precip", "temp"],
             interpolate_param=False,
         )
+        data_base_params["start_stamp"] = 20
         self.test_loader = CSVTestLoader(
             os.path.join(self.test_data_path, "keag_small.csv"),
             336,
@@ -43,6 +44,10 @@ class DataLoaderTests(unittest.TestCase):
         self.ae_loader = AEDataloader(
             os.path.join(self.test_data_path, "keag_small.csv"),
             relevant_cols=["cfs", "temp", "precip"],
+        )
+        data_base_params["end_stamp"] = 220
+        self.train_loader2 = CSVDataLoader(
+            **data_base_params
         )
 
     def test_loader2_get_item(self):
@@ -79,9 +84,6 @@ class DataLoaderTests(unittest.TestCase):
             "data/task_ts_data/2020-08-17/Afghanistan____.csv",
         )
 
-
-if __name__ == "__main__":
-
     def test_ae(self):
         x, y = self.ae_loader[0]
         self.assertEqual(x.shape, y.squeeze(1).shape)
@@ -93,4 +95,11 @@ if __name__ == "__main__":
         self.assertEqual(y.shape[0], 20)
         # Check first and last dim are not overlap
         self.assertFalse(torch.eq(x[29, 0], y[0, 0]))
-        # Need more checks here
+
+    def test_start_end(self):
+        self.assertEqual(len(self.train_loader.df), len(self.test_loader.df) + 20)
+        self.assertEqual(len(self.train_loader2.df), 200)
+
+
+if __name__ == "__main__":
+    unittest.main()
