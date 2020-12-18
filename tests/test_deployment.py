@@ -17,7 +17,8 @@ class InferenceTests(unittest.TestCase):
         self.infer_class = InferenceMode(20, 30, self.config_test, self.new_csv_path, self.weight_path, "covid-core")
 
     def test_load_model(self):
-        load_model(self.config_test, self.new_csv_path, self.weight_path)
+        model = load_model(self.config_test, self.new_csv_path, self.weight_path)
+        self.assertIsInstance(model, object)
 
     def test_infer_mode(self):
         # Test inference
