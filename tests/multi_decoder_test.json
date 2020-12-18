@@ -21,7 +21,10 @@
        "valid_end": 401,
        "target_col": ["cfs", "temp"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "StandardScaler", 
+       "scaler": "MinmaxScaler",
+       "scaler_params":{
+         "feature_range":[0, 2]
+       },
        "interpolate": false
     },
     "training_params":
@@ -60,7 +63,10 @@
              "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
-             "scaling": "StandardScaler",
+             "scaling": "MinMaxScaler",
+             "scaler_params":{
+                "feature_range":[0,2]
+             },
              "interpolate_param": false
           }
    }
