@@ -169,7 +169,10 @@ class PyTorchForecast(TimeSeriesModel):
         if loader_type + "_end" in dataset_params:
             start_end_params["end_stamp"] = dataset_params[loader_type + "_end"]
         if "scaler" in dataset_params:
-            start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]]
+            if "scaler_params" in "dataset_params":
+                start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]](dataset_params["scaler_params"])
+            else:
+                start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]]()
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
         if "feature_param" in dataset_params:
