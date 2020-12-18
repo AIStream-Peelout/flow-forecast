@@ -1,7 +1,7 @@
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
-from flood_forecast.time_model import scaling_function
+from flood_forecast.pre_dict import scaler_dict
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
@@ -21,8 +21,8 @@ class InferenceMode(object):
         self.model = load_model(model_params.copy(), csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
         if "scaling" in self.inference_params["dataset_params"]:
-            s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
-            self.inference_params["dataset_params"]["scaling"] = s
+            s = self.inference_params["dataset_params"]["scaling"]
+            self.inference_params["dataset_params"]["scaling"] = scaler_dict[s]
         self.inference_params["hours_to_forecast"] = hours_to_forecast
         self.inference_params["num_prediction_samples"] = num_prediction_samples
         if wandb_proj:

@@ -163,12 +163,13 @@ class PyTorchForecast(TimeSeriesModel):
             the_class="default"):
         start_end_params = {}
         the_class = dataset_params["class"]
-        start_end_params = scaling_function(start_end_params, dataset_params)
         # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
             start_end_params["end_stamp"] = dataset_params[loader_type + "_end"]
+        if "scaler" in dataset_params:
+            start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]]
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
         if "feature_param" in dataset_params:
@@ -203,19 +204,3 @@ class PyTorchForecast(TimeSeriesModel):
             # TODO support custom DataLoader
             loader = None
         return loader
-
-
-def scaling_function(start_end_params, dataset_params):
-    in_dataset_params = False
-    if "scaler" in dataset_params:
-        in_dataset_params = "scaler"
-    elif "scaling" in dataset_params:
-        in_dataset_params = "scaling"
-    else:
-        return {}
-    if "scaler_params" in "dataset_params":
-        scaler = scaler_dict[dataset_params[in_dataset_params]](dataset_params["scaler_params"])
-    else:
-        scaler = scaler_dict[dataset_params[in_dataset_params]]()
-        start_end_params["scaling"] = scaler
-    return start_end_params

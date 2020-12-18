@@ -3,10 +3,11 @@ from flood_forecast.preprocessing.interpolate_preprocess import (interpolate_mis
                                                                  back_forward_generic, forward_back_generic)
 
 scaler_dict = {
-    "StandardScaler": StandardScaler,
-    "RobustScaler": RobustScaler,
-    "MinMaxScaler": MinMaxScaler,
-    "MaxAbsScaler": MaxAbsScaler}
+    "StandardScaler": StandardScaler(),
+    "RobustScaler": RobustScaler(),
+    "MinMaxScaler": MinMaxScaler(),
+    "MaxAbsScaler": MaxAbsScaler()}
 
+# TODO add more mean, median nearest etc
 interpolate_dict = {"back_forward": interpolate_missing_values, "back_forward_generic": back_forward_generic,
                     "forward_back_generic": forward_back_generic}
