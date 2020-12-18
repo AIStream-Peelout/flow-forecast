@@ -8,6 +8,5 @@ scaler_dict = {
     "MinMaxScaler": MinMaxScaler,
     "MaxAbsScaler": MaxAbsScaler}
 
-# TODO add more mean, median nearest etc
 interpolate_dict = {"back_forward": interpolate_missing_values, "back_forward_generic": back_forward_generic,
                     "forward_back_generic": forward_back_generic}
