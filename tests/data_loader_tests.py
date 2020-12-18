@@ -45,14 +45,9 @@ class DataLoaderTests(unittest.TestCase):
             os.path.join(self.test_data_path, "keag_small.csv"),
             relevant_cols=["cfs", "temp", "precip"],
         )
-        data_base_params["end_stamp"] = 60
+        data_base_params["end_stamp"] = 220
         self.train_loader2 = CSVDataLoader(
-            os.path.join(self.test_data_path, "keag_small.csv"),
-            30,
-            20,
-            target_col=["cfs"],
-            relevant_cols=["cfs", "precip", "temp"],
-            interpolate_param=False,
+            **data_base_params
         )
 
     def test_loader2_get_item(self):
@@ -103,7 +98,7 @@ class DataLoaderTests(unittest.TestCase):
 
     def test_start_end(self):
         self.assertEqual(len(self.train_loader.df), len(self.test_loader.df) + 20)
-        self.assertEqual(len(self.train_loader2.df), 40)
+        self.assertEqual(len(self.train_loader2.df), 200)
 
 
 if __name__ == "__main__":

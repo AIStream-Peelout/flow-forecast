@@ -76,7 +76,7 @@
              "feature_params":{
                 "datetime_params":{
                    "hour":"cyclical"
-                }
+                } 
              }
           }
    } 
