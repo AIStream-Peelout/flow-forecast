@@ -79,9 +79,6 @@ class DataLoaderTests(unittest.TestCase):
             "data/task_ts_data/2020-08-17/Afghanistan____.csv",
         )
 
-
-if __name__ == "__main__":
-
     def test_ae(self):
         x, y = self.ae_loader[0]
         self.assertEqual(x.shape, y.squeeze(1).shape)
@@ -94,3 +91,7 @@ if __name__ == "__main__":
         # Check first and last dim are not overlap
         self.assertFalse(torch.eq(x[29, 0], y[0, 0]))
         # Need more checks here
+
+
+if __name__ == "__main__":
+    unittest.main()
