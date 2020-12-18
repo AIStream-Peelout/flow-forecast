@@ -24,7 +24,7 @@
        "test_end": 500,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "Normalizer", 
+       "scaler": "StandardScaler", 
        "interpolate": false
     },
 
@@ -67,7 +67,7 @@
              "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
-             "scaling": "Normalizer", 
+             "scaling": "StandardScaler",
              "interpolate_param": false
             },
          "decoder_params":{
