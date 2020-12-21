@@ -3,7 +3,7 @@ import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerEncoderLayer, LayerNorm
 from torch.autograd import Variable
 from flood_forecast.meta_models.merging_model import MergingModel
-
+from flood_forecast.pre_dict import final_layer_dict
 
 class SimpleTransformer(torch.nn.Module):
     def __init__(
