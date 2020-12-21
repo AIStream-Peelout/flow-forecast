@@ -6,7 +6,7 @@
       "seq_length":5,
       "output_seq_length": 1, 
       "n_layers_encoder": 6,
-      "output_dim_layer":2
+      "output_dim":2
      }, 
     "dataset_params":
     {  "class": "default",
