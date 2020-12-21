@@ -21,7 +21,7 @@
        "valid_end": 401,
        "target_col": ["cfs", "temp"],
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "MinmaxScaler",
+       "scaler": "MinMaxScaler",
        "scaler_params":{
          "feature_range":[0, 2]
        },
