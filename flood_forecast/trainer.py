@@ -45,7 +45,7 @@ def train_function(model_type: str, params: Dict):
             else:
                 params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
                                                                                            dataset_params)["scaling"]
-            dataset_params.pop('scaler_params', None)
+            params["inference_params"]["dataset_params"].pop('scaler_params', None)
         test_acc = evaluate_model(
             trained_model,
             model_type,
