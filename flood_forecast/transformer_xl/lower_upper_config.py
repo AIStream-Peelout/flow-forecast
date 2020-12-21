@@ -9,7 +9,10 @@ def initial_layer(layer_type: str, layer_params: Dict, layer_number: int = 1):
     return layer_map[layer_type](**layer_params)
 
 
-activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus()}
+def swish(x):
+    return x * torch.sigmoid(x)
+
+activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus(), "swish": swish}
 
 
 def variable_forecast_layer(layer_type, layer_params):
