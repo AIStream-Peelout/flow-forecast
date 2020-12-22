@@ -3,6 +3,7 @@ import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerEncoderLayer, LayerNorm
 from torch.autograd import Variable
 from flood_forecast.meta_models.merging_model import MergingModel
+from flood_forecast.transformer_xl.lower_upper_config import activation_dict
 
 
 class SimpleTransformer(torch.nn.Module):
@@ -78,6 +79,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             dropout=0.1,
             use_mask=False,
             meta_data=None,
+            final_act=None,
             n_heads=8):
         """
         Uses a number of encoder layers with simple linear decoder layer
@@ -93,6 +95,9 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.out_length_lay = torch.nn.Linear(seq_length, output_seq_length)
         self.mask = generate_square_subsequent_mask(seq_length)
         self.mask_it = use_mask
+        self.final_act = None
+        if final_act:
+            self.final_act = activation_dict[final_act]
         if meta_data:
             self.meta_merger = MergingModel(meta_data["method"], meta_data["params"])
 
@@ -119,6 +124,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         x = self.output_dim_layer(x)
         x = x.permute(1, 2, 0)
         x = self.out_length_lay(x)
+        if self.final_act:
+            x = self.final_act(x)
         return x.view(-1, self.output_seq_length)
 
 
