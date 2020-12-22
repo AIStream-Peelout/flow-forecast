@@ -217,5 +217,5 @@ def scaling_function(start_end_params, dataset_params):
         scaler = scaler_dict[dataset_params[in_dataset_params]](dataset_params["scaler_params"])
     else:
         scaler = scaler_dict[dataset_params[in_dataset_params]]()
-    start_end_params["scaling"] = scaler
+        start_end_params["scaling"] = scaler
     return start_end_params
