@@ -254,10 +254,14 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/decoder_test.json
             echo -e 'running trainer_custom_encode \n'
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
-      - run: 
+            echo -e 'running da_rnn probabilistic test'
+            coverage run flood_forecast/trainer.py -p tests/da_rnn_probabilistic.json
+
+      - run:
           name: upload results
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
+
       - store_test_results:
           path: test-results
 
