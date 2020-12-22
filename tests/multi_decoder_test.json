@@ -7,7 +7,7 @@
       "output_seq_length": 1, 
       "n_layers_encoder": 6,
       "output_dim":2,
-      "final_act":"Softplus"
+      "final_act":"swish"
      }, 
     "dataset_params":
     {  "class": "default",
@@ -20,7 +20,7 @@
        "train_end": 100,
        "valid_start":301,
        "valid_end": 401,
-       "target_col": ["cfs", "temp"],
+       "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "MinMaxScaler",
        "scaler_params":{
