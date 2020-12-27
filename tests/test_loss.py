@@ -17,13 +17,13 @@ class TestLossFunctions(unittest.TestCase):
         m = MASELoss("mean")
         pred = torch.Tensor([2, 2]).repeat(2, 1)
         targ = torch.Tensor([4, 4]).repeat(2, 1)
-        hist = torch.Tensor([5, 5]).repeat(2, 1)
+        hist = torch.Tensor([6, 6]).repeat(2, 1)
         result = m(pred, targ, hist)
-        self.assertEqual(result, 2)
+        self.assertEqual(result, 1)
 
-    def test_map_correct(self):
+    def test_mape_correct(self):
         m = MAPELoss()
-        m(torch.rand(1, 3), torch.rand(1, 4))
+        m(torch.rand(1, 3), torch.rand(1, 3))
         self.assertEqual(1, 1)
 
     def test_rmse_correct(self):

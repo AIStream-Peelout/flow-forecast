@@ -14,7 +14,7 @@ Flow forecast repository is an open-source deep learning for time series library
 Using the library
 1. Run `pip install flood-forecast`
 2. Detailed info on training models can be found on the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
-3. Check out our atlassin a
+3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview)
 
 **Models currently supported**
 
