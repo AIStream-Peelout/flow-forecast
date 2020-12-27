@@ -23,15 +23,16 @@ class TestLossFunctions(unittest.TestCase):
 
     def test_mape_correct(self):
         m = MAPELoss()
+        hist = torch.Tensor([7, 7]).repeat(2, 1)
+        targ = torch.Tensor([4, 4]).repeat(2, 1)
         m(torch.rand(1, 3), torch.rand(1, 3))
-        self.assertEqual(1, 1)
+        self.assertEqual(.75, m(hist, targ))
 
     def test_rmse_correct(self):
         pred = torch.Tensor([2, 2]).repeat(2, 1)
         targ = torch.Tensor([4, 4]).repeat(2, 1)
         r = RMSELoss()
-        r(pred, targ)
-        self.assertEqual(1, 1)
+        self.assertEqual(r(pred, targ), 2)
 
 if __name__ == '__main__':
     unittest.main()

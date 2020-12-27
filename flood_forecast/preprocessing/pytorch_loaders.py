@@ -89,6 +89,7 @@ class CSVDataLoader(Dataset):
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
+        self.df.to_csv("temp_df.csv")
 
     def __getitem__(self, idx):
         rows = self.df.iloc[idx: self.forecast_history + idx]
