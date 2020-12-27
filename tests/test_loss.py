@@ -1,4 +1,4 @@
-from flood_forecast.custom.custom_opt import MASELoss
+from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss
 import unittest
 import torch
 
@@ -15,11 +15,23 @@ class TestLossFunctions(unittest.TestCase):
 
     def test_mase_mean_correct(self):
         m = MASELoss("mean")
-        pred = torch.Tensor([2, 2]).repeat(2, 2, 1)
-        targ = torch.Tensor([4, 4]).repeat(2, 2, 1)
-        hist = torch.Tensor([5, 5]).repeat(2, 2, 1)
+        pred = torch.Tensor([2, 2]).repeat(2, 1)
+        targ = torch.Tensor([4, 4]).repeat(2, 1)
+        hist = torch.Tensor([5, 5]).repeat(2, 1)
         result = m(pred, targ, hist)
         self.assertEqual(result, 2)
+
+    def test_map_correct(self):
+        m = MAPELoss()
+        m(torch.rand(1, 3), torch.rand(1, 4))
+        self.assertEqual(1, 1)
+
+    def test_rmse_correct(self):
+        pred = torch.Tensor([2, 2]).repeat(2, 1)
+        targ = torch.Tensor([4, 4]).repeat(2, 1)
+        r = RMSELoss()
+        r(pred, targ)
+        self.assertEqual(1, 1)
 
 if __name__ == '__main__':
     unittest.main()

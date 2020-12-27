@@ -61,10 +61,14 @@ class MASELoss(torch.nn.Module):
             target = target.unsqueeze(0)
         if len(output.shape) == 1:
             output = output.unsqueeze(0)
-        result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
+        if len(train_data.shape > 2):
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
+        else:
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
         MAE = torch.nn.L1Loss()
         mae2 = MAE(target, output)
         mase4 = MAE(result_baseline, target)
+        # Prevent divison by zero/loss exploding
         if mase4 < 0.001:
             mase4 = 0.001
         return mae2 / mase4
