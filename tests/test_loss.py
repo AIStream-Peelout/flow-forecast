@@ -18,7 +18,7 @@ class TestLossFunctions(unittest.TestCase):
         pred = torch.Tensor([2, 2]).repeat(2, 1)
         targ = torch.Tensor([4, 4]).repeat(2, 1)
         hist = torch.Tensor([6, 6]).repeat(2, 1)
-        result = m(pred, targ, hist)
+        result = m(targ, pred, hist)
         self.assertEqual(result, 1)
 
     def test_mape_correct(self):

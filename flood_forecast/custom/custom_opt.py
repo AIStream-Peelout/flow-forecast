@@ -66,7 +66,7 @@ class MASELoss(torch.nn.Module):
         else:
             result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
         MAE = torch.nn.L1Loss()
-        mae2 = MAE(target, output)
+        mae2 = MAE(output, target)
         mase4 = MAE(result_baseline, target)
         # Prevent divison by zero/loss exploding
         if mase4 < 0.001:
