@@ -18,7 +18,7 @@
        "forecast_history":5,
        "forecast_length":1,
        "train_end": 100,
-       "valid_start":3012,
+       "valid_start":101,
        "valid_end": 401,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
