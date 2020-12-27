@@ -8,6 +8,7 @@ from flood_forecast.da_rnn.train_da import da_rnn, train
 
 class TestDARNN(unittest.TestCase):
     def setUp(self):
+        # TODO REMOVE
         self.preprocessed_data = self.preprocessed_data = make_data(os.path.join(
             os.path.dirname(__file__), "test_init", "keag_small.csv"), ["cfs"], 72)
 

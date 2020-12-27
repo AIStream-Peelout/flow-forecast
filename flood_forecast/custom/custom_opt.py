@@ -61,10 +61,14 @@ class MASELoss(torch.nn.Module):
             target = target.unsqueeze(0)
         if len(output.shape) == 1:
             output = output.unsqueeze(0)
-        result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
+        if len(train_data.shape) > 2:
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
+        else:
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
         MAE = torch.nn.L1Loss()
-        mae2 = MAE(target, output)
+        mae2 = MAE(output, target)
         mase4 = MAE(result_baseline, target)
+        # Prevent divison by zero/loss exploding
         if mase4 < 0.001:
             mase4 = 0.001
         return mae2 / mase4
@@ -83,7 +87,7 @@ class RMSELoss(torch.nn.Module):
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         if len(output) > 1:
 
             diff = torch.sub(target, output)
@@ -110,7 +114,7 @@ class MAPELoss(torch.nn.Module):
         super().__init__()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         if len(output) > 1:
             return torch.mean(torch.abs(torch.sub(target, output) / target)) + \
                 self.variance_penalty * torch.std(torch.sub(target, output))
@@ -131,7 +135,7 @@ class PenalizedMSELoss(torch.nn.Module):
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         return self.mse(target, output) + \
             self.variance_penalty * torch.std(torch.sub(target, output))
 

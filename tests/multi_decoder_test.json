@@ -18,7 +18,7 @@
        "forecast_history":5,
        "forecast_length":1,
        "train_end": 100,
-       "valid_start":301,
+       "valid_start":3012,
        "valid_end": 401,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
@@ -30,7 +30,7 @@
     },
     "training_params":
     {
-       "criterion":"MSE",
+       "criterion":"MAPE",
        "optimizer": "Adam",
        "optim_params":
        {
