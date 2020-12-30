@@ -1,0 +1,17 @@
+codecov:
+  require_ci_to_pass: yescoverage:
+  precision: 3
+  round: down
+  range: "70...100"status:
+    project: yes
+    patch: yes
+    changes: noparsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: nocomment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: no
