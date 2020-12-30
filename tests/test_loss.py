@@ -1,4 +1,5 @@
-from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam
+from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam, l1_regularlizer
+from flood_forecast.da_rnn.model import DARNN
 import unittest
 import torch
 
@@ -38,6 +39,10 @@ class TestLossFunctions(unittest.TestCase):
         b_adam = BertAdam({"lr": 0.1})
         print(b_adam.get_lr)
         self.assertEqual(1, 1)
+
+    def test_regularlizer(self):
+        dd = DARNN(3, 128, 10, 128, 1, 0.2)
+        l1_regularlizer(dd)
 
 if __name__ == '__main__':
     unittest.main()
