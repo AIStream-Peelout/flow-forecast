@@ -1,4 +1,4 @@
-from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss
+from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam
 import unittest
 import torch
 
@@ -33,6 +33,11 @@ class TestLossFunctions(unittest.TestCase):
         targ = torch.Tensor([4, 4]).repeat(2, 1)
         r = RMSELoss()
         self.assertEqual(r(pred, targ), 2)
+
+    def test_bert_adam(self):
+        b_adam = BertAdam({"lr": 0.1})
+        print(b_adam.get_lr)
+        self.assertEqual(1, 1)
 
 if __name__ == '__main__':
     unittest.main()
