@@ -17,6 +17,8 @@ class MergingModel(torch.nn.Module):
             temporal_data:
         """
         batch_size = temporal_data.shape[0]
+        # This assume there is no batch size present in meta-data
+        # This will make meta_data -> (batch_size, 1, meta_data_shape)
         meta_data = meta_data.repeat(batch_size, 1).unsqueeze(1)
         if self.method == "Bilinear":
             meta_data = meta_data.permute(0, 2, 1)
@@ -34,7 +36,8 @@ class MergingModel(torch.nn.Module):
 
 # A class to handle concatenation
 class Concatenation(torch.nn.Module):
-    def __init__(self, combined_shape: int, out_shape: int, cat_dim: int, repeat: bool = True, use_layer: bool = False):
+    def __init__(self, cat_dim: int, repeat: bool = True, use_layer: bool = False,
+                 combined_shape: int = 1, out_shape: int = 1):
         """
         Args:
             combined_shape int: The shape of the combined tensor along the cat dim
