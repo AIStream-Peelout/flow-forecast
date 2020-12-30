@@ -147,12 +147,19 @@ jobs:
           when: always
           command: |
             coverage run -m unittest -v tests/test_meta_pr.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/time_model_test.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/model_config_tests.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/data_loader_tests.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_da_rnn.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_loss.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_merging_models.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/pytorc_train_tests.py
       - run:
           name: upload_stuff
@@ -257,16 +264,17 @@ jobs:
             echo -e 'running trainer_custom_encode \n'
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
-      - run: 
-          name: upload results
-          when: always
-          command: bash <(curl -s https://codecov.io/bash) -cF python
       - store_test_results:
           path: test-results
 
       - store_artifacts:
           path: test-results
           destination: test-results-trainer
+      
+      - run: 
+          name: upload results
+          when: always
+          command: bash <(curl -s https://codecov.io/bash) -cF python
 
   plot_test:
     <<: *defaults
