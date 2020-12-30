@@ -1,4 +1,6 @@
-from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss
+from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam, l1_regularizer, orth_regularizer
+from flood_forecast.da_rnn.model import DARNN
+from flood_forecast.custom.dilate_loss import pairwise_distances
 import unittest
 import torch
 
@@ -33,6 +35,21 @@ class TestLossFunctions(unittest.TestCase):
         targ = torch.Tensor([4, 4]).repeat(2, 1)
         r = RMSELoss()
         self.assertEqual(r(pred, targ), 2)
+
+    def test_bert_adam(self):
+        dd = DARNN(3, 128, 10, 128, 1, 0.2)
+        b_adam = BertAdam(dd.parameters(), lr=.01, warmup=0.0)
+        print(b_adam.get_lr)
+        self.assertEqual(1, 1)
+
+    def test_regularlizer(self):
+        dd = DARNN(3, 128, 10, 128, 1, 0.2)
+        l1_regularizer(dd)
+        orth_regularizer(dd)
+        self.assertIsInstance(dd, DARNN)
+
+    def test_pairwise(self):
+        pairwise_distances(torch.rand(2, 3))
 
 if __name__ == '__main__':
     unittest.main()
