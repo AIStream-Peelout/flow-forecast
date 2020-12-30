@@ -1,5 +1,4 @@
 from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam, l1_regularlizer, orth_regularizer
-from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.da_rnn.model import DARNN
 import unittest
 import torch
