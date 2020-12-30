@@ -153,6 +153,7 @@ jobs:
             coverage run -m unittest -v tests/data_loader_tests.py
             coverage run -m unittest -v tests/test_da_rnn.py
             coverage run -m unittest -v tests/test_loss.py
+            coverage run -m unittest -v tests/test_merging_models.py
 
       - run:
           name: upload_stuff

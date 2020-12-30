@@ -12,11 +12,11 @@ class MetaModels(unittest.TestCase):
 
     def test_ae_init(self):
         self.assertEqual(self.AE.encoder_hidden_layer.in_features, 10)
-        self.assertEqual(self.AE(torch.rand(2, 10)).shape, (2, 128))
+        self.assertEqual(self.AE(torch.rand(2, 10)).shape, ([2, 10]))
 
     def test_ae_2(self):
         self.assertEqual(self.AE.decoder_output_layer.out_features, 10)
-        res = numpy_to_tvar(numpy.random(1, 2))
+        res = numpy_to_tvar(numpy.random.rand(1, 2))
         self.assertIsInstance(res, torch.Tensor)
 
 if __name__ == '__main__':

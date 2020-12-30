@@ -35,6 +35,12 @@ class MergingModel(torch.nn.Module):
 # A class to handle concatenation
 class Concatenation(torch.nn.Module):
     def __init__(self, combined_shape: int, out_shape: int, cat_dim: int, repeat: bool = True, use_layer: bool = False):
+        """
+        Args:
+            combined_shape int: The shape of the combined tensor along the cat dim
+            out_shape int: The dimension of the outshape
+            cat_dim int: The dimension to concatenate along
+        """
         super().__init__()
         self.combined_shape = combined_shape
         self.out_shape = out_shape
