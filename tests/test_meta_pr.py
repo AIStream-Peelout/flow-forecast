@@ -1,6 +1,8 @@
 import torch
+import numpy
 import unittest
 from flood_forecast.meta_models.basic_ae import AE
+from flood_forecast.utils import numpy_to_tvar
 
 
 class MetaModels(unittest.TestCase):
@@ -14,6 +16,8 @@ class MetaModels(unittest.TestCase):
 
     def test_ae_2(self):
         self.assertEqual(self.AE.decoder_output_layer.output_shape, 128)
+        res = numpy_to_tvar(numpy.random(1, 2))
+        self.assertIsInstance(res, torch.Tensor)
 
 if __name__ == '__main__':
     unittest.main()
