@@ -1,4 +1,4 @@
-from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam, l1_regularlizer, orth_regularizer
+from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam, l1_regularizer, orth_regularizer
 from flood_forecast.da_rnn.model import DARNN
 from flood_forecast.custom.dilate_loss import pairwise_distances
 import unittest
@@ -43,7 +43,7 @@ class TestLossFunctions(unittest.TestCase):
 
     def test_regularlizer(self):
         dd = DARNN(3, 128, 10, 128, 1, 0.2)
-        l1_regularlizer(dd)
+        l1_regularizer(dd)
         orth_regularizer(dd)
         self.assertIsInstance(dd, DARNN)
 

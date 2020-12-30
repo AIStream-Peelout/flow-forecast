@@ -40,6 +40,8 @@ class Concatenation(torch.nn.Module):
             combined_shape int: The shape of the combined tensor along the cat dim
             out_shape int: The dimension of the outshape
             cat_dim int: The dimension to concatenate along
+        Examples:
+        s
         """
         super().__init__()
         self.combined_shape = combined_shape
@@ -50,7 +52,7 @@ class Concatenation(torch.nn.Module):
         if self.use_layer:
             self.linear = torch.nn.Linear(combined_shape, out_shape)
 
-    def forward(self, temporal_data, meta_data) -> torch.Tensor:
+    def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor) -> torch.Tensor:
         """
         Args:
             temporal_data: (batch_size, seq_len, d_model)
@@ -68,10 +70,10 @@ class Concatenation(torch.nn.Module):
 
 
 class MultiModalSelfAttention(torch.nn.Module):
-    def __init__(self, d_model, n_heads, dropout):
+    def __init__(self, d_model: int, n_heads: int, dropout: float):
         self.main_layer = MultiheadAttention(d_model, n_heads, dropout)
 
-    def forward(self, temporal_data, meta_data):
+    def forward(self, temporal_data: torch.Tensor, meta_data) -> torch.Tensor:
         meta_data = meta_data.permute(2, 0, 1)
         temporal_data = temporal_data.permute(1, 0, 2)
         x = self.main_layer(temporal_data, meta_data, meta_data)
