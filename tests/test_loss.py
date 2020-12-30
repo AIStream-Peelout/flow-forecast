@@ -38,7 +38,7 @@ class TestLossFunctions(unittest.TestCase):
 
     def test_bert_adam(self):
         dd = DARNN(3, 128, 10, 128, 1, 0.2)
-        b_adam = BertAdam(dd.parameters())
+        b_adam = BertAdam(dd.parameters(), lr=.01, warmup=0.0)
         print(b_adam.get_lr)
         self.assertEqual(1, 1)
 
