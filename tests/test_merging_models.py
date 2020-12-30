@@ -5,7 +5,7 @@ import torch
 
 class TestLossFunctions(unittest.TestCase):
     def setUp(self):
-        self.merging_model = MergingModel("concat", {"combined_shape": 40, "out_shape": 128, "cat_dim": 1})
+        self.merging_model = MergingModel("Concat", {"combined_shape": 40, "out_shape": 128, "cat_dim": 1})
 
     def test_merger_runs(self):
         m = self.merging_model(torch.rand(2, 6, 10), torch.rand(2, 4, 10))
