@@ -1,4 +1,5 @@
 from flood_forecast.meta_models.merging_model import MergingModel
+from flood_forecast.utils import make_criterion_functions
 import unittest
 import torch
 
@@ -15,6 +16,14 @@ class TestLossFunctions(unittest.TestCase):
 
     def test_merger_two(self):
         pass
+
+    def test_crit_functions_list(self):
+        res = make_criterion_functions(["MSE", "RMSE", "MAPE"])
+        self.assertIsInstance(res, list)
+
+    def test_crit_functions_dict(self):
+        res = make_criterion_functions({"MASE": {"baseline_method": "mean"}, "MSE": {}})
+        self.assertIsInstance(res, list)
 
 if __name__ == '__main__':
     unittest.main()
