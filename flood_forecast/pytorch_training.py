@@ -253,6 +253,8 @@ def compute_validation(validation_loader: DataLoader,
     Function to compute the validation or the test loss
     """
     print('compute_validation')
+    unscaled_crit = dict.fromkeys(criterion, 0)
+    scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
     loop_loss = 0.0
     output_std = None
@@ -305,8 +307,10 @@ def compute_validation(validation_loader: DataLoader,
                 if validation_dataset.scale:
                     loss_unscaled_full += compute_loss(labels, output, src, crit, validation_dataset,
                                                        probabilistic, output_std)
+                    unscaled_crit[crit] += loss_unscaled_full
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
                 loop_loss += len(labels.float()) * loss.item()
+                scaled_crit[crit] += loop_loss
     if use_wandb:
         if loss_unscaled_full:
             tot_unscaled_loss = loss_unscaled_full / (len(validation_loader.dataset) - 1)
