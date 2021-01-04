@@ -52,7 +52,7 @@
        "project": "repo-flood_forecast"
     },
    "forward_params":{},
-   "metrics":["MASELoss"],
+   "metrics":{"MASELoss":{"baseline_method":"mean"}},
    "inference_params":
    {     "num_prediction_samples": 10,
          "criterion_params":{

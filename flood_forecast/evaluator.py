@@ -112,12 +112,9 @@ def evaluate_model(
                 )
         print("Current historical dataframe")
         print(df_train_and_test)
-    for evaluation_metric in evaluation_metrics:
+    for evaluation_metric in model.crit:
         for target in target_col:
-            eval_params = {}
-            if "criterion_params" in inference_params:
-                eval_params = inference_params["criterion_params"]
-            evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
+            evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
                     torch.distributions.Normal(end_tensor[0], end_tensor[1][0]),
