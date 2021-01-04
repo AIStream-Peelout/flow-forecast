@@ -257,6 +257,7 @@ def compute_validation(validation_loader: DataLoader,
     loop_loss = 0.0
     output_std = None
     loss_arr = {}
+    loss_unscaled_arr = {}
     with torch.no_grad():
         i = 0
         loss_unscaled_full = 0.0
@@ -302,10 +303,15 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src.float())
             labels = targ[:, :, 0]
             validation_dataset = validation_loader.dataset
-            if validation_dataset.scale:
-                loss_unscaled_full += compute_loss(labels, output, src, criterion, validation_dataset,
-                                                   probabilistic, output_std)
             for crit in criterion:
+                if validation_dataset.scale:
+                    loss_unscaled_full += compute_loss(labels, output, src, criterion, validation_dataset,
+                                                       probabilistic, output_std)
+                    if crit in loss_unscaled_arr:
+                        # stuyff
+                        loss_unscaled_arr[crit] = loss_unscaled_arr[crit] + loss_unscaled_full
+                    else:
+                        loss_unscaled_arr["crit"] = loss_unscaled_arr
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
                 loop_loss = len(labels.float()) * loss.item()
                 if crit not in loss_arr:
@@ -315,12 +321,12 @@ def compute_validation(validation_loader: DataLoader,
 
     if use_wandb:
         if loss_unscaled_full:
-            tot_unscaled_loss = loss_unscaled_full / (len(validation_loader.dataset) - 1)
+            newD = {k: v / (len(validation_loader.dataset) - 1) for k, v in loss_unscaled_arr.items()}
             wandb.log({'epoch': epoch,
                        val_or_test: loop_loss / (len(validation_loader.dataset) - 1),
-                       "unscaled_" + val_or_test: tot_unscaled_loss})
+                       "unscaled_" + val_or_test: newD})
         else:
-            wandb.log({'epoch': epoch, val_or_test: loop_loss /
-                       (len(validation_loader.dataset) - 1)})
+            newD = {k: v / (len(validation_loader.dataset) - 1) for k, v in loss_arr.items()}
+            wandb.log({'epoch': epoch, val_or_test: loss_arr})
     model.train()
     return loop_loss / (len(validation_loader.dataset) - 1)
