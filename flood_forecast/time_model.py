@@ -4,7 +4,7 @@ import torch
 import json
 import os
 from datetime import datetime
-from flood_forecast.model_dict_function import pytorch_model_dict
+from flood_forecast.model_dict_function import pytorch_model_dict, pytorch_criterion_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
@@ -203,6 +203,12 @@ class PyTorchForecast(TimeSeriesModel):
             # TODO support custom DataLoader
             loader = None
         return loader
+
+    def make_eval_criter(self, criterion_list, criterion_params):
+        crit_final = []
+        for criterion, value in criterion_list.items():
+            crit_final.append(pytorch_criterion_dict[criterion](**value))
+        self.eval_crit = crit_final
 
 
 def scaling_function(start_end_params, dataset_params):

@@ -1,6 +1,6 @@
 # Deep learning for time series forecasting
 ![Example image](https://raw.githubusercontent.com/CoronaWhy/task-ts/master/images/Picture1.png)
-Flow forecast repository is an open-source deep learning for time series library. It provides all the latest state of the art models and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and serving capabilities. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains this repository. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
+Flow forecast repository is an open-source deep learning for time series library written in PyTorch. Our repository provides all the latest state of the art models and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and serving capabilities. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains flow forecast. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
@@ -23,12 +23,15 @@ Using the library
 3. Simple Multi-Head Attention: A simple multi-head attention block/embedding layers. Suitable for transfer learning.
 4. Transformer w/a linear decoder: A transformer with n-encoder blocks (this is tunable) and linear decoder. Suitable for transfer learning.
 5. DA-RNN (CPU only for now): A well rounded model with which utilizes a LSTM + attention. 
+6. Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting
 
 **Forthcoming Models**
 
 We have a number of models we are planning on releasing soon. [Please check our project board for more info](https://github.com/AIStream-Peelout/flow-forecast/projects/5)
 
 **Integrations**
+
+Our platform integrates natively with the following tools:
 
 [Google Cloud Platform](https://github.com/AIStream-Peelout/flow-forecast/wiki/Cloud-Provider-Integration) 
 
