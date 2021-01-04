@@ -305,6 +305,7 @@ def compute_validation(validation_loader: DataLoader,
             validation_dataset = validation_loader.dataset
             for crit in criterion:
                 if validation_dataset.scale:
+                    # Should this also do loss.item()?
                     loss_unscaled_full += compute_loss(labels, output, src, crit, validation_dataset,
                                                        probabilistic, output_std)
                     unscaled_crit[crit] += loss_unscaled_full
