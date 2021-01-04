@@ -142,7 +142,7 @@ def train_transformer_style(
         model.model,
         epoch,
         model.params["dataset_params"]["forecast_length"],
-        criterion,
+        model.eval_crit,
         model.device,
         meta_model=meta_model,
         decoder_structure=decoder_structure,
@@ -256,6 +256,7 @@ def compute_validation(validation_loader: DataLoader,
     model.eval()
     loop_loss = 0.0
     output_std = None
+    loss_arr = {}
     with torch.no_grad():
         i = 0
         loss_unscaled_full = 0.0
@@ -304,8 +305,14 @@ def compute_validation(validation_loader: DataLoader,
             if validation_dataset.scale:
                 loss_unscaled_full += compute_loss(labels, output, src, criterion, validation_dataset,
                                                    probabilistic, output_std)
-            loss = compute_loss(labels, output, src, criterion, False, probabilistic, output_std)
-            loop_loss += len(labels.float()) * loss.item()
+            for crit in criterion:
+                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
+                loop_loss = len(labels.float()) * loss.item()
+                if crit not in loss_arr:
+                    loss_arr[crit] = loop_loss
+                else:
+                    loss_arr[crit] = loss_arr[crit] + loop_loss
+
     if use_wandb:
         if loss_unscaled_full:
             tot_unscaled_loss = loss_unscaled_full / (len(validation_loader.dataset) - 1)

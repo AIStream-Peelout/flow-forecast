@@ -204,7 +204,7 @@ class PyTorchForecast(TimeSeriesModel):
             loader = None
         return loader
 
-    def make_eval_criter(self, criterion_list) -> None:
+    def make_eval_criter(self, criterion_list: object) -> None:
         """
         Function that creates criterion to be used for testing and evaluation purposes.
         """
