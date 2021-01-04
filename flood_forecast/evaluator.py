@@ -10,7 +10,7 @@ from flood_forecast.explain_model_output import (
     deep_explain_model_heatmap,
     deep_explain_model_summary_plot,
 )
-from flood_forecast.model_dict_function import decoding_functions, pytorch_criterion_dict
+from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.custom.custom_opt import MASELoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
