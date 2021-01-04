@@ -311,7 +311,7 @@ def compute_validation(validation_loader: DataLoader,
                         # stuyff
                         loss_unscaled_arr[crit] = loss_unscaled_arr[crit] + loss_unscaled_full
                     else:
-                        loss_unscaled_arr["crit"] = loss_unscaled_arr
+                        loss_unscaled_arr["crit"] = loss_unscaled_full
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
                 loop_loss = len(labels.float()) * loss.item()
                 if crit not in loss_arr:
