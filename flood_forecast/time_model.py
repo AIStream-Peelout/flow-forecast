@@ -43,7 +43,7 @@ class TimeSeriesModel(ABC):
         else:
             self.gcs_client = None
         self.wandb = self.wandb_init()
-        self.crit_params = make_criterion_functions(params["metrics"])
+        self.crit = make_criterion_functions(params["metrics"])
 
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:

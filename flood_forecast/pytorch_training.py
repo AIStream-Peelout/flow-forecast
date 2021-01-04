@@ -114,7 +114,7 @@ def train_transformer_style(
             model.model,
             epoch,
             model.params["dataset_params"]["forecast_length"],
-            criterion,
+            model.crit,
             model.device,
             meta_model=meta_model,
             decoder_structure=use_decoder,
@@ -142,7 +142,7 @@ def train_transformer_style(
         model.model,
         epoch,
         model.params["dataset_params"]["forecast_length"],
-        criterion,
+        model.crit,
         model.device,
         meta_model=meta_model,
         decoder_structure=decoder_structure,
@@ -301,11 +301,12 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src.float())
             labels = targ[:, :, 0]
             validation_dataset = validation_loader.dataset
-            if validation_dataset.scale:
-                loss_unscaled_full += compute_loss(labels, output, src, criterion, validation_dataset,
-                                                   probabilistic, output_std)
-            loss = compute_loss(labels, output, src, criterion, False, probabilistic, output_std)
-            loop_loss += len(labels.float()) * loss.item()
+            for crit in criterion:
+                if validation_dataset.scale:
+                    loss_unscaled_full += compute_loss(labels, output, src, crit, validation_dataset,
+                                                       probabilistic, output_std)
+                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
+                loop_loss += len(labels.float()) * loss.item()
     if use_wandb:
         if loss_unscaled_full:
             tot_unscaled_loss = loss_unscaled_full / (len(validation_loader.dataset) - 1)
