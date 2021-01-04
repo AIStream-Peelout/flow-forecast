@@ -36,6 +36,7 @@ def train_function(model_type: str, params: Dict):
             dataset_params["validation_path"],
             dataset_params["test_path"],
             params)
+        trained_model.make_eval_criter(params["metrics"])
         train_transformer_style(trained_model, params["training_params"], params["forward_params"])
         # To do delete
         if "scaler" in dataset_params:

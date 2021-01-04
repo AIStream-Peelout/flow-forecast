@@ -204,10 +204,17 @@ class PyTorchForecast(TimeSeriesModel):
             loader = None
         return loader
 
-    def make_eval_criter(self, criterion_list, criterion_params):
+    def make_eval_criter(self, criterion_list) -> None:
+        """
+        Function that creates criterion to be used for testing and evaluation purposes.
+        """
         crit_final = []
-        for criterion, value in criterion_list.items():
-            crit_final.append(pytorch_criterion_dict[criterion](**value))
+        if type(criterion_list) == list:
+            for crit in criterion_list:
+                crit_final.append(pytorch_criterion_dict[crit]())
+        else:
+            for criterion, value in criterion_list.items():
+                crit_final.append(pytorch_criterion_dict[criterion](**value))
         self.eval_crit = crit_final
 
 

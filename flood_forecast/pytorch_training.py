@@ -114,7 +114,7 @@ def train_transformer_style(
             model.model,
             epoch,
             model.params["dataset_params"]["forecast_length"],
-            criterion,
+            model.eval_crit,
             model.device,
             meta_model=meta_model,
             decoder_structure=use_decoder,
