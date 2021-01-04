@@ -314,12 +314,12 @@ def compute_validation(validation_loader: DataLoader,
                 scaled_crit[crit] += loop_loss
     if use_wandb:
         if loss_unscaled_full:
-            newD = {k: v / (len(validation_loader.dataset) - 1) for k, v in unscaled_crit.items()}
+            newD = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in unscaled_crit.items()}
             wandb.log({'epoch': epoch,
                        val_or_test: loop_loss / (len(validation_loader.dataset) - 1),
                        "unscaled_" + val_or_test: newD})
         else:
-            scaled = {k: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
+            scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
     model.train()
     return list(scaled_crit.values)[0]

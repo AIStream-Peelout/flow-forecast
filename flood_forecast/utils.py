@@ -15,6 +15,7 @@ def flatten_list_function(input_list: List):
 
 
 def make_criterion_functions(crit_list) -> List:
+    """crit_list should be either dict or list"""
     final_list = []
     if type(crit_list) == list:
         for crit in crit_list:
