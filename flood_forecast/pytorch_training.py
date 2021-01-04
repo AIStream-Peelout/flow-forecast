@@ -322,4 +322,4 @@ def compute_validation(validation_loader: DataLoader,
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
     model.train()
-    return list(scaled_crit.values)[0]
+    return list(scaled_crit.values())[0]

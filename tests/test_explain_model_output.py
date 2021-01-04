@@ -16,6 +16,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
     model_params: dict = {
         "model_name": "MultiAttnHeadSimple",
         "model_params": {"number_time_series": 3, "seq_len": 20, "output_seq_len": 10},
+        "metrics": ["MSE", "DilateLoss"],
         "dataset_params": {
             "forecast_history": 20,
             "class": "default",
@@ -37,6 +38,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
     lstm_model_params: dict = {
         "model_name": "LSTM",
         "model_params": {"seq_length": 20, "n_time_series": 3, "output_seq_len": 10},
+        "metrics": ["MSE", "DilateLoss"],
         "dataset_params": {
             "forecast_history": 20,
             "class": "default",
@@ -57,6 +59,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
     }
     simple_param = {
         "model_name": "SimpleLinearModel",
+        "metrics": ["MSE", "DilateLoss"],
         "use_decoder": True,
         "model_params": {"n_time_series": 3, "seq_length": 20, "output_seq_len": 10},
         "dataset_params": {
