@@ -140,7 +140,7 @@ def evaluate_model(
                     ),
                     end_tensor,
                 )
-            eval_log[target + "_" + evaluation_metric] = s
+            eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
     # Explain model behaviour using shap
     if "probabilistic" in inference_params:
