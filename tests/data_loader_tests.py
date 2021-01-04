@@ -69,7 +69,7 @@ class DataLoaderTests(unittest.TestCase):
 
     def test_loader_get_gcs_data(self):
         test_loader = CSVDataLoader(
-            file_path="gs://task_ts_data/2020-08-17/Afghanistan____.csv",
+            file_path="gs://task_ts_data2/2020-08-17/Afghanistan____.csv",
             forecast_history=14,
             forecast_length=14,
             target_col=["cases"],
@@ -81,7 +81,7 @@ class DataLoaderTests(unittest.TestCase):
 
         self.assertEqual(
             test_loader.local_file_path,
-            "data/task_ts_data/2020-08-17/Afghanistan____.csv",
+            "data/task_ts_data2/2020-08-17/Afghanistan____.csv",
         )
 
     def test_ae(self):
