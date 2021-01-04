@@ -10,7 +10,7 @@ def numpy_to_tvar(x):
     return Variable(torch.from_numpy(x).type(torch.FloatTensor).to(device))
 
 
-def flatten_list_function(input_list):
+def flatten_list_function(input_list: List):
     return [item for sublist in input_list for item in sublist]
 
 
