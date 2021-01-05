@@ -254,7 +254,7 @@ class PyTorchTrainTests(unittest.TestCase):
 
     def test_compute_loss(self):
         crit = self.model.crit[0]
-        loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), None, crit, None)
+        loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
         self.assertEqual(loss, 40)
 if __name__ == '__main__':
     unittest.main()
