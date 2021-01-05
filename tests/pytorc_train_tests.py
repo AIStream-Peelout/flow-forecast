@@ -2,7 +2,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
-from flood_forecast.pytorch_training import torch_single_train
+from flood_forecast.pytorch_training import torch_single_train, compute_loss
 import unittest
 from flood_forecast.pytorch_training import train_transformer_style
 
@@ -248,6 +248,9 @@ class PyTorchTrainTests(unittest.TestCase):
             self.simple_param["training_params"],
             True)
 
-
+    def test_compute_loss(self):
+        crit = self.model.crit[0]
+        loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), None, crit, None)
+        self.assertEqual(loss, 40)
 if __name__ == '__main__':
     unittest.main()
