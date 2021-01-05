@@ -193,7 +193,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         loss = criterion(labels.float(), output, src)
     else:
         loss = criterion(output, labels.float())
-    return loss.item() * len(labels.float())
+    return loss
 
 
 def torch_single_train(model: PyTorchForecast,
@@ -308,9 +308,9 @@ def compute_validation(validation_loader: DataLoader,
                     # Should this also do loss.item() stuff?
                     loss_unscaled_full += compute_loss(labels, output, src, crit, validation_dataset,
                                                        probabilistic, output_std)
-                    unscaled_crit[crit] += loss_unscaled_full
+                    unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
-                scaled_crit[crit] += loss
+                scaled_crit[crit] += loss.item() * len(labels.float())
     if use_wandb:
         if loss_unscaled_full:
             newD = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in unscaled_crit.items()}
