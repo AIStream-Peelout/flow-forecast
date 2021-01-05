@@ -174,7 +174,7 @@ def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
         str: local file name
     """
     if gcp_service_key is None:
-        gcp_service_key = os.environ["GCP_ENVRIONMENT"]
+        gcp_service_key = os.environ["ENVIRONMENT_GCP"]
     if file_path.startswith("gs://"):
         # doanload data from gcs to local
         regex = r"(?<=gs:\/\/)[a-zA-Z\-\_]*(?=\/)"
