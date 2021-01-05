@@ -107,7 +107,9 @@ jobs:
             coverage run -m unittest -v tests/data_format_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/usgs_tests.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_join.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_preprocessing.py
 
       - run:
