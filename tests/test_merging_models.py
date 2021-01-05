@@ -22,7 +22,7 @@ class TestLossFunctions(unittest.TestCase):
         self.assertIsInstance(res, list)
 
     def test_crit_functions_dict(self):
-        res = make_criterion_functions({"MASE": {"baseline_method": "mean"}, "MSE": {}})
+        res = make_criterion_functions({"MASELoss": {"baseline_method": "mean"}, "MSE": {}})
         self.assertIsInstance(res, list)
 
 if __name__ == '__main__':
