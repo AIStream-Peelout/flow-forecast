@@ -10,7 +10,7 @@ from flood_forecast.explain_model_output import (
     deep_explain_model_heatmap,
     deep_explain_model_summary_plot,
 )
-from flood_forecast.model_dict_function import decoding_functions, pytorch_criterion_dict
+from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.custom.custom_opt import MASELoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
@@ -112,12 +112,9 @@ def evaluate_model(
                 )
         print("Current historical dataframe")
         print(df_train_and_test)
-    for evaluation_metric in evaluation_metrics:
+    for evaluation_metric in model.crit:
         for target in target_col:
-            eval_params = {}
-            if "criterion_params" in inference_params:
-                eval_params = inference_params["criterion_params"]
-            evaluation_metric_function = pytorch_criterion_dict[evaluation_metric](**eval_params)
+            evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
                     torch.distributions.Normal(end_tensor[0], end_tensor[1][0]),
@@ -143,7 +140,7 @@ def evaluate_model(
                     ),
                     end_tensor,
                 )
-            eval_log[target + "_" + evaluation_metric] = s
+            eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
     # Explain model behaviour using shap
     if "probabilistic" in inference_params:

@@ -16,6 +16,7 @@ class EvaluationTest(unittest.TestCase):
         )
         self.model_params = {
             "model_name": "MultiAttnHeadSimple",
+            "metrics": ["MSE", "MAPE"],
             "model_params": {"number_time_series": 3, "seq_len": 20},
             "dataset_params": {
                 "forecast_history": 20,
@@ -30,6 +31,7 @@ class EvaluationTest(unittest.TestCase):
         }
         self.model_linear_params = {
             "model_name": "SimpleLinearModel",
+            "metrics": ["MSE", "MAPE"],
             "use_decoder": True,
             "model_params": {
                 "n_time_series": 3,

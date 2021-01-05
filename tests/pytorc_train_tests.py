@@ -2,7 +2,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
-from flood_forecast.pytorch_training import torch_single_train
+from flood_forecast.pytorch_training import torch_single_train, compute_loss
 import unittest
 from flood_forecast.pytorch_training import train_transformer_style
 
@@ -11,6 +11,7 @@ class PyTorchTrainTests(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {
+            "metrics": ["MSE", "MAPE"],
             "model_params": {
                 "number_time_series": 3,
                 "seq_len": 20},
@@ -44,6 +45,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.dummy_model = PyTorchForecast(
             "DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {
                 "model_params": {"forecast_length": 5},
+                "metrics": ["MAPE", "MSE"],
                 "dataset_params": {
                     "forecast_history": 5,
                     "class": "default",
@@ -69,6 +71,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "number_time_series": 3,
                 "seq_length": 20,
                 "output_seq_len": 15},
+            "metrics": ["MAPE", "MSE"],
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
@@ -97,6 +100,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "n_time_series": 3,
                 "seq_length": 80,
                 "output_seq_len": 20},
+            "metrics": ["MAPE", "MSE"],
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
@@ -248,6 +252,9 @@ class PyTorchTrainTests(unittest.TestCase):
             self.simple_param["training_params"],
             True)
 
-
+    def test_compute_loss(self):
+        crit = self.model.crit[0]
+        loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
+        self.assertEqual(loss, 40)
 if __name__ == '__main__':
     unittest.main()

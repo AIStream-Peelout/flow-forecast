@@ -8,6 +8,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
+from flood_forecast.utils import make_criterion_functions
 from flood_forecast.preprocessing.buil_dataset import get_data
 import wandb
 
@@ -42,6 +43,7 @@ class TimeSeriesModel(ABC):
         else:
             self.gcs_client = None
         self.wandb = self.wandb_init()
+        self.crit = make_criterion_functions(params["metrics"])
 
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:

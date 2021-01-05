@@ -114,7 +114,7 @@ def train_transformer_style(
             model.model,
             epoch,
             model.params["dataset_params"]["forecast_length"],
-            criterion,
+            model.crit,
             model.device,
             meta_model=meta_model,
             decoder_structure=use_decoder,
@@ -142,7 +142,7 @@ def train_transformer_style(
         model.model,
         epoch,
         model.params["dataset_params"]["forecast_length"],
-        criterion,
+        model.crit,
         model.device,
         meta_model=meta_model,
         decoder_structure=decoder_structure,
@@ -253,6 +253,8 @@ def compute_validation(validation_loader: DataLoader,
     Function to compute the validation or the test loss
     """
     print('compute_validation')
+    unscaled_crit = dict.fromkeys(criterion, 0)
+    scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
     loop_loss = 0.0
     output_std = None
@@ -301,19 +303,22 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src.float())
             labels = targ[:, :, 0]
             validation_dataset = validation_loader.dataset
-            if validation_dataset.scale:
-                loss_unscaled_full += compute_loss(labels, output, src, criterion, validation_dataset,
-                                                   probabilistic, output_std)
-            loss = compute_loss(labels, output, src, criterion, False, probabilistic, output_std)
-            loop_loss += len(labels.float()) * loss.item()
+            for crit in criterion:
+                if validation_dataset.scale:
+                    # Should this also do loss.item() stuff?
+                    loss_unscaled_full += compute_loss(labels, output, src, crit, validation_dataset,
+                                                       probabilistic, output_std)
+                    unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
+                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
+                scaled_crit[crit] += loss.item() * len(labels.float())
     if use_wandb:
         if loss_unscaled_full:
-            tot_unscaled_loss = loss_unscaled_full / (len(validation_loader.dataset) - 1)
+            newD = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in unscaled_crit.items()}
             wandb.log({'epoch': epoch,
                        val_or_test: loop_loss / (len(validation_loader.dataset) - 1),
-                       "unscaled_" + val_or_test: tot_unscaled_loss})
+                       "unscaled_" + val_or_test: newD})
         else:
-            wandb.log({'epoch': epoch, val_or_test: loop_loss /
-                       (len(validation_loader.dataset) - 1)})
+            scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
+            wandb.log({'epoch': epoch, val_or_test: scaled})
     model.train()
-    return loop_loss / (len(validation_loader.dataset) - 1)
+    return list(scaled_crit.values())[0]
