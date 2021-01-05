@@ -11,6 +11,7 @@ class PyTorchTrainTests(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {
+            "metrics": ["MSE", "MAPE"],
             "model_params": {
                 "number_time_series": 3,
                 "seq_len": 20},
@@ -44,6 +45,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.dummy_model = PyTorchForecast(
             "DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {
                 "model_params": {"forecast_length": 5},
+                "metrics": ["MAPE", "MSE"],
                 "dataset_params": {
                     "forecast_history": 5,
                     "class": "default",
@@ -69,6 +71,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "number_time_series": 3,
                 "seq_length": 20,
                 "output_seq_len": 15},
+            "metrics": ["MAPE", "MSE"],
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
@@ -97,6 +100,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "n_time_series": 3,
                 "seq_length": 80,
                 "output_seq_len": 20},
+            "metrics": ["MAPE", "MSE"],
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
