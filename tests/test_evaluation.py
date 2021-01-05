@@ -110,7 +110,8 @@ class EvaluationTest(unittest.TestCase):
         model_result = evaluate_model(
             self.model, "PyTorch", ["cfs"], ["MSE", "L1"], inference_params, {}
         )
-        self.assertGreater(model_result[0]["cfs_L1Loss"], 0)
+        print(model_result)
+        self.assertGreater(model_result[0]["cfs_MAPELoss"], 0)
         self.assertGreater(model_result[0]["cfs_MSELoss"], 1)
 
     def test_evaluator_generate_prediction_samples(self):
