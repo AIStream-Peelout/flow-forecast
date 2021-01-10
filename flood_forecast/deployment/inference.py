@@ -1,6 +1,7 @@
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
+from flood_forecast.explain_model_output import deep_explain_model_heatmap, deep_explain_model_summary_plot
 from flood_forecast.time_model import scaling_function
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
@@ -59,6 +60,8 @@ class InferenceMode(object):
         plt = plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
         if wandb_plot_id:
             wandb.log({wandb_plot_id: plt})
+            deep_explain_model_summary_plot(self.model, test, date)
+            deep_explain_model_heatmap(self.model, test, date)
         return tensor, history, test, plt
 
 
