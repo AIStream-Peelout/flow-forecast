@@ -229,8 +229,9 @@ def torch_single_train(model: PyTorchForecast,
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
             if meta_loss:
-                output = meta_data_model(meta_data_model_representation)
-                compute_loss(meta_data_model_representation, output, torch.rand(2, 3, 2), meta_loss, None, None, None)
+                output = meta_data_model.model(meta_data_model_representation)
+                met_loss = compute_loss(meta_data_model_representation, output, torch.rand(2, 3, 2), meta_loss, None)
+                met_loss.backward()
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
