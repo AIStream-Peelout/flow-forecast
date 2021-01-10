@@ -13,6 +13,23 @@ from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 
 
+def handle_meta_data(model):
+    meta_loss = None
+    with open(model.params["meta_data"]["path"]) as f:
+        json_data = json.load(f)
+    if "meta_loss" in model.params["meta_data"]:
+        meta_loss_str = model.params["meta_data"]["meta_loss"]
+        meta_loss = pytorch_criterion_dict[meta_loss_str]()
+    dataset_params2 = json_data["dataset_params"]
+    training_path = dataset_params2["training_path"]
+    valid_path = dataset_params2["validation_path"]
+    meta_name = json_data["model_name"]
+    meta_model = PyTorchForecast(meta_name, training_path, valid_path, dataset_params2["test_path"], json_data)
+    meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
+                                                  model.params["meta_data"]["uuid"], meta_model)
+    return meta_model, meta_representation, meta_loss
+
+
 def train_transformer_style(
         model: PyTorchForecast,
         training_params: Dict,
@@ -83,18 +100,7 @@ def train_transformer_style(
     if model.params.get("meta_data") is None:
         model.params["meta_data"] = False
     if model.params["meta_data"]:
-        with open(model.params["meta_data"]["path"]) as f:
-            json_data = json.load(f)
-        if "meta_loss" in model.params["meta_data"]:
-            meta_loss_str = model.params["meta_data"]["meta_loss"]
-            meta_loss = pytorch_criterion_dict[meta_loss_str]()
-        dataset_params2 = json_data["dataset_params"]
-        training_path = dataset_params2["training_path"]
-        valid_path = dataset_params2["validation_path"]
-        meta_name = json_data["model_name"]
-        meta_model = PyTorchForecast(meta_name, training_path, valid_path, dataset_params2["test_path"], json_data)
-        meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
-                                                      model.params["meta_data"]["uuid"], meta_model)
+        meta_model, meta_representation, meta_loss = handle_meta_data(model)
     if use_wandb:
         wandb.watch(model.model)
     session_params = []
