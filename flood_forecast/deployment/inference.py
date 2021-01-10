@@ -60,8 +60,8 @@ class InferenceMode(object):
         plt = plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
         if wandb_plot_id:
             wandb.log({wandb_plot_id: plt})
-            deep_explain_model_summary_plot(self.model, df, date)
-            deep_explain_model_heatmap(self.model, df, date)
+            deep_explain_model_summary_plot(self.model, test, date)
+            deep_explain_model_heatmap(self.model, test, date)
         return tensor, history, test, plt
 
 
