@@ -203,6 +203,7 @@ def torch_single_train(model: PyTorchForecast,
                        takes_target: bool,
                        meta_data_model: PyTorchForecast,
                        meta_data_model_representation: torch.Tensor,
+                       meta_loss = None,
                        forward_params: Dict = {}) -> float:
     print('running torch_single_train')
     i = 0
@@ -216,6 +217,9 @@ def torch_single_train(model: PyTorchForecast,
         if meta_data_model:
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
+            if meta_loss:
+                output = meta_data_model(meta_data_model_representation)
+                compute_loss(meta_data_model_representation, output, torch.rand(2, 3, 2), meta_loss, None, None, None)
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
