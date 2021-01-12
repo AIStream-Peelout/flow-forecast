@@ -256,7 +256,8 @@ class PyTorchTrainTests(unittest.TestCase):
 
     def test_ae(self):
         model = PyTorchForecast("PyTorch", self.keag_file, self.keag_file, self.keag_file, self.meta_model_params)
-        self.assertTrue(model.model.parameters())
+        for parameter in model.model.parameters():
+            self.assertTrue(parameter.requires_grad)
 
     def test_compute_loss(self):
         crit = self.model.crit[0]
