@@ -272,7 +272,6 @@ def compute_validation(validation_loader: DataLoader,
     unscaled_crit = dict.fromkeys(criterion, 0)
     scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
-    loop_loss = 0.0
     output_std = None
     with torch.no_grad():
         i = 0
