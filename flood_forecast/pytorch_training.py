@@ -322,7 +322,7 @@ def compute_validation(validation_loader: DataLoader,
             for crit in criterion:
                 if validation_dataset.scale:
                     # Should this also do loss.item() stuff?
-                    loss_unscaled_full += compute_loss(labels, output, src, crit, validation_dataset,
+                    loss_unscaled_full = compute_loss(labels, output, src, crit, validation_dataset,
                                                        probabilistic, output_std)
                     unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
@@ -330,8 +330,9 @@ def compute_validation(validation_loader: DataLoader,
     if use_wandb:
         if loss_unscaled_full:
             newD = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in unscaled_crit.items()}
+            scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch,
-                       val_or_test: loop_loss / (len(validation_loader.dataset) - 1),
+                       val_or_test: scaled_crit,
                        "unscaled_" + val_or_test: newD})
         else:
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
