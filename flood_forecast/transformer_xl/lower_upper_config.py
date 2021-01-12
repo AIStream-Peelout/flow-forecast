@@ -2,6 +2,7 @@ import torch.nn as nn
 from typing import Dict
 import torch.nn.functional as F
 import torch
+from entmax import entmax15, sparsemax, entmax_bisect
 
 
 def initial_layer(layer_type: str, layer_params: Dict, layer_number: int = 1):
@@ -12,7 +13,8 @@ def initial_layer(layer_type: str, layer_params: Dict, layer_number: int = 1):
 def swish(x):
     return x * torch.sigmoid(x)
 
-activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus(), "Swish": swish}
+activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus(), "Swish": swish,
+                   "entmax": entmax15, "entmax_bisect": entmax_bisect, "sparsemax": sparsemax}
 
 
 def variable_forecast_layer(layer_type, layer_params):

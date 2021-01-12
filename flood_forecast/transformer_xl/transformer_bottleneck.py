@@ -36,6 +36,8 @@ import math
 import copy
 from torch.nn.parameter import Parameter
 from typing import Dict
+from entmax import sparsemax, entmax15, entmax_bisect
+from flood_forecast.transformer_xl.lower_upper_config import activation_dict
 
 
 def gelu(x):
@@ -107,14 +109,14 @@ class Attention(nn.Module):
                 index -= sub_len
         return mask
 
-    def attn(self, query, key, value):
-
+    def attn(self, query, key, value, activation="Softmax"):
+        activation = activation_dict["activation"](dim=-1)
         pre_att = torch.matmul(query, key)
         if self.scale:
             pre_att = pre_att / math.sqrt(value.size(-1))
         mask = self.mask_tri[:, :, :pre_att.size(-2), :pre_att.size(-1)]
         pre_att = pre_att * mask + -1e9 * (1 - mask)
-        pre_att = nn.Softmax(dim=-1)(pre_att)
+        pre_att = activation(pre_att)
         pre_att = self.attn_dropout(pre_att)
         attn = torch.matmul(pre_att, value)
 
@@ -269,7 +271,8 @@ class TransformerModel(nn.Module):
 class DecoderTransformer(nn.Module):
     def __init__(self, n_time_series: int, n_head: int, num_layer: int,
                  n_embd: int, forecast_history: int, dropout: float, q_len: int, additional_params: Dict,
-                 forecast_length: int = None, scale_att: bool = False, seq_num=None, sub_len=1, mu=None):
+                 activation="Softmax", forecast_length: int = None, scale_att: bool = False, seq_num=None,
+                 sub_len=1, mu=None):
         """
         Args:
             n_time_series: Number of time series present in input
