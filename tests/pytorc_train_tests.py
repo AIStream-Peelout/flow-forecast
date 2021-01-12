@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.pytorch_training import torch_single_train, compute_loss
 import unittest
+import json
 from flood_forecast.pytorch_training import train_transformer_style
 
 
@@ -149,7 +150,8 @@ class PyTorchTrainTests(unittest.TestCase):
             drop_last=False,
             timeout=0,
             worker_init_fn=None)
-        # TODO add LSTM test self.lstm =
+        with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
+            self.meta_model_params = json.load(f)
 
     def test_pytorch_train_base(self):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
@@ -252,9 +254,15 @@ class PyTorchTrainTests(unittest.TestCase):
             self.simple_param["training_params"],
             True)
 
+    def test_ae(self):
+        model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, self.meta_model_params)
+        for parameter in model.model.parameters():
+            self.assertTrue(parameter.requires_grad)
+
     def test_compute_loss(self):
         crit = self.model.crit[0]
         loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
         self.assertEqual(loss.item(), 1.0)
+
 if __name__ == '__main__':
     unittest.main()

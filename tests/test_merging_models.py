@@ -4,7 +4,7 @@ import unittest
 import torch
 
 
-class TestLossFunctions(unittest.TestCase):
+class TestMerging(unittest.TestCase):
     def setUp(self):
         self.merging_model = MergingModel("Concat", {"cat_dim": 2, "repeat": True})
 
@@ -24,6 +24,7 @@ class TestLossFunctions(unittest.TestCase):
     def test_crit_functions_dict(self):
         res = make_criterion_functions({"MASELoss": {"baseline_method": "mean"}, "MSE": {}})
         self.assertIsInstance(res, list)
+
 
 if __name__ == '__main__':
     unittest.main()
