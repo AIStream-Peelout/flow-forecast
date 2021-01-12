@@ -150,7 +150,7 @@ class PyTorchTrainTests(unittest.TestCase):
             drop_last=False,
             timeout=0,
             worker_init_fn=None)
-        with open(os.path.join(os.path.dirname(__file__), "meta_da.json")) as f:
+        with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
             self.meta_model_params = json.load(f)
 
     def test_pytorch_train_base(self):
