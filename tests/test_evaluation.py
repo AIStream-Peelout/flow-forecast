@@ -113,9 +113,9 @@ class EvaluationTest(unittest.TestCase):
         print(model_result)
         eval_dict = model_result[0]
         self.assertGreater(eval_dict["cfs_MAPELoss"], 0)
-        self.assertGreater(eval_dict["cfs_MSELoss"], 1)
+        self.assertGreater(eval_dict["cfs_MSELoss"], 420)
         # self.assertNotAlmostEqual(eval_dict["cfs_MAPELoss"], eval_dict["cfs_MSELoss"])
-        self.assertLessEqual(eval_dict["cfs_MAPELoss"].item(), 1)
+        self.assertLessEqual(eval_dict["cfs_MAPELoss"].item(), 400)
 
     def test_evaluator_generate_prediction_samples(self):
         inference_params = {

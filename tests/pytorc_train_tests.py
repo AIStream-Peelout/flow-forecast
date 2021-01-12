@@ -255,7 +255,7 @@ class PyTorchTrainTests(unittest.TestCase):
             True)
 
     def test_ae(self):
-        model = PyTorchForecast("PyTorch", self.keag_file, self.keag_file, self.keag_file, self.meta_model_params)
+        model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, self.meta_model_params)
         for parameter in model.model.parameters():
             self.assertTrue(parameter.requires_grad)
 
