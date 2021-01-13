@@ -2,7 +2,7 @@ import torch.nn as nn
 from typing import Dict
 import torch.nn.functional as F
 import torch
-from flood_forecast.custom.custom_activation import entmax15, sparsemax, entmax_bisect
+from flood_forecast.custom.custom_activation import entmax15, sparsemax
 
 
 def initial_layer(layer_type: str, layer_params: Dict, layer_number: int = 1):
