@@ -53,6 +53,7 @@ jobs:
             sudo pip install pipenv
             sudo pip install coverage
             sudo pip install --quiet --force-reinstall  --upgrade -r requirements.txt
+            sudo pip install entmax
             sudo python setup.py develop --no-deps
 
       - save_cache:

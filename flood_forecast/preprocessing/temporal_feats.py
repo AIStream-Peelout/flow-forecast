@@ -41,7 +41,7 @@ def feature_fix(preprocess_params, dt_column, df):
     return df, column_names
 
 
-def cyclical(df, feature_column):
+def cyclical(df, feature_column: str) -> pd.DataFrame:
     df["norm"] = 2 * np.pi * df[feature_column] / df[feature_column].max()
     df['cos_' + feature_column] = np.cos(df['norm'])
     df['sin_' + feature_column] = np.sin(df['norm'])

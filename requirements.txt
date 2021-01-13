@@ -22,4 +22,3 @@ numba>=0.50
 sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
-entmax
