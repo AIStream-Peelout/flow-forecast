@@ -7,7 +7,7 @@ from flood_forecast.trainer import train_function
 
 
 class MultitTaskTests(unittest.TestCase):
-    def setUpClass(self):
+    def setUpClass(cls, self):
         """
         Modules to test model inference.
         """
