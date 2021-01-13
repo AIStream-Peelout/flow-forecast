@@ -47,6 +47,7 @@ def simple_decode(model: Type[torch.nn.Module],
                   device='cpu',
                   unsqueeze_dim=1,
                   meta_data=None,
+                  multi_task=False,
                   use_real_target: bool = True,
                   probabilistic: bool = False) -> torch.Tensor:
     """
