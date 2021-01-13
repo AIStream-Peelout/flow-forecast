@@ -47,7 +47,7 @@ def simple_decode(model: Type[torch.nn.Module],
                   device='cpu',
                   unsqueeze_dim=1,
                   meta_data=None,
-                  multi_task=False,
+                  multi_targets=0,
                   use_real_target: bool = True,
                   probabilistic: bool = False) -> torch.Tensor:
     """
@@ -58,6 +58,7 @@ def simple_decode(model: Type[torch.nn.Module],
     :start_symbol used to match the function signature of greedy_decode not ever used here though.
     :output_len potentially used to forecast multiple steps at once. Not implemented yet though.
     :device used to to match function signature
+    :multi_task int: Multitask return will always be (batch_size, output_len, multi_targets)
     :returns a torch.Tensor of dimension (B, max_seq_len, M)
     """
     real_target = real_target.float()
@@ -75,7 +76,7 @@ def simple_decode(model: Type[torch.nn.Module],
             if probabilistic:
                 out_std = out.stddev.detach()
                 out = out.mean.detach()
-                ys_std_dev.append(out_std[:, 0].unsqueeze(0))
+                ys_std_dev.append(out_std[:, 0:multi_targets].unsqueeze(0))
 
             if output_len == 1:
                 real_target2[:, i, 0] = out[:, 0]

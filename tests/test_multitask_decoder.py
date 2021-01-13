@@ -23,7 +23,7 @@ class MultitTaskTests(unittest.TestCase):
         pass
 
     def test_decoder_multi_step(self):
-        t = torch.Tensor([3, 4, 5]).repeat(1, 336, 3)
+        t = torch.Tensor([3, 4, 5]).repeat(1, 336, 1)
         output = simple_decode(self.forecast_model.model, torch.ones(1, 5, 3), 336, t, output_len=3)
         # We want to check for leakage
         self.assertFalse(3 in output[:, :, 0])
