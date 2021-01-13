@@ -13,8 +13,8 @@ def initial_layer(layer_type: str, layer_params: Dict, layer_number: int = 1):
 def swish(x):
     return x * torch.sigmoid(x)
 
-activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus(), "Swish": swish,
-                   "entmax": entmax15, "sparsemax": sparsemax}
+activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus(), "Swish": swish, 
+                   "entmax": entmax15, "sparsemax": sparsemax, "Softmax":torch.nn.Softmax()}
 
 
 def variable_forecast_layer(layer_type, layer_params):
