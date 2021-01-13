@@ -245,7 +245,7 @@ class PyTorchTrainTests(unittest.TestCase):
     #     self.assertEqual(1, 1)
     #
     # def test_transfom_validation(self):
-    #     # TODO add t
+    #     # TODO add
     #     pass
 
     def linear_model_test(self):
