@@ -69,9 +69,9 @@ def simple_decode(model: Type[torch.nn.Module],
     for i in range(0, max_seq_len, output_len):
         with torch.no_grad():
             if meta_data:
-                out = model(src, meta_data)
+                out = model(src, meta_data).unsqueeze(2)
             else:
-                out = model(src)
+                out = model(src).unsqueeze(2)
 
             if probabilistic:
                 out_std = out.stddev.detach()
