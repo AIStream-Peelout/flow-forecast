@@ -7,16 +7,17 @@ from flood_forecast.trainer import train_function
 
 
 class MultitTaskTests(unittest.TestCase):
-    def setUpClass(self, cls):
+    @classmethod
+    def setUpClass(cls):
         """
         Modules to test model inference.
         """
         with open(os.path.join(os.path.dirname(__file__), "multi_test.json")) as a:
-            self.model_params = json.load(a)
-        self.keag_path = os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv")
-        if "save_path" in self.model_params:
-            del self.model_params["save_path"]
-        self.forecast_model = train_function("PyTorch", self.model_params)
+            cls.model_params = json.load(a)
+        cls.keag_path = os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv")
+        if "save_path" in cls.model_params:
+            del cls.model_params["save_path"]
+        cls.forecast_model = train_function("PyTorch", cls.model_params)
 
     def test_decoder_single_step(self):
         pass
