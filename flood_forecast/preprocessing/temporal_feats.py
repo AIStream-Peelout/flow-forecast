@@ -28,7 +28,7 @@ def create_feature(key, value, df, dt_column):
 
 
 def feature_fix(preprocess_params, dt_column, df):
-    print("running feature fix code")
+    print("running feature fix code s")
     column_names = []
     if "datetime_params" in preprocess_params:
         for key, value in preprocess_params["datetime_params"].items():

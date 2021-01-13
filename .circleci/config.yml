@@ -105,6 +105,7 @@ jobs:
           name: Data Quality Tests
           command: |
             coverage run -m unittest -v tests/test_multitask_decoder.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/data_format_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/usgs_tests.py
@@ -306,6 +307,7 @@ jobs:
           when: always
           command: |
             coverage run -m unittest -v tests/test_plot.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_explain_model_output.py
       - run:
           name: upload_stuff
