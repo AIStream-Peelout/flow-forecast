@@ -109,7 +109,7 @@ class Attention(nn.Module):
         return mask
 
     def attn(self, query, key, value, activation="Softmax"):
-        activation = activation_dict["activation"](dim=-1)
+        activation = activation_dict[activation](dim=-1)
         pre_att = torch.matmul(query, key)
         if self.scale:
             pre_att = pre_att / math.sqrt(value.size(-1))
