@@ -36,7 +36,6 @@ import math
 import copy
 from torch.nn.parameter import Parameter
 from typing import Dict
-from entmax import sparsemax, entmax15, entmax_bisect
 from flood_forecast.transformer_xl.lower_upper_config import activation_dict
 
 
