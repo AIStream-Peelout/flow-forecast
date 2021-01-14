@@ -242,7 +242,10 @@ def torch_single_train(model: PyTorchForecast,
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
-        labels = trg[:, :, 0:multi_targets]
+        if multi_targets == 1:
+            labels = trg[:, :, 0]
+        elif multi_targets > 1:
+            labels = trg[:, :, 0:multi_targets]
         loss = compute_loss(labels, output, src, criterion, None, None, None)
         if loss > 100:
             print("Warning: high loss detected")
@@ -324,7 +327,10 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
-            labels = targ[:, :, 0:multi_targets]
+            if multi_targets == 1:
+                labels = targ[:, :, 0]
+            elif multi_targets > 1:
+                labels = targ[:, :, 0:multi_targets]
             validation_dataset = validation_loader.dataset
             for crit in criterion:
                 if validation_dataset.scale:

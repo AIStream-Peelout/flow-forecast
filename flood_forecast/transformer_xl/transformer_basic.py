@@ -94,6 +94,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.output_seq_length = output_seq_length
         self.out_length_lay = torch.nn.Linear(seq_length, output_seq_length)
         self.mask = generate_square_subsequent_mask(seq_length)
+        self.out_dim = output_dim
         self.mask_it = use_mask
         self.final_act = None
         if final_act:
@@ -126,6 +127,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         x = self.out_length_lay(x)
         if self.final_act:
             x = self.final_act(x)
+        if self.output_dim > 1:
+            return x
         return x.view(-1, self.output_seq_length)
 
 
