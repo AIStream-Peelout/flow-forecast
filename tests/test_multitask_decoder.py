@@ -25,7 +25,7 @@ class MultitTaskTests(unittest.TestCase):
         if "save_path" in cls.model_params3:
             del cls.model_params["save_path"]
         cls.model_params["model_params"]["output_seq_len"] = 1
-        cls.model_params["model_params"]["dataset_params"]["forecast_length"] = 1
+        cls.model_params["modeel_params"]["dataset_params"]["forecast_length"] = 1
         cls.forecast_model2 = train_function("PyTorch", cls.model_params)
         cls.forecast_model3 = train_function("PyTorch", cls.model_params3)
 
