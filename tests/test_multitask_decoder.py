@@ -14,6 +14,8 @@ class MultitTaskTests(unittest.TestCase):
         """
         with open(os.path.join(os.path.dirname(__file__), "multi_test.json")) as a:
             cls.model_params = json.load(a)
+        with open(os.path.join(os.path.dirname(__file__), "multitask_decoder.json")) as a:
+            cls.model_params = json.load(a)
         cls.keag_path = os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv")
         if "save_path" in cls.model_params:
             del cls.model_params["save_path"]

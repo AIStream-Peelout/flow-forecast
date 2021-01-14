@@ -48,6 +48,9 @@ def train_transformer_style(
     worker_num = 1
     pin_memory = False
     dataset_params = model.params["dataset_params"]
+    num_targets = 1
+    if "multi_targets" in dataset_params:
+        num_targets = dataset_params["multi_targets"]
     if "num_workers" in dataset_params:
         worker_num = dataset_params["num_workers"]
     if "pin_memory" in dataset_params:
@@ -114,7 +117,8 @@ def train_transformer_style(
             meta_model,
             meta_representation,
             meta_loss,
-            forward_params.copy())
+            multi_targets=num_targets,
+            forward_params=forward_params.copy())
         print("The loss for epoch " + str(epoch))
         print(total_loss)
         use_decoder = False
@@ -127,6 +131,7 @@ def train_transformer_style(
             model.params["dataset_params"]["forecast_length"],
             model.crit,
             model.device,
+            multi_targets=num_targets,
             meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb,
@@ -156,6 +161,7 @@ def train_transformer_style(
         model.crit,
         model.device,
         meta_model=meta_model,
+        multi_targets=num_targets,
         decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss",
@@ -215,6 +221,7 @@ def torch_single_train(model: PyTorchForecast,
                        meta_data_model: PyTorchForecast,
                        meta_data_model_representation: torch.Tensor,
                        meta_loss=None,
+                       multi_targets=1,
                        forward_params: Dict = {}) -> float:
     print('running torch_single_train')
     i = 0
@@ -235,7 +242,7 @@ def torch_single_train(model: PyTorchForecast,
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
-        labels = trg[:, :, 0]
+        labels = trg[:, :, 0:multi_targets]
         loss = compute_loss(labels, output, src, criterion, None, None, None)
         if loss > 100:
             print("Warning: high loss detected")
@@ -263,6 +270,7 @@ def compute_validation(validation_loader: DataLoader,
                        meta_data_model=None,
                        use_wandb: bool = False,
                        meta_model=None,
+                       multi_targets=1,
                        val_or_test="validation_loss",
                        probabilistic=False) -> float:
     """
@@ -316,7 +324,7 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
-            labels = targ[:, :, 0]
+            labels = targ[:, :, 0:multi_targets]
             validation_dataset = validation_loader.dataset
             for crit in criterion:
                 if validation_dataset.scale:

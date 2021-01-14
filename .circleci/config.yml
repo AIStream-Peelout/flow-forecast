@@ -243,7 +243,7 @@ jobs:
           when: always
           command: |
             echo -e 'mutitask decoder'
-            coverage run flood_forecast/trainer.py -p tests/multi_task_decoder.json
+            coverage run flood_forecast/trainer.py -p tests/multitask_decoder.json
             echo -e 'running da-meta data unit test'
             coverage run flood_forecast/trainer.py -p tests/da_meta.json
             echo -e 'running transformer bottleneck'
