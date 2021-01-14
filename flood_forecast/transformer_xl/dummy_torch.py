@@ -14,5 +14,5 @@ class DummyTorchModel(nn.Module):
 
     def forward(self, x: torch.Tensor, mask=None):
         batch_sz = x.size(0)
-        result = torch.ones(batch_sz, self.out_len, requires_grad=True, device=x.device)
+        result = torch.ones(batch_sz, self.out_len, 1, requires_grad=True, device=x.device)
         return result
