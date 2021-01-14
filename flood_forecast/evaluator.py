@@ -210,8 +210,8 @@ def infer_on_torch_model(
         hours_to_forecast,
         decoder_params,
     )
-    #if csv_test_loader.targ_col > 1:
-        #for cole
+    # if csv_test_loader.targ_col > 1:
+    #    # for cole
     df_train_and_test["preds"] = 0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
