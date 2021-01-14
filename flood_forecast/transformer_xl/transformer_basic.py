@@ -127,7 +127,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         x = self.out_length_lay(x)
         if self.final_act:
             x = self.final_act(x)
-        if self.output_dim > 1:
+        if self.out_dim > 1:
             return x
         return x.view(-1, self.output_seq_length)
 
