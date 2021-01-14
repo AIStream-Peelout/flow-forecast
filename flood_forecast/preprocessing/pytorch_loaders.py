@@ -82,6 +82,7 @@ class CSVDataLoader(Dataset):
             # other present time series values.
             targ_scale_class = self.scale.__class__
             self.targ_scaler = targ_scale_class()
+            print(len(target_col))
             if len(target_col) == 1:
                 self.targ_scaler.fit_transform(
                     self.df[target_col[0]].values.reshape(-1, 1)
