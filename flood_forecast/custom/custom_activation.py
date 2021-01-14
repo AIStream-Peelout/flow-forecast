@@ -161,7 +161,7 @@ class SparsemaxFunction(Function):
 
 class Entmax15Function(Function):
     @classmethod
-    def forward(cls, ctx, X, dim=0, k=None):
+    def forward(cls, ctx, X: torch.Tensor, dim=0, k=None):
         ctx.dim = dim
 
         max_val, _ = X.max(dim=dim, keepdim=True)
@@ -281,5 +281,5 @@ class Entmax15(nn.Module):
         self.k = k
         super(Entmax15, self).__init__()
 
-    def forward(self, X):
+    def forward(self, X: torch.Tensor):
         return entmax15(X, dim=self.dim, k=self.k)
