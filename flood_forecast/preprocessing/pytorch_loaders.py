@@ -120,7 +120,7 @@ class CSVDataLoader(Dataset):
 
         if isinstance(result_data, torch.Tensor):
             if len(result_data.shape) > 2:
-                result_data = result_data.permute(1, 0, 2).reshpae(result_data.shape[1], -1)
+                result_data = result_data.permute(2, 0, 1).reshape(result_data.shape[2], -1)
             result_data_np = result_data.numpy()
         if isinstance(result_data, pd.Series) or isinstance(
             result_data, pd.DataFrame
