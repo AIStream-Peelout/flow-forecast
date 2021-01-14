@@ -63,7 +63,7 @@ class SimpleTransformer(torch.nn.Module):
         x = self.final_layer(x)
         if self.sigmoid:
             x = self.sigmoid(x)
-        return x.view(-1, view_number)
+        return x
 
 
 class CustomTransformerDecoder(torch.nn.Module):
@@ -126,7 +126,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         x = self.out_length_lay(x)
         if self.final_act:
             x = self.final_act(x)
-        return x.view(-1, self.output_seq_length)
+        return x
 
 
 class SimplePositionalEncoding(torch.nn.Module):

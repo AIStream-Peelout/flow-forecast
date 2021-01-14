@@ -51,5 +51,5 @@ class MultiAttnHeadSimple(torch.nn.Module):
             x = self.last_layer(x)
             if self.sigmoid:
                 x = self.sigmoid(x)
-            return x.view(-1, self.forecast_length)
-        return x.view(-1, self.length_data)
+            return x
+        return x
