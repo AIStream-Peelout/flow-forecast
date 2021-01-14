@@ -70,7 +70,7 @@ def simple_decode(model: Type[torch.nn.Module],
         with torch.no_grad():
             if meta_data:
                 out = model(src, meta_data).unsqueeze(2)
-            elif max_seq_len < 2:
+            elif probabilistic:
                 out = model(src)
             else:
                 out = model(src).unsqueeze(2)
