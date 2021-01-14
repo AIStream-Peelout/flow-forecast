@@ -35,7 +35,7 @@ class SimpleLinearModel(torch.nn.Module):
             std = torch.clamp(x[..., 1][..., None], min=0.01)
             return torch.distributions.Normal(mean, std)
         else:
-            return x
+            return x.view(-1, self.output_len)
 
 
 def simple_decode(model: Type[torch.nn.Module],
@@ -69,9 +69,11 @@ def simple_decode(model: Type[torch.nn.Module],
     for i in range(0, max_seq_len, output_len):
         with torch.no_grad():
             if meta_data:
-                out = model(src, meta_data)
-            else:
+                out = model(src, meta_data).unsqueeze(2)
+            elif max_seq_len < 2:
                 out = model(src)
+            else:
+                out = model(src).unsqueeze(2)
 
             if probabilistic:
                 out_std = out.stddev.detach()
