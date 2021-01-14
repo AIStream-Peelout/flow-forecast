@@ -82,9 +82,15 @@ class CSVDataLoader(Dataset):
             # other present time series values.
             targ_scale_class = self.scale.__class__
             self.targ_scaler = targ_scale_class()
-            self.targ_scaler.fit_transform(
-                self.df[target_col[0]].values.reshape(-1, 1)
-            )
+            if len(target_col) == 1:
+                self.targ_scaler.fit_transform(
+                    self.df[target_col[0]].values.reshape(-1, 1)
+                )
+            else:
+                self.targ_scaler.fit_transform(
+                    self.df[target_col]
+                )
+
             self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
