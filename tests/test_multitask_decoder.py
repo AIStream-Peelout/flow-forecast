@@ -20,17 +20,14 @@ class MultitTaskTests(unittest.TestCase):
         if "save_path" in cls.model_params:
             del cls.model_params["save_path"]
         cls.forecast_model = train_function("PyTorch", cls.model_params)
+        if "save_path" in cls.model_params:
+            del cls.model_params["save_path"]
         if "save_path" in cls.model_params3:
             del cls.model_params["save_path"]
         cls.model_params["model_params"]["output_seq_len"] = 1
+        cls.model_params["modeel_params"]["dataset_params"]["forecast_length"] = 1
         cls.forecast_model2 = train_function("PyTorch", cls.model_params)
         cls.forecast_model3 = train_function("PyTorch", cls.model_params3)
-
-    def test_decoder_single_step(self):
-        t = torch.Tensor([3, 4, 5]).repeat(1, 336, 1)
-        output = simple_decode(self.forecast_model2.model, torch.ones(1, 5, 3), 336, t, output_len=3)
-        # We want to check for leakage
-        self.assertFalse(3 in output[:, :, 0])
 
     def test_decoder_multi_step(self):
         t = torch.Tensor([3, 4, 5]).repeat(1, 336, 1)
@@ -43,6 +40,12 @@ class MultitTaskTests(unittest.TestCase):
         output = simple_decode(self.forecast_model3.model, torch.ones(1, 5, 3), 336, t, output_len=3)
         self.assertFalse(3 in output)
         self.assertFalse(6 in output)
+
+    def test_decoder_single_step(self):
+        t = torch.Tensor([3, 4, 5]).repeat(1, 336, 1)
+        output = simple_decode(self.forecast_model2.model, torch.ones(1, 5, 3), 336, t, output_len=3)
+        # We want to check for leakage
+        self.assertFalse(3 in output[:, :, 0])
 
 if __name__ == "__main__":
     unittest.main()
