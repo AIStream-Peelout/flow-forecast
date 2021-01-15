@@ -12,32 +12,31 @@ class MultitTaskTests(unittest.TestCase):
         """
         Modules to test model inference.
         """
-        with open(os.path.join(os.path.dirname(__file__), "multi_test.json")) as a:
+        with open(os.path.join(os.path.dirname(__file__), "multi_decoder_test.json")) as a:
             cls.model_params = json.load(a)
         with open(os.path.join(os.path.dirname(__file__), "multitask_decoder.json")) as a:
             cls.model_params3 = json.load(a)
         cls.keag_path = os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv")
         if "save_path" in cls.model_params:
             del cls.model_params["save_path"]
-        cls.forecast_model = train_function("PyTorch", cls.model_params)
-        if "save_path" in cls.model_params:
-            del cls.model_params["save_path"]
-        if "save_path" in cls.model_params3:
-            del cls.model_params["save_path"]
-        cls.model_params["model_params"]["output_seq_len"] = 1
-        cls.model_params["dataset_params"]["forecast_length"] = 1
         # cls.forecast_model2 = train_function("PyTorch", cls.model_params)
 
     def test_decoder_multi_step(self):
+        if "save_path" in self.model_params:
+            del self.model_params["save_path"]
+        forecast_model = train_function("PyTorch", self.model_params)
         t = torch.Tensor([3, 4, 5]).repeat(1, 336, 1)
-        output = simple_decode(self.forecast_model.model, torch.ones(1, 5, 3), 336, t, output_len=3)
+        output = simple_decode(forecast_model.model, torch.ones(1, 5, 3), 336, t, output_len=3)
         # We want to check for leakage
         self.assertFalse(3 in output[:, :, 0])
 
     def test_multivariate_single_step(self):
+        # dumb error fixes
+        if "save_path" in self.model_params3:
+            del self.model_params["save_path"]
         t = torch.Tensor([3, 6, 5]).repeat(1, 100, 1)
         forecast_model3 = train_function("PyTorch", self.model_params3)
-        output = simple_decode(forecast_model3, torch.ones(1, 5, 3), 100, t, output_len=3)
+        output = simple_decode(forecast_model3.model, torch.ones(1, 5, 3), 100, t, output_len=3, multi_targets=2)
         self.assertFalse(3 in output)
         self.assertFalse(6 in output)
 

@@ -61,7 +61,7 @@ class MASELoss(torch.nn.Module):
             target = target.unsqueeze(0)
         if len(output.shape) == 1:
             output = output.unsqueeze(0)
-        if len(train_data.shape) > 2:
+        if len(target.shape) > 2 and len(train_data.shape) > 2:
             result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
         else:
             result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
