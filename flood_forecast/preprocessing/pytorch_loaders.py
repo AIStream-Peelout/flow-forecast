@@ -132,7 +132,7 @@ class CSVDataLoader(Dataset):
             result_data_np = result_data.values
         if isinstance(result_data, np.ndarray):
             result_data_np = result_data
-        print(result_data_np)
+        print(result_data_np.shape)
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )
