@@ -177,9 +177,6 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None):
     # Warning this assumes src target is 1-D
-    if len(src.shape) == 2:
-        src = src.unsqueeze(0)
-    src = src[:, :, 0]
     if probabilistic:
         if type(output_std) != torch.Tensor:
             print("Converted")
@@ -337,7 +334,10 @@ def compute_validation(validation_loader: DataLoader,
             for crit in criterion:
                 if validation_dataset.scale:
                     # Should this also do loss.item() stuff?
-                    loss_unscaled_full = compute_loss(labels, output, src, crit, validation_dataset,
+                    if len(src.shape) == 2:
+                        src1 = src.unsqueeze(0)
+                    src1 = src1[:, :, 0:multi_targets]
+                    loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
                                                       probabilistic, output_std)
                     unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
