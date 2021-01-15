@@ -327,10 +327,12 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
+            print("multi targets below")
             if multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:
                 labels = targ[:, :, 0:multi_targets]
+                print(multi_targets)
             validation_dataset = validation_loader.dataset
             for crit in criterion:
                 if validation_dataset.scale:
