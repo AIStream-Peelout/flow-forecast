@@ -54,7 +54,7 @@ class MASELoss(torch.nn.Module):
         self.baseline_method = self.method_dict[baseline_method]
 
     def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor) -> torch.Tensor:
-        # Ugh why can't all tensors have batch size...
+        # Ugh why can't all tensors have batch size... Fixes for modern
         if len(train_data.shape) == 1:
             train_data = train_data.reshape(1, train_data.shape[0])
         if len(target.shape) == 1:
@@ -62,6 +62,8 @@ class MASELoss(torch.nn.Module):
         if len(output.shape) == 1:
             output = output.unsqueeze(0)
         if len(target.shape) > 2 and len(train_data.shape) > 2:
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
+        elif len(target.shape) > 2:
             result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
         else:
             result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
