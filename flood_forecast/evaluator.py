@@ -179,6 +179,9 @@ def infer_on_torch_model(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if isinstance(datetime_start, str):
         datetime_start = datetime.strptime(datetime_start, "%Y-%m-%d")
+    multi_params = 1
+    if multi_params in model.params:
+        multi_params = model.params["n_targets"]
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
@@ -209,6 +212,7 @@ def infer_on_torch_model(
         forecast_length,
         hours_to_forecast,
         decoder_params,
+        multi_params=multi_params
     )
     # if csv_test_loader.targ_col > 1:
     #    # for cole
@@ -242,6 +246,7 @@ def infer_on_torch_model(
             hours_to_forecast,
             decoder_params,
             num_prediction_samples,
+            multi_params=1
         )
         df_prediction_samples = pd.DataFrame(
             index=df_train_and_test.index,
@@ -279,6 +284,7 @@ def generate_predictions(
     forecast_length: int,
     hours_to_forecast: int,
     decoder_params: Dict,
+    multi_params=1
 ) -> torch.Tensor:
     history_dim = history.unsqueeze(0).to(model.device)
     print("Add debugging crap below")
@@ -301,6 +307,7 @@ def generate_predictions(
             history_dim,
             hours_to_forecast,
             decoder_params,
+            multi_targets=multi_params
         )
     return end_tensor
 
@@ -364,6 +371,7 @@ def generate_decoded_predictions(
     history_dim: torch.Tensor,
     hours_to_forecast: int,
     decoder_params: Dict,
+    multi_targets=1,
 ) -> torch.Tensor:
     probabilistic = False
     if decoder_params is not None:
@@ -383,6 +391,7 @@ def generate_decoded_predictions(
         real_target_tensor,
         decoder_params["unsqueeze_dim"],
         output_len=model.params["dataset_params"]["forecast_length"],
+        multi_targets=multi_targets,
         device=model.device,
         probabilistic=probabilistic,
     )
@@ -404,6 +413,8 @@ def generate_prediction_samples(
     hours_to_forecast: int,
     decoder_params: Dict,
     num_prediction_samples: int,
+    multi_params=1
+
 ) -> np.ndarray:
     pred_samples = []
     std_dev_samples = []
@@ -423,6 +434,7 @@ def generate_prediction_samples(
             forecast_length,
             hours_to_forecast,
             decoder_params,
+            multi_params=multi_params
         )
 
         if probabilistic:
