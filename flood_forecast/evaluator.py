@@ -404,7 +404,10 @@ def generate_decoded_predictions(
     if probabilistic:
         end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
         return end_tensor_mean, end_tensor[1]
-    end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
+    if multi_targets == 1:
+        end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
+    else:
+        end_tensor = end_tensor[:, :, :].view(-1).to("cpu").detach()
     return end_tensor
 
 
