@@ -99,7 +99,10 @@ def evaluate_model(
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
                 end_tensor_mean = end_tensor_mean.squeeze(1)
             else:
-                end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
+                if "n_targets" in model.params:
+                    end_tensor = test_data.inverse_scale(end_tensor.detach())
+                else:
+                    end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
                 end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
                 end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
             history_length = model.params["dataset_params"]["forecast_history"]
@@ -110,7 +113,7 @@ def evaluate_model(
                     test_data.inverse_scale(df_predictions).numpy(),
                     index=df_predictions.index,
                 )
-        print("Current historical dataframe")
+        print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
         for target in target_col:
