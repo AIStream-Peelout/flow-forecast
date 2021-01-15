@@ -165,6 +165,8 @@ def evaluate_model(
     # Explain model behaviour using shap
     if "probabilistic" in inference_params:
         print("Probabilistic explainability currently not supported.")
+    elif "n_targets" in model.params:
+        print("Multitask forecasting support coming soon")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]

@@ -35,9 +35,9 @@ class MultitTaskTests(unittest.TestCase):
         self.assertFalse(3 in output[:, :, 0])
 
     def test_multivariate_single_step(self):
-        t = torch.Tensor([3, 6, 5]).repeat(1, 336, 1)
+        t = torch.Tensor([3, 6, 5]).repeat(1, 100, 1)
         forecast_model3 = train_function("PyTorch", self.model_params3)
-        output = simple_decode(forecast_model3, torch.ones(1, 5, 3), 336, t, output_len=3)
+        output = simple_decode(forecast_model3, torch.ones(1, 5, 3), 100, t, output_len=3)
         self.assertFalse(3 in output)
         self.assertFalse(6 in output)
 
