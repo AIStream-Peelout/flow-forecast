@@ -48,7 +48,7 @@
        "batch_size":4
     },
     "GCS": false,
-    
+   
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
