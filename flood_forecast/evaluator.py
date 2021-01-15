@@ -122,6 +122,7 @@ def evaluate_model(
         print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
+        idx = 0
         for target in target_col:
             evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
@@ -143,12 +144,22 @@ def evaluate_model(
                 )
 
             else:
-                s = evaluation_metric_function(
-                    torch.from_numpy(
-                        df_train_and_test[target][forecast_history:].to_numpy()
-                    ),
-                    end_tensor,
-                )
+                if "n_targets" in model.params:
+                    s = evaluation_metric_function(
+                        torch.from_numpy(
+                            df_train_and_test[target][forecast_history:].to_numpy()
+                        ),
+                        end_tensor[:, idx],
+                    )
+                else:
+                    s = evaluation_metric_function(
+                        torch.from_numpy(
+                            df_train_and_test[target][forecast_history:].to_numpy()
+                        ),
+                        end_tensor,
+                    )
+            idx += 1
+
             eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
     # Explain model behaviour using shap
