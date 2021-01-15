@@ -26,7 +26,7 @@ class MultitTaskTests(unittest.TestCase):
             del cls.model_params["save_path"]
         cls.model_params["model_params"]["output_seq_len"] = 1
         cls.model_params["dataset_params"]["forecast_length"] = 1
-        # cls.forecast_model2 = train_function("PyTorch", cls.model_params)
+        cls.forecast_model2 = train_function("PyTorch", cls.model_params)
         cls.forecast_model3 = train_function("PyTorch", cls.model_params3)
 
     def test_decoder_multi_step(self):
@@ -42,11 +42,10 @@ class MultitTaskTests(unittest.TestCase):
         self.assertFalse(6 in output)
 
     def test_decoder_single_step(self):
-        # t = torch.Tensor([3, 4, 5]).repeat(1, 336, 1)
-        # output = simple_decode(self.forecast_model2.model, torch.ones(1, 5, 3), 336, t, output_len=3)
+        t = torch.Tensor([3, 4, 5]).repeat(1, 336, 1)
+        output = simple_decode(self.forecast_model2.model, torch.ones(1, 5, 3), 336, t, output_len=3)
         # We want to check for leakage
-        # self.assertFalse(3 in output[:, :, 0])
-        pass
+        self.assertFalse(3 in output[:, :, 0])
 
 if __name__ == "__main__":
     unittest.main()

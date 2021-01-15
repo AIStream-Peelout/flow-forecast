@@ -327,11 +327,9 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
-            print("The number of targets are: ")
             if multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:
-                print(multi_targets)
                 labels = targ[:, :, 0:multi_targets]
             validation_dataset = validation_loader.dataset
             for crit in criterion:
