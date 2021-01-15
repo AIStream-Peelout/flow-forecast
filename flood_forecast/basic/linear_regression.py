@@ -71,16 +71,14 @@ def simple_decode(model: Type[torch.nn.Module],
         with torch.no_grad():
             if meta_data:
                 out = model(src, meta_data).unsqueeze(2)
-            elif multi_targets < 2:
-                out = model(src)
-            else:
-                out = model(src).unsqueeze(2)
-
-            if probabilistic:
+            elif probabilistic:
                 out_std = out.stddev.detach()
                 out = out.mean.detach()
-                ys_std_dev.append(out_std[:, 0:multi_targets].unsqueeze(0))
-
+                ys_std_dev.append(out_std[:, 0].unsqueeze(0))
+            elif multi_targets < 2:
+                out = model(src).unsqueeze(2)
+            else:
+                out = model(src)
             if output_len == 1:
                 real_target2[:, i, 0:multi_targets] = out[:, 0]
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
