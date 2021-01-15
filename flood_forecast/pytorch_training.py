@@ -335,8 +335,8 @@ def compute_validation(validation_loader: DataLoader,
                 if validation_dataset.scale:
                     # Should this also do loss.item() stuff?
                     if len(src.shape) == 2:
-                        src1 = src.unsqueeze(0)
-                    src1 = src1[:, :, 0:multi_targets]
+                        src = src.unsqueeze(0)
+                    src1 = src[:, :, 0:multi_targets]
                     loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
                                                       probabilistic, output_std)
                     unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
