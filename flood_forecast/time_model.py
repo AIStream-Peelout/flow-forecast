@@ -155,7 +155,11 @@ class PyTorchForecast(TimeSeriesModel):
         self.upload_gcs(params_save_path, params_name, "_params", epoch)
         self.upload_gcs(model_save_path, model_name, "_model", epoch)
         if self.wandb:
-            wandb.config.save_path = model_save_path
+            try:
+                wandb.config.save_path = model_save_path
+            except Exception as e:
+                print("Wandb stupid error")
+                print(e.__traceback__)
 
     def make_data_load(
             self,
