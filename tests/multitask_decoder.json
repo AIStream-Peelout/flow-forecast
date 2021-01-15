@@ -9,6 +9,7 @@
       "output_dim":2,
       "final_act":"Swish"
      },
+     "n_targets":2,
     "dataset_params":
     {  "class": "default",
        "training_path": "tests/test_data/keag_small.csv",

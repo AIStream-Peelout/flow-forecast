@@ -49,8 +49,8 @@ def train_transformer_style(
     pin_memory = False
     dataset_params = model.params["dataset_params"]
     num_targets = 1
-    if "multi_targets" in dataset_params:
-        num_targets = dataset_params["multi_targets"]
+    if "n_targets" in dataset_params:
+        num_targets = dataset_params["n_targets"]
     if "num_workers" in dataset_params:
         worker_num = dataset_params["num_workers"]
     if "pin_memory" in dataset_params:
