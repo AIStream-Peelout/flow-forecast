@@ -307,6 +307,7 @@ def compute_validation(validation_loader: DataLoader,
                                                            targ.shape[1],
                                                            targ,
                                                            1,
+                                                           multi_targets=multi_targets,
                                                            probabilistic=probabilistic)
                         output, output_std = output[:, :, 0], output_std[0]
                         output_dist = torch.distributions.Normal(output, output_std)
@@ -316,7 +317,8 @@ def compute_validation(validation_loader: DataLoader,
                                                max_seq_len=targ.shape[1],
                                                real_target=targ,
                                                output_len=1,
-                                               probabilistic=probabilistic)[:, :, 0]
+                                               multi_targets=multi_targets,
+                                               probabilistic=probabilistic)[:, :, 0:multi_targets]
             else:
                 if probabilistic:
                     output_dist = model(src.float())
