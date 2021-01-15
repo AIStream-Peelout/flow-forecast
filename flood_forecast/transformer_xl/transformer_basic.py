@@ -94,6 +94,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.output_seq_length = output_seq_length
         self.out_length_lay = torch.nn.Linear(seq_length, output_seq_length)
         self.mask = generate_square_subsequent_mask(seq_length)
+        self.out_dim = output_dim
         self.mask_it = use_mask
         self.final_act = None
         if final_act:
@@ -115,6 +116,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             x = self.meta_merger(x, meta_data)
             # x = x.permute(0, 2, 1)
         x = self.pe(x)
+        # (L, B, N)
         x = x.permute(1, 0, 2)
         if self.mask_it:
             x = self.transformer_enc(x, self.mask)
@@ -122,10 +124,13 @@ class CustomTransformerDecoder(torch.nn.Module):
             # Allow no mask
             x = self.transformer_enc(x)
         x = self.output_dim_layer(x)
+        # (B, N, L)
         x = x.permute(1, 2, 0)
         x = self.out_length_lay(x)
         if self.final_act:
             x = self.final_act(x)
+        if self.out_dim > 1:
+            return x.permute(0, 2, 1)
         return x.view(-1, self.output_seq_length)
 
 

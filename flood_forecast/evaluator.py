@@ -99,20 +99,30 @@ def evaluate_model(
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
                 end_tensor_mean = end_tensor_mean.squeeze(1)
             else:
-                end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
+                print(end_tensor.shape)
+                if "n_targets" in model.params:
+                    end_tensor = test_data.inverse_scale(end_tensor.detach())
+                else:
+                    end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
                 end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
                 end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
             history_length = model.params["dataset_params"]["forecast_history"]
-            df_train_and_test["preds"][history_length:] = end_tensor_list
+            if "n_targets" in model.params:
+                df_train_and_test["preds"][history_length:] = end_tensor[:, 0].numpy().tolist()
+                for i in range(1, model.params["n_targets"]):
+                    df_train_and_test["pred_" + str(i)] = end_tensor[:, i].numpy().tolist
+            else:
+                df_train_and_test["preds"][history_length:] = end_tensor_list
             print('end_tensor', end_tensor)
             if len(df_predictions.columns > 0):
                 df_predictions = pd.DataFrame(
                     test_data.inverse_scale(df_predictions).numpy(),
                     index=df_predictions.index,
                 )
-        print("Current historical dataframe")
+        print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
+        idx = 0
         for target in target_col:
             evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
@@ -134,17 +144,29 @@ def evaluate_model(
                 )
 
             else:
-                s = evaluation_metric_function(
-                    torch.from_numpy(
-                        df_train_and_test[target][forecast_history:].to_numpy()
-                    ),
-                    end_tensor,
-                )
+                if "n_targets" in model.params:
+                    s = evaluation_metric_function(
+                        torch.from_numpy(
+                            df_train_and_test[target][forecast_history:].to_numpy()
+                        ),
+                        end_tensor[:, idx],
+                    )
+                else:
+                    s = evaluation_metric_function(
+                        torch.from_numpy(
+                            df_train_and_test[target][forecast_history:].to_numpy()
+                        ),
+                        end_tensor,
+                    )
+            idx += 1
+
             eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
     # Explain model behaviour using shap
     if "probabilistic" in inference_params:
         print("Probabilistic explainability currently not supported.")
+    elif "n_targets" in model.params:
+        print("Multitask forecasting support coming soon")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
@@ -179,6 +201,11 @@ def infer_on_torch_model(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if isinstance(datetime_start, str):
         datetime_start = datetime.strptime(datetime_start, "%Y-%m-%d")
+    multi_params = 1
+    if "n_targets" in model.params:
+        multi_params = model.params["n_targets"]
+    print("Multi_params")
+    print(multi_params)
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
@@ -209,7 +236,10 @@ def infer_on_torch_model(
         forecast_length,
         hours_to_forecast,
         decoder_params,
+        multi_params=multi_params
     )
+    # if csv_test_loader.targ_col > 1:
+    #    # for cole
     df_train_and_test["preds"] = 0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
@@ -240,6 +270,7 @@ def infer_on_torch_model(
             hours_to_forecast,
             decoder_params,
             num_prediction_samples,
+            multi_params=multi_params
         )
         df_prediction_samples = pd.DataFrame(
             index=df_train_and_test.index,
@@ -277,6 +308,7 @@ def generate_predictions(
     forecast_length: int,
     hours_to_forecast: int,
     decoder_params: Dict,
+    multi_params=1
 ) -> torch.Tensor:
     history_dim = history.unsqueeze(0).to(model.device)
     print("Add debugging crap below")
@@ -299,6 +331,7 @@ def generate_predictions(
             history_dim,
             hours_to_forecast,
             decoder_params,
+            multi_targets=multi_params
         )
     return end_tensor
 
@@ -362,6 +395,7 @@ def generate_decoded_predictions(
     history_dim: torch.Tensor,
     hours_to_forecast: int,
     decoder_params: Dict,
+    multi_targets=1,
 ) -> torch.Tensor:
     probabilistic = False
     if decoder_params is not None:
@@ -381,13 +415,17 @@ def generate_decoded_predictions(
         real_target_tensor,
         decoder_params["unsqueeze_dim"],
         output_len=model.params["dataset_params"]["forecast_length"],
+        multi_targets=multi_targets,
         device=model.device,
         probabilistic=probabilistic,
     )
     if probabilistic:
         end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
         return end_tensor_mean, end_tensor[1]
-    end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
+    if multi_targets == 1:
+        end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
+    else:
+        end_tensor = end_tensor[:, :, 0:multi_targets].to("cpu").detach()
     return end_tensor
 
 
@@ -402,6 +440,7 @@ def generate_prediction_samples(
     hours_to_forecast: int,
     decoder_params: Dict,
     num_prediction_samples: int,
+    multi_params=1
 ) -> np.ndarray:
     pred_samples = []
     std_dev_samples = []
@@ -421,6 +460,7 @@ def generate_prediction_samples(
             forecast_length,
             hours_to_forecast,
             decoder_params,
+            multi_params=multi_params
         )
 
         if probabilistic:

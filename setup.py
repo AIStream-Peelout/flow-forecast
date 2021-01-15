@@ -27,7 +27,7 @@ setup(
         "flood_forecast.deployment",
         "flood_forecast.custom"],
     license='Public',
-    long_description='A public package for deep time series forecasting with PyTorch',
+    long_description='A public package for deep time series forecasting built with PyTorch',
     install_requires=install_requires,
     extras_require={
         'dev': dev_requirements})

@@ -4,6 +4,10 @@ import datetime
 from sklearn.preprocessing import StandardScaler
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model, evaluate_model
+import torch
+import numpy
+numpy.random.seed(0)
+torch.manual_seed(0)
 
 
 class EvaluationTest(unittest.TestCase):

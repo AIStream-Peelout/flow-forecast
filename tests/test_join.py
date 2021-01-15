@@ -27,6 +27,5 @@ class JoinTest(unittest.TestCase):
         self.assertEqual(result_df.iloc[0]['cfs'], 2210)
         self.assertEqual(result_df.iloc[0]['tmpf'], 19.94)
 
-
 if __name__ == '__main__':
     unittest.main()

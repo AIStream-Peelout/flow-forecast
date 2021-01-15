@@ -12,7 +12,7 @@
       "scale_att": false,
       "forecast_length": 1,
       "additional_params":{}
-     }, 
+     },
     "dataset_params":
     {  "class": "default",
        "num_workers": 2,
@@ -48,7 +48,7 @@
        "batch_size":4
     },
     "GCS": false,
-    
+   
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
@@ -57,7 +57,7 @@
     "forward_params":{},
    "metrics":["DilateLoss"],
    "inference_params":
-   {     
+   {
          "datetime_start":"2016-05-31",
           "hours_to_forecast":336, 
           "test_csv_path":"tests/test_data/keag_small.csv",

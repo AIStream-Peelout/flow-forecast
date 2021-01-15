@@ -28,7 +28,7 @@ def create_feature(key, value, df, dt_column):
 
 
 def feature_fix(preprocess_params, dt_column, df):
-    print("running feature fix code")
+    print("running feature fix code s")
     column_names = []
     if "datetime_params" in preprocess_params:
         for key, value in preprocess_params["datetime_params"].items():
@@ -41,7 +41,7 @@ def feature_fix(preprocess_params, dt_column, df):
     return df, column_names
 
 
-def cyclical(df, feature_column):
+def cyclical(df, feature_column: str) -> pd.DataFrame:
     df["norm"] = 2 * np.pi * df[feature_column] / df[feature_column].max()
     df['cos_' + feature_column] = np.cos(df['norm'])
     df['sin_' + feature_column] = np.sin(df['norm'])

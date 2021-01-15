@@ -82,9 +82,16 @@ class CSVDataLoader(Dataset):
             # other present time series values.
             targ_scale_class = self.scale.__class__
             self.targ_scaler = targ_scale_class()
-            self.targ_scaler.fit_transform(
-                self.df[target_col[0]].values.reshape(-1, 1)
-            )
+            print(len(target_col))
+            if len(target_col) == 1:
+                self.targ_scaler.fit_transform(
+                    self.df[target_col[0]].values.reshape(-1, 1)
+                )
+            else:
+                self.targ_scaler.fit_transform(
+                    self.df[target_col]
+                )
+
             self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
@@ -113,6 +120,11 @@ class CSVDataLoader(Dataset):
     ) -> torch.Tensor:
 
         if isinstance(result_data, torch.Tensor):
+            if len(result_data.shape) > 2:
+                print("Result stuff")
+                print(result_data.shape)
+                result_data = result_data.permute(2, 0, 1).reshape(result_data.shape[2], -1)
+                result_data = result_data.permute(1, 0)
             result_data_np = result_data.numpy()
         if isinstance(result_data, pd.Series) or isinstance(
             result_data, pd.DataFrame
@@ -120,6 +132,7 @@ class CSVDataLoader(Dataset):
             result_data_np = result_data.values
         if isinstance(result_data, np.ndarray):
             result_data_np = result_data
+        print(result_data_np.shape)
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )

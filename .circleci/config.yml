@@ -104,6 +104,8 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
+            coverage run -m unittest -v tests/test_multitask_decoder.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/data_format_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/usgs_tests.py
@@ -240,6 +242,8 @@ jobs:
           name: Trainer tests
           when: always
           command: |
+            echo -e 'emutitask decoder r'
+            coverage run flood_forecast/trainer.py -p tests/multitask_decoder.json
             echo -e 'running da-meta data unit test'
             coverage run flood_forecast/trainer.py -p tests/da_meta.json
             echo -e 'running transformer bottleneck'
@@ -305,6 +309,7 @@ jobs:
           when: always
           command: |
             coverage run -m unittest -v tests/test_plot.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_explain_model_output.py
       - run:
           name: upload_stuff
