@@ -19,8 +19,6 @@ class MultitTaskTests(unittest.TestCase):
         cls.keag_path = os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv")
         if "save_path" in cls.model_params:
             del cls.model_params["save_path"]
-        cls.model_params["model_params"]["output_seq_len"] = 1
-        cls.model_params["dataset_params"]["forecast_length"] = 1
         # cls.forecast_model2 = train_function("PyTorch", cls.model_params)
 
     def test_decoder_multi_step(self):
