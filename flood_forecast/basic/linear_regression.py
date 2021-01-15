@@ -72,6 +72,7 @@ def simple_decode(model: Type[torch.nn.Module],
             if meta_data:
                 out = model(src, meta_data).unsqueeze(2)
             elif probabilistic:
+                out = model(src)
                 out_std = out.stddev.detach()
                 out = out.mean.detach()
                 ys_std_dev.append(out_std[:, 0].unsqueeze(0))

@@ -38,7 +38,7 @@ class MultitTaskTests(unittest.TestCase):
             del self.model_params["save_path"]
         t = torch.Tensor([3, 6, 5]).repeat(1, 100, 1)
         forecast_model3 = train_function("PyTorch", self.model_params3)
-        output = simple_decode(forecast_model3.model, torch.ones(1, 5, 3), 100, t, output_len=3)
+        output = simple_decode(forecast_model3.model, torch.ones(1, 5, 3), 100, t, output_len=3, multi_targets=2)
         self.assertFalse(3 in output)
         self.assertFalse(6 in output)
 
