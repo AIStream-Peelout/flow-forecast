@@ -99,6 +99,7 @@ def evaluate_model(
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
                 end_tensor_mean = end_tensor_mean.squeeze(1)
             else:
+                print(end_tensor.shape)
                 if "n_targets" in model.params:
                     end_tensor = test_data.inverse_scale(end_tensor.detach())
                 else:
