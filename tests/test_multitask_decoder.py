@@ -12,7 +12,7 @@ class MultitTaskTests(unittest.TestCase):
         """
         Modules to test model inference.
         """
-        with open(os.path.join(os.path.dirname(__file__), "multi_test.json")) as a:
+        with open(os.path.join(os.path.dirname(__file__), "multi_decoder_test.json")) as a:
             cls.model_params = json.load(a)
         with open(os.path.join(os.path.dirname(__file__), "multitask_decoder.json")) as a:
             cls.model_params3 = json.load(a)
