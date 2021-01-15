@@ -182,6 +182,8 @@ def infer_on_torch_model(
     multi_params = 1
     if multi_params in model.params:
         multi_params = model.params["n_targets"]
+    print("Multi_params")
+    print(multi_params)
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
