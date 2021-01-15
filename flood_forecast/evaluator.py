@@ -108,9 +108,9 @@ def evaluate_model(
                 end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
             history_length = model.params["dataset_params"]["forecast_history"]
             if "n_targets" in model.params:
-                df_train_and_test["preds"][history_length:] = end_tensor_list[:, 0]
+                df_train_and_test["preds"][history_length:] = flatten_list_function(end_tensor[:, 0].numpy().tolist())
                 for i in range(1, model.params["n_targets"]):
-                    df_train_and_test["pred_" + str(i)] = end_tensor_list[:, i]
+                    df_train_and_test["pred_" + str(i)] = flatten_list_function(end_tensor[:, i].numpy().tolist())
             else:
                 df_train_and_test["preds"][history_length:] = end_tensor_list
             print('end_tensor', end_tensor)
