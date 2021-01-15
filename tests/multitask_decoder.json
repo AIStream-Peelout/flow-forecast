@@ -33,7 +33,7 @@
     },
     "training_params":
     {
-       "criterion":"MAPE",
+       "criterion":"MSE",
        "optimizer": "Adam",
        "optim_params":
        {
