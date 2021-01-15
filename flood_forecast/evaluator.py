@@ -180,7 +180,7 @@ def infer_on_torch_model(
     if isinstance(datetime_start, str):
         datetime_start = datetime.strptime(datetime_start, "%Y-%m-%d")
     multi_params = 1
-    if multi_params in model.params:
+    if "multi_params" in model.params:
         multi_params = model.params["n_targets"]
     print("Multi_params")
     print(multi_params)
