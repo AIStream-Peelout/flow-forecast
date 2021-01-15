@@ -407,7 +407,7 @@ def generate_decoded_predictions(
     if multi_targets == 1:
         end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
     else:
-        end_tensor = end_tensor.to("cpu").detach()
+        end_tensor = end_tensor[:, :, 0:multi_targets].to("cpu").detach()
     return end_tensor
 
 
@@ -423,7 +423,6 @@ def generate_prediction_samples(
     decoder_params: Dict,
     num_prediction_samples: int,
     multi_params=1
-
 ) -> np.ndarray:
     pred_samples = []
     std_dev_samples = []
