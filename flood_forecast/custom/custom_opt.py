@@ -54,12 +54,14 @@ class MASELoss(torch.nn.Module):
         self.baseline_method = self.method_dict[baseline_method]
 
     def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor, multi=1) -> torch.Tensor:
+        if len(train_data) < 3:
+            train_data = train_data.unsqueeze(0)
         if len(target.shape) == 2 and multi == 1:
             target = target.unsqueeze(2)
             output = output.unsqueeze(2)
         elif len(target.shape) == 1:
             target = target.unsqueeze(0)
-            output = output.unsuqeeze(0)
+            output = output.unsqueeze(0)
             target = target.unsqueeze(2)
             output = output.unsqueeze(2)
         result_baseline = self.baseline_method(train_data, target.shape)
