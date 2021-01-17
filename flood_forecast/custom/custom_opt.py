@@ -50,25 +50,19 @@ class MASELoss(torch.nn.Module):
         This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
         """
         super(MASELoss, self).__init__()
-        self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
+        self.method_dict = {"mean": lambda x, y: torch.mean(x, 1).unsqueeze(1).repeat(1, y[1], 1)}
         self.baseline_method = self.method_dict[baseline_method]
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor) -> torch.Tensor:
-        # Ugh why can't all tensors have batch size... Fixes for modern
-        if len(train_data.shape) == 1:
-            train_data = train_data.reshape(1, train_data.shape[0])
-        if len(target.shape) == 1:
+    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor, multi=1) -> torch.Tensor:
+        if len(target.shape) == 2 and multi == 1:
+            target = target.unsqueeze(2)
+            output = output.unsqueeze(2)
+        elif len(target.shape) == 1:
             target = target.unsqueeze(0)
-        if len(output.shape) == 1:
-            output = output.unsqueeze(0)
-        if len(target.shape) > 2 and len(train_data.shape) > 2:
-            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
-        elif len(target.shape) > 2:
-            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
-        elif len(train_data.shape) > 1:
-            result_baseline = self.baseline_method(train_data).repeat(1, 1, target.shape[1])
-        else:
-            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
+            output = output.unsuqeeze(0)
+            target = target.unsqueeze(2)
+            output = output.unsqueeze(2)
+        result_baseline = self.baseline_method(train_data, target.shape)
         MAE = torch.nn.L1Loss()
         mae2 = MAE(output, target)
         mase4 = MAE(result_baseline, target)
@@ -76,6 +70,7 @@ class MASELoss(torch.nn.Module):
         if mase4 < 0.001:
             mase4 = 0.001
         return mae2 / mase4
+
 
 
 class RMSELoss(torch.nn.Module):
