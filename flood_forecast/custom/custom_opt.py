@@ -50,24 +50,23 @@ class MASELoss(torch.nn.Module):
         This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
         """
         super(MASELoss, self).__init__()
-        self.method_dict = {"mean": lambda x, y: torch.mean(x, 1).unsqueeze(1).repeat(1, y[1], 1)}
+        self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
         self.baseline_method = self.method_dict[baseline_method]
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor, m=1) -> torch.Tensor:
+    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor) -> torch.Tensor:
         # Ugh why can't all tensors have batch size... Fixes for modern
-        print(train_data.shape)
-        print(target.shape)
-        if len(train_data.shape) < 3:
-            train_data = train_data.unsqueeze(0)
-        if m == 1 and len(target.shape) == 1:
-            output = output.unsqueeze(2)
-            output = output.unsqueeze(0)
-            target = target.unsqueeze(2)
+        if len(train_data.shape) == 1:
+            train_data = train_data.reshape(1, train_data.shape[0])
+        if len(target.shape) == 1:
             target = target.unsqueeze(0)
-        if len(target.shape) == 2:
+        if len(output.shape) == 1:
             output = output.unsqueeze(0)
-            target = target.unsqueeze(0)
-        result_baseline = self.baseline_method(train_data, output.shape)
+        if len(target.shape) > 2 and len(train_data.shape) > 2:
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
+        elif len(target.shape) > 2:
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1], target.shape[2])
+        else:
+            result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
         MAE = torch.nn.L1Loss()
         mae2 = MAE(output, target)
         mase4 = MAE(result_baseline, target)
