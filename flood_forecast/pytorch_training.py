@@ -175,7 +175,7 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
     return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
 
 
-def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None):
+def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, multi=1):
     # Warning this assumes src target is 1-D
     if probabilistic:
         if type(output_std) != torch.Tensor:
@@ -204,7 +204,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         g_loss = GaussianLoss(output[0], output[1])
         loss = g_loss(labels)
     elif isinstance(criterion, MASELoss):
-        loss = criterion(labels.float(), output, src)
+        loss = criterion(labels.float(), output, src, multi)
     else:
         loss = criterion(output, labels.float())
     return loss
@@ -234,7 +234,7 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["meta_data"] = representation
             if meta_loss:
                 output = meta_data_model.model(meta_data_model_representation)
-                met_loss = compute_loss(meta_data_model_representation, output, torch.rand(2, 3, 2), meta_loss, None)
+                met_loss = compute_loss(meta_data_model_representation, output, torch.rand(2, 3, 2), meta_loss, None, multi=multi_targets)
                 met_loss.backward()
         if takes_target:
             forward_params["t"] = trg
@@ -340,9 +340,9 @@ def compute_validation(validation_loader: DataLoader,
                         src = src.unsqueeze(0)
                     src1 = src[:, :, 0:multi_targets]
                     loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
-                                                      probabilistic, output_std)
+                                                      probabilistic, output_std, multi=multi_targets)
                     unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
-                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
+                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std, multi=multi_targets)
                 scaled_crit[crit] += loss.item() * len(labels.float())
     if use_wandb:
         if loss_unscaled_full:

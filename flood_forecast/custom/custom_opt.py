@@ -72,7 +72,6 @@ class MASELoss(torch.nn.Module):
         return mae2 / mase4
 
 
-
 class RMSELoss(torch.nn.Module):
     '''
     Returns RMSE using:
