@@ -343,7 +343,7 @@ def compute_validation(validation_loader: DataLoader,
                     loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
                                                       probabilistic, output_std, multi=multi_targets)
                     unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
-                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std)
+                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std, multi=multi_targets)
                 scaled_crit[crit] += loss.item() * len(labels.float())
     if use_wandb:
         if loss_unscaled_full:
