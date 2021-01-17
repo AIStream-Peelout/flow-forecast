@@ -160,6 +160,7 @@ def greedy_decode(
         unsqueeze_dim=1,
         output_len=1,
         device='cpu',
+        multi_targets=1,
         probabilistic=False):
     """
     Mechanism to sequentially decode the model
