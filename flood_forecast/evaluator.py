@@ -278,7 +278,7 @@ def infer_on_torch_model(
         if decoder_params is not None:
             if len(prediction_samples > 0):
                 predict = pd.DataFrame(csv_test_loader.inverse_scale(prediction_samples).numpy(),
-                                       index=df_train_and_test)
+                                       index=df_train_and_test.index)
             prediction_samples = predict
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
@@ -286,7 +286,7 @@ def infer_on_torch_model(
                 for i in range(0, multi_params):
                     print("Prediction samp")
                     print(prediction_samples.shape)
-                    df_prediction_samples.iloc[history_length:] = prediction_samples[0, :, 0, :]
+                    df_prediction_samples.iloc[history_length:] = prediction_samples[i, :, 0, :]
                     df_prediction_arr.append(df_prediction_samples)
             else:
                 df_prediction_samples.iloc[history_length:] = prediction_samples
