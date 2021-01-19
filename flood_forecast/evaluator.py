@@ -276,7 +276,7 @@ def infer_on_torch_model(
         print("Predict samples")
 
         if decoder_params is not None:
-            if len(prediction_samples > 0) and multi_params == 1:
+            if len(prediction_samples) > 0 and multi_params == 1:
                 predict = csv_test_loader.inverse_scale(prediction_samples).numpy()
                 prediction_samples = predict
             if "probabilistic" in decoder_params:
@@ -285,7 +285,8 @@ def infer_on_torch_model(
                 print(prediction_samples.shape)
                 for i in range(0, len(prediction_samples)):
                     tra = prediction_samples[:, :, 0, i]
-                    prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.permute(1, 0)).permute(1, 0)
+                    # Work around
+                    prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)
                 for i in range(0, multi_params):
                     print("Prediction samp")
                     print(prediction_samples.shape)
