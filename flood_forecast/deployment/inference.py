@@ -52,11 +52,12 @@ class InferenceMode(object):
         if csv_path is None:
             csv_path = self.csv_path
         df, tensor, history, forecast_start, test, samples = self.infer_now(date, csv_path, csv_bucket, save_name)
-        plt = plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
-        if wandb_plot_id:
-            wandb.log({wandb_plot_id: plt})
-            deep_explain_model_summary_plot(self.model, test, date)
-            deep_explain_model_heatmap(self.model, test, date)
+        for sample in samples:
+            plt = plot_df_test_with_confidence_interval(df, sample, forecast_start, self.model.params)
+            if wandb_plot_id:
+                wandb.log({wandb_plot_id: plt})
+                deep_explain_model_summary_plot(self.model, test, date)
+                deep_explain_model_heatmap(self.model, test, date)
         return tensor, history, test, plt
 
 
