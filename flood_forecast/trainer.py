@@ -60,7 +60,7 @@ def train_function(model_type: str, params: Dict):
         mae = (df_train_and_test.loc[forecast_start_idx:, "preds"] -
                df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
         inverse_mae = 1 / mae
-        pred_std = df_prediction_samples.std(axis=1)
+        pred_std = df_prediction_samples[0].std(axis=1)
         average_prediction_sharpe = (inverse_mae / pred_std).mean()
         wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
 
@@ -71,7 +71,7 @@ def train_function(model_type: str, params: Dict):
                 forecast_start_idx,
                 params,)
         else:
-            for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"][0]):
+            for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
                 test_plot = plot_df_test_with_confidence_interval(
                     df_train_and_test,
                     thing[0],
@@ -79,7 +79,7 @@ def train_function(model_type: str, params: Dict):
                     params,
                     ci=95,
                     alpha=0.25)
-            wandb.log({"test_plot": test_plot})
+            wandb.log({"test_plot_" + thing[1]: test_plot})
 
         test_plot_all = go.Figure()
         for relevant_col in params["dataset_params"]["relevant_cols"]:
