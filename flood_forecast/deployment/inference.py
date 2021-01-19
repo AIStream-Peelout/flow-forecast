@@ -52,6 +52,7 @@ class InferenceMode(object):
         if csv_path is None:
             csv_path = self.csv_path
         df, tensor, history, forecast_start, test, samples = self.infer_now(date, csv_path, csv_bucket, save_name)
+        plt = {}
         for sample in samples:
             plt = plot_df_test_with_confidence_interval(df, sample, forecast_start, self.model.params)
             if wandb_plot_id:
