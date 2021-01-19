@@ -59,6 +59,7 @@
           "decoder_params":{
             "decoder_function": "simple_decode", 
             "unsqueeze_dim": 1},
+         "num_prediction_samples":20,
           "dataset_params":{
              "file_path": "tests/test_data/keag_small.csv",
              "forecast_history":5,
