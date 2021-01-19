@@ -80,7 +80,7 @@ def train_function(model_type: str, params: Dict):
                     params,
                     ci=95,
                     alpha=0.25)
-            wandb.log({"test_plot_" + thing[1]: test_plot})
+                wandb.log({"test_plot_" + thing[1]: test_plot})
 
         test_plot_all = go.Figure()
         for relevant_col in params["dataset_params"]["relevant_cols"]:

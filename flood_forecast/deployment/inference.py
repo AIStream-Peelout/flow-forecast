@@ -41,11 +41,7 @@ class InferenceMode(object):
         if test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
-        if len(samples.columns) > 1:
-            index = samples.index
-            if hasattr(test, "targ_scaler"):
-                samples = test.inverse_scale(samples)
-                samples = pd.DataFrame(samples.numpy(), index=index)
+        if len(samples) > 1:
             samples[:forecast_history] = 0
         if save_buck:
             df.to_csv("temp3.csv")
