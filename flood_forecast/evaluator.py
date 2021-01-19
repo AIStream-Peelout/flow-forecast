@@ -286,7 +286,7 @@ def infer_on_torch_model(
                 for i in range(0, multi_params):
                     print("Prediction samp")
                     print(prediction_samples.shape)
-                    df_prediction_samples.iloc[history_length:] = prediction_samples[i]
+                    df_prediction_samples.iloc[history_length:] = prediction_samples[0, :, 0, :]
                     df_preds_arr.append(df_prediction_samples)
             else:
                 df_prediction_samples.iloc[history_length:] = prediction_samples
