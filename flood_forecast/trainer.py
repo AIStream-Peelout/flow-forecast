@@ -64,7 +64,7 @@ def train_function(model_type: str, params: Dict):
         average_prediction_sharpe = (inverse_mae / pred_std).mean()
         wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
 
-        # Log plots
+        # Log plots now
         if "probabilistic" in params["inference_params"]:
             test_plot = plot_df_test_with_probabilistic_confidence_interval(
                 df_train_and_test,

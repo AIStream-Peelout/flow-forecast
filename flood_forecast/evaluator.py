@@ -114,11 +114,7 @@ def evaluate_model(
             else:
                 df_train_and_test["preds"][history_length:] = end_tensor_list
             print('end_tensor', end_tensor)
-            if len(df_predictions.columns > 0):
-                df_predictions = pd.DataFrame(
-                    test_data.inverse_scale(df_predictions).numpy(),
-                    index=df_predictions.index,
-                )
+
         print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
@@ -278,7 +274,12 @@ def infer_on_torch_model(
             dtype="float",
         )
         print("Predict samples")
+
         if decoder_params is not None:
+            if len(prediction_samples > 0):
+                predict = pd.DataFrame(csv_test_loader.inverse_scale(prediction_samples).numpy(),
+                                       index=df_train_and_test)
+            prediction_samples = predict
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
             elif multi_params != 1:
@@ -289,7 +290,7 @@ def infer_on_torch_model(
                     df_prediction_arr.append(df_prediction_samples)
             else:
                 df_prediction_samples.iloc[history_length:] = prediction_samples
-                df_prediction_arr.append(df_prediction_samples)
+
                 # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
             df_prediction_samples.iloc[history_length:] = prediction_samples
