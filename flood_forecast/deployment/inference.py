@@ -6,7 +6,6 @@ from flood_forecast.time_model import scaling_function
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
-import pandas as pd
 import wandb
 # mport json
 

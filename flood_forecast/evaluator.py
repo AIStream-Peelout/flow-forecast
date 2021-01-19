@@ -284,8 +284,8 @@ def infer_on_torch_model(
             elif multi_params != 1:
                 print(prediction_samples.shape)
                 for i in range(0, len(prediction_samples)):
-                    tra = df_prediction_samples[:, :, 0, i]
-                    df_prediction_samples[:, :, 0, i] = test_csv_path.inverse_transform(tra)
+                    tra = prediction_samples[:, :, 0, i]
+                    prediction_samples[:, :, 0, i] = test_csv_path.inverse_transform(tra)
                 for i in range(0, multi_params):
                     print("Prediction samp")
                     print(prediction_samples.shape)
