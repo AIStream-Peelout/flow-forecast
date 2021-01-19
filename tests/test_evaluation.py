@@ -134,6 +134,7 @@ class EvaluationTest(unittest.TestCase):
         )
         df_train_and_test = model_result[1]
         df_prediction_samples = model_result[3]
+        print(len(df_prediction_samples))
         self.assertTrue(df_train_and_test.index.equals(df_prediction_samples[0].index))
         self.assertEqual(100, df_prediction_samples[0].shape[1])
 
@@ -189,7 +190,7 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
-        self.assertFalse(model_result_1[0][3].equals(model_result_2[0][3]))
+        self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))
 
     def test_linear_decoder(self):
         decoder_params = {"decoder_function": "simple_decode", "unsqueeze_dim": 1}
