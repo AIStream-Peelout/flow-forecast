@@ -71,14 +71,15 @@ def train_function(model_type: str, params: Dict):
                 forecast_start_idx,
                 params,)
         else:
-            test_plot = plot_df_test_with_confidence_interval(
-                df_train_and_test,
-                df_prediction_samples,
-                forecast_start_idx,
-                params,
-                ci=95,
-                alpha=0.25)
-        wandb.log({"test_plot": test_plot})
+            for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"][0]):
+                test_plot = plot_df_test_with_confidence_interval(
+                    df_train_and_test,
+                    thing[0],
+                    forecast_start_idx,
+                    params,
+                    ci=95,
+                    alpha=0.25)
+            wandb.log({"test_plot": test_plot})
 
         test_plot_all = go.Figure()
         for relevant_col in params["dataset_params"]["relevant_cols"]:

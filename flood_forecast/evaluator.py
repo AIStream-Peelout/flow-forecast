@@ -253,7 +253,7 @@ def infer_on_torch_model(
                 print(e)
     else:
         df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
-
+    df_prediction_arr = []
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
     # df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
     if num_prediction_samples is not None:
@@ -282,14 +282,14 @@ def infer_on_torch_model(
             if "probabilistic" in decoder_params:
                 df_prediction_samples.iloc[history_length:] = prediction_samples[0]
             elif multi_params != 1:
-                df_preds_arr = []
                 for i in range(0, multi_params):
                     print("Prediction samp")
                     print(prediction_samples.shape)
                     df_prediction_samples.iloc[history_length:] = prediction_samples[0, :, 0, :]
-                    df_preds_arr.append(df_prediction_samples)
+                    df_prediction_arr.append(df_prediction_samples)
             else:
                 df_prediction_samples.iloc[history_length:] = prediction_samples
+                df_prediction_arr.append(df_prediction_samples)
                 # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
         else:
             df_prediction_samples.iloc[history_length:] = prediction_samples
@@ -300,7 +300,7 @@ def infer_on_torch_model(
         history_length,
         forecast_start_idx,
         csv_test_loader,
-        df_prediction_samples,
+        df_prediction_arr,
         # df_prediction_samples_std_dev
     )
 
