@@ -21,6 +21,14 @@ Welcome to Flow Forecast's documentation!
    time_model
    trainer
 
+.. automodule:: flood_forecast.deployment
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Inference:
+   
+   inference
+
 .. automodule:: flood_forecast.preprocessing
 
 .. toctree::
@@ -56,6 +64,7 @@ Welcome to Flow Forecast's documentation!
   multi_head_base
   transformer_basic
   transformer_xl
+  transformer_bottleneck
 
 .. automodule:: flood_forecast.gcp_integration
 
