@@ -1,5 +1,6 @@
 import torch
 from torch.nn.modules.activation import MultiheadAttention
+from flood_forecast.transformer_xl.lower_upper_config import activation_dict
 from flood_forecast.transformer_xl.transformer_basic import SimplePositionalEncoding
 
 
@@ -15,7 +16,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
             num_heads=8,
             forecast_length=None,
             dropout=0.1,
-            sigmoid=False):
+            final_layer=False):
         super().__init__()
         self.dense_shape = torch.nn.Linear(number_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
@@ -27,14 +28,14 @@ class MultiAttnHeadSimple(torch.nn.Module):
         self.sigmoid = None
         if self.forecast_length:
             self.last_layer = torch.nn.Linear(seq_len, output_seq_len)
-        if sigmoid:
-            self.sigmoid = torch.nn.Sigmoid()
+        if final_layer:
+            self.sigmoid = activation_dict[final_layer]()
 
     def forward(self, x: torch.Tensor, mask=None) -> torch.Tensor:
         """
-        :param x torch.Tensor: of shape (B, L, M)
+        :param: x torch.Tensor: of shape (B, L, M)
         Where B is the batch size, L is the sequence length and M is the number of time
-        :returns a tensor of dimension (B, forecast_length)
+        :return: a tensor of dimension (B, forecast_length)
         """
         x = self.dense_shape(x)
         x = self.pe(x)

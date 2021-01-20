@@ -13,7 +13,20 @@ def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame
     return df
 
 
-def create_feature(key, value, df, dt_column):
+def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
+    """Function to create temporal features
+
+    :param key: The datetime feature you would like to create
+    :type key: str
+    :param value: The type of feature you would like to create (cyclical or numerical)
+    :type value: str
+    :param df: The Pandas dataframe with the datetime
+    :type df: pd.DataFrame
+    :param dt_column: The name of the datetime column
+    :type dt_column: str
+    :return: [description]
+    :rtype: [type]
+    """
     if key == "day_of_week":
         df[key] = df[dt_column].map(lambda x: x.weekday())
     elif key == "hour":
@@ -41,7 +54,17 @@ def feature_fix(preprocess_params, dt_column, df):
     return df, column_names
 
 
-def cyclical(df, feature_column: str) -> pd.DataFrame:
+def cyclical(df: pd.DataFrame, feature_column: str) -> pd.DataFrame:
+    """ A function to create cyclical encodings for Pandas data-frames.
+    :param df: A Pandas Dataframe where you want the dt encoded
+    :type df: pd.DataFrame
+    :param feature_column: The name of the feature column. Should be
+    either (day_of_week, hour, month, year)
+    :type feature_column: str
+    :return: The dataframew with three new columns: norm_feature, cos_feature
+    sin_feature
+    :rtype: pd.DataFrame
+    """
     df["norm"] = 2 * np.pi * df[feature_column] / df[feature_column].max()
     df['cos_' + feature_column] = np.cos(df['norm'])
     df['sin_' + feature_column] = np.sin(df['norm'])

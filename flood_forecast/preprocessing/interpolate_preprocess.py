@@ -43,7 +43,9 @@ def back_forward_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFra
 
 
 def convert_time_var(df, method_list: List[str]):
-    """ Func to convert to datetimes to feats"""
+    """ Function to convert to datetimes to feats
+    
+    """
     method_dict = {
         "weekeday_raw": lambda x: x.dayofweek()
 
