@@ -60,10 +60,12 @@ def train_function(model_type: str, params: Dict):
         mae = (df_train_and_test.loc[forecast_start_idx:, "preds"] -
                df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
         inverse_mae = 1 / mae
-        if len(df_prediction_samples) > 0:
-            pred_std = df_prediction_samples[0].std(axis=1)
+        i = 0
+        for df in df_prediction_samples:
+            pred_std = df.std(axis=1)
             average_prediction_sharpe = (inverse_mae / pred_std).mean()
-            wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
+            wandb.log({'average_prediction_sharpe' + str(i): average_prediction_sharpe})
+            i += 1
         df_train_and_test.to_csv("temp_preds.csv")
         # Log plots now
         if "probabilistic" in params["inference_params"]:
