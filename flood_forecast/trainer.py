@@ -64,7 +64,7 @@ def train_function(model_type: str, params: Dict):
             pred_std = df_prediction_samples[0].std(axis=1)
             average_prediction_sharpe = (inverse_mae / pred_std).mean()
             wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
-
+        df_train_and_test.to_csv("temp_preds.csv")
         # Log plots now
         if "probabilistic" in params["inference_params"]:
             test_plot = plot_df_test_with_probabilistic_confidence_interval(
@@ -73,6 +73,7 @@ def train_function(model_type: str, params: Dict):
                 params,)
         else:
             for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
+                thing[0].to_csv(params["dataset_params"]["target_col"] + ".csv")
                 test_plot = plot_df_test_with_confidence_interval(
                     df_train_and_test,
                     thing[0],
