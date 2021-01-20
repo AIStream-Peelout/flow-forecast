@@ -303,6 +303,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
                     if np.equal(tra, prediction_samples[:, :, 0, i - 1]).all():
                         print("WARNING model values are the same. Try varying dropout or other mechanism")
             for i in range(0, multi_params):
+                print(prediction_samples)
                 if i > 0:
                     assert np.equal(prediction_samples[i, :, 0, :], prediction_samples[i - 1, :, 0, :]).all() is False
                 df_pred.iloc[history_length:] = prediction_samples[i, :, 0, :]
