@@ -55,9 +55,6 @@ class MASELoss(torch.nn.Module):
 
     def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor, m=1) -> torch.Tensor:
         # Ugh why can't all tensors have batch size... Fixes for modern
-        print("MASE stuff below")
-        print(train_data.shape)
-        print(target.shape)
         if len(train_data.shape) < 3:
             train_data = train_data.unsqueeze(0)
         if m == 1 and len(target.shape) == 1:
