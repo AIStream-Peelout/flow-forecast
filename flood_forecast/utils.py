@@ -7,6 +7,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def numpy_to_tvar(x):
+    """ Converts a numpy array into a PyTorch Tensor
+
+    :param x: [description]
+    :type x: [type]
+    :return: [description]
+    :rtype: [type]
+    """
     return Variable(torch.from_numpy(x).type(torch.FloatTensor).to(device))
 
 
