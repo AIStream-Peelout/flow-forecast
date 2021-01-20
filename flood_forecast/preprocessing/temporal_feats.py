@@ -41,6 +41,17 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
 
 
 def feature_fix(preprocess_params, dt_column, df):
+    """[summary]
+
+    :param preprocess_params: [description]
+    :type preprocess_params: [type]
+    :param dt_column: [description]
+    :type dt_column: [type]
+    :param df: [description]
+    :type df: [type]
+    :return: [description]
+    :rtype: [type]
+    """
     print("running feature fix code s")
     column_names = []
     if "datetime_params" in preprocess_params:
@@ -56,6 +67,7 @@ def feature_fix(preprocess_params, dt_column, df):
 
 def cyclical(df: pd.DataFrame, feature_column: str) -> pd.DataFrame:
     """ A function to create cyclical encodings for Pandas data-frames.
+
     :param df: A Pandas Dataframe where you want the dt encoded
     :type df: pd.DataFrame
     :param feature_column: The name of the feature column. Should be

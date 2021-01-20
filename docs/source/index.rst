@@ -24,9 +24,9 @@ Welcome to Flow Forecast's documentation!
 .. automodule:: flood_forecast.deployment
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Inference:
-   
+  :maxdepth: 2
+  :caption: Deployment
+
    inference
 
 .. automodule:: flood_forecast.preprocessing
