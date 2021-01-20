@@ -73,7 +73,7 @@ def train_function(model_type: str, params: Dict):
                 params,)
         else:
             for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
-                thing[0].to_csv(params["dataset_params"]["target_col"] + ".csv")
+                thing[0].to_csv(thing[1] + ".csv")
                 test_plot = plot_df_test_with_confidence_interval(
                     df_train_and_test,
                     thing[0],
