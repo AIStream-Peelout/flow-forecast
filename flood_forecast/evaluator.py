@@ -251,7 +251,7 @@ def infer_on_torch_model(
     # df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
     if num_prediction_samples is not None:
         model.model.train()  # sets mode to train so the dropout layers will be touched
-        assert num_prediction_samples > 1
+        assert num_prediction_samples > 0
         prediction_samples = generate_prediction_samples(
             model,
             df_train_and_test,
@@ -295,7 +295,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
             prediction_samples = predict
             df_pred.iloc[history_length:] = prediction_samples
             df_prediction_arr.append(df_pred)
-        elif multi_params != 1:
+        else:
             print(prediction_samples.shape)
             for i in range(0, len(prediction_samples)):
                 tra = prediction_samples[:, :, 0, i]
@@ -303,15 +303,15 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
                     assert tra != prediction_samples[:, :, 0, i - 1]
                 prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)
             for i in range(0, multi_params):
-                print("Prediction samp")
+                print("Prediction samples below")
                 print(prediction_samples.shape)
                 df_pred.iloc[history_length:] = prediction_samples[i, :, 0, :]
                 df_prediction_arr.append(df_pred)
     else:
         df_pred.iloc[history_length:] = prediction_samples
-        df_pred.append(df_pred)
+        df_prediction_arr.append(df_pred)
     if len(df_prediction_arr) < 1:
-        raise ValueError("Error length of prediction array must be one")
+        raise ValueError("Error length of prediction array must be one or greater")
     return df_prediction_arr
 
 
