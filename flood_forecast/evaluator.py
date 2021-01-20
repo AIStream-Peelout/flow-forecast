@@ -32,7 +32,6 @@ def stream_baseline(
     mse_baseline = sklearn.metrics.mean_squared_error(
         test_river_data[forecast_column], test_river_data["predicted_baseline"]
     )
-    print(mse_baseline)
     return test_river_data, round(mse_baseline, ndigits=3)
 
 
@@ -299,13 +298,13 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
             print(prediction_samples.shape)
             for i in range(0, len(prediction_samples)):
                 tra = prediction_samples[:, :, 0, i]
-                print(tra)
-                if i > 0:
-                    assert tra.all() != prediction_samples[:, :, 0, i - 1].all()
                 prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)
+                if i > 0:
+                    if np.equal(tra, prediction_samples[:, :, 0, i - 1]).all():
+                        print("WARNING model values are the same. Try varying dropout or other mechanism")
             for i in range(0, multi_params):
-                print("Prediction samples below")
-                print(prediction_samples.shape)
+                if i > 0:
+                    assert np.equal(prediction_samples[i, :, 0, :], prediction_samples[i - 1, :, 0, :]).all() is False
                 df_pred.iloc[history_length:] = prediction_samples[i, :, 0, :]
                 df_prediction_arr.append(df_pred)
     else:
@@ -489,6 +488,4 @@ def generate_prediction_samples(
     if probabilistic:
         return np.array(pred_samples).T, np.array(std_dev_samples).T
     else:
-        print(np.array(pred_samples).T.shape)
-        print(np.array(pred_samples).T)
         return np.array(pred_samples).T  # each column is 1 array of predictions
