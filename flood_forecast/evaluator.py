@@ -270,8 +270,8 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
-    df_prediction_arr = handle_ci_multi(prediction_samples, csv_test_loader, multi_params,
-                                        df_prediction_samples, decoder_params, history_length)
+        df_prediction_arr = handle_ci_multi(prediction_samples, csv_test_loader, multi_params,
+                                            df_prediction_samples, decoder_params, history_length)
     return (
         df_train_and_test,
         end_tensor,
