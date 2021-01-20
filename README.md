@@ -49,11 +49,13 @@ Task two focuses on predicting the severity of the flood based on the flood fore
 
 If you use either the data or code from this repository please cite as
 ```
-@inproceedings{GodfriedFlow2019,
-Author = {Isaac Godfried},
-Title = {Flow: A large scale dataset for stream flow and flood damage forecasting},
-Booktitle  = {Arxiv Preprint},
-Year = {2019}
+@misc{godfried2020flowdb,
+      title={FlowDB a large scale precipitation, river, and flash flood dataset}, 
+      author={Isaac Godfried and Kriti Mahajan and Maggie Wang and Kevin Li and Pranjalya Tiwari},
+      year={2020},
+      eprint={2012.11154},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
 }
 ```
  

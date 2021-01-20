@@ -90,7 +90,6 @@ def evaluate_model(
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
-        print("test_data scale")
         if test_data.scale:
             print("Un-transforming data")
             if "probabilistic" in inference_params:
@@ -182,17 +181,18 @@ def infer_on_torch_model(
     num_prediction_samples: int = None,
     probabilistic: bool = False,
     criterion_params: Dict = None
-) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, pd.DataFrame):
+) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]):
     """
-    Function to handle both test evaluation and inference on a test dataframe.
-    :returns
+    Function to handle both test evaluation and inference on a test data-frame.
+    :return:
         df: df including training and test data
         end_tensor: the final tensor after the model has finished predictions
         history_length: num rows to use in training
         forecast_start_idx: row index to start forecasting
         test_data: CSVTestLoader instance
         df_prediction_samples: has same index as df, and num cols equal to num_prediction_samples
-            or no columns if num_prediction_samples is None
+        or no columns if num_prediction_samples is None
+    :rtype: tuple()
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if isinstance(datetime_start, str):
@@ -200,12 +200,11 @@ def infer_on_torch_model(
     multi_params = 1
     if "n_targets" in model.params:
         multi_params = model.params["n_targets"]
-    print("Multi_params")
-    print(multi_params)
+    print("This model is currently forecasting for : " + str(multi_params) + " targets")
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
-    # If the tes t dataframe is none use default one supplied in params
+    # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
     else:
@@ -234,8 +233,6 @@ def infer_on_torch_model(
         decoder_params,
         multi_params=multi_params
     )
-    # if csv_test_loader.targ_col > 1:
-    #    # for cole
     df_train_and_test["preds"] = 0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
@@ -273,33 +270,8 @@ def infer_on_torch_model(
             columns=list(range(num_prediction_samples)),
             dtype="float",
         )
-        print("Predict samples")
-
-        if decoder_params is not None:
-            if "probabilistic" in decoder_params:
-                prediction_samples = prediction_samples[0]
-            if num_prediction_samples > 0 and multi_params == 1:
-                print(type(prediction_samples))
-                predict = csv_test_loader.inverse_scale(prediction_samples).numpy()
-                prediction_samples = predict
-            elif multi_params != 1:
-                print(prediction_samples.shape)
-                for i in range(0, len(prediction_samples)):
-                    tra = prediction_samples[:, :, 0, i]
-                    # Work around
-                    prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)
-                for i in range(0, multi_params):
-                    print("Prediction samp")
-                    print(prediction_samples.shape)
-                    df_prediction_samples.iloc[history_length:] = prediction_samples[i, :, 0, :]
-                    df_prediction_arr.append(df_prediction_samples)
-            else:
-                df_prediction_samples.iloc[history_length:] = prediction_samples
-                df_prediction_arr.append(df_prediction_samples)
-                # df_prediction_samples_std_dev.iloc[history_length:] = prediction_samples[1]
-        else:
-            df_prediction_samples.iloc[history_length:] = prediction_samples
-        print(df_prediction_samples)
+    df_prediction_arr = handle_ci_multi(prediction_samples, csv_test_loader, multi_params,
+                                        df_prediction_samples, decoder_params, history_length)
     return (
         df_train_and_test,
         end_tensor,
@@ -309,6 +281,38 @@ def infer_on_torch_model(
         df_prediction_arr,
         # df_prediction_samples_std_dev
     )
+
+
+def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
+                    df_pred, decoder_param: bool, history_length: int) -> List[pd.DataFrame]:
+    df_prediction_arr = []
+    if decoder_param is not None:
+        if "probabilistic" in decoder_param:
+            prediction_samples = prediction_samples[0]
+        if multi_params == 1:
+            print(type(prediction_samples))
+            predict = csv_test_loader.inverse_scale(prediction_samples).numpy()
+            prediction_samples = predict
+            df_pred.iloc[history_length:] = prediction_samples
+            df_prediction_arr.append(df_pred)
+        elif multi_params != 1:
+            print(prediction_samples.shape)
+            for i in range(0, len(prediction_samples)):
+                tra = prediction_samples[:, :, 0, i]
+                if i > 0:
+                    assert tra != prediction_samples[:, :, 0, i - 1]
+                prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)
+            for i in range(0, multi_params):
+                print("Prediction samp")
+                print(prediction_samples.shape)
+                df_pred.iloc[history_length:] = prediction_samples[i, :, 0, :]
+                df_prediction_arr.append(df_pred)
+    else:
+        df_pred.iloc[history_length:] = prediction_samples
+        df_pred.append(df_pred)
+    if len(df_prediction_arr) < 1:
+        raise ValueError("Error length of prediction array must be one")
+    return df_prediction_arr
 
 
 def generate_predictions(
