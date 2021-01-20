@@ -299,6 +299,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
             print(prediction_samples.shape)
             for i in range(0, len(prediction_samples)):
                 tra = prediction_samples[:, :, 0, i]
+                print(tra)
                 if i > 0:
                     assert tra.all() != prediction_samples[:, :, 0, i - 1].all()
                 prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)
