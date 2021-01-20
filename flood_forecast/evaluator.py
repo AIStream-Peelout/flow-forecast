@@ -111,7 +111,6 @@ def evaluate_model(
                     df_train_and_test["pred_" + str(i)] = end_tensor[:, i].numpy().tolist
             else:
                 df_train_and_test["preds"][history_length:] = end_tensor_list
-            print('end_tensor', end_tensor)
 
         print("Current historical dataframe ")
         print(df_train_and_test)
@@ -303,9 +302,9 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
                     if np.equal(tra, prediction_samples[:, :, 0, i - 1]).all():
                         print("WARNING model values are the same. Try varying dropout or other mechanism")
             for i in range(0, multi_params):
-                print(prediction_samples)
                 if i > 0:
-                    assert np.equal(prediction_samples[i, :, 0, :], prediction_samples[i - 1, :, 0, :]).all() is False
+                    if np.equal(prediction_samples[i, :, 0, :], prediction_samples[i - 1, :, 0, :]).all():
+                        raise ValueError("Something is wrong data for the targets is equal")
                 df_pred.iloc[history_length:] = prediction_samples[i, :, 0, :]
                 df_prediction_arr.append(df_pred)
     else:
