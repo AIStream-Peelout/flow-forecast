@@ -204,6 +204,8 @@ class EvaluationTest(unittest.TestCase):
         }
         infer_on_torch_model(self.linear_model, **inference_params)
 
+    def test_outputs_different(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()
