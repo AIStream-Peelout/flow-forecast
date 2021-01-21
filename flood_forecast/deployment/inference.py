@@ -6,7 +6,6 @@ from flood_forecast.time_model import scaling_function
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
-import pandas as pd
 import wandb
 import torch
 # mport json
@@ -14,8 +13,8 @@ import torch
 
 class InferenceMode(object):
     def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
-                 wandb_proj: str = None):
-        """Class to handle inference for PyTorchForecast models
+                 wandb_proj: str = None, torch_script=False):
+        """Class to handle inference for models
 
         :param hours_to_forecast: [description]
         :type hours_to_forecast: int
@@ -68,11 +67,7 @@ class InferenceMode(object):
         if test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
-        if len(samples.columns) > 1:
-            index = samples.index
-            if hasattr(test, "targ_scaler"):
-                samples = test.inverse_scale(samples)
-                samples = pd.DataFrame(samples.numpy(), index=index)
+        if len(samples) > 1:
             samples[:forecast_history] = 0
         if save_buck:
             df.to_csv("temp3.csv")
@@ -99,11 +94,13 @@ class InferenceMode(object):
         if csv_path is None:
             csv_path = self.csv_path
         df, tensor, history, forecast_start, test, samples = self.infer_now(date, csv_path, csv_bucket, save_name)
-        plt = plot_df_test_with_confidence_interval(df, samples, forecast_start, self.model.params)
-        if wandb_plot_id:
-            wandb.log({wandb_plot_id: plt})
-            deep_explain_model_summary_plot(self.model, test, date)
-            deep_explain_model_heatmap(self.model, test, date)
+        plt = {}
+        for sample in samples:
+            plt = plot_df_test_with_confidence_interval(df, sample, forecast_start, self.model.params)
+            if wandb_plot_id:
+                wandb.log({wandb_plot_id: plt})
+                deep_explain_model_summary_plot(self.model, test, date)
+                deep_explain_model_heatmap(self.model, test, date)
         return tensor, history, test, plt
 
     def export_torchscript(self):
@@ -111,8 +108,7 @@ class InferenceMode(object):
 
 
 def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
-    """ Function that loads a PyTorchForecast model 
-    
+    """ Function that loads a PyTorchForecast model
     :param model_params_dict: [description]
     :type model_params_dict: [type]
     :param file_path: [description]
