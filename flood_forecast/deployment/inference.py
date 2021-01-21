@@ -7,7 +7,7 @@ from flood_forecast.time_model import scaling_function
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
 import wandb
-# mport json
+import torch
 
 
 class InferenceMode(object):
@@ -100,6 +100,18 @@ class InferenceMode(object):
                 deep_explain_model_summary_plot(self.model, test, date)
                 deep_explain_model_heatmap(self.model, test, date)
         return tensor, history, test, plt
+
+
+def convert_to_torch_script(model: PyTorchForecast) -> PyTorchForecast:
+    forecast_history = model.params["dataset_params"]["forecast_history"]
+    n_features = len(model.params["dataset_params"]["relevant_cols"])
+    test_input = torch.rand(2, forecast_history, n_features)
+    s = torch.jit.script(model.model, test_input)
+    test_input1 = torch.rand(4, forecast_history, n_features)
+    a = s(test_input1)
+    b = model.model(test_input1)
+    assert torch.eq(a, b)
+    return model
 
 
 def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:

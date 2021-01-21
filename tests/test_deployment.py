@@ -1,6 +1,6 @@
 import os
 import json
-from flood_forecast.deployment.inference import load_model, InferenceMode
+from flood_forecast.deployment.inference import load_model, convert_to_torch_script, InferenceMode
 import unittest
 from datetime import datetime
 
@@ -19,6 +19,7 @@ class InferenceTests(unittest.TestCase):
     def test_load_model(self):
         model = load_model(self.config_test, self.new_csv_path, self.weight_path)
         self.assertIsInstance(model, object)
+        convert_to_torch_script(model)
 
     def test_infer_mode(self):
         # Test inference
