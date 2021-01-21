@@ -8,13 +8,14 @@ from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
 import pandas as pd
 import wandb
+import torch
 # mport json
 
 
 class InferenceMode(object):
     def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
                  wandb_proj: str = None):
-        """Class to handle inference for models
+        """Class to handle inference for PyTorchForecast models
 
         :param hours_to_forecast: [description]
         :type hours_to_forecast: int
@@ -32,6 +33,7 @@ class InferenceMode(object):
         self.hours_to_forecast = hours_to_forecast
         self.csv_path = csv_path
         self.model = load_model(model_params.copy(), csv_path, weight_path)
+        self.scripted_model = None
         self.inference_params = model_params["inference_params"]
         if "scaling" in self.inference_params["dataset_params"]:
             s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
@@ -81,7 +83,7 @@ class InferenceMode(object):
                    save_name=None, wandb_plot_id=None):
         """[summary]
 
-        :param date: [description]
+        :param date: The datetime that you want forecasts to start on.
         :type date: datetime
         :param csv_path: [description], defaults to None
         :type csv_path: str, optional
@@ -104,10 +106,13 @@ class InferenceMode(object):
             deep_explain_model_heatmap(self.model, test, date)
         return tensor, history, test, plt
 
+    def export_torchscript(self):
+        self.model_scripted = torch.jit.script(self.model.model)
+
 
 def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
-    """[summary]
-
+    """ Function that loads a PyTorchForecast model 
+    
     :param model_params_dict: [description]
     :type model_params_dict: [type]
     :param file_path: [description]
