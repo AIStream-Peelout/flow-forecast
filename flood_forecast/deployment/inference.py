@@ -108,7 +108,7 @@ class InferenceMode(object):
 
 
 def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
-    """ Function that loads a PyTorchForecast model
+    """ Function that loads a PyTorchForecast model for inference purposes.
     :param model_params_dict: [description]
     :type model_params_dict: [type]
     :param file_path: [description]
