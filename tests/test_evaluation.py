@@ -134,8 +134,9 @@ class EvaluationTest(unittest.TestCase):
         )
         df_train_and_test = model_result[1]
         df_prediction_samples = model_result[3]
-        self.assertTrue(df_train_and_test.index.equals(df_prediction_samples.index))
-        self.assertEqual(100, df_prediction_samples.shape[1])
+        print(len(df_prediction_samples))
+        self.assertTrue(df_train_and_test.index.equals(df_prediction_samples[0].index))
+        self.assertEqual(100, df_prediction_samples[0].shape[1])
 
     def test_evaluator_with_scaling_not_equal_without_scaling(self):
         inference_params = {
@@ -189,7 +190,7 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
-        self.assertFalse(model_result_1[3].equals(model_result_2[3]))
+        self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))
 
     def test_linear_decoder(self):
         decoder_params = {"decoder_function": "simple_decode", "unsqueeze_dim": 1}
@@ -203,6 +204,8 @@ class EvaluationTest(unittest.TestCase):
         }
         infer_on_torch_model(self.linear_model, **inference_params)
 
+    def test_outputs_different(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()
