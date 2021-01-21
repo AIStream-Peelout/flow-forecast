@@ -326,6 +326,7 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
+            print("multi targets below")
             if multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:

@@ -61,6 +61,7 @@ def simple_decode(model: Type[torch.nn.Module],
     :multi_task int: Multitask return will always be (batch_size, output_len, multi_targets)
     :returns a torch.Tensor of dimension (B, max_seq_len, M)
     """
+    print(multi_targets)
     real_target = real_target.float()
     real_target2 = real_target.clone()
     # Use last value
