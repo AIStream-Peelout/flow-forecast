@@ -242,7 +242,7 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            echo -e 'emutitask decoder r'
+            echo -e 'training multi-task-decoder'
             coverage run flood_forecast/trainer.py -p tests/multitask_decoder.json
             echo -e 'running da-meta data unit test'
             coverage run flood_forecast/trainer.py -p tests/da_meta.json
