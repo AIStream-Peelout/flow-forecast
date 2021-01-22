@@ -3,8 +3,7 @@ An implementation of entmax (Peters et al., 2019). See
 https://arxiv.org/pdf/1905.05702 for detailed description.
 This builds on previous work with sparsemax (Martins & Astudillo, 2016).
 See https://arxiv.org/pdf/1602.02068.
-""" 
-
+"""
 # Author: Ben Peters
 # Author: Vlad Niculae <vlad@vene.ro>
 # License: MIT

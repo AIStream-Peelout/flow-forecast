@@ -102,27 +102,37 @@ class InferenceMode(object):
         return tensor, history, test, plt
 
 
-def convert_to_torch_script(model):
+def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchForecast:
+    """Function to convert PyTorch model to torch script and save
+
+    :param model: The PyTorchForecast model you wish to convert
+    :type model: PyTorchForecast
+    :param save_path: File name to save the TorchScript model under.
+    :type save_path: str
+    :return: Returns the model with an added .script_model attribute
+    :rtype: PyTorchForecast
+    """
     model.model.eval()
     forecast_history = model.params["dataset_params"]["forecast_history"]
     n_features = model.params["model_params"]["n_time_series"]
-    print(n_features)
     test_input = torch.rand(2, forecast_history, n_features)
-    s = torch.jit.trace(model.model, test_input)
+    model_script = torch.jit.trace(model.model, test_input)
     test_input1 = torch.rand(4, forecast_history, n_features)
-    a = s(test_input1)
+    a = model_script(test_input1)
     b = model.model(test_input1)
+    model.script_model = model_script
     assert torch.eq(a, b).all()
+    model_script.save(save_path)
     return model
 
 
 def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
     """Function to load a PyTorchForecast model from an existing config file.
 
-    :param model_params_dict: [description]
-    :type model_params_dict: [type]
+    :param model_params_dict: Dictionary of model parameters
+    :type model_params_dict: Dict
     :param file_path: [description]
-    :type file_path: [type]
+    :type file_path: str
     :param weight_path: [description]
     :type weight_path: str
     :return: [description]
