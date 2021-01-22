@@ -42,18 +42,18 @@ class InferenceMode(object):
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
             wandb.config.update(model_params)
 
-    def infer_now(self, some_date, csv_path=None, save_buck=None, save_name=None):
-        """[summary]
+    def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
+        """Performs inference at a specified datatime
 
-        :param some_date: [description]
-        :type some_date: [type]
+        :param some_date: The date you want inference to begin on.
         :param csv_path: [description], defaults to None
         :type csv_path: [type], optional
         :param save_buck: [description], defaults to None
         :type save_buck: [type], optional
-        :param save_name: [description], defaults to None
+        :param save_name: The name of the file to save the Pandas data-frame to GCP as, defaults to None
         :type save_name: [type], optional
-        :return: [description]
+        :return: Returns a tuple consisting of the Pandas dataframe with predictions + history,
+        the prediction tensor, a tensor of the historical values, the forecast start index, and the test
         :rtype: [type]
         """
         forecast_history = self.inference_params["dataset_params"]["forecast_history"]
@@ -74,7 +74,7 @@ class InferenceMode(object):
 
     def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
                    save_name=None, wandb_plot_id=None):
-        """[summary]
+        """
 
         :param date: [description]
         :type date: datetime
@@ -102,20 +102,22 @@ class InferenceMode(object):
         return tensor, history, test, plt
 
 
-def convert_to_torch_script(model: PyTorchForecast) -> PyTorchForecast:
+def convert_to_torch_script(model):
+    model.model.eval()
     forecast_history = model.params["dataset_params"]["forecast_history"]
-    n_features = len(model.params["dataset_params"]["relevant_cols"])
+    n_features = model.params["model_params"]["n_time_series"]
+    print(n_features)
     test_input = torch.rand(2, forecast_history, n_features)
-    s = torch.jit.script(model.model, test_input)
+    s = torch.jit.trace(model.model, test_input)
     test_input1 = torch.rand(4, forecast_history, n_features)
     a = s(test_input1)
     b = model.model(test_input1)
-    assert torch.eq(a, b)
+    assert torch.eq(a, b).all()
     return model
 
 
 def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
-    """[summary]
+    """Function to load a PyTorchForecast model from an existing config file.
 
     :param model_params_dict: [description]
     :type model_params_dict: [type]
