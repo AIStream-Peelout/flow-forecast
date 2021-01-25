@@ -7,7 +7,8 @@ Welcome to Flow Forecast's documentation!
 =========================================
 
 Flow Forecast is a deep learning for time series forecasting framework written in PyTorch. Flow Forecast makes it easy to train PyTorch Forecast models on a wide variety
-of datasets.
+of datasets. Please note that documentation for APIs is provided here. This is good if you want to leverage the underlying Flow Forecast APIs and learn about the specific 
+parameters for models. However, if you are looking for conceptual information, using the configuration files, or benchmarks please vist our `confluence site <https://flow-forecast.atlassian.net/wiki/spaces/FF/overview>`_.
 
 .. automodule:: flood_forecast
 
@@ -60,7 +61,7 @@ of datasets.
 
 .. toctree::
   :maxdepth: 2
-  :caption: TransformerXL:
+  :caption: Transformer Model:
 
   dummy_torch
   lower_upper_config
@@ -81,7 +82,8 @@ of datasets.
 
 .. toctree::
   :maxdepth: 3
-  :caption: DA RNN:
+  :caption: DA-RNN:
+  
   model
 
 
