@@ -21,7 +21,7 @@ Using the library
 1. Vanilla LSTM: A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
 2. Full transformer: The full transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
 3. Simple Multi-Head Attention: A simple multi-head attention block and linear embedding layers. Suitable for transfer learning.
-4. Transformer with a linear decoder: A transformer with n-encoder blocks (this is tunable) and a linear decoder. Suitable for transfer learning.
+4. Transformer with a linear decoder: A transformer with n-encoder blocks (this is tunable) and a linear decoder.
 5. [DA-RNN](https://arxiv.org/abs/1704.02971): A well rounded model with which utilizes a LSTM + attention. 
 6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](hhttps://arxiv.org/abs/1907.00235): 
 7. Transformer XL:

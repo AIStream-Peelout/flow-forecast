@@ -232,7 +232,7 @@ def torch_single_train(model: PyTorchForecast,
                        multi_targets=1,
                        forward_params: Dict = {}) -> float:
     probablistic = None
-    if probablistic in model.params:
+    if probablistic in model.params["model_params"]:
         probablistic = True
     print('running torch_single_train')
     i = 0
