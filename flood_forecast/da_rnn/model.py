@@ -35,13 +35,26 @@ class DARNN(nn.Module):
             meta_data=False,
             gru_lstm=True,
             probabilistic=False):
-        """
-        `Model Benchmark information <https://rb.gy/koozff>`
-        n_time_series: Number of time series present in input
-        forecast_history: How many historic time steps to use for forecasting (add one to this number)
-        hidden_size_encoder: dimension of the hidden state encoder
-        decoder_hidden_size: dimension of hidden size of the decoder
-        forecast_history: The number of historical steps fed into the time series model
+        """ `Model Benchmark information <https://rb.gy/koozff>`
+
+        :param n_time_series: Number of time series present in input
+        :type n_time_series: int
+        :param hidden_size_encoder: dimension of the hidden state encoder
+        :type hidden_size_encoder: int
+        :param forecast_history: How many historic time steps to use for forecasting (add one to this number)
+        :type forecast_history: int
+        :param decoder_hidden_size: dimension of hidden size of the decoder
+        :type decoder_hidden_size: int
+        :param out_feats: [description], defaults to 1
+        :type out_feats: int, optional
+        :param dropout: defaults to .01
+        :type dropout: float, optional
+        :param meta_data: [description], defaults to False
+        :type meta_data: bool, optional
+        :param gru_lstm: Specify true if you want to use LSTM, defaults to True
+        :type gru_lstm: bool, optional
+        :param probabilistic: Specify true if you want to use a probablistic variation, defaults to False
+        :type probabilistic: bool, optional
         """
         super().__init__()
         self.probabilistic = probabilistic
