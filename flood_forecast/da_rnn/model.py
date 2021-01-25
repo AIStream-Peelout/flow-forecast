@@ -36,6 +36,7 @@ class DARNN(nn.Module):
             gru_lstm=True,
             probabilistic=False):
         """
+        `Model Benchmark information <https://rb.gy/koozff>`
         n_time_series: Number of time series present in input
         forecast_history: How many historic time steps to use for forecasting (add one to this number)
         hidden_size_encoder: dimension of the hidden state encoder
