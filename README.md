@@ -23,7 +23,7 @@ Using the library
 3. Simple Multi-Head Attention: A simple multi-head attention block and linear embedding layers. Suitable for transfer learning.
 4. Transformer with a linear decoder: A transformer with n-encoder blocks (this is tunable) and a linear decoder. Suitable for transfer learning.
 5. [DA-RNN](https://arxiv.org/abs/1704.02971): A well rounded model with which utilizes a LSTM + attention. 
-6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](hhttps://arxiv.org/abs/1907.00235): 
+6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235): 
 7. Transformer XL:
 8. Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
