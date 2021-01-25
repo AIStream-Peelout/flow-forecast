@@ -181,7 +181,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         print(labels.shape)
         print(output.shape)
         labels = labels.unsqueeze(0)
-        # raise AssertionError("Shape of lablels and output not equal")
     if probabilistic:
         if type(output_std) != torch.Tensor:
             print("Converted")
@@ -201,7 +200,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             output = validation_dataset.inverse_scale(output.cpu())
             labels = validation_dataset.inverse_scale(labels.cpu())
             src = validation_dataset.inverse_scale(src.cpu())
-
+    assert len(labels.shape) == len(output.shape)
+    assert labels.shape[0] == output.shape[0]
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
         loss = loss.numpy()
