@@ -236,6 +236,7 @@ def torch_single_train(model: PyTorchForecast,
         probablistic = True
     print('running torch_single_train')
     i = 0
+    output_std = None
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
@@ -257,7 +258,10 @@ def torch_single_train(model: PyTorchForecast,
             labels = trg[:, :, 0]
         elif multi_targets > 1:
             labels = trg[:, :, 0:multi_targets]
-        loss = compute_loss(labels, output, src, criterion, None, probablistic, None, m=multi_targets)
+        if probablistic:
+            output = output.mean.detach().numpy()
+            output_std = output.stddev.detach().numpy()
+        loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()

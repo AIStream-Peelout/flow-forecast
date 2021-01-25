@@ -1,5 +1,4 @@
-eco_gage_set = {'A', 'AURO',
-                'BEAR', 'BUCK', 'BURN',
+eco_gage_set = {'A', 'AURO', 'BEAR', 'BUCK', 'BURN',
                 'CAST', 'CLA2', 'CLAY',
                 'CLIN', 'DURH',
                 'FLET',
