@@ -1,5 +1,5 @@
 ## Training 
-To train a model for stream forecasting (task one) `python trainer.py -t config.json `
+To train a model  `python trainer.py -t config.json `
 
 ## New model 
 
