@@ -88,6 +88,7 @@ class TimeSeriesModelTest(unittest.TestCase):
             keag_file,
             keag_file,
             self.model_params)
+        model
 
 
 if __name__ == '__main__':
