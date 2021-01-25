@@ -76,3 +76,11 @@ html_static_path = []  # '_static'
 
 # if 'READTHEDOCS' not in os.environ:
 #    import cython_generated_ext
+
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'special-members': '__init__',
+    'undoc-members': True,
+    'exclude-members': '__weakref__'
+}
