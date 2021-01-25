@@ -80,5 +80,15 @@ class TimeSeriesModelTest(unittest.TestCase):
         self.assertEqual(model.model.dense_shape.in_features, 6)
         self.assertEqual(model.model.mask.shape, torch.Size([19, 19]))
 
+    def test_data_correct(self):
+        keag_file = os.path.join(self.test_path, "keag_small.csv")
+        model = PyTorchForecast(
+            "MultiAttnHeadSimple",
+            keag_file,
+            keag_file,
+            keag_file,
+            self.model_params)
+
+
 if __name__ == '__main__':
     unittest.main()
