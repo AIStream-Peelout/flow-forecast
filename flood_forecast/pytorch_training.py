@@ -180,7 +180,11 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     if len(labels.shape) != len(output.shape):
         print(labels.shape)
         print(output.shape)
-        labels = labels.unsqueeze(0)
+        if len(labels.shape) > 1:
+            if labels.shape[1] == output.shape[1]:
+                labels = labels.unsqueeze(2)
+            else:
+                labels = labels.unsqueeze(0)
     if probabilistic:
         if type(output_std) != torch.Tensor:
             print("Converted")
