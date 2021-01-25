@@ -7,7 +7,7 @@ from torch.autograd import Function
 class DilateLoss(torch.nn.Module):
     def __init__(self, gamma=0.001, alpha=0.5):
         """
-        Dilate loss function from
+        Dilate loss function originally from
         https://github.com/manjot4/NIPS-Reproducibility-Challenge
         """
         super().__init__()
@@ -24,8 +24,6 @@ class DilateLoss(torch.nn.Module):
         outputs = outputs.float()
         targets = targets.float()
         # outputs, targets: shape (batch_size, N_output, 1)
-        print("The shape of targets is :")
-        print(targets.shape)
         if len(targets.size()) < 2:
             print("begin fixed loss func")
             targets = targets.unsqueeze(0)

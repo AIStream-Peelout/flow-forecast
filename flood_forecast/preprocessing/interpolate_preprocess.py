@@ -4,16 +4,12 @@ from typing import List
 
 def fix_timezones(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Basic function to fix intial data bug
+    Basic function to fix initil data bug
     related to NaN values in non-eastern-time zones due
     to UTC conversion.
     """
     the_count = df[0:2]['cfs'].isna().sum()
     return df[the_count:]
-
-
-def split_on_na_chunks(df: pd.DataFrame) -> None:
-    pass
 
 
 def interpolate_missing_values(df: pd.DataFrame) -> pd.DataFrame:

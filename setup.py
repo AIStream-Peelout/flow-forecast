@@ -15,7 +15,7 @@ dev_requirements = [
 # Change version to .09
 setup(
     name='flood_forecast',
-    version='0.0921dev',
+    version='0.09214dev',
     packages=[
         'flood_forecast',
         'flood_forecast.transformer_xl',
@@ -24,9 +24,10 @@ setup(
         "flood_forecast.basic",
         "flood_forecast.meta_models",
         "flood_forecast.gcp_integration",
+        "flood_forecast.deployment",
         "flood_forecast.custom"],
     license='Public',
-    long_description='A public package for forecasting river flows and flash flood severity',
+    long_description='A public package for deep time series forecasting built with PyTorch',
     install_requires=install_requires,
     extras_require={
         'dev': dev_requirements})

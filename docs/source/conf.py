@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'Flow Forecast'
-copyright = '2020, Issac Godfried'
-author = 'Issac Godfried'
+copyright = '2020, Isaac Godfried'
+author = 'Isaac Godfried'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'

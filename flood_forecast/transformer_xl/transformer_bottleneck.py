@@ -36,6 +36,7 @@ import math
 import copy
 from torch.nn.parameter import Parameter
 from typing import Dict
+from flood_forecast.transformer_xl.lower_upper_config import activation_dict
 
 
 def gelu(x):
@@ -107,14 +108,14 @@ class Attention(nn.Module):
                 index -= sub_len
         return mask
 
-    def attn(self, query, key, value):
-
+    def attn(self, query, key, value, activation="Softmax"):
+        activation = activation_dict[activation](dim=-1)
         pre_att = torch.matmul(query, key)
         if self.scale:
             pre_att = pre_att / math.sqrt(value.size(-1))
         mask = self.mask_tri[:, :, :pre_att.size(-2), :pre_att.size(-1)]
         pre_att = pre_att * mask + -1e9 * (1 - mask)
-        pre_att = nn.Softmax(dim=-1)(pre_att)
+        pre_att = activation(pre_att)
         pre_att = self.attn_dropout(pre_att)
         attn = torch.matmul(pre_att, value)
 
@@ -269,7 +270,8 @@ class TransformerModel(nn.Module):
 class DecoderTransformer(nn.Module):
     def __init__(self, n_time_series: int, n_head: int, num_layer: int,
                  n_embd: int, forecast_history: int, dropout: float, q_len: int, additional_params: Dict,
-                 forecast_length: int = None, scale_att: bool = False, seq_num=None, sub_len=1, mu=None):
+                 activation="Softmax", forecast_length: int = None, scale_att: bool = False, seq_num=None,
+                 sub_len=1, mu=None):
         """
         Args:
             n_time_series: Number of time series present in input
@@ -311,7 +313,7 @@ class DecoderTransformer(nn.Module):
             series_id: Optional id of the series in the dataframe. Currently not supported
         Returns:
             Case 1: tensor of dimension (batch_size, forecast_length)
-            Case 2: Return sigma and mu tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
+            Case 2: Return sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
@@ -320,5 +322,7 @@ class DecoderTransformer(nn.Module):
             sigma = self.softplus(sigma)
             return mu, sigma
         if self.forecast_len_layer:
-            sigma = self.forecast_len_layer(sigma)
-        return sigma.reshape(x.shape[0], -1)
+            # Swap to (batch_size, 1, features) for linear layer
+            sigma = sigma.permute(0, 2, 1)
+            sigma = self.forecast_len_layer(sigma).permute(0, 2, 1)
+        return sigma.squeeze(2)

@@ -164,9 +164,7 @@ def plot_df_test_with_probabilistic_confidence_interval(
     params: Dict,
     real_data=True
 ) -> go.Figure:
-
     fig = go.Figure()
-
     target_col = params["dataset_params"]["target_col"][0]
     fig.add_trace(go.Scatter(x=df_test.index, y=df_test["preds"], name="preds"))
     if real_data:
@@ -181,7 +179,7 @@ def plot_df_test_with_probabilistic_confidence_interval(
                 min((df_test["preds"] - df_test["std_dev"]).min(), df_test[target_col].min()),
                 max((df_test["preds"] + df_test["std_dev"]).max(), df_test[target_col].max()),
             ],
-            name="pred_start",
+            name="pred_start"
         )
     )
     return fig

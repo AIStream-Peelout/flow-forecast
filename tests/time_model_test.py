@@ -9,6 +9,7 @@ class TimeSeriesModelTest(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {
+            "metrics": ["MSE", "DilateLoss"],
             "model_params": {
                 "number_time_series": 3},
             "inference_params": {

@@ -2,11 +2,19 @@ import torch.nn as nn
 from typing import Dict
 import torch.nn.functional as F
 import torch
+from flood_forecast.custom.custom_activation import entmax15, sparsemax
 
 
 def initial_layer(layer_type: str, layer_params: Dict, layer_number: int = 1):
     layer_map = {"1DConv": nn.Conv1d, "Linear": nn.Linear}
     return layer_map[layer_type](**layer_params)
+
+
+def swish(x):
+    return x * torch.sigmoid(x)
+
+activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus(), "Swish": swish,
+                   "entmax": entmax15, "sparsemax": sparsemax, "Softmax": torch.nn.Softmax}
 
 
 def variable_forecast_layer(layer_type, layer_params):

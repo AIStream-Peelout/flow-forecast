@@ -1,6 +1,6 @@
 # Deep learning for time series forecasting
 ![Example image](https://raw.githubusercontent.com/CoronaWhy/task-ts/master/images/Picture1.png)
-Flow forecast repository is an open-source deep learning for time series library. It provide all the latest SOTA models and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and serving capabilities. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains this repository. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
+Flow forecast repository is an open-source deep learning for time series library. It provides all the latest state of the art models and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and serving capabilities. Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains this repository. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
@@ -14,6 +14,7 @@ Flow forecast repository is an open-source deep learning for time series library
 Using the library
 1. Run `pip install flood-forecast`
 2. Detailed info on training models can be found on the [Wiki](https://github.com/AIStream-Peelout/flow-forecast/wiki/Training-models).
+3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview)
 
 **Models currently supported**
 
@@ -48,11 +49,13 @@ Task two focuses on predicting the severity of the flood based on the flood fore
 
 If you use either the data or code from this repository please cite as
 ```
-@inproceedings{GodfriedFlow2019,
-Author = {Isaac Godfried},
-Title = {Flow: A large scale dataset for stream flow and flood damage forecasting},
-Booktitle  = {Arxiv Preprint},
-Year = {2019}
+@misc{godfried2020flowdb,
+      title={FlowDB a large scale precipitation, river, and flash flood dataset}, 
+      author={Isaac Godfried and Kriti Mahajan and Maggie Wang and Kevin Li and Pranjalya Tiwari},
+      year={2020},
+      eprint={2012.11154},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
 }
 ```
  

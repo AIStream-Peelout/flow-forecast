@@ -44,11 +44,42 @@ SCHEDULES = {
 }
 
 
+class MASELoss(torch.nn.Module):
+    def __init__(self, baseline_method):
+        """
+        This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
+        """
+        super(MASELoss, self).__init__()
+        self.method_dict = {"mean": lambda x, y: torch.mean(x, 1).unsqueeze(1).repeat(1, y[1], 1)}
+        self.baseline_method = self.method_dict[baseline_method]
+
+    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor, m=1) -> torch.Tensor:
+        # Ugh why can't all tensors have batch size... Fixes for modern
+        if len(train_data.shape) < 3:
+            train_data = train_data.unsqueeze(0)
+        if m == 1 and len(target.shape) == 1:
+            output = output.unsqueeze(0)
+            output = output.unsqueeze(2)
+            target = target.unsqueeze(0)
+            target = target.unsqueeze(2)
+        if len(target.shape) == 2:
+            output = output.unsqueeze(0)
+            target = target.unsqueeze(0)
+        result_baseline = self.baseline_method(train_data, output.shape)
+        MAE = torch.nn.L1Loss()
+        mae2 = MAE(output, target)
+        mase4 = MAE(result_baseline, target)
+        # Prevent divison by zero/loss exploding
+        if mase4 < 0.001:
+            mase4 = 0.001
+        return mae2 / mase4
+
+
 class RMSELoss(torch.nn.Module):
     '''
     Returns RMSE using:
     target -> True y
-    output -> Predtion by model
+    output -> Prediction by model
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
     '''
 
@@ -57,7 +88,7 @@ class RMSELoss(torch.nn.Module):
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         if len(output) > 1:
 
             diff = torch.sub(target, output)
@@ -84,7 +115,7 @@ class MAPELoss(torch.nn.Module):
         super().__init__()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         if len(output) > 1:
             return torch.mean(torch.abs(torch.sub(target, output) / target)) + \
                 self.variance_penalty * torch.std(torch.sub(target, output))
@@ -105,7 +136,7 @@ class PenalizedMSELoss(torch.nn.Module):
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         return self.mse(target, output) + \
             self.variance_penalty * torch.std(torch.sub(target, output))
 
@@ -120,7 +151,7 @@ class GaussianLoss(torch.nn.Module):
         self.mu = mu
         self.sigma = sigma
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         loss = - tdist.Normal(self.mu, self.sigma).log_prob(x)
         return torch.sum(loss) / (loss.size(0) * loss.size(1))
 

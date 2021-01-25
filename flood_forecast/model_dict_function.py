@@ -10,7 +10,7 @@ from flood_forecast.custom.custom_opt import BertAdam
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.da_rnn.model import DARNN
-from flood_forecast.custom.custom_opt import RMSELoss, MAPELoss, PenalizedMSELoss, NegativeLogLikelihood
+from flood_forecast.custom.custom_opt import RMSELoss, MAPELoss, PenalizedMSELoss, NegativeLogLikelihood, MASELoss
 from flood_forecast.transformer_xl.transformer_bottleneck import DecoderTransformer
 from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
@@ -18,7 +18,7 @@ from flood_forecast.deep_ar.model import DeepAR
 import torch
 
 """
-Utility dictionaries to map a string to a class
+Utility dictionaries to map a string to a class.
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,
@@ -32,10 +32,10 @@ pytorch_model_dict = {
     "DecoderTransformer": DecoderTransformer,
     "BasicAE": AE,
     "DeepAR": DeepAR
-
 }
 
 pytorch_criterion_dict = {
+    "MASELoss": MASELoss,
     "MSE": MSELoss,
     "SmoothL1Loss": SmoothL1Loss,
     "PoissonNLLLoss": PoissonNLLLoss,
@@ -46,12 +46,9 @@ pytorch_criterion_dict = {
     "PenalizedMSELoss": PenalizedMSELoss,
     "NegativeLogLikelihood": NegativeLogLikelihood}
 
-evaluation_functions_dict = {"NSE": "", "MSE": ""}
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}
 
 pytorch_opt_dict = {"Adam": Adam, "SGD": SGD, "BertAdam": BertAdam}
-
-scikit_dict = {}
 
 
 def generate_square_subsequent_mask(sz: int) -> torch.Tensor:

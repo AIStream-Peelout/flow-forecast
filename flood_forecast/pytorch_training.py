@@ -10,7 +10,24 @@ from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criteri
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
-from flood_forecast.custom.custom_opt import GaussianLoss
+from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
+
+
+def handle_meta_data(model):
+    meta_loss = None
+    with open(model.params["meta_data"]["path"]) as f:
+        json_data = json.load(f)
+    if "meta_loss" in model.params["meta_data"]:
+        meta_loss_str = model.params["meta_data"]["meta_loss"]
+        meta_loss = pytorch_criterion_dict[meta_loss_str]()
+    dataset_params2 = json_data["dataset_params"]
+    training_path = dataset_params2["training_path"]
+    valid_path = dataset_params2["validation_path"]
+    meta_name = json_data["model_name"]
+    meta_model = PyTorchForecast(meta_name, training_path, valid_path, dataset_params2["test_path"], json_data)
+    meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
+                                                  model.params["meta_data"]["uuid"], meta_model)
+    return meta_model, meta_representation, meta_loss
 
 
 def train_transformer_style(
@@ -28,6 +45,17 @@ def train_transformer_style(
     """
     use_wandb = model.wandb
     es = None
+    worker_num = 1
+    pin_memory = False
+    dataset_params = model.params["dataset_params"]
+    num_targets = 1
+    if "n_targets" in model.params:
+        num_targets = model.params["n_targets"]
+    if "num_workers" in dataset_params:
+        worker_num = dataset_params["num_workers"]
+    if "pin_memory" in dataset_params:
+        pin_memory = dataset_params["pin_memory"]
+        print("Pin memory set to true")
     if "early_stopping" in model.params:
         es = EarlyStopper(model.params["early_stopping"]['patience'])
     opt = pytorch_opt_dict[training_params["optimizer"]](
@@ -47,9 +75,9 @@ def train_transformer_style(
         shuffle=False,
         sampler=None,
         batch_sampler=None,
-        num_workers=0,
+        num_workers=worker_num,
         collate_fn=None,
-        pin_memory=False,
+        pin_memory=pin_memory,
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
@@ -59,30 +87,23 @@ def train_transformer_style(
         shuffle=False,
         sampler=None,
         batch_sampler=None,
-        num_workers=0,
+        num_workers=worker_num,
         collate_fn=None,
-        pin_memory=False,
+        pin_memory=pin_memory,
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
     test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
-                                  batch_sampler=None, num_workers=0, collate_fn=None,
-                                  pin_memory=False, drop_last=False, timeout=0,
+                                  batch_sampler=None, num_workers=worker_num, collate_fn=None,
+                                  pin_memory=pin_memory, drop_last=False, timeout=0,
                                   worker_init_fn=None)
     meta_model = None
     meta_representation = None
+    meta_loss = None
     if model.params.get("meta_data") is None:
         model.params["meta_data"] = False
     if model.params["meta_data"]:
-        with open(model.params["meta_data"]["path"]) as f:
-            json_data = json.load(f)
-        dataset_params2 = json_data["dataset_params"]
-        training_path = dataset_params2["training_path"]
-        valid_path = dataset_params2["validation_path"]
-        meta_name = json_data["model_name"]
-        meta_model = PyTorchForecast(meta_name, training_path, valid_path, dataset_params2["test_path"], json_data)
-        meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
-                                                      model.params["meta_data"]["uuid"], meta_model)
+        meta_model, meta_representation, meta_loss = handle_meta_data(model)
     if use_wandb:
         wandb.watch(model.model)
     session_params = []
@@ -95,7 +116,9 @@ def train_transformer_style(
             takes_target,
             meta_model,
             meta_representation,
-            forward_params)
+            meta_loss,
+            multi_targets=num_targets,
+            forward_params=forward_params.copy())
         print("The loss for epoch " + str(epoch))
         print(total_loss)
         use_decoder = False
@@ -106,14 +129,15 @@ def train_transformer_style(
             model.model,
             epoch,
             model.params["dataset_params"]["forecast_length"],
-            criterion,
+            model.crit,
             model.device,
+            multi_targets=num_targets,
             meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb,
             probabilistic=probabilistic)
-        if valid < 0.01:
-            raise("Error validation loss is zero there is a problem with the validator.")
+        if valid == 0.0:
+            raise ValueError("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
             wandb.log({'epoch': epoch, 'loss': total_loss})
         epoch_params = {
@@ -134,9 +158,10 @@ def train_transformer_style(
         model.model,
         epoch,
         model.params["dataset_params"]["forecast_length"],
-        criterion,
+        model.crit,
         model.device,
         meta_model=meta_model,
+        multi_targets=num_targets,
         decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss",
@@ -150,6 +175,41 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
     return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
 
 
+def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, m=1):
+    # Warning this assumes src target is 1-D
+    if probabilistic:
+        if type(output_std) != torch.Tensor:
+            print("Converted")
+            output_std = torch.from_numpy(output_std)
+        if type(output) != torch.Tensor:
+            output = torch.from_numpy(output)
+        output_dist = torch.distributions.Normal(output, output_std)
+    if validation_dataset:
+        if probabilistic:
+            unscaled_out = validation_dataset.inverse_scale(output)
+            try:
+                output_std = numpy_to_tvar(output_std)
+            except Exception:
+                pass
+            output_dist = torch.distributions.Normal(unscaled_out, output_std)
+        else:
+            output = validation_dataset.inverse_scale(output.cpu())
+            labels = validation_dataset.inverse_scale(labels.cpu())
+            src = validation_dataset.inverse_scale(src.cpu())
+
+    if probabilistic:
+        loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
+        loss = loss.numpy()
+    elif isinstance(criterion, GaussianLoss):
+        g_loss = GaussianLoss(output[0], output[1])
+        loss = g_loss(labels)
+    elif isinstance(criterion, MASELoss):
+        loss = criterion(labels.float(), output, src, m)
+    else:
+        loss = criterion(output, labels.float())
+    return loss
+
+
 def torch_single_train(model: PyTorchForecast,
                        opt: optim.Optimizer,
                        criterion: Type[torch.nn.modules.loss._Loss],
@@ -157,8 +217,10 @@ def torch_single_train(model: PyTorchForecast,
                        takes_target: bool,
                        meta_data_model: PyTorchForecast,
                        meta_data_model_representation: torch.Tensor,
+                       meta_loss=None,
+                       multi_targets=1,
                        forward_params: Dict = {}) -> float:
-    print('torch_single_train')
+    print('running torch_single_train')
     i = 0
     running_loss = 0.0
     for src, trg in data_loader:
@@ -170,17 +232,18 @@ def torch_single_train(model: PyTorchForecast,
         if meta_data_model:
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
+            if meta_loss:
+                output = meta_data_model.model(meta_data_model_representation)
+                met_loss = compute_loss(meta_data_model_representation, output, torch.rand(2, 3, 2), meta_loss, None)
+                met_loss.backward()
         if takes_target:
             forward_params["t"] = trg
         output = model.model(src, **forward_params)
-        labels = trg[:, :, 0]
-        if isinstance(criterion, GaussianLoss):
-            g_loss = GaussianLoss(output[0], output[1])
-            loss = g_loss(labels)
-        else:
-            loss = criterion(output, labels.float())
-        # TODO fix Guassian loss
-
+        if multi_targets == 1:
+            labels = trg[:, :, 0]
+        elif multi_targets > 1:
+            labels = trg[:, :, 0:multi_targets]
+        loss = compute_loss(labels, output, src, criterion, None, None, None, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
@@ -197,7 +260,7 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
-def compute_validation(validation_loader: DataLoader,  # s lint
+def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
                        sequence_size: int,
@@ -207,14 +270,17 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                        meta_data_model=None,
                        use_wandb: bool = False,
                        meta_model=None,
+                       multi_targets=1,
                        val_or_test="validation_loss",
                        probabilistic=False) -> float:
     """
     Function to compute the validation or the test loss
     """
     print('compute_validation')
+    unscaled_crit = dict.fromkeys(criterion, 0)
+    scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
-    loop_loss = 0.0
+    output_std = None
     with torch.no_grad():
         i = 0
         loss_unscaled_full = 0.0
@@ -241,6 +307,7 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                                                            targ.shape[1],
                                                            targ,
                                                            1,
+                                                           multi_targets=multi_targets,
                                                            probabilistic=probabilistic)
                         output, output_std = output[:, :, 0], output_std[0]
                         output_dist = torch.distributions.Normal(output, output_std)
@@ -250,7 +317,8 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                                                max_seq_len=targ.shape[1],
                                                real_target=targ,
                                                output_len=1,
-                                               probabilistic=probabilistic)[:, :, 0]
+                                               multi_targets=multi_targets,
+                                               probabilistic=probabilistic)[:, :, 0:multi_targets]
             else:
                 if probabilistic:
                     output_dist = model(src.float())
@@ -258,44 +326,31 @@ def compute_validation(validation_loader: DataLoader,  # s lint
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
-            labels = targ[:, :, 0]
+            if multi_targets == 1:
+                labels = targ[:, :, 0]
+            elif multi_targets > 1:
+                labels = targ[:, :, 0:multi_targets]
             validation_dataset = validation_loader.dataset
-            if validation_dataset.scale:
-                unscaled_labels = validation_dataset.inverse_scale(labels)
-                if probabilistic:
-                    unscaled_out = validation_dataset.inverse_scale(output)
-                    try:
-                        output_std = numpy_to_tvar(output_std)
-                    except Exception:
-                        pass
-                    unscaled_dist = torch.distributions.Normal(unscaled_out, output_std)
-                    loss_unscaled = -unscaled_dist.log_prob(unscaled_labels.float()).sum()  # FIX THIS
-                    loss_unscaled_full += len(labels.float()) * loss_unscaled.numpy().item()
-                else:
-                    # unscaled_src = validation_dataset.scale.inverse_transform(src.cpu())
-                    unscaled_out = validation_dataset.inverse_scale(output.cpu())
-                    unscaled_labels = validation_dataset.inverse_scale(labels.cpu())
-                    loss_unscaled = criterion(unscaled_out, unscaled_labels.float())
-                    loss_unscaled_full += len(labels.float()) * loss_unscaled.item()
-                if i % 10 == 0 and use_wandb:
-                    wandb.log({"trg": unscaled_labels, "model_pred": unscaled_out})
-            if probabilistic:
-                loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
-                loss = loss.numpy()
-            elif isinstance(criterion, GaussianLoss):
-                g_loss = GaussianLoss(output[0], output[1])
-                loss = g_loss(labels)
-            else:
-                loss = criterion(output, labels.float())
-            loop_loss += len(labels.float()) * loss.item()
+            for crit in criterion:
+                if validation_dataset.scale:
+                    # Should this also do loss.item() stuff?
+                    if len(src.shape) == 2:
+                        src = src.unsqueeze(0)
+                    src1 = src[:, :, 0:multi_targets]
+                    loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
+                                                      probabilistic, output_std, m=multi_targets)
+                    unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
+                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std, m=multi_targets)
+                scaled_crit[crit] += loss.item() * len(labels.float())
     if use_wandb:
         if loss_unscaled_full:
-            tot_unscaled_loss = loss_unscaled_full / (len(validation_loader.dataset) - 1)
+            scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
+            newD = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in unscaled_crit.items()}
             wandb.log({'epoch': epoch,
-                       val_or_test: loop_loss / (len(validation_loader.dataset) - 1),
-                       "unscaled_" + val_or_test: tot_unscaled_loss})
+                       val_or_test: scaled,
+                       "unscaled_" + val_or_test: newD})
         else:
-            wandb.log({'epoch': epoch, val_or_test: loop_loss /
-                       (len(validation_loader.dataset) - 1)})
+            scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
+            wandb.log({'epoch': epoch, val_or_test: scaled})
     model.train()
-    return loop_loss / (len(validation_loader.dataset) - 1)
+    return list(scaled_crit.values())[0]
