@@ -207,7 +207,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             src = validation_dataset.inverse_scale(src.cpu())
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
-        loss = loss.numpy()
     elif isinstance(criterion, GaussianLoss):
         g_loss = GaussianLoss(output[0], output[1])
         loss = g_loss(labels)
@@ -259,8 +258,9 @@ def torch_single_train(model: PyTorchForecast,
         elif multi_targets > 1:
             labels = trg[:, :, 0:multi_targets]
         if probablistic:
-            output = output.mean.detach().numpy()
-            output_std = output.stddev.detach().numpy()
+            output1 = output
+            output = output.mean
+            output_std = output1.stddev
         loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
