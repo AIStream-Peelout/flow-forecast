@@ -268,9 +268,9 @@ class PyTorchTrainTests(unittest.TestCase):
         _, trg = self.model.test_data[0]
         _, trg1 = self.dummy_model.test_data[1]
         _, trg2 = self.transformer.test_data[0]
-        self.assertEqual(trg.shape[1], 10)
-        self.assertEqual(trg1.shape[1], 15)
-        self.assertEqual(trg2.shape[1], 100)
+        self.assertEqual(trg.shape[0], 10)
+        self.assertEqual(trg1.shape[0], 15)
+        self.assertEqual(trg2.shape[0], 100)
 
 if __name__ == '__main__':
     unittest.main()
