@@ -125,8 +125,8 @@ def plot_df_test_with_confidence_interval(
     assert 0.0 <= ci <= 100.0
     assert 0.0 < alpha < 1.0
     fig = go.Figure()
-    if "preds_" + targ_col in df_test:
-        df_test["preds"] = df_test["preds_" + targ_col]
+    if "pred_" + targ_col in df_test:
+        df_test["preds"] = df_test["pred_" + targ_col]
         # a
     target_col = targ_col
     fig.add_trace(go.Scatter(x=df_test.index, y=df_test["preds"], name="preds"))

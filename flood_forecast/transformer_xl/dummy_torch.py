@@ -9,7 +9,7 @@ class DummyTorchModel(nn.Module):
     def __init__(self, forecast_length: int):
         """A dummy model that will return a tensor of ones (batch_size, forecast_len)
 
-        :param forecast_length: [description]
+        :param forecast_length: The length to forecast
         :type forecast_length: int
         """
         super(DummyTorchModel, self).__init__()
