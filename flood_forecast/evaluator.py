@@ -75,8 +75,17 @@ def evaluate_model(
     eval_log: Dict,
 ) -> Tuple[Dict, pd.DataFrame, int, pd.DataFrame]:
     """
-    A function to evaluate a model.
-    Requires a model of type TimeSeriesModel
+    A function to evaluate a model. Called automatically at end of training.
+    Can be imported for continuing to evaluate a model in other places as well.
+
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from flood_forecast.evaluator import evaluate_model
+        evaluate_model(model, )
+        ...
+    '''
     """
     if model_type == "PyTorch":
         (
@@ -113,7 +122,7 @@ def evaluate_model(
             else:
                 df_train_and_test["preds"][history_length:] = end_tensor_list
                 df_train_and_test["pred_" + target_col[0]] = 0
-                df_train_and_test["pred_" + target_col[0]][history_length:] = end_tensor_list.numpy().tolist()
+                df_train_and_test["pred_" + target_col[0]][history_length:] = end_tensor_list
         print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
