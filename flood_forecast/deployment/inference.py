@@ -13,7 +13,7 @@ import torch
 class InferenceMode(object):
     def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
                  wandb_proj: str = None, torch_script=False):
-        """Class to handle inference for models
+        """Class to handle inference for models,,
 
         :param hours_to_forecast: [description]
         :type hours_to_forecast: int
