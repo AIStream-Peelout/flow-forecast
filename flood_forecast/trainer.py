@@ -81,6 +81,7 @@ def train_function(model_type: str, params: Dict):
                     thing[0],
                     forecast_start_idx,
                     params,
+                    thing[1],
                     ci=95,
                     alpha=0.25)
                 wandb.log({"test_plot_" + thing[1]: test_plot})
