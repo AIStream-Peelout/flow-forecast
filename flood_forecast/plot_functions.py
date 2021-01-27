@@ -136,7 +136,7 @@ def plot_df_test_with_confidence_interval(
         ((100.0 - ci) / 2.0 + ci) / 100.0,
     )
     df_quantiles = calculate_confidence_intervals(
-        df_prediction_samples, df_test["preds"], ci_lower, ci_upper
+        df_prediction_samples, df_test["preds" + targ_col], ci_lower, ci_upper
     )
 
     print("plotting with CI now")
