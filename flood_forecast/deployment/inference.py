@@ -13,11 +13,11 @@ import torch
 class InferenceMode(object):
     def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
                  wandb_proj: str = None, torch_script=False):
-        """Class to handle inference for models,,
+        """Class to handle inference for models,
 
-        :param hours_to_forecast: [description]
+        :param hours_to_forecast: Number of time-steps to forecasts (doesn't have to be hours)
         :type hours_to_forecast: int
-        :param num_prediction_samples: [description]
+        :param num_prediction_samples: Number of prediction samples
         :type num_prediction_samples: int
         :param model_params: [description]
         :type model_params: [type]
@@ -26,7 +26,7 @@ class InferenceMode(object):
         :param weight_path: [description]
         :type weight_path: [type]
         :param wandb_proj: [description], defaults to None
-        :type wandb_proj: str, optional
+        :type wandb_proj: str, optionals
         """
         self.hours_to_forecast = hours_to_forecast
         self.csv_path = csv_path
