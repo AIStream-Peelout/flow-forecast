@@ -48,6 +48,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "model_params": {"forecast_length": 5},
                 "metrics": ["MAPE", "MSE"],
                 "dataset_params": {
+                    "forecast_test_len": 15,
                     "forecast_history": 5,
                     "class": "default",
                     "forecast_length": 5,
@@ -268,9 +269,9 @@ class PyTorchTrainTests(unittest.TestCase):
         _, trg = self.model.test_data[0]
         _, trg1 = self.dummy_model.test_data[1]
         _, trg2 = self.transformer.test_data[0]
-        self.assertEqual(trg.shape[0], 10)
+        self.assertEqual(trg.shape[0], 20)
         self.assertEqual(trg1.shape[0], 15)
-        self.assertEqual(trg2.shape[0], 100)
+        self.assertEqual(trg2.shape[0], 15)
 
 if __name__ == '__main__':
     unittest.main()
