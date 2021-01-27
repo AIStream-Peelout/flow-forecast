@@ -34,7 +34,7 @@ class TimeSeriesModel(ABC):
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
             self.model = self.load_model(model_base, params["model_params"])
-        params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
+        # params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
