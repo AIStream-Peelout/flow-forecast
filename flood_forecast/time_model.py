@@ -182,7 +182,7 @@ class PyTorchForecast(TimeSeriesModel):
             "Feature param put into stuff"
         if "sort_column" in dataset_params:
             start_end_params["sort_column"] = dataset_params["sort_column"]
-        is_proper_dataloader = loader_type == "test" and the_class == "deault"
+        is_proper_dataloader = loader_type == "test" and the_class == "default"
         if is_proper_dataloader and "forecast_test_len" in dataset_params:
             loader = CSVDataLoader(
                 data_path,
