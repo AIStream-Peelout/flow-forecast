@@ -34,7 +34,7 @@ class TimeSeriesModel(ABC):
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
             self.model = self.load_model(model_base, params["model_params"])
-        params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
+        # params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
@@ -182,7 +182,7 @@ class PyTorchForecast(TimeSeriesModel):
             "Feature param put into stuff"
         if "sort_column" in dataset_params:
             start_end_params["sort_column"] = dataset_params["sort_column"]
-        is_proper_dataloader = loader_type == "test" and the_class == "deault"
+        is_proper_dataloader = loader_type == "test" and the_class == "default"
         if is_proper_dataloader and "forecast_test_len" in dataset_params:
             loader = CSVDataLoader(
                 data_path,

@@ -48,6 +48,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "model_params": {"forecast_length": 5},
                 "metrics": ["MAPE", "MSE"],
                 "dataset_params": {
+                    "forecast_test_len": 15,
                     "forecast_history": 5,
                     "class": "default",
                     "forecast_length": 5,
@@ -93,7 +94,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "batch_size": 2,
                 "optim_params": {}},
             "inference_params": {
-                "hours_to_forecast": 10},
+                "hours_to_forecast": 100},
             "wandb": False}
         self.simple_param = {
             "use_decoder": True,
@@ -103,6 +104,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "output_seq_len": 20},
             "metrics": ["MAPE", "MSE"],
             "dataset_params": {
+                "forecast_test_len": 25,
                 "forecast_history": 20,
                 "class": "default",
                 "forecast_length": 15,
@@ -263,6 +265,16 @@ class PyTorchTrainTests(unittest.TestCase):
         crit = self.model.crit[0]
         loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
         self.assertEqual(loss.item(), 1.0)
+
+    def test_test_data(self):
+        _, trg = self.model.test_data[0]
+        _, trg1 = self.dummy_model.test_data[1]
+        _, trg2 = self.transformer.test_data[0]
+        _, trg3 = self.simple_linear_model.test_data[0]
+        self.assertEqual(trg.shape[0], 20)
+        self.assertEqual(trg1.shape[0], 15)
+        self.assertEqual(trg2.shape[0], 15)
+        self.assertEqual(trg3.shape[0], 25)
 
 if __name__ == '__main__':
     unittest.main()
