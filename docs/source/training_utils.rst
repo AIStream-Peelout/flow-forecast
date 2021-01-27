@@ -1,7 +1,7 @@
 Training Utils
 ==================
 
-This moduile oncludeds 
+This module includes functions that useful 
 
 .. automodule:: flood_forecast.training_utils
     :members:
