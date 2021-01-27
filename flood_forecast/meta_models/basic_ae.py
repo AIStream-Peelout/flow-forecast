@@ -6,10 +6,14 @@ class AE(nn.Module):
     def __init__(self, input_shape, out_features):
         """[summary]
 
-        :param input_shape: [description]
-        :type input_shape: [type]
-        :param out_features: [description]
-        :type out_features: [type]
+        :param input_shape: The number of features for input.
+        :type input_shape: int
+        :param out_features: The number of output features (that will be merged)
+        :type out_features: int
+
+        .. code-block:: python
+            auto_model = AE(10, 3)
+
         """
         super().__init__()
         self.encoder_hidden_layer = nn.Linear(

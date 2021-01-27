@@ -107,7 +107,7 @@ def evaluate_model(
             history_length = model.params["dataset_params"]["forecast_history"]
             if "n_targets" in model.params:
                 df_train_and_test["preds"][history_length:] = end_tensor[:, 0].numpy().tolist()
-                for i, target in target_col:
+                for i, target in enumerate(target_col):
                     df_train_and_test["pred_" + target] = end_tensor[:, i].numpy().tolist
             else:
                 df_train_and_test["preds"][history_length:] = end_tensor_list
