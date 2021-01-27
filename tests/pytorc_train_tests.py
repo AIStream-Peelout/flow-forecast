@@ -93,7 +93,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "batch_size": 2,
                 "optim_params": {}},
             "inference_params": {
-                "hours_to_forecast": 10},
+                "hours_to_forecast": 100},
             "wandb": False}
         self.simple_param = {
             "use_decoder": True,
@@ -263,6 +263,14 @@ class PyTorchTrainTests(unittest.TestCase):
         crit = self.model.crit[0]
         loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
         self.assertEqual(loss.item(), 1.0)
+
+    def test_test_data(self):
+        _, trg = self.model.test_data[0]
+        _, trg1 = self.dummy_model.test_data[1]
+        _, trg2 = self.transformer.test_data[0]
+        self.assertEqual(trg.shape[1], 10)
+        self.assertEqual(trg1.shape[1], 15)
+        self.assertEqual(trg2.shape[1], 100)
 
 if __name__ == '__main__':
     unittest.main()
