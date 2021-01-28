@@ -65,7 +65,6 @@ jobs:
           when: always
           command: |
             coverage run -m unittest -v tests/test_deployment.py
-            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_evaluation.py
 
       - run:

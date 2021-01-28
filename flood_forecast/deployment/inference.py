@@ -19,17 +19,16 @@ class InferenceMode(object):
         :type hours_to_forecast: int
         :param num_prediction_samples: Number of prediction samples
         :type num_prediction_samples: int
-        :param model_params: A dictionary of the model parameters
-        :type model_params: Dict
+        :param model_params: [description]
+        :type model_params: [type]
         :param csv_path: [description]
         :type csv_path: str
-        :param weight_path: The path to the weigths can either be local path or GCS path.
-        :type weight_path: str
-        :param wandb_proj: The name of the Weigths and Biases project, defaults to None
+        :param weight_path: [description]
+        :type weight_path: [type]
+        :param wandb_proj: [description], defaults to None
         :type wandb_proj: str, optionals
         """
         self.hours_to_forecast = hours_to_forecast
-        self.n_targets = model_params.get("n_targets")
         self.csv_path = csv_path
         self.model = load_model(model_params.copy(), csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
@@ -63,12 +62,7 @@ class InferenceMode(object):
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
-        targ = self.model.params["dataset_params"]["target_col"]
-        if test.scale and self.n_targets:
-            for i in range(self.n_targets):
-                df["preds_" + targ[i]] = 0
-                df["preds_" + targ[i]][forecast_history:] = test.inverse_scale(tensor.numpy())
-        elif test.scale:
+        if test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
         if len(samples) > 1:
@@ -82,7 +76,7 @@ class InferenceMode(object):
                    save_name=None, wandb_plot_id=None):
         """
 
-        :param date: the start date
+        :param date: [description]
         :type date: datetime
         :param csv_path: [description], defaults to None
         :type csv_path: str, optional
