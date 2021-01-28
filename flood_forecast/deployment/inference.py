@@ -37,6 +37,8 @@ class InferenceMode(object):
             self.inference_params["dataset_params"]["scaling"] = s
         self.inference_params["hours_to_forecast"] = hours_to_forecast
         self.inference_params["num_prediction_samples"] = num_prediction_samples
+        self.target_col = model_params["dataset_params"]["target_col"]
+        self.n_targets = model_params.get("n_targets")
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
@@ -62,7 +64,11 @@ class InferenceMode(object):
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
-        if test.scale:
+        if test.scale and self.n_targets:
+            unscaled = test.inverse_scale(tensor.numpy())
+            for i in range(0, self.n_targets):
+                df["pred_" + self.target_col[i]] = unscaled[i, :]
+        elif test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
         if len(samples) > 1:
