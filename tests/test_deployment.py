@@ -36,7 +36,7 @@ class InferenceTests(unittest.TestCase):
         infer_multi = InferenceMode(20, 30, self.multi_config_test, self.multi_path, self.multi_weight_path,
                                     "covid-core")
         infer_multi.make_plots(datetime(2020, 12, 10), csv_bucket="flow_datasets",
-                               csv_path="tes1/t2.csv", wandb_plot_id="prod_plot")
+                               save_name="tes1/t2.csv", wandb_plot_id="prod_plot")
 
     def test_speed(self):
         pass
