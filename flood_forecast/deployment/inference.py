@@ -3,6 +3,7 @@ from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.explain_model_output import deep_explain_model_heatmap, deep_explain_model_summary_plot
 from flood_forecast.time_model import scaling_function
+from typing import Dict
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
@@ -11,7 +12,7 @@ import torch
 
 
 class InferenceMode(object):
-    def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
+    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params: Dict, csv_path: str, weight_path,
                  wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
@@ -28,14 +29,14 @@ class InferenceMode(object):
         :param wandb_proj: [description], defaults to None
         :type wandb_proj: str, optionals
         """
-        self.hours_to_forecast = hours_to_forecast
+        self.hours_to_forecast = forecast_steps
         self.csv_path = csv_path
         self.model = load_model(model_params.copy(), csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
         if "scaling" in self.inference_params["dataset_params"]:
             s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
             self.inference_params["dataset_params"]["scaling"] = s
-        self.inference_params["hours_to_forecast"] = hours_to_forecast
+        self.inference_params["hours_to_forecast"] = forecast_steps
         self.inference_params["num_prediction_samples"] = num_prediction_samples
         self.target_col = model_params["dataset_params"]["target_col"]
         self.n_targets = model_params.get("n_targets")
@@ -67,6 +68,7 @@ class InferenceMode(object):
         if test.scale and self.n_targets:
             unscaled = test.inverse_scale(tensor.numpy())
             for i in range(0, self.n_targets):
+                df["pred_" + self.target_col[i]] = 0
                 df["pred_" + self.target_col[i]][forecast_history:] = unscaled[i, :]
         elif test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
