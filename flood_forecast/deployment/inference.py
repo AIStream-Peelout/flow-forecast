@@ -42,7 +42,7 @@ class InferenceMode(object):
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
-            wandb.config.update(model_params)
+            wandb.config.update(model_params, allow_val_change=True)
 
     def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
         """Performs inference at a specified datatime
