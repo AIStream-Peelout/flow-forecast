@@ -51,6 +51,13 @@ class AE(nn.Module):
         return reconstructed
 
     def generate_representation(self, features):
+        """[summary]
+
+        :param features: Features for the tensor
+        :type features: torch.Tensor
+        :return: [description]
+        :rtype: [type]
+        """
         activation = self.encoder_hidden_layer(features)
         activation = torch.relu(activation)
         code = self.encoder_output_layer(activation)
