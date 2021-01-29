@@ -11,3 +11,7 @@ data
 mypy
 .mypy_cache
 *.png
+.vscode
+.vscode/*
+.idea
+.idea/

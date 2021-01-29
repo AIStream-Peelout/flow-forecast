@@ -246,6 +246,8 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/multitask_decoder.json
             echo -e 'running da-meta data unit test'
             coverage run flood_forecast/trainer.py -p tests/da_meta.json
+            echo -e 'running Deep_AR_test \n'
+            coverage run flood_forecast/trainer.py -p tests/DeepAR_test.json
             echo -e 'running transformer bottleneck'
             coverage run flood_forecast/trainer.py -p tests/transformer_bottleneck.json
             echo -e 'running da_rnn probabilistic test'
