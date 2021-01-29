@@ -3,6 +3,7 @@ from torch import nn
 from torch.autograd import Variable
 from typing import Tuple
 from flood_forecast.meta_models.merging_model import MergingModel
+from flood_forecast.transformer_xl.lower_upper_config import activation_dict
 
 
 class MetaMerger(nn.Module):
@@ -34,13 +35,29 @@ class DARNN(nn.Module):
             dropout=.01,
             meta_data=False,
             gru_lstm=True,
-            probabilistic=False):
-        """
-        n_time_series: Number of time series present in input
-        forecast_history: How many historic time steps to use for forecasting (add one to this number)
-        hidden_size_encoder: dimension of the hidden state encoder
-        decoder_hidden_size: dimension of hidden size of the decoder
-        forecast_history: The number of historical steps fed into the time series model
+            probabilistic=False,
+            final_act=None):
+
+        """ For model benchmark information see link on side https://rb.gy/koozff
+
+        :param n_time_series: Number of time series present in input
+        :type n_time_series: int
+        :param hidden_size_encoder: dimension of the hidden state encoder
+        :type hidden_size_encoder: int
+        :param forecast_history: How many historic time steps to use for forecasting (add one to this number)
+        :type forecast_history: int
+        :param decoder_hidden_size: dimension of hidden size of the decoder
+        :type decoder_hidden_size: int
+        :param out_feats: [description], defaults to 1
+        :type out_feats: int, optional
+        :param dropout: defaults to .01
+        :type dropout: float, optional
+        :param meta_data: [description], defaults to False
+        :type meta_data: bool, optional
+        :param gru_lstm: Specify true if you want to use LSTM, defaults to True
+        :type gru_lstm: bool, optional
+        :param probabilistic: Specify true if you want to use a probablistic variation, defaults to False
+        :type probabilistic: bool, optional
         """
         super().__init__()
         self.probabilistic = probabilistic
@@ -48,8 +65,20 @@ class DARNN(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm,
                                self.probabilistic)
+        self.final_act = final_act
+        if final_act:
+            self.final_act = activation_dict[final_act]
 
     def forward(self, x: torch.Tensor, meta_data: torch.Tensor = None) -> torch.Tensor:
+        """[summary]
+
+        :param x: The core temporal data represented as a tensor (batch_size, forecast_history, n_time_series)
+        :type x: torch.Tensor
+        :param meta_data: The meta-data represented as a tensor (), defaults to None
+        :type meta_data: torch( ).Tensor, optional
+        :return: The predictetd number should be in format
+        :rtype: torch.Tensor
+        """
         _, input_encoded = self.encoder(x[:, :, 1:], meta_data)
         dropped_input = self.dropout(input_encoded)
         y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
@@ -57,6 +86,8 @@ class DARNN(nn.Module):
             mean = y_pred[..., 0][..., None]
             std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
             y_pred = torch.distributions.Normal(mean, std)
+        if self.final_act:
+            return self.final_act(y_pred)
         return y_pred
 
 

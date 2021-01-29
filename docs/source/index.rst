@@ -83,7 +83,6 @@ of datasets.
   :maxdepth: 3
   :caption: DA RNN:
   model
-  modules
 
 
 Indices and tables
