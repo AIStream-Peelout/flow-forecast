@@ -36,7 +36,7 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install flake8
-            flake8 .
+            flake8 . 
 
   evaluator_test:
     <<: *defaults
