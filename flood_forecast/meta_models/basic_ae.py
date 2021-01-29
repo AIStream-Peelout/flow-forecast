@@ -6,10 +6,10 @@ class AE(nn.Module):
     def __init__(self, input_shape, out_features):
         """[summary]
 
-        :param input_shape: [description]
-        :type input_shape: [type]
-        :param out_features: [description]
-        :type out_features: [type]
+        :param input_shape: The number of features for input.
+        :type input_shape: int
+        :param out_features: The number of output features (that will be merged)
+        :type out_features: int
         """
         super().__init__()
         self.encoder_hidden_layer = nn.Linear(
@@ -26,12 +26,19 @@ class AE(nn.Module):
         )
 
     def forward(self, features: torch.Tensor):
-        """[summary]
+        """Runs the full forward pass on the model. In practice
+        this will only be done during training.
 
         :param features: [description]
         :type features: [type]
         :return: [description]
         :rtype: [type]
+
+        .. code-block:: python
+            auto_model = AE(10, 4)
+            x = torch.rand(2, 10) # batch_size, n_features
+            result = auto_model(x)
+            print(result.shape) # (2, 10)
         """
         activation = self.encoder_hidden_layer(features)
         activation = torch.relu(activation)

@@ -64,7 +64,7 @@ def train_transformer_style(
     if "criterion_params" in training_params:
         criterion_init_params = training_params["criterion_params"]
     criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
-    if "probabilistic" in training_params:
+    if "probabilistic" in model.params["model_params"]:
         probabilistic = True
     else:
         probabilistic = False
@@ -177,6 +177,15 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, m=1):
     # Warning this assumes src target is 1-D
+    if not probabilistic and isinstance(output, torch.Tensor):
+        if len(labels.shape) != len(output.shape):
+            print(labels.shape)
+            print(output.shape)
+            if len(labels.shape) > 1:
+                if labels.shape[1] == output.shape[1]:
+                    labels = labels.unsqueeze(2)
+                else:
+                    labels = labels.unsqueeze(0)
     if probabilistic:
         if type(output_std) != torch.Tensor:
             print("Converted")
@@ -196,16 +205,17 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             output = validation_dataset.inverse_scale(output.cpu())
             labels = validation_dataset.inverse_scale(labels.cpu())
             src = validation_dataset.inverse_scale(src.cpu())
-
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
-        loss = loss.numpy()
     elif isinstance(criterion, GaussianLoss):
         g_loss = GaussianLoss(output[0], output[1])
         loss = g_loss(labels)
     elif isinstance(criterion, MASELoss):
+        assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
     else:
+        assert len(labels.shape) == len(output.shape)
+        assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
     return loss
 
@@ -220,8 +230,12 @@ def torch_single_train(model: PyTorchForecast,
                        meta_loss=None,
                        multi_targets=1,
                        forward_params: Dict = {}) -> float:
+    probablistic = None
+    if "probabilistic" in model.params["model_params"]:
+        probablistic = True
     print('running torch_single_train')
     i = 0
+    output_std = None
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
@@ -243,7 +257,11 @@ def torch_single_train(model: PyTorchForecast,
             labels = trg[:, :, 0]
         elif multi_targets > 1:
             labels = trg[:, :, 0:multi_targets]
-        loss = compute_loss(labels, output, src, criterion, None, None, None, m=multi_targets)
+        if probablistic:
+            output1 = output
+            output = output.mean
+            output_std = output1.stddev
+        loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
