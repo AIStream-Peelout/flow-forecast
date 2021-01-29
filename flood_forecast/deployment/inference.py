@@ -16,8 +16,8 @@ class InferenceMode(object):
                  wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
-        :param hours_to_forecast: Number of time-steps to forecasts (doesn't have to be hours)
-        :type hours_to_forecast: int
+        :param forecast_steps: Number of time-steps to forecasts (doesn't have to be hours)
+        :type forecast_steps: int
         :param num_prediction_samples: Number of prediction samples
         :type num_prediction_samples: int
         :param model_params: [description]
@@ -74,7 +74,8 @@ class InferenceMode(object):
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
         if len(samples) > 1:
-            samples[:forecast_history] = 0
+            for i in range(0, len(samples)):
+                samples[i][:forecast_history] = 0
         if save_buck:
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
