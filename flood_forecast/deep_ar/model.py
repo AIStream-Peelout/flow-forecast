@@ -66,8 +66,10 @@ class DeepAR(nn.Module):
         self.distribution_mu = nn.Linear(self.params["lstm_hidden_dim"] * self.params["lstm_layers"], 1)
         self.distribution_presigma = nn.Linear(self.params["lstm_hidden_dim"] * self.params["lstm_layers"], 1)
         self.distribution_sigma = nn.Softplus()
+        self.cell = self.init_cell(1 + self.params["cov_dim"] + self.params["embedding_dim"])
+        self.hidden = self.init_hidden(1 + self.params["cov_dim"] + self.params["embedding_dim"])
 
-    def forward(self, x, idx, hidden, cell):
+    def forward(self, x, idx=0):
         '''
         Predict mu and sigma of the distribution for z_t.
         Args:
@@ -83,7 +85,9 @@ class DeepAR(nn.Module):
         '''
         onehot_embed = self.embedding(idx)  # TODO: is it possible to do this only once per window instead of per step?
         lstm_input = torch.cat((x, onehot_embed), dim=2)
-        output, (hidden, cell) = self.lstm(lstm_input, (hidden, cell))
+        output, (hidden, cell) = self.lstm(lstm_input, (self.hidden, self.cell))
+        self.cell = cell
+        self.hidden = hidden
         # use h from all three layers to calculate mu and sigma
         hidden_permute = hidden.permute(1, 2, 0).contiguous().view(hidden.shape[1], -1)
         pre_sigma = self.distribution_presigma(hidden_permute)
