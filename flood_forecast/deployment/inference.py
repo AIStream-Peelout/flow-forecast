@@ -11,25 +11,27 @@ import torch
 
 
 class InferenceMode(object):
-    def __init__(self, hours_to_forecast: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
+    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
                  wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
-        :param hours_to_forecast: Number of time-steps to forecasts (doesn't have to be hours)
-        :type hours_to_forecast: int
+        :param forecasts_steps: Number of time-steps to forecast (doesn't have to be hours)
+        :type forecast_steps: int
         :param num_prediction_samples: Number of prediction samples
         :type num_prediction_samples: int
-        :param model_params: [description]
-        :type model_params: [type]
-        :param csv_path: [description]
+        :param model_params: A dictionary of model parameters (ideally this should come from saved JSON config file)
+        :type model_params: Dict
+        :param csv_path: Path to the CSV test file you want to be used for inference. Evem of you aren't using
         :type csv_path: str
-        :param weight_path: [description]
+        :param weight_path: Path to the model weights
         :type weight_path: [type]
         :param wandb_proj: [description], defaults to None
         :type wandb_proj: str, optionals
         """
-        self.hours_to_forecast = hours_to_forecast
+        self.hours_to_forecast = forecast_steps
         self.csv_path = csv_path
+        self.n_targets = model_params.get("n_targets")
+        self.targ_cols = model_params["dataset_params"]["target_col"]
         self.model = load_model(model_params.copy(), csv_path, weight_path)
         self.inference_params = model_params["inference_params"]
         if "scaling" in self.inference_params["dataset_params"]:
@@ -62,7 +64,9 @@ class InferenceMode(object):
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
-        if test.scale:
+        if test.scale and self.n_targets:
+
+        elif test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
         if len(samples) > 1:
