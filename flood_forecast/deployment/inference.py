@@ -65,8 +65,9 @@ class InferenceMode(object):
         if test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
-        if len(samples) > 1:
-            samples[:forecast_history] = 0
+        if len(samples) > 0:
+            for i in range(0, len(samples)):
+                samples[i][:forecast_history] = 0
         if save_buck:
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
