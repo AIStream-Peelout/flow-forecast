@@ -105,7 +105,7 @@ class InferenceMode(object):
         for sample, targ in zip(samples, self.model.params["dataset_params"]["target_col"]):
             plt = plot_df_test_with_confidence_interval(df, sample, forecast_start, self.model.params, targ)
             if wandb_plot_id:
-                wandb.log({wandb_plot_id: plt})
+                wandb.log({wandb_plot_id + targ: plt})
                 if not self.n_targets:
                     deep_explain_model_summary_plot(self.model, test, date)
                     deep_explain_model_heatmap(self.model, test, date)
