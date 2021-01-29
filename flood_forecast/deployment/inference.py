@@ -24,8 +24,8 @@ class InferenceMode(object):
         :param csv_path: Path to the CSV test file you want to be used for inference. Evem of you aren't using
         :type csv_path: str
         :param weight_path: Path to the model weights
-        :type weight_path: [type]
-        :param wandb_proj: [description], defaults to None
+        :type weight_path: str
+        :param wandb_proj: The name of the WB project leave blank if you don't want to log to Wandb, defaults to None
         :type wandb_proj: str, optionals
         """
         self.hours_to_forecast = forecast_steps
@@ -37,12 +37,12 @@ class InferenceMode(object):
         if "scaling" in self.inference_params["dataset_params"]:
             s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
             self.inference_params["dataset_params"]["scaling"] = s
-        self.inference_params["hours_to_forecast"] = hours_to_forecast
+        self.inference_params["hours_to_forecast"] = forecast_steps
         self.inference_params["num_prediction_samples"] = num_prediction_samples
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
-            wandb.config.update(model_params)
+            wandb.config.update(model_params, allow_val_change=True)
 
     def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
         """Performs inference at a specified datatime
@@ -56,7 +56,7 @@ class InferenceMode(object):
         :type save_name: [type], optional
         :return: Returns a tuple consisting of the Pandas dataframe with predictions + history,
         the prediction tensor, a tensor of the historical values, the forecast start index, and the test
-        :rtype: [type]
+        :rtype: tuple(pd.DataFrame, torch.Tensor, )
         """
         forecast_history = self.inference_params["dataset_params"]["forecast_history"]
         self.inference_params["datetime_start"] = some_date
@@ -65,7 +65,12 @@ class InferenceMode(object):
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
         if test.scale and self.n_targets:
-
+            for i in range(0, self.n_targets):
+                unscaled = test.inverse_scale(tensor.numpy())
+                df["pred_" + self.targ_cols[i]] = 0
+                print("Shape of unscaled is: ")
+                print(unscaled.shape)
+                df["pred_" + self.targ_cols[i]][forecast_history:] = unscaled
         elif test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
@@ -91,7 +96,7 @@ class InferenceMode(object):
         :param wandb_plot_id: [description], defaults to None
         :type wandb_plot_id: [type], optional
         :return: [description]
-        :rtype: [type]
+        :rtype: tuple()
         """
         if csv_path is None:
             csv_path = self.csv_path
@@ -100,9 +105,10 @@ class InferenceMode(object):
         for sample, targ in zip(samples, self.model.params["dataset_params"]["target_col"]):
             plt = plot_df_test_with_confidence_interval(df, sample, forecast_start, self.model.params, targ)
             if wandb_plot_id:
-                wandb.log({wandb_plot_id: plt})
-                deep_explain_model_summary_plot(self.model, test, date)
-                deep_explain_model_heatmap(self.model, test, date)
+                wandb.log({wandb_plot_id + targ: plt})
+                if not self.n_targets:
+                    deep_explain_model_summary_plot(self.model, test, date)
+                    deep_explain_model_heatmap(self.model, test, date)
         return tensor, history, test, plt
 
 
