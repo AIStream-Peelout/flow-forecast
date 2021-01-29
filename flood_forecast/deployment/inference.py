@@ -83,7 +83,7 @@ class InferenceMode(object):
 
     def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
                    save_name=None, wandb_plot_id=None):
-        """
+        """Function to create plots in inference mode.
 
         :param date: [description]
         :type date: datetime
@@ -136,7 +136,11 @@ def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchFo
     return model
 
 
-def load_model(model_params_dict, file_path, weight_path: str) -> PyTorchForecast:
+def convert_to_onnx():
+    pass
+
+
+def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchForecast:
     """Function to load a PyTorchForecast model from an existing config file.
 
     :param model_params_dict: Dictionary of model parameters
