@@ -69,7 +69,7 @@ class DeepAR(nn.Module):
         self.cell = self.init_cell(1 + self.params["cov_dim"] + self.params["embedding_dim"])
         self.hidden = self.init_hidden(1 + self.params["cov_dim"] + self.params["embedding_dim"])
 
-    def forward(self, x, idx=0):
+    def forward(self, x, idx=torch.Tensor(0)):
         '''
         Predict mu and sigma of the distribution for z_t.
         Args:
