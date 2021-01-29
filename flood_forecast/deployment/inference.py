@@ -69,7 +69,7 @@ class InferenceMode(object):
             unscaled = test.inverse_scale(tensor.numpy())
             for i in range(0, self.n_targets):
                 df["pred_" + self.target_col[i]] = 0
-                df["pred_" + self.target_col[i]][forecast_history:] = unscaled[i, :]
+                df["pred_" + self.target_col[i]][forecast_history:] = unscaled[i, :].numpy()
         elif test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
