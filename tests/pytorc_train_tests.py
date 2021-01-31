@@ -5,7 +5,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.pytorch_training import torch_single_train, compute_loss
 import unittest
 import json
-from flood_forecast.pytorch_training import train_transformer_style
+from flood_forecast.pytorch_training import train_transformer_style, handle_meta_data
 
 
 class PyTorchTrainTests(unittest.TestCase):
@@ -275,6 +275,25 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(trg1.shape[0], 15)
         self.assertEqual(trg2.shape[0], 15)
         self.assertEqual(trg3.shape[0], 25)
+
+    def test_handle_meta(self):
+        with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
+            json_config = json.load(f)
+        model = PyTorchForecast("PyTorch", self.keag_file, self.keag_file, self.keag_file, json_config)
+        meta_models, meta_reps, loss = handle_meta_data(model)
+        self.assertIsNone(loss)
+        self.assertIsInstance(meta_reps, torch.Tensor)
+        self.assertIsInstance(meta_models, PyTorchForecast)
+
+    def test_handle_meta2(self):
+        with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
+            json_config = json.load(f)
+        json_config["meta_data"]["meta_loss"] = "MSE"
+        model = PyTorchForecast("PyTorch", self.keag_file, self.keag_file, self.keag_file, json_config)
+        meta_models, meta_reps, loss = handle_meta_data(model)
+        self.assertIsNotNone(loss)
+        self.assertIsInstance(meta_reps, torch.Tensor)
+        self.assertIsInstance(meta_models, PyTorchForecast)
 
 if __name__ == '__main__':
     unittest.main()
