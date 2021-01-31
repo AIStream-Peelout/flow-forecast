@@ -3,6 +3,7 @@ from flood_forecast.da_rnn.model import DARNN
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.dilate_loss import pairwise_distances
 from flood_forecast.basic.linear_regression import SimpleLinearModel
+from flood_forecast.custom.custom_activation import _sparsemax_threshold_and_support, _make_ix_like
 import unittest
 import torch
 
@@ -73,6 +74,11 @@ class TestLossFunctions(unittest.TestCase):
         s.check_loss(mod, 14)
         s.check_loss(mod, 13.9)
         self.assertFalse(s.check_loss(mod, 14.6))
+
+    def test_sparse_threshold(self):
+        _make_ix_like(torch.rand(2, 20, 20), 1)
+        _sparsemax_threshold_and_support(torch.rand(2, 30, 40))
+
 
 if __name__ == '__main__':
     unittest.main()
