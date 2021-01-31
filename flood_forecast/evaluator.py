@@ -317,7 +317,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
             for i in range(0, multi_params):
                 if i > 0:
                     if np.equal(prediction_samples[i, :, 0, :], prediction_samples[i - 1, :, 0, :]).all():
-                        raise ValueError("Something is wrong data for the targets is equal")
+                        raise ValueError("Something is wrong data for the target values is equal")
                 df_pred.iloc[history_length:] = prediction_samples[i, :, 0, :]
                 df_prediction_arr.append(df_pred.copy())
     else:
