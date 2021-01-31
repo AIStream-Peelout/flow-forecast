@@ -56,11 +56,10 @@ class TestLossFunctions(unittest.TestCase):
         pairwise_distances(torch.rand(2, 3))
 
     def test_early_stop(self):
-        s = EarlyStopper(2, 0.2)
+        s = EarlyStopper(2, 0.2, True)
         mod = SimpleLinearModel(2, 2)
         s.check_loss(mod, 14)
         s.check_loss(mod, 14.5)
-        s.check_loss(mod, 14.6)
         self.assertFalse(s.check_loss(mod, 14.6))
 
     def test_early2_stop(self):
