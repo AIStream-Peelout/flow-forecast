@@ -47,6 +47,7 @@ class TestLossFunctions(unittest.TestCase):
 
     def test_regularlizer(self):
         dd = DARNN(3, 128, 10, 128, 1, 0.2)
+        # Todo actually use these outputs
         l1_regularizer(dd)
         orth_regularizer(dd)
         self.assertIsInstance(dd, DARNN)
