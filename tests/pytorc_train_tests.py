@@ -280,7 +280,7 @@ class PyTorchTrainTests(unittest.TestCase):
     def test_handle_meta(self):
         with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
             json_config = json.load(f)
-        model = PyTorchForecast("PyTorch", self.keag_file, self.keag_file, self.keag_file, json_config)
+        model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, json_config)
         meta_models, meta_reps, loss = handle_meta_data(model)
         self.assertIsNone(loss)
         self.assertIsInstance(meta_reps, torch.Tensor)
@@ -290,7 +290,7 @@ class PyTorchTrainTests(unittest.TestCase):
         with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
             json_config = json.load(f)
         json_config["meta_data"]["meta_loss"] = "MSE"
-        model = PyTorchForecast("PyTorch", self.keag_file, self.keag_file, self.keag_file, json_config)
+        model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, json_config)
         meta_models, meta_reps, loss = handle_meta_data(model)
         self.assertIsNotNone(loss)
         self.assertIsInstance(meta_reps, torch.Tensor)
