@@ -13,7 +13,14 @@ from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 
 
-def handle_meta_data(model):
+def handle_meta_data(model: PyTorchForecast):
+    """A function to init models with meta-data
+
+    :param model: A PyTorchForecast model with meta_data parameter block in config file.
+    :type model: PyTorchForecast
+    :return: Returns a tuple of the initial meta-representation
+    :rtype: tuple(PyTorchForecast, torch.Tensor, torch.nn)
+    """
     meta_loss = None
     with open(model.params["meta_data"]["path"]) as f:
         json_data = json.load(f)

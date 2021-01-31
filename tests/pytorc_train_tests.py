@@ -49,6 +49,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "metrics": ["MAPE", "MSE"],
                 "dataset_params": {
                     "forecast_test_len": 15,
+                    "num_workers": 2,
                     "forecast_history": 5,
                     "class": "default",
                     "forecast_length": 5,
