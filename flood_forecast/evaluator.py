@@ -295,6 +295,8 @@ def infer_on_torch_model(
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int) -> List[pd.DataFrame]:
+    print(type(prediction_samples))
+    print(len(prediction_samples))
     df_prediction_arr = []
     if decoder_param is not None:
         if "probabilistic" in decoder_param:
@@ -306,7 +308,6 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
             df_pred.iloc[history_length:] = prediction_samples
             df_prediction_arr.append(df_pred)
         else:
-            print(prediction_samples.shape)
             for i in range(0, len(prediction_samples)):
                 tra = prediction_samples[:, :, 0, i]
                 prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)

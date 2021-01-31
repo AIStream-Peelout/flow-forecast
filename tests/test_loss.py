@@ -60,6 +60,7 @@ class TestLossFunctions(unittest.TestCase):
         mod = SimpleLinearModel(2, 2)
         s.check_loss(mod, 14)
         s.check_loss(mod, 14.5)
+        s.check_loss(mod, 14.6)
         self.assertFalse(s.check_loss(mod, 14.6))
 
     def test_early2_stop(self):
@@ -74,6 +75,7 @@ class TestLossFunctions(unittest.TestCase):
         mod = SimpleLinearModel(2, 2)
         s.check_loss(mod, 14)
         s.check_loss(mod, 13.9)
+        s.check_loss(mod, 14.5)
         self.assertFalse(s.check_loss(mod, 14.6))
 
     def test_sparse_threshold(self):
