@@ -59,6 +59,7 @@ class TestLossFunctions(unittest.TestCase):
         n = NaiveBase(2, 2)
         e.check_loss(n, .9)
         e.check_loss(n, .8)
+        e.check_loss(n, .9)
         self.assertFalse(e.check_loss(n, .75))
 
     def test_early_stopper2(self):
@@ -76,7 +77,7 @@ class TestLossFunctions(unittest.TestCase):
         e.check_loss(n, 1.2)
         self.assertFalse(e.check_loss(n, .8))
 
-    def test_sparse_max_run(self):
+    def test_sparse_max(self):
         _entmax_threshold_and_support(torch.rand(2, 20, 3))
         _sparsemax_threshold_and_support(torch.rand(2, 30, 3))
 
