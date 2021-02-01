@@ -5,16 +5,16 @@ class NaiveBase(torch.nn.Module):
     """
     A very simple baseline model that returns
     the fixed value based on the input sequence.
-    No learning used at all
+    No learning used at all a
     """
 
     def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, metric: str = "last"):
-        super.__init__()
+        super().__init__()
         self.forecast_history = seq_length
         self.n_time_series = n_time_series
         self.initial_layer = torch.nn.Linear(n_time_series, 1)
         self.output_layer = torch.nn.Linear(seq_length, output_seq_len)
-        self.metric_dic = {"last": the_last}
+        self.metric_dict = {"last": the_last}
         self.output_seq_len = output_seq_len
         self.metric_function = self.metric_dict[metric]
 
