@@ -12,7 +12,7 @@ def numpy_to_tvar(x):
     :param x: [description]
     :type x: [type]
     :return: [description]
-    :rtype: [type]
+    :rtype: torch.Variable
     """
     return Variable(torch.from_numpy(x).type(torch.FloatTensor).to(device))
 
