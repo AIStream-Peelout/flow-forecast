@@ -43,7 +43,7 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
 def feature_fix(preprocess_params, dt_column, df):
     """Adds temporal features
 
-    :param preprocess_params: [description]
+    :param preprocess_params: Stuff
     :type preprocess_params: [type]
     :param dt_column: [description]
     :type dt_column: [type]

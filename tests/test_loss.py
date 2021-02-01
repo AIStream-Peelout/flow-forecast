@@ -1,6 +1,9 @@
 from flood_forecast.custom.custom_opt import MASELoss, MAPELoss, RMSELoss, BertAdam, l1_regularizer, orth_regularizer
 from flood_forecast.da_rnn.model import DARNN
+from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.dilate_loss import pairwise_distances
+from flood_forecast.basic.linear_regression import SimpleLinearModel
+from flood_forecast.custom.custom_activation import _sparsemax_threshold_and_support, _make_ix_like
 import unittest
 import torch
 
@@ -44,12 +47,40 @@ class TestLossFunctions(unittest.TestCase):
 
     def test_regularlizer(self):
         dd = DARNN(3, 128, 10, 128, 1, 0.2)
+        # Todo actually use these outputs
         l1_regularizer(dd)
         orth_regularizer(dd)
         self.assertIsInstance(dd, DARNN)
 
     def test_pairwise(self):
         pairwise_distances(torch.rand(2, 3))
+
+    def test_early_stop(self):
+        s = EarlyStopper(2, 0.2, True)
+        mod = SimpleLinearModel(2, 2)
+        s.check_loss(mod, 14)
+        s.check_loss(mod, 14.5)
+        self.assertFalse(s.check_loss(mod, 14.6))
+
+    def test_early2_stop(self):
+        s = EarlyStopper(2, 0.01)
+        mod = SimpleLinearModel(2, 2)
+        s.check_loss(mod, 14)
+        s.check_loss(mod, 13.9)
+        self.assertTrue(s.check_loss(mod, 14.6))
+
+    def test_early3_stop(self):
+        s = EarlyStopper(2, 0.4)
+        mod = SimpleLinearModel(2, 2)
+        s.check_loss(mod, 14)
+        s.check_loss(mod, 13.9)
+        s.check_loss(mod, 14.5)
+        self.assertFalse(s.check_loss(mod, 14.6))
+
+    def test_sparse_threshold(self):
+        _make_ix_like(torch.rand(2, 20, 20), 1)
+        _sparsemax_threshold_and_support(torch.rand(2, 30, 40))
+
 
 if __name__ == '__main__':
     unittest.main()
