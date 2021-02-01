@@ -344,7 +344,6 @@ def orth_regularizer(model, lambda_orth=0.01):
     """
     lossorth = 0
     for model_param_name, model_param_value in model.named_parameters():
-        print(model_param_name)
         if model_param_name.endswith('weight'):
             param_flat = model_param_value.view(model_param_value.shape[0], -1)
             sym = torch.mm(param_flat, torch.t(param_flat))
