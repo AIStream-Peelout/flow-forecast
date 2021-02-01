@@ -14,7 +14,7 @@ class NaiveBase(torch.nn.Module):
         self.n_time_series = n_time_series
         self.initial_layer = torch.nn.Linear(n_time_series, 1)
         self.output_layer = torch.nn.Linear(seq_length, output_seq_len)
-        self.metric_dic = {"last": the_last}
+        self.metric_dict = {"last": the_last}
         self.output_seq_len = output_seq_len
         self.metric_function = self.metric_dict[metric]
 
