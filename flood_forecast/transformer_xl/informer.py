@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from flood_forecast.transformer_xl.attn import FullAttention, ProbAttention, AttentionLayer
-from models.embed import DataEmbedding
+from flood_forecast.transformer_xl.data_embeddding import DataEmbedding
 
 """ This is the implementation of the Informer available from the original authors
     https://github.com/zhouhaoyi/Informer2020. We have done some minimal refactoring"""

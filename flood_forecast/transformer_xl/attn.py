@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 from math import sqrt
 from flood_forecast.transformer_xl.masks import TriangularCausalMask, ProbMask
@@ -67,8 +66,8 @@ class ProbAttention(nn.Module):
         if not self.mask_flag:
             V_sum = V.sum(dim=-2)
             contex = V_sum.unsqueeze(-2).expand(B, H, L_Q, V_sum.shape[-1]).clone()
-        else: # use mask
-            assert(L_Q == L_V) # requires that L_Q == L_V, i.e. for self-attention only
+        else:  # use mask
+            assert(L_Q == L_V)  # requires that L_Q == L_V, i.e. for self-attention only
             contex = V.cumsum(dim=-1)
         return contex
 
@@ -79,7 +78,7 @@ class ProbAttention(nn.Module):
             attn_mask = ProbMask(B, H, L_Q, index, scores, device=V.device)
             scores.masked_fill_(attn_mask.mask, -np.inf)
 
-        attn = torch.softmax(scores, dim=-1) # nn.Softmax(dim=-1)(scores)
+        attn = torch.softmax(scores, dim=-1)  # nn.Softmax(dim=-1)(scores)
 
         context_in[torch.arange(B)[:, None, None],
                    torch.arange(H)[None, :, None],
@@ -96,17 +95,15 @@ class ProbAttention(nn.Module):
 
         U = self.factor * np.ceil(np.log(S)).astype('int').item()
         u = self.factor * np.ceil(np.log(L)).astype('int').item()
-        
         scores_top, index = self._prob_QK(queries, keys, u, U)
         # add scale factor
-        scale = self.scale or 1./sqrt(D)
+        scale = self.scale or 1. / sqrt(D)
         if scale is not None:
             scores_top = scores_top * scale
         # get the context
         context = self._get_initial_context(values, L)
         # update the context with selected top_k queries
         context = self._update_context(context, values, scores_top, index, L, attn_mask)
-        
         return context.contiguous()
 
 
@@ -115,8 +112,8 @@ class AttentionLayer(nn.Module):
                  d_values=None):
         super(AttentionLayer, self).__init__()
 
-        d_keys = d_keys or (d_model//n_heads)
-        d_values = d_values or (d_model//n_heads)
+        d_keys = d_keys or (d_model // n_heads)
+        d_values = d_values or (d_model // n_heads)
 
         self.inner_attention = attention
         self.query_projection = nn.Linear(d_model, d_keys * n_heads)
@@ -140,5 +137,4 @@ class AttentionLayer(nn.Module):
             values,
             attn_mask
         ).view(B, L, -1)
-
         return self.out_projection(out)
