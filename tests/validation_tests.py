@@ -14,12 +14,12 @@ class TestValidationLogic(unittest.TestCase):
             "metrics": ["MSE", "MAPE"],
             "model_params": {
                 "number_time_series": 3,
-                "forecast_length": 30,
+                "forecast_length": 10,
                 "seq_len": 20},
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
-                "forecast_length": 30,
+                "forecast_length": 10,
                 "forecast_test_len": 100,
                 "relevant_cols": [
                     "cfs",
@@ -44,12 +44,19 @@ class TestValidationLogic(unittest.TestCase):
 
     def test_compute_validation(self):
         d = torch.utils.data.DataLoader(self.model_m.test_data)
-        s, u = compute_validation(d, self.model_m.model, 0, 30, [torch.nn.MSELoss(), MAPELoss()], "cpu",
+        s, u = compute_validation(d, self.model_m.model, 0, 10, [torch.nn.MSELoss(), MAPELoss()], "cpu",
                                   True, val_or_test="test_loss")
-        self.assertIn("MAPELoss", s)
-        self.assertIn("MSELoss", s)
-        self.assertIn("MAPELoss", u)
-        self.assertIn("MSELoss", u)
+        result_values = list(s.values())
+        unscale_result_values = list(u.values())
+        self.assertEqual(len(result_values), 2)
+        # Each of these represents a specific bug that was found earlier.
+        self.assertNotAlmostEqual(result_values[0], result_values[1])
+        self.assertNotAlmostEqual(result_values[0], result_values[1] * 2)
+        self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1])
+        self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
+
+    def test_naieve(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
