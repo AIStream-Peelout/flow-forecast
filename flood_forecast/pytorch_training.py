@@ -1,6 +1,6 @@
 import torch
 import torch.optim as optim
-from typing import Type, Dict
+from typing import Type, Dict, List
 from torch.utils.data import DataLoader
 import json
 import wandb
@@ -315,7 +315,7 @@ def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
                        forecast_length: int,
-                       criterion: Type[torch.nn.modules.loss._Loss],
+                       criterion: List[torch.nn.modules.loss._Loss],
                        device: torch.device,
                        decoder_structure=False,
                        meta_data_model=None,
@@ -383,6 +383,7 @@ def compute_validation(validation_loader: DataLoader,
             elif multi_targets > 1:
                 labels = targ[:, :, 0:multi_targets]
             validation_dataset = validation_loader.dataset
+            print("running crit ")
             for crit in criterion:
                 if validation_dataset.scale:
                     # Should this also do loss.item() stuff?
@@ -392,6 +393,7 @@ def compute_validation(validation_loader: DataLoader,
                     loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
                                                       probabilistic, output_std, m=multi_targets)
                     unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
+                    print(unscaled_crit)
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std, m=multi_targets)
                 scaled_crit[crit] += loss.item() * len(labels.float())
     end_time = timer()

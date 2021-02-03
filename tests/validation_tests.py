@@ -97,6 +97,7 @@ class TestValidationLogic(unittest.TestCase):
                                   True, val_or_test="test_loss")
         result_values = list(s.values())
         unscale_result_values = list(u.values())
+        self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
         self.assertGreater(result_values[1], result_values[0])
         self.assertLess(unscale_result_values[0], unscale_result_values[1])
 
