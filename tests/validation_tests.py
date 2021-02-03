@@ -1,5 +1,6 @@
 from flood_forecast.pytorch_training import compute_validation
 from flood_forecast.custom.custom_opt import MAPELoss
+import numpy as np
 from flood_forecast.time_model import PyTorchForecast
 # from torch.utils.data import DataLoader
 import unittest
@@ -48,8 +49,8 @@ class TestValidationLogic(unittest.TestCase):
                                   True, val_or_test="test_loss")
         result_values = list(s.values())
         unscale_result_values = list(u.values())
-        unscale_mse = self.model_m.test_data.inverse_scale(result_values[0])
-        unscale_mape = self.model_m.test_data.inverse_scale(result_values[1])
+        unscale_mse = self.model_m.test_data.inverse_scale(np.ndarray(result_values[0]).reshape(-1, 1))
+        unscale_mape = self.model_m.test_data.inverse_scale(np.ndarray(result_values[1]).reshape(-1, 1))
         self.assertEqual(len(result_values), 2)
         # Each of these represents a specific bug that was found earlier.
         self.assertNotAlmostEqual(result_values[0], result_values[1])
