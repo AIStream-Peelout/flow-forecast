@@ -39,6 +39,10 @@ class TestValidationLogic(unittest.TestCase):
             "wandb": False,
             "inference_params": {
                 "hours_to_forecast": 10}}
+        self.baseline_model_params = {
+            "model_name": ""
+
+        }
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model_m = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file,
                                        self.keag_file, self.model_params)
@@ -49,8 +53,10 @@ class TestValidationLogic(unittest.TestCase):
                                   True, val_or_test="test_loss")
         result_values = list(s.values())
         unscale_result_values = list(u.values())
-        unscale_mse = self.model_m.test_data.inverse_scale(np.ndarray(result_values[0]).reshape(-1, 1))
-        unscale_mape = self.model_m.test_data.inverse_scale(np.ndarray(result_values[1]).reshape(-1, 1))
+        numpy_arr = np.full(shape=1, fill_value=result_values[0], dtype=np.float).reshape(-1, 1)
+        numpy_arr2 = np.full(shape=1, fill_value=result_values[1], dtype=np.float).reshape(-1, 1)
+        unscale_mse = self.model_m.test_data.inverse_scale(numpy_arr)
+        unscale_mape = self.model_m.test_data.inverse_scale(numpy_arr2)
         self.assertEqual(len(result_values), 2)
         # Each of these represents a specific bug that was found earlier.
         self.assertNotAlmostEqual(result_values[0], result_values[1])
