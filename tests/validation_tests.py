@@ -1,5 +1,7 @@
 from flood_forecast.pytorch_training import compute_validation
 from flood_forecast.custom.custom_opt import MAPELoss
+from flood_forecast.custom.dilate_loss import DilateLoss
+
 import numpy as np
 from flood_forecast.time_model import PyTorchForecast
 # from torch.utils.data import DataLoader
@@ -40,7 +42,7 @@ class TestValidationLogic(unittest.TestCase):
             "inference_params": {
                 "hours_to_forecast": 10}}
         self.baseline_model_params = {
-            "metrics": ["MSE", "MAPE"],
+            "metrics": ["MSE", "DilateLoss"],
             "model_params": {
                 "number_time_series": 3,
                 "forecast_length": 10,
@@ -70,7 +72,7 @@ class TestValidationLogic(unittest.TestCase):
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model_m = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file,
                                        self.keag_file, self.model_params)
-        self.model_dumb = PyTorchForecast("DummyModel", self.keag_file, self.keag_file, self.keag_file,
+        self.model_dumb = PyTorchForecast("DummyTorchModel", self.keag_file, self.keag_file, self.keag_file,
                                           self.baseline_model_params)
 
     def test_compute_validation(self):
@@ -93,7 +95,13 @@ class TestValidationLogic(unittest.TestCase):
         self.assertAlmostEqual(unscale_mape.numpy()[0], unscale_result_values[1])
 
     def test_naieve(self):
-        pass
+        d = torch.utils.data.DataLoader(self.model_dumb.test_data)
+        s, u = compute_validation(d, self.model_m.model, 0, 10, [torch.nn.MSELoss(), DilateLoss()], "cpu",
+                                  True, val_or_test="test_loss")
+        result_values = list(s.values())
+        unscale_result_values = list(u.values())
+        self.assertGreater(result_values[1], result_values[0])
+        self.assertLess(unscale_result_values[0], unscale_result_values[1])
 
 if __name__ == '__main__':
     unittest.main()
