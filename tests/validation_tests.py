@@ -63,8 +63,8 @@ class TestValidationLogic(unittest.TestCase):
         self.assertNotAlmostEqual(result_values[0], result_values[1] * 2)
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1])
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
-        self.assertAlmostEqual(unscale_mse, unscale_result_values[0])
-        self.assertAlmostEqual(unscale_mape, unscale_result_values[1])
+        self.assertAlmostEqual(unscale_mse.numpy(), unscale_result_values[0])
+        self.assertAlmostEqual(unscale_mape.numpy(), unscale_result_values[1])
 
     def test_naieve(self):
         pass
