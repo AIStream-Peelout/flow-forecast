@@ -14,12 +14,12 @@ class TestValidationLogic(unittest.TestCase):
             "metrics": ["MSE", "MAPE"],
             "model_params": {
                 "number_time_series": 3,
-                "forecast_length": 30,
+                "forecast_length": 5,
                 "seq_len": 20},
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
-                "forecast_length": 30,
+                "forecast_length": 5,
                 "forecast_test_len": 100,
                 "relevant_cols": [
                     "cfs",
@@ -44,7 +44,7 @@ class TestValidationLogic(unittest.TestCase):
 
     def test_compute_validation(self):
         d = torch.utils.data.DataLoader(self.model_m.test_data)
-        s, u = compute_validation(d, self.model_m.model, 0, 30, [torch.nn.MSELoss(), MAPELoss()], "cpu",
+        s, u = compute_validation(d, self.model_m.model, 0, 5, [torch.nn.MSELoss(), MAPELoss()], "cpu",
                                   True, val_or_test="test_loss")
         self.assertIn("MAPELoss", s)
         self.assertIn("MSELoss", s)
