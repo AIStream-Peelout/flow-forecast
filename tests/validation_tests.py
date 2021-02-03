@@ -1,13 +1,12 @@
-from flood_forecast.pytorch_training import compute_validation
-from flood_forecast.custom.custom_opt import MAPELoss
-from flood_forecast.custom.dilate_loss import DilateLoss
-
-import numpy as np
-from flood_forecast.time_model import PyTorchForecast
-# from torch.utils.data import DataLoader
 import unittest
 import torch
 import os
+import numpy as np
+from flood_forecast.pytorch_training import compute_validation
+from flood_forecast.custom.custom_opt import MAPELoss
+from flood_forecast.custom.dilate_loss import DilateLoss
+from flood_forecast.time_model import PyTorchForecast
+# from torch.utils.data import DataLoader
 
 
 class TestValidationLogic(unittest.TestCase):
@@ -44,9 +43,7 @@ class TestValidationLogic(unittest.TestCase):
         self.baseline_model_params = {
             "metrics": ["MSE", "DilateLoss"],
             "model_params": {
-                "number_time_series": 3,
-                "forecast_length": 10,
-                "seq_len": 20},
+                "forecast_length": 10},
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
