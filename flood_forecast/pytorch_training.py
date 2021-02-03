@@ -4,6 +4,7 @@ from typing import Type, Dict
 from torch.utils.data import DataLoader
 import json
 import wandb
+from timeit import default_timer as timer
 from flood_forecast.utils import numpy_to_tvar
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
@@ -143,6 +144,8 @@ def train_transformer_style(
             decoder_structure=use_decoder,
             use_wandb=use_wandb,
             probabilistic=probabilistic)
+        # Get metric from the return tuple
+        valid = list(valid[0])[0]
         if valid == 0.0:
             raise ValueError("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
@@ -183,7 +186,27 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, m=1):
-    # Warning this assumes src target is 1-D
+    """[summary]
+
+    :param labels: [description]
+    :type labels: [type]
+    :param output: [description]
+    :type output: [type]
+    :param src: [description]
+    :type src: [type]
+    :param criterion: [description]
+    :type criterion: [type]
+    :param validation_dataset: [description]
+    :type validation_dataset: [type]
+    :param probabilistic: [description], defaults to None
+    :type probabilistic: [type], optional
+    :param output_std: [description], defaults to None
+    :type output_std: [type], optional
+    :param m: [description], defaults to 1
+    :type m: int, optional
+    :return: [description]
+    :rtype: [type]
+    """
     if not probabilistic and isinstance(output, torch.Tensor):
         if len(labels.shape) != len(output.shape):
             if len(labels.shape) > 1:
@@ -235,6 +258,7 @@ def torch_single_train(model: PyTorchForecast,
                        meta_loss=None,
                        multi_targets=1,
                        forward_params: Dict = {}) -> float:
+    start_time = timer()
     probablistic = None
     if "probabilistic" in model.params["model_params"]:
         probablistic = True
@@ -275,6 +299,9 @@ def torch_single_train(model: PyTorchForecast,
             raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
         running_loss += loss.item()
         i += 1
+    end_time = timer()
+    elapsed_time = end_time - start_time
+    wandb.log({"train_loop_time": elapsed_time})
     print("The running loss is:")
     print(running_loss)
     print("The number of items in train is: ")
@@ -286,7 +313,7 @@ def torch_single_train(model: PyTorchForecast,
 def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
-                       sequence_size: int,
+                       forecast_length: int,
                        criterion: Type[torch.nn.modules.loss._Loss],
                        device: torch.device,
                        decoder_structure=False,
@@ -299,7 +326,8 @@ def compute_validation(validation_loader: DataLoader,
     """
     Function to compute the validation or the test loss
     """
-    print('compute_validation')
+    print('Computing validation loss')
+    start_time = timer()
     unscaled_crit = dict.fromkeys(criterion, 0)
     scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
@@ -339,7 +367,7 @@ def compute_validation(validation_loader: DataLoader,
                                                src=src,
                                                max_seq_len=targ.shape[1],
                                                real_target=targ,
-                                               output_len=sequence_size,
+                                               output_len=forecast_length,
                                                multi_targets=multi_targets,
                                                probabilistic=probabilistic)[:, :, 0:multi_targets]
             else:
@@ -365,15 +393,17 @@ def compute_validation(validation_loader: DataLoader,
                     unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
                 loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std, m=multi_targets)
                 scaled_crit[crit] += loss.item() * len(labels.float())
+    end_time = timer()
     if use_wandb:
         if loss_unscaled_full:
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             newD = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in unscaled_crit.items()}
             wandb.log({'epoch': epoch,
                        val_or_test: scaled,
+                       val_or_test + "_time": end_time - start_time,
                        "unscaled_" + val_or_test: newD})
         else:
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
     model.train()
-    return list(scaled_crit.values())[0]
+    return scaled_crit, unscaled_crit

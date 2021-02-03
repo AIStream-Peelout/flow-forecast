@@ -102,7 +102,7 @@ jobs:
             - ~/.local
 
       - run:
-          name: Data Quality Tests
+          name: Data Quality Tests and Validation Tests
           command: |
             coverage run -m unittest -v tests/test_multitask_decoder.py
             bash <(curl -s https://codecov.io/bash) -cF python
@@ -113,6 +113,7 @@ jobs:
             coverage run -m unittest -v tests/test_join.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_preprocessing.py
+            coverage run -m unittest -v tests/validation_tests.py
 
       - run:
           name: upload_stuff
