@@ -48,12 +48,16 @@ class TestValidationLogic(unittest.TestCase):
                                   True, val_or_test="test_loss")
         result_values = list(s.values())
         unscale_result_values = list(u.values())
+        unscale_mse = self.model_m.test_data.inverse_scale(result_values[0])
+        unscale_mape = self.model_m.test_data.inverse_scale(result_values[1])
         self.assertEqual(len(result_values), 2)
         # Each of these represents a specific bug that was found earlier.
         self.assertNotAlmostEqual(result_values[0], result_values[1])
         self.assertNotAlmostEqual(result_values[0], result_values[1] * 2)
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1])
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
+        self.assertAlmostEqual(unscale_mse, unscale_result_values[0])
+        self.assertAlmostEqual(unscale_mape, unscale_result_values[1])
 
     def test_naieve(self):
         pass
