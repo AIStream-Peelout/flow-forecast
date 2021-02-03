@@ -267,6 +267,9 @@ class PyTorchTrainTests(unittest.TestCase):
         loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
         self.assertEqual(loss.item(), 1.0)
 
+    def test_compute_validation_loss(self):
+        pass
+
     def test_test_data(self):
         _, trg = self.model.test_data[0]
         _, trg1 = self.dummy_model.test_data[1]
