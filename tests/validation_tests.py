@@ -43,7 +43,7 @@ class TestValidationLogic(unittest.TestCase):
 
     def test_compute_validation(self):
         d = torch.utils.data.DataLoader(self.model_m.test_data)
-        compute_validation(d, self.model_m, 0, 30, [torch.nn.MSELoss(), MAPELoss()], "cpu",
+        compute_validation(d, self.model_m.model, 0, 30, [torch.nn.MSELoss(), MAPELoss()], "cpu",
                            True, val_or_test="test_loss")
 
 if __name__ == '__main__':

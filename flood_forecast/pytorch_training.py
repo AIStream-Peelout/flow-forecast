@@ -145,7 +145,8 @@ def train_transformer_style(
             use_wandb=use_wandb,
             probabilistic=probabilistic)
         # Get metric from the return tuple
-        valid = list(valid[0])[0]
+        # scaled_crit, unscaled_crit
+        valid = list(valid[0].values())[0]
         if valid == 0.0:
             raise ValueError("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
