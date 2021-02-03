@@ -46,6 +46,5 @@ class TestValidationLogic(unittest.TestCase):
         compute_validation(d, self.model_m, 0, 30, [torch.nn.MSELoss(), MAPELoss()], "cpu",
                            True, val_or_test="test_loss")
 
- 
 if __name__ == '__main__':
     unittest.main()
