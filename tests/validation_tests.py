@@ -40,12 +40,38 @@ class TestValidationLogic(unittest.TestCase):
             "inference_params": {
                 "hours_to_forecast": 10}}
         self.baseline_model_params = {
-            "model_name": ""
-
-        }
+            "metrics": ["MSE", "MAPE"],
+            "model_params": {
+                "number_time_series": 3,
+                "forecast_length": 10,
+                "seq_len": 20},
+            "dataset_params": {
+                "forecast_history": 20,
+                "class": "default",
+                "forecast_length": 10,
+                "forecast_test_len": 100,
+                "relevant_cols": [
+                    "cfs",
+                    "temp",
+                    "precip"],
+                "scaler": "StandardScaler",
+                "target_col": ["cfs"],
+                "interpolate": False},
+            "training_params": {
+                "optimizer": "Adam",
+                "lr": .1,
+                "criterion": "MSE",
+                "epochs": 1,
+                "batch_size": 2,
+                "optim_params": {}},
+            "wandb": False,
+            "inference_params": {
+                "hours_to_forecast": 10}}
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model_m = PyTorchForecast("MultiAttnHeadSimple", self.keag_file, self.keag_file,
                                        self.keag_file, self.model_params)
+        self.model_dumb = PyTorchForecast("DummyModel", self.keag_file, self.keag_file, self.keag_file,
+                                          self.baseline_model_params)
 
     def test_compute_validation(self):
         d = torch.utils.data.DataLoader(self.model_m.test_data)
@@ -63,8 +89,8 @@ class TestValidationLogic(unittest.TestCase):
         self.assertNotAlmostEqual(result_values[0], result_values[1] * 2)
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1])
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
-        self.assertAlmostEqual(unscale_mse.numpy(), unscale_result_values[0])
-        self.assertAlmostEqual(unscale_mape.numpy(), unscale_result_values[1])
+        self.assertAlmostEqual(unscale_mse.numpy()[0], unscale_result_values[0])
+        self.assertAlmostEqual(unscale_mape.numpy()[0], unscale_result_values[1])
 
     def test_naieve(self):
         pass
