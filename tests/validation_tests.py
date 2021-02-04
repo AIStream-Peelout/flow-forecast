@@ -95,8 +95,14 @@ class TestValidationLogic(unittest.TestCase):
         d = torch.utils.data.DataLoader(self.model_dumb.test_data)
         s, u = compute_validation(d, self.model_m.model, 0, 10, [torch.nn.MSELoss(), DilateLoss()], "cpu",
                                   True, val_or_test="test_loss")
+        s2, u2 = compute_validation(d, self.model_m.model, 0, 10, [torch.nn.MSELoss(), DilateLoss()], "cpu",
+                                    True, val_or_test="test_loss")
         result_values = list(s.values())
         unscale_result_values = list(u.values())
+        result_values = list(s2.values())
+        unscale_result_values = list(u2.values())
+        self.assertEqual(s2[0], s[0])
+        self.assertEqual(u[0], u2[0])
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
         self.assertGreater(result_values[1], result_values[0])
         self.assertLess(unscale_result_values[0], unscale_result_values[1])

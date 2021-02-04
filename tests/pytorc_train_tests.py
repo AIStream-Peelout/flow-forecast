@@ -267,7 +267,7 @@ class PyTorchTrainTests(unittest.TestCase):
         a = torch.Tensor([4.0]).repeat(2, 20)
         loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
         loss_4 = compute_loss(torch.ones(2, 20), a, torch.rand(3, 20, 1), crit, None, None)
-        loss_5 = compute_loss(torch.zeroes(2, 20), a, torch.rand(3, 20, 1), crit, None, None)
+        loss_5 = compute_loss(torch.zeros(2, 20), a, torch.rand(3, 20, 1), crit, None, None)
         self.assertEqual(loss.item(), 1.0)
         self.assertEqual(loss_4.item(), 9)
         self.assertEqual(loss_5.item(), 16)
