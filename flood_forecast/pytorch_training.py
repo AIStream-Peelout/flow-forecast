@@ -341,7 +341,7 @@ def compute_validation(validation_loader: DataLoader,
                                                src=src,
                                                max_seq_len=targ.shape[1],
                                                real_target=targ,
-                                               output_len=1,
+                                               output_len=sequence_size,
                                                multi_targets=multi_targets,
                                                probabilistic=probabilistic)[:, :, 0:multi_targets]
             else:
