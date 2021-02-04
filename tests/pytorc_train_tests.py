@@ -2,6 +2,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
+from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.pytorch_training import torch_single_train, compute_loss
 import unittest
 import json
@@ -299,12 +300,16 @@ class PyTorchTrainTests(unittest.TestCase):
 
     def test_scaling_data(self):
         scaled_src, _ = self.model.test_data[0]
-        data_unscaled = self.model.test_data.original_df.iloc[0:20].values
-        inverse_scale = self.model.test_data.inverse_scale(scaled_src[0, :])
+        data_unscaled = self.model.test_data.original_df.iloc[0:20]["cfs"].values
+        inverse_scale = self.model.test_data.inverse_scale(scaled_src[:, 0])
         self.assertAlmostEqual(inverse_scale, data_unscaled)
 
-    def test_compute_loss_scaling(self):
-        pass
+    def test_compute_loss_no_scaling(self):
+        exam = torch.Tensor([4.0]).repeat(2, 20, 5)
+        exam2 = torch.Tensor([1.0]).repeat(2, 20, 5)
+        compute_loss(exam, exam2, torch.rand(2, 20), DilateLoss(), None)
+        result = compute_loss(exam, exam2, torch.rand(2, 20), torch.nn.MSELoss(), None)
+        self.assertEqual(result, 9.0)
 
 if __name__ == '__main__':
     unittest.main()
