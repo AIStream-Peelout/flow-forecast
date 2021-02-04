@@ -279,7 +279,7 @@ class PyTorchTrainTests(unittest.TestCase):
         loss = compute_loss(torch.ones(2, 20), a, torch.rand(3, 20, 1), crit, None, None)
         loss_a_b = compute_loss(a, b, torch.rand(2, 20, 2), crit, None, None)
         self.assertEqual(loss.item(), 3.0)
-        self.assertEqual(loss_a_b, .75)
+        self.assertEqual(loss_a_b, .25)
 
     def test_test_data(self):
         _, trg = self.model.test_data[0]

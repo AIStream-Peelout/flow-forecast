@@ -88,8 +88,8 @@ class TestValidationLogic(unittest.TestCase):
         self.assertNotAlmostEqual(result_values[0], result_values[1] * 2)
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1])
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
-        self.assertAlmostEqual(unscale_mse.numpy()[0], unscale_result_values[0])
-        self.assertAlmostEqual(unscale_mape.numpy()[0], unscale_result_values[1])
+        self.assertAlmostEqual(float(unscale_mse.numpy()[0]), unscale_result_values[0])
+        self.assertAlmostEqual(float(unscale_mape.numpy()[0]), unscale_result_values[1])
 
     def test_naieve(self):
         d = torch.utils.data.DataLoader(self.model_dumb.test_data)
