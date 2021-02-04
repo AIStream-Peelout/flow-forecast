@@ -18,6 +18,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "seq_len": 20},
             "dataset_params": {
                 "forecast_history": 20,
+                "scaling": "StandardScaler",
                 "class": "default",
                 "forecast_length": 20,
                 "relevant_cols": [
