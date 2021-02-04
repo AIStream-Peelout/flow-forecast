@@ -1,7 +1,7 @@
 import unittest
 import torch
 import os
-import numpy as np
+# import numpy as np
 from flood_forecast.pytorch_training import compute_validation
 from flood_forecast.custom.custom_opt import MAPELoss
 from flood_forecast.custom.dilate_loss import DilateLoss
