@@ -77,6 +77,9 @@ class TestLossFunctions(unittest.TestCase):
         e.check_loss(n, 1.2)
         self.assertFalse(e.check_loss(n, .8))
 
+    def test_dilate_correct(self):
+        pass
+
     def test_sparse_max_runs(self):
         _entmax_threshold_and_support(torch.rand(2, 20, 3))
         _sparsemax_threshold_and_support(torch.rand(2, 30, 3))

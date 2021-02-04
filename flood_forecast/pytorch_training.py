@@ -298,8 +298,36 @@ def compute_validation(validation_loader: DataLoader,
                        multi_targets=1,
                        val_or_test="validation_loss",
                        probabilistic=False) -> float:
-    """
-    Function to compute the validation or the test loss
+    """Function to compute the validation loss metrics
+
+    :param validation_loader: The data-loader of either validation or test-data
+    :type validation_loader: DataLoader
+    :param model: model
+    :type model: [type]
+    :param epoch: [description]
+    :type epoch: int
+    :param sequence_size: [description]
+    :type sequence_size: int
+    :param criterion: [description]
+    :type criterion: Type[torch.nn.modules.loss._Loss]
+    :param device: [description]
+    :type device: torch.device
+    :param decoder_structure: [description], defaults to False
+    :type decoder_structure: bool, optional
+    :param meta_data_model: [description], defaults to None
+    :type meta_data_model: [type], optional
+    :param use_wandb: [description], defaults to False
+    :type use_wandb: bool, optional
+    :param meta_model: [description], defaults to None
+    :type meta_model: [type], optional
+    :param multi_targets: [description], defaults to 1
+    :type multi_targets: int, optional
+    :param val_or_test: [description], defaults to "validation_loss"
+    :type val_or_test: str, optional
+    :param probabilistic: [description], defaults to False
+    :type probabilistic: bool, optional
+    :return: [description]
+    :rtype: float
     """
     print('compute_validation')
     unscaled_crit = dict.fromkeys(criterion, 0)
