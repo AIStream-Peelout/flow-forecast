@@ -309,7 +309,7 @@ class PyTorchTrainTests(unittest.TestCase):
         exam = torch.Tensor([4.0]).repeat(2, 20, 5)
         exam2 = torch.Tensor([1.0]).repeat(2, 20, 5)
         d = DilateLoss()
-        d  # stfu linter
+        compute_loss(exam, exam2, torch.rand(1, 20), d, None)
         # compute_loss(exam, exam2, torch.rand(2, 20), DilateLoss(), None)
         result = compute_loss(exam, exam2, torch.rand(2, 20), torch.nn.MSELoss(), None)
         self.assertEqual(float(result), 9.0)
