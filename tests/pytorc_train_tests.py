@@ -296,5 +296,14 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertIsInstance(meta_reps, torch.Tensor)
         self.assertIsInstance(meta_models, PyTorchForecast)
 
+    def test_scaling_data(self):
+        scaled_src, _ = self.model.test_data[0]
+        data_unscaled = self.model.test_data.original_df.iloc[0:20].values
+        inverse_scale = self.model.test_data.inverse_scale(scaled_src[0, :])
+        self.assertAlmostEqual(inverse_scale, data_unscaled)
+
+    def test_compute_loss_scaling(self):
+        pass
+
 if __name__ == '__main__':
     unittest.main()
