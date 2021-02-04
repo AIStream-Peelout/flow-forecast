@@ -1,4 +1,4 @@
-{
+{ 
     "model_name": "SimpleLinearModel",
     "model_type": "PyTorch",
     "model_params": {
