@@ -93,7 +93,7 @@ class TestValidationLogic(unittest.TestCase):
 
     def test_naieve(self):
         d = torch.utils.data.DataLoader(self.model_dumb.test_data)
-        s, u = compute_validation(d, self.model_m.model, 0, 10, [torch.nn.MSELoss(), DilateLoss()], "cpu",
+        s, u = compute_validation(d, self.model_m.model, 0, 10, [DilateLoss(), torch.nn.MSELoss()], "cpu",
                                   True, val_or_test="test_loss")
         s2, u2 = compute_validation(d, self.model_m.model, 0, 10, [torch.nn.MSELoss(), DilateLoss()], "cpu",
                                     True, val_or_test="test_loss")
@@ -101,8 +101,8 @@ class TestValidationLogic(unittest.TestCase):
         unscale_result_values = list(u.values())
         result_values2 = list(s2.values())
         unscale_result_values2 = list(u2.values())
-        self.assertEqual(result_values[0], result_values2[0])
-        self.assertEqual(unscale_result_values[0], unscale_result_values2[0])
+        self.assertEqual(result_values[0], result_values2[1])
+        self.assertEqual(unscale_result_values[1], unscale_result_values2[0])
         self.assertNotAlmostEqual(unscale_result_values[0], unscale_result_values[1] * 2)
         self.assertGreater(result_values[1], result_values[0])
         self.assertLess(unscale_result_values[0], unscale_result_values[1])
