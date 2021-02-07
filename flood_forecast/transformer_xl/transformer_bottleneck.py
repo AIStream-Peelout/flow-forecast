@@ -238,7 +238,7 @@ class TransformerModel(nn.Module):
         self.n_embd = n_embd
         self.win_len = forecast_history
         # The following is the implementation of this paragraph
-        """For positional encoding in Transformer, we use learnable position embedding.
+        """ For positional encoding in Transformer, we use learnable position embedding.
         For covariates, following [3], we use all or part of year, month, day-of-the-week,
         hour-of-the-day, minute-of-the-hour, age and time-series-ID according to the granularities of datasets.
         age is the distance to the first observation in that time series [3]. Each of them except time series

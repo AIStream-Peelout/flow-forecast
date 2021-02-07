@@ -2,6 +2,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
+from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.pytorch_training import torch_single_train, compute_loss
 import unittest
 import json
@@ -18,6 +19,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "seq_len": 20},
             "dataset_params": {
                 "forecast_history": 20,
+                "scaling": "StandardScaler",
                 "class": "default",
                 "forecast_length": 20,
                 "relevant_cols": [
@@ -309,6 +311,24 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertIsNotNone(loss)
         self.assertIsInstance(meta_reps, torch.Tensor)
         self.assertIsInstance(meta_models, PyTorchForecast)
+
+    def test_scaling_data(self):
+        scaled_src, _ = self.model.test_data[0]
+        data_unscaled = self.model.test_data.original_df.iloc[0:20]["cfs"].values
+        inverse_scale = self.model.test_data.inverse_scale(scaled_src[:, 0])
+        self.assertAlmostEqual(inverse_scale.numpy()[0], data_unscaled[0])
+        self.assertAlmostEqual(inverse_scale.numpy()[9], data_unscaled[9])
+
+    def test_compute_loss_no_scaling(self):
+        exam = torch.Tensor([4.0]).repeat(2, 20, 5)
+        exam2 = torch.Tensor([1.0]).repeat(2, 20, 5)
+        exam11 = torch.Tensor([4.0]).repeat(2, 20)
+        exam1 = torch.Tensor([1.0]).repeat(2, 20)
+        d = DilateLoss()
+        compute_loss(exam11, exam1, torch.rand(1, 20), d, None)
+        # compute_loss(exam, exam2, torch.rand(2, 20), DilateLoss(), None)
+        result = compute_loss(exam, exam2, torch.rand(2, 20), torch.nn.MSELoss(), None)
+        self.assertEqual(float(result), 9.0)
 
 if __name__ == '__main__':
     unittest.main()
