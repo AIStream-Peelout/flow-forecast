@@ -127,7 +127,7 @@ def train_transformer_style(
             meta_loss,
             multi_targets=num_targets,
             forward_params=forward_params.copy())
-        print("The loss for  epoch " + str(epoch))
+        print("The loss for epoch " + str(epoch))
         print(total_loss)
         use_decoder = False
         if "use_decoder" in model.params:
@@ -207,8 +207,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     """
     if not probabilistic and isinstance(output, torch.Tensor):
         if len(labels.shape) != len(output.shape):
-            print(labels.shape)
-            print(output.shape)
             if len(labels.shape) > 1:
                 if labels.shape[1] == output.shape[1]:
                     labels = labels.unsqueeze(2)
@@ -229,6 +227,10 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             except Exception:
                 pass
             output_dist = torch.distributions.Normal(unscaled_out, output_std)
+        elif len(output.shape) == 3:
+            output = validation_dataset.inverse_scale(output.cpu().numpy().transpose(0, 2, 1))
+            labels = validation_dataset.inverse_scale(labels.cpu().numpy().transpose(1, 2, 1))
+            src = validation_dataset.inverse_scale(src.cpu())
         else:
             output = validation_dataset.inverse_scale(output.cpu().transpose(1, 0))
             labels = validation_dataset.inverse_scale(labels.cpu().transpose(1, 0))
