@@ -100,6 +100,7 @@ def train_transformer_style(
         drop_last=False,
         timeout=0,
         worker_init_fn=None)
+    # TODO support batch_size > 1
     test_data_loader = DataLoader(model.test_data, batch_size=1, shuffle=False, sampler=None,
                                   batch_sampler=None, num_workers=worker_num, collate_fn=None,
                                   pin_memory=pin_memory, drop_last=False, timeout=0,
@@ -126,7 +127,7 @@ def train_transformer_style(
             meta_loss,
             multi_targets=num_targets,
             forward_params=forward_params.copy())
-        print("The loss for epoch " + str(epoch))
+        print("The loss for  epoch " + str(epoch))
         print(total_loss)
         use_decoder = False
         if "use_decoder" in model.params:
@@ -183,7 +184,27 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, m=1):
-    # Warning this assumes src target is 1-D
+    """Function for computing the loss
+
+    :param labels: The real forecasted values
+    :type labels: torch.Tensor
+    :param output: The output of the model
+    :type output: torch.Tensor
+    :param src: The source values (only really needed for MASELoss)
+    :type src: torch.Tensor
+    :param criterion: [description]
+    :type criterion: [type]
+    :param validation_dataset: [description]
+    :type validation_dataset: [type]
+    :param probabilistic: [description], defaults to None
+    :type probabilistic: [type], optional
+    :param output_std: [description], defaults to None
+    :type output_std: [type], optional
+    :param m: [description], defaults to 1
+    :type m: int, optional
+    :return: [description]
+    :rtype: [type]
+    """
     if not probabilistic and isinstance(output, torch.Tensor):
         if len(labels.shape) != len(output.shape):
             print(labels.shape)
@@ -209,8 +230,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
                 pass
             output_dist = torch.distributions.Normal(unscaled_out, output_std)
         else:
-            output = validation_dataset.inverse_scale(output.cpu())
-            labels = validation_dataset.inverse_scale(labels.cpu())
+            output = validation_dataset.inverse_scale(output.cpu().transpose(1, 0))
+            labels = validation_dataset.inverse_scale(labels.cpu().transpose(1, 0))
             src = validation_dataset.inverse_scale(src.cpu())
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS

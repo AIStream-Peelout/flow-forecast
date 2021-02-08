@@ -15,7 +15,7 @@ dev_requirements = [
 
 setup(
     name='flood_forecast',
-    version='0.095dev',
+    version='0.95dev',
     packages=[
         'flood_forecast',
         'flood_forecast.transformer_xl',

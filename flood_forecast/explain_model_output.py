@@ -87,8 +87,12 @@ def deep_explain_model_summary_plot(
     # summary plot shows overall feature ranking
     # by average absolute shap values
     fig = plot_summary_shap_values(shap_values, csv_test_loader.df.columns)
+    abs_mean_shap_values = shap_values.mean(axis=["batches"]).abs()
+    multi_shap_values = abs_mean_shap_values.mean(axis="observations")
     if use_wandb:
         wandb.log({"Overall feature ranking by shap values": fig})
+        for idx, col in enumerate(multi_shap_values):
+            wandb.log({"shap_value_" + csv_test_loader.df.columns[idx]: col})
 
     # summary plot for multi-step outputs
     # multi_shap_values = shap_values.apply_along_axis(np.mean, 'batches')
