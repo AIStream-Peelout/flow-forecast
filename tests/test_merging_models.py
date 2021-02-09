@@ -15,7 +15,8 @@ class TestMerging(unittest.TestCase):
         self.assertEqual(m.shape[2], 14)
 
     def test_merger_two(self):
-        pass
+        m = self.merging_model(torch.rand(2, 6, 20), torch.rand(4))
+        self.assertEqual(m.shape[2], 24)
 
     def test_crit_functions_list(self):
         res = make_criterion_functions(["MSE", "RMSE", "MAPE"])

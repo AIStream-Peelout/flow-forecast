@@ -276,7 +276,7 @@ class DecoderTransformer(nn.Module):
         Args:
             n_time_series: Number of time series present in input
             n_head: Number of heads in the MultiHeadAttention mechanism
-            seq_num: ?? Not relevant right now.
+            seq_num: The number of targets to forecast
             sub_len: sub_len of the sparse attention
             num_layer: The number of transformer blocks in the model.
             n_embd: The dimention of Position embedding and time series ID embedding
@@ -313,7 +313,7 @@ class DecoderTransformer(nn.Module):
             series_id: Optional id of the series in the dataframe. Currently not supported
         Returns:
             Case 1: tensor of dimension (batch_size, forecast_length)
-            Case 2: Return sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
+            Case 2: GLoss sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
@@ -324,5 +324,7 @@ class DecoderTransformer(nn.Module):
         if self.forecast_len_layer:
             # Swap to (batch_size, 1, features) for linear layer
             sigma = sigma.permute(0, 2, 1)
+            # Output (batch_size, forecast_len_)
             sigma = self.forecast_len_layer(sigma).permute(0, 2, 1)
+            print(sigma.shape)
         return sigma.squeeze(2)
