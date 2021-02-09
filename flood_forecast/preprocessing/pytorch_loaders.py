@@ -23,7 +23,8 @@ class CSVDataLoader(Dataset):
         gcp_service_key: Optional[str] = None,
         interpolate_param: bool = True,
         sort_column=None,
-        feature_params=None
+        feature_params=None,
+        no_scale_targ1=False
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -73,6 +74,7 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
+        self.unscaled_df = df
         if scaling is not None:
             print("scaling now")
             self.scale = scaling
@@ -91,19 +93,28 @@ class CSVDataLoader(Dataset):
                 self.targ_scaler.fit_transform(
                     self.df[target_col]
                 )
-
+            self.unscaled_df = self.df
             self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
         self.df.to_csv("temp_df.csv")
+        self.no_scale_targ = no_scale_targ1
+        if self.no_scale_targ:
+            self.targ_scaler = None
 
     def __getitem__(self, idx):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
-        targ_rows = self.df.iloc[
-            targs_idx_start: self.forecast_length + targs_idx_start
-        ]
+        if self.no_scale_targ:
+            targ_rows = self.unscaled_df[
+                targs_idx_start: self.forecast_length + targs_idx_start
+            ]
+        else:
+            targ_rows = self.df.iloc[
+                targs_idx_start: self.forecast_length + targs_idx_start
+            ]
+
         src_data = rows.to_numpy()
         src_data = torch.from_numpy(src_data).float()
         trg_dat = targ_rows.to_numpy()
