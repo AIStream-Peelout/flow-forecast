@@ -227,6 +227,9 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             except Exception:
                 pass
             output_dist = torch.distributions.Normal(unscaled_out, output_std)
+        elif m > 1:
+            output = validation_dataset.inverse_scale(output.cpu())
+            labels = validation_dataset.inverse_scale(labels.cpu())
         elif len(output.shape) == 3:
             output = output.cpu().numpy().transpose(0, 2, 1)
             labels = labels.cpu().numpy().transpose(0, 2, 1)
