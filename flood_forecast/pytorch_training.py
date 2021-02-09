@@ -231,6 +231,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             output = validation_dataset.inverse_scale(output.cpu())
             labels = validation_dataset.inverse_scale(labels.cpu())
         elif len(output.shape) == 3:
+            print("original output shape ")
+            print(output.shape)
             output = output.cpu().numpy().transpose(0, 2, 1)
             labels = labels.cpu().numpy().transpose(0, 2, 1)
             output = validation_dataset.inverse_scale(torch.from_numpy(output))
@@ -253,6 +255,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
     else:
+        print(output.shape)
+        print(labels.shape)
         assert len(labels.shape) == len(output.shape)
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
