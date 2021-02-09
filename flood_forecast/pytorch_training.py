@@ -235,11 +235,15 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             labels = labels.cpu().numpy().transpose(0, 2, 1)
             output = validation_dataset.inverse_scale(torch.from_numpy(output))
             labels = validation_dataset.inverse_scale(torch.from_numpy(labels))
-            # src = validation_dataset.inverse_scale(src.cpu().numpy().transpose(0, 2, 1))
+            print("Output shape is ")
+            print(output)
+            print(labels)
+            stuff = src.cpu().numpy().transpose(0, 2, 1)
+            src = validation_dataset.inverse_scale(torch.from_numpy(stuff))
         else:
             output = validation_dataset.inverse_scale(output.cpu().transpose(1, 0))
             labels = validation_dataset.inverse_scale(labels.cpu().transpose(1, 0))
-            src = validation_dataset.inverse_scale(src.cpu())
+            src = validation_dataset.inverse_scale(src.cpu().transpose(1, 0))
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
     elif isinstance(criterion, GaussianLoss):
