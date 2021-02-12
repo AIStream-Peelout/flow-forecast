@@ -99,7 +99,7 @@ class CSVDataLoader(Dataset):
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
         self.df.to_csv("temp_df.csv")
-        self.unscale = no_scale
+        self.no_scale = no_scale
 
     def __getitem__(self, idx):
         rows = self.df.iloc[idx: self.forecast_history + idx]
