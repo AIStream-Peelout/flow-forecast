@@ -364,7 +364,7 @@ def compute_validation(validation_loader: DataLoader,
     output_std = None
     scaler = None
     if validation_loader.no_scale:
-        scaler = validation_loader
+        scaler = validation_loader.dataset
     with torch.no_grad():
         i = 0
         loss_unscaled_full = 0.0

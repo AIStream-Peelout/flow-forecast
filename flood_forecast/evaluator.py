@@ -340,6 +340,31 @@ def generate_predictions(
     decoder_params: Dict,
     multi_params=1
 ) -> torch.Tensor:
+    """[summary]
+
+    :param model: [description]
+    :type model: Type[TimeSeriesModel]
+    :param df: [description]
+    :type df: pd.DataFrame
+    :param test_data: [description]
+    :type test_data: CSVTestLoader
+    :param history: [description]
+    :type history: torch.Tensor
+    :param device: [description]
+    :type device: torch.device
+    :param forecast_start_idx: [description]
+    :type forecast_start_idx: int
+    :param forecast_length: [description]
+    :type forecast_length: int
+    :param hours_to_forecast: [description]
+    :type hours_to_forecast: int
+    :param decoder_params: [description]
+    :type decoder_params: Dict
+    :param multi_params: [description], defaults to 1
+    :type multi_params: int, optional
+    :return: [description]
+    :rtype: torch.Tensor
+    """
     history_dim = history.unsqueeze(0).to(model.device)
     print("Add debugging crap below")
     if decoder_params is None:
@@ -430,7 +455,7 @@ def generate_decoded_predictions(
     probabilistic = False
     scaler = None
     if test_data.no_scale:
-        scaler = test_data
+        scaler = test_data.dataset
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             probabilistic = True
