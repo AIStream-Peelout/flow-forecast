@@ -126,6 +126,8 @@ class CSVDataLoader(Dataset):
     ) -> torch.Tensor:
         if self.no_scale and isinstance(result_data, torch.Tensor):
             return result_data
+        elif self.no_scale:
+            return torch.from_numpy(result_data)
         if isinstance(result_data, torch.Tensor):
             if len(result_data.shape) > 2:
                 result_data = result_data.permute(2, 0, 1).reshape(result_data.shape[2], -1)
