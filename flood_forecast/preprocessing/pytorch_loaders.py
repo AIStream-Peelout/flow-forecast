@@ -23,7 +23,8 @@ class CSVDataLoader(Dataset):
         gcp_service_key: Optional[str] = None,
         interpolate_param: bool = True,
         sort_column=None,
-        feature_params=None
+        feature_params=None,
+        no_scale=False
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -73,6 +74,7 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
+        self.unscaled_df = self.df[relevant_cols]
         if scaling is not None:
             print("scaling now")
             self.scale = scaling
@@ -97,13 +99,17 @@ class CSVDataLoader(Dataset):
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
         self.df.to_csv("temp_df.csv")
+        self.unscale = no_scale
 
     def __getitem__(self, idx):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
-        targ_rows = self.df.iloc[
-            targs_idx_start: self.forecast_length + targs_idx_start
-        ]
+        if self.no_scale:
+            targ_rows = self.unscaled_df.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+        else:
+            targ_rows = self.df.iloc[
+                targs_idx_start: self.forecast_length + targs_idx_start
+            ]
         src_data = rows.to_numpy()
         src_data = torch.from_numpy(src_data).float()
         trg_dat = targ_rows.to_numpy()
@@ -118,7 +124,8 @@ class CSVDataLoader(Dataset):
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
     ) -> torch.Tensor:
-
+        if self.no_scale and isinstance(result_data, torch.Tensor):
+            return result_data
         if isinstance(result_data, torch.Tensor):
             if len(result_data.shape) > 2:
                 result_data = result_data.permute(2, 0, 1).reshape(result_data.shape[2], -1)

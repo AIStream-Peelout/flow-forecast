@@ -278,7 +278,6 @@ def torch_single_train(model: PyTorchForecast,
         # Convert to CPU/GPU/TPU
         src = src.to(model.device)
         trg = trg.to(model.device)
-        # TODO figure how to avoid
         if meta_data_model:
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
