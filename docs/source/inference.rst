@@ -19,7 +19,6 @@ your model weights.
 
 .. code-block:: python 
     :caption: example plotting
-    
 
 .. automodule:: flood_forecast.deployment.inference
     :members:
