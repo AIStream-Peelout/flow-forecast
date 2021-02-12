@@ -362,6 +362,9 @@ def compute_validation(validation_loader: DataLoader,
     scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
     output_std = None
+    scaler = None
+    if validation_loader.no_scale:
+        scaler = validation_loader
     with torch.no_grad():
         i = 0
         loss_unscaled_full = 0.0
@@ -389,7 +392,8 @@ def compute_validation(validation_loader: DataLoader,
                                                            targ,
                                                            1,
                                                            multi_targets=multi_targets,
-                                                           probabilistic=probabilistic)
+                                                           probabilistic=probabilistic,
+                                                           scaler=scaler)
                         output, output_std = output[:, :, 0], output_std[0]
                         output_dist = torch.distributions.Normal(output, output_std)
                     else:
@@ -399,7 +403,8 @@ def compute_validation(validation_loader: DataLoader,
                                                real_target=targ,
                                                output_len=sequence_size,
                                                multi_targets=multi_targets,
-                                               probabilistic=probabilistic)[:, :, 0:multi_targets]
+                                               probabilistic=probabilistic,
+                                               scaler=scaler)[:, :, 0:multi_targets]
             else:
                 if probabilistic:
                     output_dist = model(src.float())

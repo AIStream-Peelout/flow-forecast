@@ -428,6 +428,9 @@ def generate_decoded_predictions(
     multi_targets=1,
 ) -> torch.Tensor:
     probabilistic = False
+    scaler = None
+    if test_data.no_scale:
+        scaler = test_data
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             probabilistic = True
@@ -448,6 +451,7 @@ def generate_decoded_predictions(
         multi_targets=multi_targets,
         device=model.device,
         probabilistic=probabilistic,
+        scaler=scaler
     )
     if probabilistic:
         end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()

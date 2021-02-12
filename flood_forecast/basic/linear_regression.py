@@ -49,7 +49,8 @@ def simple_decode(model: Type[torch.nn.Module],
                   meta_data=None,
                   multi_targets=1,
                   use_real_target: bool = True,
-                  probabilistic: bool = False) -> torch.Tensor:
+                  probabilistic: bool = False,
+                  scaler=None) -> torch.Tensor:
     """
     :model a PyTorch model to be used for decoding
     :src the source tensor

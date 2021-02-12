@@ -161,7 +161,8 @@ def greedy_decode(
         output_len=1,
         device='cpu',
         multi_targets=1,
-        probabilistic=False):
+        probabilistic=False,
+        scaler=None):
     """
     Mechanism to sequentially decode the model
     :src Historical time series values
