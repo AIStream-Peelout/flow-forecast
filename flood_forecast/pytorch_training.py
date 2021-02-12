@@ -363,7 +363,7 @@ def compute_validation(validation_loader: DataLoader,
     model.eval()
     output_std = None
     scaler = None
-    if validation_loader.no_scale:
+    if validation_loader.dataset.no_scale:
         scaler = validation_loader.dataset
     with torch.no_grad():
         i = 0

@@ -454,7 +454,7 @@ def generate_decoded_predictions(
 ) -> torch.Tensor:
     probabilistic = False
     scaler = None
-    if test_data.no_scale:
+    if test_data.dataset.no_scale:
         scaler = test_data.dataset
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
