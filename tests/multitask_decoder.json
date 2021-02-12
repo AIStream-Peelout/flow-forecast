@@ -23,6 +23,7 @@
        "valid_end": 301,
        "test_start": 202,
        "test_end": 290,
+       "no_scale": true,
        "target_col": ["cfs", "temp"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "MinMaxScaler",
@@ -66,6 +67,7 @@
              "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs", "temp"],
+             "no_scale": true,
              "scaling": "MinMaxScaler",
              "scaler_params":{
                 "feature_range":[0,2]
