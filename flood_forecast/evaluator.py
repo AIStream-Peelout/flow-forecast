@@ -342,7 +342,7 @@ def generate_predictions(
 ) -> torch.Tensor:
     """[summary]
 
-    :param model: [description]
+    :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
     :param df: [description]
     :type df: pd.DataFrame
@@ -454,7 +454,7 @@ def generate_decoded_predictions(
 ) -> torch.Tensor:
     probabilistic = False
     scaler = None
-    if test_data.no_scale:
+    if test_data.no_scale.dataset:
         scaler = test_data.dataset
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
