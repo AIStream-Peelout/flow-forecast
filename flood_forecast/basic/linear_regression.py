@@ -80,7 +80,8 @@ def simple_decode(model: Type[torch.nn.Module],
             else:
                 out = model(src)
             if scaler:
-                out = scaler.inverse_scale(out)
+                out = scaler.inverse_scale(out.detach())
+                out = out.permute(1, 0)
             if output_len == 1:
                 real_target2[:, i, 0:multi_targets] = out[:, 0]
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
