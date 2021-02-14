@@ -82,6 +82,8 @@ def simple_decode(model: Type[torch.nn.Module],
             if scaler:
                 if multi_targets == 1:
                     out = out.detach().cpu().reshape(-1, 1)
+                if len(out.shape) > 2:
+                    out = out[0, :, :]
                 out = scaler.targ_scaler.transform(out.detach().cpu())
             if output_len == 1:
                 real_target2[:, i, 0:multi_targets] = out[:, 0]
