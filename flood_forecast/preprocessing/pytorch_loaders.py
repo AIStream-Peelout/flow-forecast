@@ -74,7 +74,7 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
-        self.unscaled_df = self.df
+        self.unscaled_df = self.df[relevant_cols]
         if scaling is not None:
             print("scaling now")
             self.scale = scaling
