@@ -74,7 +74,7 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
-        self.unscaled_df = self.df[relevant_cols]
+        self.unscaled_df = self.df
         if scaling is not None:
             print("scaling now")
             self.scale = scaling
@@ -124,6 +124,13 @@ class CSVDataLoader(Dataset):
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
     ) -> torch.Tensor:
+        """Un-does the scaling of the data
+
+        :param result_data: The data you want to unscale can handle multiple data types.
+        :type result_data: Union[torch.Tensor, pd.Series, np.ndarray]
+        :return: Returns the unscaled data as PyTorch tensor.
+        :rtype: torch.Tensor
+        """
         if isinstance(result_data, pd.Series) or isinstance(
             result_data, pd.DataFrame
         ):
