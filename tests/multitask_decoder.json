@@ -66,7 +66,6 @@
              "forecast_length":1,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs", "temp"],
-             "no_scale": true,
              "scaling": "MinMaxScaler",
              "scaler_params":{
                 "feature_range":[0,2]
