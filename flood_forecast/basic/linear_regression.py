@@ -2,7 +2,6 @@ import torch
 from typing import Type
 
 
-# TODO move decode example
 class SimpleLinearModel(torch.nn.Module):
     """
     A very simple baseline model to resolve some of the
@@ -49,7 +48,8 @@ def simple_decode(model: Type[torch.nn.Module],
                   meta_data=None,
                   multi_targets=1,
                   use_real_target: bool = True,
-                  probabilistic: bool = False) -> torch.Tensor:
+                  probabilistic: bool = False,
+                  scaler=None) -> torch.Tensor:
     """
     :model a PyTorch model to be used for decoding
     :src the source tensor
@@ -79,6 +79,14 @@ def simple_decode(model: Type[torch.nn.Module],
                 out = model(src).unsqueeze(2)
             else:
                 out = model(src)
+            if scaler:
+                if multi_targets == 1:
+                    out = out.detach().cpu().reshape(-1, 1)
+                if len(out.shape) > 2:
+                    out = out[0, :, :]
+                out = scaler.targ_scaler.transform(out.detach().cpu())
+            if not isinstance(out, torch.Tensor):
+                out = torch.from_numpy(out)
             if output_len == 1:
                 real_target2[:, i, 0:multi_targets] = out[:, 0]
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
