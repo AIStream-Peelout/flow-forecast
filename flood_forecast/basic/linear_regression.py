@@ -85,6 +85,7 @@ def simple_decode(model: Type[torch.nn.Module],
                 if len(out.shape) > 2:
                     out = out[0, :, :]
                 out = scaler.targ_scaler.transform(out.detach().cpu())
+            if scaler and not isinstance(out, torch.Tensor):
                 out = torch.from_numpy(out)
             if output_len == 1:
                 real_target2[:, i, 0:multi_targets] = out[:, 0]
