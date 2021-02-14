@@ -23,7 +23,6 @@
        "valid_end": 301,
        "test_start": 202,
        "test_end": 290,
-       "no_scale": true,
        "target_col": ["cfs", "temp"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "MinMaxScaler",
