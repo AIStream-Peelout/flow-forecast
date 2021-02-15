@@ -143,7 +143,7 @@ class PenalizedMSELoss(torch.nn.Module):
 
 # Add custom loss function
 class GaussianLoss(torch.nn.Module):
-    def __init__(self, mu, sigma):
+    def __init__(self, mu=0, sigma=0):
         """Compute the negative log likelihood of Gaussian Distribution
         From https://arxiv.org/abs/1907.00235
         """
