@@ -242,9 +242,9 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             labels = validation_dataset.inverse_scale(labels.cpu().transpose(1, 0))
             src = validation_dataset.inverse_scale(src.cpu().transpose(1, 0))
     if probabilistic:
-        loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS
+        loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS?
     elif isinstance(criterion, GaussianLoss):
-        g_loss = GaussianLoss(output[0], output[1])
+        g_loss = GaussianLoss(output[0].permute(1, 0), output[1].permute(1, 0))
         loss = g_loss(labels)
     elif isinstance(criterion, MASELoss):
         assert len(labels.shape) == len(output.shape)
