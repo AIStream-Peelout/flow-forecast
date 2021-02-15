@@ -71,7 +71,7 @@ def train_transformer_style(
     if "criterion_params" in training_params:
         criterion_init_params = training_params["criterion_params"]
     criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
-    if "probabilistic" in model.params["model_params"] or model.params:
+    if "probabilistic" in model.params["model_params"] or "probabilistic" in model.params:
         probabilistic = True
     else:
         probabilistic = False
@@ -186,25 +186,29 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, m=1):
     """Function for computing the loss
 
-    :param labels: The real forecasted values
+    :param labels: The real values for the target. Shape can be variable but should follow (batch_size, time)
     :type labels: torch.Tensor
     :param output: The output of the model
     :type output: torch.Tensor
-    :param src: The source values (only really needed for MASELoss)
+    :param src: The source values (only really needed for the MASELoss function)
     :type src: torch.Tensor
     :param criterion: [description]
     :type criterion: [type]
-    :param validation_dataset: [description]
-    :type validation_dataset: [type]
-    :param probabilistic: [description], defaults to None
+    :param validation_dataset: Only passed when unscaling of data is needed.
+    :type validation_dataset: torch.utils.data.dataset
+    :param probabilistic: Whether the model is a probabalistic returns a distribution, defaults to None
     :type probabilistic: [type], optional
-    :param output_std: [description], defaults to None
+    :param output_std: The standard distribution, defaults to None
     :type output_std: [type], optional
     :param m: [description], defaults to 1
     :type m: int, optional
-    :return: [description]
+    :return: Returns the computed loss
     :rtype: [type]
-    """
+"""
+    if isinstance(criterion, GaussianLoss):
+        g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
+        loss = g_loss(labels)
+        return loss
     if not probabilistic and isinstance(output, torch.Tensor):
         if len(labels.shape) != len(output.shape):
             if len(labels.shape) > 1:
@@ -243,9 +247,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             src = validation_dataset.inverse_scale(src.cpu().transpose(1, 0))
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS?
-    elif isinstance(criterion, GaussianLoss):
-        g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
-        loss = g_loss(labels)
     elif isinstance(criterion, MASELoss):
         assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
