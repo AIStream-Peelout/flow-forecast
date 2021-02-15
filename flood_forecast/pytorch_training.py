@@ -71,7 +71,7 @@ def train_transformer_style(
     if "criterion_params" in training_params:
         criterion_init_params = training_params["criterion_params"]
     criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
-    if "probabilistic" in model.params["model_params"]:
+    if "probabilistic" in model.params["model_params"] or model.params:
         probabilistic = True
     else:
         probabilistic = False

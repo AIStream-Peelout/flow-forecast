@@ -38,6 +38,7 @@
           "hour":"cyclical" 
        }}
     },
+    "probablistic": true,
     "training_params":
     {
        "criterion":"GaussianLoss",
