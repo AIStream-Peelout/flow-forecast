@@ -90,7 +90,7 @@ class InferenceMode(object):
 
         :param date: The datetime to start inference
         :type date: datetime
-        :param csv_path: [description], defaults to None
+        :param csv_path: The path to the CSV file you want to use for inference, defaults to None
         :type csv_path: str, optional
         :param csv_bucket: [description], defaults to None
         :type csv_bucket: str, optional

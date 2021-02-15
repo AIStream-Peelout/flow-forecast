@@ -40,10 +40,14 @@
     },
     "training_params":
     {
-       "criterion":"DilateLoss",
+       "criterion":"GaussianLoss",
        "optimizer": "Adam",
        "optim_params":
        {
+       },
+       "criterion_params":{
+         "mu":0,
+         "sigma":0
        },
        "lr": 0.3,
        "epochs": 1,

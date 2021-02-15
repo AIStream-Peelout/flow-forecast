@@ -26,7 +26,7 @@ def get_storage_client(
 def upload_file(
     bucket_name: str, file_name: str, upload_name: str, client: storage.Client
 ):
-    """[summary]
+    """A function to upload a file to a GCP bucket.
 
     :param bucket_name: [description]
     :type bucket_name: str
