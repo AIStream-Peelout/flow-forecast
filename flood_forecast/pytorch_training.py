@@ -244,6 +244,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     if probabilistic:
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS?
     elif isinstance(criterion, GaussianLoss):
+        print(output[0].shape)
+        print(output[1].shape)
         g_loss = GaussianLoss(output[0].permute(1, 0), output[1].permute(1, 0))
         loss = g_loss(labels)
     elif isinstance(criterion, MASELoss):
