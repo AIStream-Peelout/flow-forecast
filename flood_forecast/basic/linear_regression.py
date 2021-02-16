@@ -116,8 +116,8 @@ def simple_decode(model: Type[torch.nn.Module],
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
     if probabilistic:
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
-        return ys[:, 1:, 0:multi_targets], ys_std_dev
+        return ys[:, 1:, :], ys_std_dev
     if handle_gauss:
-        return torch.cat(upper_out), torch.cat(lower_out), ys[:, 1:, 0:multi_targets]
+        return torch.cat(upper_out), torch.cat(lower_out), ys[:, 1:, :]
     else:
-        return ys[:, 1:, 0:multi_targets]
+        return ys[:, 1:, :]
