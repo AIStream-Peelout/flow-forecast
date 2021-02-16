@@ -417,7 +417,7 @@ def compute_validation(validation_loader: DataLoader,
                                                output_len=sequence_size,
                                                multi_targets=multi_targets,
                                                probabilistic=probabilistic,
-                                               scaler=scaler)[:, :, 0:multi_targets]
+                                               scaler=scaler)
             else:
                 if probabilistic:
                     output_dist = model(src.float())

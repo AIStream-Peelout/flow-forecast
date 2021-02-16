@@ -39,7 +39,7 @@ class SimpleLinearModel(torch.nn.Module):
 
 def handle_gaussian_loss(out: tuple):
     # Oh shit this is gonna be tough
-    out1 = torch.mean(torch.stack((out[0], out[1]), dim=0))
+    out1 = torch.mean(torch.stack([out[0], out[1]]), dim=0)
     return out1, out[0], out[1]
 
 
@@ -116,8 +116,8 @@ def simple_decode(model: Type[torch.nn.Module],
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
     if probabilistic:
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
-        return ys[:, 1:, :], ys_std_dev
+        return ys[:, 1:, 0:multi_targets], ys_std_dev
     if handle_gauss:
-        return torch.cat(upper_out), torch.cat(lower_out), ys[:, 1:, :]
+        return torch.cat(upper_out), torch.cat(lower_out), ys[:, 1:, 0:multi_targets]
     else:
-        return ys[:, 1:, :]
+        return ys[:, 1:, 0:multi_targets]
