@@ -66,6 +66,8 @@ def simple_decode(model: Type[torch.nn.Module],
     # Use last value
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
     ys_std_dev = []
+    out_up = []
+    out_lower = []
     for i in range(0, max_seq_len, output_len):
         with torch.no_grad():
             if meta_data:
@@ -78,6 +80,8 @@ def simple_decode(model: Type[torch.nn.Module],
                     ys_std_dev.append(out_std[:, 0].unsqueeze(0))
                 elif isinstance(out, tuple):
                     # Oh shit this is gonna be tough
+                    out_up.append(out[0].unsqueeze(0))
+                    out_lower.append(out[1].unsqueeze(0))
                     out = torch.mean(torch.stack((out[0], out[1]), dim=0))
                 elif multi_targets < 2:
                     out = out.unsqueeze(2)
@@ -101,5 +105,7 @@ def simple_decode(model: Type[torch.nn.Module],
     if probabilistic:
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
         return ys[:, 1:, :], ys_std_dev
+    elif len(out_up) > 1:
+        return torch.cat(out_up), torch.cat(out_lower), ys[:, 1:, :]
     else:
         return ys[:, 1:, :]

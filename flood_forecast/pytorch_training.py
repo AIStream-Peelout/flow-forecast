@@ -210,7 +210,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         if len(output[0].shape) > 2:
             g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
         else:
-            # print(output[1].shape)
+            print(output[1].shape)
             g_loss = GaussianLoss(output[0], output[1])
         loss = g_loss(labels)
         return loss
@@ -412,9 +412,7 @@ def compute_validation(validation_loader: DataLoader,
                                                probabilistic=probabilistic,
                                                scaler=scaler)[:, :, 0:multi_targets]
             else:
-                if isinstance(criterion, GaussianLoss):
-                    output = model(src.float())
-                elif probabilistic:
+                if probabilistic:
                     output_dist = model(src.float())
                     output = output_dist.mean.detach().numpy()
                     output_std = output_dist.stddev.detach().numpy()
