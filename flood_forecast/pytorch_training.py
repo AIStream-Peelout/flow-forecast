@@ -207,7 +207,10 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :rtype: [type]
 """
     if isinstance(criterion, GaussianLoss):
-        g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
+        if len(output[0].shape) > 2:
+            g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
+        else:
+            g_loss = GaussianLoss(output[0][:, 0], output[1][:, 0])
         loss = g_loss(labels)
         return loss
     if not probabilistic and isinstance(output, torch.Tensor):
