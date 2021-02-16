@@ -326,5 +326,4 @@ class DecoderTransformer(nn.Module):
             sigma = sigma.permute(0, 2, 1)
             # Output (batch_size, forecast_len_)
             sigma = self.forecast_len_layer(sigma).permute(0, 2, 1)
-            print(sigma.shape)
         return sigma.squeeze(2)

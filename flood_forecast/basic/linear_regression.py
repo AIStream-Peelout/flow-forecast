@@ -72,9 +72,13 @@ def simple_decode(model: Type[torch.nn.Module],
                 out = model(src, meta_data).unsqueeze(2)
             elif probabilistic:
                 out = model(src)
-                out_std = out.stddev.detach()
-                out = out.mean.detach()
-                ys_std_dev.append(out_std[:, 0].unsqueeze(0))
+                if isinstance(out, tuple):
+                    # Oh shit this is gonna be tough
+                    out = torch.mean(torch.stack(out[0], out[1]), dim=0)
+                else:
+                    out_std = out.stddev.detach()
+                    out = out.mean.detach()
+                    ys_std_dev.append(out_std[:, 0].unsqueeze(0))
             elif multi_targets < 2:
                 out = model(src).unsqueeze(2)
             else:
