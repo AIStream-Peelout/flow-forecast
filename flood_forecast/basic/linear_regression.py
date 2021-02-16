@@ -107,6 +107,7 @@ def simple_decode(model: Type[torch.nn.Module],
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
         return ys[:, 1:, :], ys_std_dev
     elif len(out_up) > 1:
+        print("this should be printing")
         return torch.cat(out_up), torch.cat(out_lower), ys[:, 1:, :]
     else:
         return ys[:, 1:, :]
