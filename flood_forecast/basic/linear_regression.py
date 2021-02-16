@@ -43,7 +43,7 @@ def handle_gaussian_loss(out: tuple):
     return out1, out[0], out[1]
 
 
-def handle_no_scaling(scaler: torch.utils.Dataset, out: torch.Tensor, multi_targets: int):
+def handle_no_scaling(scaler: torch.utils.data.Dataset, out: torch.Tensor, multi_targets: int):
     if multi_targets == 1:
         out = out.detach().cpu().reshape(-1, 1)
     if len(out.shape) > 2:
