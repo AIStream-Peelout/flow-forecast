@@ -37,6 +37,21 @@ class SimpleLinearModel(torch.nn.Module):
             return x.view(-1, self.output_len)
 
 
+def handle_gaussian_loss(out: tuple):
+    # Oh shit this is gonna be tough
+    out1 = torch.mean(torch.stack((out[0], out[1]), dim=0))
+    return out1, out[0], out[1]
+
+
+def handle_no_scaling(scaler: torch.utils.Dataset, out: torch.Tensor, multi_targets: int):
+    if multi_targets == 1:
+        out = out.detach().cpu().reshape(-1, 1)
+    if len(out.shape) > 2:
+        out = out[0, :, :]
+    out = scaler.targ_scaler.transform(out.detach().cpu())
+    return out
+
+
 def simple_decode(model: Type[torch.nn.Module],
                   src: torch.Tensor,
                   max_seq_len: int,
@@ -66,27 +81,28 @@ def simple_decode(model: Type[torch.nn.Module],
     # Use last value
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
     ys_std_dev = []
+    upper_out = []
+    lower_out = []
+    handle_gauss = False
     for i in range(0, max_seq_len, output_len):
         with torch.no_grad():
             if meta_data:
                 out = model(src, meta_data).unsqueeze(2)
             else:
                 out = model(src)
-                if probabilistic:
+                if isinstance(out, tuple):
+                    out, up, lower = handle_gaussian_loss(out)
+                    upper_out.append(up)
+                    lower_out.append(lower)
+                    handle_gauss = True
+                elif probabilistic:
                     out_std = out.stddev.detach()
                     out = out.mean.detach()
                     ys_std_dev.append(out_std[:, 0].unsqueeze(0))
-                elif isinstance(out, tuple):
-                    # Oh shit this is gonna be tough
-                    out = torch.mean(torch.stack((out[0], out[1]), dim=0))
                 elif multi_targets < 2:
                     out = out.unsqueeze(2)
             if scaler:
-                if multi_targets == 1:
-                    out = out.detach().cpu().reshape(-1, 1)
-                if len(out.shape) > 2:
-                    out = out[0, :, :]
-                out = scaler.targ_scaler.transform(out.detach().cpu())
+                handle_no_scaling(scaler, out, multi_targets)
             if not isinstance(out, torch.Tensor):
                 out = torch.from_numpy(out)
             if output_len == 1:
@@ -101,5 +117,7 @@ def simple_decode(model: Type[torch.nn.Module],
     if probabilistic:
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
         return ys[:, 1:, :], ys_std_dev
+    if handle_gauss:
+        return torch.cat(upper_out), torch.cat(lower_out), ys[:, 1:, :]
     else:
         return ys[:, 1:, :]
