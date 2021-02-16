@@ -70,19 +70,17 @@ def simple_decode(model: Type[torch.nn.Module],
         with torch.no_grad():
             if meta_data:
                 out = model(src, meta_data).unsqueeze(2)
-            elif probabilistic:
+            else:
                 out = model(src)
-                if isinstance(out, tuple):
-                    # Oh shit this is gonna be tough
-                    out = torch.mean(torch.stack(out[0], out[1]), dim=0)
-                else:
+                if probabilistic:
                     out_std = out.stddev.detach()
                     out = out.mean.detach()
                     ys_std_dev.append(out_std[:, 0].unsqueeze(0))
-            elif multi_targets < 2:
-                out = model(src).unsqueeze(2)
-            else:
-                out = model(src)
+                elif isinstance(out, tuple):
+                    # Oh shit this is gonna be tough
+                    out = torch.mean(torch.stack(out[0], out[1]), dim=0)
+                elif multi_targets < 2:
+                    out = out.unsqueeze(2)
             if scaler:
                 if multi_targets == 1:
                     out = out.detach().cpu().reshape(-1, 1)
