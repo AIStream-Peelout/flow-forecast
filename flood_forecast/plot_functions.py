@@ -54,6 +54,15 @@ def plot_summary_shap_values(
 def plot_summary_shap_values_over_time_series(
     shap_values: torch.tensor, columns: List[str]
 ) -> go.Figure:
+    """[summary]
+
+    :param shap_values: [description]
+    :type shap_values: torch.tensor
+    :param columns: [description]
+    :type columns: List[str]
+    :return: [description]
+    :rtype: go.Figure
+    """
     abs_mean_shap_values = shap_values.mean(axis=["batches"]).abs()
     multi_shap_values = abs_mean_shap_values.mean(axis="observations")
 
