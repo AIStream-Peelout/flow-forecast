@@ -186,6 +186,7 @@ def get_meta_representation(column_id: str, uuid: str, meta_model):
 
 def handle_scaling(validation_dataset, src, output, labels, probabilistic, m, output_std):
     # To-do move to class function
+    print("Un-scaling data")
     output_dist = None
     if probabilistic:
         unscaled_out = validation_dataset.inverse_scale(output)
@@ -220,11 +221,11 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :type output: torch.Tensor
     :param src: The source values (only really needed for the MASELoss function)
     :type src: torch.Tensor
-    :param criterion: [description]
+    :param criterion: The loss function that you want to use
     :type criterion: [type]
     :param validation_dataset: Only passed when unscaling of data is needed.
     :type validation_dataset: torch.utils.data.dataset
-    :param probabilistic: Whether the model is a probabalistic returns a distribution, defaults to None
+    :param probabilistic: Whether the model is a probabilistic and returns a distribution, defaults to None
     :type probabilistic: [type], optional
     :param output_std: The standard distribution, defaults to None
     :type output_std: [type], optional
