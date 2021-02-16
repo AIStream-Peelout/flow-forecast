@@ -78,7 +78,7 @@ def simple_decode(model: Type[torch.nn.Module],
                     ys_std_dev.append(out_std[:, 0].unsqueeze(0))
                 elif isinstance(out, tuple):
                     # Oh shit this is gonna be tough
-                    out = torch.mean(torch.stack(out[0], out[1]), dim=0)
+                    out = torch.mean(torch.stack(out[0], out[1], dim=0))
                 elif multi_targets < 2:
                     out = out.unsqueeze(2)
             if scaler:

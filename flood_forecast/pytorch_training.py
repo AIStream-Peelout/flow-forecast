@@ -60,6 +60,7 @@ def train_transformer_style(
         num_targets = model.params["n_targets"]
     if "num_workers" in dataset_params:
         worker_num = dataset_params["num_workers"]
+        print("using " + str(worker_num))
     if "pin_memory" in dataset_params:
         pin_memory = dataset_params["pin_memory"]
         print("Pin memory set to true")
@@ -407,7 +408,9 @@ def compute_validation(validation_loader: DataLoader,
                                                probabilistic=probabilistic,
                                                scaler=scaler)[:, :, 0:multi_targets]
             else:
-                if probabilistic:
+                if isinstance(criterion, GaussianLoss):
+                    output = model(src.float())
+                elif probabilistic:
                     output_dist = model(src.float())
                     output = output_dist.mean.detach().numpy()
                     output_std = output_dist.stddev.detach().numpy()
