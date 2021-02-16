@@ -99,6 +99,10 @@ def evaluate_model(
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
+        if isinstance(end_tensor, tuple):
+            end_tensor_0 = end_tensor
+            end_tensor = end_tensor[0]
+            print(end_tensor_0)
         if test_data.scale:
             print("Un-transforming data")
             if "probabilistic" in inference_params:
