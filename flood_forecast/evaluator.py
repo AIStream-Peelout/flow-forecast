@@ -100,7 +100,7 @@ def evaluate_model(
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
         if isinstance(end_tensor, tuple):
-            end_tensor_0 = end_tensor
+            end_tensor_0 = end_tensor[1]
             end_tensor = end_tensor[0]
             print(end_tensor.shape)
             print(end_tensor_0)
