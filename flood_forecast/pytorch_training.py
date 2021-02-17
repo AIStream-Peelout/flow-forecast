@@ -180,11 +180,11 @@ def train_transformer_style(
     model.save_model(model_filepath, max_epochs)
 
 
-def get_meta_representation(column_id: str, uuid: str, meta_model):
+def get_meta_representation(column_id: str, uuid: str, meta_model: PyTorchForecast) -> torch.Tensor:
     return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
 
 
-def handle_scaling(validation_dataset, src, output, labels, probabilistic, m, output_std):
+def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probabilistic, m, output_std):
     # To-do move to class function
     output_dist = None
     if probabilistic:

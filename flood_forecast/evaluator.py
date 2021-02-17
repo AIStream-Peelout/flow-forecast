@@ -103,7 +103,7 @@ def evaluate_model(
             end_tensor_0 = end_tensor[1]
             end_tensor = end_tensor[0]
             print(end_tensor.shape)
-            print(end_tensor_0)
+            print(end_tensor_0.shape)
         print("transform end tens preform")
         if test_data.scale:
             print("Un-transforming data")
@@ -151,8 +151,8 @@ def evaluate_model(
                     )
                 )
             elif isinstance(evaluation_metric_function, GaussianLoss):
-                g = GaussianLoss(end_tensor, end_tensor_0)
-                s = g(labels)
+                g = GaussianLoss(end_tensor.unsqueeze(1), end_tensor_0.unsqueeze(1))
+                s = g(labels.unsqueeze(1))
 
             else:
                 if "n_targets" in model.params:
