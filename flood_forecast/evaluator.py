@@ -126,16 +126,16 @@ def evaluate_model(
             history_length = model.params["dataset_params"]["forecast_history"]
             if "n_targets" in model.params:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                        "preds"] = end_tensor[:, 0].numpy().tolist()
+                                      "preds"] = end_tensor[:, 0].numpy().tolist()
                 for i, target in enumerate(target_col):
                     df_train_and_test["pred_" + target] = 0
                     df_train_and_test.loc[df_train_and_test.index[history_length:],
-                            "pred_" + target]= end_tensor[:, i].numpy().tolist()
+                                          "pred_" + target] = end_tensor[:, i].numpy().tolist()
             else:
                 df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor_list
                 df_train_and_test["pred_" + target_col[0]] = 0
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                        'pred' + target_col[0]] = end_tensor_list
+                                      "pred" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
@@ -261,10 +261,10 @@ def infer_on_torch_model(
             print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             try:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                        "std_dev"] = end_tensor[1][0].numpy().tolist()
+                                      "std_dev"] = end_tensor[1][0].numpy().tolist()
             except Exception as e:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                        "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
+                                      "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
                 print(e)
     else:
         df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor.numpy().tolist()
