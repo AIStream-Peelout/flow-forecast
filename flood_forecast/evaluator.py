@@ -11,7 +11,7 @@ from flood_forecast.explain_model_output import (
     deep_explain_model_summary_plot,
 )
 from flood_forecast.model_dict_function import decoding_functions
-from flood_forecast.custom.custom_opt import MASELoss
+from flood_forecast.custom.custom_opt import MASELoss, GaussianLoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
@@ -135,13 +135,12 @@ def evaluate_model(
     for evaluation_metric in model.crit:
         idx = 0
         for target in target_col:
+            labels = torch.from_numpy(df_train_and_test[target][:forecast_history].to_numpy())
             evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
                     torch.distributions.Normal(end_tensor[0], end_tensor[1][0]),
-                    torch.from_numpy(
-                        df_train_and_test[target][forecast_history:].to_numpy()
-                    ),
+                    labels,
                 )
             elif isinstance(evaluation_metric_function, MASELoss):
                 s = evaluation_metric_function(
@@ -149,28 +148,24 @@ def evaluate_model(
                         df_train_and_test[target][forecast_history:].to_numpy()
                     ),
                     end_tensor,
-                    torch.from_numpy(
-                        df_train_and_test[target][:forecast_history].to_numpy()
-                    )
+                    labels
                 )
+            elif isinstance(evaluation_metric_function, GaussianLoss):
+                g = GaussianLoss(end_tensor, end_tensor_0)
+                s = g(labels)
 
             else:
                 if "n_targets" in model.params:
                     s = evaluation_metric_function(
-                        torch.from_numpy(
-                            df_train_and_test[target][forecast_history:].to_numpy()
-                        ),
+                        labels,
                         end_tensor[:, idx],
                     )
                 else:
                     s = evaluation_metric_function(
-                        torch.from_numpy(
-                            df_train_and_test[target][forecast_history:].to_numpy()
-                        ),
+                        labels,
                         end_tensor,
                     )
             idx += 1
-
             eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
     # Explain model behaviour using shap
