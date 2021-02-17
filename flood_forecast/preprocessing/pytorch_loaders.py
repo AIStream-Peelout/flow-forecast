@@ -274,7 +274,7 @@ class AEDataloader(CSVDataLoader):
     def __len__(self):
         return len(self.df.index) - 1
 
-    def __getitem__(self, idx, uuid: int = None, column_relevant: str = None):
+    def __getitem__(self, idx: int, uuid: int = None, column_relevant: str = None):
         # Warning this assumes that data is
         if uuid:
             idx = self.original_df[self.original_df[column_relevant] == uuid].index

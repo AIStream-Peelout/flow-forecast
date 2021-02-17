@@ -108,7 +108,7 @@ class Attention(nn.Module):
                 index -= sub_len
         return mask
 
-    def attn(self, query, key, value, activation="Softmax"):
+    def attn(self, query: torch.Tensor, key, value: torch.Tensor, activation="Softmax"):
         activation = activation_dict[activation](dim=-1)
         pre_att = torch.matmul(query, key)
         if self.scale:
@@ -326,5 +326,4 @@ class DecoderTransformer(nn.Module):
             sigma = sigma.permute(0, 2, 1)
             # Output (batch_size, forecast_len_)
             sigma = self.forecast_len_layer(sigma).permute(0, 2, 1)
-            print(sigma.shape)
         return sigma.squeeze(2)

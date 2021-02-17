@@ -11,7 +11,7 @@ from flood_forecast.explain_model_output import (
     deep_explain_model_summary_plot,
 )
 from flood_forecast.model_dict_function import decoding_functions
-from flood_forecast.custom.custom_opt import MASELoss
+from flood_forecast.custom.custom_opt import MASELoss, GaussianLoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
@@ -83,7 +83,8 @@ def evaluate_model(
     .. code-block:: python
 
         from flood_forecast.evaluator import evaluate_model
-        evaluate_model(model, )
+        forecast_model = PyTorchForecast()
+        evaluate_model(forecast_model, )
         ...
     '''
     """
@@ -98,10 +99,19 @@ def evaluate_model(
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
+        g_loss = False
+        probablistic = True if "probabilistic" in inference_params else False
+        if isinstance(end_tensor, tuple) and not probablistic:
+            end_tensor_0 = end_tensor[1]
+            end_tensor = end_tensor[0]
+            print(end_tensor.shape)
+            print(end_tensor_0.shape)
+            g_loss = True
+        print("transform end tens preform")
         if test_data.scale:
             print("Un-transforming data")
-            if "probabilistic" in inference_params:
-                print('probabilistic in infer_on_torch_model')
+            if probablistic:
+                print('probabilistic running on infer_on_torch_model')
                 end_tensor_mean = test_data.inverse_scale(end_tensor[0].detach().reshape(-1, 1))
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
                 end_tensor_mean = end_tensor_mean.squeeze(1)
@@ -128,42 +138,37 @@ def evaluate_model(
     for evaluation_metric in model.crit:
         idx = 0
         for target in target_col:
+            labels = torch.from_numpy(df_train_and_test[target][forecast_history:].to_numpy())
             evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
                     torch.distributions.Normal(end_tensor[0], end_tensor[1][0]),
-                    torch.from_numpy(
-                        df_train_and_test[target][forecast_history:].to_numpy()
-                    ),
+                    labels,
                 )
             elif isinstance(evaluation_metric_function, MASELoss):
                 s = evaluation_metric_function(
-                    torch.from_numpy(
-                        df_train_and_test[target][forecast_history:].to_numpy()
-                    ),
+                    labels,
                     end_tensor,
                     torch.from_numpy(
                         df_train_and_test[target][:forecast_history].to_numpy()
                     )
                 )
+            elif g_loss:
+                g = GaussianLoss(end_tensor.unsqueeze(1), end_tensor_0.unsqueeze(1))
+                s = g(labels.unsqueeze(1))
 
             else:
                 if "n_targets" in model.params:
                     s = evaluation_metric_function(
-                        torch.from_numpy(
-                            df_train_and_test[target][forecast_history:].to_numpy()
-                        ),
+                        labels,
                         end_tensor[:, idx],
                     )
                 else:
                     s = evaluation_metric_function(
-                        torch.from_numpy(
-                            df_train_and_test[target][forecast_history:].to_numpy()
-                        ),
+                        labels,
                         end_tensor,
                     )
             idx += 1
-
             eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
     # Explain model behaviour using shap
@@ -171,6 +176,8 @@ def evaluate_model(
         print("Probabilistic explainability currently not supported.")
     elif "n_targets" in model.params:
         print("Multitask forecasting support coming soon")
+    elif g_loss:
+        print("SHAP not yet supported for these models with GLoss")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
@@ -324,7 +331,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
         df_pred.iloc[history_length:] = prediction_samples
         df_prediction_arr.append(df_pred)
     if len(df_prediction_arr) < 1:
-        raise ValueError("Error length of prediction array must be one or greater")
+        raise ValueError("Error length of the prediction array must be one or greater")
     return df_prediction_arr
 
 
@@ -338,7 +345,7 @@ def generate_predictions(
     forecast_length: int,
     hours_to_forecast: int,
     decoder_params: Dict,
-    multi_params=1
+    multi_params: int = 1
 ) -> torch.Tensor:
     """[summary]
 
@@ -450,7 +457,7 @@ def generate_decoded_predictions(
     history_dim: torch.Tensor,
     hours_to_forecast: int,
     decoder_params: Dict,
-    multi_targets=1,
+    multi_targets: int = 1,
 ) -> torch.Tensor:
     probabilistic = False
     scaler = None
@@ -481,11 +488,11 @@ def generate_decoded_predictions(
     if probabilistic:
         end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
         return end_tensor_mean, end_tensor[1]
+    elif isinstance(end_tensor, tuple):
+        return end_tensor[0][:, :, 0].view(-1).to("cpu").detach(), end_tensor[1][:, :, 0].view(-1).to("cpu").detach()
     if multi_targets == 1:
-        end_tensor = end_tensor[:, :, 0].view(-1).to("cpu").detach()
-    else:
-        end_tensor = end_tensor[:, :, 0:multi_targets].to("cpu").detach()
-    return end_tensor
+        end_tensor = end_tensor[:, :, 0].view(-1)
+    return end_tensor.to("cpu").detach()
 
 
 def generate_prediction_samples(
