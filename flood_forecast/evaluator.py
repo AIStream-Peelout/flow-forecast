@@ -177,7 +177,7 @@ def evaluate_model(
     elif "n_targets" in model.params:
         print("Multitask forecasting support coming soon")
     elif g_loss:
-        print("SHAP not yet supported for these models")
+        print("SHAP not yet supported for these models with GLoss")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
@@ -331,7 +331,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
         df_pred.iloc[history_length:] = prediction_samples
         df_prediction_arr.append(df_pred)
     if len(df_prediction_arr) < 1:
-        raise ValueError("Error length of prediction array must be one or greater")
+        raise ValueError("Error length of the prediction array must be one or greater")
     return df_prediction_arr
 
 
@@ -345,7 +345,7 @@ def generate_predictions(
     forecast_length: int,
     hours_to_forecast: int,
     decoder_params: Dict,
-    multi_params=1
+    multi_params: int = 1
 ) -> torch.Tensor:
     """[summary]
 
@@ -457,7 +457,7 @@ def generate_decoded_predictions(
     history_dim: torch.Tensor,
     hours_to_forecast: int,
     decoder_params: Dict,
-    multi_targets=1,
+    multi_targets: int = 1,
 ) -> torch.Tensor:
     probabilistic = False
     scaler = None
