@@ -144,11 +144,11 @@ def evaluate_model(
                 )
             elif isinstance(evaluation_metric_function, MASELoss):
                 s = evaluation_metric_function(
-                    torch.from_numpy(
-                        df_train_and_test[target][forecast_history:].to_numpy()
-                    ),
+                    labels,
                     end_tensor,
-                    labels
+                    torch.from_numpy(
+                        df_train_and_test[target][:forecast_history].to_numpy()
+                    )
                 )
             elif isinstance(evaluation_metric_function, GaussianLoss):
                 g = GaussianLoss(end_tensor, end_tensor_0)
