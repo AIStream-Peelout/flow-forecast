@@ -185,7 +185,7 @@ def get_meta_representation(column_id: str, uuid: str, meta_model: PyTorchForeca
 
 
 def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probabilistic, m, output_std):
-    # To-do move to class function
+    # To-do move to class fun ction
     output_dist = None
     if probabilistic:
         unscaled_out = validation_dataset.inverse_scale(output)

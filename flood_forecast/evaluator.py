@@ -99,16 +99,19 @@ def evaluate_model(
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
-        if isinstance(end_tensor, tuple):
+        g_loss = False
+        probablistic = False
+        if isinstance(end_tensor, tuple) and not probablistic:
             end_tensor_0 = end_tensor[1]
             end_tensor = end_tensor[0]
             print(end_tensor.shape)
             print(end_tensor_0.shape)
+            g_loss = True
         print("transform end tens preform")
         if test_data.scale:
             print("Un-transforming data")
-            if "probabilistic" in inference_params:
-                print('probabilistic in infer_on_torch_model')
+            if probablistic:
+                print('probabilistic running on infer_on_torch_model')
                 end_tensor_mean = test_data.inverse_scale(end_tensor[0].detach().reshape(-1, 1))
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
                 end_tensor_mean = end_tensor_mean.squeeze(1)
@@ -150,7 +153,7 @@ def evaluate_model(
                         df_train_and_test[target][:forecast_history].to_numpy()
                     )
                 )
-            elif isinstance(evaluation_metric_function, GaussianLoss):
+            elif g_loss:
                 g = GaussianLoss(end_tensor.unsqueeze(1), end_tensor_0.unsqueeze(1))
                 s = g(labels.unsqueeze(1))
 
@@ -173,6 +176,8 @@ def evaluate_model(
         print("Probabilistic explainability currently not supported.")
     elif "n_targets" in model.params:
         print("Multitask forecasting support coming soon")
+    elif g_loss:
+        print("SHAP not yet supported for these models")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
