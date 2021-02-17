@@ -231,7 +231,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :param m: [description], defaults to 1
     :type m: int, optional
     :return: Returns the computed loss
-    :rtype: [type]
+    :rtype: float
 """
     if isinstance(criterion, GaussianLoss):
         if len(output[0].shape) > 2:
@@ -249,7 +249,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
                     labels = labels.unsqueeze(0)
     if probabilistic:
         if type(output_std) != torch.Tensor:
-            print("Converted")
+            print("Converted tensor")
             output_std = torch.from_numpy(output_std)
         if type(output) != torch.Tensor:
             output = torch.from_numpy(output)
@@ -318,7 +318,7 @@ def torch_single_train(model: PyTorchForecast,
             raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
         running_loss += loss.item()
         i += 1
-    print("The running loss is:")
+    print("The running loss is: ")
     print(running_loss)
     print("The number of items in train is: ")
     print(i)
@@ -367,10 +367,10 @@ def compute_validation(validation_loader: DataLoader,
     :type val_or_test: str, optional
     :param probabilistic: [description], defaults to False
     :type probabilistic: bool, optional
-    :return: [description]
+    :return: The loss of the first metirc in the list.
     :rtype: float
     """
-    print('compute_validation')
+    print('Computing validation loss')
     unscaled_crit = dict.fromkeys(criterion, 0)
     scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()

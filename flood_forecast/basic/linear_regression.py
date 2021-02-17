@@ -87,6 +87,7 @@ def simple_decode(model: Type[torch.nn.Module],
     lower_out = []
     handle_gauss = False
     for i in range(0, max_seq_len, output_len):
+        residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
         with torch.no_grad():
             if meta_data:
                 out = model(src, meta_data).unsqueeze(2)
@@ -95,8 +96,8 @@ def simple_decode(model: Type[torch.nn.Module],
                 if isinstance(out, tuple):
                     out, up, lower = handle_gaussian_loss(out)
                     print(up)
-                    upper_out.append(up)
-                    lower_out.append(lower)
+                    upper_out.append(up[:, :residual])
+                    lower_out.append(lower[:, :residual])
                     handle_gauss = True
                 elif probabilistic:
                     out_std = out.stddev.detach()
@@ -113,7 +114,7 @@ def simple_decode(model: Type[torch.nn.Module],
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
                 ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
             else:
-                residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
+                # residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
                 real_target2[:, i:i + residual, 0:multi_targets] = out[:, :residual]
                 src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
