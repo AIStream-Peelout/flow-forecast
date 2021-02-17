@@ -100,7 +100,7 @@ def evaluate_model(
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
         g_loss = False
-        probablistic = False
+        probablistic = True if "probabilistic" in inference_params else False
         if isinstance(end_tensor, tuple) and not probablistic:
             end_tensor_0 = end_tensor[1]
             end_tensor = end_tensor[0]
