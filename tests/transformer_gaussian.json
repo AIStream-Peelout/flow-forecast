@@ -22,7 +22,7 @@
        "test_path": "tests/test_data/keag_small.csv",
        "batch_size":4,
        "forecast_history":5,
-       "forecast_length":1,
+       "forecast_length":5,
        "train_end": 100,
        "valid_start":301,
        "valid_end": 401,
@@ -72,7 +72,7 @@
           "dataset_params":{
              "file_path": "tests/test_data/keag_small.csv",
              "forecast_history":5,
-             "forecast_length":1,
+             "forecast_length":5,
              "no_scale": true,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],

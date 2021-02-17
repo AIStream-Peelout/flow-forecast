@@ -102,7 +102,9 @@ def evaluate_model(
         if isinstance(end_tensor, tuple):
             end_tensor_0 = end_tensor
             end_tensor = end_tensor[0]
+            print(end_tensor.shape)
             print(end_tensor_0)
+        print("transform end tens preform")
         if test_data.scale:
             print("Un-transforming data")
             if "probabilistic" in inference_params:
