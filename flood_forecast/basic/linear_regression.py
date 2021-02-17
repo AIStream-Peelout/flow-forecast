@@ -122,6 +122,6 @@ def simple_decode(model: Type[torch.nn.Module],
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
         return ys[:, 1:, 0:multi_targets], ys_std_dev
     if handle_gauss:
-        return torch.cat(upper_out), torch.cat(lower_out), ys[:, 1:, 0:multi_targets]
+        return torch.cat(upper_out, dim=1), torch.cat(lower_out, dim=1), ys[:, 1:, 0:multi_targets]
     else:
         return ys[:, 1:, 0:multi_targets]
