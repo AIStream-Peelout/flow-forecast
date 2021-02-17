@@ -135,7 +135,7 @@ def evaluate_model(
     for evaluation_metric in model.crit:
         idx = 0
         for target in target_col:
-            labels = torch.from_numpy(df_train_and_test[target][:forecast_history].to_numpy())
+            labels = torch.from_numpy(df_train_and_test[target][forecast_history:].to_numpy())
             evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(

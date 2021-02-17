@@ -259,7 +259,7 @@ class TransformerXL(torch.nn.Module):
         self.seq_len = seq_len
         self.mem_len = mem_len
 
-    def forward(self, idxs: torch.LongTensor,  # (cs, bs)
+    def forward(self, idxs: torch.LongTensor,  # (cs, bs) 2
                 target: torch.LongTensor,  # (cs, bs)
                 memory: Optional[List[torch.FloatTensor]] = None,
                 ) -> Dict[str, torch.Tensor]:
