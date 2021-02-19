@@ -3,7 +3,7 @@ import unittest
 import torch
 
 
-class TestDARNN(unittest.TestCase):
+class TestAttention(unittest.TestCase):
     def setUp(self):
         self.prob_attention = ProbAttention()
         self.full_attention = FullAttention()
