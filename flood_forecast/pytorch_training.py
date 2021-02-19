@@ -43,12 +43,20 @@ def train_transformer_style(
         takes_target=False,
         forward_params: Dict = {},
         model_filepath: str = "model_save") -> None:
-    """
-    Function to train any PyTorchForecast model
-    :model The initialized PyTorchForecastModel
-    :training_params_dict A dictionary of the parameters needed to train model
-    :takes_target boolean: Determines whether to pass target during training
-    :forward_params: A dictionary for additional forward parameters (for instance target)
+
+    """Function to train any PyTorchForecast model
+
+    :param model:  A properly wrapped PyTorchForecast model
+    :type model: PyTorchForecast
+    :param training_params: A dictionary of the necessary parameters for training.
+    :type training_params: Dict
+    :param takes_target: A parameter to determine whether a model requires the target, defaults to False
+    :type takes_target: bool, optional
+    :param forward_params: [description], defaults to {}
+    :type forward_params: Dict, optional
+    :param model_filepath: The file path to load modeel weights from, defaults to "model_save"
+    :type model_filepath: str, optional
+    :raises ValueError: [description]
     """
     use_wandb = model.wandb
     es = None
@@ -320,8 +328,7 @@ def torch_single_train(model: PyTorchForecast,
         i += 1
     print("The running loss is: ")
     print(running_loss)
-    print("The number of items in train is: ")
-    print(i)
+    print("The number of items in train is: " + str(i))
     total_loss = running_loss / float(i)
     return total_loss
 

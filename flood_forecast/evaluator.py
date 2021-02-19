@@ -104,8 +104,6 @@ def evaluate_model(
         if isinstance(end_tensor, tuple) and not probablistic:
             end_tensor_0 = end_tensor[1]
             end_tensor = end_tensor[0]
-            print(end_tensor.shape)
-            print(end_tensor_0.shape)
             g_loss = True
         print("transform end tens preform")
         if test_data.scale:
@@ -116,7 +114,6 @@ def evaluate_model(
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
                 end_tensor_mean = end_tensor_mean.squeeze(1)
             else:
-                print(end_tensor.shape)
                 if "n_targets" in model.params:
                     end_tensor = test_data.inverse_scale(end_tensor.detach())
                 else:
@@ -177,7 +174,7 @@ def evaluate_model(
     elif "n_targets" in model.params:
         print("Multitask forecasting support coming soon")
     elif g_loss:
-        print("SHAP not yet supported for these models with GLoss")
+        print("SHAP not yet supported for these models with multiple outputs")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
