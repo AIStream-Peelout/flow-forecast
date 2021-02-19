@@ -10,3 +10,4 @@ class TestDARNN(unittest.TestCase):
 
     def test_full_attn(self):
         r = self.prob_attention(torch.rand(2, 20, 30))
+        self.assertTrue(r)
