@@ -61,10 +61,8 @@ class CSVDataLoader(Dataset):
         print(relevant_cols3)
         self.relevant_cols3 = relevant_cols3
         if interpolate:
-            interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
-            self.df = interpolated_df[relevant_cols + relevant_cols3]
-        else:
-            self.df = df[relevant_cols + relevant_cols3]
+            df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
+        self.df = df[relevant_cols + relevant_cols3].copy()
         print("Now loading" + file_path)
         self.original_df = df
         self.scale = None
@@ -77,22 +75,14 @@ class CSVDataLoader(Dataset):
         self.unscaled_df = self.df
         if scaling is not None:
             print("scaling now")
-            self.scale = scaling
-            temp_df = self.scale.fit_transform(self.df[relevant_cols])
+            self.scale = scaling.fit(self.df[relevant_cols])
+            temp_df = self.scale.transform(self.df[relevant_cols])
             # We define a second scaler to scale the end output
             # back to normal as models might not necessarily predict
             # other present time series values.
             targ_scale_class = self.scale.__class__
             self.targ_scaler = targ_scale_class()
-            print(len(target_col))
-            if len(target_col) == 1:
-                self.targ_scaler.fit_transform(
-                    self.df[target_col[0]].values.reshape(-1, 1)
-                )
-            else:
-                self.targ_scaler.fit_transform(
-                    self.df[target_col]
-                )
+            self.df[target_col] = self.targ_scaler.fit_transform(self.df[target_col])
 
             self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
@@ -204,7 +194,7 @@ class CSVTestLoader(CSVDataLoader):
             # ]
             all_rows_orig = self.original_df.iloc[
                 idx: self.forecast_total + target_idx_start
-            ]
+            ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start
 

@@ -104,8 +104,6 @@ def evaluate_model(
         if isinstance(end_tensor, tuple) and not probablistic:
             end_tensor_0 = end_tensor[1]
             end_tensor = end_tensor[0]
-            print(end_tensor.shape)
-            print(end_tensor_0.shape)
             g_loss = True
         print("transform end tens preform")
         if test_data.scale:
@@ -116,7 +114,6 @@ def evaluate_model(
                 end_tensor_list = flatten_list_function(end_tensor_mean.numpy().tolist())
                 end_tensor_mean = end_tensor_mean.squeeze(1)
             else:
-                print(end_tensor.shape)
                 if "n_targets" in model.params:
                     end_tensor = test_data.inverse_scale(end_tensor.detach())
                 else:
@@ -125,14 +122,17 @@ def evaluate_model(
                 end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
             history_length = model.params["dataset_params"]["forecast_history"]
             if "n_targets" in model.params:
-                df_train_and_test["preds"][history_length:] = end_tensor[:, 0].numpy().tolist()
+                df_train_and_test.loc[df_train_and_test.index[history_length:],
+                                      "preds"] = end_tensor[:, 0].numpy().tolist()
                 for i, target in enumerate(target_col):
                     df_train_and_test["pred_" + target] = 0
-                    df_train_and_test["pred_" + target][history_length:] = end_tensor[:, i].numpy().tolist()
+                    df_train_and_test.loc[df_train_and_test.index[history_length:],
+                                          "pred_" + target] = end_tensor[:, i].numpy().tolist()
             else:
-                df_train_and_test["preds"][history_length:] = end_tensor_list
+                df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor_list
                 df_train_and_test["pred_" + target_col[0]] = 0
-                df_train_and_test["pred_" + target_col[0]][history_length:] = end_tensor_list
+                df_train_and_test.loc[df_train_and_test.index[history_length:],
+                                      "pred" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
@@ -177,7 +177,7 @@ def evaluate_model(
     elif "n_targets" in model.params:
         print("Multitask forecasting support coming soon")
     elif g_loss:
-        print("SHAP not yet supported for these models with GLoss")
+        print("SHAP not yet supported for these models with multiple outputs")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
@@ -253,16 +253,18 @@ def infer_on_torch_model(
     df_train_and_test["preds"] = 0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
-            df_train_and_test["preds"][history_length:] = end_tensor[0].numpy().tolist()
+            df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor[0].numpy().tolist()
             df_train_and_test["std_dev"] = 0
             print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             try:
-                df_train_and_test["std_dev"][history_length:] = end_tensor[1][0].numpy().tolist()
+                df_train_and_test.loc[df_train_and_test.index[history_length:],
+                                      "std_dev"] = end_tensor[1][0].numpy().tolist()
             except Exception as e:
-                df_train_and_test["std_dev"][history_length:] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
+                df_train_and_test.loc[df_train_and_test.index[history_length:],
+                                      "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
                 print(e)
     else:
-        df_train_and_test["preds"][history_length:] = end_tensor.numpy().tolist()
+        df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor.numpy().tolist()
     df_prediction_arr = []
     df_prediction_samples = pd.DataFrame(index=df_train_and_test.index)
     # df_prediction_samples_std_dev = pd.DataFrame(index=df_train_and_test.index)
