@@ -132,7 +132,7 @@ def evaluate_model(
                 df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor_list
                 df_train_and_test["pred_" + target_col[0]] = 0
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                                      "pred" + target_col[0]] = end_tensor_list
+                                      "pred_" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
         print(df_train_and_test)
     for evaluation_metric in model.crit:
