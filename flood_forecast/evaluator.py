@@ -177,7 +177,7 @@ def evaluate_model(
     elif "n_targets" in model.params:
         print("Multitask forecasting support coming soon")
     elif g_loss:
-        print("SHAP not yet supported for these models with multiple outputs")
+        print("SHAP not yet supported for models with multiple outputs")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
