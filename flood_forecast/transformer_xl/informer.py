@@ -4,21 +4,59 @@ import torch.nn.functional as F
 from flood_forecast.transformer_xl.attn import FullAttention, ProbAttention, AttentionLayer
 from flood_forecast.transformer_xl.data_embeddding import DataEmbedding
 
-""" This is the implementation of the Informer available from the original authors
-    https://github.com/zhouhaoyi/Informer2020. We have done some minimal refactoring"""
-
 
 class Informer(nn.Module):
-    def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, out_len,
+    def __init__(self, n_time_series: int, dec_in: int, c_out: int, seq_len, label_len, out_len,
                  factor=5, d_model=512, n_heads=8, e_layers=3, d_layers=2, d_ff=512,
                  dropout=0.0, attn='prob', embed='fixed', data='ETTh', activation='gelu',
                  device=torch.device('cuda:0')):
+        """ This is based on the implementation of the Informer available from the original authors
+            https://github.com/zhouhaoyi/Informer2020. We have done some minimal refactoring, but
+            the core code remains the same.
+
+        :param n_time_series: The number of time series present in the multivariate forecasting problem.
+        :type n_time_series: int
+        :param dec_in: The input size to the decoder (e.g. the number of time series present to the decoder)
+        :type dec_in: int
+        :param c_out: The output dimension of the model.
+        :type c_out:  int
+        :param seq_len: The number of historical time steps to pass into the model.
+        :type seq_len: int
+        :param label_len: The length of the label sequence passed into the decoder.
+        :type label_len: int
+        :param out_len: [description]
+        :type out_len: [type]
+        :param factor: [description], defaults to 5
+        :type factor: int, optional
+        :param d_model: [description], defaults to 512
+        :type d_model: int, optional
+        :param n_heads: [description], defaults to 8
+        :type n_heads: int, optional
+        :param e_layers: [description], defaults to 3
+        :type e_layers: int, optional
+        :param d_layers: [description], defaults to 2
+        :type d_layers: int, optional
+        :param d_ff: [description], defaults to 512
+        :type d_ff: int, optional
+        :param dropout: [description], defaults to 0.0
+        :type dropout: float, optional
+        :param attn: [description], defaults to 'prob'
+        :type attn: str, optional
+        :param embed: [description], defaults to 'fixed'
+        :type embed: str, optional
+        :param data: [description], defaults to 'ETTh'
+        :type data: str, optional
+        :param activation: [description], defaults to 'gelu'
+        :type activation: str, optional
+        :param device: [description], defaults to torch.device('cuda:0')
+        :type device: [type], optional
+        """
         super(Informer, self).__init__()
         self.pred_len = out_len
         self.attn = attn
 
         # Encoding
-        self.enc_embedding = DataEmbedding(enc_in, d_model, embed, data, dropout)
+        self.enc_embedding = DataEmbedding(n_time_series, d_model, embed, data, dropout)
         self.dec_embedding = DataEmbedding(dec_in, d_model, embed, data, dropout)
         # Attention
         Attn = ProbAttention if attn == 'prob' else FullAttention
@@ -64,6 +102,25 @@ class Informer(nn.Module):
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
+        """
+
+        :param x_enc: The core tensor going into the model. Of dimension (batch_size, ?, ?)
+        :type x_enc: torch.Tensor
+        :param x_mark_enc: [description]
+        :type x_mark_enc: [type]
+        :param x_dec: [description]
+        :type x_dec: [type]
+        :param x_mark_dec: [description]
+        :type x_mark_dec: [type]
+        :param enc_self_mask: [description], defaults to None
+        :type enc_self_mask: [type], optional
+        :param dec_self_mask: [description], defaults to None
+        :type dec_self_mask: [type], optional
+        :param dec_enc_mask: [description], defaults to None
+        :type dec_enc_mask: [type], optional
+        :return: [description]
+        :rtype: [type]
+        """
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out = self.encoder(enc_out, attn_mask=enc_self_mask)
 

@@ -83,7 +83,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             final_act=None,
             n_heads=8):
         """
-        Uses a number of encoder layers with simple linear decoder layer
+        Uses a number of encoder layers with simple linear decoder layer.
         """
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
@@ -105,7 +105,6 @@ class CustomTransformerDecoder(torch.nn.Module):
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
-                    # might have to permute
         Performs forward pass on tensor of (batch_size, sequence_length, n_time_series)
         Return tensor of dim (batch_size, output_seq_length)
         """
