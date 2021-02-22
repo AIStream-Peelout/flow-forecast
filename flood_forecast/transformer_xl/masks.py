@@ -16,9 +16,9 @@ class TriangularCausalMask(object):
 
         :param bath_size: The batch_size should be passed
         :type bath_size: int
-        :param seq_len: [description]
-        :type seq_len: [type]
-        :param device: [description], defaults to "cpu"
+        :param seq_len: Number of historical time steps.
+        :type seq_len: int
+        :param device: The device typically will be cpu, cuda, or tpu, defaults to "cpu"
         :type device: str, optional
         """
         mask_shape = [bath_size, 1, seq_len, seq_len]
