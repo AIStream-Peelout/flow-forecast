@@ -16,9 +16,9 @@ class Informer(nn.Module):
 
         :param n_time_series: The number of time series present in the multivariate forecasting problem.
         :type n_time_series: int
-        :param dec_in: The input size to the decoder (e.g. the number of time series present to the decoder)
+        :param dec_in: The input size to the decoder (e.g. the number of time series passed to the decoder)
         :type dec_in: int
-        :param c_out: The output dimension of the model.
+        :param c_out: The output dimension of the model (usually will be the number of variables you are forecasting).
         :type c_out:  int
         :param seq_len: The number of historical time steps to pass into the model.
         :type seq_len: int
