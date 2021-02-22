@@ -17,7 +17,7 @@ class DummyTorchModel(nn.Module):
         # Layer specifically to avoid NULL parameter method
         self.linear_test_layer = nn.Linear(3, 10)
 
-    def forward(self, x: torch.Tensor, mask=None) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """The forward pass for the dummy model
 
         :param x: Here the data is irrelvant. Only batch_size is grabbed
