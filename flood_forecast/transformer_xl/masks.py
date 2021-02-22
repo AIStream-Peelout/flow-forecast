@@ -15,9 +15,9 @@ class TriangularCausalMask(object):
         """This is a mask for the attention mechanism
 
         :param bath_size: The size of the batch
-        :type bath_size: int
+        :type bath_size: [type]
         :param seq_len: [description]
-        :type seq_len: int
+        :type seq_len: [type]
         :param device: [description], defaults to "cpu"
         :type device: str, optional
         """
