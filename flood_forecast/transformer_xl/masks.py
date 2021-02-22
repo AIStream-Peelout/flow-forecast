@@ -14,8 +14,8 @@ class TriangularCausalMask(object):
     def __init__(self, bath_size, seq_len, device="cpu"):
         """This is a mask for the attention mechanism
 
-        :param bath_size: The size of the batch
-        :type bath_size: [type]
+        :param bath_size: The batch_size should be passed
+        :type bath_size: int
         :param seq_len: [description]
         :type seq_len: [type]
         :param device: [description], defaults to "cpu"
