@@ -14,12 +14,12 @@ class TestAttention(unittest.TestCase):
         #   B, L, H, D
         a = torch.rand(2, 20, 8, 30)
 
-        r = self.prob_attention(torch.rand(2, 20, 8, 30), a, torch.rand(2, 20, 8, 30), self.triangle)
+        r = self.prob_attention(torch.rand(2, 20, 8, 30), a, torch.rand(2, 20, 8, 30), self.triangle.mask)
         self.assertTrue(r)
         self.assertIsInstance(r, torch.Tensor)
 
     def test_full_attn(self):
         t = torch.rand(2, 20, 8, 30)
-        a = self.full_attention(torch.rand(3, 20, 8, 30), t, t, self.triangle)
+        a = self.full_attention(torch.rand(2, 20, 8, 30), t, t, self.triangle.mask)
         self.assertIsInstance(a, torch.Tensor)
         self.assertEqual(len(a.shape), 3)
