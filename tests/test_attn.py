@@ -22,4 +22,4 @@ class TestAttention(unittest.TestCase):
         t = torch.rand(2, 20, 8, 30)
         a = self.full_attention(torch.rand(2, 20, 8, 30), t, t, self.triangle)
         self.assertIsInstance(a, torch.Tensor)
-        self.assertEqual(len(a.shape), 3)
+        self.assertEqual(len(a.shape), 4)
