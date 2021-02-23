@@ -24,8 +24,8 @@ class Informer(nn.Module):
         :type seq_len: int
         :param label_len: The length of the label sequence passed into the decoder.
         :type label_len: int
-        :param out_len: [description]
-        :type out_len: [type]
+        :param out_len: The overall output length from the decoder.
+        :type out_len: int
         :param factor: [description], defaults to 5
         :type factor: int, optional
         :param d_model: [description], defaults to 512
