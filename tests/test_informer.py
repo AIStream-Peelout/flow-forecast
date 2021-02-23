@@ -8,7 +8,4 @@ class TestInformer(unittest.TestCase):
         self.informer = Informer(3, 3, 3, 20, 20, 20)
 
     def test_informer(self):
-        self.informer(torch.rand(2, 20, 3), torch.rand(2, 20, 3), torch.rand(2, 20, 3), torch.rand(2, 20, 3))
-
-    def s(self):
-        pass
+        self.informer(torch.rand(2, 3))
