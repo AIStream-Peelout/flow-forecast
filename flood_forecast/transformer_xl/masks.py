@@ -11,7 +11,7 @@ def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
 
 
 class TriangularCausalMask(object):
-    def __init__(self, bath_size, seq_len, device="cpu"):
+    def __init__(self, bath_size: int, seq_len: int, device="cpu"):
         """This is a mask for the attention mechanism
 
         :param bath_size: The batch_size should be passed
