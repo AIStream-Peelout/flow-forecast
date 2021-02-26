@@ -7,7 +7,7 @@ class PositionalEmbedding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         """[summary]
 
-        :param d_model: The embedding dimension used for the model
+        :param d_model: [description]
         :type d_model: [type]
         :param max_len: [description], defaults to 5000
         :type max_len: int, optional

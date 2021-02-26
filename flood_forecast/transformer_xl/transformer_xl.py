@@ -1,5 +1,5 @@
 """
-Model from Keita Kurita. Not useable yet..
+Model from Keita Kurita. Not useable
 https://github.com/keitakurita/Practical_NLP_in_PyTorch/blob/master/deep_dives/transformer_xl_from_scratch.ipynb
 """
 import torch
