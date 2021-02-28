@@ -8,7 +8,7 @@ class PositionalEmbedding(nn.Module):
         """[summary]
 
         :param d_model: [description]
-        :type d_model: [type]
+        :type d_model: int
         :param max_len: [description], defaults to 5000
         :type max_len: int, optional
         """
@@ -27,11 +27,25 @@ class PositionalEmbedding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
+        """[summary]
+
+        :param x: [description]
+        :type x: [type]
+        :return: [description]
+        :rtype: [type]
+        """
         return self.pe[:, :x.size(1)]
 
 
 class TokenEmbedding(nn.Module):
-    def __init__(self, c_in, d_model):
+    def __init__(self, c_in: int, d_model: int):
+        """Create the token embedding
+
+        :param c_in: [description]
+        :type c_in: [type]
+        :param d_model: [description]
+        :type d_model: [type]
+        """
         super(TokenEmbedding, self).__init__()
         padding = 1 if torch.__version__ >= '1.5.0' else 2
         self.tokenConv = nn.Conv1d(in_channels=c_in, out_channels=d_model,
@@ -40,7 +54,14 @@ class TokenEmbedding(nn.Module):
             if isinstance(m, nn.Conv1d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='leaky_relu')
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Create the token toke embedding
+
+        :param x: [description]
+        :type x: torch.Tensor
+        :return: [description]
+        :rtype: torch.Tensor
+        """
         x = self.tokenConv(x.permute(0, 2, 1)).transpose(1, 2)
         return x
 

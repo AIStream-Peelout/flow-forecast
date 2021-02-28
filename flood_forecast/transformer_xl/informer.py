@@ -104,7 +104,7 @@ class Informer(nn.Module):
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
         """
 
-        :param x_enc: The core tensor going into the model. Of dimension (batch_size, ?, ?)
+        :param x_enc: The core tensor going into the model. Of dimension (batch_size, seq_len, n_time_series)
         :type x_enc: torch.Tensor
         :param x_mark_enc: [description]
         :type x_mark_enc: [type]

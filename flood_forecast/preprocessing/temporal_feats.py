@@ -70,11 +70,9 @@ def cyclical(df: pd.DataFrame, feature_column: str) -> pd.DataFrame:
 
     :param df: A Pandas Dataframe where you want the dt encoded
     :type df: pd.DataFrame
-    :param feature_column: The name of the feature column. Should be
-    either (day_of_week, hour, month, year)
+    :param feature_column: The name of the feature column. Should beeither (day_of_week, hour, month, year)
     :type feature_column: str
-    :return: The dataframew with three new columns: norm_feature, cos_feature
-    sin_feature
+    :return: The dataframew with three new columns: norm_feature, cos_feature, sin_feature
     :rtype: pd.DataFrame
     """
     df["norm"] = 2 * np.pi * df[feature_column] / df[feature_column].max()
