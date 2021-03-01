@@ -9,4 +9,4 @@ class TestInformer(unittest.TestCase):
 
     def test_informer(self):
         # Format should be batch_size, seq
-        self.informer(torch.rand(2, 20, 3), torch.rand(2, 20, 3), torch.rand(2, 20, 3), torch.rand(2, 20, 3))
+        self.informer(torch.rand(2, 20, 3), torch.rand(2, 20, 4), torch.rand(2, 20, 3), torch.rand(2, 20, 4))

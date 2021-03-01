@@ -71,7 +71,7 @@ class ProbAttention(nn.Module):
             contex = V.cumsum(dim=-1)
         return contex
 
-    def _update_context(self, context_in, V, scores, index, L_Q, attn_mask):
+    def _update_context(self, context_in: torch.Tensor, V, scores, index, L_Q, attn_mask):
         B, H, L_V, D = V.shape
 
         if self.mask_flag:
@@ -126,7 +126,7 @@ class AttentionLayer(nn.Module):
         B, L, _ = queries.shape
         _, S, _ = keys.shape
         H = self.n_heads
-
+        # 4-D tensor of shape (batch_size, seq_len, n_heads, d_model)
         queries = self.query_projection(queries).view(B, L, H, -1)
         keys = self.key_projection(keys).view(B, S, H, -1)
         values = self.value_projection(values).view(B, S, H, -1)
