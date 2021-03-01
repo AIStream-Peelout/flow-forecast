@@ -106,10 +106,10 @@ class Informer(nn.Module):
 
         :param x_enc: The core tensor going into the model. Of dimension (batch_size, seq_len, n_time_series)
         :type x_enc: torch.Tensor
-        :param x_mark_enc: The datetime variable should in the shape (batch_size, seq_len, n_time_features)
-        :type x_mark_enc: torch.Tensor
-        :param x_dec: The core forecasted tensor. Should be dimension (batch_size, seq_len, n_time_series)
-        :type x_dec: The datetime variable should be in the shape (batch_size, seq_len, n_time_features)
+        :param x_mark_enc: [description]
+        :type x_mark_enc: [type]
+        :param x_dec: [description]
+        :type x_dec: [type]
         :param x_mark_dec: [description]
         :type x_mark_dec: [type]
         :param enc_self_mask: [description], defaults to None
