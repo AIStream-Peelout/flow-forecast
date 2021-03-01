@@ -32,11 +32,13 @@ class MultiAttnHeadSimple(torch.nn.Module):
             self.sigmoid = activation_dict[final_layer]()
 
     def forward(self, x: torch.Tensor, mask=None) -> torch.Tensor:
-        """
+        """ Forward pass of multihead attention model
+
         :param: x torch.Tensor: of shape (B, L, M)
         Where B is the batch size, L is the sequence length and M is the number of time
         :return: a tensor of dimension (B, forecast_length)
         """
+
         x = self.dense_shape(x)
         x = self.pe(x)
         # Permute to (L, B, M)
