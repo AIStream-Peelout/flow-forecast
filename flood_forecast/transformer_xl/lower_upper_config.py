@@ -6,7 +6,7 @@ from flood_forecast.custom.custom_activation import entmax15, sparsemax
 
 
 def initial_layer(layer_type: str, layer_params: Dict, layer_number: int = 1):
-    layer_map = {"1DConv": nn.Conv1d, "Linear": nn.Linear}
+    layer_map = {"1DCon2v": nn.Conv1d, "Linear": nn.Linear}
     return layer_map[layer_type](**layer_params)
 
 
@@ -24,7 +24,7 @@ def variable_forecast_layer(layer_type, layer_params):
 
 class PositionwiseFeedForward(nn.Module):
     ''' A two-feed-forward-layer module
-    Take from DSANET
+    Take from DSANET repo
      '''
 
     def __init__(self, d_in, d_hid, dropout=0.1):

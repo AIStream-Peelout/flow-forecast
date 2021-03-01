@@ -106,20 +106,20 @@ class Informer(nn.Module):
 
         :param x_enc: The core tensor going into the model. Of dimension (batch_size, seq_len, n_time_series)
         :type x_enc: torch.Tensor
-        :param x_mark_enc: [description]
-        :type x_mark_enc: [type]
-        :param x_dec: [description]
-        :type x_dec: [type]
-        :param x_mark_dec: [description]
-        :type x_mark_dec: [type]
+        :param x_mark_enc: A tensor with the relevant datetime information. (batch_size, seq_len, n_datetime_feats)
+        :type x_mark_enc: torch.Tensor
+        :param x_dec: The datetime tensor information. Has dimension batch_size, seq_len, n_time_series
+        :type x_dec: torch.Tensor
+        :param x_mark_dec: A tensor with the relevant datetime information. (batch_size, seq_len, n_datetime_feats)
+        :type x_mark_dec: torch.Tensor
         :param enc_self_mask: [description], defaults to None
         :type enc_self_mask: [type], optional
         :param dec_self_mask: [description], defaults to None
         :type dec_self_mask: [type], optional
         :param dec_enc_mask: [description], defaults to None
         :type dec_enc_mask: [type], optional
-        :return: [description]
-        :rtype: [type]
+        :return: Returns a PyTorch tensor of shape (batch_size, ?, ?)
+        :rtype: torch.Tensor
         """
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out = self.encoder(enc_out, attn_mask=enc_self_mask)
