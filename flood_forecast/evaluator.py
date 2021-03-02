@@ -83,7 +83,7 @@ def evaluate_model(
     .. code-block:: python
 
         from flood_forecast.evaluator import evaluate_model
-        evaluate_model(model, )
+        evaluate_model(model, , "cfs", )
         ...
     '''
     """
