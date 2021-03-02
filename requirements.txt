@@ -17,7 +17,7 @@ setuptools~=46.4.0
 numpy~=1.18.4
 requests~=2.23.0
 torchvision~=0.6.0
-mpld3~=0.3
+mpld3~=0.5
 numba>=0.50
 sphinx
 sphinx-rtd-theme
