@@ -13,10 +13,10 @@ from flood_forecast.plot_functions import (
 
 
 def train_function(model_type: str, params: Dict):
-    """
-    Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
-    model_type str: Type of the model (for now) must be da_rnn or
-    :params dict: Dictionary containing all the parameters needed to run the model
+    """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
+    :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
+    :type model_type: str
+    :param dict: Dictionary containing all the parameters needed to run the model
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
@@ -79,7 +79,7 @@ def train_function(model_type: str, params: Dict):
                 df_train_and_test,
                 forecast_start_idx,
                 params,)
-        else:
+        elif len(df_prediction_samples) > 0:
             for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
                 thing[0].to_csv(thing[1] + ".csv")
                 test_plot = plot_df_test_with_confidence_interval(
@@ -91,7 +91,12 @@ def train_function(model_type: str, params: Dict):
                     ci=95,
                     alpha=0.25)
                 wandb.log({"test_plot_" + thing[1]: test_plot})
-
+        else:
+            t = params["dataset_params"]["target_col"][0]
+            idx = forecast_start_idx
+            test_plot = plot_df_test_with_confidence_interval(df_train_and_test, df_prediction_samples, idx, params, t)
+            wandb.log({"test_plot_" + t: test_plot})
+        print("Now plotting final plots")
         test_plot_all = go.Figure()
         for relevant_col in params["dataset_params"]["relevant_cols"]:
             test_plot_all.add_trace(
@@ -107,7 +112,7 @@ def train_function(model_type: str, params: Dict):
 
 def main():
     """
-    Main function which is called from the command line. Entrypoint for all ML models.
+    Main function which is called from the command line. Entrypoint for training all ML models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")
