@@ -1,4 +1,4 @@
-shap~=0.35.0
+shap~=0.38.1
 scikit-learn>=0.23.0
 pandas
 torch
@@ -11,12 +11,12 @@ pandas_gbq
 google-cloud
 google-cloud-storage
 pyyaml
-plotly~=4.7.1
+plotly~=4.14.3
 pytz~=2020.1
 setuptools~=46.4.0
-numpy~=1.18.4
+numpy~=1.20.1
 requests~=2.23.0
-torchvision~=0.6.0
+torchvision>=0.6.0
 mpld3~=0.3
 numba>=0.50
 sphinx
