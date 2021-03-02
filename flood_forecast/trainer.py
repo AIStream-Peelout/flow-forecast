@@ -93,8 +93,7 @@ def train_function(model_type: str, params: Dict):
                 wandb.log({"test_plot_" + thing[1]: test_plot})
         else:
             t = params["dataset_params"]["target_col"][0]
-            idx = forecast_start_idx
-            test_plot = plot_df_test_with_confidence_interval(df_train_and_test, df_prediction_samples, idx, params, t)
+            test_plot = df_train_and_test[[t, "preds"]].plot()
             wandb.log({"test_plot_" + t: test_plot})
         print("Now plotting final plots")
         test_plot_all = go.Figure()
