@@ -3,6 +3,7 @@ from typing import Dict
 import json
 import plotly.graph_objects as go
 import wandb
+import pandas as pd
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
@@ -92,6 +93,7 @@ def train_function(model_type: str, params: Dict):
                     alpha=0.25)
                 wandb.log({"test_plot_" + thing[1]: test_plot})
         else:
+            pd.options.plotting.backend = "plotly"
             t = params["dataset_params"]["target_col"][0]
             test_plot = df_train_and_test[[t, "preds"]].plot()
             wandb.log({"test_plot_" + t: test_plot})
