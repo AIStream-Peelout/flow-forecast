@@ -270,3 +270,17 @@ class AEDataloader(CSVDataLoader):
         print(idx)
         print(target)
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
+
+
+class ExtraFeatsLoader(CSVDataLoader):
+    def __init__(
+            self,
+            time_feats: List[str],
+            kwargs):
+        super.__init__(**kwargs)
+
+    def __getitem__(self, idx):
+        pass
+
+    def __len__(self):
+        pass

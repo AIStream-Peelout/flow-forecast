@@ -13,6 +13,19 @@ class FullAttention(nn.Module):
         self.dropout = nn.Dropout(attention_dropout)
 
     def forward(self, queries, keys, values, attn_mask):
+        """Computes full self attention
+
+        :param queries: The query for self-attention. Will have shape (batch_size, )
+        :type queries: [type]
+        :param keys: [description]
+        :type keys: [type]
+        :param values: [description]
+        :type values: [type]
+        :param attn_mask: [description]
+        :type attn_mask: [type]
+        :return: [description]
+        :rtype: [type]
+        """
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
         scale = self.scale or 1. / sqrt(E)
