@@ -16,7 +16,7 @@ pytz~=2020.1
 setuptools~=46.4.0
 numpy~=1.18.4
 requests~=2.23.0
-torchvision~=0.6.0
+torchvision~=0.8.2
 mpld3~=0.3
 numba>=0.50
 sphinx
