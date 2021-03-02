@@ -2,20 +2,24 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from flood_forecast.time_model import PyTorchForecast
-from flood_forecast.pytorch_training import torch_single_train
+from flood_forecast.custom.dilate_loss import DilateLoss
+from flood_forecast.pytorch_training import torch_single_train, compute_loss
 import unittest
-from flood_forecast.pytorch_training import train_transformer_style
+import json
+from flood_forecast.pytorch_training import train_transformer_style, handle_meta_data
 
 
 class PyTorchTrainTests(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {
+            "metrics": ["MSE", "MAPE"],
             "model_params": {
                 "number_time_series": 3,
                 "seq_len": 20},
             "dataset_params": {
                 "forecast_history": 20,
+                "scaling": "StandardScaler",
                 "class": "default",
                 "forecast_length": 20,
                 "relevant_cols": [
@@ -44,7 +48,10 @@ class PyTorchTrainTests(unittest.TestCase):
         self.dummy_model = PyTorchForecast(
             "DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {
                 "model_params": {"forecast_length": 5},
+                "metrics": ["MAPE", "MSE"],
                 "dataset_params": {
+                    "forecast_test_len": 15,
+                    "num_workers": 2,
                     "forecast_history": 5,
                     "class": "default",
                     "forecast_length": 5,
@@ -69,6 +76,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "number_time_series": 3,
                 "seq_length": 20,
                 "output_seq_len": 15},
+            "metrics": ["MAPE", "MSE"],
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",
@@ -89,7 +97,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "batch_size": 2,
                 "optim_params": {}},
             "inference_params": {
-                "hours_to_forecast": 10},
+                "hours_to_forecast": 100},
             "wandb": False}
         self.simple_param = {
             "use_decoder": True,
@@ -97,7 +105,9 @@ class PyTorchTrainTests(unittest.TestCase):
                 "n_time_series": 3,
                 "seq_length": 80,
                 "output_seq_len": 20},
+            "metrics": ["MAPE", "MSE"],
             "dataset_params": {
+                "forecast_test_len": 25,
                 "forecast_history": 20,
                 "class": "default",
                 "forecast_length": 15,
@@ -145,7 +155,8 @@ class PyTorchTrainTests(unittest.TestCase):
             drop_last=False,
             timeout=0,
             worker_init_fn=None)
-        # TODO add LSTM test self.lstm =
+        with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
+            self.meta_model_params = json.load(f)
 
     def test_pytorch_train_base(self):
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
@@ -248,6 +259,62 @@ class PyTorchTrainTests(unittest.TestCase):
             self.simple_param["training_params"],
             True)
 
+    def test_ae(self):
+        model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, self.meta_model_params)
+        for parameter in model.model.parameters():
+            self.assertTrue(parameter.requires_grad)
+
+    def test_compute_loss(self):
+        crit = self.model.crit[0]
+        loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
+        self.assertEqual(loss.item(), 1.0)
+
+    def test_test_data(self):
+        _, trg = self.model.test_data[0]
+        _, trg1 = self.dummy_model.test_data[1]
+        _, trg2 = self.transformer.test_data[0]
+        _, trg3 = self.simple_linear_model.test_data[0]
+        self.assertEqual(trg.shape[0], 20)
+        self.assertEqual(trg1.shape[0], 15)
+        self.assertEqual(trg2.shape[0], 15)
+        self.assertEqual(trg3.shape[0], 25)
+
+    def test_handle_meta(self):
+        with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
+            json_config = json.load(f)
+        model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, json_config)
+        meta_models, meta_reps, loss = handle_meta_data(model)
+        self.assertIsNone(loss)
+        self.assertIsInstance(meta_reps, torch.Tensor)
+        self.assertIsInstance(meta_models, PyTorchForecast)
+
+    def test_handle_meta2(self):
+        with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
+            json_config = json.load(f)
+        json_config["meta_data"]["meta_loss"] = "MSE"
+        model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, json_config)
+        meta_models, meta_reps, loss = handle_meta_data(model)
+        self.assertIsNotNone(loss)
+        self.assertIsInstance(meta_reps, torch.Tensor)
+        self.assertIsInstance(meta_models, PyTorchForecast)
+
+    def test_scaling_data(self):
+        scaled_src, _ = self.model.test_data[0]
+        data_unscaled = self.model.test_data.original_df.iloc[0:20]["cfs"].values
+        inverse_scale = self.model.test_data.inverse_scale(scaled_src[:, 0])
+        self.assertAlmostEqual(inverse_scale.numpy()[0], data_unscaled[0])
+        self.assertAlmostEqual(inverse_scale.numpy()[9], data_unscaled[9])
+
+    def test_compute_loss_no_scaling(self):
+        exam = torch.Tensor([4.0]).repeat(2, 20, 5)
+        exam2 = torch.Tensor([1.0]).repeat(2, 20, 5)
+        exam11 = torch.Tensor([4.0]).repeat(2, 20)
+        exam1 = torch.Tensor([1.0]).repeat(2, 20)
+        d = DilateLoss()
+        compute_loss(exam11, exam1, torch.rand(1, 20), d, None)
+        # compute_loss(exam, exam2, torch.rand(2, 20), DilateLoss(), None)
+        result = compute_loss(exam, exam2, torch.rand(2, 20), torch.nn.MSELoss(), None)
+        self.assertEqual(float(result), 9.0)
 
 if __name__ == '__main__':
     unittest.main()

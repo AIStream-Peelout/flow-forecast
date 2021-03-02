@@ -5,6 +5,8 @@ import torch
 from typing import List, Union, Optional
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
+from datetime import datetime
+from flood_forecast.preprocessing.temporal_feats import feature_fix
 
 
 class CSVDataLoader(Dataset):
@@ -20,7 +22,9 @@ class CSVDataLoader(Dataset):
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
         interpolate_param: bool = True,
-        sort_column="datetime"
+        sort_column=None,
+        feature_params=None,
+        no_scale=False
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -44,18 +48,22 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
-        # TODO allow other filling methods
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
+        relevant_cols3 = []
         if sort_column:
+            df[sort_column] = pd.to_datetime(df[sort_column])
             df = df.sort_values(by=sort_column)
+            if feature_params:
+                df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
+                print("Relevant cols are")
+        print(relevant_cols3)
+        self.relevant_cols3 = relevant_cols3
         if interpolate:
-            interpolated_df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
-            self.df = interpolated_df[relevant_cols]
-        else:
-            self.df = df[relevant_cols]
-        print("Now loading and scaling " + file_path)
+            df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
+        self.df = df[relevant_cols + relevant_cols3].copy()
+        print("Now loading" + file_path)
         self.original_df = df
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
@@ -64,32 +72,34 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
+        self.unscaled_df = self.df
         if scaling is not None:
-            self.scale = scaling
-            temp_df = self.scale.fit_transform(self.df)
+            print("scaling now")
+            self.scale = scaling.fit(self.df[relevant_cols])
+            temp_df = self.scale.transform(self.df[relevant_cols])
             # We define a second scaler to scale the end output
             # back to normal as models might not necessarily predict
             # other present time series values.
             targ_scale_class = self.scale.__class__
             self.targ_scaler = targ_scale_class()
-            self.targ_scaler.fit_transform(
-                self.df[target_col[0]].values.reshape(-1, 1)
-            )
-            self.df = pd.DataFrame(
-                temp_df, index=self.df.index, columns=self.df.columns
-            )
+            self.df[target_col] = self.targ_scaler.fit_transform(self.df[target_col])
+
+            self.df[relevant_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
-            raise (
-                "Error nan values detected in data. Please run interpolate ffill or bfill on data"
-            )
+            print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
+        self.df.to_csv("temp_df.csv")
+        self.no_scale = no_scale
 
     def __getitem__(self, idx):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
-        targ_rows = self.df.iloc[
-            targs_idx_start: self.forecast_length + targs_idx_start
-        ]
+        if self.no_scale:
+            targ_rows = self.unscaled_df.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+        else:
+            targ_rows = self.df.iloc[
+                targs_idx_start: self.forecast_length + targs_idx_start
+            ]
         src_data = rows.to_numpy()
         src_data = torch.from_numpy(src_data).float()
         trg_dat = targ_rows.to_numpy()
@@ -104,15 +114,27 @@ class CSVDataLoader(Dataset):
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
     ) -> torch.Tensor:
+        """Un-does the scaling of the data
 
-        if isinstance(result_data, torch.Tensor):
-            result_data_np = result_data.numpy()
+        :param result_data: The data you want to unscale can handle multiple data types.
+        :type result_data: Union[torch.Tensor, pd.Series, np.ndarray]
+        :return: Returns the unscaled data as PyTorch tensor.
+        :rtype: torch.Tensor
+        """
         if isinstance(result_data, pd.Series) or isinstance(
             result_data, pd.DataFrame
         ):
             result_data_np = result_data.values
+        if isinstance(result_data, torch.Tensor):
+            if len(result_data.shape) > 2:
+                result_data = result_data.permute(2, 0, 1).reshape(result_data.shape[2], -1)
+                result_data = result_data.permute(1, 0)
+            result_data_np = result_data.numpy()
         if isinstance(result_data, np.ndarray):
             result_data_np = result_data
+        # print(type(result_data))
+        if self.no_scale:
+            return torch.from_numpy(result_data_np)
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )
@@ -127,6 +149,7 @@ class CSVTestLoader(CSVDataLoader):
         use_real_temp=True,
         target_supplied=True,
         interpolate=False,
+        sort_column_clone=None,
         **kwargs
     ):
         """
@@ -138,6 +161,8 @@ class CSVTestLoader(CSVDataLoader):
         self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
+        if sort_column_clone:
+            self.original_df = self.original_df.sort_values(by=sort_column_clone)
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
@@ -149,8 +174,10 @@ class CSVTestLoader(CSVDataLoader):
             "datetime64[ns]"
         )
         self.original_df["original_index"] = self.original_df.index
+        if len(self.relevant_cols3) > 0:
+            self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
 
-    def get_from_start_date(self, forecast_start: int):
+    def get_from_start_date(self, forecast_start: datetime):
         dt_row = self.original_df[
             self.original_df["datetime"] == forecast_start
         ]
@@ -167,7 +194,7 @@ class CSVTestLoader(CSVDataLoader):
             # ]
             all_rows_orig = self.original_df.iloc[
                 idx: self.forecast_total + target_idx_start
-            ]
+            ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start
 
@@ -237,7 +264,7 @@ class AEDataloader(CSVDataLoader):
     def __len__(self):
         return len(self.df.index) - 1
 
-    def __getitem__(self, idx, uuid: int = None, column_relevant: str = None):
+    def __getitem__(self, idx: int, uuid: int = None, column_relevant: str = None):
         # Warning this assumes that data is
         if uuid:
             idx = self.original_df[self.original_df[column_relevant] == uuid].index

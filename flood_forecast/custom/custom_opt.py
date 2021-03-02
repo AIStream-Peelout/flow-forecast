@@ -50,21 +50,26 @@ class MASELoss(torch.nn.Module):
         This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
         """
         super(MASELoss, self).__init__()
-        self.method_dict = {"mean": lambda x: torch.mean(x, 1).unsqueeze(1)}
+        self.method_dict = {"mean": lambda x, y: torch.mean(x, 1).unsqueeze(1).repeat(1, y[1], 1)}
         self.baseline_method = self.method_dict[baseline_method]
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor) -> torch.Tensor:
-        # Ugh why can't all tensors have batch size...
-        if len(train_data.shape) == 1:
-            train_data = train_data.reshape(1, train_data.shape[0])
-        if len(target.shape) == 1:
-            target = target.unsqueeze(0)
-        if len(output.shape) == 1:
+    def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor, m=1) -> torch.Tensor:
+        # Ugh why can't all tensors have batch size... Fixes for modern
+        if len(train_data.shape) < 3:
+            train_data = train_data.unsqueeze(0)
+        if m == 1 and len(target.shape) == 1:
             output = output.unsqueeze(0)
-        result_baseline = self.baseline_method(train_data).repeat(1, target.shape[1])
+            output = output.unsqueeze(2)
+            target = target.unsqueeze(0)
+            target = target.unsqueeze(2)
+        if len(target.shape) == 2:
+            output = output.unsqueeze(0)
+            target = target.unsqueeze(0)
+        result_baseline = self.baseline_method(train_data, output.shape)
         MAE = torch.nn.L1Loss()
-        mae2 = MAE(target, output)
+        mae2 = MAE(output, target)
         mase4 = MAE(result_baseline, target)
+        # Prevent divison by zero/loss exploding
         if mase4 < 0.001:
             mase4 = 0.001
         return mae2 / mase4
@@ -83,7 +88,7 @@ class RMSELoss(torch.nn.Module):
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         if len(output) > 1:
 
             diff = torch.sub(target, output)
@@ -110,7 +115,7 @@ class MAPELoss(torch.nn.Module):
         super().__init__()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         if len(output) > 1:
             return torch.mean(torch.abs(torch.sub(target, output) / target)) + \
                 self.variance_penalty * torch.std(torch.sub(target, output))
@@ -131,14 +136,14 @@ class PenalizedMSELoss(torch.nn.Module):
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
-    def forward(self, target: torch.Tensor, output: torch.Tensor):
+    def forward(self, output: torch.Tensor, target: torch.Tensor):
         return self.mse(target, output) + \
             self.variance_penalty * torch.std(torch.sub(target, output))
 
 
 # Add custom loss function
 class GaussianLoss(torch.nn.Module):
-    def __init__(self, mu, sigma):
+    def __init__(self, mu=0, sigma=0):
         """Compute the negative log likelihood of Gaussian Distribution
         From https://arxiv.org/abs/1907.00235
         """

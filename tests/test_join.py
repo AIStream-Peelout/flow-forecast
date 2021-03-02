@@ -16,7 +16,7 @@ class JoinTest(unittest.TestCase):
         asos_df = pd.read_csv(os.path.join(self.test_data_path, "asos-12N_small.csv"))
         old_timezone = pytz.timezone("America/New_York")
         new_timezone = pytz.timezone("UTC")
-        # This assumes timezones are consistent throughout the USGS stream (this should be true)
+        # This assumes timezones are consistent throughout the USGS stream (this should be true for all)
         df["datetime"] = df["datetime"].map(lambda x: old_timezone.localize(
             datetime.strptime(x, "%Y-%m-%d %H:%M")).astimezone(new_timezone))
         with open(os.path.join(self.test_data_path, "big_black_md.json")) as a:
@@ -26,7 +26,6 @@ class JoinTest(unittest.TestCase):
         self.assertEqual(result_df.iloc[0]['p01m'], 0)
         self.assertEqual(result_df.iloc[0]['cfs'], 2210)
         self.assertEqual(result_df.iloc[0]['tmpf'], 19.94)
-
 
 if __name__ == '__main__':
     unittest.main()

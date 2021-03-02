@@ -9,6 +9,7 @@ class TimeSeriesModelTest(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {
+            "metrics": ["MSE", "DilateLoss"],
             "model_params": {
                 "number_time_series": 3},
             "inference_params": {
@@ -78,6 +79,17 @@ class TimeSeriesModelTest(unittest.TestCase):
             self.model_params)
         self.assertEqual(model.model.dense_shape.in_features, 6)
         self.assertEqual(model.model.mask.shape, torch.Size([19, 19]))
+
+    def test_data_correct(self):
+        keag_file = os.path.join(self.test_path, "keag_small.csv")
+        model = PyTorchForecast(
+            "MultiAttnHeadSimple",
+            keag_file,
+            keag_file,
+            keag_file,
+            self.model_params)
+        model
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -4,6 +4,10 @@ import datetime
 from sklearn.preprocessing import StandardScaler
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model, evaluate_model
+import torch
+import numpy
+numpy.random.seed(0)
+torch.manual_seed(0)
 
 
 class EvaluationTest(unittest.TestCase):
@@ -16,6 +20,7 @@ class EvaluationTest(unittest.TestCase):
         )
         self.model_params = {
             "model_name": "MultiAttnHeadSimple",
+            "metrics": ["MSE", "MAPE"],
             "model_params": {"number_time_series": 3, "seq_len": 20},
             "dataset_params": {
                 "forecast_history": 20,
@@ -30,6 +35,7 @@ class EvaluationTest(unittest.TestCase):
         }
         self.model_linear_params = {
             "model_name": "SimpleLinearModel",
+            "metrics": ["MSE", "MAPE"],
             "use_decoder": True,
             "model_params": {
                 "n_time_series": 3,
@@ -108,8 +114,12 @@ class EvaluationTest(unittest.TestCase):
         model_result = evaluate_model(
             self.model, "PyTorch", ["cfs"], ["MSE", "L1"], inference_params, {}
         )
-        self.assertGreater(model_result[0]["cfs_L1"], 0)
-        self.assertGreater(model_result[0]["cfs_MSE"], 1)
+        print(model_result)
+        eval_dict = model_result[0]
+        self.assertGreater(eval_dict["cfs_MAPELoss"], 0)
+        self.assertGreater(eval_dict["cfs_MSELoss"], 420)
+        # self.assertNotAlmostEqual(eval_dict["cfs_MAPELoss"], eval_dict["cfs_MSELoss"])
+        self.assertLessEqual(eval_dict["cfs_MAPELoss"].item(), 400)
 
     def test_evaluator_generate_prediction_samples(self):
         inference_params = {
@@ -124,8 +134,9 @@ class EvaluationTest(unittest.TestCase):
         )
         df_train_and_test = model_result[1]
         df_prediction_samples = model_result[3]
-        self.assertTrue(df_train_and_test.index.equals(df_prediction_samples.index))
-        self.assertEqual(100, df_prediction_samples.shape[1])
+        print(len(df_prediction_samples))
+        self.assertTrue(df_train_and_test.index.equals(df_prediction_samples[0].index))
+        self.assertEqual(100, df_prediction_samples[0].shape[1])
 
     def test_evaluator_with_scaling_not_equal_without_scaling(self):
         inference_params = {
@@ -179,7 +190,7 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
-        self.assertFalse(model_result_1[3].equals(model_result_2[3]))
+        self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))
 
     def test_linear_decoder(self):
         decoder_params = {"decoder_function": "simple_decode", "unsqueeze_dim": 1}
@@ -193,6 +204,8 @@ class EvaluationTest(unittest.TestCase):
         }
         infer_on_torch_model(self.linear_model, **inference_params)
 
+    def test_outputs_different(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()

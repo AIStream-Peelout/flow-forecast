@@ -1,4 +1,4 @@
-{
+{ 
     "model_name": "SimpleLinearModel",
     "model_type": "PyTorch",
     "model_params": {
@@ -15,11 +15,12 @@
        "batch_size":4,
        "forecast_history":10,
        "forecast_length":1,
+       "forecast_test_len": 10,
        "train_start": 1,
        "train_end": 300,
        "valid_start":301,
        "valid_end": 401,
-       "test_start":50,
+       "test_start":380,
        "test_end": 450,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
@@ -38,7 +39,6 @@
        "optimizer": "Adam",
        "optim_params":
        {
-
        },
        "lr": 0.01,
        "epochs": 1,

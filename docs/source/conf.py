@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'Flow Forecast'
-copyright = '2020, Issac Godfried'
-author = 'Issac Godfried'
+copyright = '2020, Isaac Godfried'
+author = 'Isaac Godfried'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
@@ -76,3 +76,11 @@ html_static_path = []  # '_static'
 
 # if 'READTHEDOCS' not in os.environ:
 #    import cython_generated_ext
+
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'special-members': '__init__',
+    'undoc-members': True,
+    'exclude-members': '__weakref__'
+}

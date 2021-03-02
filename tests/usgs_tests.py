@@ -8,6 +8,7 @@ from flood_forecast.preprocessing.interpolate_preprocess import interpolate_miss
 
 class DataQualityTests(unittest.TestCase):
     def setUp(self):
+        # These are historical tests.
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
 
     def test_intermediate_csv(self):
@@ -19,7 +20,7 @@ class DataQualityTests(unittest.TestCase):
 
     def test_tz_interpolate_fix(self):
         """
-        Additional function to test interpolation
+        Additional function to test data interpolation
         """
         file_path = os.path.join(self.test_data_path, "river_test_sm.csv")
         test_d = pd.read_csv(file_path)
@@ -29,9 +30,6 @@ class DataQualityTests(unittest.TestCase):
         revised_df = interpolate_missing_values(revised_df)
         self.assertEqual(0, sum(pd.isnull(revised_df['cfs'])))
         self.assertEqual(0, sum(pd.isnull(revised_df['precip'])))
-
-    def test_chunking(self):
-        self.assertEqual(1, 1)
 
 if __name__ == '__main__':
     unittest.main()

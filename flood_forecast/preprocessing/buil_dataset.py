@@ -174,8 +174,9 @@ def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
         str: local file name
     """
     if file_path.startswith("gs://"):
-        # doanload data from gcs to local
-        regex = r"(?<=gs:\/\/)[a-zA-Z\-\_]*(?=\/)"
+        # download data from gcs to local
+        print(file_path)
+        regex = r"(?<=gs:\/\/)[a-zA-Z0-9\-\_]*(?=\/)"
         bucket_name = re.search(regex, file_path).group()
         object_name = re.search(rf"(?<={bucket_name}\/).*", file_path).group()
         local_temp_filepath = Path("data") / bucket_name / object_name

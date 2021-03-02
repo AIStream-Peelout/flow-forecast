@@ -7,7 +7,7 @@ from torch.autograd import Function
 class DilateLoss(torch.nn.Module):
     def __init__(self, gamma=0.001, alpha=0.5):
         """
-        Dilate loss function from
+        Dilate loss function originally from
         https://github.com/manjot4/NIPS-Reproducibility-Challenge
         """
         super().__init__()
@@ -24,20 +24,19 @@ class DilateLoss(torch.nn.Module):
         outputs = outputs.float()
         targets = targets.float()
         # outputs, targets: shape (batch_size, N_output, 1)
-        print("The shape of targets is :")
-        print(targets.shape)
         if len(targets.size()) < 2:
             print("begin fixed loss func")
             targets = targets.unsqueeze(0)
             outputs = outputs.unsqueeze(0)
-        outputs = outputs.unsqueeze(2)
-        target = targets.unsqueeze(2)
+        if len(targets.size()) < 3:
+            outputs = outputs.unsqueeze(2)
+            targets = targets.unsqueeze(2)
         batch_size, N_output = outputs.shape[0:2]
         loss_shape = 0
         softdtw_batch = SoftDTWBatch.apply
         D = torch.zeros((batch_size, N_output, N_output)).to(self.device)
         for k in range(batch_size):
-            Dk = pairwise_distances(target[k, :, :].view(-1, 1), outputs[k, :, :].view(-1, 1))
+            Dk = pairwise_distances(targets[k, :, :].view(-1, 1), outputs[k, :, :].view(-1, 1))
             D[k:k + 1, :, :] = Dk
         loss_shape = softdtw_batch(D, self.gamma)
         path_dtw = PathDTWBatch.apply

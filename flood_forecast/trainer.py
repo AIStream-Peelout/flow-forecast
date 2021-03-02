@@ -6,7 +6,7 @@ import wandb
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import evaluate_model
-from flood_forecast.pre_dict import scaler_dict
+from flood_forecast.time_model import scaling_function
 from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
@@ -42,8 +42,16 @@ def train_function(model_type: str, params: Dict):
         train_transformer_style(model=trained_model,
                                 training_params=params["training_params"],
                                 takes_target=takes_target,
-                                forward_params=params["forward_params"])
-        params["inference_params"]["dataset_params"]["scaling"] = scaler_dict[dataset_params["scaler"]]
+                                forward_params=params["forward_params"]
+        # To do delete
+        if "scaler" in dataset_params:
+            if "scaler_params" in dataset_params:
+                params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
+                                                                                           dataset_params)["scaling"]
+            else:
+                params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
+                                                                                           dataset_params)["scaling"]
+            params["inference_params"]["dataset_params"].pop('scaler_params', None)
         test_acc = evaluate_model(
             trained_model,
             model_type,
@@ -58,25 +66,31 @@ def train_function(model_type: str, params: Dict):
         mae = (df_train_and_test.loc[forecast_start_idx:, "preds"] -
                df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
         inverse_mae = 1 / mae
-        pred_std = df_prediction_samples.std(axis=1)
-        average_prediction_sharpe = (inverse_mae / pred_std).mean()
-        wandb.log({'average_prediction_sharpe': average_prediction_sharpe})
-
-        # Log plots
+        i = 0
+        for df in df_prediction_samples:
+            pred_std = df.std(axis=1)
+            average_prediction_sharpe = (inverse_mae / pred_std).mean()
+            wandb.log({'average_prediction_sharpe' + str(i): average_prediction_sharpe})
+            i += 1
+        df_train_and_test.to_csv("temp_preds.csv")
+        # Log plots now
         if "probabilistic" in params["inference_params"]:
             test_plot = plot_df_test_with_probabilistic_confidence_interval(
                 df_train_and_test,
                 forecast_start_idx,
                 params,)
         else:
-            test_plot = plot_df_test_with_confidence_interval(
-                df_train_and_test,
-                df_prediction_samples,
-                forecast_start_idx,
-                params,
-                ci=95,
-                alpha=0.25)
-        wandb.log({"test_plot": test_plot})
+            for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
+                thing[0].to_csv(thing[1] + ".csv")
+                test_plot = plot_df_test_with_confidence_interval(
+                    df_train_and_test,
+                    thing[0],
+                    forecast_start_idx,
+                    params,
+                    targ_col=thing[1],
+                    ci=95,
+                    alpha=0.25)
+                wandb.log({"test_plot_" + thing[1]: test_plot})
 
         test_plot_all = go.Figure()
         for relevant_col in params["dataset_params"]["relevant_cols"]:

@@ -6,7 +6,7 @@ import torch
 from typing import Dict, List
 
 
-def jitter(points: torch.tensor):
+def jitter(points: torch.tensor) -> np.ndarray:
     stdev = float(0.01 * (max(points) - min(points)))
     return np.random.randn(len(points)) * stdev
 
@@ -118,14 +118,16 @@ def plot_df_test_with_confidence_interval(
     df_prediction_samples: pd.DataFrame,
     forecast_start_index: int,
     params: Dict,
+    targ_col,
     ci: float = 95.0,
     alpha=0.25,
 ) -> go.Figure:
     assert 0.0 <= ci <= 100.0
     assert 0.0 < alpha < 1.0
     fig = go.Figure()
-
-    target_col = params["dataset_params"]["target_col"][0]
+    if "pred_" + targ_col in df_test:
+        df_test["preds"] = df_test["pred_" + targ_col]
+    target_col = targ_col
     fig.add_trace(go.Scatter(x=df_test.index, y=df_test["preds"], name="preds"))
     fig.add_trace(go.Scatter(x=df_test.index, y=df_test[target_col], name=target_col))
     ci_lower, ci_upper = (

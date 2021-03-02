@@ -8,6 +8,7 @@ from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
+from flood_forecast.utils import make_criterion_functions
 from flood_forecast.preprocessing.buil_dataset import get_data
 import wandb
 
@@ -33,7 +34,7 @@ class TimeSeriesModel(ABC):
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
             self.model = self.load_model(model_base, params["model_params"])
-        params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
+        # params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
@@ -42,6 +43,7 @@ class TimeSeriesModel(ABC):
         else:
             self.gcs_client = None
         self.wandb = self.wandb_init()
+        self.crit = make_criterion_functions(params["metrics"])
 
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:
@@ -153,7 +155,11 @@ class PyTorchForecast(TimeSeriesModel):
         self.upload_gcs(params_save_path, params_name, "_params", epoch)
         self.upload_gcs(model_save_path, model_name, "_model", epoch)
         if self.wandb:
-            wandb.config.save_path = model_save_path
+            try:
+                wandb.config.save_path = model_save_path
+            except Exception as e:
+                print("Wandb stupid error")
+                print(e.__traceback__)
 
     def make_data_load(
             self,
@@ -163,16 +169,22 @@ class PyTorchForecast(TimeSeriesModel):
             the_class="default"):
         start_end_params = {}
         the_class = dataset_params["class"]
+        start_end_params = scaling_function(start_end_params, dataset_params)
         # TODO clean up else if blocks
         if loader_type + "_start" in dataset_params:
             start_end_params["start_stamp"] = dataset_params[loader_type + "_start"]
         if loader_type + "_end" in dataset_params:
             start_end_params["end_stamp"] = dataset_params[loader_type + "_end"]
-        if "scaler" in dataset_params:
-            start_end_params["scaling"] = scaler_dict[dataset_params["scaler"]]
         if "interpolate" in dataset_params:
             start_end_params["interpolate_param"] = dataset_params["interpolate"]
-        is_proper_dataloader = loader_type == "test" and the_class == "deault"
+        if "feature_param" in dataset_params:
+            start_end_params["feature_params"] = dataset_params["feature_param"]
+            "Feature param put into stuff"
+        if "sort_column" in dataset_params:
+            start_end_params["sort_column"] = dataset_params["sort_column"]
+        if "no_scale" in dataset_params:
+            start_end_params["no_scale"] = dataset_params["no_scale"]
+        is_proper_dataloader = loader_type == "test" and the_class == "default"
         if is_proper_dataloader and "forecast_test_len" in dataset_params:
             loader = CSVDataLoader(
                 data_path,
@@ -199,3 +211,19 @@ class PyTorchForecast(TimeSeriesModel):
             # TODO support custom DataLoader
             loader = None
         return loader
+
+
+def scaling_function(start_end_params, dataset_params):
+    in_dataset_params = False
+    if "scaler" in dataset_params:
+        in_dataset_params = "scaler"
+    elif "scaling" in dataset_params:
+        in_dataset_params = "scaling"
+    else:
+        return {}
+    if "scaler_params" in dataset_params:
+        scaler = scaler_dict[dataset_params[in_dataset_params]](**dataset_params["scaler_params"])
+    else:
+        scaler = scaler_dict[dataset_params[in_dataset_params]]()
+    start_end_params["scaling"] = scaler
+    return start_end_params

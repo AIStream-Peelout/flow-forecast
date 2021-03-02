@@ -5,6 +5,8 @@ from flood_forecast.plot_functions import calculate_confidence_intervals, plot_d
 
 
 class PlotFunctionsTest(unittest.TestCase):
+    """ Tests the plot functions
+    """
     df_test = pd.DataFrame({
         'preds': [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
         'target_col': [4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
@@ -34,13 +36,13 @@ class PlotFunctionsTest(unittest.TestCase):
 
     def test_plot_df_test_with_confidence_interval(self):
         params = {'dataset_params': {'target_col': ['target_col']}}
-        fig = plot_df_test_with_confidence_interval(self.df_test, self.df_preds, 0, params, 95)
+        fig = plot_df_test_with_confidence_interval(self.df_test, self.df_preds, 0, params, "target_col", 95)
         self.assertIsInstance(fig, go.Figure)
 
     def test_plot_df_test_with_confidence_interval_df_preds_empty(self):
         params = {'dataset_params': {'target_col': ['target_col']}}
         fig = plot_df_test_with_confidence_interval(
-            self.df_test, self.df_preds_empty, 0, params, 95)
+            self.df_test, self.df_preds_empty, 0, params, "target_col", 95)
         self.assertIsInstance(fig, go.Figure)
 
 

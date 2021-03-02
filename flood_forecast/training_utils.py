@@ -54,7 +54,7 @@ class EarlyStopper(object):
             self.save_model_checkpoint(model)
             self.best_score = score
 
-        elif score >= self.best_score + self.min_delta:
+        elif score + self.min_delta >= self.best_score:
             if not self.cumulative_delta and score > self.best_score:
                 self.best_score = score
             self.counter += 1
