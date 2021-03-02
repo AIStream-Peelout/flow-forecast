@@ -36,7 +36,13 @@ def train_function(model_type: str, params: Dict):
             dataset_params["validation_path"],
             dataset_params["test_path"],
             params)
-        train_transformer_style(trained_model, params["training_params"], params["forward_params"])
+        takes_target = False
+        if "takes_target" in trained_model.params:
+            takes_target = trained_model.params["takes_target"]
+        train_transformer_style(model=trained_model,
+                                training_params=params["training_params"],
+                                takes_target=takes_target,
+                                forward_params=params["forward_params"])
         # To do delete
         if "scaler" in dataset_params:
             if "scaler_params" in dataset_params:
