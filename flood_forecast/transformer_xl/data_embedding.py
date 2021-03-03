@@ -99,7 +99,7 @@ class TemporalEmbedding(nn.Module):
                             "weekday_embed": Embed(weekday_size, d_model), "hour_embed": Embed(hour_size, d_model),
                             "minute_embed": Embed(minute_size, d_model)}
         for i in range(0, lowest_level):
-            setattr(self, lowest_level_map.keys()[i], lowest_level_map.values()[i])
+            setattr(self, list(lowest_level_map.keys())[i], list(lowest_level_map.values())[i])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Creates the datetime embedding component
