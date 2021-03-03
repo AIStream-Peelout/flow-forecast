@@ -306,4 +306,6 @@ class ExtraFeatsLoader(CSVDataLoader):
         return src_data, trg_dat
 
     def __len__(self):
-        pass
+        return (
+            len(self.df.index) - self.forecast_history - self.forecast_total - 1
+        )
