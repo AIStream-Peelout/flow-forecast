@@ -289,7 +289,7 @@ class TemporalLoader(CSVDataLoader):
             self,
             time_feats: List[str],
             kwargs):
-        super.__init__(**kwargs)
+        super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
         self.other_feats = self.df.drop(time_feats)
