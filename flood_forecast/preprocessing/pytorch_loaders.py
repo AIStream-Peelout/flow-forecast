@@ -57,13 +57,13 @@ class CSVDataLoader(Dataset):
             df = df.sort_values(by=sort_column)
             if feature_params:
                 df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
-                print("Relevant cols are")
+                print("Created datetime feature columns are: ")
         print(relevant_cols3)
         self.relevant_cols3 = relevant_cols3
         if interpolate:
             df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
         self.df = df[relevant_cols + relevant_cols3].copy()
-        print("Now loading" + file_path)
+        print("Now loading " + file_path)
         self.original_df = df
         self.scale = None
         if start_stamp != 0 and end_stamp is not None:
