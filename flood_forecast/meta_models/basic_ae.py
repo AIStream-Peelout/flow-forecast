@@ -3,8 +3,8 @@ from torch import nn
 
 
 class AE(nn.Module):
-    def __init__(self, input_shape, out_features):
-        """[summary]
+    def __init__(self, input_shape: int, out_features: int):
+        """A basic and simple to use AutoEncoder
 
         :param input_shape: The number of features for input.
         :type input_shape: int

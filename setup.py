@@ -12,10 +12,10 @@ dev_requirements = [
     'autopep8',
     'flake8'
 ]
-# Change version to .09
+
 setup(
     name='flood_forecast',
-    version='0.09214dev',
+    version='0.95dev',
     packages=[
         'flood_forecast',
         'flood_forecast.transformer_xl',

@@ -108,7 +108,7 @@ class Attention(nn.Module):
                 index -= sub_len
         return mask
 
-    def attn(self, query, key, value, activation="Softmax"):
+    def attn(self, query: torch.Tensor, key, value: torch.Tensor, activation="Softmax"):
         activation = activation_dict[activation](dim=-1)
         pre_att = torch.matmul(query, key)
         if self.scale:
@@ -238,7 +238,7 @@ class TransformerModel(nn.Module):
         self.n_embd = n_embd
         self.win_len = forecast_history
         # The following is the implementation of this paragraph
-        """For positional encoding in Transformer, we use learnable position embedding.
+        """ For positional encoding in Transformer, we use learnable position embedding.
         For covariates, following [3], we use all or part of year, month, day-of-the-week,
         hour-of-the-day, minute-of-the-hour, age and time-series-ID according to the granularities of datasets.
         age is the distance to the first observation in that time series [3]. Each of them except time series
@@ -276,7 +276,7 @@ class DecoderTransformer(nn.Module):
         Args:
             n_time_series: Number of time series present in input
             n_head: Number of heads in the MultiHeadAttention mechanism
-            seq_num: ?? Not relevant right now.
+            seq_num: The number of targets to forecast
             sub_len: sub_len of the sparse attention
             num_layer: The number of transformer blocks in the model.
             n_embd: The dimention of Position embedding and time series ID embedding
@@ -313,7 +313,7 @@ class DecoderTransformer(nn.Module):
             series_id: Optional id of the series in the dataframe. Currently  not supported
         Returns:
             Case 1: tensor of dimension (batch_size, forecast_length)
-            Case 2: Return sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
+            Case 2: GLoss sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))
         """
         h = self.transformer(series_id, x)
         mu = self.mu(h)
@@ -324,5 +324,6 @@ class DecoderTransformer(nn.Module):
         if self.forecast_len_layer:
             # Swap to (batch_size, 1, features) for linear layer
             sigma = sigma.permute(0, 2, 1)
+            # Output (batch_size, forecast_len_)
             sigma = self.forecast_len_layer(sigma).permute(0, 2, 1)
         return sigma.squeeze(2)

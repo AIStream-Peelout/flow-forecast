@@ -245,7 +245,7 @@ class TransformerXL(torch.nn.Module):
         # For the updated memory, we use the most recent `self.mem_len`
         # states, including the previous memory
         # In other words, if `seq_len` < `self.mem_len` some of the previous memory
-        # will carry over to the next memory
+        # will carry over to the next memory o
         with torch.no_grad():
             new_memory = []
             end_idx = mem_len + seq_len
@@ -259,7 +259,7 @@ class TransformerXL(torch.nn.Module):
         self.seq_len = seq_len
         self.mem_len = mem_len
 
-    def forward(self, idxs: torch.LongTensor,  # (cs, bs)
+    def forward(self, idxs: torch.LongTensor,  # (cs, bs) 2
                 target: torch.LongTensor,  # (cs, bs)
                 memory: Optional[List[torch.FloatTensor]] = None,
                 ) -> Dict[str, torch.Tensor]:
@@ -269,7 +269,7 @@ class TransformerXL(torch.nn.Module):
         cur_seq, bs = idxs.size()
         prev_seq = memory[0].size(0)
 
-        # Construct attention mask
+        # Construct the attention mask
         dec_attn_mask = torch.triu(
             torch.ones((cur_seq, cur_seq + prev_seq)),
             diagonal=1 + prev_seq,
@@ -280,7 +280,7 @@ class TransformerXL(torch.nn.Module):
                                 dtype=torch.float).to(word_embs.device)
         pos_embs = self.drop(self.pos_embs(pos_idxs))
 
-        # Main part of forward pass
+        # Main part of forward passe
         hidden_states = [word_embs]
         layer_out = word_embs
         for mem, layer in zip(memory, self.layers):
@@ -291,7 +291,7 @@ class TransformerXL(torch.nn.Module):
         logits = self.output_projection(self.drop(layer_out))
         loss = self.loss_fn(logits.view(-1, logits.size(-1)), target.view(-1))
 
-        # Update memory
+        # Update the memory
         # Ensure the memory is treated as a constant
         # and we do not back propagate through them
         new_memory = self.update_memory(memory, hidden_states)
