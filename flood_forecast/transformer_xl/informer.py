@@ -8,7 +8,7 @@ from flood_forecast.transformer_xl.data_embedding import DataEmbedding
 class Informer(nn.Module):
     def __init__(self, n_time_series: int, dec_in: int, c_out: int, seq_len, label_len, out_len,
                  factor=5, d_model=512, n_heads=8, e_layers=3, d_layers=2, d_ff=512,
-                 dropout=0.0, attn='prob', embed='fixed', data=4, activation='gelu',
+                 dropout=0.0, attn='prob', embed='fixed', temp_depth=4, activation='gelu',
                  device=torch.device('cuda:0')):
         """ This is based on the implementation of the Informer available from the original authors
             https://github.com/zhouhaoyi/Informer2020. We have done some minimal refactoring, but
@@ -56,8 +56,8 @@ class Informer(nn.Module):
         self.attn = attn
 
         # Encoding
-        self.enc_embedding = DataEmbedding(n_time_series, d_model, embed, data, dropout)
-        self.dec_embedding = DataEmbedding(dec_in, d_model, embed, data, dropout)
+        self.enc_embedding = DataEmbedding(n_time_series, d_model, embed, temp_depth, dropout)
+        self.dec_embedding = DataEmbedding(dec_in, d_model, embed, temp_depth, dropout)
         # Attention
         Attn = ProbAttention if attn == 'prob' else FullAttention
         # Encoder
