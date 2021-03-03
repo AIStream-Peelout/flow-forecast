@@ -53,6 +53,7 @@
     "forward_params":{
         "t":{}
     },
+   "takes_target": true,
    "metrics":["MSE"],
    "inference_params":
    {     

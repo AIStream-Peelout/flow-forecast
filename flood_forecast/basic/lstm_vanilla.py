@@ -31,7 +31,12 @@ class LSTMForecast(torch.nn.Module):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.init_hidden(batch_size)
 
-    def init_hidden(self, batch_size) -> None:
+    def init_hidden(self, batch_size: int) -> None:
+        """[summary]
+
+        :param batch_size: [description]
+        :type batch_size: int
+        """
         # This is what we'll initialise our hidden state
         self.hidden = (
             torch.zeros(

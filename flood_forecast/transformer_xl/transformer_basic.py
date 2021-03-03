@@ -38,9 +38,9 @@ class SimpleTransformer(torch.nn.Module):
 
     def forward(self, x: torch.Tensor, t: torch.Tensor, tgt_mask=None, src_mask=None):
         if src_mask:
-            x = self.encode_sequence(x, src_mask)
+            x = self.encode_sequence(x[:, :-1, :], src_mask)
         else:
-            x = self.encode_sequence(x, src_mask)
+            x = self.encode_sequence(x[:, :-1, :], src_mask)
         return self.decode_seq(x, t, tgt_mask)
 
     def basic_feature(self, x: torch.Tensor):
@@ -161,7 +161,8 @@ def greedy_decode(
         output_len=1,
         device='cpu',
         multi_targets=1,
-        probabilistic=False):
+        probabilistic=False,
+        scaler=None):
     """
     Mechanism to sequentially decode the model
     :src Historical time series values

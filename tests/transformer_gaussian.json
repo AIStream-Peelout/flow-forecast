@@ -2,6 +2,7 @@
     "model_name": "DecoderTransformer",
     "model_type": "PyTorch",
     "model_params": {
+      "mu": true,
       "n_time_series":5,
       "n_head": 8,
       "forecast_history":5,
@@ -21,7 +22,7 @@
        "test_path": "tests/test_data/keag_small.csv",
        "batch_size":4,
        "forecast_history":5,
-       "forecast_length":1,
+       "forecast_length":5,
        "train_end": 100,
        "valid_start":301,
        "valid_end": 401,
@@ -39,10 +40,14 @@
     },
     "training_params":
     {
-       "criterion":"DilateLoss",
+       "criterion":"GaussianLoss",
        "optimizer": "Adam",
        "optim_params":
        {
+       },
+       "criterion_params":{
+         "mu":0,
+         "sigma":0
        },
        "lr": 0.3,
        "epochs": 1,
@@ -56,10 +61,9 @@
        "tags": ["dummy_run", "circleci"]
     },
     "forward_params":{},
-   "metrics":["DilateLoss"],
+   "metrics":["GaussianLoss"],
    "inference_params":
-   {
-         "datetime_start":"2016-05-31",
+   {     "datetime_start":"2016-05-31",
           "hours_to_forecast":336, 
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
@@ -68,7 +72,7 @@
           "dataset_params":{
              "file_path": "tests/test_data/keag_small.csv",
              "forecast_history":5,
-             "forecast_length":1,
+             "forecast_length":5,
              "no_scale": true,
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
