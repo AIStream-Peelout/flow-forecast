@@ -114,7 +114,7 @@ class TemporalEmbedding(nn.Module):
         """Creates the datetime embedding component
         :param x: A PyTorch tensor of shape (batch_size, seq_len, n_feats).
         n_feats is formatted in the following manner.
-        following way
+        following way ()
         :type x: torch.Tensor
         :return: The datetime embedding of shape (batch_size, seq_len, 1)
         :rtype: torch.Tensor

@@ -1,6 +1,7 @@
 import unittest
 from flood_forecast.transformer_xl.informer import Informer
 from flood_forecast.transformer_xl.data_embedding import DataEmbedding
+from flood_forecast.preprocessing.pytorch_loaders import TemporalLoader
 import torch
 
 
@@ -20,6 +21,12 @@ class TestInformer(unittest.TestCase):
         r = d(torch.rand(2, 10, 5), torch.rand(2, 10, 5))
         self.assertTrue(hasattr(d.temporal_embedding, "minute_embed"))
         self.assertEqual(r.shape[2], 128)
+
+    def test_temporal_loader(self):
+        kwargs = {}
+        loa = TemporalLoader(["month", "weekday", "hour"], kwargs)
+        result = loa.__getitem__(0)
+        self.assertEqual(len(result), 4)
 
     #  def test_different_minute(self): e
     #  d = DataEmbedding(5, 128, data=5)

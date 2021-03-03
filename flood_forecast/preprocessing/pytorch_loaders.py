@@ -284,26 +284,33 @@ class AEDataloader(CSVDataLoader):
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
 
 
-class ExtraFeatsLoader(CSVDataLoader):
+class TemporalLoader(CSVDataLoader):
     def __init__(
             self,
             time_feats: List[str],
-            date_time_col: str,
             kwargs):
         super.__init__(**kwargs)
         self.time_feats = time_feats
+        self.temporal_df = self.df[time_feats]
+        self.other_feats = self.df.drop(time_feats)
+
+    @staticmethod
+    def df_to_numpy(pandas_stuff):
+        return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
     def __getitem__(self, idx: int):
-        rows = self.df.iloc[idx: self.forecast_history + idx]
+        rows = self.other_feats.loc[idx: self.forecast_history + idx]
+        temporal_feats = self.temporal_df.loc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
         targ_rows = self.df.iloc[
             targs_idx_start: self.forecast_length + targs_idx_start
         ]
-        src_data = rows.to_numpy()
-        src_data = torch.from_numpy(src_data).float()
-        trg_dat = targ_rows.to_numpy()
-        trg_dat = torch.from_numpy(trg_dat).float()
-        return src_data, trg_dat
+        tar_temporal_feats = self.temporal_df.loc[targs_idx_start: self.forecast_length + targs_idx_start]
+        src_data = self.df_to_numpy(rows)
+        trg_data = self.df_to_numpy(targ_rows)
+        temporal_feats = self.df_to_numpy(temporal_feats)
+        tar_temp = self.df_to_numpy(tar_temporal_feats)
+        return src_data, trg_data, temporal_feats, tar_temp
 
     def __len__(self):
         return (
