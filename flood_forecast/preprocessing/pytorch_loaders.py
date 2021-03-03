@@ -24,7 +24,7 @@ class CSVDataLoader(Dataset):
         interpolate_param: bool = True,
         sort_column=None,
         scaled_cols=None,
-        feature_params=None
+        feature_params=None,
         no_scale=False
 
     ):
@@ -45,6 +45,9 @@ class CSVDataLoader(Dataset):
         :param end_stamp int: Optional if you want to only use part of a CSV for training, validation,
                             or testing supply these
         :param sort_column str: The column to sort the time series on prior to forecast.
+        :param scaled_cols: The columns you want scaling applied to (if left blank will default to all columns)
+        :param feature_params: These are the datetime features you want to create.
+        :param no_scale: This means that the end labels will not be scaled when running
         """
         super().__init__()
         interpolate = interpolate_param
