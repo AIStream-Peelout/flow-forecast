@@ -88,6 +88,15 @@ class FixedEmbedding(nn.Module):
 
 class TemporalEmbedding(nn.Module):
     def __init__(self, d_model, embed_type='fixed', lowest_level=4):
+        """A class to create
+
+        :param d_model: The model embedding dimension
+        :type d_model: int
+        :param embed_tsype: [description], defaults to 'fixed'
+        :type embed_type: str, optional
+        :param lowest_level: [description], defaults to 4
+        :type lowest_level: int, optional
+        """
         super(TemporalEmbedding, self).__init__()
         minute_size = 4
         hour_size = 24
