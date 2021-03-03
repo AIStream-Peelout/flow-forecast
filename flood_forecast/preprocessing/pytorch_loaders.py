@@ -23,6 +23,7 @@ class CSVDataLoader(Dataset):
         gcp_service_key: Optional[str] = None,
         interpolate_param: bool = True,
         sort_column=None,
+        scaled_cols=None,
         feature_params=None
     ):
         """
@@ -67,6 +68,8 @@ class CSVDataLoader(Dataset):
         print("Now loading" + file_path)
         self.original_df = df
         self.scale = None
+        if scaled_cols is None:
+            scaled_cols = relevant_cols
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
         elif start_stamp != 0:
@@ -76,7 +79,7 @@ class CSVDataLoader(Dataset):
         if scaling is not None:
             print("scaling now")
             self.scale = scaling
-            temp_df = self.scale.fit_transform(self.df[relevant_cols])
+            temp_df = self.scale.fit_transform(self.df[scaled_cols])
             # We define a second scaler to scale the end output
             # back to normal as models might not necessarily predict
             # other present time series values.
@@ -92,7 +95,7 @@ class CSVDataLoader(Dataset):
                     self.df[target_col]
                 )
 
-            self.df[relevant_cols] = temp_df
+            self.df[scaled_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
