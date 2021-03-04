@@ -2,7 +2,7 @@ import torch
 
 
 def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
-    """ Generate a square mask for the sequence. The masked positions are filled with float('-inf').
+    """ Generates a square mask for the sequence. The masked positions are filled with float('-inf').
         Unmasked positions are filled with float(0.0).
     """
     mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
@@ -32,6 +32,21 @@ class TriangularCausalMask(object):
 
 class ProbMask(object):
     def __init__(self, B, H, L, index, scores, device="cpu"):
+        """Creates a probablistic mask
+
+        :param B: batch_size
+        :type B: int
+        :param H: Number of heads
+        :type H: int
+        :param L: Sequence length
+        :type L: in
+        :param index: [description]s
+        :type index: [type]
+        :param scores: [description]
+        :type scores: [type]
+        :param device: [description], defaults to "cpu"
+        :type device: str, optional
+        """
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
         _mask_ex = _mask[None, None, :].expand(B, H, L, scores.shape[-1])
         indicator = _mask_ex[torch.arange(B)[:, None, None],

@@ -24,9 +24,7 @@ class TestInformer(unittest.TestCase):
 
     def test_temporal_loader(self):
         kwargs = {
-                    "training_path": "tests/test_data/keag_small.csv",
-                    "validation_path": "tests/test_data/keag_small.csv",
-                    "test_path": "tests/test_data/keag_small.csv",
+                    "file_path": "tests/test_data/keag_small.csv",
                     "forecast_history": 5,
                     "forecast_length": 1,
                     "train_end": 100,
@@ -34,7 +32,7 @@ class TestInformer(unittest.TestCase):
                     "valid_end": 401,
                     "test_end": 400,
         }
-        loa = TemporalLoader(["month", "weekday", "hour"], kwargs)
+        loa = TemporalLoader(["month", "day", "weekday", "hour"], kwargs)
         result = loa.__getitem__(0)
         self.assertEqual(len(result), 4)
 
