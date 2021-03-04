@@ -7,22 +7,24 @@ Welcome to Flow Forecast's documentation!
 =========================================
 
 Flow Forecast is a deep learning for time series forecasting framework written in PyTorch. Flow Forecast makes it easy to train PyTorch Forecast models on a wide variety
-of datasets.
+of datasets. This site provides doucumentation on the internals of Flow Forecast. If you are looking for tutorials or conceptual information please go to our 
+`Confluence Page <https://flow-forecast.atlassian.net/wiki/home>`
 
 .. automodule:: flood_forecast
 
 .. toctree::
    :maxdepth: 2
    :caption: General:
-
-   utils
+   trainer
+   pytorch_training
+   time_model
    evaluator
    long_train
    model_dict_function
    pre_dict
-   pytorch_training
-   time_model
-   trainer
+   utils
+   
+   
 
 .. automodule:: flood_forecast.deployment
 
