@@ -15,5 +15,5 @@ class TrainData(typing.NamedTuple):
     feats: np.ndarray
     targs: np.ndarray
 
-
+#  stuff
 DaRnnNet = collections.namedtuple("DaRnnNet", ["encoder", "decoder", "enc_opt", "dec_opt"])
