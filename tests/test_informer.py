@@ -51,8 +51,6 @@ class TestInformer(unittest.TestCase):
         # Test output right order
         # temporal_src_embd = result[1]
         # second = temporal_src_embd[2, :]
-        
-
 
     #  def test_different_minute(self): e
     #  d = DataEmbedding(5, 128, data=5)

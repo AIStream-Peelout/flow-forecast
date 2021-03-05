@@ -112,7 +112,7 @@ class Informer(nn.Module):
         :type x_dec: torch.Tensor
         :param x_mark_dec: A tensor with the relevant datetime information. (batch_size, seq_len, n_datetime_feats)
         :type x_mark_dec: torch.Tensor
-        :param enc_self_mask: The mask of the encoder model (), defaults to None
+        :param enc_self_mask: The mask of the encoder model has size (), defaults to None
         :type enc_self_mask: [type], optional
         :param dec_self_mask: [description], defaults to None
         :type dec_self_mask: [type], optional
