@@ -41,10 +41,11 @@ class TestInformer(unittest.TestCase):
                     }
                 }
         loa = TemporalLoader(["month", "day", "day_of_week", "hour"], kwargs)
-        result = loa.__getitem__(0)
+        result = loa[0]
         self.assertEqual(len(result), 4)
         # Test output has proper dimensions
-        print(result)
+        print(result[0].shape)
+        # print(loa[0][0].shape)
         self.assertEqual(result[0].shape[0], 5)
         self.assertEqual(result[1].shape[1], 4)
         self.assertEqual(result[0].shape[1], 3)
