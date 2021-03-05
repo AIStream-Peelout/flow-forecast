@@ -302,15 +302,15 @@ class TemporalLoader(CSVDataLoader):
         rows = self.other_feats.iloc[idx: self.forecast_history + idx]
         temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
-        targ_rows = self.df.iloc[
+        targ_rows = self.other_feats.iloc[
             targs_idx_start: self.forecast_length + targs_idx_start
         ]
-        tar_temporal_feats = self.temporal_df.loc[targs_idx_start: self.forecast_length + targs_idx_start]
+        tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
         src_data = self.df_to_numpy(rows)
         trg_data = self.df_to_numpy(targ_rows)
         temporal_feats = self.df_to_numpy(temporal_feats)
         tar_temp = self.df_to_numpy(tar_temporal_feats)
-        return src_data, trg_data, temporal_feats, tar_temp
+        return src_data, temporal_feats, tar_temp, trg_data
 
     def __len__(self):
         return (
