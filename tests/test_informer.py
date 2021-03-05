@@ -29,6 +29,7 @@ class TestInformer(unittest.TestCase):
                     "forecast_length": 1,
                     "target_col": ["cfs"],
                     "relevant_cols": ["cfs", "temp", "precip"],
+                    "sort_column": "date",
                     "feature_params":
                     {
                         "datetime_params": {
@@ -39,7 +40,7 @@ class TestInformer(unittest.TestCase):
                         }
                     }
                 }
-        loa = TemporalLoader(["month", "day", "weekday", "hour"], kwargs)
+        loa = TemporalLoader(["month", "day", "day_of_week", "hour"], kwargs)
         result = loa.__getitem__(0)
         self.assertEqual(len(result), 4)
 

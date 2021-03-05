@@ -17,7 +17,8 @@ def train_function(model_type: str, params: Dict):
     """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
-    :param dict: Dictionary containing all the parameters needed to run the model
+    :param params: Dictionary containing all the parameters needed to run the model
+    :type Dict:
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
