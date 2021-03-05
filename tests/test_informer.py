@@ -55,7 +55,7 @@ class TestInformer(unittest.TestCase):
         second = temporal_src_embd[2, :]
         self.assertEqual(second[0], 5)
         self.assertEqual(second[1], 1)
-        self.assertEqual(second[3], 3)
+        self.assertEqual(second[3], 2)
     #  def test_different_minute(self): e
     #  d = DataEmbedding(5, 128, data=5)
     #  r = d(torch.rand(5, 128, 5))
