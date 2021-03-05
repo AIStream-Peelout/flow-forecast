@@ -44,7 +44,7 @@ class TestInformer(unittest.TestCase):
         result = loa[0]
         self.assertEqual(len(result), 4)
         # Test output has proper dimensions
-        print(result[0].shape)
+        print(result[3].shape)
         # print(loa[0][0].shape)
         self.assertEqual(result[0].shape[0], 5)
         self.assertEqual(result[1].shape[1], 4)
