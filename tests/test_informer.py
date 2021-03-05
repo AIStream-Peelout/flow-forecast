@@ -56,9 +56,7 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(second[0], 5)
         self.assertEqual(second[1], 1)
         self.assertEqual(second[3], 3)
-    #  def test_different_minute(self): e
-    #  d = DataEmbedding(5, 128, data=5)
-    #  r = d(torch.rand(5, 128, 5))
-    #  d1 = DataEmbedding(5, 128, data=4)
-    #  r1= d(torch.rand)
-    #  self.assertNotAlmostEqual(r, r)
+        # Test data loading component
+        d = DataEmbedding(3, 128)
+        embedding = d(result[0].unsqueeze(0), temporal_src_embd.unsqueeze(0))
+        self.assertEqual(embedding.shape[2], 128)
