@@ -21,7 +21,7 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
-        interpolate_param: bool = True,
+        interpolate_param: bool = False,
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
