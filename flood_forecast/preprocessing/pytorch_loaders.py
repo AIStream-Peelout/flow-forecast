@@ -292,10 +292,10 @@ class TemporalLoader(CSVDataLoader):
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
-        self.other_feats = self.df.drop(time_feats)
+        self.other_feats = self.df.drop(columns=time_feats)
 
     @staticmethod
-    def df_to_numpy(pandas_stuff):
+    def df_to_numpy(pandas_stuff: pd.DataFrame):
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
     def __getitem__(self, idx: int):
