@@ -56,7 +56,7 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(second[0], 5)
         self.assertEqual(second[1], 1)
         self.assertEqual(second[3], 3)
-        # Test data loading component
+        # Test data loading component 2
         d = DataEmbedding(3, 128)
         embedding = d(result[0].unsqueeze(0), temporal_src_embd.unsqueeze(0))
         self.assertEqual(embedding.shape[2], 128)
