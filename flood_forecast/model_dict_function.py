@@ -1,5 +1,6 @@
 from flood_forecast.transformer_xl.multi_head_base import MultiAttnHeadSimple
 from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, CustomTransformerDecoder
+from flood_forecast.transformer_xl.informer import Informer
 from flood_forecast.transformer_xl.transformer_xl import TransformerXL
 from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
@@ -30,7 +31,8 @@ pytorch_model_dict = {
     "CustomTransformerDecoder": CustomTransformerDecoder,
     "DARNN": DARNN,
     "DecoderTransformer": DecoderTransformer,
-    "BasicAE": AE
+    "BasicAE": AE,
+    "Informer": Informer
 }
 
 pytorch_criterion_dict = {

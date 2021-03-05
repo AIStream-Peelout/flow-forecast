@@ -310,7 +310,7 @@ class DecoderTransformer(nn.Module):
         """
         Args:
             x: Tensor of dimension (batch_size, seq_len, number_of_time_series)
-            series_id: Optional id of the series in the dataframe. Currently not supported
+            series_id: Optional id of the series in the dataframe. Currently  not supported
         Returns:
             Case 1: tensor of dimension (batch_size, forecast_length)
             Case 2: GLoss sigma and mu: tuple of ((batch_size, forecast_history, 1), (batch_size, forecast_history, 1))

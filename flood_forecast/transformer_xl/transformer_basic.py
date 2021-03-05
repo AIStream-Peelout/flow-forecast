@@ -1,6 +1,7 @@
 import torch
 import math
 from torch.nn.modules import Transformer, TransformerEncoder, TransformerEncoderLayer, LayerNorm
+from flood_forecast.transformer_xl.masks import generate_square_subsequent_mask
 from torch.autograd import Variable
 from flood_forecast.meta_models.merging_model import MergingModel
 from flood_forecast.transformer_xl.lower_upper_config import activation_dict
@@ -82,7 +83,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             final_act=None,
             n_heads=8):
         """
-        Uses a number of encoder layers with simple linear decoder layer
+        Uses a number of encoder layers with simple linear decoder layer.
         """
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
@@ -104,7 +105,6 @@ class CustomTransformerDecoder(torch.nn.Module):
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
-                    # might have to permute
         Performs forward pass on tensor of (batch_size, sequence_length, n_time_series)
         Return tensor of dim (batch_size, output_seq_length)
         """
@@ -187,12 +187,3 @@ def greedy_decode(
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
         memory = model.encode_sequence(src[:, i + 1:, :], src_mask)
     return ys[:, 1:, :]
-
-
-def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
-    r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
-        Unmasked positions are filled with float(0.0).
-    """
-    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-    return mask

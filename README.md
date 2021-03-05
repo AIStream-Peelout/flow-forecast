@@ -19,13 +19,13 @@ Using the library
 **Models currently supported**
 
 1. Vanilla LSTM: A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
-2. Full transformer: The full transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
+2. Full transformer: The full original transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
 3. Simple Multi-Head Attention: A simple multi-head attention block and linear embedding layers. Suitable for transfer learning.
 4. Transformer with a linear decoder: A transformer with n-encoder blocks (this is tunable) and a linear decoder.
 5. [DA-RNN](https://arxiv.org/abs/1704.02971): A well rounded model with which utilizes a LSTM + attention. 
 6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235): 
 7. Transformer XL:
-8. Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting
+8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
 
 **Forthcoming Models**
@@ -51,7 +51,7 @@ This task focuses on forecasting a stream's future flow/height (in either cfs or
 ### Task 2 Flood severity forecasting
 Task two focuses on predicting the severity of the flood based on the flood forecast, population information, and topography. Flood severity is defined based on several factors including the number of injuires, property damage, and crop damage.
 
-If you use either the data or code from this repository please cite as
+If you use either the data or code from this repository please us the citation. Additionally please cite the original authors of the models.
 ```
 @misc{godfried2020flowdb,
       title={FlowDB a large scale precipitation, river, and flash flood dataset}, 

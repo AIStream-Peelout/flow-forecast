@@ -84,7 +84,7 @@ def evaluate_model(
 
         from flood_forecast.evaluator import evaluate_model
         forecast_model = PyTorchForecast()
-        evaluate_model(forecast_model, )
+        evaluate_model(forecast_model, d, "cfs", )
         ...
     '''
     """

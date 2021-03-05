@@ -21,10 +21,12 @@ class CSVDataLoader(Dataset):
         start_stamp: int = 0,
         end_stamp: int = None,
         gcp_service_key: Optional[str] = None,
-        interpolate_param: bool = True,
+        interpolate_param: bool = False,
         sort_column=None,
+        scaled_cols=None,
         feature_params=None,
         no_scale=False
+
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
@@ -43,6 +45,9 @@ class CSVDataLoader(Dataset):
         :param end_stamp int: Optional if you want to only use part of a CSV for training, validation,
                             or testing supply these
         :param sort_column str: The column to sort the time series on prior to forecast.
+        :param scaled_cols: The columns you want scaling applied to (if left blank will default to all columns)
+        :param feature_params: These are the datetime features you want to create.
+        :param no_scale: This means that the end labels will not be scaled when running
         """
         super().__init__()
         interpolate = interpolate_param
@@ -66,6 +71,8 @@ class CSVDataLoader(Dataset):
         print("Now loading " + file_path)
         self.original_df = df
         self.scale = None
+        if scaled_cols is None:
+            scaled_cols = relevant_cols
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
         elif start_stamp != 0:
@@ -75,8 +82,9 @@ class CSVDataLoader(Dataset):
         self.unscaled_df = self.df
         if scaling is not None:
             print("scaling now")
-            self.scale = scaling.fit(self.df[relevant_cols])
-            temp_df = self.scale.transform(self.df[relevant_cols])
+            self.scale = scaling.fit(self.df[scaled_cols])
+            temp_df = self.scale.transform(self.df[scaled_cols])
+
             # We define a second scaler to scale the end output
             # back to normal as models might not necessarily predict
             # other present time series values.
@@ -84,7 +92,7 @@ class CSVDataLoader(Dataset):
             self.targ_scaler = targ_scale_class()
             self.df[target_col] = self.targ_scaler.fit_transform(self.df[target_col])
 
-            self.df[relevant_cols] = temp_df
+            self.df[scaled_cols] = temp_df
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
@@ -274,3 +282,37 @@ class AEDataloader(CSVDataLoader):
         print(idx)
         print(target)
         return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
+
+
+class TemporalLoader(CSVDataLoader):
+    def __init__(
+            self,
+            time_feats: List[str],
+            kwargs):
+        super().__init__(**kwargs)
+        self.time_feats = time_feats
+        self.temporal_df = self.df[time_feats]
+        self.other_feats = self.df.drop(columns=time_feats)
+
+    @staticmethod
+    def df_to_numpy(pandas_stuff: pd.DataFrame):
+        return torch.from_numpy(pandas_stuff.to_numpy()).float()
+
+    def __getitem__(self, idx: int):
+        rows = self.other_feats.iloc[idx: self.forecast_history + idx]
+        temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
+        targs_idx_start = self.forecast_history + idx
+        targ_rows = self.other_feats.iloc[
+            targs_idx_start: self.forecast_length + targs_idx_start
+        ]
+        tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+        src_data = self.df_to_numpy(rows)
+        trg_data = self.df_to_numpy(targ_rows)
+        temporal_feats = self.df_to_numpy(temporal_feats)
+        tar_temp = self.df_to_numpy(tar_temporal_feats)
+        return src_data, temporal_feats, tar_temp, trg_data
+
+    def __len__(self):
+        return (
+            len(self.df.index) - self.forecast_history - self.forecast_total - 1
+        )
