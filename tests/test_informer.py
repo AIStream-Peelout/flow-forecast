@@ -19,7 +19,7 @@ class TestInformer(unittest.TestCase):
     def test_data_embedding(self):
         d = DataEmbedding(5, 128, data=5)
         r = d(torch.rand(2, 10, 5), torch.rand(2, 10, 5))
-        self.assertTrue(hasattr(d.temporal_embedding, "minute_embed"))
+        self.assertTrue(hasattr(d, "minute_embed"))
         self.assertEqual(r.shape[2], 128)
 
     def test_temporal_loader(self):
