@@ -27,6 +27,8 @@ class TestInformer(unittest.TestCase):
                     "file_path": "tests/test_data/keag_small.csv",
                     "forecast_history": 5,
                     "forecast_length": 1,
+                    "target_col": ["cfs"],
+                    "relevant_cols": ["cfs", "temp", "precip"],
                     "feature_params":
                     {
                         "datetime_params": {
