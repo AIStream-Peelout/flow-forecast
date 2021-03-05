@@ -31,6 +31,8 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
         df[key] = df[dt_column].map(lambda x: x.weekday())
     elif key == "hour":
         df[key] = df[dt_column].map(lambda x: x.hour)
+    elif key == "day":
+        df[key] = df[dt_column].map(lambda x: x.day)
     elif key == "month":
         df[key] = df[dt_column].map(lambda x: x.month)
     elif key == "year":
