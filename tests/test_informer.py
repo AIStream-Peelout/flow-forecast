@@ -44,14 +44,17 @@ class TestInformer(unittest.TestCase):
         result = loa.__getitem__(0)
         self.assertEqual(len(result), 4)
         # Test output has proper dimensions
+        print(result)
         self.assertEqual(result[0].shape[0], 5)
         self.assertEqual(result[1].shape[1], 4)
         self.assertEqual(result[0].shape[1], 3)
         self.assertEqual(result[1].shape[0], 5)
         # Test output right order
-        # temporal_src_embd = result[1]
-        # second = temporal_src_embd[2, :]
-
+        temporal_src_embd = result[1]
+        second = temporal_src_embd[2, :]
+        self.assertEqual(second[0], 5)
+        self.assertEqual(second[1], 1)
+        self.assertEqual(second[3], 2)
     #  def test_different_minute(self): e
     #  d = DataEmbedding(5, 128, data=5)
     #  r = d(torch.rand(5, 128, 5))

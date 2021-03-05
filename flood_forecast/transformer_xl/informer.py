@@ -30,9 +30,9 @@ class Informer(nn.Module):
         :type factor: int, optional
         :param d_model: The embedding dimension of the model, defaults to 512
         :type d_model: int, optional
-        :param n_heads: [description], defaults to 8
+        :param n_heads: The number of heads in , defaults to 8
         :type n_heads: int, optional
-        :param e_layers: [description], defaults to 3
+        :param e_layers: [descrisption], defaults to 3
         :type e_layers: int, optional
         :param d_layers: [description], defaults to 2
         :type d_layers: int, optional
@@ -44,8 +44,8 @@ class Informer(nn.Module):
         :type attn: str, optional
         :param embed: [description], defaults to 'fixed'
         :type embed: str, optional
-        :param data: [description], defaults to 'ETTh'
-        :type data: str, optional
+        :param temp_depth: The temporald depth (e.g), defaults to 4
+        :type data: int, optional
         :param activation: [description], defaults to 'gelu'
         :type activation: str, optional
         :param device: [description], defaults to torch.device('cuda:0')
