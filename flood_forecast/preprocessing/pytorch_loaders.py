@@ -299,8 +299,8 @@ class TemporalLoader(CSVDataLoader):
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
     def __getitem__(self, idx: int):
-        rows = self.other_feats.iloc[idx: self.forecast_history + idx]
-        temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
+        rows = self.other_feats.loc[idx: self.forecast_history + idx]
+        temporal_feats = self.temporal_df.loc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
         targ_rows = self.df.iloc[
             targs_idx_start: self.forecast_length + targs_idx_start
