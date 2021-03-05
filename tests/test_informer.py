@@ -19,7 +19,7 @@ class TestInformer(unittest.TestCase):
     def test_data_embedding(self):
         d = DataEmbedding(5, 128, data=5)
         r = d(torch.rand(2, 10, 5), torch.rand(2, 10, 5))
-        self.assertTrue(hasattr(d, "minute_embed"))
+        self.assertTrue(hasattr(d.temporal_embedding, "month_embed"))
         self.assertEqual(r.shape[2], 128)
 
     def test_temporal_loader(self):
@@ -27,11 +27,16 @@ class TestInformer(unittest.TestCase):
                     "file_path": "tests/test_data/keag_small.csv",
                     "forecast_history": 5,
                     "forecast_length": 1,
-                    "train_end": 100,
-                    "valid_start": 301,
-                    "valid_end": 401,
-                    "test_end": 400,
-        }
+                    "feature_params":
+                    {
+                        "datetime_params": {
+                            "month": "numerical",
+                            "day": "numerical",
+                            "day_of_week": "numerical",
+                            "hour": "numerical"
+                        }
+                    }
+                }
         loa = TemporalLoader(["month", "day", "weekday", "hour"], kwargs)
         result = loa.__getitem__(0)
         self.assertEqual(len(result), 4)

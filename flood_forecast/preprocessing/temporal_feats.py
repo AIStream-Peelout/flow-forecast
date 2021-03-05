@@ -40,19 +40,23 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     return df
 
 
-def feature_fix(preprocess_params, dt_column, df):
+def feature_fix(preprocess_params: Dict, dt_column: str, df: pd.DataFrame):
     """Adds temporal features
 
-    :param preprocess_params: [description]
-    :type preprocess_params: [type]
-    :param dt_column: [description]
-    :type dt_column: [type]
-    :param df: [description]
-    :type df: [type]
-    :return: [description]
-    :rtype: [type]
+    :param preprocess_params: Dictionary of temporal parameters e.g. {"day":"numerical"}
+    :type preprocess_params: Dict
+    :param dt_column: The column name of the data
+    :param df: The dataframe to add the temporal features to
+    :type df: pd.DataFrame
+    :return: Returns the new data-frame and a list of the new column names
+    :rtype: Tuple(pd.Dataframe, List[str])
+
+    .. code-block:: python
+        feats_to_add = {"month":"cyclical", "day":"numerical"}
+        df, column_names feature_fix(feats_to_add, "datetime")
+        print(column_names) # ["cos_month", "sin_month", "day"]
     """
-    print("running feature fix code s")
+    print("Running code to add temporal features")
     column_names = []
     if "datetime_params" in preprocess_params:
         for key, value in preprocess_params["datetime_params"].items():
@@ -70,7 +74,7 @@ def cyclical(df: pd.DataFrame, feature_column: str) -> pd.DataFrame:
 
     :param df: A Pandas Dataframe where you want the dt encoded
     :type df: pd.DataFrame
-    :param feature_column: The name of the feature column. Should beeither (day_of_week, hour, month, year)
+    :param feature_column: The name of the feature column. Should be either (day_of_week, hour, month, year)
     :type feature_column: str
     :return: The dataframew with three new columns: norm_feature, cos_feature, sin_feature
     :rtype: pd.DataFrame

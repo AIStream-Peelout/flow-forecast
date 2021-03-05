@@ -16,15 +16,15 @@ class FullAttention(nn.Module):
         """Computes full self attention
 
         :param queries: The query for self-attention. Will have shape (batch_size, )
-        :type queries: [type]
-        :param keys: [description]
-        :type keys: [type]
+        :type queries: torch.Tensor
+        :param keys: The (batch_size, ?)
+        :type keys: torch.Tensor
         :param values: [description]
-        :type values: [type]
+        :type values: torch.Tensor
         :param attn_mask: [description]
         :type attn_mask: [type]
-        :return: [description]
-        :rtype: [type]
+        :return: Returns the computed attention vector
+        :rtype: torch.Tensor
         """
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
