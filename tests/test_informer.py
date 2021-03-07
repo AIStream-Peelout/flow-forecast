@@ -61,6 +61,5 @@ class TestInformer(unittest.TestCase):
         embedding = d(result[0].unsqueeze(0), temporal_src_embd.unsqueeze(0))
         self.assertEqual(embedding.shape[2], 128)
         i = Informer(3, 3, 3, 5, 5, 4, 2)
-        print(result[0])
-        res = i(result[0].unsqueeze(0), result[1].unsqueeze(0). result[3].unsqueeze(0), result[2].unsqueeze(0))
+        res = i(result[0].unsqueeze(0), result[1].unsqueeze(0), result[3].unsqueeze(0), result[2].unsqueeze(0))
         self.assertEqual(res.shape[1], 4)
