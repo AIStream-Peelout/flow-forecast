@@ -129,6 +129,7 @@ class Informer(nn.Module):
         dec_out = self.projection(dec_out)
         # dec_out = self.end_conv1(dec_out)
         # dec_out = self.end_conv2(dec_out.transpose(2,1)).transpose(1,2)
+        print(dec_out.shape)
         return dec_out[:, -self.pred_len:, :]  # [B, L, D]
 
 
