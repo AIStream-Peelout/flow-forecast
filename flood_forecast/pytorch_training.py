@@ -412,26 +412,18 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         0]
                 else:
+                    output = simple_decode(model=model,
+                                           src=src,
+                                           max_seq_len=targ.shape[1],
+                                           real_target=targ,
+                                           output_len=sequence_size,
+                                           multi_targets=multi_targets,
+                                           probabilistic=probabilistic,
+                                           scaler=scaler)
                     if probabilistic:
-                        output, output_std = simple_decode(model,
-                                                           src,
-                                                           targ.shape[1],
-                                                           targ,
-                                                           1,
-                                                           multi_targets=multi_targets,
-                                                           probabilistic=probabilistic,
-                                                           scaler=scaler)
+                        output, output_std = output[0], output[1]
                         output, output_std = output[:, :, 0], output_std[0]
                         output_dist = torch.distributions.Normal(output, output_std)
-                    else:
-                        output = simple_decode(model=model,
-                                               src=src,
-                                               max_seq_len=targ.shape[1],
-                                               real_target=targ,
-                                               output_len=sequence_size,
-                                               multi_targets=multi_targets,
-                                               probabilistic=probabilistic,
-                                               scaler=scaler)
             else:
                 if probabilistic:
                     output_dist = model(src.float())
