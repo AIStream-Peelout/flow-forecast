@@ -217,7 +217,7 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["target_col"] = dataset_params["target_col"]
             start_end_params["relevant_col"] = dataset_params["relevant_cols"]
             loader = TemporalLoader(
-                dataset_params["time_feats"],
+                dataset_params["temporal_feats"],
                 start_end_params)
         else:
             # TODO support custom DataLoader
