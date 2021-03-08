@@ -24,32 +24,32 @@ class Informer(nn.Module):
         :type seq_len: int
         :param label_len: The length of the label sequence passed into the decoder.
         :type label_len: int
-        :param out_len: The overall output length from the decoder.
+        :param out_len: The overall output length from the decoder .
         :type out_len: int
-        :param factor: The multiplicative factor in the prob attention mechanism, defaults to 5
+        :param factor: The multiplicative factor in the probablistic attention mechanism, defaults to 5
         :type factor: int, optional
         :param d_model: The embedding dimension of the model, defaults to 512
         :type d_model: int, optional
-        :param n_heads: The number of heads in , defaults to 8
+        :param n_heads: The number of heads in the multi-head attention mechanism , defaults to 8
         :type n_heads: int, optional
-        :param e_layers: [descrisption], defaults to 3
+        :param e_layers: The number of layers in the encoder, defaults to 3
         :type e_layers: int, optional
-        :param d_layers: [description], defaults to 2
+        :param d_layers: The number of layers in the decoder, defaults to 2
         :type d_layers: int, optional
         :param d_ff: [description], defaults to 512
         :type d_ff: int, optional
         :param dropout: [description], defaults to 0.0
         :type dropout: float, optional
-        :param attn: [description], defaults to 'prob'
+        :param attn: The type of the attention mechanism either 'prob' or 'full', defaults to 'prob'
         :type attn: str, optional
-        :param embed: [description], defaults to 'fixed'
+        :param embed: Whether to use class: `FixedEmbedding` or torch.nn.Embbeding , defaults to 'fixed'
         :type embed: str, optional
         :param temp_depth: The temporald depth (e.g), defaults to 4
         :type data: int, optional
-        :param activation: [description], defaults to 'gelu'
+        :param activation: The activation func, defaults to 'gelu'
         :type activation: str, optional
-        :param device: [description], defaults to torch.device('cuda:0')
-        :type device: [type], optional
+        :param device: The device the model uses, defaults to torch.device('cuda:0')
+        :type device: str, optional
         """
         super(Informer, self).__init__()
         self.pred_len = out_len
