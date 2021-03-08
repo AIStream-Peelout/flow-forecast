@@ -64,3 +64,6 @@ class TestInformer(unittest.TestCase):
         res = i(result[0].unsqueeze(0), result[1].unsqueeze(0), result[3].unsqueeze(0), result[2].unsqueeze(0))
         print(res.shape)
         self.assertEqual(res.shape[1], 1)
+
+    def test_init_model(self):
+        pass
