@@ -123,6 +123,9 @@ def train_transformer_style(
         meta_model, meta_representation, meta_loss = handle_meta_data(model)
     if use_wandb:
         wandb.watch(model.model)
+    use_decoder = False
+    if "use_decoder" in model.params:
+        use_decoder = True
     session_params = []
     for epoch in range(max_epochs):
         total_loss = torch_single_train(
@@ -138,9 +141,6 @@ def train_transformer_style(
             forward_params=forward_params.copy())
         print("The loss for epoch " + str(epoch))
         print(total_loss)
-        use_decoder = False
-        if "use_decoder" in model.params:
-            use_decoder = True
         valid = compute_validation(
             validation_data_loader,
             model.model,
@@ -333,6 +333,13 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
+def multi_step_forecasts_append(self):
+    """Function to handle forecasts
+    that span multiple
+    """
+    pass
+
+
 def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
@@ -352,29 +359,29 @@ def compute_validation(validation_loader: DataLoader,
     :type validation_loader: DataLoader
     :param model: model
     :type model: [type]
-    :param epoch: [description]
+    :param epoch: The epoch where the validation/test loss is being computed.
     :type epoch: int
     :param sequence_size: [description]
     :type sequence_size: int
     :param criterion: [description]
     :type criterion: Type[torch.nn.modules.loss._Loss]
-    :param device: [description]
+    :param device: The device
     :type device: torch.device
-    :param decoder_structure: [description], defaults to False
+    :param decoder_structure: Whether the model should use sequential decoding, defaults to False
     :type decoder_structure: bool, optional
     :param meta_data_model: [description], defaults to None
     :type meta_data_model: [type], optional
     :param use_wandb: [description], defaults to False
     :type use_wandb: bool, optional
-    :param meta_model: [description], defaults to None
-    :type meta_model: [type], optional
-    :param multi_targets: [description], defaults to 1
+    :param meta_model: Whether the model leverages meta-data, defaults to None
+    :type meta_model: bool, optional
+    :param multi_targets: Whether the model, defaults to 1
     :type multi_targets: int, optional
-    :param val_or_test: [description], defaults to "validation_loss"
+    :param val_or_test: Whether validation or test loss is computed, defaults to "validation_loss"
     :type val_or_test: str, optional
-    :param probabilistic: [description], defaults to False
+    :param probabilistic: Whether the model is probablistic, defaults to False
     :type probabilistic: bool, optional
-    :return: The loss of the first metirc in the list.
+    :return: The loss of the first metric in the list.
     :rtype: float
     """
     print('Computing validation loss')
