@@ -16,7 +16,7 @@ def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame
 def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     """Function to create temporal features
 
-    :param key: The datetime feature you would like to create for the training
+    :param key: The datetime feature you would like to create
     :type key: str
     :param value: The type of feature you would like to create (cyclical or numerical)
     :type value: str

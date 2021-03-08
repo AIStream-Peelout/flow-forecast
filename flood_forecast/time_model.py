@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
-from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader, TemporalLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, AEDataloader
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 from flood_forecast.utils import make_criterion_functions
 from flood_forecast.preprocessing.buil_dataset import get_data
@@ -209,17 +209,6 @@ class PyTorchForecast(TimeSeriesModel):
                 data_path,
                 dataset_params["relevant_cols"],
                 **start_end_params
-            )
-        elif the_class == "TemporalLoader":
-            start_end_params["file_path"] = data_path
-            start_end_params["forecast_history"] = dataset_params["forecast_history"]
-            start_end_params["forecast_length"] = dataset_params["forecast_length"]
-            start_end_params["target_col"] = dataset_params["target_col"]
-            start_end_params["relevant_col"] = dataset_params["relevant_cols"]
-            loader = TemporalLoader(
-                dataset_params["time_feats"],
-                start_end_params
-
             )
         else:
             # TODO support custom DataLoader
