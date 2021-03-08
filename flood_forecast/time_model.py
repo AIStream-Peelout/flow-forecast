@@ -215,7 +215,7 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["forecast_history"] = dataset_params["forecast_history"]
             start_end_params["forecast_length"] = dataset_params["forecast_length"]
             start_end_params["target_col"] = dataset_params["target_col"]
-            start_end_params["relevant_col"] = dataset_params["relevant_cols"]
+            start_end_params["relevant_cols"] = dataset_params["relevant_cols"]
             loader = TemporalLoader(
                 dataset_params["temporal_feats"],
                 start_end_params)
