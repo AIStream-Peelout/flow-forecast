@@ -94,7 +94,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         import json
         with open(os.path.join(self.test_path, "test_informer.json")) as y:
             json_params = json.load(y)
-        keag_file = os.path.join((os.path.dirname(os.path.abspath(__file__), "keag_small.csv")
+        keag_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "keag_small.csv")
         inf = PyTorchForecast("Informer", keag_file, keag_file, keag_file, json_params)
         self.assertTrue(inf)
 
