@@ -42,7 +42,7 @@ class Informer(nn.Module):
         :type dropout: float, optional
         :param attn: The type of the attention mechanism either 'prob' or 'full', defaults to 'prob'
         :type attn: str, optional
-        :param embed: Whether to use class: `FixedEmbedding` or torch.nn.Embbeding , defaults to 'fixed'
+        :param embed: Whether to use class: `FixedEmbedding` or `torch.nn.Embbeding` , defaults to 'fixed'
         :type embed: str, optional
         :param temp_depth: The temporald depth (e.g), defaults to 4
         :type data: int, optional
