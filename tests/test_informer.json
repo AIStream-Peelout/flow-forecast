@@ -28,7 +28,7 @@
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
-       "sort_column": "date",
+       "sort_column":"datetime",
        "interpolate": false,
        "feature_param":
      {
