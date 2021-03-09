@@ -411,6 +411,9 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         :,
                         0]
+                elif type(model).__name__ == "Informer":
+                    pass
+
                 else:
                     output = simple_decode(model=model,
                                            src=src,

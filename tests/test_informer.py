@@ -46,23 +46,26 @@ class TestInformer(unittest.TestCase):
         # Test output has proper dimensions
         print(result[2].shape)
         # print(loa[0][0].shape)
-        self.assertEqual(result[0].shape[0], 5)
-        self.assertEqual(result[1].shape[1], 4)
-        self.assertEqual(result[0].shape[1], 3)
-        self.assertEqual(result[1].shape[0], 5)
+        self.assertEqual(result[0][0].shape[0], 5)
+        self.assertEqual(result[0][1].shape[1], 4)
+        self.assertEqual(result[0][0].shape[1], 3)
+        self.assertEqual(result[0][1].shape[0], 5)
         # Test output right order
-        temporal_src_embd = result[1]
+        temporal_src_embd = result[0][1]
         second = temporal_src_embd[2, :]
         self.assertEqual(second[0], 5)
         self.assertEqual(second[1], 1)
         self.assertEqual(second[3], 3)
         # Test data loading component
         d = DataEmbedding(3, 128)
-        embedding = d(result[0].unsqueeze(0), temporal_src_embd.unsqueeze(0))
+        embedding = d(result[0][0].unsqueeze(0), temporal_src_embd.unsqueeze(0))
         self.assertEqual(embedding.shape[2], 128)
         i = Informer(3, 3, 3, 5, 5, out_len=4, factor=1)
-        res = i(result[0].unsqueeze(0), result[1].unsqueeze(0), result[3].unsqueeze(0), result[2].unsqueeze(0))
-        print(res.shape)
+        r0 = result[0][0].unsqueeze(0)
+        r1 = result[0][1].unsqueeze(0)
+        r3 = result[1][1].unsqueeze(0)
+        r2 = result[1][0].unsqueeze(0)
+        res = i(r0, r1, r3, r2)
         self.assertEqual(res.shape[1], 1)
 
     def test_data_loader_init(self):

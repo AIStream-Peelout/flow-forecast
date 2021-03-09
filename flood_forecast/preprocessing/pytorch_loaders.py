@@ -310,7 +310,7 @@ class TemporalLoader(CSVDataLoader):
         trg_data = self.df_to_numpy(targ_rows)
         temporal_feats = self.df_to_numpy(temporal_feats)
         tar_temp = self.df_to_numpy(tar_temporal_feats)
-        return src_data, temporal_feats, tar_temp, trg_data
+        return (src_data, temporal_feats), (tar_temp, trg_data)
 
     def __len__(self):
         return (
