@@ -53,6 +53,7 @@ class Informer(nn.Module):
         """
         super(Informer, self).__init__()
         self.pred_len = out_len
+        self.label_len = label_len
         self.attn = attn
 
         # Encoding
