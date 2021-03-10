@@ -425,7 +425,9 @@ def compute_validation(validation_loader: DataLoader,
                     label_len = model.label_len
                     dec_inp = torch.zeros_like(trg_b[:, -pred_len:, :]).double()
                     dec_inp = torch.cat([trg_b[:, :label_len, :], dec_inp], dim=1).float().to(device)
+                    print(dec_inp.shape)
                     output = model(src[0], src[1], dec_inp, targ[0])
+
 
                 else:
                     output = simple_decode(model=model,
