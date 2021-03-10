@@ -404,8 +404,7 @@ def compute_validation(validation_loader: DataLoader,
         loss_unscaled_full = 0.0
         for src, targ in validation_loader:
             src = src if isinstance(src, list) else src.to(device)
-            targ = targ.to(device)
-            # targ = targ if isinstance(targ, list) else targ.to(device)
+            targ = targ if isinstance(targ, list) else targ.to(device)
             i += 1
             if decoder_structure:
                 if type(model).__name__ == "SimpleTransformer":
