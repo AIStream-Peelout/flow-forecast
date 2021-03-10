@@ -376,9 +376,9 @@ def compute_validation(validation_loader: DataLoader,
     :type device: torch.device
     :param decoder_structure: Whether the model should use sequential decoding, defaults to False
     :type decoder_structure: bool, optional
-    :param meta_data_model: [description], defaults to None
-    :type meta_data_model: [type], optional
-    :param use_wandb: [description], defaults to False
+    :param meta_data_model: The model to handle the meta-data, defaults to None
+    :type meta_data_model: PyTorchForecast, optional
+    :param use_wandb: Whether Weights and Biases is in use, defaults to False
     :type use_wandb: bool, optional
     :param meta_model: Whether the model leverages meta-data, defaults to None
     :type meta_model: bool, optional
@@ -404,7 +404,7 @@ def compute_validation(validation_loader: DataLoader,
         loss_unscaled_full = 0.0
         for src, targ in validation_loader:
             src = src if isinstance(src, list) else src.to(device)
-            targ = targ.to(device)
+            targ = targ if isinstance(targ, list) else targ.to(device)
             # targ = targ if isinstance(targ, list) else targ.to(device)
             i += 1
             if decoder_structure:
@@ -425,7 +425,7 @@ def compute_validation(validation_loader: DataLoader,
                     label_len = model.label_len
                     dec_inp = torch.zeros_like(trg_b[:, -pred_len:, :]).double()
                     dec_inp = torch.cat([trg_b[:, :label_len, :], dec_inp], dim=1).double().to(device)
-                    output = model(src[0], src[1], dec_inp, targ[0])
+                    output = model(src[0].double(), src[1].double(), dec_inp, targ[0].double())
 
                 else:
                     output = simple_decode(model=model,

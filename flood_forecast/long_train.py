@@ -55,7 +55,7 @@ def loop_through(
             print(e)
 
 
-def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_path=None):
+def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_path: str = None):
     the_config = {
         "model_name": "MultiAttnHeadSimple",
         "model_type": "PyTorch",
