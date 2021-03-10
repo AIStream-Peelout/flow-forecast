@@ -308,6 +308,11 @@ def torch_single_train(model: PyTorchForecast,
                 met_loss.backward()
         if takes_target:
             forward_params["t"] = trg
+        elif "TemporalLoader" == model.params["dataset_params"]["class"]:
+            forward_params["x_mark_enc"] = src[1]
+            forward_params["x_dec"] = trg[1]
+            forward_params["x_mark_dec"] = trg[0]
+            src = src[0]
         output = model.model(src, **forward_params)
         if multi_targets == 1:
             labels = trg[:, :, 0]
@@ -334,8 +339,7 @@ def torch_single_train(model: PyTorchForecast,
 
 
 def multi_step_forecasts_append(self):
-    """Function to handle forecasts
-    that span multiple
+    """Function to handle forecasts that span multiple time steps
     """
     pass
 
