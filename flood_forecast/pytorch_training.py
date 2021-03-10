@@ -297,8 +297,7 @@ def torch_single_train(model: PyTorchForecast,
     for src, trg in data_loader:
         opt.zero_grad()
         # Convert to CPU/GPU/TPU
-        src = src.to(model.device)
-        trg = trg.to(model.device)
+
         if meta_data_model:
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
@@ -309,10 +308,14 @@ def torch_single_train(model: PyTorchForecast,
         if takes_target:
             forward_params["t"] = trg
         elif "TemporalLoader" == model.params["dataset_params"]["class"]:
-            forward_params["x_mark_enc"] = src[1]
-            forward_params["x_dec"] = trg[1]
-            forward_params["x_mark_dec"] = trg[0]
+            forward_params["x_mark_enc"] = src[1].to(model.device)
+            forward_params["x_dec"] = trg[1].to(model.device)
+            forward_params["x_mark_dec"] = trg[0].to(model.device)
             src = src[0]
+            # Assign to avoid other if statement
+            trg = trg[0]
+        src = src.to(model.device)
+        trg = trg.to(model.device)
         output = model.model(src, **forward_params)
         if multi_targets == 1:
             labels = trg[:, :, 0]
