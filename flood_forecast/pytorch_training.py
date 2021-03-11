@@ -313,7 +313,7 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["x_mark_dec"] = trg[0].to(model.device)
             src = src[0]
             # Assign to avoid other if statement
-            trg = trg[0]
+            trg = trg[1][-model.pred_len:]
         src = src.to(model.device)
         trg = trg.to(model.device)
         output = model.model(src, **forward_params)
