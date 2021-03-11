@@ -325,6 +325,9 @@ def torch_single_train(model: PyTorchForecast,
             output1 = output
             output = output.mean
             output_std = output1.stddev
+        if hasattr(model.model, "pred_len"):
+            pred_len = model.model.pred_len
+            labels[:, -pred_len:, :]
         loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
@@ -420,16 +423,12 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         0]
                 elif type(model).__name__ == "Informer":
-                    trg_b = targ[1]
+                    filled_targ = targ[1].clone()
                     pred_len = model.pred_len
-                    label_len = model.label_len
-                    dec_inp = torch.zeros_like(trg_b[:, -pred_len:, :]).float()
-                    print("a")
-                    print(dec_inp)
-                    if label_len > pred_len:
-                        dec_inp = torch.cat([trg_b[:, :label_len, :], dec_inp], dim=1).float().to(device)
-                    print(dec_inp.shape)
-                    output = model(src[0], src[1], dec_inp, targ[0])
+                    filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float()
+                    print("The shape is below")
+                    output = model(src[0], src[1], filled_targ, targ[0])
+                    targ = targ[1]
 
                 else:
                     output = simple_decode(model=model,
