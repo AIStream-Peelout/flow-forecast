@@ -431,6 +431,8 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src[0], src[1], filled_targ, targ[0])
                     targ = targ[1][:, -pred_len:, :]
                     src = src[0]
+                    print(targ)
+                    print(output)
 
                 else:
                     output = simple_decode(model=model,
