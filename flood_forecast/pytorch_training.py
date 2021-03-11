@@ -424,6 +424,8 @@ def compute_validation(validation_loader: DataLoader,
                     pred_len = model.pred_len
                     label_len = model.label_len
                     dec_inp = torch.zeros_like(trg_b[:, -pred_len:, :]).float()
+                    print("a")
+                    print(dec_inp)
                     if label_len > pred_len:
                         dec_inp = torch.cat([trg_b[:, :label_len, :], dec_inp], dim=1).float().to(device)
                     print(dec_inp.shape)
