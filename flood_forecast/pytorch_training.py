@@ -428,7 +428,6 @@ def compute_validation(validation_loader: DataLoader,
                     print(dec_inp.shape)
                     output = model(src[0], src[1], dec_inp, targ[0])
 
-
                 else:
                     output = simple_decode(model=model,
                                            src=src,
