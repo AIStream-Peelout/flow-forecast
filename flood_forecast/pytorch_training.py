@@ -56,7 +56,7 @@ def train_transformer_style(
     :type forward_params: Dict, optional
     :param model_filepath: The file path to load modeel weights from, defaults to "model_save"
     :type model_filepath: str, optional
-    :raises ValueError: [description]
+    :raises ValueError: Has an error
     """
     use_wandb = model.wandb
     es = None
@@ -241,7 +241,10 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :return: Returns the computed loss
     :rtype: float
 """
+    print("sepr")
+    print("Label shape below")
     print(labels.shape)
+    print("Output shape below")
     print(output.shape)
     if isinstance(criterion, GaussianLoss):
         if len(output[0].shape) > 2:
@@ -273,6 +276,9 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
     else:
+        print("Final label shape")
+        print(labels.shape)
+        print(output.shape)
         assert len(labels.shape) == len(output.shape)
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
@@ -431,7 +437,7 @@ def compute_validation(validation_loader: DataLoader,
                     filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float()
                     print("The shape is below")
                     output = model(src[0], src[1], filled_targ, targ[0])
-                    labels = targ[1][:, -pred_len:, :multi_targets]
+                    labels = targ[1][:, -pred_len:, 0:multi_targets]
                     src = src[0]
                     multi_targets = False
                 else:
