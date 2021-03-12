@@ -20,7 +20,7 @@ def loop_through(
         end_index: int = 25) -> None:
     """
     Function that makes and executes a set of config files
-    This is since we have over 9k files.
+    This is since we have over 9k files and.
     """
     if not os.path.exists("model_save"):
         os.mkdir("model_save")
@@ -55,7 +55,7 @@ def loop_through(
             print(e)
 
 
-def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_path=None):
+def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_path: str = None):
     the_config = {
         "model_name": "MultiAttnHeadSimple",
         "model_type": "PyTorch",

@@ -56,7 +56,7 @@ def train_transformer_style(
     :type forward_params: Dict, optional
     :param model_filepath: The file path to load modeel weights from, defaults to "model_save"
     :type model_filepath: str, optional
-    :raises ValueError: [description]
+    :raises ValueError: Has an error
     """
     use_wandb = model.wandb
     es = None
@@ -123,6 +123,9 @@ def train_transformer_style(
         meta_model, meta_representation, meta_loss = handle_meta_data(model)
     if use_wandb:
         wandb.watch(model.model)
+    use_decoder = False
+    if "use_decoder" in model.params:
+        use_decoder = True
     session_params = []
     for epoch in range(max_epochs):
         total_loss = torch_single_train(
@@ -138,9 +141,6 @@ def train_transformer_style(
             forward_params=forward_params.copy())
         print("The loss for epoch " + str(epoch))
         print(total_loss)
-        use_decoder = False
-        if "use_decoder" in model.params:
-            use_decoder = True
         valid = compute_validation(
             validation_data_loader,
             model.model,
@@ -168,7 +168,7 @@ def train_transformer_style(
                 model.model.load_state_dict(torch.load("checkpoint.pth"))
                 break
     decoder_structure = True
-    if model.params["dataset_params"]["class"] != "default":
+    if model.params["dataset_params"]["class"] == "AutoEncoder":
         decoder_structure = False
     test = compute_validation(
         test_data_loader,
@@ -293,12 +293,12 @@ def torch_single_train(model: PyTorchForecast,
     print('running torch_single_train')
     i = 0
     output_std = None
+    mulit_targets_copy = multi_targets
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
         # Convert to CPU/GPU/TPU
-        src = src.to(model.device)
-        trg = trg.to(model.device)
+
         if meta_data_model:
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
@@ -308,7 +308,21 @@ def torch_single_train(model: PyTorchForecast,
                 met_loss.backward()
         if takes_target:
             forward_params["t"] = trg
+        elif "TemporalLoader" == model.params["dataset_params"]["class"]:
+            forward_params["x_mark_enc"] = src[1].to(model.device)
+            forward_params["x_dec"] = trg[1].to(model.device)
+            forward_params["x_mark_dec"] = trg[0].to(model.device)
+            src = src[0]
+            # Assign to avoid other if statement
+            trg = trg[0]
+        src = src.to(model.device)
+        trg = trg.to(model.device)
         output = model.model(src, **forward_params)
+        if hasattr(model.model, "pred_len"):
+            multi_targets = mulit_targets_copy
+            pred_len = model.model.pred_len
+            labels = trg[:, -pred_len:, 0:multi_targets]
+            multi_targets = False
         if multi_targets == 1:
             labels = trg[:, :, 0]
         elif multi_targets > 1:
@@ -317,6 +331,7 @@ def torch_single_train(model: PyTorchForecast,
             output1 = output
             output = output.mean
             output_std = output1.stddev
+
         loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
@@ -331,6 +346,12 @@ def torch_single_train(model: PyTorchForecast,
     print("The number of items in train is: " + str(i))
     total_loss = running_loss / float(i)
     return total_loss
+
+
+def multi_step_forecasts_append(self):
+    """Function to handle forecasts that span multiple time steps
+    """
+    pass
 
 
 def compute_validation(validation_loader: DataLoader,
@@ -352,29 +373,29 @@ def compute_validation(validation_loader: DataLoader,
     :type validation_loader: DataLoader
     :param model: model
     :type model: [type]
-    :param epoch: [description]
+    :param epoch: The epoch where the validation/test loss is being computed.
     :type epoch: int
     :param sequence_size: [description]
     :type sequence_size: int
     :param criterion: [description]
     :type criterion: Type[torch.nn.modules.loss._Loss]
-    :param device: [description]
+    :param device: The device
     :type device: torch.device
-    :param decoder_structure: [description], defaults to False
+    :param decoder_structure: Whether the model should use sequential decoding, defaults to False
     :type decoder_structure: bool, optional
-    :param meta_data_model: [description], defaults to None
-    :type meta_data_model: [type], optional
-    :param use_wandb: [description], defaults to False
+    :param meta_data_model: The model to handle the meta-data, defaults to None
+    :type meta_data_model: PyTorchForecast, optional
+    :param use_wandb: Whether Weights and Biases is in use, defaults to False
     :type use_wandb: bool, optional
-    :param meta_model: [description], defaults to None
-    :type meta_model: [type], optional
-    :param multi_targets: [description], defaults to 1
+    :param meta_model: Whether the model leverages meta-data, defaults to None
+    :type meta_model: bool, optional
+    :param multi_targets: Whether the model, defaults to 1
     :type multi_targets: int, optional
-    :param val_or_test: [description], defaults to "validation_loss"
+    :param val_or_test: Whether validation or test loss is computed, defaults to "validation_loss"
     :type val_or_test: str, optional
-    :param probabilistic: [description], defaults to False
+    :param probabilistic: Whether the model is probablistic, defaults to False
     :type probabilistic: bool, optional
-    :return: The loss of the first metirc in the list.
+    :return: The loss of the first metric in the list.
     :rtype: float
     """
     print('Computing validation loss')
@@ -382,6 +403,7 @@ def compute_validation(validation_loader: DataLoader,
     scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
     output_std = None
+    multi_targs1 = multi_targets
     scaler = None
     if validation_loader.dataset.no_scale:
         scaler = validation_loader.dataset
@@ -389,8 +411,9 @@ def compute_validation(validation_loader: DataLoader,
         i = 0
         loss_unscaled_full = 0.0
         for src, targ in validation_loader:
-            src = src.to(device)
-            targ = targ.to(device)
+            src = src if isinstance(src, list) else src.to(device)
+            targ = targ if isinstance(targ, list) else targ.to(device)
+            # targ = targ if isinstance(targ, list) else targ.to(device)
             i += 1
             if decoder_structure:
                 if type(model).__name__ == "SimpleTransformer":
@@ -404,27 +427,30 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         :,
                         0]
+                elif type(model).__name__ == "Informer":
+                    multi_targets = multi_targs1
+                    filled_targ = targ[1].clone()
+                    pred_len = model.pred_len
+                    filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float()
+                    print("The shape is below")
+                    output = model(src[0], src[1], filled_targ, targ[0])
+                    labels = targ[1][:, -pred_len:, 0:multi_targets]
+                    print(labels.shape)
+                    src = src[0]
+                    multi_targets = False
                 else:
+                    output = simple_decode(model=model,
+                                           src=src,
+                                           max_seq_len=targ.shape[1],
+                                           real_target=targ,
+                                           output_len=sequence_size,
+                                           multi_targets=multi_targets,
+                                           probabilistic=probabilistic,
+                                           scaler=scaler)
                     if probabilistic:
-                        output, output_std = simple_decode(model,
-                                                           src,
-                                                           targ.shape[1],
-                                                           targ,
-                                                           1,
-                                                           multi_targets=multi_targets,
-                                                           probabilistic=probabilistic,
-                                                           scaler=scaler)
+                        output, output_std = output[0], output[1]
                         output, output_std = output[:, :, 0], output_std[0]
                         output_dist = torch.distributions.Normal(output, output_std)
-                    else:
-                        output = simple_decode(model=model,
-                                               src=src,
-                                               max_seq_len=targ.shape[1],
-                                               real_target=targ,
-                                               output_len=sequence_size,
-                                               multi_targets=multi_targets,
-                                               probabilistic=probabilistic,
-                                               scaler=scaler)
             else:
                 if probabilistic:
                     output_dist = model(src.float())

@@ -90,6 +90,14 @@ class TimeSeriesModelTest(unittest.TestCase):
             self.model_params)
         model
 
+    def test_informer_init(self):
+        import json
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_informer.json")) as y:
+            json_params = json.load(y)
+        keag_file = os.path.join(self.test_path, "keag_small.csv")
+        inf = PyTorchForecast("Informer", keag_file, keag_file, keag_file, json_params)
+        self.assertTrue(inf)
+
 
 if __name__ == '__main__':
     unittest.main()

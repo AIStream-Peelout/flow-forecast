@@ -165,9 +165,9 @@ def greedy_decode(
         scaler=None):
     """
     Mechanism to sequentially decode the model
-    :src Historical time series values
-    :real_target The real values (they should be masked), however if want can include known real values.
-    :returns tensor
+    :src The Historical time series values
+    :real_target The real values (they should be masked), however if you want can include known real values.
+    :returns torch.Tensor
     """
     src = src.float()
     real_target = real_target.float()

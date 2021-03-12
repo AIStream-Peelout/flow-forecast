@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Callable, Dict, List, Tuple, Type
+from typing import Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -12,7 +12,7 @@ from flood_forecast.explain_model_output import (
 )
 from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.custom.custom_opt import MASELoss, GaussianLoss
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
 
@@ -223,6 +223,13 @@ def infer_on_torch_model(
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
+    elif model.params["dataset_params"]["class"] == "TemporalLoader":
+        input_dict = {
+            "df_path": test_csv_path,
+            "forecast_total": hours_to_forecast,
+            "kwargs": dataset_params
+        }
+        csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict)
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -232,11 +239,15 @@ def infer_on_torch_model(
             interpolate=dataset_params["interpolate_param"]
         )
     model.model.eval()
-    (
-        history,
-        df_train_and_test,
-        forecast_start_idx,
-    ) = csv_test_loader.get_from_start_date(datetime_start)
+    targ = False
+    if model.params["dataset_params"]["class"] == "TemporalLoader":
+        history, targ, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    else:
+        (
+            history,
+            df_train_and_test,
+            forecast_start_idx,
+        ) = csv_test_loader.get_from_start_date(datetime_start)
     end_tensor = generate_predictions(
         model,
         df_train_and_test,
@@ -247,7 +258,8 @@ def infer_on_torch_model(
         forecast_length,
         hours_to_forecast,
         decoder_params,
-        multi_params=multi_params
+        multi_params=multi_params,
+        targs=targ
     )
 
     df_train_and_test["preds"] = 0
@@ -347,13 +359,14 @@ def generate_predictions(
     forecast_length: int,
     hours_to_forecast: int,
     decoder_params: Dict,
+    targs=False,
     multi_params: int = 1
 ) -> torch.Tensor:
-    """[summary]
+    """A function to generate the actual model prediction
 
     :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
-    :param df: [description]
+    :param df: The main dataframe [descriptison]
     :type df: pd.DataFrame
     :param test_data: [description]
     :type test_data: CSVTestLoader
@@ -395,7 +408,8 @@ def generate_predictions(
             history_dim,
             hours_to_forecast,
             decoder_params,
-            multi_targets=multi_params
+            multi_targets=multi_params,
+            targs=targs
         )
     return end_tensor
 
@@ -460,6 +474,7 @@ def generate_decoded_predictions(
     hours_to_forecast: int,
     decoder_params: Dict,
     multi_targets: int = 1,
+    targs: Union[bool, torch.Tensor] = False
 ) -> torch.Tensor:
     probabilistic = False
     scaler = None
@@ -468,32 +483,35 @@ def generate_decoded_predictions(
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             probabilistic = True
-
-    real_target_tensor = (
-        torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
-        .to(device)
-        .unsqueeze(0)
-        .to(model.device)
-    )
-    end_tensor = decoding_functions[decoder_params["decoder_function"]](
-        model.model,
-        history_dim,
-        hours_to_forecast,
-        real_target_tensor,
-        decoder_params["unsqueeze_dim"],
-        output_len=model.params["dataset_params"]["forecast_length"],
-        multi_targets=multi_targets,
-        device=model.device,
-        probabilistic=probabilistic,
-        scaler=scaler
-    )
-    if probabilistic:
-        end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
-        return end_tensor_mean, end_tensor[1]
-    elif isinstance(end_tensor, tuple):
-        return end_tensor[0][:, :, 0].view(-1).to("cpu").detach(), end_tensor[1][:, :, 0].view(-1).to("cpu").detach()
-    if multi_targets == 1:
-        end_tensor = end_tensor[:, :, 0].view(-1)
+    if targs:
+        pass
+    else:
+        real_target_tensor = (
+            torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
+            .to(device)
+            .unsqueeze(0)
+            .to(model.device)
+        )
+        end_tensor = decoding_functions[decoder_params["decoder_function"]](
+            model.model,
+            history_dim,
+            hours_to_forecast,
+            real_target_tensor,
+            decoder_params["unsqueeze_dim"],
+            output_len=model.params["dataset_params"]["forecast_length"],
+            multi_targets=multi_targets,
+            device=model.device,
+            probabilistic=probabilistic,
+            scaler=scaler
+        )
+        if probabilistic:
+            end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
+            return end_tensor_mean, end_tensor[1]
+        elif isinstance(end_tensor, tuple):
+            e = end_tensor[0][:, :, 0].view(-1).to("cpu").detach(), end_tensor[1][:, :, 0].view(-1).to("cpu").detach()
+            return e
+        if multi_targets == 1:
+            end_tensor = end_tensor[:, :, 0].view(-1)
     return end_tensor.to("cpu").detach()
 
 

@@ -14,7 +14,7 @@ class TriangularCausalMask(object):
     def __init__(self, bath_size: int, seq_len: int, device="cpu"):
         """This is a mask for the attention mechanism
 
-        :param bath_size: The batch_size should be passed
+        :param bath_size: The batch_size should be passed on init
         :type bath_size: int
         :param seq_len: Number of historical time steps.
         :type seq_len: int
@@ -31,7 +31,7 @@ class TriangularCausalMask(object):
 
 
 class ProbMask(object):
-    def __init__(self, B, H, L, index, scores, device="cpu"):
+    def __init__(self, B: int, H, L, index, scores, device="cpu"):
         """Creates a probablistic mask
 
         :param B: batch_size

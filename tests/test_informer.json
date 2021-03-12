@@ -8,12 +8,13 @@
       "c_out": 3,
       "seq_len":10,
       "label_len":10, 
-      "out_len":10,
-      "factor":2,
-      "output_seq_len": 2
-     },
+      "out_len":2,
+      "factor":2
+   },
+   "n_targets":3,
     "dataset_params":
-    {  "class": "default",
+    { "class": "TemporalLoader",
+      "temporal_feats": ["month", "day", "day_of_week", "hour"],
        "training_path": "tests/test_data/keag_small.csv",
        "validation_path": "tests/test_data/keag_small.csv",
        "test_path": "tests/test_data/keag_small.csv",
@@ -28,7 +29,17 @@
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
-       "interpolate": false
+       "sort_column":"datetime",
+       "interpolate": false,
+       "feature_param":
+     {
+         "datetime_params":{
+            "month": "numerical",
+            "day": "numerical",
+            "day_of_week": "numerical",
+            "hour":"numerical"
+         }
+     }
     },
     "early_stopping":
     {
@@ -56,7 +67,6 @@
        "project":"repo-flood_forecast"
     },
     "forward_params":{
-        "t":{}
     },
    "metrics":["MSE"],
    "inference_params":
@@ -74,7 +84,17 @@
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
-             "interpolate_param": false
+             "interpolate_param": false,
+             "feature_params":
+             {
+                 "datetime_params":{
+                    "month": "numerical",
+                    "day": "numerical",
+                    "day_of_week": "numerical",
+                    "hour":"numerical"
+                 }
+             },
+             "sort_column":"datetime"
           }
    }
        

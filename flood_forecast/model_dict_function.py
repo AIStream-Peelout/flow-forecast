@@ -16,7 +16,6 @@ from flood_forecast.custom.custom_opt import (RMSELoss, MAPELoss, PenalizedMSELo
 from flood_forecast.transformer_xl.transformer_bottleneck import DecoderTransformer
 from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
-import torch
 
 """
 Utility dictionaries to map a string to a class.
@@ -51,12 +50,3 @@ pytorch_criterion_dict = {
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}
 
 pytorch_opt_dict = {"Adam": Adam, "SGD": SGD, "BertAdam": BertAdam}
-
-
-def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
-    """Generate a square mask for the sequence. The masked positions are filled with float('-inf').
-        Unmasked positions are filled with float(0.0).
-    """
-    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-    return mask
