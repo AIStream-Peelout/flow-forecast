@@ -444,6 +444,7 @@ def compute_validation(validation_loader: DataLoader,
                     labels = targ[1][:, -pred_len:, 0:multi_targets]
                     print(labels.shape)
                     src = src[0]
+                    1 + 1
                     multi_targets = False
                 else:
                     output = simple_decode(model=model,
