@@ -11,4 +11,5 @@ def decoding_function(src: torch.Tensor, trg: torch.Tensor, know_columns: List, 
     """
     if temp_src is None:
         pass
-    pass
+    else:
+        pass
