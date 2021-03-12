@@ -320,7 +320,7 @@ class TemporalLoader(CSVDataLoader):
 
 class TemporalTestLoader(CSVTestLoader):
     def __init__(self, time_feats, kwargs):
-        super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs)
+        super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs["kwargs"])
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
         self.other_feats = self.df.drop(columns=time_feats)
