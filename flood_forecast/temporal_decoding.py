@@ -1,6 +1,10 @@
 
-def decoding_function(src, trg, know_columns, unknown_columns):
+import torch
+from typing import List
+
+
+def decoding_function(src: torch.Tensor, trg: torch.Tensor, know_columns: List, unknown_columns):
     """This is function aims to generalize decoding for our temporal
-    data loader models. Sepcifically it uses.
+    data loader models. Sepcifically it uses.s
     """
     pass
