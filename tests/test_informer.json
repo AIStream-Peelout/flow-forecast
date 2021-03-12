@@ -85,7 +85,7 @@
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
              "interpolate_param": false,
-             "feature_param":
+             "feature_params":
              {
                  "datetime_params":{
                     "month": "numerical",
