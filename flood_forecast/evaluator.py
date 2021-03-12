@@ -12,7 +12,7 @@ from flood_forecast.explain_model_output import (
 )
 from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.custom.custom_opt import MASELoss, GaussianLoss
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
 
@@ -223,6 +223,13 @@ def infer_on_torch_model(
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
+    elif model.params["dataset_params"]["class"] == "TemporalLoader":
+        input_dict = {
+            "df_path": test_csv_path,
+            "forecast_total": hours_to_forecast,
+            "kwargs": dataset_params
+        }
+        csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["time_feats"], input_dict)
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,

@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Dict
 import numpy as np
-
+e
 
 def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -15,7 +15,7 @@ def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame
 
 def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     """Function to create temporal features
-
+        Uses dict to make val.
     :param key: The datetime feature you would like to create
     :type key: str
     :param value: The type of feature you would like to create (cyclical or numerical)
