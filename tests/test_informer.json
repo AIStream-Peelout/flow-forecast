@@ -84,7 +84,17 @@
              "relevant_cols": ["cfs", "precip", "temp"],
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
-             "interpolate_param": false
+             "interpolate_param": false,
+             "feature_param":
+             {
+                 "datetime_params":{
+                    "month": "numerical",
+                    "day": "numerical",
+                    "day_of_week": "numerical",
+                    "hour":"numerical"
+                 }
+             },
+             "sort_column":"datetime"
           }
    }
        

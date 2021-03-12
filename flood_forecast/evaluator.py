@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Callable, Dict, List, Tuple, Type
+from typing import Callable, Dict, List, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -239,6 +239,7 @@ def infer_on_torch_model(
             interpolate=dataset_params["interpolate_param"]
         )
     model.model.eval()
+    targ = False
     if model.params["dataset_params"]["class"] == "TemporalLoader":
         history, targ, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
     else:
@@ -257,7 +258,8 @@ def infer_on_torch_model(
         forecast_length,
         hours_to_forecast,
         decoder_params,
-        multi_params=multi_params
+        multi_params=multi_params,
+        targs=targ
     )
 
     df_train_and_test["preds"] = 0
@@ -357,13 +359,14 @@ def generate_predictions(
     forecast_length: int,
     hours_to_forecast: int,
     decoder_params: Dict,
+    targs=False,
     multi_params: int = 1
 ) -> torch.Tensor:
-    """[summary]
+    """A function to generate the actual model prediction
 
     :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
-    :param df: [description]
+    :param df: The main dataframe [descriptison]
     :type df: pd.DataFrame
     :param test_data: [description]
     :type test_data: CSVTestLoader
@@ -470,6 +473,7 @@ def generate_decoded_predictions(
     hours_to_forecast: int,
     decoder_params: Dict,
     multi_targets: int = 1,
+    targs: Union[bool, torch.Tensor] = False
 ) -> torch.Tensor:
     probabilistic = False
     scaler = None
