@@ -316,3 +316,38 @@ class TemporalLoader(CSVDataLoader):
         return (
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
+
+
+class TemporalTestLoader(CSVTestLoader):
+    def __init__(self, time_feats, kwargs):
+        super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs)
+        self.time_feats = time_feats
+        self.temporal_df = self.df[time_feats]
+        self.other_feats = self.df.drop(columns=time_feats)
+
+    @staticmethod
+    def df_to_numpy(pandas_stuff: pd.DataFrame):
+        return torch.from_numpy(pandas_stuff.to_numpy()).float()
+
+    def __getitem__(self, idx):
+        if self.target_supplied:
+            historical_rows = self.df.iloc[idx: self.forecast_history + idx]
+            target_idx_start = self.forecast_history + idx
+            # Why aren't we using these
+            # targ_rows = self.df.iloc[
+            #     target_idx_start : self.forecast_total + target_idx_start
+            # ]
+            historical_rows = self.other_feats.iloc[idx: self.forecast_history + idx]
+            targs_idx_start = self.forecast_history + idx
+            temporal_feat = self.temporal_df.iloc[idx: self.forecast_history + idx]
+            tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+            targ_rows = self.other_feats.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+            src_data = self.df_to_numpy(historical_rows)
+            trg_data = self.df_to_numpy(targ_rows)
+            temporal_feat = self.df_to_numpy(temporal_feat)
+            tar_temp = self.df_to_numpy(tar_temporal_feats)
+            all_rows_orig = self.original_df.iloc[
+                idx: self.forecast_total + target_idx_start
+            ].copy()
+            historical_rows = torch.from_numpy(historical_rows.to_numpy())
+            return (src_data, temporal_feat), (tar_temp, trg_data), all_rows_orig, target_idx_start
