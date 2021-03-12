@@ -168,7 +168,7 @@ def train_transformer_style(
                 model.model.load_state_dict(torch.load("checkpoint.pth"))
                 break
     decoder_structure = True
-    if model.params["dataset_params"]["class"] != "default":
+    if model.params["dataset_params"]["class"] != "AutoEncoder":
         decoder_structure = False
     test = compute_validation(
         test_data_loader,
