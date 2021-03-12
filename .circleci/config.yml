@@ -244,7 +244,6 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            coverage run flood_forecast/trainer.py -p tests/test_informer.json
             echo -e 'test informer'
             coverage run flood_forecast/trainer.py -p tests/transformer_gaussian.json
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
