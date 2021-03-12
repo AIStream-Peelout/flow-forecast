@@ -483,32 +483,35 @@ def generate_decoded_predictions(
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             probabilistic = True
-
-    real_target_tensor = (
-        torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
-        .to(device)
-        .unsqueeze(0)
-        .to(model.device)
-    )
-    end_tensor = decoding_functions[decoder_params["decoder_function"]](
-        model.model,
-        history_dim,
-        hours_to_forecast,
-        real_target_tensor,
-        decoder_params["unsqueeze_dim"],
-        output_len=model.params["dataset_params"]["forecast_length"],
-        multi_targets=multi_targets,
-        device=model.device,
-        probabilistic=probabilistic,
-        scaler=scaler
-    )
-    if probabilistic:
-        end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
-        return end_tensor_mean, end_tensor[1]
-    elif isinstance(end_tensor, tuple):
-        return end_tensor[0][:, :, 0].view(-1).to("cpu").detach(), end_tensor[1][:, :, 0].view(-1).to("cpu").detach()
-    if multi_targets == 1:
-        end_tensor = end_tensor[:, :, 0].view(-1)
+    if targs:
+        pass
+    else:
+        real_target_tensor = (
+            torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
+            .to(device)
+            .unsqueeze(0)
+            .to(model.device)
+        )
+        end_tensor = decoding_functions[decoder_params["decoder_function"]](
+            model.model,
+            history_dim,
+            hours_to_forecast,
+            real_target_tensor,
+            decoder_params["unsqueeze_dim"],
+            output_len=model.params["dataset_params"]["forecast_length"],
+            multi_targets=multi_targets,
+            device=model.device,
+            probabilistic=probabilistic,
+            scaler=scaler
+        )
+        if probabilistic:
+            end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
+            return end_tensor_mean, end_tensor[1]
+        elif isinstance(end_tensor, tuple):
+            e = end_tensor[0][:, :, 0].view(-1).to("cpu").detach(), end_tensor[1][:, :, 0].view(-1).to("cpu").detach()
+            return e
+        if multi_targets == 1:
+            end_tensor = end_tensor[:, :, 0].view(-1)
     return end_tensor.to("cpu").detach()
 
 
