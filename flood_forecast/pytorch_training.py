@@ -241,6 +241,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :return: Returns the computed loss
     :rtype: float
 """
+    print(labels.shape)
+    print(output.shape)
     if isinstance(criterion, GaussianLoss):
         if len(output[0].shape) > 2:
             g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
@@ -431,9 +433,6 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src[0], src[1], filled_targ, targ[0])
                     targ = targ[1][:, -pred_len:, :]
                     src = src[0]
-                    print(targ)
-                    print(output)
-
                 else:
                     output = simple_decode(model=model,
                                            src=src,
