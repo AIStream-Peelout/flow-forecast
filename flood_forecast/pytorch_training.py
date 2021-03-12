@@ -442,7 +442,7 @@ def compute_validation(validation_loader: DataLoader,
                     print("The shape is below")
                     output = model(src[0], src[1], filled_targ, targ[0])
                     labels = targ[1][:, -pred_len:, 0:multi_targets]
-                    print(label.shape)
+                    print(labels.shape)
                     src = src[0]
                     multi_targets = False
                 else:
