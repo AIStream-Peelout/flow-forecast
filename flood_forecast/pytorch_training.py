@@ -433,6 +433,7 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src[0], src[1], filled_targ, targ[0])
                     targ = targ[1][:, -pred_len:, :multi_targets]
                     src = src[0]
+                    multi_targets = False
                 else:
                     output = simple_decode(model=model,
                                            src=src,
