@@ -408,7 +408,8 @@ def generate_predictions(
             history_dim,
             hours_to_forecast,
             decoder_params,
-            multi_targets=multi_params
+            multi_targets=multi_params,
+            targs=targs
         )
     return end_tensor
 
