@@ -300,6 +300,7 @@ def torch_single_train(model: PyTorchForecast,
     print('running torch_single_train')
     i = 0
     output_std = None
+    mulit_targets_copy = multi_targets
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
@@ -325,6 +326,7 @@ def torch_single_train(model: PyTorchForecast,
         trg = trg.to(model.device)
         output = model.model(src, **forward_params)
         if hasattr(model.model, "pred_len"):
+            multi_targets = mulit_targets_copy
             pred_len = model.model.pred_len
             labels = trg[:, -pred_len:, 0:multi_targets]
             multi_targets = False
