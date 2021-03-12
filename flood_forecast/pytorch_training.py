@@ -241,10 +241,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :return: Returns the computed loss
     :rtype: float
 """
-    print("Label shape below")
-    print(labels.shape)
-    print("Output shape below")
-    print(output.shape)
     if isinstance(criterion, GaussianLoss):
         if len(output[0].shape) > 2:
             g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
@@ -275,9 +271,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
     else:
-        print("Final label shape")
-        print(labels.shape)
-        print(output.shape)
         assert len(labels.shape) == len(output.shape)
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
