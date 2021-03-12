@@ -410,6 +410,7 @@ def compute_validation(validation_loader: DataLoader,
     scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
     output_std = None
+    multi_targs1 = multi_targets
     scaler = None
     if validation_loader.dataset.no_scale:
         scaler = validation_loader.dataset
@@ -434,6 +435,7 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         0]
                 elif type(model).__name__ == "Informer":
+                    multi_targets = multi_targs1
                     filled_targ = targ[1].clone()
                     pred_len = model.pred_len
                     filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float()
