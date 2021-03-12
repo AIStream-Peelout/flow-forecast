@@ -431,7 +431,7 @@ def compute_validation(validation_loader: DataLoader,
                     filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float()
                     print("The shape is below")
                     output = model(src[0], src[1], filled_targ, targ[0])
-                    targ = targ[1][:, -pred_len:, :]
+                    targ = targ[1][:, -pred_len:, :multi_targets]
                     src = src[0]
                 else:
                     output = simple_decode(model=model,
