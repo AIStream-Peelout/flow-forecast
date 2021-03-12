@@ -229,7 +229,7 @@ def infer_on_torch_model(
             "forecast_total": hours_to_forecast,
             "kwargs": dataset_params
         }
-        csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["time_feats"], input_dict)
+        csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict)
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -239,11 +239,14 @@ def infer_on_torch_model(
             interpolate=dataset_params["interpolate_param"]
         )
     model.model.eval()
-    (
-        history,
-        df_train_and_test,
-        forecast_start_idx,
-    ) = csv_test_loader.get_from_start_date(datetime_start)
+    if model.params["dataset_params"]["class"] == "TemporalLoader":
+        history, targ, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    else:
+        (
+            history,
+            df_train_and_test,
+            forecast_start_idx,
+        ) = csv_test_loader.get_from_start_date(datetime_start)
     end_tensor = generate_predictions(
         model,
         df_train_and_test,
