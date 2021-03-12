@@ -10,6 +10,7 @@ def decoding_function(src: torch.Tensor, trg: torch.Tensor, know_columns: List, 
 
     """
     if temp_src is None:
-        pass
+        for i in range(0, max_seq_len):
+            pass
     else:
         pass
