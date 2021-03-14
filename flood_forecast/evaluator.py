@@ -378,7 +378,7 @@ def generate_predictions(
     :type forecast_start_idx: int
     :param forecast_length: [description]
     :type forecast_length: int
-    :param hours_to_forecast: [description]
+    :param hours_to_forecast: The number of time steps to forecast
     :type hours_to_forecast: int
     :param decoder_params: [description]
     :type decoder_params: Dict
@@ -387,7 +387,8 @@ def generate_predictions(
     :return: [description]
     :rtype: torch.Tensor
     """
-    history_dim = history.unsqueeze(0).to(model.device)
+    if not targs:
+        history_dim = history.unsqueeze(0).to(model.device)
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
