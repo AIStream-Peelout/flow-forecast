@@ -387,7 +387,10 @@ def generate_predictions(
     :return: [description]
     :rtype: torch.Tensor
     """
-    history_dim = history.unsqueeze(0).to(model.device)
+    if targs:
+        history_dim = history
+    else:
+        history_dim = history.unsqueeze(0).to(model.device)
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
@@ -483,8 +486,6 @@ def generate_decoded_predictions(
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             probabilistic = True
-    if targs:
-        pass
     else:
         real_target_tensor = (
             torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())

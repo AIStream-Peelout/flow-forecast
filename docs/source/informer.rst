@@ -1,2 +1,2 @@
-.. automodule:: flood_forecast.transformer_xl.in
+.. automodule:: flood_forecast.transformer_xl.informer
     :members:
