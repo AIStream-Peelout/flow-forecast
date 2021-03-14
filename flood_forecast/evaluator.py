@@ -486,7 +486,7 @@ def generate_decoded_predictions(
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             probabilistic = True
-    else:
+
         real_target_tensor = (
             torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
             .to(device)
