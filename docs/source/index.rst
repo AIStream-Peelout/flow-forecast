@@ -68,6 +68,7 @@ of datasets.
   transformer_basic
   transformer_xl
   transformer_bottleneck
+  informer
 
 .. automodule:: flood_forecast.gcp_integration
 
