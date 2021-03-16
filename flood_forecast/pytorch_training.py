@@ -357,7 +357,7 @@ def multi_step_forecasts_append(self):
 def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
-                       sequence_size: int,
+                       out_sequence_size: int,
                        criterion: Type[torch.nn.modules.loss._Loss],
                        device: torch.device,
                        decoder_structure=False,
@@ -372,12 +372,12 @@ def compute_validation(validation_loader: DataLoader,
     :param validation_loader: The data-loader of either validation or test-data
     :type validation_loader: DataLoader
     :param model: model
-    :type model: [type]
+    :type model: Type[torch.nn.Module]
     :param epoch: The epoch where the validation/test loss is being computed.
     :type epoch: int
-    :param sequence_size: [description]
-    :type sequence_size: int
-    :param criterion: [description]
+    :param out_sequence_size: The length to forecast (e.g. equivalent to forecast_history)
+    :type out_sequence_size: int
+    :param criterion: The criterion used to validate the models
     :type criterion: Type[torch.nn.modules.loss._Loss]
     :param device: The device
     :type device: torch.device
@@ -391,7 +391,7 @@ def compute_validation(validation_loader: DataLoader,
     :type meta_model: bool, optional
     :param multi_targets: Whether the model, defaults to 1
     :type multi_targets: int, optional
-    :param val_or_test: Whether validation or test loss is computed, defaults to "validation_loss"
+    :param val_or_test: Whether validation or test_loss is computed, defaults to "validation_loss"
     :type val_or_test: str, optional
     :param probabilistic: Whether the model is probablistic, defaults to False
     :type probabilistic: bool, optional
@@ -443,7 +443,7 @@ def compute_validation(validation_loader: DataLoader,
                                            src=src,
                                            max_seq_len=targ.shape[1],
                                            real_target=targ,
-                                           output_len=sequence_size,
+                                           output_len=out_sequence_size,
                                            multi_targets=multi_targets,
                                            probabilistic=probabilistic,
                                            scaler=scaler)
