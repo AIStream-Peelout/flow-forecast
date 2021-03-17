@@ -15,6 +15,7 @@ from flood_forecast.custom.custom_opt import MASELoss, GaussianLoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
+from flood_forecast.temporal_decoding import decoding_function
 
 
 def stream_baseline(
@@ -493,6 +494,13 @@ def generate_decoded_predictions(
             .unsqueeze(0)
             .to(model.device)
         )
+        if model.model.__name__ == "Informer":
+            src = history_dim[0][0]
+            trg = history_dim[1][1]
+            decoder_seq_len = model.params["model_params"]["dec_in"]
+            end_tensor = decoding_function(model.model, src, trg, model.params["dataset_params"]["forecast_length"],
+                                           src[0][1], trg[1][0], 1, decoder_seq_len, hours_to_forecast)
+        else:
         end_tensor = decoding_functions[decoder_params["decoder_function"]](
             model.model,
             history_dim,
