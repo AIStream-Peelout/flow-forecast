@@ -36,11 +36,6 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         src_temp = src_temp.unsqueeze(0)
         tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg)
-    print("Out 1")
-    print(out1.shape)
-    print(src.shape)
-    print(trg.shape)
-    print(tar_temp.shape)
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
     for i in range(0, max_len, forecast_length):
@@ -53,10 +48,10 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         print("out shape is ")
         print(out.shape)
         residual1 = forecast_length if i + forecast_length < max_len else max_len % forecast_length
-        out1[:, i: i + residual, :] = out[:, -residual1:, :]
+        out1[:, i: i + residual1, :] = out[:, -residual1:, :]
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
         filled_target1[:, -forecast_length * 2:-forecast_length, :] = out[:, -forecast_length:, :]
         filled_target = torch.cat((filled_target, filled_target1), dim=1)
         print("Out shape below")
         print(filled_target.shape)
-    return residual1
+    return out1
