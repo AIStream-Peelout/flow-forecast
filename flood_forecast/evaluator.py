@@ -494,7 +494,7 @@ def generate_decoded_predictions(
             .unsqueeze(0)
             .to(model.device)
         )
-        if model.model.__name__ == "Informer":
+        if model.model.__class__.__name__ == "Informer":
             src = history_dim[0][0]
             trg = history_dim[1][1]
             decoder_seq_len = model.params["model_params"]["dec_in"]
