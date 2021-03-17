@@ -494,12 +494,13 @@ def generate_decoded_predictions(
             .unsqueeze(0)
             .to(model.device)
         )
-        if model.model.__class__.__name__ == "Informer":
-            src = history_dim[0][0]
-            trg = history_dim[1][1]
+        if targs:
+            src = history_dim
+            src0 = src[0]
+            trg = targs
             decoder_seq_len = model.params["model_params"]["dec_in"]
-            end_tensor = decoding_function(model.model, src, trg, model.params["dataset_params"]["forecast_length"],
-                                           src[0][1], trg[1][0], 1, decoder_seq_len, hours_to_forecast)
+            end_tensor = decoding_function(model.model, src0, trg[1], model.params["dataset_params"]["forecast_length"],
+                                           src[1], trg[0], 1, decoder_seq_len, hours_to_forecast)
         else:
             end_tensor = decoding_functions[decoder_params["decoder_function"]](
                 model.model,

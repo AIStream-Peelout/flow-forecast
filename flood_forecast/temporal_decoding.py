@@ -4,15 +4,15 @@ import torch
 
 def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_length, src_temp,
                       tar_temp, unknown_cols_st: int, decoder_seq_len: int, max_len: int):
-    """[summary]
+    """This function is responsible for decoding models that use `TemporalLoader` data.
 
-    :param model: [description]
+    :param model: The PyTorch Time Series forecasting model
     :type model: [type]
-    :param src: [description]
+    :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series)
     :type src: torch.Tensor
-    :param trg: [description]
+    :param trg: The target tensor. Should be of dimension (batch_size, hours_to_forecast, n_time_series)
     :type trg: torch.Tensor
-    :param forecast_length: [description]
+    :param forecast_length: A
     :type forecast_length: [type]
     :param src_temp: [description]
     :type src_temp: [type]
