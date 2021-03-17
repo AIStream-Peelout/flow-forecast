@@ -501,18 +501,18 @@ def generate_decoded_predictions(
             end_tensor = decoding_function(model.model, src, trg, model.params["dataset_params"]["forecast_length"],
                                            src[0][1], trg[1][0], 1, decoder_seq_len, hours_to_forecast)
         else:
-        end_tensor = decoding_functions[decoder_params["decoder_function"]](
-            model.model,
-            history_dim,
-            hours_to_forecast,
-            real_target_tensor,
-            decoder_params["unsqueeze_dim"],
-            output_len=model.params["dataset_params"]["forecast_length"],
-            multi_targets=multi_targets,
-            device=model.device,
-            probabilistic=probabilistic,
-            scaler=scaler
-        )
+            end_tensor = decoding_functions[decoder_params["decoder_function"]](
+                model.model,
+                history_dim,
+                hours_to_forecast,
+                real_target_tensor,
+                decoder_params["unsqueeze_dim"],
+                output_len=model.params["dataset_params"]["forecast_length"],
+                multi_targets=multi_targets,
+                device=model.device,
+                probabilistic=probabilistic,
+                scaler=scaler
+            )
         if probabilistic:
             end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
             return end_tensor_mean, end_tensor[1]
