@@ -15,7 +15,7 @@ from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 
 def handle_meta_data(model: PyTorchForecast):
     """A function to init models with meta-data
-
+    s
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initial meta-representation

@@ -2,23 +2,24 @@
 import torch
 
 
-def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_length, src_temp,
-                      tar_temp, unknown_cols_st: int, decoder_seq_len: int, max_len: int):
+def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_length: int, src_temp: torch.Tensor,
+                      tar_temp: torch.Tensor, unknown_cols_st: int, decoder_seq_len: int, max_len: int):
     """This function is responsible for decoding models that use `TemporalLoader` data.
 
-    :param model: The PyTorch Time Series forecasting model
-    :type model: [type]
-    :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series)
+    :param model: The PyTorch time series forecasting model for
+    :type model: `torch.nn.Module`
+    :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series).
+    Ocassionally batch_size will not be present so at some points it will only be (forecast_history, n_time_series)
     :type src: torch.Tensor
     :param trg: The target tensor. Should be of dimension (batch_size, hours_to_forecast, n_time_series)
     :type trg: torch.Tensor
-    :param forecast_length: A
+    :param forecast_length: The of length of the forecast the model makes at each forward pass.
     :type forecast_length: [type]
-    :param src_temp: [description]
+    :param src_temp: The te
     :type src_temp: [type]
-    :param tar_temp: [description]
+    :param tar_temp: The target's temporal features
     :type tar_temp: [type]
-    :param unknown_cols_st: [description]
+    :param unknown_cols_st: The un
     :type unknown_cols_st: int
     :param decoder_seq_len: [description]
     :type decoder_seq_len: int
@@ -27,6 +28,13 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :return: [description]
     :rtype: [type]
     """
+    if len(src.shape) == 2:
+        # We assume batch_size is missing in this case
+        # this should be ubiquitous
+        src = src.unsqueeze(0)
+        trg = trg.unsqueeze(0)
+        src_temp = src_temp.unsqueeze(0)
+        tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg)
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
