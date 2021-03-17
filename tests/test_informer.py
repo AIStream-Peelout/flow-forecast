@@ -73,11 +73,11 @@ class TestInformer(unittest.TestCase):
 
     def test_decodign_t(self):
         src = torch.rand(20, 3)
-        trg = torch.rand(20, 3)
+        trg = torch.rand(336, 3)
         src1 = torch.rand(20, 4)
-        trg1 = torch.rand(20, 4)
+        trg1 = torch.rand(336, 4)
         # model, src: torch.Tensor, trg: torch.Tensor, forecast_length: int, src_temp: torch.Tensor,
-        #              tar_temp: torch.Tensor, unknown_cols_st: int, decoder_seq_len: int, max_len: int
+        #       #       tar_temp: torch.Tensor, unknown_cols_st: int, decoder_seq_len: int, max_len: int
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336)
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
