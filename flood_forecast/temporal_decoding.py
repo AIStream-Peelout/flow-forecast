@@ -54,12 +54,13 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
             out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
         else:
             out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
-        print("out shape is ")
+        print("out shape is")
         print(out.shape)
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
         print("residual1 is")
         out1[:, i: i + residual1, :] = out[:, -residual1:, :]
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
+        print(forecast_length * 2)
         filled_target1[:, -forecast_length * 2:-forecast_length, :] = out[:, -forecast_length:, :]
         filled_target = torch.cat((filled_target, filled_target1), dim=1)
         print("Out shape below")
