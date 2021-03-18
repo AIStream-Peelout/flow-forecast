@@ -43,6 +43,8 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     print(tar_temp)
     print(forecast_length)
     print(decoder_seq_len)
+    print(unknown_cols_st)
+    print(max_len)
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
     for i in range(0, max_len, forecast_length):
