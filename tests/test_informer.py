@@ -68,7 +68,7 @@ class TestInformer(unittest.TestCase):
         res = i(r0, r1, r3, r2)
         self.assertEqual(res.shape[1], 1)
 
-    def test_data_loader_init(self):
+    def test_data_temporal_loader_init(self):
         pass
 
     def test_decodign_t(self):
