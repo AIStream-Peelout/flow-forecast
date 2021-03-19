@@ -13,8 +13,9 @@ from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 
 
-def handle_meta_data(model: PyTorchForecast) -> tuple:
+def handle_meta_data(model: PyTorchForecast):
     """A function to init models with meta-data
+    s
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initial meta-representation
@@ -188,7 +189,6 @@ def train_transformer_style(
 
 
 def get_meta_representation(column_id: str, uuid: str, meta_model: PyTorchForecast) -> torch.Tensor:
-    print("Return meta")
     return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
 
 
