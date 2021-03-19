@@ -4,7 +4,10 @@ import torch
 
 def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_length: int, src_temp: torch.Tensor,
                       tar_temp: torch.Tensor, unknown_cols_st: int, decoder_seq_len: int, max_len: int):
-    """This function is responsible for decoding models that use `TemporalLoader` data.
+    """This function is responsible for decoding models that use `TemporalLoader` data. The basic logic of this
+    function is as follows. The data to the encoder (e.g. src) is not modified at each step of the decoding process.
+    Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
+    New data is appended
 
     :param model: The PyTorch time series forecasting model for
     :type model: `torch.nn.Module`
@@ -17,8 +20,8 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :type forecast_length: [type]
     :param src_temp: The te
     :type src_temp: [type]
-    :param tar_temp: The target's temporal features
-    :type tar_temp: [type]
+    :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, max_len+diff, n_time_series)
+    :type tar_temp: torch.Tensor
     :param unknown_cols_st: The un
     :type unknown_cols_st: int
     :param decoder_seq_len: [description]
@@ -47,6 +50,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     print(max_len)
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
+    assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
     for i in range(0, max_len, forecast_length):
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
