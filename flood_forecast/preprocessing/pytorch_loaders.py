@@ -340,15 +340,15 @@ class TemporalTestLoader(CSVTestLoader):
             # ]
             historical_rows = self.other_feats.iloc[idx: self.forecast_history + idx]
             targs_idx_start = self.forecast_history + idx
+            temporal_feat = self.temporal_df.iloc[idx: self.forecast_history + idx]
             end_idx = self.forecast_total + target_idx_start
             if self.decoder_step_len:
                 end_idx = self.forecast_total + target_idx_start + self.decoder_step_len
-                temporal_feat = self.other_feats.iloc[idx: end_idx]
                 tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: end_idx]
+                targ_rows = self.other_feats.iloc[targs_idx_start: end_idx]
             else:
-                temporal_feat = self.other_feats.iloc[targs_idx_start: self.forecast_total + end_idx]
                 tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: end_idx]
-            targ_rows = self.other_feats.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+                targ_rows = self.other_feats.iloc[targs_idx_start: end_idx]
             src_data = self.df_to_numpy(historical_rows)
             trg_data = self.df_to_numpy(targ_rows)
             temporal_feat = self.df_to_numpy(temporal_feat)
