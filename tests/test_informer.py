@@ -77,8 +77,9 @@ class TestInformer(unittest.TestCase):
         }
         d = TemporalTestLoader(["month", "day", "day_of_week", "hour"], kwargs3, 18)
         src, trg, _, _ = d[0]
-        self.assertEqual(trg[0].shape[1], 354)
+        self.assertEqual(trg[0].shape[0], 354)
         self.assertEqual(src[0].shape[1], 10)
+        
 
     def test_decodign_t(self):
         src = torch.rand(20, 3)
