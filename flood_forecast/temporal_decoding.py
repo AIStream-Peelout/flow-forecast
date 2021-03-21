@@ -7,7 +7,8 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     """This function is responsible for decoding models that use `TemporalLoader` data. The basic logic of this
     function is as follows. The data to the encoder (e.g. src) is not modified at each step of the decoding process.
     Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
-    New data is appended
+    New data is appended (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 )
+    First 8 shouhl
 
     :param model: The PyTorch time series forecasting model for
     :type model: `torch.nn.Module`
@@ -39,15 +40,6 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         src_temp = src_temp.unsqueeze(0)
         tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg)
-    print("everything")
-    print(src.shape)
-    print(trg.shape)
-    print(src_temp.shape)
-    print(tar_temp.shape)
-    print(forecast_length)
-    print(decoder_seq_len)
-    print(unknown_cols_st)
-    print(max_len)
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
@@ -55,8 +47,12 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
+            print("Shape of tar_temp")
+            print(tar_temp[:, -residual:, :].shape)
             out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
         else:
+            print("Shape of tar_temp")
+            print(tar_temp[:, -residual:, :].shape)
             out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
         print("out shape is ")
         print(out.shape)
