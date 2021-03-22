@@ -15,6 +15,7 @@ from flood_forecast.custom.custom_opt import MASELoss, GaussianLoss
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
+from flood_forecast.temporal_decoding import decoding_function
 
 
 def stream_baseline(
@@ -387,7 +388,10 @@ def generate_predictions(
     :return: [description]
     :rtype: torch.Tensor
     """
-    history_dim = history.unsqueeze(0).to(model.device)
+    if targs:
+        history_dim = history
+    else:
+        history_dim = history.unsqueeze(0).to(model.device)
     print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
@@ -483,27 +487,33 @@ def generate_decoded_predictions(
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             probabilistic = True
-    if targs:
-        pass
-    else:
+
         real_target_tensor = (
             torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
             .to(device)
             .unsqueeze(0)
             .to(model.device)
         )
-        end_tensor = decoding_functions[decoder_params["decoder_function"]](
-            model.model,
-            history_dim,
-            hours_to_forecast,
-            real_target_tensor,
-            decoder_params["unsqueeze_dim"],
-            output_len=model.params["dataset_params"]["forecast_length"],
-            multi_targets=multi_targets,
-            device=model.device,
-            probabilistic=probabilistic,
-            scaler=scaler
-        )
+        if targs:
+            src = history_dim
+            src0 = src[0]
+            trg = targs
+            decoder_seq_len = model.params["model_params"]["label_len"]
+            end_tensor = decoding_function(model.model, src0, trg[1], model.params["dataset_params"]["forecast_length"],
+                                           src[1], trg[0], 1, decoder_seq_len, hours_to_forecast)
+        else:
+            end_tensor = decoding_functions[decoder_params["decoder_function"]](
+                model.model,
+                history_dim,
+                hours_to_forecast,
+                real_target_tensor,
+                decoder_params["unsqueeze_dim"],
+                output_len=model.params["dataset_params"]["forecast_length"],
+                multi_targets=multi_targets,
+                device=model.device,
+                probabilistic=probabilistic,
+                scaler=scaler
+            )
         if probabilistic:
             end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
             return end_tensor_mean, end_tensor[1]
