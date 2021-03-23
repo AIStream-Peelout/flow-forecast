@@ -18,22 +18,22 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :type trg: torch.Tensor
     :param forecast_length: The of length of the forecast the model makes at each forward pass.
     :type forecast_length: [type]
-    :param src_temp: The te
-    :type src_temp: [type]
+    :param src_temp: The temporal features for the forecast_history steps
+    :type src_temp: int
     :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, max_len+diff, n_time_series)
     :type tar_temp: torch.Tensor
     :param unknown_cols_st: The un
     :type unknown_cols_st: int
-    :param decoder_seq_len: [description]
+    :param decoder_seq_len: The length of the sequence passed into the decoder
     :type decoder_seq_len: int
-    :param max_len: [description]
+    :param max_len: The total number of time steps to forecast
     :type max_len: int
-    :return: [description]
-    :rtype: [type]
+    :return: The forecasted values of shape (batch_sizes, max_len, n_targets)
+    :rtype: torch.Tensor
     """
     if len(src.shape) == 2:
         # We assume batch_size is missing in this case
-        # this should be ubiquitous
+        # We add the batch_size dimension back
         src = src.unsqueeze(0)
         trg = trg.unsqueeze(0)
         src_temp = src_temp.unsqueeze(0)
