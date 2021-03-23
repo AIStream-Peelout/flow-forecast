@@ -89,3 +89,6 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
         self.assertEqual(d.shape[1], 336)
+
+    def test_full_(self):
+        pass
