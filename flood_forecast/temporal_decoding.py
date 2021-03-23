@@ -17,7 +17,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :param trg: The target tensor. Should be of dimension (batch_size, hours_to_forecast, n_time_series)
     :type trg: torch.Tensor
     :param forecast_length: The of length of the forecast the model makes at each forward pass.
-    :type forecast_length: [type]
+    :type forecast_length: torch.Tensor
     :param src_temp: The temporal features for the forecast_history steps
     :type src_temp: int
     :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, max_len+diff, n_time_series)
@@ -38,7 +38,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         trg = trg.unsqueeze(0)
         src_temp = src_temp.unsqueeze(0)
         tar_temp = tar_temp.unsqueeze(0)
-    out1 = torch.zeros_like(trg)
+    out1 = torch.zeros_like(trg[:, :max_len, :])
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
     # Useless variable to avoid long line error

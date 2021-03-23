@@ -92,7 +92,7 @@ class TestInformer(unittest.TestCase):
 
     def test_decoding_2(self):
         src = torch.rand(20, 3)
-        trg = torch.rand(336, 3)
+        trg = torch.rand(354, 3)
         src1 = torch.rand(20, 4)
         trg1 = torch.rand(354, 4)
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336)
