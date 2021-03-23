@@ -231,9 +231,8 @@ def infer_on_torch_model(
             "kwargs": dataset_params
         }
         test_idx = None
-        # Remove label len for now
-        # if "label_len" in model.params["model_params"]:
-        # test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
+        if "label_len" in model.params["model_params"]:
+            test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     else:
         csv_test_loader = CSVTestLoader(
