@@ -7,8 +7,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     """This function is responsible for decoding models that use `TemporalLoader` data. The basic logic of this
     function is as follows. The data to the encoder (e.g. src) is not modified at each step of the decoding process.
     Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
-    New data is appended (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 )
-    First 8 shouhl
+    New data is appended (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 First 8 should
 
     :param model: The PyTorch time series forecasting model for
     :type model: `torch.nn.Module`
@@ -42,12 +41,15 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     out1 = torch.zeros_like(trg)
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
+    # Useless variable to avoid long line error
+    d = decoder_seq_len
+    assert filled_target.any()[:, -forecast_length:, :] != trg[:, d - forecast_length:decoder_seq_len].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
     for i in range(0, max_len, forecast_length):
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
-            print("Shape of tar_temp")
+            print("Shape of tar_temp resid")
             print(tar_temp[:, -residual:, :].shape)
             out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
         else:
@@ -66,4 +68,6 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         filled_target = torch.cat((filled_target, filled_target1), dim=1)
         print("Out shape below")
         print(filled_target.shape)
+        assert out1[0, 0, 0] != 0
+        assert out1[0, 0, 0] != 0
     return out1
