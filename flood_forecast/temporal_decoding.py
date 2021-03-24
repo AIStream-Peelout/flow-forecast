@@ -22,7 +22,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :type src_temp: int
     :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, max_len+diff, n_time_series)
     :type tar_temp: torch.Tensor
-    :param unknown_cols_st: The un
+    :param unknown_cols_st: The unknown columns
     :type unknown_cols_st: int
     :param decoder_seq_len: The length of the sequence passed into the decoder
     :type decoder_seq_len: int
@@ -41,7 +41,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     out1 = torch.zeros_like(trg[:, :max_len, :])
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
-    # Useless variable to avoid long line error
+    # Useless variable to avoid long line error..
     d = decoder_seq_len
     assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
