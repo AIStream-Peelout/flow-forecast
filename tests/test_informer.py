@@ -86,7 +86,7 @@ class TestInformer(unittest.TestCase):
         trg = torch.rand(336, 3)
         src1 = torch.rand(20, 4)
         trg1 = torch.rand(336, 4)
-        d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336)
+        d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
 
@@ -95,6 +95,6 @@ class TestInformer(unittest.TestCase):
         trg = torch.rand(354, 3)
         src1 = torch.rand(20, 4)
         trg1 = torch.rand(354, 4)
-        d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336)
+        d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
