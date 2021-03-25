@@ -3,7 +3,7 @@ import torch
 
 
 def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_length: int, src_temp: torch.Tensor,
-                      tar_temp: torch.Tensor, unknown_cols_st: int, decoder_seq_len: int, max_len: int):
+                      tar_temp: torch.Tensor, unknown_cols_st: int, decoder_seq_len: int, max_len: int, device: str):
     """This function is responsible for decoding models that use `TemporalLoader` data. The basic logic of this
     function is as follows. The data to the encoder (e.g. src) is not modified at each step of the decoding process.
     Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
@@ -40,7 +40,9 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg[:, :max_len, :])
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
-    filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :])
+    src = src.to(device)
+    trg = trg.to(device)
+    filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :]).to(device)
     # Useless variable to avoid long line error..
     d = decoder_seq_len
     assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
