@@ -232,6 +232,7 @@ def infer_on_torch_model(
         }
         test_idx = None
         if "label_len" in model.params["model_params"]:
+            # Fixes label len issue
             test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     else:
@@ -332,7 +333,6 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
             df_pred.iloc[history_length:] = prediction_samples
             df_prediction_arr.append(df_pred)
         else:
-            print(prediction_samples.shape)
             for i in range(0, num_samples):
                 tra = prediction_samples[:, :, 0, i]
                 prediction_samples[:, :, 0, i] = csv_test_loader.inverse_scale(tra.transpose(1, 0)).transpose(1, 0)

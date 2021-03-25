@@ -7,7 +7,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     """This function is responsible for decoding models that use `TemporalLoader` data. The basic logic of this
     function is as follows. The data to the encoder (e.g. src) is not modified at each step of the decoding process.
     Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
-    New data is appended (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 First 8 should
+    New data is appended in the form (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 First 8 should
 
     :param model: The PyTorch time series forecasting model for
     :type model: `torch.nn.Module`
@@ -42,6 +42,8 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     filled_target = trg.clone()[:, 0:decoder_seq_len, :]
     src = src.to(device)
     trg = trg.to(device)
+    src_temp = src_temp.to(device)
+    tar_temp = tar_temp.to(device)
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :]).to(device)
     # Useless variable to avoid long line error..
     d = decoder_seq_len
