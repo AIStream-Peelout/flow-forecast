@@ -432,7 +432,7 @@ def compute_validation(validation_loader: DataLoader,
                     filled_targ = targ[1].clone()
                     pred_len = model.pred_len
                     filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float().to(device)
-                    output = model(src[0], src[1], filled_targ, targ[0])
+                    output = model(src[0].to(device), src[1].to(device), filled_targ, targ[0].to(device))
                     labels = targ[1][:, -pred_len:, 0:multi_targets]
                     src = src[0]
                     multi_targets = False
