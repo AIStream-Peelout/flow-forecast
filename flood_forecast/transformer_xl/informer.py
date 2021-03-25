@@ -36,7 +36,7 @@ class Informer(nn.Module):
         :type e_layers: int, optional
         :param d_layers: The number of layers in the decoder, defaults to 2
         :type d_layers: int, optional
-        :param d_ff: [description], defaults to 512
+        :param d_ff: The dimension of the forward pass, defaults to 512
         :type d_ff: int, optional
         :param dropout: [description], defaults to 0.0
         :type dropout: float, optional
