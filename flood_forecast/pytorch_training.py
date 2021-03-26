@@ -435,6 +435,8 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src[0].to(device), src[1].to(device), filled_targ.to(device), targ[0].to(device))
                     labels = targ[1][:, -pred_len:, 0:multi_targets]
                     src = src[0]
+                    assert output.shape[1] != 0
+                    assert labels.shape[1] != 0
                     multi_targets = False
                 else:
                     output = simple_decode(model=model,
