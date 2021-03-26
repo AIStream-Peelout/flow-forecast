@@ -230,7 +230,10 @@ def infer_on_torch_model(
             "forecast_total": hours_to_forecast,
             "kwargs": dataset_params
         }
-        csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict)
+        test_idx = None
+        if "label_len" in model.params["model_params"]:
+            test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
+        csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -367,11 +370,11 @@ def generate_predictions(
 
     :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
-    :param df: The main dataframe [descriptison]
+    :param df: The main dataframe
     :type df: pd.DataFrame
-    :param test_data: [description]
+    :param test_data: The test data loader
     :type test_data: CSVTestLoader
-    :param history: [description]
+    :param history: The forecast historical data
     :type history: torch.Tensor
     :param device: [description]
     :type device: torch.device
@@ -500,7 +503,7 @@ def generate_decoded_predictions(
             trg = targs
             decoder_seq_len = model.params["model_params"]["label_len"]
             end_tensor = decoding_function(model.model, src0, trg[1], model.params["dataset_params"]["forecast_length"],
-                                           src[1], trg[0], 1, decoder_seq_len, hours_to_forecast)
+                                           src[1], trg[0], 1, decoder_seq_len, hours_to_forecast, device)
         else:
             end_tensor = decoding_functions[decoder_params["decoder_function"]](
                 model.model,
