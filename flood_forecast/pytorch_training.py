@@ -236,7 +236,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :type probabilistic: [type], optional
     :param output_std: The standard distribution, defaults to None
     :type output_std: [type], optional
-    :param m: [description], defaults to 1
+    :param m: The number of targs defaults to 1
     :type m: int, optional
     :return: Returns the computed loss
     :rtype: float
@@ -431,11 +431,9 @@ def compute_validation(validation_loader: DataLoader,
                     multi_targets = multi_targs1
                     filled_targ = targ[1].clone()
                     pred_len = model.pred_len
-                    filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float()
-                    print("The shape is below")
-                    output = model(src[0], src[1], filled_targ, targ[0])
+                    filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float().to(device)
+                    output = model(src[0].to(device), src[1].to(device), filled_targ.to(device), targ[0].to(device))
                     labels = targ[1][:, -pred_len:, 0:multi_targets]
-                    print(labels.shape)
                     src = src[0]
                     multi_targets = False
                 else:

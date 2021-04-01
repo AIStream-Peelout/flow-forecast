@@ -76,16 +76,25 @@ class TestInformer(unittest.TestCase):
             "kwargs": kwargs2
         }
         d = TemporalTestLoader(["month", "day", "day_of_week", "hour"], kwargs3, 18)
-        src, trg, _, _ = d[0]
+        src, trg, df, _ = d[0]
         self.assertEqual(trg[0].shape[0], 354)
         self.assertEqual(src[0].shape[0], 5)
+        self.assertEqual(len(df.index), 341)
 
     def test_decodign_t(self):
         src = torch.rand(20, 3)
         trg = torch.rand(336, 3)
         src1 = torch.rand(20, 4)
         trg1 = torch.rand(336, 4)
-        d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336)
+        d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
+
+    def test_decoding_2(self):
+        src = torch.rand(20, 3)
+        trg = torch.rand(354, 3)
+        src1 = torch.rand(20, 4)
+        trg1 = torch.rand(354, 4)
+        d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
+        self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
