@@ -203,6 +203,9 @@ def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probab
             pass
         output_dist = torch.distributions.Normal(unscaled_out, output_std)
     elif m > 1:
+        print("Shapes below")
+        print(output.shape)
+        print(labels.shape)
         output = validation_dataset.inverse_scale(output.cpu())
         labels = validation_dataset.inverse_scale(labels.cpu())
     elif len(output.shape) == 3:
