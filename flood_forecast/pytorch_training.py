@@ -465,7 +465,9 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
-            if multi_targets == 1:
+            if type(model).__name__ == "Informer":
+                pass
+            elif multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:
                 labels = targ[:, :, 0:multi_targets]
