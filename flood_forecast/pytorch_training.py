@@ -266,11 +266,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             output = torch.from_numpy(output)
         output_dist = torch.distributions.Normal(output, output_std)
     if validation_dataset:
-        print("Values are ")
-        print(m)
-        print(src.shape)
-        print(labels.shape)
-        print(output.shape)
         src, output, labels, output_dist = handle_scaling(validation_dataset, src, output, labels,
                                                           probabilistic, m, output_std)
     if probabilistic:

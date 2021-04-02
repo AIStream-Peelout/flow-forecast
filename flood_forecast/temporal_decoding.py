@@ -46,6 +46,8 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :]).to(device)
     # Useless variable to avoid long line error..
     d = decoder_seq_len
+    print("Filled target below")
+    print(filled_target)
     assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
     for i in range(0, max_len, forecast_length):
