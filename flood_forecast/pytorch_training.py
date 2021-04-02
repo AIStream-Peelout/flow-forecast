@@ -441,7 +441,7 @@ def compute_validation(validation_loader: DataLoader,
                     pred_len = model.pred_len
                     filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float().to(device)
                     output = model(src[0].to(device), src[1].to(device), filled_targ.to(device), targ[0].to(device))
-                    labels = targ[1][:, -pred_len:, 0:multi_targets]
+                    labels = targ[1][:, -pred_len:, 0:multi_targets].to(device)
                     src = src[0]
                     assert output.shape[1] != 0
                     assert labels.shape[1] != 0
