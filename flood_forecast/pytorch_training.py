@@ -445,7 +445,6 @@ def compute_validation(validation_loader: DataLoader,
                     src = src[0]
                     assert output.shape[1] != 0
                     assert labels.shape[1] != 0
-                    multi_targets = False
                 else:
                     output = simple_decode(model=model,
                                            src=src,
