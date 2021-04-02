@@ -203,9 +203,6 @@ def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probab
             pass
         output_dist = torch.distributions.Normal(unscaled_out, output_std)
     elif m > 1:
-        print("Shapes below")
-        print(output.shape)
-        print(labels.shape)
         output = validation_dataset.inverse_scale(output.cpu())
         labels = validation_dataset.inverse_scale(labels.cpu())
     elif len(output.shape) == 3:
@@ -239,7 +236,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :type probabilistic: [type], optional
     :param output_std: The standard distribution, defaults to None
     :type output_std: [type], optional
-    :param m: The number of targs defaults to 1
+    :param m: The number of targets defaults to 1
     :type m: int, optional
     :return: Returns the computed loss
     :rtype: float
