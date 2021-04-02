@@ -39,7 +39,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         src_temp = src_temp.unsqueeze(0)
         tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg[:, :max_len, :])
-    filled_target = trg.clone()[:, 0:decoder_seq_len, :]
+    filled_target = trg.clone()[:, 0:decoder_seq_len, :].to(device)
     src = src.to(device)
     trg = trg.to(device)
     # src_temp = src_temp.to(device)
