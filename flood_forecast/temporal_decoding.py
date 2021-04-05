@@ -42,7 +42,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     filled_target = trg.clone()[:, 0:decoder_seq_len, :].to(device)
     src = src.to(device)
     trg = trg.to(device)
-    # src_temp = src_temp.to(device)
+    src_temp = src_temp.to(device)
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :]).to(device)
     # Useless variable to avoid long line error..
     d = decoder_seq_len
@@ -51,21 +51,15 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     print(trg[:, d - forecast_length:decoder_seq_len, :].shape)
     # assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
+    assert filled_target[0, -1, 0] != trg[0, -1, 0]
     for i in range(0, max_len, forecast_length):
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
-            print("Shape of tar_temp resid")
-            print(tar_temp[:, -residual:, :].shape)
             out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
         else:
-            print("Shape of tar_temp")
-            print(tar_temp[:, -residual:, :].shape)
             out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
-        print("out shape is ")
-        print(out.shape)
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
-        print("residual1 is")
         out1[:, i: i + residual1, :] = out[:, -residual1:, :]
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
         print(filled_target1.shape[1])
