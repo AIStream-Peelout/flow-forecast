@@ -49,6 +49,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     print("Filled target below")
     print(filled_target[:, -forecast_length:, :].shape)
     print(trg[:, d - forecast_length:decoder_seq_len, :].shape)
+    filled_target = filled_target.to(device)
     # assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
     assert filled_target[0, -1, 0] != trg[0, -1, 0]
