@@ -413,6 +413,7 @@ def compute_validation(validation_loader: DataLoader,
         for src, targ in validation_loader:
             src = src if isinstance(src, list) else src.to(device)
             targ = targ if isinstance(targ, list) else targ.to(device)
+            # targ = targ if isinstance(targ, list) else targ.to(device)
             i += 1
             if decoder_structure:
                 if type(model).__name__ == "SimpleTransformer":
@@ -446,9 +447,7 @@ def compute_validation(validation_loader: DataLoader,
                                            probabilistic=probabilistic,
                                            scaler=scaler)
                     if probabilistic:
-                        # Output returns a tuple (mean and std)
                         output, output_std = output[0], output[1]
-                        # Warning this will only work for forecasting single target
                         output, output_std = output[:, :, 0], output_std[0]
                         output_dist = torch.distributions.Normal(output, output_std)
             else:
