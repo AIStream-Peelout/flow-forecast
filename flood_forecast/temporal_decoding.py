@@ -73,4 +73,4 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         print(filled_target.shape)
         assert out1[0, 0, 0] != 0
         assert out1[0, 0, 0] != 0
-    return out1
+    return out1[:, :, :n_target]
