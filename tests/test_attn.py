@@ -18,7 +18,7 @@ class TestAttention(unittest.TestCase):
         self.assertIsInstance(r, torch.Tensor)
 
     def test_full_attn(self):
-        # Tests the full attention mechanism
+        # Tests the full attention mechanism and
         t = torch.rand(2, 20, 8, 30)
         a = self.full_attention(torch.rand(2, 20, 8, 30), t, t, self.triangle)
         self.assertIsInstance(a, torch.Tensor)

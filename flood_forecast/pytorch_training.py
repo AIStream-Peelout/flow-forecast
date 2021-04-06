@@ -236,7 +236,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :type probabilistic: [type], optional
     :param output_std: The standard distribution, defaults to None
     :type output_std: [type], optional
-    :param m: The number of targs defaults to 1
+    :param m: The number of targets defaults to 1
     :type m: int, optional
     :return: Returns the computed loss
     :rtype: float
@@ -433,9 +433,10 @@ def compute_validation(validation_loader: DataLoader,
                     pred_len = model.pred_len
                     filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float().to(device)
                     output = model(src[0].to(device), src[1].to(device), filled_targ.to(device), targ[0].to(device))
-                    labels = targ[1][:, -pred_len:, 0:multi_targets]
+                    labels = targ[1][:, -pred_len:, 0:multi_targets].to(device)
                     src = src[0]
-                    multi_targets = False
+                    assert output.shape[1] != 0
+                    assert labels.shape[1] != 0
                 else:
                     output = simple_decode(model=model,
                                            src=src,
@@ -456,7 +457,9 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
-            if multi_targets == 1:
+            if type(model).__name__ == "Informer":
+                pass
+            elif multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:
                 labels = targ[:, :, 0:multi_targets]

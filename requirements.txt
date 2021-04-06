@@ -7,7 +7,6 @@ seaborn
 future
 h5py
 wandb
-pandas_gbq
 google-cloud
 google-cloud-storage
 pyyaml

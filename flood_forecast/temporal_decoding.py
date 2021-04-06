@@ -31,6 +31,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :return: The forecasted values of shape (batch_sizes, max_len, n_targets)
     :rtype: torch.Tensor
     """
+    n_target = model.c_out
     if len(src.shape) == 2:
         # We assume batch_size is missing in this case
         # We add the batch_size dimension back
@@ -39,31 +40,30 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         src_temp = src_temp.unsqueeze(0)
         tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg[:, :max_len, :])
-    filled_target = trg.clone()[:, 0:decoder_seq_len, :]
+    filled_target = trg.clone()[:, 0:decoder_seq_len, :].to(device)
     src = src.to(device)
     trg = trg.to(device)
-    # src_temp = src_temp.to(device)
+    src_temp = src_temp.to(device)
+    tar_temp = tar_temp.to(device)
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :]).to(device)
     # Useless variable to avoid long line error..
     d = decoder_seq_len
-    assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
+    print("Filled target below")
+    print(filled_target[:, -forecast_length:, :].shape)
+    print(trg[:, d - forecast_length:decoder_seq_len, :].shape)
+    filled_target = filled_target.to(device)
+    # assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
+    assert filled_target[0, -1, 0] != trg[0, -1, 0]
     for i in range(0, max_len, forecast_length):
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
-            print("Shape of tar_temp resid")
-            print(tar_temp[:, -residual:, :].shape)
             out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
         else:
-            print("Shape of tar_temp")
-            print(tar_temp[:, -residual:, :].shape)
             out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
-        print("out shape is ")
-        print(out.shape)
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
-        print("residual1 is")
-        out1[:, i: i + residual1, :] = out[:, -residual1:, :]
+        out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
         print(filled_target1.shape[1])
         assert filled_target1.shape[1] == forecast_length * 2
