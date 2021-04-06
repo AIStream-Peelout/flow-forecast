@@ -540,7 +540,8 @@ def generate_prediction_samples(
     hours_to_forecast: int,
     decoder_params: Dict,
     num_prediction_samples: int,
-    multi_params=1
+    multi_params=1,
+    targs=False
 ) -> np.ndarray:
     pred_samples = []
     std_dev_samples = []
@@ -560,7 +561,8 @@ def generate_prediction_samples(
             forecast_length,
             hours_to_forecast,
             decoder_params,
-            multi_params=multi_params
+            multi_params=multi_params,
+            targs=targs
         )
 
         if probabilistic:
