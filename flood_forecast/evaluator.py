@@ -298,7 +298,8 @@ def infer_on_torch_model(
             hours_to_forecast,
             decoder_params,
             num_prediction_samples,
-            multi_params=multi_params
+            multi_params=multi_params,
+            targs=targ
         )
         df_prediction_samples = pd.DataFrame(
             index=df_train_and_test.index,
