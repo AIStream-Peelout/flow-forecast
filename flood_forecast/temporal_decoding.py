@@ -59,11 +59,11 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
-            out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :n_target])
+            out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
         else:
-            out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :n_target])
+            out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
-        out1[:, i: i + residual1, :] = out[:, -residual1:, :]
+        out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
         print(filled_target1.shape[1])
         assert filled_target1.shape[1] == forecast_length * 2
