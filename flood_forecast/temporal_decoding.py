@@ -69,8 +69,6 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         assert filled_target1.shape[1] == forecast_length * 2
         filled_target1[:, -forecast_length * 2:-forecast_length, :n_target] = out[:, -forecast_length:, :]
         filled_target = torch.cat((filled_target, filled_target1), dim=1)
-        print("Out shape below")
-        print(filled_target.shape)
         assert out1[0, 0, 0] != 0
         assert out1[0, 0, 0] != 0
     return out1[:, :, :n_target]
