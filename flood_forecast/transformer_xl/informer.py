@@ -55,7 +55,7 @@ class Informer(nn.Module):
         self.pred_len = out_len
         self.label_len = label_len
         self.attn = attn
-
+        self.c_out = c_out
         # Encoding
         self.enc_embedding = DataEmbedding(n_time_series, d_model, embed, temp_depth, dropout)
         self.dec_embedding = DataEmbedding(dec_in, d_model, embed, temp_depth, dropout)

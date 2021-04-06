@@ -31,6 +31,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :return: The forecasted values of shape (batch_sizes, max_len, n_targets)
     :rtype: torch.Tensor
     """
+    n_target = model.c_out
     if len(src.shape) == 2:
         # We assume batch_size is missing in this case
         # We add the batch_size dimension back
@@ -58,9 +59,9 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
-            out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
+            out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :n_target])
         else:
-            out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
+            out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :n_target])
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
         out1[:, i: i + residual1, :] = out[:, -residual1:, :]
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
