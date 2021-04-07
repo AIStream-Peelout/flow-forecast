@@ -298,7 +298,8 @@ def infer_on_torch_model(
             hours_to_forecast,
             decoder_params,
             num_prediction_samples,
-            multi_params=multi_params
+            multi_params=multi_params,
+            targs=targ
         )
         df_prediction_samples = pd.DataFrame(
             index=df_train_and_test.index,
@@ -539,7 +540,8 @@ def generate_prediction_samples(
     hours_to_forecast: int,
     decoder_params: Dict,
     num_prediction_samples: int,
-    multi_params=1
+    multi_params=1,
+    targs=False
 ) -> np.ndarray:
     pred_samples = []
     std_dev_samples = []
@@ -559,7 +561,8 @@ def generate_prediction_samples(
             forecast_length,
             hours_to_forecast,
             decoder_params,
-            multi_params=multi_params
+            multi_params=multi_params,
+            targs=targs
         )
 
         if probabilistic:
