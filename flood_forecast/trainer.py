@@ -61,7 +61,8 @@ def train_function(model_type: str, params: Dict):
             params["metrics"],
             params["inference_params"],
             {})
-        wandb.run.summary["test_accuracy"] = test_acc[0]
+        if wandb.run is not None:
+            wandb.run.summary["test_accuracy"] = test_acc[0]
         df_train_and_test = test_acc[1]
         forecast_start_idx = test_acc[2]
         df_prediction_samples = test_acc[3]
