@@ -4,8 +4,16 @@ import numpy as np
 
 
 def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Function to create features
+    """[summary]
+
+    :param features_list: [description]
+    :type features_list: Dict
+    :param dt_column: [description]
+    :type dt_column: str
+    :param df: [description]
+    :type df: pd.DataFrame
+    :return: [description]
+    :rtype: pd.DataFrame
     """
     df[dt_column] = df[dt_column].to_datetime()
     for key, value in features_list.items():
