@@ -28,7 +28,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :type decoder_seq_len: int
     :param max_len: The total number of time steps to forecast
     :type max_len: int
-    :return: The forecasted values of shape (batch_sizes, max_len, n_targets)
+    :return: The forecasted values of shape (batch_size, max_len, n_targets)
     :rtype: torch.Tensor
     """
     n_target = model.c_out
@@ -45,7 +45,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     trg = trg.to(device)
     src_temp = src_temp.to(device)
     tar_temp = tar_temp.to(device)
-    filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :]).to(device)
+    filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :n_target]).to(device)
     # Useless variable to avoid long line error..
     d = decoder_seq_len
     print("Filled target below")
@@ -65,9 +65,11 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
         out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
-        assert filled_target1.shape[1] == forecast_length * 2
-        filled_target1[:, -forecast_length * 2:-forecast_length, :n_target] = out[:, -forecast_length:, :]
-        filled_target = torch.cat((filled_target, filled_target1), dim=1)
+        print("Forecast length * 2 " + str(forecast_length))
+        print(filled_target1.shape)
+        if filled_target1.shape[1] == forecast_length * 2:
+            filled_target1[:, -forecast_length * 2:-forecast_length, :n_target] = out[:, -forecast_length:, :]
+            filled_target = torch.cat((filled_target, filled_target1), dim=1)
         assert out1[0, 0, 0] != 0
         assert out1[0, 0, 0] != 0
     return out1[:, :, :n_target]

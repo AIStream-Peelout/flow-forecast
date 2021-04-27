@@ -41,6 +41,8 @@ def train_function(model_type: str, params: Dict):
         takes_target = False
         if "takes_target" in trained_model.params:
             takes_target = trained_model.params["takes_target"]
+        if "dataset_params" not in trained_model.params["inference_params"]:
+            trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"]
         train_transformer_style(model=trained_model,
                                 training_params=params["training_params"],
                                 takes_target=takes_target,
