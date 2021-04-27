@@ -4,9 +4,9 @@ import numpy as np
 
 
 def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame) -> pd.DataFrame:
-    """[summary]
+    """A function that creates temporal features
 
-    :param features_list: [description]
+    :param features_list: d
     :type features_list: Dict
     :param dt_column: [description]
     :type dt_column: str
