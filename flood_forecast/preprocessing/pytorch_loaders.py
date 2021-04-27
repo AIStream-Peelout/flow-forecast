@@ -54,6 +54,7 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
+        self.series_col = id_series_col
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
