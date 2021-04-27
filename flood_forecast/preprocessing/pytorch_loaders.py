@@ -25,6 +25,7 @@ class CSVDataLoader(Dataset):
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
+        id_series_col=None,
         no_scale=False
 
     ):
