@@ -337,7 +337,6 @@ class TemporalTestLoader(CSVTestLoader):
             # Why aren't we using these
             # targ_rows = self.df.iloc[
             #     target_idx_start : self.forecast_total + target_idx_start
-            # ]
             historical_rows = self.other_feats.iloc[idx: self.forecast_history + idx]
             targs_idx_start = self.forecast_history + idx
             temporal_feat = self.temporal_df.iloc[idx: self.forecast_history + idx]
