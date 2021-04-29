@@ -1,3 +1,4 @@
+# flake8: noqa
 import argparse
 from typing import Dict
 import json
