@@ -1,4 +1,4 @@
-shap~=0.39.0
+shap~=0.35.0
 scikit-learn>=0.23.0
 pandas
 torch
@@ -6,7 +6,7 @@ tb-nightly
 seaborn
 future
 h5py
-wandb~=0.10.27
+wandb
 google-cloud
 google-cloud-storage
 pyyaml
