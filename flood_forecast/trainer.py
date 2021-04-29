@@ -32,6 +32,7 @@ def train_function(model_type: str, params: Dict):
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
     elif model_type == "PyTorch":
+        dataset_params["batch_size"] = params["training_params"]["batch_size"]
         trained_model = PyTorchForecast(
             params["model_name"],
             dataset_params["training_path"],
