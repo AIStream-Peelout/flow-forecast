@@ -6,7 +6,7 @@ tb-nightly
 seaborn
 future
 h5py
-wandb
+wandb~=0.10.27
 google-cloud
 google-cloud-storage
 pyyaml
