@@ -84,8 +84,8 @@ def evaluate_model(
     .. code-block:: python
 
         from flood_forecast.evaluator import evaluate_model
-        forecast_model = PyTorchForecast()
-        evaluate_model(forecast_model, d, "cfs", )
+        forecast_model = PyTorchForecast(config_file)
+        evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
         ...
     '''
     """
@@ -221,6 +221,7 @@ def infer_on_torch_model(
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
+    #
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
@@ -322,6 +323,27 @@ def infer_on_torch_model(
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
+    """[summary]
+
+    :param prediction_samples: [description]
+    :type prediction_samples: torch.Tensor
+    :param csv_test_loader: [description]
+    :type csv_test_loader: CSVTestLoader
+    :param multi_params: [description]
+    :type multi_params: int
+    :param df_pred: [description]
+    :type df_pred: [type]
+    :param decoder_param: [description]
+    :type decoder_param: bool
+    :param history_length: [description]
+    :type history_length: int
+    :param num_samples: [description]
+    :type num_samples: int
+    :raises ValueError: [description]
+    :raises ValueError: [description]
+    :return: [description]
+    :rtype: List[pd.DataFrame]
+    """
     df_prediction_arr = []
     if decoder_param is not None:
         if "probabilistic" in decoder_param:
@@ -371,25 +393,25 @@ def generate_predictions(
 
     :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
-    :param df: The main dataframe
+    :param df: The main dataframe containing data
     :type df: pd.DataFrame
     :param test_data: The test data loader
     :type test_data: CSVTestLoader
     :param history: The forecast historical data
     :type history: torch.Tensor
-    :param device: [description]
+    :param device: The device usually cpu or cuda
     :type device: torch.device
-    :param forecast_start_idx: [description]
+    :param forecast_start_idx: The index you want the forecast to begin
     :type forecast_start_idx: int
-    :param forecast_length: [description]
+    :param forecast_length: The length of the forecast the model outputs per time step
     :type forecast_length: int
-    :param hours_to_forecast: [description]
+    :param hours_to_forecast: The number of time_steps to forecast in future
     :type hours_to_forecast: int
-    :param decoder_params: [description]
+    :param decoder_params: The parameters the decoder function takes.
     :type decoder_params: Dict
-    :param multi_params: [description], defaults to 1
+    :param multi_params: n_targets, defaults to 1
     :type multi_params: int, optional
-    :return: [description]
+    :return: The forecasted tensor
     :rtype: torch.Tensor
     """
     if targs:
@@ -430,6 +452,23 @@ def generate_predictions_non_decoded(
     forecast_length: int,
     hours_to_forecast: int,
 ) -> torch.Tensor:
+    """Generates predictions for the models that do not use a decoder
+
+    :param model: [description]
+    :type model: Type[TimeSeriesModel]
+    :param df: [description]
+    :type df: pd.DataFrame
+    :param test_data: [description]
+    :type test_data: CSVTestLoader
+    :param history_dim: [description]
+    :type history_dim: torch.Tensor
+    :param forecast_length: [description]
+    :type forecast_length: int
+    :param hours_to_forecast: [description]
+    :type hours_to_forecast: int
+    :return: [description]
+    :rtype: torch.Tensor
+    """
     full_history = [history_dim]
     all_tensor = []
     if test_data.use_real_precip:
@@ -543,6 +582,9 @@ def generate_prediction_samples(
     multi_params=1,
     targs=False
 ) -> np.ndarray:
+    """
+    ss
+    """
     pred_samples = []
     std_dev_samples = []
     probabilistic = False

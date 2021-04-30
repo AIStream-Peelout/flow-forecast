@@ -1,3 +1,4 @@
+# flake8: noqa
 import argparse
 from typing import Dict
 import json
@@ -32,6 +33,7 @@ def train_function(model_type: str, params: Dict):
         # All train functions return trained_model
         trained_model = train(model, preprocessed_data, config)
     elif model_type == "PyTorch":
+        dataset_params["batch_size"] = params["training_params"]["batch_size"]
         trained_model = PyTorchForecast(
             params["model_name"],
             dataset_params["training_path"],
@@ -42,7 +44,18 @@ def train_function(model_type: str, params: Dict):
         if "takes_target" in trained_model.params:
             takes_target = trained_model.params["takes_target"]
         if "dataset_params" not in trained_model.params["inference_params"]:
-            trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"]
+            print("Using generic dataset params")
+            trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"].copy()
+            del trained_model.params["inference_params"]["dataset_params"]["class"]
+            # noqa: F501
+            trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
+            trained_model.params["inference_params"]["dataset_params"]["scaling"] = trained_model.params["inference_params"]["dataset_params"].pop("scaler")
+            trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
+            delete_params = ["num_workers", "pin_memory", "train_start", "train_end", "valid_start", "valid_end", "test_start", "test_end",
+                            "training_path", "validation_path", "test_path", "batch_size"]
+            for param in delete_params:
+                if param in trained_model.params["inference_params"]["dataset_params"]:
+                    del trained_model.params["inference_params"]["dataset_params"][param]
         train_transformer_style(model=trained_model,
                                 training_params=params["training_params"],
                                 takes_target=takes_target,

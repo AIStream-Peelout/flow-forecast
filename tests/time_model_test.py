@@ -13,7 +13,7 @@ class TimeSeriesModelTest(unittest.TestCase):
             "model_params": {
                 "number_time_series": 3},
             "inference_params": {
-                "hours_to_forecast": 15},
+                "hours_to_forecast": 16},
             "dataset_params": {
                 "forecast_history": 20,
                 "class": "default",

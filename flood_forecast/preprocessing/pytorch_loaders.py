@@ -25,6 +25,7 @@ class CSVDataLoader(Dataset):
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
+        id_series_col=None,
         no_scale=False
 
     ):
@@ -53,6 +54,7 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
+        self.series_col = id_series_col
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
@@ -164,6 +166,8 @@ class CSVTestLoader(CSVDataLoader):
         :param str df_path:
         A data loader for the test data.
         """
+        if "file_path" not in kwargs:
+            kwargs["file_path"] = df_path
         super().__init__(**kwargs)
         df_path = get_data(df_path)
         self.original_df = pd.read_csv(df_path)
@@ -178,7 +182,8 @@ class CSVTestLoader(CSVDataLoader):
         self.use_real_precip = use_real_precip
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
-        self.original_df["datetime"] = self.original_df["datetime"].astype(
+        sort_col1 = sort_column_clone if sort_column_clone else "datetime"
+        self.original_df[sort_col1] = self.original_df["datetime"].astype(
             "datetime64[ns]"
         )
         self.original_df["original_index"] = self.original_df.index
@@ -289,6 +294,13 @@ class TemporalLoader(CSVDataLoader):
             self,
             time_feats: List[str],
             kwargs):
+        """[summary]
+
+        :param time_feats: [description]
+        :type time_feats: List[str]
+        :param kwargs: [description]
+        :type kwargs: [type]
+        """
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
@@ -320,6 +332,15 @@ class TemporalLoader(CSVDataLoader):
 
 class TemporalTestLoader(CSVTestLoader):
     def __init__(self, time_feats, kwargs={}, decoder_step_len=None):
+        """[summary]
+
+        :param time_feats: [description]
+        :type time_feats: [type]
+        :param kwargs: [description], defaults to {}
+        :type kwargs: dict, optional
+        :param decoder_step_len: [description], defaults to None
+        :type decoder_step_len: [type], optional
+        """
         super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs["kwargs"])
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
@@ -337,7 +358,6 @@ class TemporalTestLoader(CSVTestLoader):
             # Why aren't we using these
             # targ_rows = self.df.iloc[
             #     target_idx_start : self.forecast_total + target_idx_start
-            # ]
             historical_rows = self.other_feats.iloc[idx: self.forecast_history + idx]
             targs_idx_start = self.forecast_history + idx
             temporal_feat = self.temporal_df.iloc[idx: self.forecast_history + idx]
