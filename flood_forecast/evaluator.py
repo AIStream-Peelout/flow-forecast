@@ -583,6 +583,7 @@ def generate_prediction_samples(
     targs=False
 ) -> np.ndarray:
     """
+    ss
     """
     pred_samples = []
     std_dev_samples = []
