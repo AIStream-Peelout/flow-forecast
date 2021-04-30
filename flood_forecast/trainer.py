@@ -45,10 +45,10 @@ def train_function(model_type: str, params: Dict):
             takes_target = trained_model.params["takes_target"]
         if "dataset_params" not in trained_model.params["inference_params"]:
             print("Using generic dataset params")
-            trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"]
+            trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"].copy()
             del trained_model.params["inference_params"]["dataset_params"]["class"]
             # noqa: F501
-            trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["dataset_params"].pop("interpolate")
+            trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
         train_transformer_style(model=trained_model,
                                 training_params=params["training_params"],
                                 takes_target=takes_target,

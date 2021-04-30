@@ -393,15 +393,15 @@ def generate_predictions(
 
     :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
-    :param df: The main dataframe
+    :param df: The main dataframe containing data
     :type df: pd.DataFrame
     :param test_data: The test data loader
     :type test_data: CSVTestLoader
     :param history: The forecast historical data
     :type history: torch.Tensor
-    :param device: [description]
+    :param device: The device usually cpu or cuda
     :type device: torch.device
-    :param forecast_start_idx: [description]
+    :param forecast_start_idx: The index you want the forecast to begin
     :type forecast_start_idx: int
     :param forecast_length: [description]
     :type forecast_length: int
@@ -565,6 +565,8 @@ def generate_prediction_samples(
     multi_params=1,
     targs=False
 ) -> np.ndarray:
+    """
+    """
     pred_samples = []
     std_dev_samples = []
     probabilistic = False
