@@ -15,7 +15,7 @@ dev_requirements = [
 
 setup(
     name='flood_forecast',
-    version='0.955dev',
+    version='0.956dev',
     packages=[
         'flood_forecast',
         'flood_forecast.transformer_xl',
@@ -27,7 +27,7 @@ setup(
         "flood_forecast.deployment",
         "flood_forecast.custom"],
     license='Public',
-    long_description='A public package for deep time series forecasting built with PyTorch',
+    long_description='An open source framework for deep time series forecasting built with PyTorch',
     install_requires=install_requires,
     extras_require={
         'dev': dev_requirements})

@@ -28,7 +28,7 @@ def upload_file(
 ):
     """A function to upload a file to a GCP bucket.
 
-    :param bucket_name: [description]
+    :param bucket_name: The name of the bucket
     :type bucket_name: str
     :param file_name: [description]
     :type file_name: str

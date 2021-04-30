@@ -36,7 +36,6 @@
        "optimizer": "Adam",
        "optim_params":
        {
-
        },
        "lr": 0.3,
        "epochs": 4,

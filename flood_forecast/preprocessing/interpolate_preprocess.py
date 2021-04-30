@@ -33,7 +33,7 @@ def forward_back_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFra
     return df
 
 
-def back_forward_generic(df: pd.DataFrame, relevant_columns: List) -> pd.DataFrame:
+def back_forward_generic(df: pd.DataFrame, relevant_columns: List[str]) -> pd.DataFrame:
     """
     Function to fill missing values with nearest values (backward first)
     """
