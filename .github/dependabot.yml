@@ -1,0 +1,17 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: mpld3
+    versions:
+    - 0.5.2
+  - dependency-name: torchvision
+    versions:
+    - 0.8.2
+  - dependency-name: shap
+    versions:
+    - 0.38.1
