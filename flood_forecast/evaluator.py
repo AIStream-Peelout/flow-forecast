@@ -403,15 +403,15 @@ def generate_predictions(
     :type device: torch.device
     :param forecast_start_idx: The index you want the forecast to begin
     :type forecast_start_idx: int
-    :param forecast_length: [description]
+    :param forecast_length: The length of the forecast the model outputs per time step
     :type forecast_length: int
-    :param hours_to_forecast: [description]
+    :param hours_to_forecast: The number of time_steps to forecast in future
     :type hours_to_forecast: int
-    :param decoder_params: [description]
+    :param decoder_params: The parameters the decoder function takes.
     :type decoder_params: Dict
-    :param multi_params: [description], defaults to 1
+    :param multi_params: n_targets, defaults to 1
     :type multi_params: int, optional
-    :return: [description]
+    :return: The forecasted tensor
     :rtype: torch.Tensor
     """
     if targs:
@@ -452,6 +452,23 @@ def generate_predictions_non_decoded(
     forecast_length: int,
     hours_to_forecast: int,
 ) -> torch.Tensor:
+    """Generates predictions for the models that do not use a decoder
+
+    :param model: [description]
+    :type model: Type[TimeSeriesModel]
+    :param df: [description]
+    :type df: pd.DataFrame
+    :param test_data: [description]
+    :type test_data: CSVTestLoader
+    :param history_dim: [description]
+    :type history_dim: torch.Tensor
+    :param forecast_length: [description]
+    :type forecast_length: int
+    :param hours_to_forecast: [description]
+    :type hours_to_forecast: int
+    :return: [description]
+    :rtype: torch.Tensor
+    """
     full_history = [history_dim]
     all_tensor = []
     if test_data.use_real_precip:
