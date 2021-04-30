@@ -50,7 +50,7 @@ def train_function(model_type: str, params: Dict):
             # noqa: F501
             trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
             delete_params = ["num_workers", "pin_memory", "train_start", "train_end", "valid_start", "valid_end", "test_start", "test_end",
-                            "training_path", "validation_path", "test_path"]
+                            "training_path", "validation_path", "test_path", "batch_size"]
             for param in delete_params:
                 if param in trained_model.params["inference_params"]["dataset_params"]:
                     del trained_model.params["inference_params"]["dataset_params"][param]
