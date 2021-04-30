@@ -84,8 +84,8 @@ def evaluate_model(
     .. code-block:: python
 
         from flood_forecast.evaluator import evaluate_model
-        forecast_model = PyTorchForecast()
-        evaluate_model(forecast_model, d, "cfs", )
+        forecast_model = PyTorchForecast(config_file)
+        evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
         ...
     '''
     """
@@ -221,6 +221,7 @@ def infer_on_torch_model(
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
+    #
     # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
@@ -322,6 +323,27 @@ def infer_on_torch_model(
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
+    """[summary]
+
+    :param prediction_samples: [description]
+    :type prediction_samples: torch.Tensor
+    :param csv_test_loader: [description]
+    :type csv_test_loader: CSVTestLoader
+    :param multi_params: [description]
+    :type multi_params: int
+    :param df_pred: [description]
+    :type df_pred: [type]
+    :param decoder_param: [description]
+    :type decoder_param: bool
+    :param history_length: [description]
+    :type history_length: int
+    :param num_samples: [description]
+    :type num_samples: int
+    :raises ValueError: [description]
+    :raises ValueError: [description]
+    :return: [description]
+    :rtype: List[pd.DataFrame]
+    """
     df_prediction_arr = []
     if decoder_param is not None:
         if "probabilistic" in decoder_param:
