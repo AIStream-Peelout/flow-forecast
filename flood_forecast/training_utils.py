@@ -67,5 +67,5 @@ class EarlyStopper(object):
             self.counter = 0
         return True
 
-    def save_model_checkpoint(self, model):
+    def save_model_checkpoint(self, model: torch.nn.Module):
         torch.save(model.state_dict(), "checkpoint.pth")
