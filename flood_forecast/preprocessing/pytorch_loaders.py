@@ -166,6 +166,8 @@ class CSVTestLoader(CSVDataLoader):
         :param str df_path:
         A data loader for the test data.
         """
+        if "file_path" not in kwargs:
+            kwargs["file_path"] = df_path
         super().__init__(**kwargs)
         df_path = get_data(df_path)
         self.original_df = pd.read_csv(df_path)
