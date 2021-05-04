@@ -97,7 +97,8 @@ def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_
         "wandb": {
             "name": "flood_forecast_" + str(gage_id),
             "tags": [gage_id, station_id, "MultiAttnHeadSimple", "36", "corrected"]
-        }
+        },
+        "forward_params": {}
     }
     if weight_path:
         the_config["weight_path"] = weight_path
