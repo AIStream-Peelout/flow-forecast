@@ -13,8 +13,8 @@ pyyaml
 plotly~=4.14.3
 pytz~=2021.1
 setuptools~=56.0.0
-numpy~=1.20.2
-requests~=2.25.1
+numpy
+requests
 torchvision>=0.6.0
 mpld3~=0.3
 numba>=0.50
