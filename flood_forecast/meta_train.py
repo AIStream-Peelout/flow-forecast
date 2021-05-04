@@ -9,7 +9,8 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """ Function to train meta data-models"""
     params["forward_params"] = {}
     dataset_params = params["dataset_params"]
-    dataset_params["forecast_history"] = 1
+    if "forecast_history" not in dataset_params:
+        dataset_params["forecast_history"] = 1
     dataset_params["forecast_length"] = 1
     dataset_params["forecast_something_or"] = 1
     trained_model = PyTorchForecast(

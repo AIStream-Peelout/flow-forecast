@@ -188,7 +188,8 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["no_scale"] = dataset_params["no_scale"]
         if "id_series_col" in dataset_params:
             start_end_params["id_series_col"] = dataset_params["id_series_col"]
-
+        if the_class == "AutoEncoder":
+            start_end_params["forecast_history"] = dataset_params["forecast_history"]
         is_proper_dataloader = loader_type == "test" and the_class == "default"
         if is_proper_dataloader and "forecast_test_len" in dataset_params:
             loader = CSVDataLoader(
