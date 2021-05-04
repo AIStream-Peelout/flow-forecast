@@ -59,7 +59,7 @@ def train_function(model_type: str, params: Dict):
         train_transformer_style(model=trained_model,
                                 training_params=params["training_params"],
                                 takes_target=takes_target,
-                                forward_params=params["forward_params"])
+                                forward_params={})
         # To do delete
         if "scaler" in dataset_params:
             if "scaler_params" in dataset_params:

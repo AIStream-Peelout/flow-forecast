@@ -18,7 +18,7 @@ def handle_meta_data(model: PyTorchForecast):
     s
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
-    :return: Returns a tuple of the initial meta-representation
+    :return: Returns a tuple of the initial meta-representationf
     :rtype: tuple(PyTorchForecast, torch.Tensor, torch.nn)
     """
     meta_loss = None
@@ -137,8 +137,7 @@ def train_transformer_style(
             meta_model,
             meta_representation,
             meta_loss,
-            multi_targets=num_targets,
-            forward_params=forward_params.copy())
+            multi_targets=num_targets)
         print("The loss for epoch " + str(epoch))
         print(total_loss)
         valid = compute_validation(
