@@ -90,7 +90,6 @@ def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_
 
             "epochs": 14,
             "batch_size": 20
-
         },
         "GCS": True,
 
