@@ -279,7 +279,7 @@ class AEDataloader(CSVDataLoader):
         pass
 
     def __len__(self):
-        return len(self.df.index) - 1
+        return len(self.df.index + self.forecast_history) - 1
 
     def __getitem__(self, idx: int, uuid: int = None, column_relevant: str = None):
         # Warning this assumes that data is
