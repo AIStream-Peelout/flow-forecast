@@ -6,13 +6,13 @@ import numpy as np
 def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame) -> pd.DataFrame:
     """A function that creates temporal features
 
-    :param features_list: d
+    :param features_list: A list of features in the form of a dictionary
     :type features_list: Dict
     :param dt_column: [description]
     :type dt_column: str
     :param df: [description]
     :type df: pd.DataFrame
-    :return: [description]
+    :return: The DF with several new columns added
     :rtype: pd.DataFrame
     """
     df[dt_column] = df[dt_column].to_datetime()
@@ -33,7 +33,7 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     :param dt_column: The name of the datetime column
     :type dt_column: str
     :return: The dataframe with the newly added column
-    :rtype: pd.DataFrame w
+    :rtype: pd.DataFrame
     """
     if key == "day_of_week":
         df[key] = df[dt_column].map(lambda x: x.weekday())
@@ -86,7 +86,7 @@ def cyclical(df: pd.DataFrame, feature_column: str) -> pd.DataFrame:
     :type df: pd.DataFrame
     :param feature_column: The name of the feature column. Should be either (day_of_week, hour, month, year)
     :type feature_column: str
-    :return: The dataframew with three new columns: norm_feature, cos_feature, sin_feature
+    :return: The dataframe with three new columns: norm_feature, cos_feature, sin_feature
     :rtype: pd.DataFrame
     """
     df["norm"] = 2 * np.pi * df[feature_column] / df[feature_column].max()
