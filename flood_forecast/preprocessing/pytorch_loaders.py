@@ -263,6 +263,7 @@ class AEDataloader(CSVDataLoader):
             unsqueeze_dim: int = 1,
             interpolate_param=False,
             forecast_history=1,
+            no_scale=True,
             sort_column=None):
         """
         A data loader class for autoencoders.
@@ -272,7 +273,8 @@ class AEDataloader(CSVDataLoader):
         """
         super().__init__(file_path=file_path, forecast_history=forecast_history, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
-                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False, scaling=scaling)
+                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False,
+                         scaling=scaling)
         self.unsqueeze_dim = unsqueeze_dim
 
     def __handle_params__():
@@ -288,8 +290,6 @@ class AEDataloader(CSVDataLoader):
         target = torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float()
         if target.shape[0] == 0:
             raise ValueError("The item was not found in the index please try again")
-        print(idx)
-        print(target)
         return torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float(), target
 
 
