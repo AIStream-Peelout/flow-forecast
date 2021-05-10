@@ -6,7 +6,7 @@ class SimpleLinearModel(torch.nn.Module):
     """
     A very simple baseline model to resolve some of the
     difficulties with bugs in the various train/validation loops
-    in code. Has only two layers.
+    in code. Has only two layers. .
     """
 
     def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, probabilistic: bool = False):
@@ -39,13 +39,13 @@ class SimpleLinearModel(torch.nn.Module):
 
 def handle_gaussian_loss(out: tuple):
     # Oh shit this is gonna be tough
-    print("shit stuff")
+    print("shit stuff ")
     print(out[1])
     out1 = torch.mean(torch.stack([out[0], out[1]]), dim=0)
     return out1, out[0], out[1]
 
 
-def handle_no_scaling(scaler: torch.utils.data.Dataset, out: torch.Tensor, multi_targets: int):
+def handle_no_scaling(scaler: torch.utils.data.Dataset, out: torch.Tensor, multi_targets: int) -> torch.Tensor:
     if multi_targets == 1:
         out = out.detach().cpu().reshape(-1, 1)
     if len(out.shape) > 2:
