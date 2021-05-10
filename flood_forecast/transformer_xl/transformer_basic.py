@@ -103,6 +103,17 @@ class CustomTransformerDecoder(torch.nn.Module):
         if meta_data:
             self.meta_merger = MergingModel(meta_data["method"], meta_data["params"])
 
+    def make_embedding(self, x: torch.Tensor):
+        x = self.dense_shape(x)
+        x = self.pe(x)
+        # (L, B, N)
+        x = x.permute(1, 0, 2)
+        if self.mask_it:
+            x = self.transformer_enc(x, self.mask)
+        else:
+            # Allow no mask
+            x = self.transformer_enc(x)
+
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
         Performs forward pass on tensor of (batch_size, sequence_length, n_time_series)
