@@ -271,6 +271,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         loss = criterion(labels.float(), output, src, m)
     else:
         assert len(labels.shape) == len(output.shape)
+        print(labels.shape)
+        print(labels.shape[0])
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
     return loss
