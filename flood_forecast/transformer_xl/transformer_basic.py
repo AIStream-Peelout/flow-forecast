@@ -113,6 +113,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         else:
             # Allow no mask
             x = self.transformer_enc(x)
+        return x
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
         """
