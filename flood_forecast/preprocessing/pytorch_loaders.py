@@ -131,6 +131,8 @@ class CSVDataLoader(Dataset):
         :return: Returns the unscaled data as PyTorch tensor.
         :rtype: torch.Tensor
         """
+        if self.no_scale:
+            return torch.from_numpy(result_data_np)
         if isinstance(result_data, pd.Series) or isinstance(
             result_data, pd.DataFrame
         ):
@@ -143,8 +145,6 @@ class CSVDataLoader(Dataset):
         if isinstance(result_data, np.ndarray):
             result_data_np = result_data
         # print(type(result_data))
-        if self.no_scale:
-            return torch.from_numpy(result_data_np)
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )
