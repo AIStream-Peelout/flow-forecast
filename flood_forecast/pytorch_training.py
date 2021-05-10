@@ -464,7 +464,7 @@ def compute_validation(validation_loader: DataLoader,
                 labels = targ[:, :, 0:multi_targets]
             validation_dataset = validation_loader.dataset
             for crit in criterion:
-                if validation_dataset.scale and not meta_data_model:
+                if validation_dataset.scale:
                     # Should this also do loss.item() stuff?
                     if len(src.shape) == 2:
                         src = src.unsqueeze(0)
