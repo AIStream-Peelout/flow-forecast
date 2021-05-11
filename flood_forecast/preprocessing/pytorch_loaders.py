@@ -262,6 +262,8 @@ class AEDataloader(CSVDataLoader):
             end_stamp: int = None,
             unsqueeze_dim: int = 1,
             interpolate_param=False,
+            forecast_history=1,
+            no_scale=True,
             sort_column=None):
         """
         A data loader class for autoencoders.
@@ -269,24 +271,26 @@ class AEDataloader(CSVDataLoader):
         Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
         Same parameters as before.
         """
-        super().__init__(file_path=file_path, forecast_history=1, forecast_length=1,
+        super().__init__(file_path=file_path, forecast_history=forecast_history, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
-                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False)
+                         end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False, no_scale=no_scale,
+                         scaling=scaling)
         self.unsqueeze_dim = unsqueeze_dim
 
+    def __handle_params__():
+        pass
+
     def __len__(self):
-        return len(self.df.index) - 1
+        return len(self.df.index) - 1 - self.forecast_history
 
     def __getitem__(self, idx: int, uuid: int = None, column_relevant: str = None):
         # Warning this assumes that data is
         if uuid:
-            idx = self.original_df[self.original_df[column_relevant] == uuid].index
-        target = torch.from_numpy(self.df.iloc[idx].to_numpy()).float().unsqueeze(self.unsqueeze_dim)
+            idx = self.original_df[self.original_df[column_relevant] == uuid].index.values.astype(int)[0]
+        target = torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float()
         if target.shape[0] == 0:
             raise ValueError("The item was not found in the index please try again")
-        print(idx)
-        print(target)
-        return torch.from_numpy(self.df.iloc[idx].to_numpy()).float(), target
+        return torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float(), target
 
 
 class TemporalLoader(CSVDataLoader):
