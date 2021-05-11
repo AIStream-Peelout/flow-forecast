@@ -287,7 +287,6 @@ class AEDataloader(CSVDataLoader):
         # Warning this assumes that data is
         if uuid:
             idx = self.original_df[self.original_df[column_relevant] == uuid].index
-            idx = int(idx)
         target = torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float()
         if target.shape[0] == 0:
             raise ValueError("The item was not found in the index please try again")
