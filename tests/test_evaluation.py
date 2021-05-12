@@ -8,7 +8,7 @@ import torch
 import numpy
 numpy.random.seed(0)
 torch.manual_seed(0)
-# 2
+
 
 class EvaluationTest(unittest.TestCase):
     def setUp(self):
