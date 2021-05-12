@@ -5,8 +5,9 @@ from datetime import datetime
 from flood_forecast.explain_model_output import (
     deep_explain_model_heatmap,
     deep_explain_model_summary_plot,
+    handle_dl_output
 )
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 from flood_forecast.time_model import PyTorchForecast
 
 
@@ -136,6 +137,11 @@ class ModelInterpretabilityTest(unittest.TestCase):
         # dummy assert
         self.assertEqual(1, 1)
 
+    def test_handle_dl(self):
+        t = TemporalTestLoader(["hour"], self.simple_param["dataset_params"])
+        self.assertIsInstance(handle_dl_output(self.model.test_data, "normal"), tuple)
+        print(t)
+        # self.assertIsEqual(len(handle_dl_output(t, "TemporalLoader")), 3)
 
 if __name__ == "__main__":
     unittest.main()

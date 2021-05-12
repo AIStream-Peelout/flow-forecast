@@ -17,6 +17,10 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 BACKGROUND_BATCH_SIZE = 5
 
 
+def handle_dl_output(dl, dl_class: str):
+    pass
+
+
 def _prepare_background_tensor(
     csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE
 ) -> torch.Tensor:
@@ -150,6 +154,7 @@ def deep_explain_model_heatmap(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if model.params["model_name"] == "DARNN" and device.type == "cuda":
+        # TO-DO check if this is still true
         print("Currently DARNN doesn't work with shap on CUDA")
         return
 
