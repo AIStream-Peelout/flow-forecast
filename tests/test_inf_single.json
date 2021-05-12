@@ -5,7 +5,7 @@
     "model_params": {
       "n_time_series":3,
       "dec_in":3,
-      "c_out": 3,
+      "c_out": 1,
       "seq_len":10,
       "label_len":10, 
       "out_len":2,
