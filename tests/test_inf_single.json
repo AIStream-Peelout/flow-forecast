@@ -85,6 +85,7 @@
              "target_col": ["cfs"],
              "scaling": "StandardScaler",
              "interpolate_param": false,
+             "sort_column":"datetime",
              "feature_params":
              {
                  "datetime_params":{
@@ -93,8 +94,8 @@
                     "day_of_week": "numerical",
                     "hour":"numerical"
                  }
-             },
-             "sort_column":"datetime"
+             }
+            
           }
    }
    }
