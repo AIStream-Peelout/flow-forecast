@@ -76,7 +76,8 @@ def deep_explain_model_summary_plot(
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    history, forecast_start_idx = handle_dl_output(csv_test_loader, model.params["dataset_params"]["class"],
+                                                   datetime_start)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
@@ -166,7 +167,8 @@ def deep_explain_model_heatmap(
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    history, forecast_start_idx = handle_dl_output(csv_test_loader, model.params["dataset_params"]["class"],
+                                                   datetime_start)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
