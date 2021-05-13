@@ -382,3 +382,6 @@ class TemporalTestLoader(CSVTestLoader):
             ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return (src_data, temporal_feat), (tar_temp, trg_data), all_rows_orig, target_idx_start
+
+    def convert_history_batches(self, the_col, rows_to_convert):
+        pass

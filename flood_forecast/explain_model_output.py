@@ -84,8 +84,13 @@ def deep_explain_model_summary_plot(
 
     # background shape (L, N, M)
     # L - batch size, N - history length, M - feature size
-    deep_explainer = shap.DeepExplainer(model.model, background_tensor)
-    shap_values = deep_explainer.shap_values(background_tensor)
+    if type(history) == list:
+        deep_explainer = shap.DeepExplainer(model.model, history)
+        shap_values = deep_explainer.shap_values(history)
+    else:
+        deep_explainer = shap.DeepExplainer(model.model, background_tensor)
+        shap_values = deep_explainer.shap_values(background_tensor)
+
     shap_values = np.stack(shap_values)
     # shap_values needs to be 4-dimensional
     if len(shap_values.shape) != 4:
