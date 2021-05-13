@@ -145,6 +145,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
              "forecast_length": 5,
              "no_scale": True,
              "relevant_cols": ["cfs", "precip", "temp"],
+             "sort_column": "datetime",
              "feature_params": {
                  "datetime_params": {
                      "hour": "numerical"
