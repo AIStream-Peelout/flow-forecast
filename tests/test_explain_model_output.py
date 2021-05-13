@@ -138,7 +138,15 @@ class ModelInterpretabilityTest(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_handle_dl(self):
-        params_dict = {}
+        params_dict = {
+             "file_path": "tests/test_data/keag_small.csv",
+             "forecast_history": 5,
+             "forecast_length": 5,
+             "no_scale": True,
+             "relevant_cols": ["cfs", "precip", "temp"],
+             "target_col": ["cfs"],
+             "scaling": "RobustScaler",
+             "interpolate_param": False}
         params_dict["kwargs"] = self.simple_param["dataset_params"].copy()
         params_dict["df_path"] = self.keag_file
         params_dict["forecast_total"] = 35
