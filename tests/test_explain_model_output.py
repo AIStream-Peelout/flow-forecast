@@ -138,7 +138,9 @@ class ModelInterpretabilityTest(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_handle_dl(self):
-        t = TemporalTestLoader(["hour"], self.simple_param["dataset_params"])
+        params_copy = self.simple_param["dataset_params"].copy()
+        params_copy["df_path"] = self.keag_file
+        t = TemporalTestLoader(["hour"], params_copy)
         self.assertIsInstance(handle_dl_output(self.model.test_data, "normal"), tuple)
         print(t)
         # self.assertIsEqual(len(handle_dl_output(t, "TemporalLoader")), 3)
