@@ -145,6 +145,12 @@ class ModelInterpretabilityTest(unittest.TestCase):
              "forecast_length": 5,
              "no_scale": True,
              "relevant_cols": ["cfs", "precip", "temp"],
+             "feature_param":
+             {
+                 "datetime_params": {
+                     "hour": "numerical"
+                 }
+             },
              "target_col": ["cfs"],
              "interpolate_param": False}
         params_dict["df_path"] = self.keag_file
