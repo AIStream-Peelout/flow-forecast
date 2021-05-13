@@ -90,7 +90,7 @@ def deep_explain_model_summary_plot(
     else:
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
         shap_values = deep_explainer.shap_values(background_tensor)
-        shap_values = np.stack(shap_values)
+    shap_values = np.stack(shap_values)
     # shap_values needs to be 4-dimensional
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
