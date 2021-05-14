@@ -78,6 +78,8 @@ of datasets.
 
   basic_utils
 
+.. automodule:: flood_forecast.explain_model_output
+
 .. automodule:: flood_forecast.da_rnn
 
 .. toctree::

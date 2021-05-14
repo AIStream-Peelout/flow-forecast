@@ -18,17 +18,17 @@ BACKGROUND_BATCH_SIZE = 5
 
 
 def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -> Tuple[torch.Tensor, int]:
-    """[summary]
+    """
 
-    :param dl: [description]
-    :type dl: [type]
-    :param dl_class: [description]
+    :param dl: The test data-loader. Should be passed directly
+    :type dl: Union[CSVTestLoader, TemporalTestLoader]
+    :param dl_class: A string that is the name of DL passef from the params file.
     :type dl_class: str
-    :param datetime_start: [description]
+    :param datetime_start: The start datetime for the forecast
     :type datetime_start: datetime
-    :param device: [description]
+    :param device: Typical device should be either cpu or cuda
     :type device: str
-    :return: [description]
+    :return: Returns a tuple containing either a..
     :rtype: Tuple[torch.Tensor, int]
     """
     if dl_class == "TemporalLoader":
@@ -213,7 +213,6 @@ def deep_explain_model_heatmap(
     if isinstance(history, list):
         deep_explainer = shap.DeepExplainer(model.model, history)
         shap_values = deep_explainer.shap_values(history)
-        shap_values = list(zip(*shap_values))
         s_values_list.append(shap_values)
     else:
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
