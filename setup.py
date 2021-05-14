@@ -1,3 +1,4 @@
+# flake8: noqa
 from setuptools import setup
 import os
 
@@ -15,7 +16,7 @@ dev_requirements = [
 
 setup(
     name='flood_forecast',
-    version='0.98dev',
+    version='0.981dev',
     packages=[
         'flood_forecast',
         'flood_forecast.transformer_xl',
@@ -27,7 +28,8 @@ setup(
         "flood_forecast.deployment",
         "flood_forecast.custom"],
     license='Public',
-    long_description='An open source framework for deep time series forecasting built with PyTorch',
+    description="An open source framework for deep time series forecasting built with PyTorch.",
+    long_description='Flow Forecast is the top open source deep learning for time series forecasting and classification framework. We were the original framework to contain models like the transformer and have now expanded to include all popular deep learning models.',
     install_requires=install_requires,
     extras_require={
         'dev': dev_requirements})
