@@ -18,6 +18,19 @@ BACKGROUND_BATCH_SIZE = 5
 
 
 def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -> Tuple[torch.Tensor, int]:
+    """[summary]
+
+    :param dl: [description]
+    :type dl: [type]
+    :param dl_class: [description]
+    :type dl_class: str
+    :param datetime_start: [description]
+    :type datetime_start: datetime
+    :param device: [description]
+    :type device: str
+    :return: [description]
+    :rtype: Tuple[torch.Tensor, int]
+    """
     if dl_class == "TemporalLoader":
         his, tar, _, forecast_start_idx = dl.get_from_start_date(datetime_start)
         history = [his[0].unsqueeze(0), his[1].unsqueeze(0), tar[1].unsqueeze(0), tar[0].unsqueeze(0)]
@@ -122,9 +135,13 @@ def deep_explain_model_summary_plot(
         wandb.log({"Overall feature ranking per prediction time-step": fig})
 
     # summary plot for one prediction at datetime_start
+    if isinstance(history, list):
+        hist = history[0]
+    else:
+        hist = history
 
     history_numpy = torch.tensor(
-        history.cpu().numpy(), names=["batches", "observations", "features"]
+        hist.cpu().numpy(), names=["batches", "observations", "features"]
     )
 
     shap_values = deep_explainer.shap_values(history)
@@ -185,11 +202,17 @@ def deep_explain_model_heatmap(
     # L - batch size, N - history length, M - feature size
     # for each element in each N x M batch in L,
     # attribute to each prediction in forecast len
-    deep_explainer = shap.DeepExplainer(model.model, background_tensor)
-    shap_values = deep_explainer.shap_values(
-        background_tensor
-    )  # forecast_len x N x L x M
-    shap_values = np.stack(shap_values)
+    s_values_list = []
+    if isinstance(history, list):
+        deep_explainer = shap.DeepExplainer(model.model, history)
+        shap_values = deep_explainer.shap_values(history)
+        shap_values = list(zip(*shap_values[::-1]))
+        s_values_list.append(shap_values)
+        shap_values = np.stack(shap_values[0])
+    else:
+        deep_explainer = shap.DeepExplainer(model.model, background_tensor)
+        shap_values = deep_explainer.shap_values(background_tensor)
+        shap_values = np.stack(shap_values)  # forecast_len x N x L x M
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
@@ -210,7 +233,6 @@ def deep_explain_model_heatmap(
     shap_values = torch.tensor(
         shap_values, names=["preds", "batches", "observations", "features"]
     )
-
     figs = plot_shap_value_heatmaps(shap_values)
     if use_wandb:
         for fig, feature in zip(figs, csv_test_loader.df.columns):
