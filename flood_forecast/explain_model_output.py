@@ -145,7 +145,8 @@ def deep_explain_model_summary_plot(
     )
 
     shap_values = deep_explainer.shap_values(history)
-    shap_values = np.stack(shap_values[0]) if isinstance(history, list) else np.stack(shap_values)
+    shap_values = shap_values[0]if isinstance(history, list) else shap_values
+    shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
@@ -227,12 +228,13 @@ def deep_explain_model_heatmap(
     # (seq_len*forecast_len) per fop feature
     to_explain = history
     shap_values = deep_explainer.shap_values(to_explain)
-    shap_values = np.stack(shap_values[0]) if isinstance(history, list) else np.stack(shap_values)
+    shap_values = shap_values[0]if isinstance(history, list) else shap_values
+    shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
         shap_values, names=["preds", "batches", "observations", "features"]
-    )
+    )  # no fake ballo t
     figs = plot_shap_value_heatmaps(shap_values)
     if use_wandb:
         for fig, feature in zip(figs, csv_test_loader.df.columns):
