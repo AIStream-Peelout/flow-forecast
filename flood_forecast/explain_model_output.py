@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple
 import numpy as np
 import shap
 import torch
@@ -17,7 +17,7 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 BACKGROUND_BATCH_SIZE = 5
 
 
-def handle_dl_output(dl, dl_class: str, datetime_start):
+def handle_dl_output(dl, dl_class: str, datetime_start: datetime) -> Tuple[torch.Tensor, int]:
     if dl_class == "TemporalLoader":
         his, tar, _, forecast_start_idx = dl.get_from_start_date(datetime_start)
         history = [his[0].unsqueeze(0), his[1].unsqueeze(0), tar[1].unsqueeze(0), tar[0].unsqueeze(0)]
@@ -84,9 +84,12 @@ def deep_explain_model_summary_plot(
 
     # background shape (L, N, M)
     # L - batch size, N - history length, M - feature size
+    s_values_list = []
     if isinstance(history, list):
         deep_explainer = shap.DeepExplainer(model.model, history)
         shap_values = deep_explainer.shap_values(history)
+        shap_values = list(zip(*shap_values[::-1]))
+        s_values_list.append(shap_values)
         shap_values = np.stack(shap_values[0])
     else:
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
