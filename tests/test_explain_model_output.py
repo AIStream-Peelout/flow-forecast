@@ -156,7 +156,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
         params_dict["df_path"] = self.keag_file
         params_dict["forecast_total"] = 35
         t = TemporalTestLoader(["hour"], params_dict)
-        self.assertIsInstance(handle_dl_output(self.csv_test_loader, "normal", datetime(2014, 6, 2, 0)), tuple)
+        self.assertIsInstance(handle_dl_output(self.csv_test_loader, "normal", datetime(2014, 6, 2, 0), "cpu"), tuple)
         print(t)
         # self.assertIsEqual(len(handle_dl_output(t, "TemporalLoader")), 3)
 

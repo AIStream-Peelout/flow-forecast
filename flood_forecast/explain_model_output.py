@@ -17,12 +17,13 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 BACKGROUND_BATCH_SIZE = 5
 
 
-def handle_dl_output(dl, dl_class: str, datetime_start: datetime) -> Tuple[torch.Tensor, int]:
+def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -> Tuple[torch.Tensor, int]:
     if dl_class == "TemporalLoader":
         his, tar, _, forecast_start_idx = dl.get_from_start_date(datetime_start)
         history = [his[0].unsqueeze(0), his[1].unsqueeze(0), tar[1].unsqueeze(0), tar[0].unsqueeze(0)]
     else:
         history, _, forecast_start_idx = dl.get_from_start_date(datetime_start)
+        history = history.to(device).unsqueeze(0)
     return history, forecast_start_idx
 
 
@@ -77,7 +78,7 @@ def deep_explain_model_summary_plot(
         datetime_start = model.params["inference_params"]["datetime_start"]
 
     history, forecast_start_idx = handle_dl_output(csv_test_loader, model.params["dataset_params"]["class"],
-                                                   datetime_start)
+                                                   datetime_start, device)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
@@ -122,7 +123,6 @@ def deep_explain_model_summary_plot(
 
     # summary plot for one prediction at datetime_start
 
-    history = history.to(device).unsqueeze(0)
     history_numpy = torch.tensor(
         history.cpu().numpy(), names=["batches", "observations", "features"]
     )
@@ -176,7 +176,7 @@ def deep_explain_model_heatmap(
         datetime_start = model.params["inference_params"]["datetime_start"]
 
     history, forecast_start_idx = handle_dl_output(csv_test_loader, model.params["dataset_params"]["class"],
-                                                   datetime_start)
+                                                   datetime_start, device)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
