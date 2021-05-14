@@ -165,7 +165,7 @@ def deep_explain_model_summary_plot(
 
 def fix_shap_values(shap_values, history):
     if isinstance(history, list):
-        shap_values = zip(*shap_values)[0]
+        shap_values = list(zip(*shap_values))[0]
         return shap_values
     return shap_values
 
