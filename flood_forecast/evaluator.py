@@ -343,7 +343,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
     :type num_samples: int
     :raises ValueError: [description]
     :raises ValueError: [description]
-    :return: [description]
+    :return: Returns an array with different CI predictions
     :rtype: List[pd.DataFrame]
     """
     df_prediction_arr = []
@@ -456,7 +456,7 @@ def generate_predictions_non_decoded(
 ) -> torch.Tensor:
     """Generates predictions for the models that do not use a decoder
 
-    :param model: [description]
+    :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
     :param df: [description]
     :type df: pd.DataFrame
