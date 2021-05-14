@@ -106,7 +106,7 @@ def deep_explain_model_summary_plot(
     else:
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
         shap_values = deep_explainer.shap_values(background_tensor)
-    shap_values = handle_shap_values(shap_values, history)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     # shap_values needs to be 4-dimensional
     if len(shap_values.shape) != 4:
@@ -144,7 +144,7 @@ def deep_explain_model_summary_plot(
     )
 
     shap_values = deep_explainer.shap_values(history)
-    shap_values = handle_shap_values(shap_values, history)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
@@ -163,7 +163,7 @@ def deep_explain_model_summary_plot(
             )
 
 
-def handle_shap_values(shap_values, history):
+def fix_shap_values(shap_values, history):
     if isinstance(history, list):
         shap_values = zip(*shap_values)[0]
         return shap_values
@@ -218,7 +218,7 @@ def deep_explain_model_heatmap(
     else:
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
         shap_values = deep_explainer.shap_values(background_tensor)
-    shap_values = handle_shap_values(shap_values, history)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)  # forecast_len x N x L x M
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
@@ -234,7 +234,7 @@ def deep_explain_model_heatmap(
     # (seq_len*forecast_len) per fop feature
     to_explain = history
     shap_values = deep_explainer.shap_values(to_explain)
-    shap_values = handle_shap_values(shap_values, history)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
