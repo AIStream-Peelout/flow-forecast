@@ -247,7 +247,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/test_inf_single.json
             echo -e 'test informer single target'
             coverage run flood_forecast/trainer.py -p tests/test_informer.json
-            echo -e 'test informer'
+            echo -e 'test multi informer'
             coverage run flood_forecast/trainer.py -p tests/transformer_gaussian.json
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
             echo -e 'training multi-task-decoder'
