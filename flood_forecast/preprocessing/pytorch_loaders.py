@@ -121,6 +121,9 @@ class CSVDataLoader(Dataset):
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
 
+    def __sample_and_track_series__(self, idx, series_id=None):
+        pass
+
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
     ) -> torch.Tensor:
