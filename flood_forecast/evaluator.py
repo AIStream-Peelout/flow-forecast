@@ -85,7 +85,9 @@ def evaluate_model(
 
         from flood_forecast.evaluator import evaluate_model
         forecast_model = PyTorchForecast(config_file)
-        evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
+        e_log, df_train_test, f_idx, df_preds = evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
+        print(e_log) # {"MSE":0.2, "MAPE":0.1}
+        print(df_train_test) #
         ...
     '''
     """
@@ -341,7 +343,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
     :type num_samples: int
     :raises ValueError: [description]
     :raises ValueError: [description]
-    :return: [description]
+    :return: Returns an array with different CI predictions
     :rtype: List[pd.DataFrame]
     """
     df_prediction_arr = []
@@ -454,7 +456,7 @@ def generate_predictions_non_decoded(
 ) -> torch.Tensor:
     """Generates predictions for the models that do not use a decoder
 
-    :param model: [description]
+    :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
     :param df: [description]
     :type df: pd.DataFrame

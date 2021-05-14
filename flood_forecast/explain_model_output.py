@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple
 import numpy as np
 import shap
 import torch
@@ -15,6 +15,29 @@ from flood_forecast.plot_functions import (
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 
 BACKGROUND_BATCH_SIZE = 5
+
+
+def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -> Tuple[torch.Tensor, int]:
+    """
+
+    :param dl: The test data-loader. Should be passed directly
+    :type dl: Union[CSVTestLoader, TemporalTestLoader]
+    :param dl_class: A string that is the name of DL passef from the params file.
+    :type dl_class: str
+    :param datetime_start: The start datetime for the forecast
+    :type datetime_start: datetime
+    :param device: Typical device should be either cpu or cuda
+    :type device: str
+    :return: Returns a tuple containing either a..
+    :rtype: Tuple[torch.Tensor, int]
+    """
+    if dl_class == "TemporalLoader":
+        his, tar, _, forecast_start_idx = dl.get_from_start_date(datetime_start)
+        history = [his[0].unsqueeze(0), his[1].unsqueeze(0), tar[1].unsqueeze(0), tar[0].unsqueeze(0)]
+    else:
+        history, _, forecast_start_idx = dl.get_from_start_date(datetime_start)
+        history = history.to(device).unsqueeze(0)
+    return history, forecast_start_idx
 
 
 def _prepare_background_tensor(
@@ -67,15 +90,23 @@ def deep_explain_model_summary_plot(
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    history, forecast_start_idx = handle_dl_output(csv_test_loader, model.params["dataset_params"]["class"],
+                                                   datetime_start, device)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
 
     # background shape (L, N, M)
     # L - batch size, N - history length, M - feature size
-    deep_explainer = shap.DeepExplainer(model.model, background_tensor)
-    shap_values = deep_explainer.shap_values(background_tensor)
+    s_values_list = []
+    if isinstance(history, list):
+        deep_explainer = shap.DeepExplainer(model.model, history)
+        shap_values = deep_explainer.shap_values(history)
+        s_values_list.append(shap_values)
+    else:
+        deep_explainer = shap.DeepExplainer(model.model, background_tensor)
+        shap_values = deep_explainer.shap_values(background_tensor)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     # shap_values needs to be 4-dimensional
     if len(shap_values.shape) != 4:
@@ -103,13 +134,17 @@ def deep_explain_model_summary_plot(
         wandb.log({"Overall feature ranking per prediction time-step": fig})
 
     # summary plot for one prediction at datetime_start
+    if isinstance(history, list):
+        hist = history[0]
+    else:
+        hist = history
 
-    history = history.to(device).unsqueeze(0)
     history_numpy = torch.tensor(
-        history.cpu().numpy(), names=["batches", "observations", "features"]
+        hist.cpu().numpy(), names=["batches", "observations", "features"]
     )
 
     shap_values = deep_explainer.shap_values(history)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
@@ -126,6 +161,13 @@ def deep_explain_model_summary_plot(
                     f" at {datetime_start} - {feature}": fig
                 }
             )
+
+
+def fix_shap_values(shap_values, history):
+    if isinstance(history, list):
+        shap_values = list(zip(*shap_values))[0]
+        return shap_values
+    return shap_values
 
 
 def deep_explain_model_heatmap(
@@ -150,13 +192,15 @@ def deep_explain_model_heatmap(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if model.params["model_name"] == "DARNN" and device.type == "cuda":
+        # TO-DO check if this is still true
         print("Currently DARNN doesn't work with shap on CUDA")
         return
 
     if datetime_start is None:
         datetime_start = model.params["inference_params"]["datetime_start"]
 
-    history, _, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+    history, forecast_start_idx = handle_dl_output(csv_test_loader, model.params["dataset_params"]["class"],
+                                                   datetime_start, device)
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
@@ -165,11 +209,16 @@ def deep_explain_model_heatmap(
     # L - batch size, N - history length, M - feature size
     # for each element in each N x M batch in L,
     # attribute to each prediction in forecast len
-    deep_explainer = shap.DeepExplainer(model.model, background_tensor)
-    shap_values = deep_explainer.shap_values(
-        background_tensor
-    )  # forecast_len x N x L x M
-    shap_values = np.stack(shap_values)
+    s_values_list = []
+    if isinstance(history, list):
+        deep_explainer = shap.DeepExplainer(model.model, history)
+        shap_values = deep_explainer.shap_values(history)
+        s_values_list.append(shap_values)
+    else:
+        deep_explainer = shap.DeepExplainer(model.model, background_tensor)
+        shap_values = deep_explainer.shap_values(background_tensor)
+    shap_values = fix_shap_values(shap_values, history)
+    shap_values = np.stack(shap_values)  # forecast_len x N x L x M
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
@@ -182,15 +231,15 @@ def deep_explain_model_heatmap(
 
     # heatmap one prediction sequence at datetime_start
     # (seq_len*forecast_len) per fop feature
-    to_explain = history.to(device).unsqueeze(0)
+    to_explain = history
     shap_values = deep_explainer.shap_values(to_explain)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
         shap_values, names=["preds", "batches", "observations", "features"]
-    )
-
+    )  # no fake ballo t
     figs = plot_shap_value_heatmaps(shap_values)
     if use_wandb:
         for fig, feature in zip(figs, csv_test_loader.df.columns):

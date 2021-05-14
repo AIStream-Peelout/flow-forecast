@@ -5,8 +5,9 @@ from datetime import datetime
 from flood_forecast.explain_model_output import (
     deep_explain_model_heatmap,
     deep_explain_model_summary_plot,
+    handle_dl_output
 )
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 from flood_forecast.time_model import PyTorchForecast
 
 
@@ -136,6 +137,28 @@ class ModelInterpretabilityTest(unittest.TestCase):
         # dummy assert
         self.assertEqual(1, 1)
 
+    def test_handle_dl(self):
+        params_dict = {}
+        params_dict["kwargs"] = {
+             "file_path": "tests/test_data/keag_small.csv",
+             "forecast_history": 5,
+             "forecast_length": 5,
+             "no_scale": True,
+             "relevant_cols": ["cfs", "precip", "temp"],
+             "sort_column": "datetime",
+             "feature_params": {
+                 "datetime_params": {
+                     "hour": "numerical"
+                 }
+             },
+             "target_col": ["cfs"],
+             "interpolate_param": False}
+        params_dict["df_path"] = self.keag_file
+        params_dict["forecast_total"] = 35
+        t = TemporalTestLoader(["hour"], params_dict)
+        self.assertIsInstance(handle_dl_output(self.csv_test_loader, "normal", datetime(2014, 6, 2, 0), "cpu"), tuple)
+        self.assertIsInstance(handle_dl_output(t, "TemporalLoader", datetime(2014, 6, 2, 0), "cpu")[0], list)
+        # self.assertIsEqual(len(handle_dl_output(t, "TemporalLoader")), 3)
 
 if __name__ == "__main__":
     unittest.main()
