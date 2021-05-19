@@ -22,9 +22,9 @@ class Informer(nn.Module):
         :type c_out:  int
         :param seq_len: The number of historical time steps to pass into the model.
         :type seq_len: int
-        :param label_len: The length of the label sequence passed into the decoder.
+        :param label_len: The length of the label sequence passed into the decoder (n_time_steps not used forecasted)
         :type label_len: int
-        :param out_len: The overall output length from the decoder .
+        :param out_len: The predicted number of time steps. forecast_length should equal out_len + label_len
         :type out_len: int
         :param factor: The multiplicative factor in the probablistic attention mechanism, defaults to 5
         :type factor: int, optional
@@ -38,7 +38,7 @@ class Informer(nn.Module):
         :type d_layers: int, optional
         :param d_ff: The dimension of the forward pass, defaults to 512
         :type d_ff: int, optional
-        :param dropout: [description], defaults to 0.0
+        :param dropout: Whether to use dropout, defaults to 0.0
         :type dropout: float, optional
         :param attn: The type of the attention mechanism either 'prob' or 'full', defaults to 'prob'
         :type attn: str, optional
