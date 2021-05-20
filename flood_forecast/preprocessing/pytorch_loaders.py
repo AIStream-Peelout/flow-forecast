@@ -310,7 +310,7 @@ class TemporalLoader(CSVDataLoader):
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
         self.other_feats = self.df.drop(columns=time_feats)
-        self.label_len = self.label_len
+        self.label_len = label_len
 
     @staticmethod
     def df_to_numpy(pandas_stuff: pd.DataFrame):
