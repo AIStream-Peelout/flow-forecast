@@ -297,7 +297,8 @@ class TemporalLoader(CSVDataLoader):
     def __init__(
             self,
             time_feats: List[str],
-            kwargs):
+            kwargs,
+            label_len=0):
         """[summary]
 
         :param time_feats: [description]
@@ -309,7 +310,7 @@ class TemporalLoader(CSVDataLoader):
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
         self.other_feats = self.df.drop(columns=time_feats)
-        self.label_len = 0
+        self.label_len = self.label_len
 
     @staticmethod
     def df_to_numpy(pandas_stuff: pd.DataFrame):
