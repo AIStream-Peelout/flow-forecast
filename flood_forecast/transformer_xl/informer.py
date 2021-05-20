@@ -44,7 +44,7 @@ class Informer(nn.Module):
         :type attn: str, optional
         :param embed: Whether to use class: `FixedEmbedding` or `torch.nn.Embbeding` , defaults to 'fixed'
         :type embed: str, optional
-        :param temp_depth: The temporald depth (e.g), defaults to 4
+        :param temp_depth: The temporald depth (e.g year, month, day, weekday, etc), defaults to 4
         :type data: int, optional
         :param activation: The activation func, defaults to 'gelu'
         :type activation: str, optional

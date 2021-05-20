@@ -309,6 +309,7 @@ class TemporalLoader(CSVDataLoader):
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
         self.other_feats = self.df.drop(columns=time_feats)
+        self.label_len = 0
 
     @staticmethod
     def df_to_numpy(pandas_stuff: pd.DataFrame):
@@ -317,11 +318,12 @@ class TemporalLoader(CSVDataLoader):
     def __getitem__(self, idx: int):
         rows = self.other_feats.iloc[idx: self.forecast_history + idx]
         temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
-        targs_idx_start = self.forecast_history + idx
+        targs_idx_start = self.forecast_history + idx - self.label_len
         targ_rows = self.other_feats.iloc[
-            targs_idx_start: self.forecast_length + targs_idx_start
+            targs_idx_start: self.forecast_length + targs_idx_start + self.label_len
         ]
-        tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+        targs_idx_s = targs_idx_start
+        tar_temporal_feats = self.temporal_df.iloc[targs_idx_s: self.forecast_length + targs_idx_start + self.label_len]
         src_data = self.df_to_numpy(rows)
         trg_data = self.df_to_numpy(targ_rows)
         temporal_feats = self.df_to_numpy(temporal_feats)

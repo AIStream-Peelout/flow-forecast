@@ -9,7 +9,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
     New data is appended (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 First 8 should
 
-    :param model: The PyTorch time series forecasting model for
+    :param model: The PyTorch time series forecasting model that you want to use forecasting on.
     :type model: `torch.nn.Module`
     :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series).
     Ocassionally batch_size will not be present so at some points it will only be (forecast_history, n_time_series)
