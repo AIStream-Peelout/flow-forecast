@@ -103,7 +103,7 @@ def deep_explain_model_summary_plot(
     # L - batch size, N - history length, M - feature size
     s_values_list = []
     if isinstance(history, list):
-        model.model = model.to(device)
+        model.model = model.model.to(device)
         deep_explainer = shap.DeepExplainer(model.model, history)
         shap_values = deep_explainer.shap_values(history)
         s_values_list.append(shap_values)
