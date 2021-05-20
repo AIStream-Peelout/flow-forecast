@@ -95,7 +95,6 @@ def deep_explain_model_summary_plot(
 
     history, forecast_start_idx = handle_dl_output(csv_test_loader, model.params["dataset_params"]["class"],
                                                    datetime_start, device)
-    
     background_tensor = _prepare_background_tensor(csv_test_loader)
     background_tensor = background_tensor.to(device)
     model.model.eval()
