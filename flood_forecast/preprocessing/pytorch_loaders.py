@@ -372,8 +372,10 @@ class TemporalTestLoader(CSVTestLoader):
             if self.decoder_step_len:
                 print("The label length is " + str(self.decoder_step_len))
                 targs_idx_start = targs_idx_start - self.decoder_step_len
+                print(targs_idx_start)
                 target_idx_start = targs_idx_start - self.decoder_step_len
                 end_idx = self.forecast_total + target_idx_start + self.decoder_step_len
+                print(end_idx)
                 tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: end_idx]
                 targ_rows = self.other_feats.iloc[targs_idx_start: end_idx]
             else:
