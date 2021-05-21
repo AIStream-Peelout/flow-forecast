@@ -77,7 +77,7 @@ class TestInformer(unittest.TestCase):
         }
         d = TemporalTestLoader(["month", "day", "day_of_week", "hour"], kwargs3, 3)
         src, trg, df, _ = d[0]
-        self.assertEqual(trg[0].shape[0], 354)
+        self.assertEqual(trg[0].shape[0], 339)
         self.assertEqual(src[0].shape[0], 5)
         self.assertEqual(len(df.index), 341)
 
