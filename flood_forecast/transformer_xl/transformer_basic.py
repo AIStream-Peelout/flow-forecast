@@ -81,6 +81,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             use_mask=False,
             meta_data=None,
             final_act=None,
+            squashed_embedding=False,
             n_heads=8):
         """
         Uses a number of encoder layers with simple linear decoder layer.
@@ -98,10 +99,14 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.out_dim = output_dim
         self.mask_it = use_mask
         self.final_act = None
+        self.squashed = None
         if final_act:
             self.final_act = activation_dict[final_act]
         if meta_data:
             self.meta_merger = MergingModel(meta_data["method"], meta_data["params"])
+        if squashed_embedding:
+            self.squashed = torch.nn.Linear(seq_length, 1)
+            self.unsquashed = torch.nn.Linear(1, seq_length)
 
     def make_embedding(self, x: torch.Tensor):
         x = self.dense_shape(x)
@@ -113,6 +118,15 @@ class CustomTransformerDecoder(torch.nn.Module):
         else:
             # Allow no mask
             x = self.transformer_enc(x)
+        if self.squashed:
+            x = self.squashed(x)
+        return x
+
+    def __squashed__embedding(self, x: torch.Tensor):
+        x = x.permute(1, 2, 0)  # (B, N, L)
+        x = self.squashed(x)
+        x = self.unsquashed(x)
+        x = x.permute(1, 0, 2)  # (L, B, N)
         return x
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
@@ -135,6 +149,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         else:
             # Allow no mask
             x = self.transformer_enc(x)
+        if self.squashed:
+            x = self.__squashed__embedding(x)
         x = self.output_dim_layer(x)
         # (B, N, L)
         x = x.permute(1, 2, 0)
