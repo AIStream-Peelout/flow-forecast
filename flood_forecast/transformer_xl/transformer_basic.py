@@ -126,7 +126,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         x = x.permute(1, 2, 0)  # (B, N, L)
         x = self.squashed(x)
         x = self.unsquashed(x)
-        x = x.permute(1, 2, 0)  # (B, L, N)
+        x = x.permute(0, 2, 1)  # (B, L, N)
         x = x.permute(1, 0, 2)  # (L, B, N)
         return x
 
