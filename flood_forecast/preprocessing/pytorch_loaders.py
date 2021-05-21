@@ -385,8 +385,9 @@ class TemporalTestLoader(CSVTestLoader):
             trg_data = self.df_to_numpy(targ_rows)
             temporal_feat = self.df_to_numpy(temporal_feat)
             tar_temp = self.df_to_numpy(tar_temporal_feats)
+            decoder_adjust = self.decoder_step_len if self.decoder_step_len else 0
             all_rows_orig = self.original_df.iloc[
-                idx: self.forecast_total + target_idx_start
+                idx: self.forecast_total + target_idx_start + decoder_adjust
             ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return (src_data, temporal_feat), (tar_temp, trg_data), all_rows_orig, target_idx_start
