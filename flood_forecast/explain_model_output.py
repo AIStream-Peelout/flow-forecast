@@ -32,7 +32,6 @@ def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -
     :rtype: Tuple[torch.Tensor, int]
     """
     if dl_class == "TemporalLoader":
-        device = "cpu"
         his, tar, _, forecast_start_idx = dl.get_from_start_date(datetime_start)
         t = tar[1].unsqueeze(0).to(device)
         t1 = tar[0].unsqueeze(0).to(device)
@@ -104,7 +103,7 @@ def deep_explain_model_summary_plot(
     # L - batch size, N - history length, M - feature size
     s_values_list = []
     if isinstance(history, list):
-        model.model = model.model.to("cpu")
+        model.model = model.model.to(device)
         deep_explainer = shap.DeepExplainer(model.model, history)
         print(history[1].type())
         shap_values = deep_explainer.shap_values(history)
