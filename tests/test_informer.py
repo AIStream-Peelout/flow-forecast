@@ -75,7 +75,7 @@ class TestInformer(unittest.TestCase):
             "df_path": "tests/test_data2/keag_small.csv",
             "kwargs": kwargs2
         }
-        d = TemporalTestLoader(["month", "day", "day_of_week", "hour"], kwargs3, 18)
+        d = TemporalTestLoader(["month", "day", "day_of_week", "hour"], kwargs3, 3)
         src, trg, df, _ = d[0]
         self.assertEqual(trg[0].shape[0], 354)
         self.assertEqual(src[0].shape[0], 5)
