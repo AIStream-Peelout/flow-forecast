@@ -105,6 +105,7 @@ def deep_explain_model_summary_plot(
     if isinstance(history, list):
         model.model = model.model.to(device)
         deep_explainer = shap.DeepExplainer(model.model, history)
+        print(history[1].type())
         shap_values = deep_explainer.shap_values(history)
         s_values_list.append(shap_values)
     else:
