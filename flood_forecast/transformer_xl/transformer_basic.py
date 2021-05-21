@@ -126,7 +126,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         x = x.permute(1, 2, 0)  # (B, N, L)
         x = self.squashed(x)
         x = self.unsquashed(x)
-        x = x.permute(1, 0, 2)  # (L, B, N)
+        x = x.permute(1, 2, 0)  # (L , N, B)
+        print(x.shape)
         return x
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
