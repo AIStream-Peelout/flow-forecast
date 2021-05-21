@@ -102,6 +102,9 @@ def evaluate_model(
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
+        print("Shape info below")
+        print(end_tensor.shape)
+        print(df_train_and_test)
         g_loss = False
         probablistic = True if "probabilistic" in inference_params else False
         if isinstance(end_tensor, tuple) and not probablistic:
