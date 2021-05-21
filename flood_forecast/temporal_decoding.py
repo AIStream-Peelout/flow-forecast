@@ -70,4 +70,4 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
             filled_target = torch.cat((filled_target, filled_target1), dim=1)
         assert out1[0, 0, 0] != 0
         assert out1[0, 0, 0] != 0
-    return out1[:, -max_len:, :n_target]
+    return out1[:, :, :n_target]
