@@ -370,6 +370,7 @@ class TemporalTestLoader(CSVTestLoader):
             temporal_feat = self.temporal_df.iloc[idx: self.forecast_history + idx]
             end_idx = self.forecast_total + target_idx_start
             if self.decoder_step_len:
+                targs_idx_start = targs_idx_start - self.decoder_step_len
                 end_idx = self.forecast_total + target_idx_start + self.decoder_step_len
                 tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: end_idx]
                 targ_rows = self.other_feats.iloc[targs_idx_start: end_idx]
