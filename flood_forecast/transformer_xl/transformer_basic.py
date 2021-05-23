@@ -119,6 +119,7 @@ class CustomTransformerDecoder(torch.nn.Module):
             # Allow no mask
             x = self.transformer_enc(x)
         if self.squashed:
+            x = x.permute(1, 2, 0)
             x = self.squashed(x)
         return x
 
