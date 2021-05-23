@@ -85,6 +85,22 @@ class CustomTransformerDecoder(torch.nn.Module):
             n_heads=8):
         """
         Uses a number of encoder layers with simple linear decoder layer.
+        :param seq_length: The number of historical time steps to pass into the model
+        :type : torch.Tensor
+        :param output_seq_length: The length of the outputted forecast
+        :type output_seq_length: torch.Tensor
+        :param d_model: The embedding dimension to use for the model
+        :type x_dec: torch.Tensor
+        :param x_mark_dec: A tensor with the relevant datetime information. (batch_size, seq_len, n_datetime_feats)
+        :type x_mark_dec: torch.Tensor
+        :param enc_self_mask: The mask of the encoder model has size (), defaults to None
+        :type enc_self_mask: [type], optional
+        :param dec_self_mask: [description], defaults to None
+        :type dec_self_mask: [type], optional
+        :param dec_enc_mask: [description], defaults to None
+        :type dec_enc_mask: [type], optional
+        :return: Returns a PyTorch tensor of shape (batch_size, ?, ?)
+        :rtype: torch.Tensor
         """
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
