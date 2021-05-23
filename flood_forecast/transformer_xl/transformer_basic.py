@@ -83,24 +83,34 @@ class CustomTransformerDecoder(torch.nn.Module):
             final_act=None,
             squashed_embedding=False,
             n_heads=8):
-        """
-        Uses a number of encoder layers with simple linear decoder layer.
-        :param seq_length: The number of historical time steps to pass into the model
-        :type : torch.Tensor
-        :param output_seq_length: The length of the outputted forecast
-        :type output_seq_length: torch.Tensor
-        :param d_model: The embedding dimension to use for the model
-        :type x_dec: torch.Tensor
-        :param x_mark_dec: A tensor with the relevant datetime information. (batch_size, seq_len, n_datetime_feats)
-        :type x_mark_dec: torch.Tensor
-        :param enc_self_mask: The mask of the encoder model has size (), defaults to None
-        :type enc_self_mask: [type], optional
-        :param dec_self_mask: [description], defaults to None
-        :type dec_self_mask: [type], optional
-        :param dec_enc_mask: [description], defaults to None
-        :type dec_enc_mask: [type], optional
-        :return: Returns a PyTorch tensor of shape (batch_size, ?, ?)
-        :rtype: torch.Tensor
+        """Uses a number of encoder layers with simple linear decoder layer.
+
+        :param seq_length: The number of historical time-steps fed into the model in each forward pass.
+        :type seq_length: int
+        :param output_seq_length: The number of forecasted time-steps outputted by the model.
+        :type output_seq_length: int
+        :param n_time_series: The total number of time series present (targets + features)
+        :type n_time_series: int
+        :param d_model: The embedding dim of the mode, defaults to 128
+        :type d_model: int, optional
+        :param output_dim: The output dimension (should correspond to n_targets), defaults to 1
+        :type output_dim: int, optional
+        :param n_layers_encoder: The number of encoder layers, defaults to 6
+        :type n_layers_encoder: int, optional
+        :param forward_dim: The forward embedding dim, defaults to 2048
+        :type forward_dim: int, optional
+        :param dropout: How much dropout to use, defaults to 0.1
+        :type dropout: float, optional
+        :param use_mask: Whether to use subsquent sequence mask during training, defaults to False
+        :type use_mask: bool, optional
+        :param meta_data: Whether to use static meta-data, defaults to None
+        :type meta_data: str, optional
+        :param final_act: Whether to use a final activation function, defaults to None
+        :type final_act: str, optional
+        :param squashed_embedding: Whether to create a one 1-D time embedding, defaults to False
+        :type squashed_embedding: bool, optional
+        :param n_heads: [description], defaults to 8
+        :type n_heads: int, optional
         """
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
