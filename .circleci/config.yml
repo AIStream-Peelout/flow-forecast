@@ -168,10 +168,7 @@ jobs:
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_merging_models.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_squashed.py
-            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/pytorc_train_tests.py
-            
       - run:
           name: upload_stuff
           when: always
