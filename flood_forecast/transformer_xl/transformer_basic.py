@@ -81,9 +81,36 @@ class CustomTransformerDecoder(torch.nn.Module):
             use_mask=False,
             meta_data=None,
             final_act=None,
+            squashed_embedding=False,
             n_heads=8):
-        """
-        Uses a number of encoder layers with simple linear decoder layer.
+        """Uses a number of encoder layers with simple linear decoder layer.
+
+        :param seq_length: The number of historical time-steps fed into the model in each forward pass.
+        :type seq_length: int
+        :param output_seq_length: The number of forecasted time-steps outputted by the model.
+        :type output_seq_length: int
+        :param n_time_series: The total number of time series present (targets + features)
+        :type n_time_series: int
+        :param d_model: The embedding dim of the mode, defaults to 128
+        :type d_model: int, optional
+        :param output_dim: The output dimension (should correspond to n_targets), defaults to 1
+        :type output_dim: int, optional
+        :param n_layers_encoder: The number of encoder layers, defaults to 6
+        :type n_layers_encoder: int, optional
+        :param forward_dim: The forward embedding dim, defaults to 2048
+        :type forward_dim: int, optional
+        :param dropout: How much dropout to use, defaults to 0.1
+        :type dropout: float, optional
+        :param use_mask: Whether to use subsquent sequence mask during training, defaults to False
+        :type use_mask: bool, optional
+        :param meta_data: Whether to use static meta-data, defaults to None
+        :type meta_data: str, optional
+        :param final_act: Whether to use a final activation function, defaults to None
+        :type final_act: str, optional
+        :param squashed_embedding: Whether to create a one 1-D time embedding, defaults to False
+        :type squashed_embedding: bool, optional
+        :param n_heads: [description], defaults to 8
+        :type n_heads: int, optional
         """
         super().__init__()
         self.dense_shape = torch.nn.Linear(n_time_series, d_model)
@@ -98,10 +125,14 @@ class CustomTransformerDecoder(torch.nn.Module):
         self.out_dim = output_dim
         self.mask_it = use_mask
         self.final_act = None
+        self.squashed = None
         if final_act:
             self.final_act = activation_dict[final_act]
         if meta_data:
             self.meta_merger = MergingModel(meta_data["method"], meta_data["params"])
+        if squashed_embedding:
+            self.squashed = torch.nn.Linear(seq_length, 1)
+            self.unsquashed = torch.nn.Linear(1, seq_length)
 
     def make_embedding(self, x: torch.Tensor):
         x = self.dense_shape(x)
@@ -113,6 +144,17 @@ class CustomTransformerDecoder(torch.nn.Module):
         else:
             # Allow no mask
             x = self.transformer_enc(x)
+        if self.squashed:
+            x = x.permute(1, 2, 0)
+            x = self.squashed(x)
+        return x
+
+    def __squashed__embedding(self, x: torch.Tensor):
+        x = x.permute(1, 2, 0)  # (B, N, L)
+        x = self.squashed(x)
+        x = self.unsquashed(x)
+        x = x.permute(0, 2, 1)  # (B, L, N)
+        x = x.permute(1, 0, 2)  # (L, B, N)
         return x
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
@@ -135,6 +177,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         else:
             # Allow no mask
             x = self.transformer_enc(x)
+        if self.squashed:
+            x = self.__squashed__embedding(x)
         x = self.output_dim_layer(x)
         # (B, N, L)
         x = x.permute(1, 2, 0)
