@@ -16,7 +16,8 @@ class TestTransformerDecoderEmbedding(unittest.TestCase):
     def test_encoder(self):
         m = self.transformer_encoder.make_embedding(torch.rand(10, 20, 5))
         self.assertEqual(m.shape[2], 1)
-        # self.assertEqual(m.shape[1], 128)
+        self.assertEqual(m.shape[1], 128)
+        self.assertEqual(m.shape[0], 10)
 
 if __name__ == '__main__':
     unittest.main()
