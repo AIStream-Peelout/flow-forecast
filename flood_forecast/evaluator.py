@@ -84,10 +84,11 @@ def evaluate_model(
     .. code-block:: python
 
         from flood_forecast.evaluator import evaluate_model
-        forecast_model = PyTorchForecast(config_file)
+        forecast_model = PyTorchForecast(train_path, valid_path, test_path, config_file)
         e_log, df_train_test, f_idx, df_preds = evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
         print(e_log) # {"MSE":0.2, "MAPE":0.1}
-        print(df_train_test) #
+        print(len(df_train_test)) # 351 (will always be forecast_history (5) + hours_to_forecast (336))
+        print(f_idx) # some integer value
         ...
     '''
     """
