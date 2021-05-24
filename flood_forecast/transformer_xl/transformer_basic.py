@@ -109,7 +109,7 @@ class CustomTransformerDecoder(torch.nn.Module):
         :type final_act: str, optional
         :param squashed_embedding: Whether to create a one 1-D time embedding, defaults to False
         :type squashed_embedding: bool, optional
-        :param n_heads: [description], defaults to 8
+        :param n_heads: The number of heads in the multi head attn e, defaults to 8
         :type n_heads: int, optional
         """
         super().__init__()
@@ -243,3 +243,15 @@ def greedy_decode(
             ys = torch.cat((ys, real_target[:, i, :].unsqueeze(1)), 1)
         memory = model.encode_sequence(src[:, i + 1:, :], src_mask)
     return ys[:, 1:, :]
+
+
+def make_embedding(model, df, row_idx):
+    """
+    Function to generate embeddings for a trained temporal model
+    """
+    relevant_cols = model.params["dataset_params"]["relevant_cols"]
+    f_history = model.params["dataset_params"]["forecast_history"]
+    print(df.iloc[row_idx:f_history][relevant_cols])
+    n_vals = model.training.scale.transform(df.iloc[row_idx:f_history + row_idx][relevant_cols])
+    embed = model.model.make_embedding(torch.from_numpy(n_vals.unsqueeze(0)))
+    return embed
