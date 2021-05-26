@@ -102,7 +102,7 @@ class TestInformer(unittest.TestCase):
     def test_t_loade2(self):
         s_wargs = {
                     "file_path": "tests/test_data/keag_small.csv",
-                    "forecast_history": 39,
+                    "forecast_history": 30,
                     "forecast_length": 2,
                     "target_col": ["cfs"],
                     "relevant_cols": ["cfs", "temp", "precip"],
