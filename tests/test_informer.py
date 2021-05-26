@@ -100,11 +100,30 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(d.shape[1], 336)
 
     def test_t_loade2(self):
-        t_load = TemporalLoader(["hour"], self.kwargs, 30)
+        s_wargs = {
+                    "file_path": "tests/test_data/keag_small.csv",
+                    "forecast_history": 30,
+                    "forecast_length": 2,
+                    "target_col": ["cfs"],
+                    "relevant_cols": ["cfs", "temp", "precip"],
+                    "sort_column": "date",
+                    "feature_params":
+                    {
+                        "datetime_params": {
+                            "month": "numerical",
+                            "day": "numerical",
+                            "day_of_week": "numerical",
+                            "hour": "numerical"
+                        }
+                    }
+                }
+        s_wargs["forecast_history"] = 39
+        t_load = TemporalLoader(["hour"], s_wargs, 30)
         src, trg = t_load[0]
-        self.assertEqual(trg[1][0].shape[0], 30)
-        self.assertEqual(trg[0][0].shape[0], 30)
-        self.assertEqual(trg[1][1].shape[0], 3)
-        self.assertEqual(trg[0][1].shape[1], 3)
+        print(trg[1].shape)
+        self.assertEqual(trg[1].shape[0], 30)
+        self.assertEqual(trg[0].shape[0], 30)
+        self.assertEqual(trg[1].shape[0], 3)
+        self.assertEqual(trg[0].shape[1], 3)
         #  this test makes sure the label_len parameter works
         print("Complet")
