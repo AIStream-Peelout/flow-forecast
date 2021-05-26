@@ -118,11 +118,11 @@ class TestInformer(unittest.TestCase):
                     }
                 }
         s_wargs["forecast_history"] = 39
-        t_load = TemporalLoader(["hour"], s_wargs, 30)
+        t_load = TemporalLoader(["hour"], s_wargs, 30
         src, trg = t_load[0]
         print(trg[1].shape)
-        self.assertEqual(trg[1].shape[0], 30)
-        self.assertEqual(trg[0].shape[0], 30)
+        self.assertEqual(trg[1].shape[0], 32)
+        self.assertEqual(trg[0].shape[0], 32)
         self.assertEqual(trg[1].shape[0], 3)
         self.assertEqual(trg[0].shape[1], 3)
         #  this test makes sure the label_len parameter works
