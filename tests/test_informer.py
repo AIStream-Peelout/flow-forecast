@@ -123,7 +123,7 @@ class TestInformer(unittest.TestCase):
         print(trg[1].shape)
         self.assertEqual(trg[1].shape[0], 32)
         self.assertEqual(trg[0].shape[0], 32)
-        self.assertEqual(trg[1].shape[0], 3)
+        self.assertEqual(trg[1].shape[1], 3)
         self.assertEqual(trg[0].shape[1], 3)
         #  this test makes sure the label_len parameter works
         print("Complet")
