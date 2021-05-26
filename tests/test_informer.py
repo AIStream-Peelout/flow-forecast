@@ -101,7 +101,7 @@ class TestInformer(unittest.TestCase):
 
     def test_t_loade2(self):
         t_load = TemporalLoader(["hour"], self.kwargs, 30)
-        src, trg = t_load[0]
+        src, trg = t_load
         self.assertEqual(trg[1].shape[0], 30)
         self.assertEqual(trg[0].shape[0], 30)
         self.assertEqual(trg[1].shape[0], 3)
