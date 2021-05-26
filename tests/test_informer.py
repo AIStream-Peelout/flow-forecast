@@ -98,3 +98,13 @@ class TestInformer(unittest.TestCase):
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
+
+    def test_t_loade2(self):
+        t_load = TemporalLoader(["hour"], self.kwargs, 30)
+        src, trg = t_load
+        self.assertEqual(trg[1].shape[0], 30)
+        self.assertEqual(trg[0].shape[0], 30)
+        self.assertEqual(trg[1].shape[0], 3)
+        self.assertEqual(trg[0].shape[1], 3)
+        #  this test makes sure the label_len param works
+        print("Complet")
