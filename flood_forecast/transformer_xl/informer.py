@@ -118,8 +118,8 @@ class Informer(nn.Module):
         :param dec_self_mask: [description], defaults to None
         :type dec_self_mask: [type], optional
         :param dec_enc_mask: [description], defaults to None
-        :type dec_enc_mask: [type], optional
-        :return: Returns a PyTorch tensor of shape (batch_size, ?, ?)
+        :type dec_enc_mask: torch.Tensor, optional
+        :return: Returns a PyTorch tensor of shape (batch_size, out_len, n_targets)
         :rtype: torch.Tensor
         """
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
