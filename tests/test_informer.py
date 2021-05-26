@@ -102,9 +102,9 @@ class TestInformer(unittest.TestCase):
     def test_t_loade2(self):
         t_load = TemporalLoader(["hour"], self.kwargs, 30)
         src, trg = t_load[0]
-        self.assertEqual(trg[1].shape[0], 30)
-        self.assertEqual(trg[0].shape[0], 30)
-        self.assertEqual(trg[1].shape[0], 3)
-        self.assertEqual(trg[0].shape[1], 3)
+        self.assertEqual(trg[1][0].shape[0], 30)
+        self.assertEqual(trg[0][0].shape[0], 30)
+        self.assertEqual(trg[1][1].shape[0], 3)
+        self.assertEqual(trg[0][1].shape[1], 3)
         #  this test makes sure the label_len parameter works
         print("Complet")
