@@ -220,9 +220,14 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["forecast_length"] = dataset_params["forecast_length"]
             start_end_params["target_col"] = dataset_params["target_col"]
             start_end_params["relevant_cols"] = dataset_params["relevant_cols"]
+            label_len = 0
+            if "label_len" in dataset_params:
+                label_len = dataset_params["label_len"]
+
             loader = TemporalLoader(
                 dataset_params["temporal_feats"],
-                start_end_params)
+                start_end_params,
+                label_len=label_len)
         else:
             # TODO support custom DataLoader
             loader = None

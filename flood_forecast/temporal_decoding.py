@@ -9,7 +9,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
     New data is appended (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 First 8 should
 
-    :param model: The PyTorch time series forecasting model for
+    :param model: The PyTorch time series forecasting model that you want to use forecasting on.
     :type model: `torch.nn.Module`
     :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series).
     Ocassionally batch_size will not be present so at some points it will only be (forecast_history, n_time_series)
@@ -53,7 +53,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     print(trg[:, d - forecast_length:decoder_seq_len, :].shape)
     filled_target = filled_target.to(device)
     # assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
-    assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
+    assert filled_target[0, -decoder_seq_len, 0] != trg[0, -decoder_seq_len, 0]
     assert filled_target[0, -1, 0] != trg[0, -1, 0]
     for i in range(0, max_len, forecast_length):
         residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
@@ -70,4 +70,4 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
             filled_target = torch.cat((filled_target, filled_target1), dim=1)
         assert out1[0, 0, 0] != 0
         assert out1[0, 0, 0] != 0
-    return out1[:, :, :n_target]
+    return out1[:, -max_len:, :n_target]
