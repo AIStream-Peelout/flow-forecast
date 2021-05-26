@@ -98,8 +98,3 @@ class TestInformer(unittest.TestCase):
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
-
-    def test_temporal_load_2(self):
-        loader = TemporalLoader(["hour"], self.kwargs, 30)
-        self.assertEqual(loader[0][0].shape[0], 30)
-        self.assertEqual(loader[0][0].shape[1], 5)
