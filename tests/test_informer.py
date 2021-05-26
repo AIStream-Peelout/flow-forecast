@@ -120,10 +120,11 @@ class TestInformer(unittest.TestCase):
         s_wargs["forecast_history"] = 39
         t_load = TemporalLoader(["month", "day", "day_of_week"], s_wargs, 30)
         src, trg = t_load[0]
+        print(trg[0])
         print(trg[1].shape)
         self.assertEqual(trg[1].shape[0], 32)
         self.assertEqual(trg[0].shape[0], 32)
-        self.assertEqual(trg[1].shape[1], 4)
-        self.assertEqual(trg[0].shape[1], 4)
+        self.assertEqual(trg[1].shape[1], 3)
+        self.assertEqual(trg[0].shape[1], 3)
         #  this test makes sure the label_len parameter works
         print("Complet")
