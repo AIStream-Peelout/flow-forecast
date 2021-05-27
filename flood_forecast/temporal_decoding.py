@@ -56,7 +56,8 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     assert filled_target[0, -decoder_seq_len, 0] != trg[0, -decoder_seq_len, 0]
     assert filled_target[0, -1, 0] != trg[0, -1, 0]
     for i in range(0, max_len, forecast_length):
-        residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
+        # CHANGE THIS LINE !!
+        residual = decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
             out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
