@@ -37,10 +37,7 @@ class SimpleTransformer(torch.nn.Module):
             self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, x: torch.Tensor, t: torch.Tensor, tgt_mask=None, src_mask=None):
-        if src_mask:
-            x = self.encode_sequence(x[:, :-1, :], src_mask)
-        else:
-            x = self.encode_sequence(x[:, :-1, :], src_mask)
+        x = self.encode_sequence(x[:, :-1, :], src_mask)
         return self.decode_seq(x, t, tgt_mask)
 
     def basic_feature(self, x: torch.Tensor):
