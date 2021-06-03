@@ -18,8 +18,24 @@ class SimpleTransformer(torch.nn.Module):
             dropout=0.1,
             forward_dim=2048,
             sigmoid=False):
-        """
-        Full transformer model
+        """A full transformer model
+
+        :param number_time_series: NOT SURE WHAT THE DIFFERENCE BETWEEN THIS AND SEQ_LENGTH IS.
+        :type number_time_series: int
+        :param seq_length: The length of your input sequence, defaults to 48
+        :type seq_length: int, optional
+        :param output_seq_len: The length of your output sequence, defaults to None
+        :type output_seq_len: int, optional
+        :param d_model: The dimensions of your model, defaults to 128
+        :type d_model: int, optional
+        :param n_heads: The number of heads in each encoder/decoder block, defaults to 8
+        :type n_heads: int, optional
+        :param dropout: The fraction of dropout you wish to apply during training, defaults to 0.1 (currently not functional)
+        :type dropout: float, optional
+        :param forward_dim: Currently not functional, defaults to 2048
+        :type forward_dim: int, optional
+        :param sigmoid: Whether to apply a sigmoid activation to the final layer (useful for binary classification), defaults to False
+        :type sigmoid: bool, optional
         """
         super().__init__()
         if output_seq_len is None:
