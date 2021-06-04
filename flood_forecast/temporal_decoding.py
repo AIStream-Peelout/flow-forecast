@@ -40,11 +40,13 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         src_temp = src_temp.unsqueeze(0)
         tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg[:, :max_len, :])
+    # Create a dummy variable of the values
     filled_target = trg.clone()[:, 0:decoder_seq_len, :].to(device)
     src = src.to(device)
     trg = trg.to(device)
     src_temp = src_temp.to(device)
     tar_temp = tar_temp.to(device)
+    # Fill the actual target variables with dummy data
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :n_target]).to(device)
     # Useless variable to avoid long line error..
     d = decoder_seq_len
@@ -60,11 +62,15 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         residual = decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
         if residual != decoder_seq_len:
+            # assert filled_target[1] == decoder_seq_len
+            # assert tar_temp[:, -residual:, :].shape[1] == decoder_seq_len
             out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
         else:
             out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
         out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
+        # WTF is this shit? !
+        # Need better variable names
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
         if filled_target1.shape[1] == forecast_length * 2:
             filled_target1[:, -forecast_length * 2:-forecast_length, :n_target] = out[:, -forecast_length:, :]
