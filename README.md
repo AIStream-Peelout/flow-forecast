@@ -6,7 +6,7 @@ Flow forecast is an open-source deep learning for time series forecasting framew
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
-| Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=latest)](https://flow-forecast.readthedocs.io/en/latest/?badge=latest)|
+| Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=latest)](https://flow-forecast.readthedocs.io/en/latest/)|
 | CodeCov| [![codecov](https://codecov.io/gh/AIStream-Peelout/flow-forecast/branch/master/graph/badge.svg)](https://codecov.io/gh/AIStream-Peelout/flow-forecast)|
 | CodeFactor| [![CodeFactor](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast/badge)](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast)|
 ## Getting Started 
@@ -14,7 +14,7 @@ Flow forecast is an open-source deep learning for time series forecasting framew
 Using the library
 1. Run `pip install flood-forecast`
 2. Detailed info on training models can be found on the [Wiki](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/364019713/Training+Models).
-3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview)
+3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview) 
 
 **Models currently supported**
 
@@ -24,7 +24,7 @@ Using the library
 4. Transformer with a linear decoder: A transformer with n-encoder blocks (this is tunable) and a linear decoder.
 5. [DA-RNN](https://arxiv.org/abs/1704.02971): A well rounded model with which utilizes a LSTM + attention. 
 6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235): 
-7. [Transformer XL]:
+7. [Transformer XL](https://arxiv.org/abs/1901.02860):
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
 
