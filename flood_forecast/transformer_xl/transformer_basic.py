@@ -20,8 +20,8 @@ class SimpleTransformer(torch.nn.Module):
             sigmoid=False):
         """A full transformer model
 
-        :param number_time_series: NOT SURE WHAT THE DIFFERENCE BETWEEN THIS
-            AND SEQ_LENGTH IS.
+        :param number_time_series: The total number of time series present
+            (e.g. n_feature_time_series + n_targets)
         :type number_time_series: int
         :param seq_length: The length of your input sequence, defaults to 48
         :type seq_length: int, optional
