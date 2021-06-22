@@ -48,8 +48,6 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     tar_temp = tar_temp.to(device)
     # Fill the actual target variables with dummy data
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :n_target]).to(device)
-    # Useless variable to avoid long line error..
-    # d = decoder_seq_len
     filled_target = filled_target.to(device)
     # assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -decoder_seq_len, 0] != trg[0, -decoder_seq_len, 0]
@@ -57,16 +55,11 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     for i in range(0, max_len, forecast_length):
         # CHANGE THIS LINE !!
         residual = decoder_seq_len
+        print("shapes below")
         print(filled_target.shape)
-        print(tar_temp[:, -residual:, :].shape)
+        print(tar_temp[:, i:i + residual:, :].shape)
         filled_target = filled_target[:, -residual:, :]
-        if residual != decoder_seq_len:
-            # assert filled_target[1] == decoder_seq_len
-            # assert tar_temp[:, -residual:, :].shape[1] == decoder_seq_len
-            print("entered block")
-            out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
-        else:
-            out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
+        out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
         out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
         # WTF is this shit? !
