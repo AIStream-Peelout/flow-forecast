@@ -11,7 +11,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
 
     :param model: The PyTorch time series forecasting model that you want to use forecasting on.
     :type model: `torch.nn.Module`
-    :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series).
+    :param src: The forecast_history tensor. Should be of the dimension (batch_size, forecast_history, n_time_series).
     Ocassionally batch_size will not be present so at some points it will only be (forecast_history, n_time_series)
     :type src: torch.Tensor
     :param trg: The target tensor. Should be of dimension (batch_size, time_steps_to_forecast, n_time_series)
