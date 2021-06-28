@@ -92,9 +92,9 @@ class TestInformer(unittest.TestCase):
 
     def test_decoding_2(self):
         src = torch.rand(20, 3)
-        trg = torch.rand(354, 3)
+        trg = torch.rand(355, 3)
         src1 = torch.rand(20, 4)
-        trg1 = torch.rand(354, 4)
+        trg1 = torch.rand(355, 4)
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
