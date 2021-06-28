@@ -14,13 +14,14 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series).
     Ocassionally batch_size will not be present so at some points it will only be (forecast_history, n_time_series)
     :type src: torch.Tensor
-    :param trg: The target tensor. Should be of dimension (batch_size, hours_to_forecast, n_time_series)
+    :param trg: The target tensor. Should be of dimension (batch_size, time_steps_to_forecast, n_time_series)
     :type trg: torch.Tensor
     :param forecast_length: The of length of the forecast the model makes at each forward pass.
     :type forecast_length: torch.Tensor
     :param src_temp: The temporal features for the forecast_history steps
     :type src_temp: int
-    :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, max_len+diff, n_time_series)
+    :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, ts+offset, n_time_series)
+    Where the offset is the decoder_seq_len - 1. So in this case it would be 336+19 = 355
     :type tar_temp: torch.Tensor
     :param unknown_cols_st: The unknown columns
     :type unknown_cols_st: int
