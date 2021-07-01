@@ -25,7 +25,6 @@ class CSVDataLoader(Dataset):
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
-        id_series_col=None,
         no_scale=False
 
     ):
@@ -54,7 +53,6 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
-        self.series_col = id_series_col
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
@@ -101,7 +99,7 @@ class CSVDataLoader(Dataset):
         self.df.to_csv("temp_df.csv")
         self.no_scale = no_scale
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
         if self.no_scale:
@@ -151,6 +149,20 @@ class CSVDataLoader(Dataset):
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )
+
+
+class CSVSeriesIDLoader(CSVDataLoader):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
+        super().__init__(**main_params)
+        self.series_id_col = series_id_col
+        self.return_method = return_method
+        self.return_all_series = return_all
+
+    def __getitem__(self, idx: int):
+        return super().__getitem__(idx)
+
+    def __sample_series_id__(idx, series_id):
+        pass
 
 
 class CSVTestLoader(CSVDataLoader):
@@ -301,7 +313,7 @@ class TemporalLoader(CSVDataLoader):
             self,
             time_feats: List[str],
             kwargs):
-        """[summary]
+        """This a data-loader meant sepecifically for temporal features
 
         :param time_feats: [description]
         :type time_feats: List[str]
