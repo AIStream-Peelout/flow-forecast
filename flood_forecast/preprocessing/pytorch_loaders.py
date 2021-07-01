@@ -158,8 +158,15 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
+        self.unique_cols = self.original_df[series_id_col].unique().tolist()
+        # df_list = []
+        for col in self.unique_cols:
+            pass
+            # df_list.append(self.df[self.df[self.series_id_col] == col])
 
     def __getitem__(self, idx: int):
+        if self.return_all_series:
+            pass
         return super().__getitem__(idx)
 
     def __sample_series_id__(idx, series_id):
