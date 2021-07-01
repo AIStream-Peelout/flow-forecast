@@ -153,6 +153,7 @@ class CSVDataLoader(Dataset):
 
 class CSVSeriesIDLoader(CSVDataLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
+        main_params["relevant_cols"].append(series_id_col)
         super().__init__(**main_params)
         self.series_id_col = series_id_col
         self.return_method = return_method
