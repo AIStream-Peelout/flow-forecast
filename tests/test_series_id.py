@@ -1,7 +1,5 @@
 from flood_forecast.preprocessing.pytorch_loaders import CSVSeriesIDLoader
 import unittest
-import pandas as pd
-import os
 
 
 class TestInterpolationCSVLoader(unittest.TestCase):
