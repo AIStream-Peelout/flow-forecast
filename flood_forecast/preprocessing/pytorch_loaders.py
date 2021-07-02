@@ -153,19 +153,41 @@ class CSVDataLoader(Dataset):
 
 class CSVSeriesIDLoader(CSVDataLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
+        """A da
+
+        :param series_id_col: s
+        :type series_id_col: str
+        :param main_params: [description]
+        :type main_params: dict
+        :param return_method: [description]
+        :type return_method: str
+        :param return_all: [description], defaults to True
+        :type return_all: bool, optional
+        """
         main_params["relevant_cols"].append(series_id_col)
         super().__init__(**main_params)
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
         self.unique_cols = self.original_df[series_id_col].unique().tolist()
-        # df_list = []
+        df_list = []
         for col in self.unique_cols:
-            pass
-            # df_list.append(self.df[self.df[self.series_id_col] == col])
+            df_list.append(self.df[self.df[self.series_id_col] == col])
+        self.listed_vals = df_list
 
     def __getitem__(self, idx: int):
         if self.return_all_series:
+            # TO-DO
+            src_list = []
+            targ_list = []
+            for va in self.listed_vals:
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].numpy())
+                targ_start_idx = idx + self.forecast_history
+                targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].numpy())
+                src_list.append(t)
+                targ_list.append(targ)
+                # targ_list ss
+        else:
             pass
         return super().__getitem__(idx)
 
