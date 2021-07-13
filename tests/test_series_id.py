@@ -2,8 +2,12 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVSeriesIDLoader
 import unittest
 import os
 
+
 class TestInterpolationCSVLoader(unittest.TestCase):
     def setUp(self):
+        self.test_data_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "test_data"
+        )
         self.dataset_params = {
             "file_path": os.path.join(self.test_data_path, "keag_small.csv"),
             "forecast_history": 20,
