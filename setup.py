@@ -29,7 +29,7 @@ setup(
         "flood_forecast.custom"],
     license='Public',
     description="An open source framework for deep time series forecasting built with PyTorch.",
-    long_description='Flow Forecast is the top open source deep learning for time series forecasting and classification framework. We were the original framework to contain models like the transformer and have now expanded to include all popular deep learning models. For more information please see our documentation.',
+    long_description='Flow Forecast is the top open source deep learning for time series forecasting and classification framework. We were the original framework to contain models like the transformer and have now expanded to include all popular deep learning models.',
     install_requires=install_requires,
     extras_require={
         'dev': dev_requirements})
