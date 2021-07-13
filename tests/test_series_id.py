@@ -9,11 +9,11 @@ class TestInterpolationCSVLoader(unittest.TestCase):
             os.path.dirname(os.path.abspath(__file__)), "test_data"
         )
         self.dataset_params = {
-            "file_path": os.path.join(self.test_data_path, "keag_small.csv"),
+            "file_path": os.path.join(self.test_data_path, "test2.csv"),
             "forecast_history": 20,
             "forecast_length": 20,
             "relevant_cols": ["cfs", "temp", "precip"],
-            "target_col": ["cfs"],
+            "target_col": ["n_1"],
             "interpolate_param": False,
         }
         self.data_loader = CSVSeriesIDLoader("shit", self.dataset_params, "")
