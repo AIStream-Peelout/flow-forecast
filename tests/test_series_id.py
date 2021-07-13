@@ -2,6 +2,7 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVSeriesIDLoader
 import unittest
 import os
 
+
 class TestInterpolationCSVLoader(unittest.TestCase):
     def setUp(self):
         self.dataset_params = {
