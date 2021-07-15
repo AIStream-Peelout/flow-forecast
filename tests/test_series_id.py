@@ -12,11 +12,11 @@ class TestInterpolationCSVLoader(unittest.TestCase):
             "file_path": os.path.join(self.test_data_path, "test2.csv"),
             "forecast_history": 20,
             "forecast_length": 20,
-            "relevant_cols": ["cfs", "temp", "precip"],
-            "target_col": ["n_1"],
+            "relevant_cols": ["Lane 1 Flow (Veh/5 Minutes)", "% Observed", "day_of_week"],
+            "target_col": ["Lane 1 Flow (Veh/5 Minutes)"],
             "interpolate_param": False,
         }
-        self.data_loader = CSVSeriesIDLoader("shit", self.dataset_params, "")
+        self.data_loader = CSVSeriesIDLoader("shit", self.dataset_params, "n_1")
 
     def test_seriesid(self):
         x, y = self.data_loader[0]
