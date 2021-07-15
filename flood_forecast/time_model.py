@@ -72,7 +72,7 @@ class TimeSeriesModel(ABC):
 
     def upload_gcs(self, save_path: str, name: str, file_type: str, epoch=0, bucket_name=None):
         """
-        Function to upload model checkpoints to GCS bucket
+        Function to upload model checkpoints to GCS
         """
         if self.gcs_client:
             if bucket_name is None:
