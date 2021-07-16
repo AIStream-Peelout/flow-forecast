@@ -19,6 +19,8 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.data_loader = CSVSeriesIDLoader("n_1", self.dataset_params, "shit")
 
     def test_seriesid(self):
+        """Tests the series_id method
+        """
         x, y = self.data_loader[0]
         self.assertTrue(x)
         self.assertGreater(x[0, 0], 1)

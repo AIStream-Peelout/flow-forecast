@@ -1,4 +1,4 @@
-,5 Minutes,Lane 1 Flow (Veh/5 Minutes),# Lane Points,% Observed,day_of_week,datetime,n_1
+,min,vel,lane,obs,day_of_week,datetime,n_1
 0,04/01/2016 0:00,12,1,100,0,12,1
 1,04/01/2016 0:05,13,1,100,0,13,1
 2,04/01/2016 0:10,11,1,100,0,11,1
