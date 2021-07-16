@@ -155,13 +155,13 @@ class CSVSeriesIDLoader(CSVDataLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
         """A da
 
-        :param series_id_col: s
+        :param series_id_col: The id
         :type series_id_col: str
-        :param main_params: [description]
+        :param main_params: The central set of parameters
         :type main_params: dict
-        :param return_method: [description]
+        :param return_method: The method of return
         :type return_method: str
-        :param return_all: [description], defaults to True
+        :param return_all: Whether to return all items, defaults to True
         :type return_all: bool, optional
         """
         main_params["relevant_cols"].append(series_id_col)
@@ -186,9 +186,9 @@ class CSVSeriesIDLoader(CSVDataLoader):
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
                 src_list.append(t)
                 targ_list.append(targ)
-                # targ_list ss
+            return src_list, targ_list
         else:
-            pass
+            print("s")
         return super().__getitem__(idx)
 
     def __sample_series_id__(idx, series_id):

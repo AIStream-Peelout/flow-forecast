@@ -22,7 +22,8 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         """Tests the series_id method
         """
         x, y = self.data_loader[0]
-        self.assertTrue(x)
+        self.assertIsInstance(x, list)
+        self.assertIsInstance(y, list)
         self.assertGreater(x[0, 0], 1)
 
 if __name__ == '__main__':
