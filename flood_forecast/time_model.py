@@ -87,10 +87,10 @@ class TimeSeriesModel(ABC):
     def wandb_init(self):
         if self.params["wandb"]:
             wandb.init(
-                project=self.params["wandb"]["project"],
+                project=self.params["wandb"].get("project"),
                 config=self.params,
-                name=self.params["wandb"]["name"],
-                tags=self.params["wandb"]["tags"])
+                name=self.params["wandb"].get("name"),
+                tags=self.params["wandb"].get("tags")),
             return True
         elif "sweep" in self.params:
             print("Using Wandb config:")
@@ -220,6 +220,10 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["forecast_length"] = dataset_params["forecast_length"]
             start_end_params["target_col"] = dataset_params["target_col"]
             start_end_params["relevant_cols"] = dataset_params["relevant_cols"]
+            label_len = 0
+            if "label_len" in dataset_params:
+                label_len = dataset_params["label_len"]
+
             loader = TemporalLoader(
                 dataset_params["temporal_feats"],
                 start_end_params)
@@ -230,6 +234,7 @@ class PyTorchForecast(TimeSeriesModel):
                 dataset_params["relevant_cols"],
                 **start_end_params
             )
+
         else:
             # TODO support custom DataLoader
             loader = None

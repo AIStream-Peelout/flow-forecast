@@ -75,9 +75,9 @@ class TestInformer(unittest.TestCase):
             "df_path": "tests/test_data2/keag_small.csv",
             "kwargs": kwargs2
         }
-        d = TemporalTestLoader(["month", "day", "day_of_week", "hour"], kwargs3, 18)
+        d = TemporalTestLoader(["month", "day", "day_of_week", "hour"], kwargs3, 3)
         src, trg, df, _ = d[0]
-        self.assertEqual(trg[0].shape[0], 354)
+        self.assertEqual(trg[0].shape[0], 339)
         self.assertEqual(src[0].shape[0], 5)
         self.assertEqual(len(df.index), 341)
 
@@ -98,3 +98,33 @@ class TestInformer(unittest.TestCase):
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
+
+    def test_t_loade2(self):
+        s_wargs = {
+                    "file_path": "tests/test_data/keag_small.csv",
+                    "forecast_history": 39,
+                    "forecast_length": 2,
+                    "target_col": ["cfs"],
+                    "relevant_cols": ["cfs", "temp", "precip"],
+                    "sort_column": "date",
+                    "feature_params":
+                    {
+                        "datetime_params": {
+                            "month": "numerical",
+                            "day": "numerical",
+                            "day_of_week": "numerical",
+                            "hour": "numerical"
+                        }
+                    }
+                }
+        s_wargs["forecast_history"] = 39
+        t_load = TemporalLoader(["month", "day"], s_wargs, 30)
+        src, trg = t_load[0]
+        print(trg[0])
+        print(trg[1].shape)
+        self.assertEqual(trg[1].shape[0], 32)
+        self.assertEqual(trg[0].shape[0], 32)
+        self.assertEqual(trg[1].shape[1], 5)
+        self.assertEqual(trg[0].shape[1], 2)
+        #  this test makes sure the label_len parameter works
+        print("Complet")
