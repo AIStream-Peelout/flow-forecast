@@ -24,7 +24,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         x, y = self.data_loader[0]
         self.assertIsInstance(x, list)
         self.assertIsInstance(y, list)
-        self.assertGreater(x[0, 0], 1)
+        self.assertGreater(x[0][0, 0], 1)
 
 if __name__ == '__main__':
     unittest.main()
