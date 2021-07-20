@@ -223,10 +223,10 @@ class PyTorchForecast(TimeSeriesModel):
             label_len = 0
             if "label_len" in dataset_params:
                 label_len = dataset_params["label_len"]
+
             loader = TemporalLoader(
                 dataset_params["temporal_feats"],
-                start_end_params,
-                label_len=label_len)
+                start_end_params)
         elif the_class == "SeriesIDLoader":
             loader = CSVSeriesIDLoader(
                 data_path,
