@@ -22,7 +22,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :type src_temp: int
     :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, max_len+diff, n_time_series)
     :type tar_temp: torch.Tensor
-    :param unknown_cols_st: The unknown columns in dataset
+    :param unknown_cols_st: The unknown columns
     :type unknown_cols_st: int
     :param decoder_seq_len: The length of the sequence passed into the decoder
     :type decoder_seq_len: int
