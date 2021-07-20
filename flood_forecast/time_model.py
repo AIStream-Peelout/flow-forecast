@@ -223,7 +223,6 @@ class PyTorchForecast(TimeSeriesModel):
             label_len = 0
             if "label_len" in dataset_params:
                 label_len = dataset_params["label_len"]
-
             loader = TemporalLoader(
                 dataset_params["temporal_feats"],
                 start_end_params,

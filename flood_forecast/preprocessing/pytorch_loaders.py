@@ -342,12 +342,8 @@ class TemporalLoader(CSVDataLoader):
     def __init__(
             self,
             time_feats: List[str],
-
-        :param time_feats: [description]
-        :type time_feats: List[str]
-        :param kwargs: [description]
-        :type kwargs: [type]
-        """
+            kwargs,
+            label_len=0):
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
@@ -433,3 +429,4 @@ class TemporalTestLoader(CSVTestLoader):
             ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return (src_data, temporal_feat), (tar_temp, trg_data), all_rows_orig, target_idx_start
+            
