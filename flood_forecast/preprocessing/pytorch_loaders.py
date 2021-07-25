@@ -25,7 +25,6 @@ class CSVDataLoader(Dataset):
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
-        id_series_col=None,
         no_scale=False
 
     ):
@@ -54,7 +53,6 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
-        self.series_col = id_series_col
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
@@ -101,7 +99,7 @@ class CSVDataLoader(Dataset):
         self.df.to_csv("temp_df.csv")
         self.no_scale = no_scale
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
         if self.no_scale:
@@ -120,6 +118,9 @@ class CSVDataLoader(Dataset):
         return (
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
+
+    def __sample_and_track_series__(self, idx, series_id=None):
+        pass
 
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
@@ -148,6 +149,50 @@ class CSVDataLoader(Dataset):
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )
+
+
+class CSVSeriesIDLoader(CSVDataLoader):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
+        """A da
+
+        :param series_id_col: The id
+        :type series_id_col: str
+        :param main_params: The central set of parameters
+        :type main_params: dict
+        :param return_method: The method of return
+        :type return_method: str
+        :param return_all: Whether to return all items, defaults to True
+        :type return_all: bool, optional
+        """
+        main_params["relevant_cols"].append(series_id_col)
+        super().__init__(**main_params)
+        self.series_id_col = series_id_col
+        self.return_method = return_method
+        self.return_all_series = return_all
+        self.unique_cols = self.original_df[series_id_col].unique().tolist()
+        df_list = []
+        for col in self.unique_cols:
+            df_list.append(self.df[self.df[self.series_id_col] == col])
+        self.listed_vals = df_list
+
+    def __getitem__(self, idx: int):
+        if self.return_all_series:
+            # TO-DO
+            src_list = []
+            targ_list = []
+            for va in self.listed_vals:
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
+                targ_start_idx = idx + self.forecast_history
+                targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
+                src_list.append(t)
+                targ_list.append(targ)
+            return src_list, targ_list
+        else:
+            print("s")
+        return super().__getitem__(idx)
+
+    def __sample_series_id__(idx, series_id):
+        pass
 
 
 class CSVTestLoader(CSVDataLoader):
@@ -299,13 +344,6 @@ class TemporalLoader(CSVDataLoader):
             time_feats: List[str],
             kwargs,
             label_len=0):
-        """[summary]
-
-        :param time_feats: [description]
-        :type time_feats: List[str]
-        :param kwargs: [description]
-        :type kwargs: [type]
-        """
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
