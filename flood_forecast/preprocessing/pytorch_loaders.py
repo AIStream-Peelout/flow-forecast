@@ -184,15 +184,15 @@ class CSVSeriesIDLoader(CSVDataLoader):
         :rtype: List
         """
         if self.return_all_series:
-            # TO-DO
             src_list = {}
             targ_list = {}
             for va in self.listed_vals:
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
                 targ_start_idx = idx + self.forecast_history
+                idx = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
-                src_list[va] = t
-                targ_list[va] = targ
+                src_list[idx] = t
+                targ_list[idx] = targ
             return src_list, targ_list
         else:
             print("s")
