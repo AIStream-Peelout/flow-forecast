@@ -180,8 +180,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
 
         :param idx: [description]
         :type idx: int
-        :return: [description]
-        :rtype: List
+        :return: A set of dictionaries that contain the data for each series.
+        :rtype: Tuple[Dict, Dict]
         """
         if self.return_all_series:
             src_list = {}
