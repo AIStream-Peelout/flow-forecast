@@ -34,6 +34,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         d = DecoderTransformer(10, 8, 4, 128, 10, 0.2, 1, seq_num=True)
         x, y = self.data_loader[0]
         l1 = handle_csv_id_output(x, y, d)
+        print(l1)
         self.assertGreater(l1, 0)
 
 

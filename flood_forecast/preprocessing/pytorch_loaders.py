@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import List, Union, Optional
+from typing import Dict, Tuple, Union, Optional, List
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
@@ -175,13 +175,13 @@ class CSVSeriesIDLoader(CSVDataLoader):
             df_list.append(self.df[self.df[self.series_id_col] == col])
         self.listed_vals = df_list
 
-    def __getitem__(self, idx: int) -> List[dict, dict]:
+    def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
 
         :param idx: [description]
         :type idx: int
         :return: [description]
-        :rtype: List[dict, dict]
+        :rtype: List
         """
         if self.return_all_series:
             # TO-DO
