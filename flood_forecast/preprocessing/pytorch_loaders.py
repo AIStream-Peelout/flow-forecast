@@ -178,7 +178,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
 
-        :param idx: [description]
+        :param idx: The index to lookup in the dataframe
         :type idx: int
         :return: A set of dictionaries that contain the data for each series.
         :rtype: Tuple[Dict, Dict]
@@ -189,7 +189,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
             for va in self.listed_vals:
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
                 targ_start_idx = idx + self.forecast_history
-                idx2 = va[self.series_id_col].first(0)
+                idx2 = va[self.series_id_col].reset_index().iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
                 src_list[int(idx2)] = t
                 targ_list[int(idx2)] = targ

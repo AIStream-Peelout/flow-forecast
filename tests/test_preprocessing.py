@@ -10,6 +10,8 @@ class TestInterpolationCode(unittest.TestCase):
         self.df = pd.read_csv(file_path)
 
     def test_back_forward(self):
+        """Test the generation of forward and backward data
+        """
         df = back_forward_generic(self.df, ["NumberOfAnimals"])
         self.assertEqual(df.iloc[3]["NumberOfAnimals"], 165)
 
