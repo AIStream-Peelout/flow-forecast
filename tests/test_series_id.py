@@ -1,6 +1,8 @@
 from flood_forecast.preprocessing.pytorch_loaders import CSVSeriesIDLoader
 import unittest
 import os
+from flood_forecast.series_id_helper import handle_csv_id_output
+from flood_forecast.model_dict_function import DecoderTransformer
 
 
 class TestInterpolationCSVLoader(unittest.TestCase):
@@ -22,9 +24,18 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         """Tests the series_id method for one
         """
         x, y = self.data_loader[0]
-        self.assertIsInstance(x, list)
-        self.assertIsInstance(y, list)
+        self.assertIsInstance(x, dict)
+        self.assertIsInstance(y, dict)
         self.assertGreater(x[0][0, 0], 1)
+
+    def test_handle_series_id(self):
+        """Tests the handle_series_id method
+        """
+        d = DecoderTransformer(10, 8, 4, 128, 10, 0.2, 1, seq_num=True)
+        x, y = self.data_loader[0]
+        l1 = handle_csv_id_output(x, y, d)
+        self.assertGreater(l1, 0)
+
 
 if __name__ == '__main__':
     unittest.main()

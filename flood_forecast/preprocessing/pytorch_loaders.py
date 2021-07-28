@@ -153,7 +153,7 @@ class CSVDataLoader(Dataset):
 
 class CSVSeriesIDLoader(CSVDataLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
-        """A da
+        """A data-loader for a CSV file that contains a series ID column.
 
         :param series_id_col: The id
         :type series_id_col: str
@@ -175,17 +175,24 @@ class CSVSeriesIDLoader(CSVDataLoader):
             df_list.append(self.df[self.df[self.series_id_col] == col])
         self.listed_vals = df_list
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> List[dict, dict]:
+        """Returns a set of dictionaries that contain the data for each series.
+
+        :param idx: [description]
+        :type idx: int
+        :return: [description]
+        :rtype: List[dict, dict]
+        """
         if self.return_all_series:
             # TO-DO
-            src_list = []
-            targ_list = []
+            src_list = {}
+            targ_list = {}
             for va in self.listed_vals:
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
                 targ_start_idx = idx + self.forecast_history
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
-                src_list.append(t)
-                targ_list.append(targ)
+                src_list[va] = t
+                targ_list[va] = targ
             return src_list, targ_list
         else:
             print("s")
