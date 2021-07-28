@@ -191,11 +191,11 @@ class CSVSeriesIDLoader(CSVDataLoader):
                 targ_start_idx = idx + self.forecast_history
                 idx = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
-                src_list[int(idx)] = t
-                targ_list[int(idx)] = targ
+                src_list[idx] = t
+                targ_list[idx] = targ
             return src_list, targ_list
         else:
-            raise NotImplementedError
+            print("s")
         return super().__getitem__(idx)
 
     def __sample_series_id__(idx, series_id):
