@@ -186,10 +186,11 @@ class CSVSeriesIDLoader(CSVDataLoader):
         if self.return_all_series:
             src_list = {}
             targ_list = {}
+            print(self.unique_cols)
             for va in self.listed_vals:
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
                 targ_start_idx = idx + self.forecast_history
-                idx2 = va[self.series_id_col].reset_index().iloc[0].values
+                idx2 = va[self.series_id_col].iloc[0].values[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
                 src_list[int(idx2)] = t
                 targ_list[int(idx2)] = targ
