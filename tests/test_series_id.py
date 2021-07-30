@@ -27,14 +27,14 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertIsInstance(x, dict)
         self.assertIsInstance(y, dict)
         self.assertGreater(x[0][0, 0], 1)
+        print(y)
 
     def test_handle_series_id(self):
         """Tests the handle_series_id method
         """
-        d = DecoderTransformer(10, 8, 4, 128, 10, 0.2, 1, seq_num=True)
+        d = DecoderTransformer(10, 8, 4, 128, 10, 0.2, 1, {}, seq_num=True)
         x, y = self.data_loader[0]
         l1 = handle_csv_id_output(x, y, d)
-        print(l1)
         self.assertGreater(l1, 0)
 
 

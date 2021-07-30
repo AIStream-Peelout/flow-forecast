@@ -169,7 +169,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
-        self.unique_cols = self.original_df[series_id_col].dropna.unique().tolist()
+        self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
         for col in self.unique_cols:
             df_list.append(self.df[self.df[self.series_id_col] == col])
