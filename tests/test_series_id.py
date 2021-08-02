@@ -2,6 +2,7 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVSeriesIDLoader
 import unittest
 import os
 from torch.nn import MSELoss
+from torch.utils.data import DataLoader
 from flood_forecast.series_id_helper import handle_csv_id_output
 from flood_forecast.model_dict_function import DecoderTransformer
 
@@ -33,8 +34,9 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         """Tests the handle_series_id method
         """
         mse1 = MSELoss()
+        d1 = DataLoader(self.data_loader, batch_size=2)
         d = DecoderTransformer(10, 8, 4, 128, 10, 0.2, 1, {}, seq_num=3)
-        x, y = self.data_loader[0]
+        x, y = d1.__iter__().__next__()
         l1 = handle_csv_id_output(x, y, d, mse1)
         self.assertGreater(l1, 0)
 
