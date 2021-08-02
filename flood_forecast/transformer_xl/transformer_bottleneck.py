@@ -258,6 +258,7 @@ class TransformerModel(nn.Module):
         if self.seq_num:
             id_embedding = self.id_embed(series_id)
             embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
+        print("shape below")
         print(embedding_sum.shape)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
         po_embedding = self.po_embed(position)
