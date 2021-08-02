@@ -252,6 +252,15 @@ class TransformerModel(nn.Module):
         nn.init.normal_(self.po_embed.weight, std=0.02)
 
     def forward(self, series_id: int, x: torch.Tensor):
+        """Runs  forward pass of the DecoderTransformer model.
+
+        :param series_id:   ID of the time series
+        :type series_id: int
+        :param x: [description]
+        :type x: torch.Tensor
+        :return: [description]
+        :rtype: [type]
+        """
         batch_size = x.size(0)
         length = x.size(1)  # (Batch_size, length, input_dim)
         embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
@@ -260,6 +269,7 @@ class TransformerModel(nn.Module):
             embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
         print("shape below")
         print(embedding_sum.shape)
+        print(x.shape)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
         po_embedding = self.po_embed(position)
         embedding_sum[:] = po_embedding
