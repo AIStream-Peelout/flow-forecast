@@ -10,7 +10,7 @@ def handle_csv_id_output(src, trg, model, criterion, random_sample=False):
     """
     total_loss = 0.0
     for (k, v), (k2, v2) in zip(src.items(), trg.items()):
-        output = model(k, v)
+        output = model(v, k)
         loss = criterion(output, v2)
         total_loss += loss.item()
     total_loss /= len(src.keys())
