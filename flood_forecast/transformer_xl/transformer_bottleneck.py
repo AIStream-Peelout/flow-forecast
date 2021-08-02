@@ -256,7 +256,7 @@ class TransformerModel(nn.Module):
 
         :param series_id:   ID of the time series
         :type series_id: int
-        :param x: [description]
+        :param x: Tensor of shape (batch_size, seq_len, n_time_series)
         :type x: torch.Tensor
         :return: [description]
         :rtype: [type]
