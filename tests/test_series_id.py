@@ -33,10 +33,8 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         """Tests the handle_series_id method
         """
         mse1 = MSELoss()
-        x, y = self.data_loader[0]
-        # add batch size to the input
-        x = x.unsqueeze(0)
         d = DecoderTransformer(10, 8, 4, 128, 10, 0.2, 1, {}, seq_num=3)
+        x, y = self.data_loader[0]
         l1 = handle_csv_id_output(x, y, d, mse1)
         self.assertGreater(l1, 0)
 
