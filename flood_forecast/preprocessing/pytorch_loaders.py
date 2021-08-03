@@ -174,6 +174,12 @@ class CSVSeriesIDLoader(CSVDataLoader):
         for col in self.unique_cols:
             df_list.append(self.df[self.df[self.series_id_col] == col])
         self.listed_vals = df_list
+        if return_all:
+            self.__assert_same_length__()
+
+    def __assert_same_length__(self):
+        for item in self.listed_vals:
+            assert len(item) == len(self.listed_vals[0])
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
