@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
+import warnings as warning
 import torch
 from typing import Dict, Tuple, Union, Optional, List
 from flood_forecast.pre_dict import interpolate_dict
@@ -179,7 +180,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
 
     def __assert_same_length__(self):
         for item in self.listed_vals:
-            assert len(item) == len(self.listed_vals[0])
+            if len(item) != len(self.listed_vals[0]):
+                warning.warn("Warning uneven sequence lengths will likely lead to errors")
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
