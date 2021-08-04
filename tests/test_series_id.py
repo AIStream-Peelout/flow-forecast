@@ -42,7 +42,5 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         l1 = handle_csv_id_output(x, y, d, mse1)
         self.assertGreater(l1, 0)
 
-
-
 if __name__ == '__main__':
     unittest.main()
