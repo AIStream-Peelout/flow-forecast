@@ -28,6 +28,7 @@ SOFTWARE.
 # Arxiv Link https://arxiv.org/pdf/1907.00235.pdf
 
 
+from pandas.core import series
 import numpy as np
 import torch
 import torch.nn as nn
@@ -269,6 +270,7 @@ class TransformerModel(nn.Module):
             embedding_sum = embedding_sum.fill_(series_id).type(torch.LongTensor).to(self.device)
             embedding_sum = self.id_embed(embedding_sum).type(torch.LongTensor)
         print("shape below")
+        print(series_id)
         print(embedding_sum.shape)
         print(x.shape)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
