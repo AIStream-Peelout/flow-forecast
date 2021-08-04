@@ -193,6 +193,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
     def __make__dict__(self):
         for i in range(0, len(self.unique_cols)):
             self.unqiue_dict[self.unique_cols[i]] = i
+        print("Unique dict here")
+        print(self.unqiue_dict)
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
