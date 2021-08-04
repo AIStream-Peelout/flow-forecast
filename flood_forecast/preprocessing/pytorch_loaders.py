@@ -175,6 +175,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         df_list = []
         for col in self.unique_cols:
             df_list.append(self.df[self.df[self.series_id_col] == col])
+        self.__make__dict__()
         self.listed_vals = df_list
         if return_all:
             self.__assert_same_length__()
@@ -190,8 +191,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
         )
 
     def __make__dict__(self):
-        for i in range(0, len(self.listed_vals)):
-            self.unqiue_dict[self.listed_vals[i][self.unique_cols].iloc[0].values[0]] = i
+        for i in range(0, len(self.unique_cols)):
+            self.unqiue_dict[self.unique_cols[i]] = i
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
