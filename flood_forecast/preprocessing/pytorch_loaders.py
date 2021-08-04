@@ -170,6 +170,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
+        self.unqiue_dict = {}
         self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
         for col in self.unique_cols:
@@ -188,6 +189,10 @@ class CSVSeriesIDLoader(CSVDataLoader):
             len(self.listed_vals[0].index) - self.forecast_history - self.forecast_length - 1
         )
 
+    def __make__dict__(self):
+        for i in range(0, len(self.listed_vals)):
+            self.unqiue_dict[self.listed_vals[i][self.unique_cols].iloc[0].values[0]] = i
+
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
 
@@ -203,10 +208,12 @@ class CSVSeriesIDLoader(CSVDataLoader):
             for va in self.listed_vals:
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
                 targ_start_idx = idx + self.forecast_history
+                # TODO fix assumption idx can be converted to int
+                # Create helper function to convert to int and stash as dict
                 idx2 = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
-                src_list[int(idx2)] = t
-                targ_list[int(idx2)] = targ
+                src_list[self.unqiue_dict[idx2]] = t
+                targ_list[self.unqiue_dict[idx2]] = targ
             return src_list, targ_list
         else:
             raise NotImplementedError

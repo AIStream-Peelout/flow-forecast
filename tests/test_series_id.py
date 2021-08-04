@@ -15,7 +15,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.dataset_params = {
             "file_path": os.path.join(self.test_data_path, "test2.csv"),
             "forecast_history": 20,
-            "forecast_length": 10,
+            "forecast_length": 1,
             "relevant_cols": ["vel", "obs", "day_of_week"],
             "target_col": ["vel"],
             "interpolate_param": False,
