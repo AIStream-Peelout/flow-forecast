@@ -284,7 +284,7 @@ class TransformerModel(nn.Module):
 class DecoderTransformer(nn.Module):
     def __init__(self, n_time_series: int, n_head: int, num_layer: int,
                  n_embd: int, forecast_history: int, dropout: float, q_len: int, additional_params: Dict,
-                 activation="Softmax", forecast_length: int = None, scale_att: bool = False, seq_num=None,
+                 activation="Softmax", forecast_length: int = None, scale_att: bool = False, seq_num1=None,
                  sub_len=1, mu=None):
         """
         Args:
@@ -299,8 +299,8 @@ class DecoderTransformer(nn.Module):
             additional_params: Additional parameters used to initalize the attention model. Can inc
         """
         super(DecoderTransformer, self).__init__()
-        self.transformer = TransformerModel(n_time_series, n_head, sub_len, num_layer, n_embd,
-                                            forecast_history, dropout, scale_att, q_len, additional_params)
+        self.transformer = TransformerModel(n_time_series, n_head, sub_len, num_layer, n_embd, forecast_history,
+                                            dropout, scale_att, q_len, additional_params, seq_num=seq_num1)
         self.softplus = nn.Softplus()
         self.mu = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
