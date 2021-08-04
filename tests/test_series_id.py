@@ -33,7 +33,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertEqual(x[2].shape[1], 3)
 
     def test_handle_series_id(self):
-        """Tests the handle_series_id method
+        """Tests the handle_series_id method for all models.
         """
         mse1 = MSELoss()
         d1 = DataLoader(self.data_loader, batch_size=2)
