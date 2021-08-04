@@ -178,7 +178,6 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.listed_vals = df_list
         if return_all:
             self.__assert_same_length__()
-        self.__make__dict__()
 
     def __assert_same_length__(self):
         for item in self.listed_vals:
@@ -213,8 +212,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
                 # Create helper function to convert to int and stash as dict
                 idx2 = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
-                src_list[self.unqiue_dict[idx2]] = t[:, :-1]
-                targ_list[self.unqiue_dict[idx2]] = targ[:, :-1]
+                src_list[self.unqiue_dict[idx2]] = t
+                targ_list[self.unqiue_dict[idx2]] = targ
             return src_list, targ_list
         else:
             raise NotImplementedError
