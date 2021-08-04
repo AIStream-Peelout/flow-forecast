@@ -176,6 +176,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
             df_list.append(self.df[self.df[self.series_id_col] == col])
         self.listed_vals = df_list
         self.__make_unique_dict__()
+        print(self.unique_dict)
+        print("unique dict")
 
     def __make_unique_dict__(self):
         for i in range(0, len(self.unique_cols)):
