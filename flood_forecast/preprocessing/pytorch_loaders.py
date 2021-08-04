@@ -181,7 +181,12 @@ class CSVSeriesIDLoader(CSVDataLoader):
     def __assert_same_length__(self):
         for item in self.listed_vals:
             if len(item) != len(self.listed_vals[0]):
-                warning.warn("Warning uneven sequence lengths will likely lead to errors")
+                warning.warn("Warning uneven sequence lengths will likely lead to errors and incorrect sequences")
+
+    def __len__(self) -> int:
+        return (
+            len(self.listed_vals[0].index) - self.forecast_history - self.forecast_length - 1
+        )
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
         """Returns a set of dictionaries that contain the data for each series.
