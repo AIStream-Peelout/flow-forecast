@@ -267,7 +267,7 @@ class TransformerModel(nn.Module):
         if self.seq_num:
             embedding_sum = torch.zeros(batch_size, length)
             embedding_sum.fill_(series_id).type(torch.LongTensor).to(self.device)
-            embedding_sum = self.id_embed(embedding_sum)
+            embedding_sum = self.id_embed(embedding_sum).type(torch.LongTensor)
         print("shape below")
         print(embedding_sum.shape)
         print(x.shape)
