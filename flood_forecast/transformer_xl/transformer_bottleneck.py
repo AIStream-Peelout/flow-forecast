@@ -265,8 +265,9 @@ class TransformerModel(nn.Module):
         length = x.size(1)  # (Batch_size, length, input_dim)
         embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
         if self.seq_num:
-            id_embedding = self.id_embed(series_id)
-            embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
+            embedding_sum = torch.zeros(batch_size, length).to(self.device)
+            embedding_sum = embedding_sum._fill(series_id)
+            embedding_sum = self.id_embed(embedding_sum)
         print("shape below")
         print(embedding_sum.shape)
         print(x.shape)
