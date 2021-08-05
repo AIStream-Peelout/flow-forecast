@@ -233,7 +233,7 @@ class TransformerModel(nn.Module):
         self.seq_num = None
         if seq_num:
             self.seq_num = seq_num
-            self.id_embed = nn.Embedding(seq_num, n_time_series)
+            self.id_embed = nn.Embedding(seq_num, n_embd)
             nn.init.normal_(self.id_embed.weight, std=0.02)
         self.n_embd = n_embd
         self.win_len = forecast_history
