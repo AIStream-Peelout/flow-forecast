@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import List, Union, Optional
+from typing import Dict, Tuple, Union, Optional, List
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
@@ -153,7 +153,7 @@ class CSVDataLoader(Dataset):
 
 class CSVSeriesIDLoader(CSVDataLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
-        """A da
+        """A data-loader for a CSV file that contains a series ID column.
 
         :param series_id_col: The id
         :type series_id_col: str
@@ -169,26 +169,42 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
-        self.unique_cols = self.original_df[series_id_col].unique().tolist()
+        self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
+        self.unique_dict = {}
         for col in self.unique_cols:
             df_list.append(self.df[self.df[self.series_id_col] == col])
         self.listed_vals = df_list
+        self.__make_unique_dict__()
+        print(self.unique_dict)
+        print("unique dict")
 
-    def __getitem__(self, idx: int):
+    def __make_unique_dict__(self):
+        for i in range(0, len(self.unique_cols)):
+            self.unique_dict[self.unique_cols[i]] = i
+
+    def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
+        """Returns a set of dictionaries that contain the data for each series.
+
+        :param idx: The index to lookup in the dataframe
+        :type idx: int
+        :return: A set of dictionaries that contain the data for each series.
+        :rtype: Tuple[Dict, Dict]
+        """
         if self.return_all_series:
-            # TO-DO
-            src_list = []
-            targ_list = []
+            src_list = {}
+            targ_list = {}
+            print(self.unique_cols)
             for va in self.listed_vals:
-                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, :len(self.relevant_cols3) - 1]
                 targ_start_idx = idx + self.forecast_history
+                idx2 = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
-                src_list.append(t)
-                targ_list.append(targ)
+                src_list[self.unique_dict[idx2]] = t
+                targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
         else:
-            print("s")
+            raise NotImplementedError
         return super().__getitem__(idx)
 
     def __sample_series_id__(idx, series_id):
