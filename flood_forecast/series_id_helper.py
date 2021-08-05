@@ -1,4 +1,4 @@
-def handle_csv_id_output(src, trg, model, criterion, random_sample=False):
+def handle_csv_id_output(src, trg, model, criterion, random_sample=False, n_targs=1):
     """A helper function to better handle the output of models with a series_id
 
     :param src: A dictionary of src sequences (partitioned by series_id)
@@ -11,6 +11,6 @@ def handle_csv_id_output(src, trg, model, criterion, random_sample=False):
     total_loss = 0.0
     for (k, v), (k2, v2) in zip(src.items(), trg.items()):
         output = model(v, k)
-        loss = criterion(output, v2)
+        loss = criterion(output, v2[:, :, :n_targs])
         total_loss += loss.item()
     total_loss /= len(src.keys())
