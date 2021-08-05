@@ -14,3 +14,4 @@ def handle_csv_id_output(src, trg, model, criterion, random_sample=False, n_targ
         loss = criterion(output, v2[:, :, :n_targs])
         total_loss += loss.item()
     total_loss /= len(src.keys())
+    return total_loss
