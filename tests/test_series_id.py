@@ -37,7 +37,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         """
         mse1 = MSELoss()
         d1 = DataLoader(self.data_loader, batch_size=2)
-        d = DecoderTransformer(10, 8, 4, 128, 20, 0.2, 1, {}, seq_num1=3)
+        d = DecoderTransformer(4, 8, 4, 128, 20, 0.2, 1, {}, seq_num1=3)
         x, y = d1.__iter__().__next__()
         l1 = handle_csv_id_output(x, y, d, mse1)
         self.assertGreater(l1, 0)
