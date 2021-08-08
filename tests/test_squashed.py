@@ -8,6 +8,7 @@ class TestTransformerDecoderEmbedding(unittest.TestCase):
         self.transformer_encoder = CustomTransformerDecoder(20, 20, 5, output_dim=5, squashed_embedding=True)
 
     def test_custom_full(self):
+        # Test custom full
         m = self.transformer_encoder(torch.rand(10, 20, 5))
         self.assertEqual(m.shape[0], 10)
         self.assertEqual(m.shape[1], 20)

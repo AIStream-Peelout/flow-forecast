@@ -6,6 +6,7 @@ import json
 import wandb
 from flood_forecast.utils import numpy_to_tvar
 from flood_forecast.time_model import PyTorchForecast
+from flood_forecast.series_id_helper import handle_csv_id_output
 from flood_forecast.model_dict_function import pytorch_opt_dict, pytorch_criterion_dict
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
@@ -17,7 +18,7 @@ def handle_meta_data(model: PyTorchForecast):
     """A function to init models with meta-data
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
-    :return: Returns a tuple of the initial meta-representationf
+    :return: Returns a tuple of the initial meta-representation
     :rtype: tuple(PyTorchForecast, torch.Tensor, torch.nn)
     """
     meta_loss = None
@@ -314,7 +315,9 @@ def torch_single_train(model: PyTorchForecast,
             # Assign to avoid other if statement
             trg = trg[0]
         elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
-            pass
+            loss = handle_csv_id_output(src, trg, model, criterion)
+            running_loss += loss
+            continue
         src = src.to(model.device)
         trg = trg.to(model.device)
         output = model.model(src, **forward_params)

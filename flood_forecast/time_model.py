@@ -161,6 +161,14 @@ class PyTorchForecast(TimeSeriesModel):
                 print("Wandb stupid error")
                 print(e.__traceback__)
 
+    def __re_add_params__(self, start_end_params, dataset_params, data_path):
+        start_end_params["file_path"] = data_path
+        start_end_params["forecast_history"] = dataset_params["forecast_history"]
+        start_end_params["forecast_length"] = dataset_params["forecast_length"]
+        start_end_params["target_col"] = dataset_params["target_col"]
+        start_end_params["relevant_cols"] = dataset_params["relevant_cols"]
+        return start_end_params
+
     def make_data_load(
             self,
             data_path: str,
@@ -215,11 +223,7 @@ class PyTorchForecast(TimeSeriesModel):
                 **start_end_params
             )
         elif the_class == "TemporalLoader":
-            start_end_params["file_path"] = data_path
-            start_end_params["forecast_history"] = dataset_params["forecast_history"]
-            start_end_params["forecast_length"] = dataset_params["forecast_length"]
-            start_end_params["target_col"] = dataset_params["target_col"]
-            start_end_params["relevant_cols"] = dataset_params["relevant_cols"]
+            start_end_params = self.__re_add_params__(start_end_params, dataset_params, data_path)
             label_len = 0
             if "label_len" in dataset_params:
                 label_len = dataset_params["label_len"]
@@ -228,11 +232,11 @@ class PyTorchForecast(TimeSeriesModel):
                 start_end_params,
                 label_len=label_len)
         elif the_class == "SeriesIDLoader":
+            start_end_params = self.__re_add_params__(start_end_params, dataset_params, data_path)
             loader = CSVSeriesIDLoader(
-                data_path,
-                dataset_params["target_col"],
-                dataset_params["relevant_cols"],
-                **start_end_params
+                dataset_params["series_id_col"],
+                start_end_params,
+                dataset_params["return_method"]
             )
 
         else:
