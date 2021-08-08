@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import List, Union, Optional
+from typing import Dict, Tuple, Union, Optional, List
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
@@ -25,7 +25,6 @@ class CSVDataLoader(Dataset):
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
-        id_series_col=None,
         no_scale=False
 
     ):
@@ -54,7 +53,6 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
-        self.series_col = id_series_col
         print("interpolate should be below")
         self.local_file_path = get_data(file_path, gcp_service_key)
         df = pd.read_csv(self.local_file_path)
@@ -101,7 +99,7 @@ class CSVDataLoader(Dataset):
         self.df.to_csv("temp_df.csv")
         self.no_scale = no_scale
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
         if self.no_scale:
@@ -120,6 +118,9 @@ class CSVDataLoader(Dataset):
         return (
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
+
+    def __sample_and_track_series__(self, idx, series_id=None):
+        pass
 
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
@@ -148,6 +149,66 @@ class CSVDataLoader(Dataset):
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )
+
+
+class CSVSeriesIDLoader(CSVDataLoader):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
+        """A data-loader for a CSV file that contains a series ID column.
+
+        :param series_id_col: The id
+        :type series_id_col: str
+        :param main_params: The central set of parameters
+        :type main_params: dict
+        :param return_method: The method of return
+        :type return_method: str
+        :param return_all: Whether to return all items, defaults to True
+        :type return_all: bool, optional
+        """
+        main_params["relevant_cols"].append(series_id_col)
+        super().__init__(**main_params)
+        self.series_id_col = series_id_col
+        self.return_method = return_method
+        self.return_all_series = return_all
+        self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
+        df_list = []
+        self.unique_dict = {}
+        for col in self.unique_cols:
+            df_list.append(self.df[self.df[self.series_id_col] == col])
+        self.listed_vals = df_list
+        self.__make_unique_dict__()
+        print(self.unique_dict)
+        print("unique dict")
+
+    def __make_unique_dict__(self):
+        for i in range(0, len(self.unique_cols)):
+            self.unique_dict[self.unique_cols[i]] = i
+
+    def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
+        """Returns a set of dictionaries that contain the data for each series.
+
+        :param idx: The index to lookup in the dataframe
+        :type idx: int
+        :return: A set of dictionaries that contain the data for each series.
+        :rtype: Tuple[Dict, Dict]
+        """
+        if self.return_all_series:
+            src_list = {}
+            targ_list = {}
+            print(self.unique_cols)
+            for va in self.listed_vals:
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, :len(self.relevant_cols3) - 1]
+                targ_start_idx = idx + self.forecast_history
+                idx2 = va[self.series_id_col].iloc[0]
+                targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
+                src_list[self.unique_dict[idx2]] = t
+                targ_list[self.unique_dict[idx2]] = targ
+            return src_list, targ_list
+        else:
+            raise NotImplementedError
+        return super().__getitem__(idx)
+
+    def __sample_series_id__(idx, series_id):
+        pass
 
 
 class CSVTestLoader(CSVDataLoader):
@@ -299,13 +360,6 @@ class TemporalLoader(CSVDataLoader):
             time_feats: List[str],
             kwargs,
             label_len=0):
-        """[summary]
-
-        :param time_feats: [description]
-        :type time_feats: List[str]
-        :param kwargs: [description]
-        :type kwargs: [type]
-        """
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
