@@ -1,15 +1,7 @@
-from flood_forecast.preprocessing.pytorch_loaders import CSVSeriesIDLoader
 import unittest
 import os
-from torch.nn import MSELoss
-from torch.utils.data import DataLoader
-from flood_forecast.series_id_helper import handle_csv_id_output
-from flood_forecast.model_dict_function import DecoderTransformer
-
-
-import torch 
-import unittest
 from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader
+import torch
 
 
 class TestGeneralClassificationCSVLoader(unittest.TestCase):
@@ -35,7 +27,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.assertGreater(x.shape[0], 1)
 
     def test_class(self):
-        """Tests the handle_series_id method
+        """Tests the classification shit
         """
         x, y = self.data_loader[0]
         self.assertIsInstance(x, torch.Tensor)
