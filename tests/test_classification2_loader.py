@@ -26,7 +26,6 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.assertIsInstance(y, torch.Tensor)
         self.assertGreater(x.shape[0], 1)
         self.assertGreater(x.shape[1], 1)
-        self.assertEqual(y.shape[0], 1)
 
     def test_class(self):
         """Tests the classification module
@@ -34,7 +33,6 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         x, y = self.data_loader[1]
         self.assertIsInstance(x, torch.Tensor)
         self.assertIsInstance(y, torch.Tensor)
-        self.assertEqual(y.shape[0], 1)
         self.assertEqual(len(y.shape), 1)
 
 if __name__ == '__main__':
