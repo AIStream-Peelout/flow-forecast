@@ -359,7 +359,8 @@ class GeneralClassificationLoader(CSVDataLoader):
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
         params["forecast_length"] = 1
-        super.__init__(**params)
+        params.pop("sequence_length")
+        super().__init__(**params)
 
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
