@@ -33,6 +33,8 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         x, y = self.data_loader[1]
         self.assertIsInstance(x, torch.Tensor)
         self.assertIsInstance(y, torch.Tensor)
+        print("y is below")
+        print(y)
         self.assertEqual(len(y.shape), 1)
 
 if __name__ == '__main__':
