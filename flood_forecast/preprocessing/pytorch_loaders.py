@@ -338,6 +338,22 @@ class AEDataloader(CSVDataLoader):
         return torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float(), target
 
 
+class GeneralClassificationLoader(CSVDataLoader):
+    def __init__(self, params: Dict):
+        params["forecast_history"] = params["sequence_length"]
+        params["no_scale"] = True
+        params["forecast_length"] = 1
+        super.__init__(**params)
+
+    def __getitem__(self, idx: int):
+        rows = self.df.iloc[idx: self.forecast_history + idx]
+        rows = torch.from_numpy(rows.to_numpy())
+        src = rows[:, 1:]
+        # Get label of the series sequence
+        targ = rows[-1, 0]
+        return src, targ
+
+
 class TemporalLoader(CSVDataLoader):
     def __init__(
             self,
