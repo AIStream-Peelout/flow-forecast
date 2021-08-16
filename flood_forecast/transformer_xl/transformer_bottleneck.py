@@ -252,12 +252,26 @@ class TransformerModel(nn.Module):
         nn.init.normal_(self.po_embed.weight, std=0.02)
 
     def forward(self, series_id: int, x: torch.Tensor):
+        """Runs  forward pass of the DecoderTransformer model.
+
+        :param series_id:   ID of the time series
+        :type series_id: int
+        :param x: [description]
+        :type x: torch.Tensor
+        :return: [description]
+        :rtype: [type]
+        """
         batch_size = x.size(0)
         length = x.size(1)  # (Batch_size, length, input_dim)
         embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)
         if self.seq_num:
-            id_embedding = self.id_embed(series_id)
-            embedding_sum = embedding_sum + id_embedding.unsqueeze(1)
+            embedding_sum = torch.zeros(batch_size, length)
+            embedding_sum = embedding_sum.fill_(series_id).type(torch.LongTensor).to(self.device)
+            embedding_sum = self.id_embed(embedding_sum)
+        print("shape below")
+        print(embedding_sum.shape)
+        print(x.shape)
+        print(series_id)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
         po_embedding = self.po_embed(position)
         embedding_sum[:] = po_embedding
@@ -270,7 +284,7 @@ class TransformerModel(nn.Module):
 class DecoderTransformer(nn.Module):
     def __init__(self, n_time_series: int, n_head: int, num_layer: int,
                  n_embd: int, forecast_history: int, dropout: float, q_len: int, additional_params: Dict,
-                 activation="Softmax", forecast_length: int = None, scale_att: bool = False, seq_num=None,
+                 activation="Softmax", forecast_length: int = None, scale_att: bool = False, seq_num1=None,
                  sub_len=1, mu=None):
         """
         Args:
@@ -285,8 +299,8 @@ class DecoderTransformer(nn.Module):
             additional_params: Additional parameters used to initalize the attention model. Can inc
         """
         super(DecoderTransformer, self).__init__()
-        self.transformer = TransformerModel(n_time_series, n_head, sub_len, num_layer, n_embd,
-                                            forecast_history, dropout, scale_att, q_len, additional_params)
+        self.transformer = TransformerModel(n_time_series, n_head, sub_len, num_layer, n_embd, forecast_history,
+                                            dropout, scale_att, q_len, additional_params, seq_num=seq_num1)
         self.softplus = nn.Softplus()
         self.mu = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
         self.sigma = torch.nn.Linear(n_time_series + n_embd, 1, bias=True)
