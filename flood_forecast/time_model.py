@@ -241,7 +241,6 @@ class PyTorchForecast(TimeSeriesModel):
             )
         elif the_class == "GeneralClassificationLoader":
             dataset_params["forecast_length"] = 1
-            start_end_params["sequence_length"] = dataset_params["sequence_length"]
             start_end_params = self.__re_add_params__(start_end_params, dataset_params, data_path)
             loader = GeneralClassificationLoader(start_end_params)
         else:
