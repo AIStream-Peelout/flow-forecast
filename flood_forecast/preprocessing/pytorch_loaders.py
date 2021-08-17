@@ -356,15 +356,23 @@ class AEDataloader(CSVDataLoader):
 
 class GeneralClassificationLoader(CSVDataLoader):
     def __init__(self, params: Dict):
+        """A generic data loader class for TS classification problems.
+
+        :param params: The standard dictionary for a dataloader (see CSVDataLoader)
+        :type params: Dict
+        """
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
+        # This could really be anything as forecast_length is not used
         params["forecast_length"] = 1
+        # Remove sequence_length prior to calling the super class
         params.pop("sequence_length")
         super().__init__(**params)
 
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         rows = torch.from_numpy(rows.to_numpy())
+        # Exclude the first row it is the target.
         src = rows[:, 1:]
         # Get label of the series sequence
         targ = rows[-1, 0]
@@ -373,6 +381,11 @@ class GeneralClassificationLoader(CSVDataLoader):
 
 class GeneralClassificationTestLoader(CSVDataLoader):
     def __init__(self, params: Dict):
+        """An extension of CSVTestLoader for TS classification problems.
+
+        :param params: a DICt of parameters for the dataloader.
+        :type params: Dict
+        """
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
         params["forecast_length"] = 0
@@ -381,7 +394,7 @@ class GeneralClassificationTestLoader(CSVDataLoader):
 
     def __getitem__(self, idx: int):
         hist_rows, all_rows, targ_start, idx = super.__getitem__(idx)
-        return hist_rows[:, -1], all_rows, targ_start, idx
+        return hist_rows[:, 1:], all_rows, targ_start, idx
 
 
 class TemporalLoader(CSVDataLoader):
