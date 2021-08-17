@@ -15,7 +15,6 @@ from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 
 def handle_meta_data(model: PyTorchForecast):
     """A function to init models with meta-data
-    s
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initial meta-representationf
@@ -228,11 +227,11 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :param src: The source values (only really needed for the MASELoss function)
     :type src: torch.Tensor
     :param criterion: [description]
-    :type criterion: [type]
+    :type criterion: torch.nn.Loss or some variation
     :param validation_dataset: Only passed when unscaling of data is needed.
     :type validation_dataset: torch.utils.data.dataset
     :param probabilistic: Whether the model is a probabalistic returns a distribution, defaults to None
-    :type probabilistic: [type], optional
+    :type probabilistic: bool, optional
     :param output_std: The standard distribution, defaults to None
     :type output_std: [type], optional
     :param m: The number of targets defaults to 1
@@ -314,6 +313,8 @@ def torch_single_train(model: PyTorchForecast,
             src = src[0]
             # Assign to avoid other if statement
             trg = trg[0]
+        elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
+            pass
         src = src.to(model.device)
         trg = trg.to(model.device)
         output = model.model(src, **forward_params)
