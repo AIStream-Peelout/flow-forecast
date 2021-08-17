@@ -8,7 +8,7 @@
       "out_feats":1,
       "forecast_history":6, 
       "gru_lstm": false,
-      "final_act":"softmax"
+      "final_act":"Softmax"
      },
 
     "dataset_params":
