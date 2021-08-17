@@ -371,6 +371,19 @@ class GeneralClassificationLoader(CSVDataLoader):
         return src, targ
 
 
+class GeneralClassificationTestLoader(CSVDataLoader):
+    def __init__(self, params: Dict):
+        params["forecast_history"] = params["sequence_length"]
+        params["no_scale"] = True
+        params["forecast_length"] = 0
+        params.pop("sequence_length")
+        super().__init__(**params)
+
+    def __getitem__(self, idx: int):
+        hist_rows, all_rows, targ_start, idx = super.__getitem__(idx)
+        return hist_rows[:, -1], all_rows, targ_start, idx
+
+
 class TemporalLoader(CSVDataLoader):
     def __init__(
             self,

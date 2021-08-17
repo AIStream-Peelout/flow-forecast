@@ -1,6 +1,6 @@
 import unittest
 import os
-from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader
+from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader, GeneralClassificationTestLoader
 import torch
 
 
@@ -17,6 +17,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
             "interpolate_param": False,
         }
         self.data_loader = GeneralClassificationLoader(self.dataset_params)
+        self.test_loader = GeneralClassificationTestLoader(self.dataset_params)
 
     def test_classification_return(self):
         """Tests the series_id method for one
