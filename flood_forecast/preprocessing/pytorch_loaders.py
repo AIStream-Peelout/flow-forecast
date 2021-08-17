@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
@@ -291,6 +291,36 @@ class AEDataloader(CSVDataLoader):
         if target.shape[0] == 0:
             raise ValueError("The item was not found in the index please try again")
         return torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float(), target
+
+
+class GeneralClassificationLoader(CSVDataLoader):
+    def __init__(self, params: Dict):
+        params["forecast_history"] = params["sequence_length"]
+        params["no_scale"] = True
+        params["forecast_length"] = 1
+        params.pop("sequence_length")
+        super().__init__(**params)
+
+    def __getitem__(self, idx: int):
+        rows = self.df.iloc[idx: self.forecast_history + idx]
+        rows = torch.from_numpy(rows.to_numpy())
+        src = rows[:, 1:]
+        # Get label of the series sequence
+        targ = rows[-1, 0]
+        return src, targ
+
+
+class GeneralClassificationTestLoader(CSVDataLoader):
+    def __init__(self, params: Dict):
+        params["forecast_history"] = params["sequence_length"]
+        params["no_scale"] = True
+        params["forecast_length"] = 0
+        params.pop("sequence_length")
+        super().__init__(**params)
+
+    def __getitem__(self, idx: int):
+        hist_rows, all_rows, targ_start, idx = super.__getitem__(idx)
+        return hist_rows[:, -1], all_rows, targ_start, idx
 
 
 class TemporalLoader(CSVDataLoader):
