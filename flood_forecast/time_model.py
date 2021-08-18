@@ -176,6 +176,8 @@ class PyTorchForecast(TimeSeriesModel):
             dataset_params: Dict,
             loader_type: str,
             the_class="default"):
+        """
+        """
         start_end_params = {}
         the_class = dataset_params["class"]
         start_end_params = scaling_function(start_end_params, dataset_params)
