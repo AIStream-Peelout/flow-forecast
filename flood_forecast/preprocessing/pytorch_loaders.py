@@ -355,7 +355,7 @@ class AEDataloader(CSVDataLoader):
 
 
 class GeneralClassificationLoader(CSVDataLoader):
-    def __init__(self, params: Dict):
+    def __init__(self, params: Dict, n_classes=2):
         """A generic data loader class for TS classification problems.
 
         :param params: The standard dictionary for a dataloader (see CSVDataLoader)

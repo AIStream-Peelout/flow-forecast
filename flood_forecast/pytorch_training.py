@@ -1,3 +1,4 @@
+from json import decoder
 import torch
 import torch.optim as optim
 from typing import Type, Dict
@@ -166,7 +167,8 @@ def train_transformer_style(
                 model.model.load_state_dict(torch.load("checkpoint.pth"))
                 break
     decoder_structure = True
-    if model.params["dataset_params"]["class"] == "AutoEncoder":
+    the_ae = model.params["dataset_params"]["class"] == "AutoEncoder"
+    if the_ae or model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
         decoder_structure = False
     test = compute_validation(
         test_data_loader,
