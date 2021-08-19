@@ -14,7 +14,7 @@ def swish(x):
     return x * torch.sigmoid(x)
 
 activation_dict = {"ReLU": torch.nn.ReLU(), "Softplus": torch.nn.Softplus(), "Swish": swish,
-                   "entmax": entmax15, "sparsemax": sparsemax, "Softmax": torch.nn.Softmax}
+                   "entmax": entmax15, "sparsemax": sparsemax, "Softmax": torch.nn.Softmax(dim=1)}
 
 
 def variable_forecast_layer(layer_type, layer_params):
