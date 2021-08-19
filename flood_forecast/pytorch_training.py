@@ -17,8 +17,8 @@ def handle_meta_data(model: PyTorchForecast):
     """A function to init models with meta-data
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
-    :return: Returns a tuple of the initial meta-representationf
-    :rtype: tuple(PyTorchForecast, torch.Tensor, torch.nn)
+    :return: Returns a tuple of the initial meta-representation
+    :rtype: tuple(PyTorchForecast, torch.Tensor, )
     """
     meta_loss = None
     with open(model.params["meta_data"]["path"]) as f:
@@ -191,6 +191,25 @@ def get_meta_representation(column_id: str, uuid: str, meta_model: PyTorchForeca
 
 
 def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probabilistic, m, output_std):
+    """Function that handles un-scaling the model output.
+
+    :param validation_dataset: A dataset object for the validation dataset. We use its inverse scale method.
+    :type validation_dataset: [type]
+    :param src: [description]
+    :type src: torch.Tensor
+    :param output: [description]
+    :type output: torch.Tensor
+    :param labels: [description]
+    :type labels: torch.Tensor
+    :param probabilistic: Whether the model is probablisitic or not.
+    :type probabilistic: bool
+    :param m: Whether there are multiple targets
+    :type m: int
+    :param output_std: [description]
+    :type output_std: [type]
+    :return: [description]
+    :rtype: [type]
+    """
     # To-do move to class fun ction
     output_dist = None
     if probabilistic:
@@ -226,7 +245,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :type output: torch.Tensor
     :param src: The source values (only really needed for the MASELoss function)
     :type src: torch.Tensor
-    :param criterion: [description]
+    :param criterion: The loss function to use
     :type criterion: torch.nn.Loss or some variation
     :param validation_dataset: Only passed when unscaling of data is needed.
     :type validation_dataset: torch.utils.data.dataset
@@ -285,6 +304,33 @@ def torch_single_train(model: PyTorchForecast,
                        meta_loss=None,
                        multi_targets=1,
                        forward_params: Dict = {}) -> float:
+    """Function that performs training of
+
+    :param model: [
+    :type model: PyTorchForecast
+    :param opt: [description]
+    :type opt: optim.Optimizer
+    :param criterion: [description]
+    :type criterion: Type[torch.nn.modules.loss._Loss]
+    :param data_loader: [description]
+    :type data_loader: DataLoader
+    :param takes_target: [description]
+    :type takes_target: bool
+    :param meta_data_model: [description]
+    :type meta_data_model: PyTorchForecast
+    :param meta_data_model_representation: [description]
+    :type meta_data_model_representation: torch.Tensor
+    :param meta_loss: [description], defaults to None
+    :type meta_loss: [type], optional
+    :param multi_targets: [description], defaults to 1
+    :type multi_targets: int, optional
+    :param forward_params: [description], defaults to {}
+    :type forward_params: Dict, optional
+    :raises ValueError: [description]
+    :return: [description]
+    :rtype: float
+    """
+
     probablistic = None
     if "probabilistic" in model.params["model_params"]:
         probablistic = True
