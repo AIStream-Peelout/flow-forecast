@@ -21,21 +21,19 @@
        "forecast_history":5,
        "train_end": 300,
        "valid_start":301,
-       "valid_end": 401,
+       "valid_end": 402,
        "test_end": 500,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
        "interpolate": false
     },
-
     "training_params":
     {
        "criterion":"MASELoss",
        "optimizer": "Adam",
        "optim_params":
-       {
-       },
+       {},
        "criterion_params":
        {
           "baseline_method":"mean"
@@ -43,13 +41,12 @@
        "lr": 0.3,
        "epochs": 1,
        "batch_size":4
-    
     },
     "GCS": false,
    
     "wandb": {
        "name": "flood_forecast_circleci",
-       "tags": ["dummy_run", "circleci", "da_revised"],
+       "tags": ["dummy_run", "circleci", "da_revised", "classification"],
        "project": "repo-flood_forecast"
     },
    "forward_params":{},

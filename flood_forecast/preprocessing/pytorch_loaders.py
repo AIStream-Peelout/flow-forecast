@@ -376,7 +376,7 @@ class GeneralClassificationLoader(CSVDataLoader):
         src = rows[:, 1:]
         # Get label of the series sequence
         targ = rows[-1, 0]
-        return src.float(), targ.float().unsqueeze(1)
+        return src.float(), targ.float().unsqueeze(0).unsqueeze(0)
 
 
 class TemporalLoader(CSVDataLoader):
