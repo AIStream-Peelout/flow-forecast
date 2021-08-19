@@ -13,7 +13,7 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
-def handle_evaluation(trained_model, params, model_type):
+def handle_model_evaluation1(trained_model, params, model_type):
     test_acc = evaluate_model(
             trained_model,
             model_type,
@@ -53,19 +53,20 @@ def handle_evaluation(trained_model, params, model_type):
                 ci=95,
                 alpha=0.25)
             wandb.log({"test_plot_" + thing[1]: test_plot})
+    else:
         pd.options.plotting.backend = "plotly"
         t = params["dataset_params"]["target_col"][0]
         test_plot = df_train_and_test[[t, "preds"]].plot()
         wandb.log({"test_plot_" + t: test_plot})
-        print("Now plotting final plots")
-        test_plot_all = go.Figure()
-        for relevant_col in params["dataset_params"]["relevant_cols"]:
-            test_plot_all.add_trace(
-                go.Scatter(
-                    x=df_train_and_test.index,
-                    y=df_train_and_test[relevant_col],
-                    name=relevant_col))
-        wandb.log({"test_plot_all": test_plot_all})
+    print("Now plotting final plots")
+    test_plot_all = go.Figure()
+    for relevant_col in params["dataset_params"]["relevant_cols"]:
+        test_plot_all.add_trace(
+            go.Scatter(
+                x=df_train_and_test.index,
+                y=df_train_and_test[relevant_col],
+                name=relevant_col))
+    wandb.log({"test_plot_all": test_plot_all})
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
@@ -124,7 +125,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
         if params["dataset_params"]["class"] != "GeneralClassificationLoader":
-            evaluate_model(trained_model, params, model_type)
+            handle_model_evaluation1(trained_model, params, model_type)
 
     else:
         raise Exception("Please supply valid model type for forecasting")

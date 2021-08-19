@@ -305,11 +305,11 @@ def torch_single_train(model: PyTorchForecast,
                        meta_loss=None,
                        multi_targets=1,
                        forward_params: Dict = {}) -> float:
-    """Function that performs training of
+    """Function that performs training of a single model. Runs through one epoch of the data.
 
-    :param model: [
+    :param model: The PyTorchForecast model that is trained
     :type model: PyTorchForecast
-    :param opt: [description]
+    :param opt: The optimizer to use in the code
     :type opt: optim.Optimizer
     :param criterion: [description]
     :type criterion: Type[torch.nn.modules.loss._Loss]
