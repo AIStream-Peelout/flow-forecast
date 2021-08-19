@@ -163,6 +163,9 @@ class PyTorchForecast(TimeSeriesModel):
                 print(e.__traceback__)
 
     def __re_add_params__(self, start_end_params, dataset_params, data_path):
+        """
+        Function to re-add the params to the model
+        """
         start_end_params["file_path"] = data_path
         start_end_params["forecast_history"] = dataset_params["forecast_history"]
         start_end_params["forecast_length"] = dataset_params["forecast_length"]
