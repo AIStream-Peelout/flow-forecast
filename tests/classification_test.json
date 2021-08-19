@@ -2,7 +2,7 @@
     "model_name": "DARNN",
     "model_type": "PyTorch",
     "model_params": {
-      "n_time_series":3,
+      "n_time_series":2,
       "hidden_size_encoder":128,
       "decoder_hidden_size":128,
       "out_feats":1,
