@@ -12,7 +12,8 @@
      },
 
     "dataset_params":
-    {  "class": "GeneralClassificationLoader",
+    { "class": "GeneralClassificationLoader",
+      "n_classes": 2,
        "training_path": "tests/test_data/keag_small.csv",
        "validation_path": "tests/test_data/keag_small.csv",
        "test_path": "tests/test_data/keag_small.csv",

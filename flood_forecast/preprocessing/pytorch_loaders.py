@@ -361,6 +361,7 @@ class GeneralClassificationLoader(CSVDataLoader):
         :param params: The standard dictionary for a dataloader (see CSVDataLoader)
         :type params: Dict
         """ # noqa
+        self.n_classes = n_classes
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
         # This could really be anything as forecast_length is not used
@@ -376,7 +377,9 @@ class GeneralClassificationLoader(CSVDataLoader):
         src = rows[:, 1:]
         # Get label of the series sequence
         targ = rows[-1, 0]
-        return src.float(), targ.float().unsqueeze(0).unsqueeze(0)
+        targ_labs = torch.zeros(self.n_classes)
+        targ_labs[targ] = 1
+        return src.float(), targ_labs.float().unsqueeze(0)
 
 
 class TemporalLoader(CSVDataLoader):
