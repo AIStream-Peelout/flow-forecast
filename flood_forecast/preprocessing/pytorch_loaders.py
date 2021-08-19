@@ -360,7 +360,7 @@ class GeneralClassificationLoader(CSVDataLoader):
 
         :param params: The standard dictionary for a dataloader (see CSVDataLoader)
         :type params: Dict
-        """
+        """ # noqa
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
         # This could really be anything as forecast_length is not used
