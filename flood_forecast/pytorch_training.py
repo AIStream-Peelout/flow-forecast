@@ -315,15 +315,15 @@ def torch_single_train(model: PyTorchForecast,
     :type criterion: Type[torch.nn.modules.loss._Loss]
     :param data_loader: [description]
     :type data_loader: DataLoader
-    :param takes_target: [description]
+    :param takes_target: A boolean that indicates whether the model takes the target during training
     :type takes_target: bool
-    :param meta_data_model: [description]
+    :param meta_data_model: If supplied a model that handles meta-data else None.
     :type meta_data_model: PyTorchForecast
     :param meta_data_model_representation: [description]
     :type meta_data_model_representation: torch.Tensor
     :param meta_loss: [description], defaults to None
     :type meta_loss: [type], optional
-    :param multi_targets: [description], defaults to 1
+    :param multi_targets: Whether the model forecasts or classifies multiple targets, defaults to 1
     :type multi_targets: int, optional
     :param forward_params: [description], defaults to {}
     :type forward_params: Dict, optional
