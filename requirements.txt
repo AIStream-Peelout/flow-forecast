@@ -17,6 +17,7 @@ numpy
 requests
 torchvision>=0.6.0
 mpld3~=0.5
+numba>=0.50
 sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
