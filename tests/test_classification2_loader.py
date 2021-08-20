@@ -10,6 +10,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
             os.path.dirname(os.path.abspath(__file__)), "test_data"
         )
         self.dataset_params = {
+            "n_classes": 2,
             "file_path": os.path.join(self.test_data_path, "test2.csv"),
             "sequence_length": 20,
             "relevant_cols": ["vel", "obs", "day_of_week"],

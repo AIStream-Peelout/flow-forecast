@@ -246,7 +246,7 @@ class PyTorchForecast(TimeSeriesModel):
             dataset_params["forecast_length"] = 1
             start_end_params = self.__re_add_params__(start_end_params, dataset_params, data_path)
             start_end_params["sequence_length"] = dataset_params["sequence_length"]
-            loader = GeneralClassificationLoader(start_end_params, dataset_params["n_clases"])
+            loader = GeneralClassificationLoader(start_end_params, dataset_params["n_classes"])
         else:
             # TODO support custom DataLoader
             loader = None
