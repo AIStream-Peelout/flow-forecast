@@ -200,7 +200,7 @@ def infer_on_torch_model(
     num_prediction_samples: int = None,
     probabilistic: bool = False,
     criterion_params: Dict = None
-) -> Tuple(pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]):
+) -> Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]:
     """
     Function to handle both test evaluation and inference on a test data-frame.
     :return:
