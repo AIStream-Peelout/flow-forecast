@@ -22,7 +22,7 @@
        "forecast_history":20,
        "forecast_length":2,
        "train_end": 200,
-       "valid_start":201,
+       "valid_start":180,
        "valid_end": 220,
        "test_start":299,
        "test_end": 400,

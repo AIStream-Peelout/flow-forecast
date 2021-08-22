@@ -385,6 +385,8 @@ class TemporalLoader(CSVDataLoader):
             time_feats: List[str],
             kwargs,
             label_len=0):
+        """
+        """
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
@@ -418,14 +420,17 @@ class TemporalLoader(CSVDataLoader):
 
 class TemporalTestLoader(CSVTestLoader):
     def __init__(self, time_feats, kwargs={}, decoder_step_len=None):
-        """[summary]
+        """A test data-loader class for data in the format of the TemporalLoader.
 
-        :param time_feats: [description]
-        :type time_feats: [type]
+        :param time_feats: The temporal featuers to use in encoding.
+        :type time_feats: List[str]
         :param kwargs: [description], defaults to {}
         :type kwargs: dict, optional
         :param decoder_step_len: [description], defaults to None
         :type decoder_step_len: [type], optional
+
+        ...
+        ...
         """
         super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs["kwargs"])
         self.time_feats = time_feats
