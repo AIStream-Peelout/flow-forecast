@@ -20,7 +20,7 @@ from flood_forecast.temporal_decoding import decoding_function
 
 def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
-) -> Tuple(pd.DataFrame, float):
+) -> (pd.DataFrame, float):
     """
     Function to compute the baseline MSE
     by using the mean value from the train data.
@@ -178,7 +178,7 @@ def evaluate_model(
     if "probabilistic" in inference_params:
         print("Probabilistic explainability currently not supported.")
     elif "n_targets" in model.params:
-        print("Full multitask forecasting support coming soon")
+        print("Multitask forecasting support coming soon")
     elif g_loss:
         print("SHAP not yet supported for these models with multiple outputs")
     else:
@@ -200,7 +200,7 @@ def infer_on_torch_model(
     num_prediction_samples: int = None,
     probabilistic: bool = False,
     criterion_params: Dict = None
-) -> Tuple(pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]):
+) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]):
     """
     Function to handle both test evaluation and inference on a test data-frame.
     :return:
