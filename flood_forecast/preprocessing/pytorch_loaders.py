@@ -355,11 +355,12 @@ class AEDataloader(CSVDataLoader):
 
 
 class GeneralClassificationLoader(CSVDataLoader):
-    def __init__(self, params: Dict, n_classes=2):
+    def __init__(self, params: Dict, n_classes: int = 2):
         """A generic data loader class for TS classification problems.
 
         :param params: The standard dictionary for a dataloader (see CSVDataLoader)
         :type params: Dict
+        :param n_classes: The number of classes in the problem
         """ # noqa
         self.n_classes = n_classes
         params["forecast_history"] = params["sequence_length"]
@@ -373,6 +374,8 @@ class GeneralClassificationLoader(CSVDataLoader):
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targ = self.unscaled_df.iloc[idx: self.forecast_history + idx]
+        print("shape of targ")
+        print(targ.shape)
         rows = torch.from_numpy(rows.to_numpy())
         # Exclude the first row it is the target.
         src = rows[:, 1:]
