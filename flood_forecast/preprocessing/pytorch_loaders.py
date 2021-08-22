@@ -79,7 +79,7 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
-        self.unscaled_df = self.df
+        self.unscaled_df = self.df.copy()
         if scaling is not None:
             print("scaling now")
             self.scale = scaling.fit(self.df[scaled_cols])
@@ -371,12 +371,16 @@ class GeneralClassificationLoader(CSVDataLoader):
 
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
+        targs = self.unscaled_df.iloc[idx: self.forecast_history + idx]
         rows = torch.from_numpy(rows.to_numpy())
+        targs = torch.from_numpy(targs.to_numpy())
         # Exclude the first row it is the target.
         src = rows[:, 1:]
         # Get label of the series sequence
-        targ = rows[-1, 0]
-        return src.float(), targ.float().unsqueeze(0).unsqueeze(0)
+        targ = targs[-1, 0]
+        targ1 = torch.zeros(self.n_classes)
+        targ1[targ] = 1
+        return src.float(), targ1.float().unsqueeze(0)
 
 
 class TemporalLoader(CSVDataLoader):
