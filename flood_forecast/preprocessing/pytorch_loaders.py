@@ -378,8 +378,6 @@ class GeneralClassificationLoader(CSVDataLoader):
         targ = torch.from_numpy(targ.to_numpy())
         src = rows[:, 1:]
         # Get label of the series sequence
-        print("Target below")
-        print(targ)
         targ = targ[-1, 0]
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
