@@ -372,11 +372,12 @@ class GeneralClassificationLoader(CSVDataLoader):
 
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
+        targ = self.unscaled_df.iloc[idx: self.forecast_history + idx]
         rows = torch.from_numpy(rows.to_numpy())
         # Exclude the first row it is the target.
         src = rows[:, 1:]
         # Get label of the series sequence
-        targ = rows[-1, 0]
+        targ = targ[-1, 0]
         print(targ)
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
