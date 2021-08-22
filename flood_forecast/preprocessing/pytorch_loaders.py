@@ -354,6 +354,31 @@ class AEDataloader(CSVDataLoader):
         return torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float(), target
 
 
+class GeneralClassificationLoader(CSVDataLoader):
+    def __init__(self, params: Dict, n_classes=2):
+        """A generic data loader class for TS classification problems.
+
+        :param params: The standard dictionary for a dataloader (see CSVDataLoader)
+        :type params: Dict
+        """ # noqa
+        params["forecast_history"] = params["sequence_length"]
+        params["no_scale"] = True
+        # This could really be anything as forecast_length is not used
+        params["forecast_length"] = 1
+        # Remove sequence_length prior to calling the super class
+        params.pop("sequence_length")
+        super().__init__(**params)
+
+    def __getitem__(self, idx: int):
+        rows = self.df.iloc[idx: self.forecast_history + idx]
+        rows = torch.from_numpy(rows.to_numpy())
+        # Exclude the first row it is the target.
+        src = rows[:, 1:]
+        # Get label of the series sequence
+        targ = rows[-1, 0]
+        return src.float(), targ.float().unsqueeze(0).unsqueeze(0)
+
+
 class TemporalLoader(CSVDataLoader):
     def __init__(
             self,
