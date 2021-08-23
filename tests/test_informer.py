@@ -98,16 +98,16 @@ class TestInformer(unittest.TestCase):
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
-    
+
     def test_decoding_3(self):
         informer_model2 = Informer(3, 3, 3, 48, 24, 12, factor=1)
         src = torch.rand(1, 48, 3)
         trg = torch.rand(1, 36, 3)
         src1 = torch.rand(1, 48, 4)
         trg1 = torch.rand(1, 36, 4)
-        decoding_function(informer_model2, src, trg, 12, src1, trg1, 1, 36, 336, "cpu") # no qa
-        #self.assertEqual(d.shape[0], 1)
-        #self.assertEqual(d.shape[1], 336)
+        decoding_function(informer_model2, src, trg, 12, src1, trg1, 1, 36, 336, "cpu")
+        # self.assertEqual(d.shape[0], 1)
+        # self.assertEqual(d.shape[1], 336)
 
     def test_t_loade2(self):
         s_wargs = {
