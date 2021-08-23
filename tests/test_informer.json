@@ -71,7 +71,7 @@
    "metrics":["MSE"],
    "inference_params":
    {     
-         "datetime_start":"2016-04-28",
+         "datetime_start":"2016-05-30",
           "hours_to_forecast":336, 
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
