@@ -56,12 +56,11 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     for i in range(0, max_len, forecast_length):
         # CHANGE THIS LINE
         residual = decoder_seq_len
-        print("shapes below")
-        print(filled_target.shape)
-        print(tar_temp[:, i:i + residual:, :].shape)
         filled_target = filled_target[:, -residual:, :]
         out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
+        print("relevant shapes below")
+        print(out[:, -residual1:, :])
         out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
         # WTF is this shit? !
         # Need better variable names
