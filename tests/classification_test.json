@@ -5,7 +5,7 @@
       "n_time_series":2,
       "hidden_size_encoder":128,
       "decoder_hidden_size":128,
-      "out_feats":1,
+      "out_feats":9,
       "forecast_history":6, 
       "gru_lstm": false,
       "final_act":"Softmax"
@@ -24,8 +24,8 @@
        "valid_start":301,
        "valid_end": 403,
        "test_end": 503,
-       "target_col": ["cfs"],
-       "relevant_cols": ["cfs", "precip", "temp"],
+       "target_col": ["00065_cd"],
+       "relevant_cols": ["00065_cd", "precip", "temp"],
        "scaler": "StandardScaler", 
        "interpolate": false
     },
