@@ -24,8 +24,8 @@
        "valid_start":301,
        "valid_end": 403,
        "test_end": 503,
-       "target_col": ["precip"],
-       "relevant_cols": ["precip", "cfs", "temp"],
+       "target_col": ["00065_cd"],
+       "relevant_cols": ["00065_cd", "precip", "temp"],
        "scaler": "StandardScaler", 
        "interpolate": false
     },
