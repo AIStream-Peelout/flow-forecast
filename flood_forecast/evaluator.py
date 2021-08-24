@@ -20,7 +20,7 @@ from flood_forecast.temporal_decoding import decoding_function
 
 def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
-) -> (pd.DataFrame, float):
+) -> Tuple[pd.DataFrame, float]:
     """
     Function to compute the baseline MSE
     by using the mean value from the train data.
@@ -87,7 +87,7 @@ def evaluate_model(
         forecast_model = PyTorchForecast(config_file)
         e_log, df_train_test, f_idx, df_preds = evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
         print(e_log) # {"MSE":0.2, "MAPE":0.1}
-        print(df_train_test) #
+        print(df_train_test) # will print a pandas dataframe
         ...
     '''
     """
@@ -200,7 +200,7 @@ def infer_on_torch_model(
     num_prediction_samples: int = None,
     probabilistic: bool = False,
     criterion_params: Dict = None
-) -> (pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]):
+) -> Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]:
     """
     Function to handle both test evaluation and inference on a test data-frame.
     :return:
@@ -219,7 +219,7 @@ def infer_on_torch_model(
     multi_params = 1
     if "n_targets" in model.params:
         multi_params = model.params["n_targets"]
-    print("This model is currently forecasting for : " + str(multi_params) + " targets")
+    print("This model is currently forecasting for: " + str(multi_params) + " targets")
     history_length = model.params["dataset_params"]["forecast_history"]
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
@@ -325,7 +325,7 @@ def infer_on_torch_model(
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
-    """[summary]
+    """Handles the confidence interval
 
     :param prediction_samples: [description]
     :type prediction_samples: torch.Tensor
@@ -405,7 +405,7 @@ def generate_predictions(
     :type device: torch.device
     :param forecast_start_idx: The index you want the forecast to begin
     :type forecast_start_idx: int
-    :param forecast_length: The length of the forecast the model outputs per time step
+    :param forecast_length: The length of the forecast the model outputs per forward pass
     :type forecast_length: int
     :param hours_to_forecast: The number of time_steps to forecast in future
     :type hours_to_forecast: int
@@ -413,7 +413,7 @@ def generate_predictions(
     :type decoder_params: Dict
     :param multi_params: n_targets, defaults to 1
     :type multi_params: int, optional
-    :return: The forecasted tensor
+    :return: The forecasted values for the time-series in a tensor
     :rtype: torch.Tensor
     """
     if targs:
