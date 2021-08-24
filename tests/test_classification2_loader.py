@@ -16,7 +16,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
             "target_col": ["vel"],
             "interpolate_param": False,
         }
-        self.data_loader = GeneralClassificationLoader(self.dataset_params.copy(), 4)
+        self.data_loader = GeneralClassificationLoader(self.dataset_params.copy(), 7)
 
     def test_classification_return(self):
         """Tests the series_id method for one
