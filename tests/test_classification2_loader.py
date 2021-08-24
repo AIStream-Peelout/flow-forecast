@@ -35,7 +35,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.assertIsInstance(y, torch.Tensor)
         print("y is below")
         print(y)
-        self.assertEqual(y.shape[0], 7)
+        self.assertEqual(y, 5)
 
 if __name__ == '__main__':
     unittest.main()
