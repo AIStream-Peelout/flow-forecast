@@ -2,7 +2,7 @@
    "model_name": "MultiAttnHeadSimple",
    "model_type": "PyTorch",
    "model_params": {
-     "number_time_series":3, 
+     "number_time_series":2, 
      "seq_len":5, 
      "final_layer": "Softmax",
      "output_seq_len": 1,
@@ -29,7 +29,7 @@
     },
     "training_params":
     {
-       "criterion":"MASELoss",
+       "criterion":"MSE",
        "optimizer": "Adam",
        "optim_params":
        {},
