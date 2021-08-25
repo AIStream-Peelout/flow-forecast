@@ -17,6 +17,7 @@ class MultiAttnHeadSimple(torch.nn.Module):
             dropout=0.1,
             output_dim=1,
             final_layer=False):
+
         super().__init__()
         self.dense_shape = torch.nn.Linear(number_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
