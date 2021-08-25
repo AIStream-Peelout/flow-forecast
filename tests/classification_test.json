@@ -25,7 +25,7 @@
        "valid_end": 403,
        "test_end": 503,
        "target_col": ["precip"],
-       "relevant_cols": ["precip", "temp"],
+       "relevant_cols": ["precip", "temp", "cfs"],
        "scaler": "StandardScaler", 
        "interpolate": false
     },
@@ -64,8 +64,8 @@
              "file_path": "tests/test_data/keag_small.csv",
              "forecast_history":5,
              "forecast_length":1,
-             "relevant_cols": ["cfs", "precip", "temp"],
-             "target_col": ["cfs"],
+             "relevant_cols": [ "precip", "temp", "cfs" ],
+             "target_col": ["precip"],
              "scaling": "StandardScaler",
              "interpolate_param": false
             },
