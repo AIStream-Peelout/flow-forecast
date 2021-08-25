@@ -4,7 +4,7 @@
    "model_params": {
      "number_time_series":3, 
      "seq_len":5, 
-     "final_layer": "Sigmoid",
+     "final_layer": "Softmax",
      "output_seq_len": 1,
      "output_dim": 9
     },
