@@ -290,6 +290,9 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         loss = criterion(labels.float(), output, src, m)
     else:
         assert len(labels.shape) == len(output.shape)
+        print("shapes below")
+        print(labels.shape)
+        print(output.shape)
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
     return loss
@@ -323,7 +326,7 @@ def torch_single_train(model: PyTorchForecast,
     :type meta_data_model_representation: torch.Tensor
     :param meta_loss: [description], defaults to None
     :type meta_loss: [type], optional
-    :param multi_targets: Whether the model forecasts or classifies multiple targets, defaults to 1
+    :param multi_targets: [description], defaults to 1
     :type multi_targets: int, optional
     :param forward_params: [description], defaults to {}
     :type forward_params: Dict, optional
@@ -422,7 +425,7 @@ def compute_validation(validation_loader: DataLoader,
     :type model: [type]
     :param epoch: The epoch where the validation/test loss is being computed.
     :type epoch: int
-    :param sequence_size: [description]
+    :param sequence_size: The length of the sequence (equivalent too
     :type sequence_size: int
     :param criterion: [description]
     :type criterion: Type[torch.nn.modules.loss._Loss]
