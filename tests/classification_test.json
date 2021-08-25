@@ -1,15 +1,13 @@
 {                 
-    "model_name": "DARNN",
-    "model_type": "PyTorch",
-    "model_params": {
-      "n_time_series":2,
-      "hidden_size_encoder":128,
-      "decoder_hidden_size":128,
-      "out_feats":9,
-      "forecast_history":6, 
-      "gru_lstm": false,
-      "final_act":"Softmax"
-     },
+   "model_name": "MultiAttnHeadSimple",
+   "model_type": "PyTorch",
+   "model_params": {
+     "number_time_series":3, 
+     "seq_len":5, 
+     "final_act": "Sigmoid",
+     "output_seq_len": 1,
+     "output_dim": 9
+    },
 
     "dataset_params":
     { "class": "GeneralClassificationLoader",
