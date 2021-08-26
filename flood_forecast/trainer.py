@@ -97,8 +97,6 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
         takes_target = False
         if "takes_target" in trained_model.params:
             takes_target = trained_model.params["takes_target"]
-        if "inference_params" in trained_model.params:
-            print("No inference params")
         if "dataset_params" not in trained_model.params["inference_params"]:
             print("Using generic dataset params")
             trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"].copy()

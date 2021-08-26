@@ -27,7 +27,7 @@
        "interpolate": false
     },
     "inference_params": {
-       "dataset_params":{}
+
     },
     "training_params":
     {
