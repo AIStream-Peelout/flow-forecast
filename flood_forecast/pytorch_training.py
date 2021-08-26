@@ -374,7 +374,9 @@ def torch_single_train(model: PyTorchForecast,
             labels = trg[:, -pred_len:, 0:multi_targets]
             multi_targets = False
         print(trg.shape)
-        if multi_targets == 1:
+        if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
+            labels = trg
+        elif multi_targets == 1:
             labels = trg[:, :, 0]
         elif multi_targets > 1:
             labels = trg[:, :, 0:multi_targets]
