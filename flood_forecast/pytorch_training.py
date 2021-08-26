@@ -41,7 +41,8 @@ def train_transformer_style(
         training_params: Dict,
         takes_target=False,
         forward_params: Dict = {},
-        model_filepath: str = "model_save") -> None:
+        model_filepath: str = "model_save",
+        class2=False) -> None:
 
     """Function to train any PyTorchForecast model
 
@@ -150,7 +151,8 @@ def train_transformer_style(
             meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb,
-            probabilistic=probabilistic)
+            probabilistic=probabilistic,
+            classification=class2)
         if valid == 0.0:
             raise ValueError("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
@@ -181,7 +183,8 @@ def train_transformer_style(
         decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss",
-        probabilistic=probabilistic)
+        probabilistic=probabilistic,
+        classification=class2)
     print("test loss:", test)
     model.params["run"] = session_params
     model.save_model(model_filepath, max_epochs)
@@ -419,7 +422,8 @@ def compute_validation(validation_loader: DataLoader,
                        meta_model=None,
                        multi_targets=1,
                        val_or_test="validation_loss",
-                       probabilistic=False) -> float:
+                       probabilistic=False,
+                       classification=False) -> float:
     """Function to compute the validation loss metrics
 
     :param validation_loader: The data-loader of either validation or test-data
@@ -512,6 +516,8 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src.float())
             if type(model).__name__ == "Informer":
                 pass
+            elif classification:
+                labels = targ
             elif multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:
