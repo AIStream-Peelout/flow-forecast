@@ -26,9 +26,7 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
-    "inference_params": {
 
-    },
     "training_params":
     {
        "criterion":"MSE",
