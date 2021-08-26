@@ -374,8 +374,6 @@ class GeneralClassificationLoader(CSVDataLoader):
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targ = self.unscaled_df.iloc[idx: self.forecast_history + idx]
-        print("shape of targ")
-        print(targ.shape)
         rows = torch.from_numpy(rows.to_numpy())
         targ = torch.from_numpy(targ.to_numpy())
         # Exclude the first row it is the target.
@@ -384,6 +382,8 @@ class GeneralClassificationLoader(CSVDataLoader):
         targ = targ[-1, 0]
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
+        if casted_shit > self.n_classes:
+            raise ValueError("The class " + str(casted_shit) + " greater than the total number of classes")
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
