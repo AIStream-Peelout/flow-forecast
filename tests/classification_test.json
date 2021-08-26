@@ -45,6 +45,6 @@
        "project": "repo-flood_forecast"
     },
    "forward_params":{},
-   "metrics":{"MASELoss":{"baseline_method":"mean"}}
+   "metrics":["MSE"]
 }
     
