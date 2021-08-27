@@ -83,21 +83,31 @@ class TestInformer(unittest.TestCase):
 
     def test_decodign_t(self):
         src = torch.rand(20, 3)
-        trg = torch.rand(336, 3)
+        trg = torch.rand(355, 3)
         src1 = torch.rand(20, 4)
-        trg1 = torch.rand(336, 4)
+        trg1 = torch.rand(355, 4)
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
 
     def test_decoding_2(self):
         src = torch.rand(20, 3)
-        trg = torch.rand(354, 3)
+        trg = torch.rand(355, 3)
         src1 = torch.rand(20, 4)
-        trg1 = torch.rand(354, 4)
+        trg1 = torch.rand(355, 4)
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
+
+    def test_decoding_3(self):
+        informer_model2 = Informer(3, 3, 3, 48, 24, 12, factor=1)
+        src = torch.rand(1, 48, 3)
+        trg = torch.rand(1, 362, 3)
+        src1 = torch.rand(1, 48, 4)
+        trg1 = torch.rand(1, 362, 4)
+        decoding_function(informer_model2, src, trg, 12, src1, trg1, 1, 36, 336, "cpu")
+        # self.assertEqual(d.shape[0], 1)
+        # self.assertEqual(d.shape[1], 336)
 
     def test_t_loade2(self):
         s_wargs = {
@@ -126,5 +136,5 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(trg[0].shape[0], 32)
         self.assertEqual(trg[1].shape[1], 5)
         self.assertEqual(trg[0].shape[1], 2)
-        #  this test makes sure the label_len parameter works
-        print("Complet")
+        #  this test makes sure the label_lens parameter works
+        print("Complete")
