@@ -20,7 +20,7 @@
        "train_end": 300,
        "valid_start":0,
        "valid_end": 300,
-       "test_end": 503,
+       "test_end": 301,
        "target_col": ["precip"],
        "relevant_cols": ["precip", "temp", "cfs"],
        "scaler": "StandardScaler", 
