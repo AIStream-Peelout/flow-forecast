@@ -110,8 +110,6 @@ class TestInformer(unittest.TestCase):
         d = decoding_function(informer_model2, src, trg, 12, src1, trg1, 1, 36, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
-        # self.assertEqual(d.shape[0], 1)
-        # self.assertEqual(d.shape[1], 336)
 
     def test_t_loade2(self):
         s_wargs = {
