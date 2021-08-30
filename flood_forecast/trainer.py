@@ -94,28 +94,30 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
             dataset_params["validation_path"],
             dataset_params["test_path"],
             params)
+        class2 = False if trained_model.params["dataset_params"]["class"] != "GeneralClassificationLoader" else True
         takes_target = False
         if "takes_target" in trained_model.params:
             takes_target = trained_model.params["takes_target"]
-        if "dataset_params" not in trained_model.params["inference_params"]:
-            print("Using generic dataset params")
-            trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"].copy()
-            del trained_model.params["inference_params"]["dataset_params"]["class"]
-            # noqa: F501
-            trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
-            trained_model.params["inference_params"]["dataset_params"]["scaling"] = trained_model.params["inference_params"]["dataset_params"].pop("scaler")
-            trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
-            delete_params = ["num_workers", "pin_memory", "train_start", "train_end", "valid_start", "valid_end", "test_start", "test_end",
-                            "training_path", "validation_path", "test_path", "batch_size"]
-            for param in delete_params:
-                if param in trained_model.params["inference_params"]["dataset_params"]:
-                    del trained_model.params["inference_params"]["dataset_params"][param]
+
+        if "inference_params" in trained_model.params:
+            if "dataset_params" not in trained_model.params["inference_params"]:
+                print("Using generic dataset params")
+                trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"].copy()
+                del trained_model.params["inference_params"]["dataset_params"]["class"]
+                # noqa: F501
+                trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
+                trained_model.params["inference_params"]["dataset_params"]["scaling"] = trained_model.params["inference_params"]["dataset_params"].pop("scaler")
+                trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
+                delete_params = ["num_workers", "pin_memory", "train_start", "train_end", "valid_start", "valid_end", "test_start", "test_end",
+                                "training_path", "validation_path", "test_path", "batch_size"]
+                for param in delete_params:
+                    if param in trained_model.params["inference_params"]["dataset_params"]:
+                        del trained_model.params["inference_params"]["dataset_params"][param]
         train_transformer_style(model=trained_model,
                                 training_params=params["training_params"],
                                 takes_target=takes_target,
-                                forward_params={})
-        # To do delete
-        if "scaler" in dataset_params:
+                                forward_params={}, class2=class2)
+        if "scaler" in dataset_params and "inference_params" in params:
             if "scaler_params" in dataset_params:
                 params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
                                                                                            dataset_params)["scaling"]
@@ -142,7 +144,6 @@ def main():
     with open(args.params) as f:
         training_config = json.load(f)
     train_function(training_config["model_type"], training_config)
-    # evaluate_model(trained_model)
     print("Process is now complete.")
 
 if __name__ == "__main__":

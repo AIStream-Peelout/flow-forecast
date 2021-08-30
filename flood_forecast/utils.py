@@ -10,7 +10,7 @@ def numpy_to_tvar(x):
     """ Converts a numpy array into a PyTorch Tensor
 
     :param x: A numpy array you want to convert
-    :type x: [type]
+    :type x: torch.Tensor
     :return: [description]
     :rtype: torch.Variable
     """

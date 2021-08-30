@@ -41,7 +41,8 @@ def train_transformer_style(
         training_params: Dict,
         takes_target=False,
         forward_params: Dict = {},
-        model_filepath: str = "model_save") -> None:
+        model_filepath: str = "model_save",
+        class2=False) -> None:
 
     """Function to train any PyTorchForecast model
 
@@ -150,7 +151,8 @@ def train_transformer_style(
             meta_model=meta_model,
             decoder_structure=use_decoder,
             use_wandb=use_wandb,
-            probabilistic=probabilistic)
+            probabilistic=probabilistic,
+            classification=class2)
         if valid == 0.0:
             raise ValueError("Error validation loss is zero there is a problem with the validator.")
         if use_wandb:
@@ -181,7 +183,8 @@ def train_transformer_style(
         decoder_structure=decoder_structure,
         use_wandb=use_wandb,
         val_or_test="test_loss",
-        probabilistic=probabilistic)
+        probabilistic=probabilistic,
+        classification=class2)
     print("test loss:", test)
     model.params["run"] = session_params
     model.save_model(model_filepath, max_epochs)
@@ -290,6 +293,9 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         loss = criterion(labels.float(), output, src, m)
     else:
         assert len(labels.shape) == len(output.shape)
+        print("shapes below")
+        print(labels.shape)
+        print(output.shape)
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
     return loss
@@ -315,9 +321,9 @@ def torch_single_train(model: PyTorchForecast,
     :type criterion: Type[torch.nn.modules.loss._Loss]
     :param data_loader: [description]
     :type data_loader: DataLoader
-    :param takes_target: [description]
+    :param takes_target: A boolean that indicates whether the model takes the target during training
     :type takes_target: bool
-    :param meta_data_model: [description]
+    :param meta_data_model: If supplied a model that handles meta-data else None.
     :type meta_data_model: PyTorchForecast
     :param meta_data_model_representation: [description]
     :type meta_data_model_representation: torch.Tensor
@@ -370,7 +376,10 @@ def torch_single_train(model: PyTorchForecast,
             pred_len = model.model.pred_len
             labels = trg[:, -pred_len:, 0:multi_targets]
             multi_targets = False
-        if multi_targets == 1:
+        print(trg.shape)
+        if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
+            labels = trg
+        elif multi_targets == 1:
             labels = trg[:, :, 0]
         elif multi_targets > 1:
             labels = trg[:, :, 0:multi_targets]
@@ -413,7 +422,8 @@ def compute_validation(validation_loader: DataLoader,
                        meta_model=None,
                        multi_targets=1,
                        val_or_test="validation_loss",
-                       probabilistic=False) -> float:
+                       probabilistic=False,
+                       classification=False) -> float:
     """Function to compute the validation loss metrics
 
     :param validation_loader: The data-loader of either validation or test-data
@@ -422,7 +432,7 @@ def compute_validation(validation_loader: DataLoader,
     :type model: [type]
     :param epoch: The epoch where the validation/test loss is being computed.
     :type epoch: int
-    :param sequence_size: [description]
+    :param sequence_size: The length of the sequence (equivalent too
     :type sequence_size: int
     :param criterion: [description]
     :type criterion: Type[torch.nn.modules.loss._Loss]
@@ -506,6 +516,8 @@ def compute_validation(validation_loader: DataLoader,
                     output = model(src.float())
             if type(model).__name__ == "Informer":
                 pass
+            elif classification:
+                labels = targ
             elif multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:

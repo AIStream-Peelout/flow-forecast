@@ -14,18 +14,20 @@ class MultiAttnHeadSimple(torch.nn.Module):
             output_seq_len=None,
             d_model=128,
             num_heads=8,
-            forecast_length=None,
             dropout=0.1,
+            output_dim=1,
             final_layer=False):
+
         super().__init__()
         self.dense_shape = torch.nn.Linear(number_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
         self.multi_attn = MultiheadAttention(
             embed_dim=d_model, num_heads=num_heads, dropout=dropout)
-        self.final_layer = torch.nn.Linear(d_model, 1)
+        self.final_layer = torch.nn.Linear(d_model, output_dim)
         self.length_data = seq_len
         self.forecast_length = output_seq_len
         self.sigmoid = None
+        self.output_dim = output_dim
         if self.forecast_length:
             self.last_layer = torch.nn.Linear(seq_len, output_seq_len)
         if final_layer:
@@ -52,5 +54,6 @@ class MultiAttnHeadSimple(torch.nn.Module):
             x = self.last_layer(x)
             if self.sigmoid:
                 x = self.sigmoid(x)
+                return x.permute(0, 2, 1)
             return x.view(-1, self.forecast_length)
         return x.view(-1, self.length_data)
