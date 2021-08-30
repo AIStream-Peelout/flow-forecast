@@ -98,8 +98,11 @@ class TestInformer(unittest.TestCase):
         d = decoding_function(self.informer, src, trg, 5, src1, trg1, 1, 20, 336, "cpu")
         self.assertEqual(d.shape[0], 1)
         self.assertEqual(d.shape[1], 336)
-        self.assertNotEqual(d[0, 0], d[0, 1])
-        self.assertNotAlmostEqual(d[0, 0], d[0, 330])
+        self.assertNotEqual(d[0, 0].item(), d[0, 1].item())
+        self.assertNotAlmostEqual(d[0, 0].item(), d[0, 330].item())
+        self.assertNotAlmostEqual(d[0, 20].item(), d[0, 333].item())
+        self.assertNotAlmostEqual(d[0, 300].item(), d[0, 334].item())
+        self.assertNotAlmostEqual(d[0, 20].item(), trg[0, 20].item())
 
     def test_decoding_3(self):
         informer_model2 = Informer(3, 3, 3, 48, 24, 12, factor=1)
