@@ -107,7 +107,9 @@ class TestInformer(unittest.TestCase):
         trg = torch.rand(1, 362, 3)
         src1 = torch.rand(1, 48, 4)
         trg1 = torch.rand(1, 362, 4)
-        decoding_function(informer_model2, src, trg, 12, src1, trg1, 1, 36, 336, "cpu")
+        d = decoding_function(informer_model2, src, trg, 12, src1, trg1, 1, 36, 336, "cpu")
+        self.assertEqual(d.shape[0], 1)
+        self.assertEqual(d.shape[1], 336)
         # self.assertEqual(d.shape[0], 1)
         # self.assertEqual(d.shape[1], 336)
 
@@ -132,8 +134,6 @@ class TestInformer(unittest.TestCase):
         s_wargs["forecast_history"] = 39
         t_load = TemporalLoader(["month", "day"], s_wargs, 30)
         src, trg = t_load[0]
-        print(trg[0])
-        print(trg[1].shape)
         self.assertEqual(trg[1].shape[0], 32)
         self.assertEqual(trg[0].shape[0], 32)
         self.assertEqual(trg[1].shape[1], 5)
