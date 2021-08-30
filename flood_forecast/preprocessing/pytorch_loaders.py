@@ -79,7 +79,7 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
-        self.unscaled_df = self.df
+        self.unscaled_df = self.df.copy()
         if scaling is not None:
             print("scaling now")
             self.scale = scaling.fit(self.df[scaled_cols])
@@ -355,12 +355,14 @@ class AEDataloader(CSVDataLoader):
 
 
 class GeneralClassificationLoader(CSVDataLoader):
-    def __init__(self, params: Dict, n_classes=2):
+    def __init__(self, params: Dict, n_classes: int = 2):
         """A generic data loader class for TS classification problems.
 
         :param params: The standard dictionary for a dataloader (see CSVDataLoader)
         :type params: Dict
+        :param n_classes: The number of classes in the problem
         """ # noqa
+        self.n_classes = n_classes
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
         # This could really be anything as forecast_length is not used
@@ -371,12 +373,19 @@ class GeneralClassificationLoader(CSVDataLoader):
 
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
+        targ = self.unscaled_df.iloc[idx: self.forecast_history + idx]
         rows = torch.from_numpy(rows.to_numpy())
+        targ = torch.from_numpy(targ.to_numpy())
         # Exclude the first row it is the target.
         src = rows[:, 1:]
         # Get label of the series sequence
-        targ = rows[-1, 0]
-        return src.float(), targ.float().unsqueeze(0).unsqueeze(0)
+        targ = targ[-1, 0]
+        targ_labs = torch.zeros(self.n_classes)
+        casted_shit = int(targ.data.tolist())
+        if casted_shit > self.n_classes:
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+        targ_labs[casted_shit] = 1
+        return src.float(), targ_labs.float().unsqueeze(0)
 
 
 class TemporalLoader(CSVDataLoader):
@@ -385,6 +394,8 @@ class TemporalLoader(CSVDataLoader):
             time_feats: List[str],
             kwargs,
             label_len=0):
+        """
+        """
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
@@ -418,14 +429,17 @@ class TemporalLoader(CSVDataLoader):
 
 class TemporalTestLoader(CSVTestLoader):
     def __init__(self, time_feats, kwargs={}, decoder_step_len=None):
-        """[summary]
+        """A test data-loader class for data in the format of the TemporalLoader.
 
-        :param time_feats: [description]
-        :type time_feats: [type]
+        :param time_feats: The temporal featuers to use in encoding.
+        :type time_feats: List[str]
         :param kwargs: [description], defaults to {}
         :type kwargs: dict, optional
         :param decoder_step_len: [description], defaults to None
         :type decoder_step_len: [type], optional
+
+        ...
+        ...
         """
         super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs["kwargs"])
         self.time_feats = time_feats

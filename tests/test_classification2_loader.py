@@ -16,7 +16,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
             "target_col": ["vel"],
             "interpolate_param": False,
         }
-        self.data_loader = GeneralClassificationLoader(self.dataset_params.copy())
+        self.data_loader = GeneralClassificationLoader(self.dataset_params.copy(), 7)
 
     def test_classification_return(self):
         """Tests the series_id method for one
@@ -35,7 +35,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.assertIsInstance(y, torch.Tensor)
         print("y is below")
         print(y)
-        self.assertEqual(y, 5)
+        self.assertEqual(y.shape[1], 7)
 
 if __name__ == '__main__':
     unittest.main()
