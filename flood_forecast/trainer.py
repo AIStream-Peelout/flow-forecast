@@ -117,8 +117,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
                                 training_params=params["training_params"],
                                 takes_target=takes_target,
                                 forward_params={}, class2=class2)
-        # To do delete
-        if "scaler" in dataset_params:
+        if "scaler" in dataset_params and "inference_params" in params:
             if "scaler_params" in dataset_params:
                 params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
                                                                                            dataset_params)["scaling"]
@@ -145,7 +144,6 @@ def main():
     with open(args.params) as f:
         training_config = json.load(f)
     train_function(training_config["model_type"], training_config)
-    # evaluate_model(trained_model)
     print("Process is now complete.")
 
 if __name__ == "__main__":
