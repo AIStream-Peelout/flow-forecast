@@ -102,8 +102,8 @@ class TestInformer(unittest.TestCase):
         self.assertNotAlmostEqual(d[0, 0, 0].item(), d[0, 330, 0].item())
         self.assertNotAlmostEqual(d[0, 20, 0].item(), d[0, 333, 0].item())
         self.assertNotAlmostEqual(d[0, 300, 0].item(), d[0, 334, 0].item())
-        self.assertNotAlmostEqual(d[0, 20, 0].item(), trg[0, 20, 0].item())
-        self.assertNotAlmostEqual(d[0, 21, 0].item(), trg[0, 21, 0].item())
+        self.assertNotAlmostEqual(d[0, 20, 0].item(), trg[0, 20].item())
+        self.assertNotAlmostEqual(d[0, 21, 0].item(), trg[0, 21].item())
 
     def test_decoding_3(self):
         informer_model2 = Informer(3, 3, 3, 48, 24, 12, factor=1)
