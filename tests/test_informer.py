@@ -80,6 +80,7 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(trg[0].shape[0], 339)
         self.assertEqual(src[0].shape[0], 5)
         self.assertEqual(len(df.index), 341)
+        self.assertEqual(trg[0, 0].item(), 449)
 
     def test_decodign_t(self):
         src = torch.rand(20, 3)
@@ -102,8 +103,8 @@ class TestInformer(unittest.TestCase):
         self.assertNotAlmostEqual(d[0, 0, 0].item(), d[0, 330, 0].item())
         self.assertNotAlmostEqual(d[0, 20, 0].item(), d[0, 333, 0].item())
         self.assertNotAlmostEqual(d[0, 300, 0].item(), d[0, 334, 0].item())
-        self.assertNotAlmostEqual(d[0, 20, 0].item(), trg[0, 20].item())
-        self.assertNotAlmostEqual(d[0, 21, 0].item(), trg[0, 21].item())
+        self.assertNotAlmostEqual(d[0, 20, 0].item(), trg[20, 0].item())
+        self.assertNotAlmostEqual(d[0, 21, 0].item(), trg[21, 0].item())
 
     def test_decoding_3(self):
         informer_model2 = Informer(3, 3, 3, 48, 24, 12, factor=1)
