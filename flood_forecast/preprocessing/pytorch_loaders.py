@@ -394,7 +394,14 @@ class TemporalLoader(CSVDataLoader):
             time_feats: List[str],
             kwargs,
             label_len=0):
-        """
+        """A data loader class for creating specific temporal features/embeddings.
+
+        :param time_feats: A list of strings of the time features (e.g. ['month', 'day', 'hour'])
+        :type time_feats: List[str]
+        :param kwargs: The set of parameters
+        :type kwargs: Dict[str, Any]
+        :param label_len: For Informer based model the, defaults to 0
+        :type label_len: int, optional
         """
         super().__init__(**kwargs)
         self.time_feats = time_feats
@@ -407,6 +414,27 @@ class TemporalLoader(CSVDataLoader):
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
     def __getitem__(self, idx: int):
+        """
+        :param idx: Index of the item to be returned
+        .. highlight:: python
+        .. code-block:: python
+            ## Example data 
+            ## -----------------
+            ## 1992-01-01    0.0
+            ## 1992-01-02    1.0
+            ## 1992-01-03    2.0
+            ## 1992-01-04    3.0
+            ## 1992-01-05    4.0
+            ## 1992-01-06    5.0
+            ## -----------------
+            kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1, "shuffle" : False, "num_workers" : 1}
+            d = TemporalLoader(time_feats=["year", "month"], kwargs, label_len=1)
+            x, y = d[0]
+            print(x[0]) # (tensor([[0.0, 1.0, 2.0, 3.0]]))]),
+            print(y[0]) # (tensor([[3.0, 4.0, 5.0, 6.0]]))])
+            print(x[1]) # ,
+        
+        """
         rows = self.other_feats.iloc[idx: self.forecast_history + idx]
         temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx - self.label_len
@@ -433,7 +461,7 @@ class TemporalTestLoader(CSVTestLoader):
 
         :param time_feats: The temporal featuers to use in encoding.
         :type time_feats: List[str]
-        :param kwargs: [description], defaults to {}
+        :param kwargs: The dict used to instantiate CSVTestLoader parent, defaults to {}
         :type kwargs: dict, optional
         :param decoder_step_len: [description], defaults to None
         :type decoder_step_len: [type], optional

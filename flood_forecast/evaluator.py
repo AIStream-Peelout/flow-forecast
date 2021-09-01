@@ -203,6 +203,8 @@ def infer_on_torch_model(
 ) -> Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]:
     """
     Function to handle both test evaluation and inference on a test data-frame.
+    :param model: The time series model present
+    :param test_csv_path: The path to the test data-frame
     :return:
         df: df including training and test data
         end_tensor: the final tensor after the model has finished predictions
