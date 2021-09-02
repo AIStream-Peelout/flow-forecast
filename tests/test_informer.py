@@ -67,6 +67,14 @@ class TestInformer(unittest.TestCase):
         r2 = result[1][0].unsqueeze(0)
         res = i(r0, r1, r3, r2)
         self.assertEqual(res.shape[1], 1)
+        self.assertEqual(r3[0, 0].item(), 459)
+
+    def test_temporal_load(self):
+        loa = TemporalLoader(["month", "day", "day_of_week", "hour"], self.kwargs, 2)
+        data = loa[0]
+        self.assertEqual(data[1][1].shape[0], 3)
+        self.assertEqual(data[1][1][0, 0].item(), 449)
+        self.assertEqual(data[1][1][2, 0], 459)
 
     def test_data_temporal_loader_init(self):
         kwargs2 = self.kwargs.copy()
