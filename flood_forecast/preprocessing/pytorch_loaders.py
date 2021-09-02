@@ -418,7 +418,7 @@ class TemporalLoader(CSVDataLoader):
         :param idx: Index of the item to be returned
         .. highlight:: python
         .. code-block:: python
-            ## Example data 
+            ## Example data
             ## -----------------
             ## 1992-01-01    0.0
             ## 1992-01-02    1.0
@@ -427,13 +427,13 @@ class TemporalLoader(CSVDataLoader):
             ## 1992-01-05    4.0
             ## 1992-01-06    5.0
             ## -----------------
-            kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1, "shuffle" : False, "num_workers" : 1}
+            kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1,
+            "shuffle" : False, "num_workers" : 1}
             d = TemporalLoader(time_feats=["year", "month"], kwargs, label_len=1)
             x, y = d[0]
             print(x[0]) # (tensor([[0.0, 1.0, 2.0, 3.0]]))]),
             print(y[0]) # (tensor([[3.0, 4.0, 5.0, 6.0]]))])
             print(x[1]) # ,
-        
         """
         rows = self.other_feats.iloc[idx: self.forecast_history + idx]
         temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]

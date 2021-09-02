@@ -329,9 +329,9 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
     """Handles the confidence interval
 
-    :param prediction_samples: [description]
+    :param prediction_samples: The number of predictions to generate using dropout
     :type prediction_samples: torch.Tensor
-    :param csv_test_loader: [description]
+    :param csv_test_loader: The test loader
     :type csv_test_loader: CSVTestLoader
     :param multi_params: [description]
     :type multi_params: int
