@@ -27,7 +27,7 @@
        "valid_end": 290,
        "test_start":299,
        "test_end": 400,
-       "target_col": ["cfs", "precip"],
+       "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
        "sort_column":"datetime",
@@ -83,7 +83,7 @@
              "forecast_history":20,
              "forecast_length":2,
              "relevant_cols": ["cfs", "precip", "temp"],
-             "target_col": ["cfs", "precip"],
+             "target_col": ["cfs"],
              "scaling": "StandardScaler",
              "interpolate_param": false,
              "feature_params":
