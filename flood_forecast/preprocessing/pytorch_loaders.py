@@ -326,11 +326,32 @@ class AEDataloader(CSVDataLoader):
             forecast_history=1,
             no_scale=True,
             sort_column=None):
-        """
-        A data loader class for autoencoders.
-        Overrides __len__ and __getitem__ from generic dataloader.
-        Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
-        Same parameters as before.
+        """A data loader class for autoencoders. Overrides __len__ and __getitem__ from generic dataloader.
+           Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
+           Same parameters as before.
+
+        :param file_path: The path to the file
+        :type file_path: str
+        :param relevant_cols: d
+        :type relevant_cols: List
+        :param scaling: [description], defaults to None
+        :type scaling: [type], optional
+        :param start_stamp: [description], defaults to 0
+        :type start_stamp: int, optional
+        :param target_col: [description], defaults to None
+        :type target_col: List, optional
+        :param end_stamp: [description], defaults to None
+        :type end_stamp: int, optional
+        :param unsqueeze_dim: [description], defaults to 1
+        :type unsqueeze_dim: int, optional
+        :param interpolate_param: [description], defaults to False
+        :type interpolate_param: bool, optional
+        :param forecast_history: [description], defaults to 1
+        :type forecast_history: int, optional
+        :param no_scale: [description], defaults to True
+        :type no_scale: bool, optional
+        :param sort_column: [description], defaults to None
+        :type sort_column: [type], optional
         """
         super().__init__(file_path=file_path, forecast_history=forecast_history, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
@@ -392,7 +413,7 @@ class TemporalLoader(CSVDataLoader):
     def __init__(
             self,
             time_feats: List[str],
-            kwargs,
+            kwargs: Dict,
             label_len=0):
         """A data loader class for creating specific temporal features/embeddings.
 
@@ -427,13 +448,14 @@ class TemporalLoader(CSVDataLoader):
             ## 1992-01-05    4.0
             ## 1992-01-06    5.0
             ## -----------------
-            kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1,
-            "shuffle" : False, "num_workers" : 1}
+            kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1, "shuffle" : False,
+            "num_workers" : 1}
             d = TemporalLoader(time_feats=["year", "month"], kwargs, label_len=1)
             x, y = d[0]
             print(x[0]) # (tensor([[0.0, 1.0, 2.0, 3.0]]))]),
             print(y[0]) # (tensor([[3.0, 4.0, 5.0, 6.0]]))])
             print(x[1]) # ,
+
         """
         rows = self.other_feats.iloc[idx: self.forecast_history + idx]
         temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
@@ -449,7 +471,7 @@ class TemporalLoader(CSVDataLoader):
         tar_temp = self.df_to_numpy(tar_temporal_feats)
         return (src_data, temporal_feats), (tar_temp, trg_data)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return (
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
