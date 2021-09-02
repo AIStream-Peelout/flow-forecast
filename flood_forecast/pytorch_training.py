@@ -11,6 +11,7 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
+from torch.nn import CrossEntropyLoss
 
 
 def handle_meta_data(model: PyTorchForecast):
@@ -291,6 +292,9 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     elif isinstance(criterion, MASELoss):
         assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
+    elif isinstance(criterion, CrossEntropyLoss):
+        max_labels = labels.max(dim=1)[1]
+        loss = criterion(output, max_labels)
     else:
         assert len(labels.shape) == len(output.shape)
         print("shapes below")
