@@ -6,7 +6,7 @@ from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
 from flood_forecast.basic.lstm_vanilla import LSTMForecast
 from torch.optim import Adam, SGD
-from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1Loss, CrossEntropyLoss, PenalizedCrossEntropyLoss
+from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1Loss, CrossEntropyLoss, BinaryCrossEntropyLoss
 from flood_forecast.custom.custom_opt import BertAdam
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
@@ -47,7 +47,7 @@ pytorch_criterion_dict = {
     "PenalizedMSELoss": PenalizedMSELoss,
     "CrossEntropyLoss": CrossEntropyLoss,
     "NegativeLogLikelihood": NegativeLogLikelihood,
-    "PenalizedCrossEntropyLoss": PenalizedCrossEntropyLoss}
+    "BinaryCrossEntropyLoss": BinaryCrossEntropyLoss}
 
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}
 
