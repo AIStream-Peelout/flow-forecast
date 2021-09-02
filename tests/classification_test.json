@@ -26,9 +26,10 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
+
     "training_params":
     {
-       "criterion":"CrossEntropyLoss",
+       "criterion":"MSE",
        "optimizer": "Adam",
        "optim_params":
        {},
@@ -44,6 +45,6 @@
        "project": "repo-flood_forecast"
     },
    "forward_params":{},
-   "metrics":["CrossEntropyLoss"]
+   "metrics":["MSE"]
 }
     
