@@ -1,7 +1,6 @@
 import unittest
 import os
 from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader
-from flood_forecast.model_dict_function import pytorch_model_dict
 import torch
 
 
@@ -37,14 +36,6 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         print("y is below")
         print(y)
         self.assertEqual(y.shape[1], 7)
-
-    def test_bce_stuff(self):
-        loss = pytorch_model_dict["CrossEntropyLoss"]
-        x, y = self.data_loader[1]
-        the_loss = loss(torch.rand(1, 7), y.max(dim=1))
-        self.assertGreater(the_loss, 0)
-        self.assertLess(the_loss, 1)
-
 
 if __name__ == '__main__':
     unittest.main()
