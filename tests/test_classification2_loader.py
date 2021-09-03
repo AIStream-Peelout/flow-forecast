@@ -39,7 +39,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.assertEqual(y.shape[1], 7)
 
     def test_bce_stuff(self):
-        loss = pytorch_criterion_dict["CrossEntropyLoss"]
+        loss = pytorch_criterion_dict["CrossEntropyLoss"]()
         x, y = self.data_loader[1]
         the_loss = loss(torch.rand(1, 7), y.max(dim=1)).item()
         self.assertGreater(the_loss, 0)

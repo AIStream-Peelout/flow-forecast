@@ -381,6 +381,7 @@ def torch_single_train(model: PyTorchForecast,
         if hasattr(model.model, "pred_len"):
             multi_targets = mulit_targets_copy
             pred_len = model.model.pred_len
+            output = output[:, :, 0:multi_targets]
             labels = trg[:, -pred_len:, 0:multi_targets]
             multi_targets = False
         print(trg.shape)
