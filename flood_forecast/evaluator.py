@@ -118,6 +118,8 @@ def evaluate_model(
                 end_tensor_mean = end_tensor_mean.squeeze(1)
             else:
                 if "n_targets" in model.params:
+                    if model.params["model_name"] == "Informer":
+                        end_tensor = end_tensor[:, :, 0:model.params["n_targets"]]
                     end_tensor = test_data.inverse_scale(end_tensor.detach())
                 else:
                     end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
@@ -327,11 +329,11 @@ def infer_on_torch_model(
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
-    """Handles the confidence interval
+    """Handles the CI confidence interval
 
-    :param prediction_samples: The number of predictions to generate using dropout
+    :param prediction_samples: The number of predictions to generate
     :type prediction_samples: torch.Tensor
-    :param csv_test_loader: The test loader
+    :param csv_test_loader: The test loader genreated in the previous
     :type csv_test_loader: CSVTestLoader
     :param multi_params: [description]
     :type multi_params: int
