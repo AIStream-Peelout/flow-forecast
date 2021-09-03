@@ -293,8 +293,9 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
     elif isinstance(criterion, CrossEntropyLoss):
-        labels = labels.permute(0, 2, 1)
-        output = output.permute(0, 2, 1)
+        if len(labels.shape) > 2:
+            labels = labels.permute(0, 2, 1)
+            output = output.permute(0, 2, 1)
         labels = labels.max(dim=1)[1]
         loss = criterion(output, labels)
     else:
