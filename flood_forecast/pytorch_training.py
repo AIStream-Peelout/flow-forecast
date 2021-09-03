@@ -523,7 +523,7 @@ def compute_validation(validation_loader: DataLoader,
                 else:
                     output = model(src.float())
             if type(model).__name__ == "Informer":
-                pass
+                output = output[:, :, 0:multi_targets]
             elif classification:
                 labels = targ
             elif multi_targets == 1:
