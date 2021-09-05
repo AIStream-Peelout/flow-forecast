@@ -98,6 +98,7 @@ class TimeSeriesModelTest(unittest.TestCase):
         inf = PyTorchForecast("Informer", keag_file, keag_file, keag_file, json_params)
         self.assertTrue(inf)
         self.assertEqual(inf.model.label_len, 10)
+        self.assertEqual(inf.model.c_out, 3)
 
 
 if __name__ == '__main__':
