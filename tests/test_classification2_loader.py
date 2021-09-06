@@ -43,7 +43,6 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         x, y = self.data_loader[1]
         the_loss = loss(torch.rand(1, 7), y.max(dim=1)[1]).item()
         self.assertGreater(the_loss, 0)
-        self.assertLess(the_loss, 1)
 
 if __name__ == '__main__':
     unittest.main()
