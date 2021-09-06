@@ -64,8 +64,7 @@
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
             "decoder_function": "simple_decode", 
-            "unsqueeze_dim": 1}
-          
+            "unsqueeze_dim": 1} 
    }
 }
     
