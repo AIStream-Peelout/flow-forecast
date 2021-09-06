@@ -12,7 +12,7 @@ class Informer(nn.Module):
                  device=torch.device('cuda:0')):
         """ This is based on the implementation of the Informer available from the original authors
             https://github.com/zhouhaoyi/Informer2020. We have done some minimal refactoring, but
-            the core code remains the same.
+            the core code remains the same. Additionally, we have added a few more options to the code
 
         :param n_time_series: The number of time series present in the multivariate forecasting problem.
         :type n_time_series: int
@@ -22,9 +22,9 @@ class Informer(nn.Module):
         :type c_out:  int
         :param seq_len: The number of historical time steps to pass into the model.
         :type seq_len: int
-        :param label_len: The length of the label sequence passed into the decoder.
+        :param label_len: The length of the label sequence passed into the decoder (n_time_steps not used forecasted)
         :type label_len: int
-        :param out_len: The overall output length from the decoder .
+        :param out_len: The predicted number of time steps. forecast_length should equal out_len + label_len
         :type out_len: int
         :param factor: The multiplicative factor in the probablistic attention mechanism, defaults to 5
         :type factor: int, optional
@@ -38,13 +38,13 @@ class Informer(nn.Module):
         :type d_layers: int, optional
         :param d_ff: The dimension of the forward pass, defaults to 512
         :type d_ff: int, optional
-        :param dropout: [description], defaults to 0.0
+        :param dropout: Whether to use dropout, defaults to 0.0
         :type dropout: float, optional
         :param attn: The type of the attention mechanism either 'prob' or 'full', defaults to 'prob'
         :type attn: str, optional
         :param embed: Whether to use class: `FixedEmbedding` or `torch.nn.Embbeding` , defaults to 'fixed'
         :type embed: str, optional
-        :param temp_depth: The temporald depth (e.g), defaults to 4
+        :param temp_depth: The temporald depth (e.g year, month, day, weekday, etc), defaults to 4
         :type data: int, optional
         :param activation: The activation func, defaults to 'gelu'
         :type activation: str, optional
@@ -101,7 +101,7 @@ class Informer(nn.Module):
         # self.end_conv2 = nn.Conv1d(in_channels=d_model, out_channels=c_out, kernel_size=1, bias=True)
         self.projection = nn.Linear(d_model, c_out, bias=True)
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
+    def forward(self, x_enc: torch.Tensor, x_mark_enc, x_dec, x_mark_dec,
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
         """
 
@@ -118,8 +118,8 @@ class Informer(nn.Module):
         :param dec_self_mask: [description], defaults to None
         :type dec_self_mask: [type], optional
         :param dec_enc_mask: [description], defaults to None
-        :type dec_enc_mask: [type], optional
-        :return: Returns a PyTorch tensor of shape (batch_size, ?, ?)
+        :type dec_enc_mask: torch.Tensor, optional
+        :return: Returns a PyTorch tensor of shape (batch_size, out_len, n_targets)
         :rtype: torch.Tensor
         """
         enc_out = self.enc_embedding(x_enc, x_mark_enc)

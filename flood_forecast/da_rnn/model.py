@@ -38,7 +38,7 @@ class DARNN(nn.Module):
             probabilistic=False,
             final_act=None):
 
-        """ For model benchmark information see link on side https://rb.gy/koozff
+        """For model benchmark information see link on side https://rb.gy/koozff
 
         :param n_time_series: Number of time series present in input
         :type n_time_series: int
@@ -48,7 +48,7 @@ class DARNN(nn.Module):
         :type forecast_history: int
         :param decoder_hidden_size: dimension of hidden size of the decoder
         :type decoder_hidden_size: int
-        :param out_feats: [description], defaults to 1
+        :param out_feats: The number of targets (or in classification classes), defaults to 1
         :type out_feats: int, optional
         :param dropout: defaults to .01
         :type dropout: float, optional
@@ -67,10 +67,10 @@ class DARNN(nn.Module):
                                self.probabilistic)
         self.final_act = final_act
         if final_act:
-            self.final_act = activation_dict[final_act]
+            self.final_act = activation_dict[final_act](dim=1)
 
     def forward(self, x: torch.Tensor, meta_data: torch.Tensor = None) -> torch.Tensor:
-        """[summary]
+        """Performs standard forward pass of the DARNN. Special handling of probablistic.
 
         :param x: The core temporal data represented as a tensor (batch_size, forecast_history, n_time_series)
         :type x: torch.Tensor

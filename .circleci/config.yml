@@ -151,9 +151,12 @@ jobs:
           name: Model basic tests
           when: always
           command: |
+            coverage run -m unittest -v tests/test_squashed.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_attn.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_informer.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_meta_pr.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/time_model_test.py
@@ -171,6 +174,7 @@ jobs:
             coverage run -m unittest -v tests/pytorc_train_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_series_id.py
+            coverage run -m unittest -v tests/test_classification2_loader.py
       - run:
           name: upload_stuff
           when: always
@@ -246,6 +250,7 @@ jobs:
           name: Trainer tests
           when: always
           command: |
+            coverage run flood_forecast/trainer.py -p tests/classification_test.json
             coverage run flood_forecast/trainer.py -p tests/test_inf_single.json
             echo -e 'test informer single target'
             coverage run flood_forecast/trainer.py -p tests/test_informer.json

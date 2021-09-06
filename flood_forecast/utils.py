@@ -10,7 +10,7 @@ def numpy_to_tvar(x):
     """ Converts a numpy array into a PyTorch Tensor
 
     :param x: A numpy array you want to convert
-    :type x: [type]
+    :type x: torch.Tensor
     :return: [description]
     :rtype: torch.Variable
     """
@@ -18,10 +18,12 @@ def numpy_to_tvar(x):
 
 
 def flatten_list_function(input_list: List):
+    """
+    """
     return [item for sublist in input_list for item in sublist]
 
 
-def make_criterion_functions(crit_list) -> List:
+def make_criterion_functions(crit_list: List) -> List:
     """crit_list should be either dict or list"""
     final_list = []
     if type(crit_list) == list:

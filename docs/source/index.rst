@@ -23,6 +23,7 @@ of datasets.
    pytorch_training
    time_model
    trainer
+   explain_model_output
 
 .. automodule:: flood_forecast.deployment
 
@@ -77,8 +78,6 @@ of datasets.
   :caption: GCP Integration:
 
   basic_utils
-
-.. automodule:: flood_forecast.explain_model_output
 
 .. automodule:: flood_forecast.da_rnn
 

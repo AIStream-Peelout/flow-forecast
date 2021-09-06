@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import List, Union, Optional
+from typing import Dict, Tuple, Union, Optional, List
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
@@ -79,7 +79,7 @@ class CSVDataLoader(Dataset):
             self.df = self.df[start_stamp:]
         elif end_stamp is not None:
             self.df = self.df[:end_stamp]
-        self.unscaled_df = self.df
+        self.unscaled_df = self.df.copy()
         if scaling is not None:
             print("scaling now")
             self.scale = scaling.fit(self.df[scaled_cols])
@@ -153,7 +153,7 @@ class CSVDataLoader(Dataset):
 
 class CSVSeriesIDLoader(CSVDataLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
-        """A da
+        """A data-loader for a CSV file that contains a series ID column.
 
         :param series_id_col: The id
         :type series_id_col: str
@@ -169,26 +169,42 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
-        self.unique_cols = self.original_df[series_id_col].unique().tolist()
+        self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
+        self.unique_dict = {}
         for col in self.unique_cols:
             df_list.append(self.df[self.df[self.series_id_col] == col])
         self.listed_vals = df_list
+        self.__make_unique_dict__()
+        print(self.unique_dict)
+        print("unique dict")
 
-    def __getitem__(self, idx: int):
+    def __make_unique_dict__(self):
+        for i in range(0, len(self.unique_cols)):
+            self.unique_dict[self.unique_cols[i]] = i
+
+    def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
+        """Returns a set of dictionaries that contain the data for each series.
+
+        :param idx: The index to lookup in the dataframe
+        :type idx: int
+        :return: A set of dictionaries that contain the data for each series.
+        :rtype: Tuple[Dict, Dict]
+        """
         if self.return_all_series:
-            # TO-DO
-            src_list = []
-            targ_list = []
+            src_list = {}
+            targ_list = {}
+            print(self.unique_cols)
             for va in self.listed_vals:
-                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, :len(self.relevant_cols3) - 1]
                 targ_start_idx = idx + self.forecast_history
+                idx2 = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
-                src_list.append(t)
-                targ_list.append(targ)
+                src_list[self.unique_dict[idx2]] = t
+                targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
         else:
-            print("s")
+            raise NotImplementedError
         return super().__getitem__(idx)
 
     def __sample_series_id__(idx, series_id):
@@ -310,11 +326,32 @@ class AEDataloader(CSVDataLoader):
             forecast_history=1,
             no_scale=True,
             sort_column=None):
-        """
-        A data loader class for autoencoders.
-        Overrides __len__ and __getitem__ from generic dataloader.
-        Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
-        Same parameters as before.
+        """A data loader class for autoencoders. Overrides __len__ and __getitem__ from generic dataloader.
+           Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
+           Same parameters as before.
+
+        :param file_path: The path to the file
+        :type file_path: str
+        :param relevant_cols: d
+        :type relevant_cols: List
+        :param scaling: [description], defaults to None
+        :type scaling: [type], optional
+        :param start_stamp: [description], defaults to 0
+        :type start_stamp: int, optional
+        :param target_col: [description], defaults to None
+        :type target_col: List, optional
+        :param end_stamp: [description], defaults to None
+        :type end_stamp: int, optional
+        :param unsqueeze_dim: [description], defaults to 1
+        :type unsqueeze_dim: int, optional
+        :param interpolate_param: [description], defaults to False
+        :type interpolate_param: bool, optional
+        :param forecast_history: [description], defaults to 1
+        :type forecast_history: int, optional
+        :param no_scale: [description], defaults to True
+        :type no_scale: bool, optional
+        :param sort_column: [description], defaults to None
+        :type sort_column: [type], optional
         """
         super().__init__(file_path=file_path, forecast_history=forecast_history, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
@@ -338,42 +375,103 @@ class AEDataloader(CSVDataLoader):
         return torch.from_numpy(self.df.iloc[idx: idx + self.forecast_history].to_numpy()).float(), target
 
 
+class GeneralClassificationLoader(CSVDataLoader):
+    def __init__(self, params: Dict, n_classes: int = 2):
+        """A generic data loader class for TS classification problems.
+
+        :param params: The standard dictionary for a dataloader (see CSVDataLoader)
+        :type params: Dict
+        :param n_classes: The number of classes in the problem
+        """ # noqa
+        self.n_classes = n_classes
+        params["forecast_history"] = params["sequence_length"]
+        params["no_scale"] = True
+        # This could really be anything as forecast_length is not used
+        params["forecast_length"] = 1
+        # Remove sequence_length prior to calling the super class
+        params.pop("sequence_length")
+        super().__init__(**params)
+
+    def __getitem__(self, idx: int):
+        rows = self.df.iloc[idx: self.forecast_history + idx]
+        targ = self.unscaled_df.iloc[idx: self.forecast_history + idx]
+        rows = torch.from_numpy(rows.to_numpy())
+        targ = torch.from_numpy(targ.to_numpy())
+        # Exclude the first row it is the target.
+        src = rows[:, 1:]
+        # Get label of the series sequence
+        targ = targ[-1, 0]
+        targ_labs = torch.zeros(self.n_classes)
+        casted_shit = int(targ.data.tolist())
+        if casted_shit > self.n_classes:
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+        targ_labs[casted_shit] = 1
+        return src.float(), targ_labs.float().unsqueeze(0)
+
+
 class TemporalLoader(CSVDataLoader):
     def __init__(
             self,
             time_feats: List[str],
-            kwargs):
-        """This a data-loader meant sepecifically for temporal features
+            kwargs: Dict,
+            label_len=0):
+        """A data loader class for creating specific temporal features/embeddings.
 
-        :param time_feats: [description]
+        :param time_feats: A list of strings of the time features (e.g. ['month', 'day', 'hour'])
         :type time_feats: List[str]
-        :param kwargs: [description]
-        :type kwargs: [type]
+        :param kwargs: The set of parameters
+        :type kwargs: Dict[str, Any]
+        :param label_len: For Informer based model the, defaults to 0
+        :type label_len: int, optional
         """
         super().__init__(**kwargs)
         self.time_feats = time_feats
         self.temporal_df = self.df[time_feats]
         self.other_feats = self.df.drop(columns=time_feats)
+        self.label_len = label_len
 
     @staticmethod
     def df_to_numpy(pandas_stuff: pd.DataFrame):
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
     def __getitem__(self, idx: int):
+        """
+        :param idx: Index of the item to be returned
+        .. highlight:: python
+        .. code-block:: python
+            ## Example data
+            ## -----------------
+            ## 1992-01-01    0.0
+            ## 1992-01-02    1.0
+            ## 1992-01-03    2.0
+            ## 1992-01-04    3.0
+            ## 1992-01-05    4.0
+            ## 1992-01-06    5.0
+            ## -----------------
+            kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1, "shuffle" : False,
+            "num_workers" : 1}
+            d = TemporalLoader(time_feats=["year", "month"], kwargs, label_len=1)
+            x, y = d[0]
+            print(x[0]) # (tensor([[0.0, 1.0, 2.0, 3.0]]))]),
+            print(y[0]) # (tensor([[3.0, 4.0, 5.0, 6.0]]))])
+            print(x[1]) # ,
+
+        """
         rows = self.other_feats.iloc[idx: self.forecast_history + idx]
         temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
-        targs_idx_start = self.forecast_history + idx
+        targs_idx_start = self.forecast_history + idx - self.label_len
         targ_rows = self.other_feats.iloc[
-            targs_idx_start: self.forecast_length + targs_idx_start
+            targs_idx_start: self.forecast_length + targs_idx_start + self.label_len
         ]
-        tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: self.forecast_length + targs_idx_start]
+        targs_idx_s = targs_idx_start
+        tar_temporal_feats = self.temporal_df.iloc[targs_idx_s: self.forecast_length + targs_idx_start + self.label_len]
         src_data = self.df_to_numpy(rows)
         trg_data = self.df_to_numpy(targ_rows)
         temporal_feats = self.df_to_numpy(temporal_feats)
         tar_temp = self.df_to_numpy(tar_temporal_feats)
         return (src_data, temporal_feats), (tar_temp, trg_data)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return (
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
@@ -381,14 +479,17 @@ class TemporalLoader(CSVDataLoader):
 
 class TemporalTestLoader(CSVTestLoader):
     def __init__(self, time_feats, kwargs={}, decoder_step_len=None):
-        """[summary]
+        """A test data-loader class for data in the format of the TemporalLoader.
 
-        :param time_feats: [description]
-        :type time_feats: [type]
-        :param kwargs: [description], defaults to {}
+        :param time_feats: The temporal featuers to use in encoding.
+        :type time_feats: List[str]
+        :param kwargs: The dict used to instantiate CSVTestLoader parent, defaults to {}
         :type kwargs: dict, optional
         :param decoder_step_len: [description], defaults to None
         :type decoder_step_len: [type], optional
+
+        ...
+        ...
         """
         super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs["kwargs"])
         self.time_feats = time_feats
@@ -412,7 +513,12 @@ class TemporalTestLoader(CSVTestLoader):
             temporal_feat = self.temporal_df.iloc[idx: self.forecast_history + idx]
             end_idx = self.forecast_total + target_idx_start
             if self.decoder_step_len:
+                print("The label length is " + str(self.decoder_step_len))
+                targs_idx_start = targs_idx_start - self.decoder_step_len
+                print(targs_idx_start)
+                target_idx_start = target_idx_start - self.decoder_step_len
                 end_idx = self.forecast_total + target_idx_start + self.decoder_step_len
+                print(end_idx)
                 tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: end_idx]
                 targ_rows = self.other_feats.iloc[targs_idx_start: end_idx]
             else:
@@ -422,8 +528,9 @@ class TemporalTestLoader(CSVTestLoader):
             trg_data = self.df_to_numpy(targ_rows)
             temporal_feat = self.df_to_numpy(temporal_feat)
             tar_temp = self.df_to_numpy(tar_temporal_feats)
+            decoder_adjust = self.decoder_step_len if self.decoder_step_len else 0
             all_rows_orig = self.original_df.iloc[
-                idx: self.forecast_total + target_idx_start
+                idx: self.forecast_total + target_idx_start + decoder_adjust
             ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return (src_data, temporal_feat), (tar_temp, trg_data), all_rows_orig, target_idx_start

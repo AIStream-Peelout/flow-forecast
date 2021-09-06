@@ -9,21 +9,23 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     Instead only the data to the decoder (e.g. the masked trg) is changed when forecasting max_len > forecast_length.
     New data is appended (forecast_len == 2) (decoder_seq==10) (max==20) (20 (8)->2 First 8 should
 
-    :param model: The PyTorch time series forecasting model for
+    :param model: The PyTorch time series forecasting model that you want to use forecasting on.
     :type model: `torch.nn.Module`
-    :param src: The forecast_history tensor. Should be of dimension (batch_size, forecast_history, n_time_series).
+    :param src: The forecast_history tensor. Should be of the dimension (batch_size, forecast_history, n_time_series).
     Ocassionally batch_size will not be present so at some points it will only be (forecast_history, n_time_series)
     :type src: torch.Tensor
-    :param trg: The target tensor. Should be of dimension (batch_size, hours_to_forecast, n_time_series)
+    :param trg: The target tensor. Should be of dimension (batch_size, time_steps_to_forecast, n_time_series)
     :type trg: torch.Tensor
-    :param forecast_length: The of length of the forecast the model makes at each forward pass.
+    :param forecast_length: The of length of the forecast the model makes at each forward pass. Note this is different
+    than the dataset param forecast_length. That forecast_length is pred_len + decoder_seq_len..
     :type forecast_length: torch.Tensor
     :param src_temp: The temporal features for the forecast_history steps
     :type src_temp: int
-    :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, max_len+diff, n_time_series)
+    :param tar_temp: The target's temporal feats. This should have a shape of (batch_size, ts+offset, n_time_series)
+    Where the offset is the decoder_seq_len - 1. So in this case it would be 336+19 = 355
     :type tar_temp: torch.Tensor
-    :param unknown_cols_st: The unknown columns
-    :type unknown_cols_st: int
+    :param unknown_cols_st: The unknown columns (not currently utilized at all)
+    :type unknown_cols_st: List[str]
     :param decoder_seq_len: The length of the sequence passed into the decoder
     :type decoder_seq_len: int
     :param max_len: The total number of time steps to forecast
@@ -40,34 +42,34 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         src_temp = src_temp.unsqueeze(0)
         tar_temp = tar_temp.unsqueeze(0)
     out1 = torch.zeros_like(trg[:, :max_len, :])
+    # Create a dummy variable of the values
     filled_target = trg.clone()[:, 0:decoder_seq_len, :].to(device)
     src = src.to(device)
     trg = trg.to(device)
     src_temp = src_temp.to(device)
     tar_temp = tar_temp.to(device)
+    # Fill the actual target variables with dummy data
     filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :n_target]).to(device)
-    # Useless variable to avoid long line error..
-    d = decoder_seq_len
-    print("Filled target below")
-    print(filled_target[:, -forecast_length:, :].shape)
-    print(trg[:, d - forecast_length:decoder_seq_len, :].shape)
     filled_target = filled_target.to(device)
     # assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]
     assert filled_target[0, -1, 0] != trg[0, -1, 0]
     for i in range(0, max_len, forecast_length):
-        residual = decoder_seq_len if i + decoder_seq_len <= max_len else max_len % decoder_seq_len
+        # CHANGE THIS LINE
+        residual = decoder_seq_len
         filled_target = filled_target[:, -residual:, :]
-        if residual != decoder_seq_len:
-            out = model(src, src_temp, filled_target, tar_temp[:, -residual:, :])
-        else:
-            out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
+        out = model(src, src_temp, filled_target, tar_temp[:, i:i + residual, :])
         residual1 = forecast_length if i + forecast_length <= max_len else max_len % forecast_length
+        print("shapes below")
+        print(out[:, -residual1:, :].shape)
+        print(out1[:, i: i + residual1, :n_target].shape)
         out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
+        # WTF is this shit? !
+        # Need better variable names
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
         if filled_target1.shape[1] == forecast_length * 2:
             filled_target1[:, -forecast_length * 2:-forecast_length, :n_target] = out[:, -forecast_length:, :]
             filled_target = torch.cat((filled_target, filled_target1), dim=1)
         assert out1[0, 0, 0] != 0
         assert out1[0, 0, 0] != 0
-    return out1[:, :, :n_target]
+    return out1[:, -max_len:, :n_target]

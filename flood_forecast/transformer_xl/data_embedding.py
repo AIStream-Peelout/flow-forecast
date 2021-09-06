@@ -55,9 +55,9 @@ class TokenEmbedding(nn.Module):
                 nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='leaky_relu')
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Create the token toke embedding
+        """Create the token embedding
 
-        :param x: [description]
+        :param x: The tensor passed to create the token embedding
         :type x: torch.Tensor
         :return: [description]
         :rtype: torch.Tensor
@@ -67,7 +67,7 @@ class TokenEmbedding(nn.Module):
 
 
 class FixedEmbedding(nn.Module):
-    def __init__(self, c_in, d_model):
+    def __init__(self, c_in: torch.Tensor, d_model):
         super(FixedEmbedding, self).__init__()
 
         w = torch.zeros(c_in, d_model).float()
