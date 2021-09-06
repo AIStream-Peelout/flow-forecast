@@ -29,7 +29,7 @@
 
     "training_params":
     {
-       "criterion":"MSE",
+       "criterion":"CrossEntropyLoss",
        "optimizer": "Adam",
        "optim_params":
        {},
@@ -45,6 +45,6 @@
        "project": "repo-flood_forecast"
     },
    "forward_params":{},
-   "metrics":["MSE"]
+   "metrics":["CrossEntropyLoss"]
 }
     

@@ -11,6 +11,7 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
+from torch.nn import CrossEntropyLoss
 
 
 def handle_meta_data(model: PyTorchForecast):
@@ -291,11 +292,14 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     elif isinstance(criterion, MASELoss):
         assert len(labels.shape) == len(output.shape)
         loss = criterion(labels.float(), output, src, m)
+    elif isinstance(criterion, CrossEntropyLoss):
+        if len(labels.shape) > 2:
+            labels = labels.permute(0, 2, 1)
+            output = output.permute(0, 2, 1)
+        labels = labels.max(dim=1)[1]
+        loss = criterion(output, labels)
     else:
         assert len(labels.shape) == len(output.shape)
-        print("shapes below")
-        print(labels.shape)
-        print(output.shape)
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
     return loss
@@ -374,6 +378,7 @@ def torch_single_train(model: PyTorchForecast,
         if hasattr(model.model, "pred_len"):
             multi_targets = mulit_targets_copy
             pred_len = model.model.pred_len
+            output = output[:, :, 0:multi_targets]
             labels = trg[:, -pred_len:, 0:multi_targets]
             multi_targets = False
         print(trg.shape)
@@ -515,7 +520,7 @@ def compute_validation(validation_loader: DataLoader,
                 else:
                     output = model(src.float())
             if type(model).__name__ == "Informer":
-                pass
+                output = output[:, :, 0:multi_targets]
             elif classification:
                 labels = targ
             elif multi_targets == 1:
