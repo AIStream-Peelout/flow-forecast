@@ -461,6 +461,8 @@ def compute_validation(validation_loader: DataLoader,
     :rtype: float
     """
     print('Computing validation loss')
+    label_list = []
+    mod_output_list = []
     unscaled_crit = dict.fromkeys(criterion, 0)
     scaled_crit = dict.fromkeys(criterion, 0)
     model.eval()
@@ -523,6 +525,8 @@ def compute_validation(validation_loader: DataLoader,
                 output = output[:, :, 0:multi_targets]
             elif classification:
                 labels = targ
+                label_list.append(labels)
+                mod_output_list.append(output)
             elif multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:
@@ -549,5 +553,8 @@ def compute_validation(validation_loader: DataLoader,
         else:
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
+    if classification:
+        wandb.log({"roc" : wandb.plot.roc_curve(torch.cat(label_list), torch.cat(mod_output_list), \
+                        labels=None, classes_to_plot=None)})
     model.train()
     return list(scaled_crit.values())[0]
