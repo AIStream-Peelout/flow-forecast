@@ -26,7 +26,6 @@
        "scaler": "StandardScaler", 
        "interpolate": false
     },
-
     "training_params":
     {
        "criterion":"CrossEntropyLoss",
