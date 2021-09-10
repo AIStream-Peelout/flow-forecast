@@ -1,10 +1,12 @@
 from flood_forecast.pytorch_training import compute_validation
+from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader
 import unittest
 
-class TestComputeValidaton(unittest.TestCase):
-    def setUp(self):
-        self.classification_loader = GeneralCl
 
-    
+class TestComputeValidation(unittest.TestCase):
+    def setUp(self):
+        param = {}
+        self.classification_loader = GeneralClassificationLoader(param, 2)
+
     def test_compute_validation(self):
-        pass
+        compute_validation()
