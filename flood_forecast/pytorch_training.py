@@ -554,7 +554,7 @@ def compute_validation(validation_loader: DataLoader,
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
     if classification:
-        wandb.log({"roc" : wandb.plot.roc_curve(torch.cat(label_list), torch.cat(mod_output_list), \
+        wandb.log({"roc" : wandb.plot.roc_curve(torch.cat(label_list).argmax(1), torch.cat(mod_output_list), \
                         labels=None, classes_to_plot=None)})
     model.train()
     return list(scaled_crit.values())[0]
