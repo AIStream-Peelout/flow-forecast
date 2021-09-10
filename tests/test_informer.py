@@ -150,4 +150,4 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(trg[1].shape[1], 5)
         self.assertEqual(trg[0].shape[1], 2)
         #  this test makes sure the label_lens parameter works
-        print("Complete")
+        print("Informer test complete")
