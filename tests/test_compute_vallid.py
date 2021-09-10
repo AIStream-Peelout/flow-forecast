@@ -7,6 +7,7 @@ class TestComputeValidation(unittest.TestCase):
     def setUp(self):
         param = {
                     "file_path": "tests/test_data/keag_small.csv",
+                    "sequence_length": 5,
                     "forecast_history": 5,
                     "forecast_length": 1,
                     "target_col": ["cfs"],
