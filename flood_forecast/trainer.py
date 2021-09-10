@@ -68,6 +68,9 @@ def handle_model_evaluation1(trained_model, params, model_type):
                 name=relevant_col))
     wandb.log({"test_plot_all": test_plot_all})
 
+def handle_classification_eval(trained_model, params: Dict):
+    pass
+
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
