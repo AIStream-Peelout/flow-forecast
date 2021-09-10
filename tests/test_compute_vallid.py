@@ -17,4 +17,4 @@ class TestComputeValidation(unittest.TestCase):
         self.classification_loader = GeneralClassificationLoader(param, 2)
 
     def test_compute_validation(self):
-        compute_validation()
+        compute_validation(1, 1)
