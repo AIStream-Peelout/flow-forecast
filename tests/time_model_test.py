@@ -5,7 +5,6 @@ import torch
 import os
 
 
-
 class TimeSeriesModelTest(unittest.TestCase):
     def setUp(self):
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
