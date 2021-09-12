@@ -554,7 +554,7 @@ def compute_validation(validation_loader: DataLoader,
             wandb.log({'epoch': epoch, val_or_test: scaled})
     if classification:
         label_list = torch.cat(label_list)
-        label_list = label_list[:, :, 0]
+        label_list = label_list[:, 0, :]
         wandb.log({"roc": wandb.plot.roc_curve(label_list.max(dim=1)[1], torch.cat(mod_output_list)[:, 0, :],
                                                labels=None, classes_to_plot=None)})
     model.train()

@@ -236,7 +236,7 @@ def entmax15(X, dim=-1, k=None):
 
 
 class Sparsemax(nn.Module):
-    def __init__(self, dim=-1, k=None):
+    def __init__(self, dim: int = -1, k=None):
         """sparsemax: normalizing sparse transform (a la softmax).
         Solves the projection:
             min_p ||x - p||_2   s.t.    p >= 0, sum(p) == 1.
