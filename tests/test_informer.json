@@ -76,7 +76,7 @@
           "hours_to_forecast":336, 
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
-            "decoder_function": "greedy_decode", 
+            "decoder_function": "simple_decode", 
             "unsqueeze_dim": 1},
           "dataset_params":{
              "file_path": "tests/test_data/keag_small.csv",
