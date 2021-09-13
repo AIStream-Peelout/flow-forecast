@@ -68,6 +68,9 @@ def simple_decode(model: Type[torch.nn.Module],
                   probabilistic: bool = False,
                   scaler=None) -> torch.Tensor:
     """
+    This is one of the primary decoding functions used in FF. The goal of this function is to generate
+    forecasts of length `max_seq_len` via appending.
+
     :model a PyTorch model to be used for decoding
     :src the source tensor
     :the max length sequence to return
@@ -93,9 +96,9 @@ def simple_decode(model: Type[torch.nn.Module],
                 out = model(src, meta_data).unsqueeze(2)
             else:
                 out = model(src)
+                # If the output is a tuple we assume we are using the GaussianLoss function
                 if isinstance(out, tuple):
                     out, up, lower = handle_gaussian_loss(out)
-                    print(up)
                     upper_out.append(up[:, :residual])
                     lower_out.append(lower[:, :residual])
                     handle_gauss = True
@@ -106,6 +109,7 @@ def simple_decode(model: Type[torch.nn.Module],
                 elif multi_targets < 2:
                     out = out.unsqueeze(2)
             if scaler:
+                # Some models incorporate scaling so we have to inverse scale them.
                 handle_no_scaling(scaler, out, multi_targets)
             if not isinstance(out, torch.Tensor):
                 out = torch.from_numpy(out)

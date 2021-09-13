@@ -438,7 +438,7 @@ def compute_validation(validation_loader: DataLoader,
     :type epoch: int
     :param sequence_size: The length of the sequence (equivalent too
     :type sequence_size: int
-    :param criterion: [description]
+    :param criterion: The loss function used for validation
     :type criterion: Type[torch.nn.modules.loss._Loss]
     :param device: The device
     :type device: torch.device
@@ -555,8 +555,9 @@ def compute_validation(validation_loader: DataLoader,
     if classification:
         label_list = torch.cat(label_list)
         label_list = label_list[:, 0, :]
-        wandb.log({"roc": wandb.plot.roc_curve(label_list.max(dim=1)[1], torch.cat(mod_output_list)[:, 0, :],
-                                               labels=None, classes_to_plot=None)})
+        mod_output1 = torch.cat(mod_output_list)[:, 0, :]
+        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(label_list.max(dim=1)[1], mod_output1,
+                                                             labels=None, classes_to_plot=None)})
     model.train()
 
     return list(scaled_crit.values())[0]
