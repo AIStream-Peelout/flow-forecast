@@ -12,7 +12,7 @@ class Informer(nn.Module):
                  device=torch.device('cuda:0')):
         """ This is based on the implementation of the Informer available from the original authors
             https://github.com/zhouhaoyi/Informer2020. We have done some minimal refactoring, but
-            the core code remains the same.
+            the core code remains the same. Additionally, we have added a few more options to the code
 
         :param n_time_series: The number of time series present in the multivariate forecasting problem.
         :type n_time_series: int
