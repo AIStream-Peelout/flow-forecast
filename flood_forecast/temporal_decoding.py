@@ -49,7 +49,8 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     src_temp = src_temp.to(device)
     tar_temp = tar_temp.to(device)
     # Fill the actual target variables with dummy data
-    filled_target[:, -forecast_length:, :] = torch.zeros_like(filled_target[:, -forecast_length:, :n_target]).to(device)
+    filled_target[:, -forecast_length:, :n_target] = torch.zeros_like(
+                                                    filled_target[:, -forecast_length:, :n_target]).to(device)
     filled_target = filled_target.to(device)
     # assert filled_target[:, -forecast_length:, :].any() != trg[:, d - forecast_length:decoder_seq_len, :].any()
     assert filled_target[0, -forecast_length, 0] != trg[0, -forecast_length, 0]

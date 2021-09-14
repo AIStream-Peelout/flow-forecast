@@ -118,7 +118,7 @@ def plot_df_test_with_confidence_interval(
     df_prediction_samples: pd.DataFrame,
     forecast_start_index: int,
     params: Dict,
-    targ_col,
+    targ_col: str,
     ci: float = 95.0,
     alpha=0.25,
 ) -> go.Figure:
