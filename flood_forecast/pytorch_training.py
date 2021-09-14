@@ -553,11 +553,13 @@ def compute_validation(validation_loader: DataLoader,
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
     if classification:
+        print("Plotting classification metrics")
         label_list = torch.cat(label_list)
         label_list = label_list[:, 0, :]
         mod_output1 = torch.cat(mod_output_list)[:, 0, :]
         wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(label_list.max(dim=1)[1], mod_output1,
                                                              labels=None, classes_to_plot=None)})
+        wandb.log({"pr": wandb.plot.pr_curve(label_list.max(dim=1)[1], mod_output1)})
     model.train()
 
     return list(scaled_crit.values())[0]

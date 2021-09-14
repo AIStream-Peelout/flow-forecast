@@ -7,7 +7,7 @@ Welcome to Flow Forecast's documentation!
 =========================================
 
 Flow Forecast is a deep learning for time series forecasting framework written in PyTorch. Flow Forecast makes it easy to train PyTorch Forecast models on a wide variety
-of datasets.
+of datasets. Below are some of the detailed pages of documentation or Flow Forecast's internal API's and models. For more info you can also visit our Wiki Page
 
 .. automodule:: flood_forecast
 
