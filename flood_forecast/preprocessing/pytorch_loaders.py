@@ -216,16 +216,35 @@ class CSVTestLoader(CSVDataLoader):
         self,
         df_path: str,
         forecast_total: int,
-        use_real_precip=True,
-        use_real_temp=True,
         target_supplied=True,
         interpolate=False,
         sort_column_clone=None,
         **kwargs
     ):
-        """
-        :param str df_path:
-        A data loader for the test data.
+        """A data-loader for testing time series forecasting models
+
+        ..highlight:: python
+        ..code-block:: python
+
+        c = CSVTestLoader("some_file.csv", 100, init_params_dict)
+
+
+        ..
+
+        :param df_path: Path to the time series test file
+        :type df_path: str
+        :param forecast_total: The total numb
+        :type forecast_total: int
+        :param use_real_precip: [description], defaults to True
+        :type use_real_precip: bool, optional
+        :param use_real_temp: [description], defaults to True
+        :type use_real_temp: bool, optional
+        :param target_supplied: [description], defaults to True
+        :type target_supplied: bool, optional
+        :param interpolate: [description], defaults to False
+        :type interpolate: bool, optional
+        :param sort_column_clone: [description], defaults to None
+        :type sort_column_clone: [type], optional
         """
         if "file_path" not in kwargs:
             kwargs["file_path"] = df_path
@@ -239,8 +258,6 @@ class CSVTestLoader(CSVDataLoader):
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
-        self.use_real_temp = use_real_temp
-        self.use_real_precip = use_real_precip
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
