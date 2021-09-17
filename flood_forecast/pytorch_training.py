@@ -559,6 +559,8 @@ def compute_validation(validation_loader: DataLoader,
         wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output1, classes_to_plot=None, labels=None,
                                                              title="roc_" + str(epoch))})
         wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output1)})
+        wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=mod_output1, y_true=fin,
+                                                           labels=None)})
     model.train()
 
     return list(scaled_crit.values())[0]
