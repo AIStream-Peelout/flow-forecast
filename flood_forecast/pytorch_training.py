@@ -560,7 +560,7 @@ def compute_validation(validation_loader: DataLoader,
                                                              title="roc_" + str(epoch))})
         wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output1)})
         wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=mod_output1, y_true=fin,
-                                                           labels=None)})
+                                                           class_names=None)})
     model.train()
 
     return list(scaled_crit.values())[0]
