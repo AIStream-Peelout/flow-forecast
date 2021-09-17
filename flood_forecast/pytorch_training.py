@@ -279,7 +279,6 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
                     labels = labels.unsqueeze(0)
     if probabilistic:
         if type(output_std) != torch.Tensor:
-            print("Converted tensor")
             output_std = torch.from_numpy(output_std)
         if type(output) != torch.Tensor:
             output = torch.from_numpy(output)
@@ -353,7 +352,6 @@ def torch_single_train(model: PyTorchForecast,
     for src, trg in data_loader:
         opt.zero_grad()
         # Convert to CPU/GPU/TPU
-
         if meta_data_model:
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
@@ -457,7 +455,6 @@ def compute_validation(validation_loader: DataLoader,
     :param probabilistic: Whether the model is probablistic, defaults to False
     :type probabilistic: bool, optional
     :return: The loss of the first metric in the list.
-    
     :rtype: float
     """
     print('Computing validation loss')
@@ -562,8 +559,6 @@ def compute_validation(validation_loader: DataLoader,
         wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output1, classes_to_plot=None, labels=None,
                                                              title="roc_" + str(epoch))})
         wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output1)})
-        wandb.log({"conf_mat" : wandb.plot.confusion_matrix(probs=None,
-                        preds=mod_output1, y_true=fin)})
     model.train()
 
     return list(scaled_crit.values())[0]
