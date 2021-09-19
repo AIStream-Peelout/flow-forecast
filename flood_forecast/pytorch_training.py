@@ -470,6 +470,8 @@ def compute_validation(validation_loader: DataLoader,
     with torch.no_grad():
         i = 0
         loss_unscaled_full = 0.0
+        label_list = []
+        mod_output_list = []
         for src, targ in validation_loader:
             src = src if isinstance(src, list) else src.to(device)
             targ = targ if isinstance(targ, list) else targ.to(device)
@@ -517,10 +519,12 @@ def compute_validation(validation_loader: DataLoader,
                     output_std = output_dist.stddev.detach().numpy()
                 else:
                     output = model(src.float())
+                    mod_output_list.append(output)
             if type(model).__name__ == "Informer":
                 output = output[:, :, 0:multi_targets]
             elif classification:
                 labels = targ
+                label_list.append(labels)
             elif multi_targets == 1:
                 labels = targ[:, :, 0]
             elif multi_targets > 1:
@@ -547,5 +551,16 @@ def compute_validation(validation_loader: DataLoader,
         else:
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
+    if classification:
+        print("Plotting classification metrics")
+        label_list = torch.cat(label_list)
+        label_list = label_list[:, 0, :]
+        mod_output1 = torch.cat(mod_output_list)[:, 0, :]
+        fin = label_list.max(dim=1)[1]
+        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output1, classes_to_plot=None, labels=None,
+                                                             title="roc_" + str(epoch))})
+        wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output1)})
+        wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output1.detach().numpy(), y_true=fin.detach().numpy(),
+                   class_names=None)})
     model.train()
     return list(scaled_crit.values())[0]
