@@ -379,7 +379,6 @@ def torch_single_train(model: PyTorchForecast,
             output = output[:, :, 0:multi_targets]
             labels = trg[:, -pred_len:, 0:multi_targets]
             multi_targets = False
-        print(trg.shape)
         if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
             labels = trg
         elif multi_targets == 1:
@@ -552,7 +551,7 @@ def compute_validation(validation_loader: DataLoader,
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
             wandb.log({'epoch': epoch, val_or_test: scaled})
     if classification:
-        print("Plotting classification metrics")
+        print("Plotting test classification metrics")
         label_list = torch.cat(label_list)
         label_list = label_list[:, 0, :]
         mod_output1 = torch.cat(mod_output_list)[:, 0, :]
