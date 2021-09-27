@@ -148,7 +148,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
             handle_model_evaluation1(trained_model, params, model_type)
 
     else:
-        raise Exception("Please supply valid model type for forecasting")
+        raise Exception("Please supply valid model type for forecasting or classification")
     return trained_model
 
 
