@@ -13,8 +13,13 @@ class MergingModel(torch.nn.Module):
 
     def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor):
         """
-        Args:
-            temporal_data:
+
+        :param temporal_data: The temporal data should be in shape (batch_size, n_time_series, n_feats)
+        :type temporal_data: torch.Tensor
+        :param meta_data: The meta-data passed to the  model will have dimension (batch_size, d_meta)
+        :type meta_data: torch.Tensor
+        :return: [description]
+        :rtype: torch.Tensor
         """
         batch_size = temporal_data.shape[0]
         # This assume there is no batch size present in meta-data
