@@ -8,8 +8,6 @@ class MergingModel(torch.nn.Module):
         """A model meant to help merge meta-data with the temporal data
 
         :param method: The method you want to use (Bilinear, Bilinear2, MultiAttn, Concat)
-                - BiLinear
-                - BiLinear2
         :type method: str
         :param other_params: A dictionary of the additional parameters necessary to init the inner part.
         :type other_params: Dict
@@ -35,6 +33,7 @@ class MergingModel(torch.nn.Module):
         # This will make meta_data -> (batch_size, 1, meta_data_shape)
         meta_data = meta_data.repeat(batch_size, 1).unsqueeze(1)
         if self.method == "Bilinear":
+            meta_data = meta_data.permute(0, 2, 1)
             temporal_data = temporal_data.permute(0, 2, 1).contiguous()
             x = self.method_layer(temporal_data, meta_data)
             x = x.permute(0, 2, 1)
