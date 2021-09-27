@@ -29,11 +29,11 @@ class TestMerging(unittest.TestCase):
         self.assertIsInstance(res, list)
 
     def test_bilinear_model(self):
-        r = self.merging_model_bi(torch.rand(2, 6, 20), torch.rand(2, 30))
+        r = self.merging_model_bi(torch.rand(2, 6, 20), torch.rand(30))
         self.assertEqual(r.shape[1], 40)
 
     def test_bilinear_2(self):
-        m = self.merging_model_2(torch.rand(2, 6, 20), torch.rand(2, 25))
+        m = self.merging_model_2(torch.rand(2, 6, 20), torch.rand(25))
         self.assertEqual(m.shape[2], 49)
 
 
