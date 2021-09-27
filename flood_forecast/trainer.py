@@ -13,7 +13,16 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
-def handle_model_evaluation1(trained_model, params, model_type):
+def handle_model_evaluation1(trained_model, params: Dict, model_type: str):
+    """Utility function to help handle model evaluation. Primarily used at the moment for forcast
+
+    :param trained_model: A PyTorchForecast model that has already been trained. 
+    :type trained_model: PyTorchForecast
+    :param params: A dictionary of the trained model parameters
+    :type params: Dict
+    :param model_type: The type of model. Almost always PyTorch in practice.
+    :type model_type: str
+    """
     test_acc = evaluate_model(
             trained_model,
             model_type,
@@ -74,6 +83,15 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     :type model_type: str
     :param params: Dictionary containing all the parameters needed to run the model
     :type Dict:
+
+    ... code-block:: python 
+    with open("model_config.json") as f: 
+        params_dict = json.load(f)
+    train_function("PyTorch", params_dict)
+
+    ...
+
+    For information on what this params_dict should include see confluence pages on training models. 
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
@@ -136,7 +154,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
 
 def main():
     """
-    Main function which is called from the command line. Entrypoint for training all TS ML models.
+    Main fundection which is called from the command line. Entrypoint for training all TS ML models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")
