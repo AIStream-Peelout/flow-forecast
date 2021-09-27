@@ -91,10 +91,18 @@ class Concatenation(torch.nn.Module):
 
 class MultiModalSelfAttention(torch.nn.Module):
     def __init__(self, d_model: int, n_heads: int, dropout: float):
+        """Uses self-attention to combine the meta-data and temporal data.
+
+        :param d_model: The dimension of the meta-data
+        :type d_model: int
+        :param n_heads: The number of heads to use in multi-head mechanism
+        :type n_heads: int
+        :param dropout: The dropout score as a flow
+        :type dropout: float
+        """
         self.main_layer = MultiheadAttention(d_model, n_heads, dropout)
 
-    def forward(self, temporal_data: torch.Tensor, meta_data) -> torch.Tensor:
-        """"""
+    def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor) -> torch.Tensor:
         meta_data = meta_data.permute(2, 0, 1)
         temporal_data = temporal_data.permute(1, 0, 2)
         x = self.main_layer(temporal_data, meta_data, meta_data)
