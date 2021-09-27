@@ -20,7 +20,7 @@ class MergingModel(torch.nn.Module):
 
     def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor):
         """
-
+        Performs the forward pass on both meta and temporal data. Returns merged tensor.
         :param temporal_data: The temporal data should be in shape (batch_size, n_time_series, n_feats)
         :type temporal_data: torch.Tensor
         :param meta_data: The meta-data passed to the model will have dimension (d_meta)
@@ -50,7 +50,7 @@ class MergingModel(torch.nn.Module):
 class Concatenation(torch.nn.Module):
     def __init__(self, cat_dim: int, repeat: bool = True, use_layer: bool = False,
                  combined_shape: int = 1, out_shape: int = 1):
-        """A function to combine tensors together via concantenation
+        """A function to combine two tensors together via concantenation
 
         :param cat_dim: The dimension that you want to concatenate along (e.g. 0, 1, 2)
         :type cat_dim: int
@@ -91,7 +91,7 @@ class Concatenation(torch.nn.Module):
 
 class MultiModalSelfAttention(torch.nn.Module):
     def __init__(self, d_model: int, n_heads: int, dropout: float):
-        """Uses self-attention to combine the meta-data and temporal data.
+        """Uses self-attention to combine the meta-data and the temporal data..
 
         :param d_model: The dimension of the meta-data
         :type d_model: int
