@@ -91,7 +91,7 @@ class Concatenation(torch.nn.Module):
 
 class MultiModalSelfAttention(torch.nn.Module):
     def __init__(self, d_model: int, n_heads: int, dropout: float):
-        """Uses self-attention to combine the meta-data and the temporal data..
+        """Uses self-attention to combine the meta-data and the temporal data.
 
         :param d_model: The dimension of the meta-data
         :type d_model: int
