@@ -5,6 +5,13 @@ from torch.nn.modules.activation import MultiheadAttention
 
 class MergingModel(torch.nn.Module):
     def __init__(self, method: str, other_params: Dict):
+        """A model meant to help merge meta-data with the temporal data
+
+        :param method: The method you want to use (Bilinear, Bilinear2, MultiAttn, Concat)
+        :type method: str
+        :param other_params: A dictionary of the additional parameters necessary to init the inner part.
+        :type other_params: Dict
+        """
         super().__init__()
         self.method_dict = {"Bilinear": torch.nn.Bilinear, "Bilinear2": torch.nn.Bilinear,
                             "MultiAttn": MultiModalSelfAttention, "Concat": Concatenation, "Other": "other"}
@@ -18,7 +25,7 @@ class MergingModel(torch.nn.Module):
         :type temporal_data: torch.Tensor
         :param meta_data: The meta-data passed to the  model will have dimension (batch_size, d_meta)
         :type meta_data: torch.Tensor
-        :return: [description]
+        :return: The combined tensor with both the meta-data and temporal data. Shape will vary.
         :rtype: torch.Tensor
         """
         batch_size = temporal_data.shape[0]
