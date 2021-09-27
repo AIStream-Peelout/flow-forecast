@@ -7,7 +7,7 @@ import torch
 class TestMerging(unittest.TestCase):
     def setUp(self):
         self.merging_model = MergingModel("Concat", {"cat_dim": 2, "repeat": True})
-        self.merging_model_bi = MergingModel("Bilinear", {"in1_features": 6, "in2_features": 2-1, "out_features": 40})
+        self.merging_model_bi = MergingModel("Bilinear", {"in1_features": 6, "in2_features": 3 - 2, "out_features": 40})
         self.merging_model_2 = MergingModel("Bilinear2", {"in1_features": 20, "in2_features": 25, "out_features": 49})
 
     def test_merger_runs(self):
