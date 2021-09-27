@@ -8,6 +8,7 @@ class TestMerging(unittest.TestCase):
     def setUp(self):
         self.merging_model = MergingModel("Concat", {"cat_dim": 2, "repeat": True})
         self.merging_model_bi = MergingModel("Bilinear", {"in1_features": 20, "in2_features": 30, "out_features": 40})
+        self.merging_model_2 = MergingModel("Bilinear2", {"in1_features": 20, "in2_features": 25, "out_features": 49})
 
     def test_merger_runs(self):
         m = self.merging_model(torch.rand(2, 6, 10), torch.rand(4))
@@ -30,6 +31,10 @@ class TestMerging(unittest.TestCase):
     def test_bilinear_model(self):
         r = self.merging_model_bi(torch.rand(2, 6, 20), torch.rand(2, 30))
         self.assertEqual(r.shape[1], 40)
+
+    def test_bilinear_2(self):
+        m = self.merging_model_bi(torch.rand(2, 6, 20), torch.rand(2, 25))
+        self.assertEqual(m.shape[2], 49)
 
 
 if __name__ == '__main__':
