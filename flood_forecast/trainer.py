@@ -84,7 +84,8 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     :param params: Dictionary containing all the parameters needed to run the model
     :type Dict:
 
-    ... code-block:: python 
+    .. highlight:: python
+    .. code-block:: python 
     with open("model_config.json") as f: 
         params_dict = json.load(f)
     train_function("PyTorch", params_dict)

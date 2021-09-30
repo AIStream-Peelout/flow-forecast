@@ -11,6 +11,11 @@ class MergingModel(torch.nn.Module):
         :type method: str
         :param other_params: A dictionary of the additional parameters necessary to init the inner part.
         :type other_params: Dict
+
+        ..code-block:: python
+        merging_mod = MergingModel("Bilinear", {"in_features1": 5, "in_features_2":1, "out_features":40 })
+        print(merging_mod(torch.rand(4, 5, 128), torch.rand(128)).shape) # (4, 40, 128)
+        ...
         """
         super().__init__()
         self.method_dict = {"Bilinear": torch.nn.Bilinear, "Bilinear2": torch.nn.Bilinear,
