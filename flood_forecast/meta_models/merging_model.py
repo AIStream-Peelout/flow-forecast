@@ -54,7 +54,7 @@ class MergingModel(torch.nn.Module):
 # A class to handle concatenation
 class Concatenation(torch.nn.Module):
     def __init__(self, cat_dim: int, repeat: bool = True, use_layer: bool = False,
-                 combined_shape: int = 1, out_shape: int = 1):
+                 combined_dim: int = 1, out_shape: int = 1):
         """A function to combine two tensors together via concantenation
 
         :param cat_dim: The dimension that you want to concatenate along (e.g. 0, 1, 2)
