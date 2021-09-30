@@ -64,7 +64,6 @@ jobs:
           name: Evaluator tests
           when: always
           command: |
-            coverage run -m unittest -v tests/validation_loop_test.py
             coverage run -m unittest -v tests/test_deployment.py
             coverage run -m unittest -v tests/test_evaluation.py
 
