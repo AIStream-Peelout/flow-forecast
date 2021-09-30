@@ -59,7 +59,7 @@ class Concatenation(torch.nn.Module):
 
         :param cat_dim: The dimension that you want to concatenate along (e.g. 0, 1, 2)
         :type cat_dim: int
-        :param repeat: boolean of whether to repeate meta_data along temporal , defaults to True
+        :param repeat: boolean of whether to repeate meta_data along temporal_dim , defaults to True
         :type repeat: bool, optional
         :param use_layer: to use a layer to get the final out_shape , defaults to False
         :type use_layer: bool, optional

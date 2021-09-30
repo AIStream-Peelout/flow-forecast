@@ -9,7 +9,8 @@ class TestMerging(unittest.TestCase):
         self.merging_model = MergingModel("Concat", {"cat_dim": 2, "repeat": True})
         self.merging_model_bi = MergingModel("Bilinear", {"in1_features": 6, "in2_features": 3 - 2, "out_features": 40})
         self.merging_model_2 = MergingModel("Bilinear2", {"in1_features": 20, "in2_features": 25, "out_features": 49})
-        self.merging_mode3 = MergingModel("Concat", {"cat_dim": 2, "repeat": True, "use_layer": True, "out_shape": 10})
+        self.merging_mode3 = MergingModel("Concat", {"cat_dim": 2, "repeat": True, "use_layer": True, "out_shape": 10,
+                                                     "combined_dim": 10})
         self.attn = MultiModalSelfAttention(128, 4, 0.2)
 
     def test_merger_runs(self):
