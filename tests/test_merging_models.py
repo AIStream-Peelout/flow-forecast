@@ -10,7 +10,7 @@ class TestMerging(unittest.TestCase):
         self.merging_model_bi = MergingModel("Bilinear", {"in1_features": 6, "in2_features": 3 - 2, "out_features": 40})
         self.merging_model_2 = MergingModel("Bilinear2", {"in1_features": 20, "in2_features": 25, "out_features": 49})
         self.merging_mode3 = MergingModel("Concat", {"cat_dim": 2, "repeat": True, "use_layer": True, "out_shape": 10,
-                                                     "combined_dim": 10})
+                                                     "combined_dim": 15})
         self.attn = MultiModalSelfAttention(128, 4, 0.2)
 
     def test_merger_runs(self):
@@ -40,7 +40,7 @@ class TestMerging(unittest.TestCase):
         self.assertEqual(m.shape[2], 49)
 
     def test_cat_out(self):
-        m = self.merging_mode3(torch.rand(2, 6, 10), torch.rand(4))
+        m = self.merging_mode3(torch.rand(2, 6, 10), torch.rand(5))
         self.assertEqual(m.shape[2], 10)
 
 if __name__ == '__main__':
