@@ -1,12 +1,12 @@
 shap==0.39.0
-scikit-learn>=0.23.0
+scikit-learn==0.24.2
 pandas
 torch
 tb-nightly
 seaborn
 future
 h5py
-wandb==0.12.1
+wandb==0.12.2
 google-cloud
 google-cloud-storage
 pyyaml

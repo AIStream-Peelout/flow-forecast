@@ -11,7 +11,7 @@ def numpy_to_tvar(x):
 
     :param x: A numpy array you want to convert
     :type x: torch.Tensor
-    :return: [description]
+    :return: A tensor variable
     :rtype: torch.Variable
     """
     return Variable(torch.from_numpy(x).type(torch.FloatTensor).to(device))

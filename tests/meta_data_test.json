@@ -1,6 +1,6 @@
 {                 
     "model_name": "CustomTransformerDecoder",
-    "model_type": "PyTorch",
+    "model_type": "PyTorch", 
     "model_params": {
       "n_time_series":3,
       "seq_length":5,
@@ -12,8 +12,8 @@
           {"in1_features":5, 
             "in2_features":1, 
             "out_features":5}
-         
       }
+
      }, 
     "meta_data":{
         "path":"tests/auto_encoder.json",
