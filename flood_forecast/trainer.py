@@ -79,19 +79,21 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str):
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
+    
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
     :param params: Dictionary containing all the parameters needed to run the model
     :type Dict:
 
-    ... code-block:: python 
+    .. highlight:: python
+    .. code-block:: python 
     with open("model_config.json") as f: 
         params_dict = json.load(f)
     train_function("PyTorch", params_dict)
 
     ...
 
-    For information on what this params_dict should include see confluence pages on training models. 
+    For information on what this params_dict should include see `Confluence pages <https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/92864513/Getting+Started>`_ on training models. 
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
