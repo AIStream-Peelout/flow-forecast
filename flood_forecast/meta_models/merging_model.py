@@ -13,7 +13,7 @@ class MergingModel(torch.nn.Module):
         :type other_params: Dict
 
         ..code-block:: python
-        merging_mod = MergingModel("Bilinear", {"in_features1": 5, "in_features_2":1, "out_features":40})
+        merging_mod = MergingModel("Bilinear", {"in_features1": 5, "in_features_2":1, "out_features":40 })
         print(merging_mod(torch.rand(4, 5, 128), torch.rand(128)).shape) # (4, 40, 128)
         ...
         """
