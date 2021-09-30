@@ -1,6 +1,6 @@
 import torch
 from typing import Dict
-from torch.nn.modules.activation import MultiheadAttention
+from torch.nn import MultiheadAttention
 
 
 class MergingModel(torch.nn.Module):
