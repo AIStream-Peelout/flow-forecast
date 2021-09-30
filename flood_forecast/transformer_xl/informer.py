@@ -44,9 +44,9 @@ class Informer(nn.Module):
         :type attn: str, optional
         :param embed: Whether to use class: `FixedEmbedding` or `torch.nn.Embbeding` , defaults to 'fixed'
         :type embed: str, optional
-        :param temp_depth: The temporald depth (e.g year, month, day, weekday, etc), defaults to 4
+        :param temp_depth: The temporal depth (e.g year, month, day, weekday, etc), defaults to 4
         :type data: int, optional
-        :param activation: The activation func, defaults to 'gelu'
+        :param activation: The activation function, defaults to 'gelu'
         :type activation: str, optional
         :param device: The device the model uses, defaults to torch.device('cuda:0')
         :type device: str, optional
@@ -117,7 +117,7 @@ class Informer(nn.Module):
         :type enc_self_mask: [type], optional
         :param dec_self_mask: [description], defaults to None
         :type dec_self_mask: [type], optional
-        :param dec_enc_mask: [description], defaults to None
+        :param dec_enc_mask: torch.Tensor, defaults to None
         :type dec_enc_mask: torch.Tensor, optional
         :return: Returns a PyTorch tensor of shape (batch_size, out_len, n_targets)
         :rtype: torch.Tensor
@@ -156,6 +156,19 @@ class ConvLayer(nn.Module):
 
 class EncoderLayer(nn.Module):
     def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu"):
+        """[summary]
+
+        :param attention: [description]
+        :type attention: [type]
+        :param d_model: [description]
+        :type d_model: [type]
+        :param d_ff: [description], defaults to None
+        :type d_ff: [type], optional
+        :param dropout: [description], defaults to 0.1
+        :type dropout: float, optional
+        :param activation: [description], defaults to "relu"
+        :type activation: str, optional
+        """
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.attention = attention
@@ -219,7 +232,7 @@ class DecoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
 
-    def forward(self, x, cross, x_mask=None, cross_mask=None):
+    def forward(self, x, cross, x_mask=None, cross_mask=None) -> torch.Tensor:
         x = x + self.dropout(self.self_attention(
             x, x, x,
             attn_mask=x_mask
@@ -243,7 +256,7 @@ class Decoder(nn.Module):
         self.layers = nn.ModuleList(layers)
         self.norm = norm_layer
 
-    def forward(self, x, cross, x_mask=None, cross_mask=None):
+    def forward(self, x, cross, x_mask=None, cross_mask=None) -> torch.Tensor:
         for layer in self.layers:
             x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask)
 
