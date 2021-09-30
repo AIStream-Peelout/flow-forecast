@@ -37,6 +37,11 @@ class SimpleLinearModel(torch.nn.Module):
             return x.view(-1, self.output_len)
 
 
+def handle_gaussian_loss(out: tuple):
+    out1 = torch.mean(torch.stack([out[0], out[1]]), dim=0)
+    return out1, out[0], out[1]
+
+
 def handle_no_scaling(scaler: torch.utils.data.Dataset, out: torch.Tensor, multi_targets: int):
     if multi_targets == 1:
         out = out.detach().cpu().reshape(-1, 1)
