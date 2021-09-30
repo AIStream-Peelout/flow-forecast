@@ -105,6 +105,7 @@ class MultiModalSelfAttention(torch.nn.Module):
         :param dropout: The dropout score as a flow
         :type dropout: float
         """
+        super().__init__()
         self.main_layer = MultiheadAttention(d_model, n_heads, dropout)
 
     def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor) -> torch.Tensor:
