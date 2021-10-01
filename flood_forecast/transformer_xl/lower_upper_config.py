@@ -56,8 +56,3 @@ class AR(nn.Module):
         x = self.linear(x)
         x = torch.transpose(x, 1, 2)
         return x
-
-
-class MetaEmbedding(nn.Module):
-    def __init__(self, meta_vector_dim: int, output_dim, predictor_number: int, predictor_order):
-        pass
