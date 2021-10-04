@@ -22,7 +22,9 @@ class DummyTorchModel(nn.Module):
 
         :param x: Here the data is irrelvant. Only batch_size is grabbed
         :type x: torch.Tensor
-        :return: [description]
+        :param mask: [description], defaults to None
+        :type mask: [type], optional
+        :return: A tensor with fixed data of one
         :rtype: torch.Tensor
         """
         batch_sz = x.size(0)
