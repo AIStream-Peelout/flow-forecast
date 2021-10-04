@@ -13,7 +13,16 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
-def handle_model_evaluation1(trained_model, params, model_type):
+def handle_model_evaluation1(trained_model, params: Dict, model_type: str):
+    """Utility function to help handle model evaluation. Primarily used at the moment for forcast
+
+    :param trained_model: A PyTorchForecast model that has already been trained. 
+    :type trained_model: PyTorchForecast
+    :param params: A dictionary of the trained model parameters
+    :type params: Dict
+    :param model_type: The type of model. Almost always PyTorch in practice.
+    :type model_type: str
+    """
     test_acc = evaluate_model(
             trained_model,
             model_type,
@@ -70,10 +79,21 @@ def handle_model_evaluation1(trained_model, params, model_type):
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
+    
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
     :param params: Dictionary containing all the parameters needed to run the model
     :type Dict:
+
+    .. highlight:: python
+    .. code-block:: python 
+    with open("model_config.json") as f: 
+        params_dict = json.load(f)
+    train_function("PyTorch", params_dict)
+
+    ...
+
+    For information on what this params_dict should include see `Confluence pages <https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/92864513/Getting+Started>`_ on training models. 
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
@@ -130,13 +150,13 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
             handle_model_evaluation1(trained_model, params, model_type)
 
     else:
-        raise Exception("Please supply valid model type for forecasting")
+        raise Exception("Please supply valid model type for forecasting or classification")
     return trained_model
 
 
 def main():
     """
-    Main function which is called from the command line. Entrypoint for training all TS ML models.
+    Main fundection which is called from the command line. Entrypoint for training all TS ML models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")

@@ -38,9 +38,6 @@ class SimpleLinearModel(torch.nn.Module):
 
 
 def handle_gaussian_loss(out: tuple):
-    # Oh shit this is gonna be tough
-    print("shit stuff")
-    print(out[1])
     out1 = torch.mean(torch.stack([out[0], out[1]]), dim=0)
     return out1, out[0], out[1]
 
