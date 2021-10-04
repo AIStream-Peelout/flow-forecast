@@ -20,7 +20,7 @@ class DataQualityTests(unittest.TestCase):
 
     def test_tz_interpolate_fix(self):
         """
-        Additional function to test data interpolation
+        Additional function to test data interpolation in full.
         """
         file_path = os.path.join(self.test_data_path, "river_test_sm.csv")
         test_d = pd.read_csv(file_path)
