@@ -19,6 +19,7 @@ class DummyTorchModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """The forward pass for the dummy model
+        
         :param x: Here the data is irrelvant. Only batch_size is grabbed
         :type x: torch.Tensor
         :param mask: [description], defaults to None
