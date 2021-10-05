@@ -45,17 +45,6 @@ class FullAttention(nn.Module):
 
 class ProbAttention(nn.Module):
     def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1):
-        """T
-
-        :param mask_flag: [description], defaults to True
-        :type mask_flag: bool, optional
-        :param factor: [description], defaults to 5
-        :type factor: int, optional
-        :param scale: [description], defaults to None
-        :type scale: [typsoptional
-        :param attention_dropout: [description], defaults to 0.1
-        :type attention_dropout: float, optional
-        """
         super(ProbAttention, self).__init__()
         self.factor = factor
         self.scale = scale
