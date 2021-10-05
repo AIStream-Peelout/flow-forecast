@@ -10,7 +10,7 @@ class TestInterpolationCode(unittest.TestCase):
         file_path = os.path.join(os.path.dirname(__file__), "test_data", "farm_ex.csv")
         file_path_2 = os.path.join(os.path.dirname(__file__), "test_data", "fake_test_small.csv")
         self.df = pd.read_csv(file_path)
-        self.df_2 = pd.read_csv(file_path_2, delimiter="\t")
+        self.df_2 = pd.read_csv(file_path_2)
 
     def test_back_forward(self):
         """Test the generation of forward and backward data
