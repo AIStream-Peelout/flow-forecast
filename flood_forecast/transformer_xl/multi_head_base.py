@@ -17,25 +17,6 @@ class MultiAttnHeadSimple(torch.nn.Module):
             dropout=0.1,
             output_dim=1,
             final_layer=False):
-        """
-
-        :param number_time_series: The total number of time series present
-        :type number_time_series: int
-        :param seq_len: The forecast_history, defaults to 10
-        :type seq_len: int, optional
-        :param output_seq_len: The forecast length, defaults to None
-        :type output_seq_len: [type], optional
-        :param d_model: The dimensional embedding of the multi-head mech, defaults to 128
-        :type d_model: int, optional
-        :param num_heads: [description], defaults to 8
-        :type num_heads: int, optional
-        :param dropout: [description], defaults to 0.1
-        :type dropout: float, optional
-        :param output_dim: [description], defaults to 1
-        :type output_dim: int, optional
-        :param final_layer: [description], defaults to False
-        :type final_layer: bool, optional
-        """
 
         super().__init__()
         self.dense_shape = torch.nn.Linear(number_time_series, d_model)
@@ -73,7 +54,6 @@ class MultiAttnHeadSimple(torch.nn.Module):
             x = self.last_layer(x)
             if self.sigmoid:
                 x = self.sigmoid(x)
-            if self.output_dim > 1:
                 return x.permute(0, 2, 1)
             return x.view(-1, self.forecast_length)
         return x.view(-1, self.length_data)

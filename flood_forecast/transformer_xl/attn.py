@@ -19,10 +19,10 @@ class FullAttention(nn.Module):
         :type queries: torch.Tensor
         :param keys: The (batch_size, ?)
         :type keys: torch.Tensor
-        :param values: The value in the attention. Will have shape (batch_size, ?)
+        :param values: [description]
         :type values: torch.Tensor
         :param attn_mask: [description]
-        :type attn_mask: torch.Tensor
+        :type attn_mask: [type]
         :return: Returns the computed attention vector
         :rtype: torch.Tensor
         """
