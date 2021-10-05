@@ -28,7 +28,7 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     :type key: str
     :param value: The type of feature you would like to create (cyclical or numerical)
     :type value: str
-    :param df: The Pandas ddataframe with the datetime
+    :param df: The Pandas dataframe with the datetime
     :type df: pd.DataFrame
     :param dt_column: The name of the datetime column
     :type dt_column: str

@@ -1,5 +1,5 @@
 from flood_forecast.preprocessing.interpolate_preprocess import back_forward_generic
-from flood_forecast.preprocessing.temporal_feats import make_temporal_features
+from flood_forecast.preprocessing.temporal_feats import feature_fix
 import unittest
 import pandas as pd
 import os
@@ -19,9 +19,9 @@ class TestInterpolationCode(unittest.TestCase):
         self.assertEqual(df.iloc[3]["NumberOfAnimals"], 165)
 
     def test_make_temp_feats(self):
-        feats = make_temporal_features({"hour": "cyclical"}, "datetime", self.df_2)
-        self.assertIn("sin_hour", feats.columns)
-        self.assertIn("cos_hour", feats.columns)
+        feats = feature_fix({"datetime_params": {"hour": "cyclical"}}, "datetime", self.df_2)
+        self.assertIn("sin_hour", feats[0].columns)
+        self.assertIn("cos_hour", feats[0].columns)
 
 if __name__ == '__main__':
     unittest.main()
