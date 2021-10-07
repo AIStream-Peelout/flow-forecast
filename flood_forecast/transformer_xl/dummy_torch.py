@@ -1,5 +1,5 @@
 """
-A dummy model specifically for unit and integration testing purposes
+A small dummy model specifically for unit and integration testing purposes
 """
 import torch
 from torch import nn
@@ -19,11 +19,12 @@ class DummyTorchModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """The forward pass for the dummy model
+
         :param x: Here the data is irrelvant. Only batch_size is grabbed
         :type x: torch.Tensor
         :param mask: [description], defaults to None
         :type mask: [type], optional
-        :return: [description]
+        :return: A tensor with fixed data of one
         :rtype: torch.Tensor
         """
         batch_sz = x.size(0)
