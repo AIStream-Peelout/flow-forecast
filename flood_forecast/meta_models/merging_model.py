@@ -13,10 +13,8 @@ class MergingModel(torch.nn.Module):
         :type other_params: Dict
 
         ..code-block:: python
-
         merging_mod = MergingModel("Bilinear", {"in_features1": 5, "in_features_2":1, "out_features":40 })
         print(merging_mod(torch.rand(4, 5, 128), torch.rand(128)).shape) # (4, 40, 128)
-
         ...
         """
         super().__init__()
@@ -26,8 +24,8 @@ class MergingModel(torch.nn.Module):
         self.method = method
 
     def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor):
-        """ Performs the forward pass on both meta and temporal data. Returns merged tensor.
-        
+        """
+        Performs the forward pass on both meta and temporal data. Returns merged tensor.
         :param temporal_data: The temporal data should be in shape (batch_size, n_time_series, n_feats)
         :type temporal_data: torch.Tensor
         :param meta_data: The meta-data passed to the model will have dimension (d_meta)
