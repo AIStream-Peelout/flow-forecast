@@ -17,5 +17,9 @@ class TestBasicMethodVal(unittest.TestCase):
     def test_handle_no_scaling(self):
         pass
 
+    def valid_loop_test_1(self):
+        # todo will test valid
+        print("s")
+
 if __name__ == '__main__':
     unittest.main()
