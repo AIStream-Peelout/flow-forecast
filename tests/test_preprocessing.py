@@ -24,5 +24,12 @@ class TestInterpolationCode(unittest.TestCase):
         self.assertIn("sin_hour", feats[0].columns)
         self.assertIn("cos_hour", feats[0].columns)
 
+    def test_make_temp_feats2(self):
+        feats = feature_fix({"datetime_params": {"year": "numerical", "day": "cyclical"}}, "datetime", self.df_2)
+        self.assertIn("year", feats[0].columns)
+        self.assertIn("sin_day", feats[0].columns)
+        self.assertIn("cos_day", feats[0].columns)
+        self.assertIn("norm", feats[0].columns)
+
 if __name__ == '__main__':
     unittest.main()
