@@ -359,7 +359,7 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(float(result), 9.0)
 
     def test_inf(self):
-        train_transformer_style(self.inf_model, self.inf_params["training_params"], True)
+        train_transformer_style(self.inf, self.inf_params["training_params"], True)
 
 if __name__ == '__main__':
     unittest.main()
