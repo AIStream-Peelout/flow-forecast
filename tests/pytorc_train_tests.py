@@ -357,8 +357,8 @@ class PyTorchTrainTests(unittest.TestCase):
         result = compute_loss(exam, exam2, torch.rand(2, 20), torch.nn.MSELoss(), None)
         self.assertEqual(float(result), 9.0)
 
-    def test_inf(self):
-        train_transformer_style(self.inf, self.inf_params3["training_params"], True)
+    def test_z_inf(self):
+        train_transformer_style(self.inf, self.inf_params3["training_params"], False)
 
 if __name__ == '__main__':
     unittest.main()
