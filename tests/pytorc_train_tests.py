@@ -38,6 +38,46 @@ class PyTorchTrainTests(unittest.TestCase):
             "wandb": False,
             "inference_params": {
                 "hours_to_forecast": 10}}
+        self.inf_params3 = {
+            "metrics": ["MSE", "MAPE"],
+            "model_params": {
+                "n_time_series": 3,
+                "dec_in": 3,
+                "c_out": 1,
+                "seq_len": 20,
+                "label_len": 10,
+                "out_len": 2,
+                "factor": 2},
+            "dataset_params": {
+                "forecast_history": 20,
+                "scaling": "StandardScaler",
+                "class": "default",
+                "forecast_length": 2,
+                "relevant_cols": [
+                    "cfs",
+                    "temp",
+                    "precip"],
+                "target_col": ["cfs"],
+                "interpolate": False,
+                "feature_param":
+                {
+                    "datetime_params": {
+                        "month": "numerical",
+                        "day": "numerical",
+                        "day_of_week": "numerical",
+                        "hour": "numerical"
+                    },
+                }},
+            "training_params": {
+                "optimizer": "BertAdam",
+                "lr": .1,
+                "criterion": "MSE",
+                "epochs": 1,
+                "batch_size": 2,
+                "optim_params": {}},
+            "wandb": False,
+            "inference_params": {
+                "hours_to_forecast": 10}}
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model = PyTorchForecast(
             "MultiAttnHeadSimple",
@@ -45,6 +85,8 @@ class PyTorchTrainTests(unittest.TestCase):
             self.keag_file,
             self.keag_file,
             self.model_params)
+        self.inf = PyTorchForecast("Informer", self.keag_file, self.keag_file,
+                                   self.keag_file, self.inf_params3)
         self.dummy_model = PyTorchForecast(
             "DummyTorchModel", self.keag_file, self.keag_file, self.keag_file, {
                 "model_params": {"forecast_length": 5},
@@ -315,6 +357,9 @@ class PyTorchTrainTests(unittest.TestCase):
         # compute_loss(exam, exam2, torch.rand(2, 20), DilateLoss(), None)
         result = compute_loss(exam, exam2, torch.rand(2, 20), torch.nn.MSELoss(), None)
         self.assertEqual(float(result), 9.0)
+
+    def test_inf(self):
+        train_transformer_style(self.inf_model, self.inf_params["training_params"], True)
 
 if __name__ == '__main__':
     unittest.main()
