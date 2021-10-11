@@ -70,11 +70,10 @@ class PyTorchTrainTests(unittest.TestCase):
                 }},
             "training_params": {
                 "optimizer": "BertAdam",
-                "lr": .1,
                 "criterion": "MSE",
                 "epochs": 1,
                 "batch_size": 2,
-                "optim_params": {}},
+                "optim_params": {"lr": .1}},
             "wandb": False,
             "inference_params": {
                 "hours_to_forecast": 10}}
