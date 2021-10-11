@@ -51,7 +51,7 @@ class PyTorchTrainTests(unittest.TestCase):
             "dataset_params": {
                 "forecast_history": 20,
                 "scaling": "StandardScaler",
-                "class": "default",
+                "class": "TemporalLoader",
                 "forecast_length": 2,
                 "relevant_cols": [
                     "cfs",
@@ -76,7 +76,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "optim_params": {"lr": .1}},
             "wandb": False,
             "inference_params": {
-                "hours_to_forecast": 10}}
+                "hours_to_forecast": 11}}
         self.keag_file = os.path.join(self.test_path, "keag_small.csv")
         self.model = PyTorchForecast(
             "MultiAttnHeadSimple",
