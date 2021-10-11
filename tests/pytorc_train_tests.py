@@ -52,6 +52,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "forecast_history": 20,
                 "scaling": "StandardScaler",
                 "class": "TemporalLoader",
+                "temporal_feats": ["month", "day", "day_of_week", "hour"],
                 "forecast_length": 2,
                 "relevant_cols": [
                     "cfs",
