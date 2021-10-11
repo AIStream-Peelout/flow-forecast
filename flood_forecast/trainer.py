@@ -87,10 +87,10 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     :return: A trained model
     
     .. code-block:: python 
-    
-    with open("model_config.json") as f: 
-        params_dict = json.load(f)
-    train_function("PyTorch", params_dict)
+        
+        with open("model_config.json") as f: 
+            params_dict = json.load(f)
+        train_function("PyTorch", params_dict)
 
     ...
 
