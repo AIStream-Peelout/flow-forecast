@@ -14,7 +14,7 @@ class TestBasicMethodVal(unittest.TestCase):
         handle_gaussian_loss((torch.rand(10, 2), torch.rand(10, 2)))
 
     def test_handle_no_scaling(self):
-        # TODO more loop
+        # TODO implement
         pass
 
 if __name__ == '__main__':
