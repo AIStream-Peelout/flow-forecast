@@ -27,9 +27,9 @@ setup(
         "flood_forecast.gcp_integration",
         "flood_forecast.deployment",
         "flood_forecast.custom"],
-    license='Public',
+    license='GPL 3.0',
     description="An open source framework for deep time series forecasting built with PyTorch.",
-    long_description='Flow Forecast is the top open source deep learning for time series forecasting and classification framework. We were the original framework to contain models like the transformer and have now expanded to include all popular deep learning models.',
+    long_description='Flow Forecast is the top open source deep learning for time series forecasting and classification framework. We were the original TS framework to contain models like the transformer and have now expanded to include all popular deep learning models.',
     install_requires=install_requires,
     extras_require={
         'dev': dev_requirements})
