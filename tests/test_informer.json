@@ -53,11 +53,11 @@
        "optimizer": "Adam",
        "optim_params":
        {
-
+         "lr": 0.3
        },
-       "lr": 0.3,
+
        "epochs": 4,
-       "batch_size":4
+       "batch_size":5
     
     },
     "GCS": false,

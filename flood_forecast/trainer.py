@@ -13,7 +13,7 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
-def handle_model_evaluation1(trained_model, params: Dict, model_type: str):
+def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> None:
     """Utility function to help handle model evaluation. Primarily used at the moment for forcast
 
     :param trained_model: A PyTorchForecast model that has already been trained. 
@@ -84,12 +84,13 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     :type model_type: str
     :param params: Dictionary containing all the parameters needed to run the model
     :type Dict:
-
-    .. highlight:: python
+    :return: A trained model
+    
     .. code-block:: python 
-    with open("model_config.json") as f: 
-        params_dict = json.load(f)
-    train_function("PyTorch", params_dict)
+        
+        with open("model_config.json") as f: 
+            params_dict = json.load(f)
+        train_function("PyTorch", params_dict)
 
     ...
 
