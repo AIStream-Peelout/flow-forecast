@@ -60,6 +60,7 @@ class PyTorchTrainTests(unittest.TestCase):
                     "precip"],
                 "target_col": ["cfs"],
                 "interpolate": False,
+                "sort_column": "datetime",
                 "feature_param":
                 {
                     "datetime_params": {
