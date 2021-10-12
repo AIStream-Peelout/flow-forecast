@@ -40,6 +40,7 @@ class PyTorchTrainTests(unittest.TestCase):
                 "hours_to_forecast": 10}}
         self.inf_params3 = {
             "metrics": ["MSE", "MAPE"],
+            "use_decoder": True,
             "model_params": {
                 "n_time_series": 3,
                 "dec_in": 3,
