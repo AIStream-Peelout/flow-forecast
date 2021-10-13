@@ -1,6 +1,8 @@
 import unittest
 import torch
 from flood_forecast.basic.linear_regression import SimpleLinearModel, handle_gaussian_loss
+from flood_forecast.meta_models.basic_ae import AE
+from flood_forecast.basic.base_line_methods import NaiveBase
 
 
 class TestBasicMethodVal(unittest.TestCase):
@@ -13,8 +15,17 @@ class TestBasicMethodVal(unittest.TestCase):
     def test_handle_gaussian_loss(self):
         handle_gaussian_loss((torch.rand(10, 2), torch.rand(10, 2)))
 
-    def test_handle_no_scaling(self):
-        # TODO more loop
+    def test_hano_scaling(self):
+        n = NaiveBase(20, 10, 1)
+        e = n(torch.rand(4, 20, 10))
+        self.assertEqual(e.shape, (4, 1))
+
+    def test_ae(self):
+        ae = AE(9, 128)
+        rep = ae.generate_representation(torch.rand(4, 9))
+        self.assertEqual(rep.shape, (4, 128))
+
+    def new_test(self):
         pass
 
 if __name__ == '__main__':
