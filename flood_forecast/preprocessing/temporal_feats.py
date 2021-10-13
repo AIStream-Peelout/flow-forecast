@@ -3,24 +3,6 @@ from typing import Dict
 import numpy as np
 
 
-def make_temporal_features(features_list: Dict, dt_column: str, df: pd.DataFrame) -> pd.DataFrame:
-    """A function that creates temporal features
-
-    :param features_list: A list of features in the form of a dictionary
-    :type features_list: Dict
-    :param dt_column: [description]
-    :type dt_column: str
-    :param df: A data frame with a datetime column
-    :type df: pd.DataFrame
-    :return: The DF with several new columns added
-    :rtype: pd.DataFrame
-    """
-    df[dt_column] = df[dt_column].to_datetime()
-    for key, value in features_list.items():
-        df[key] = df[dt_column].map(value)
-    return df
-
-
 def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     """Function to create temporal feature. Uses dict to make val.
 
