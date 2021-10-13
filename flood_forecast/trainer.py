@@ -128,7 +128,8 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
                 # noqa: F501
                 trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
                 trained_model.params["inference_params"]["dataset_params"]["scaling"] = trained_model.params["inference_params"]["dataset_params"].pop("scaler")
-                trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
+                if "feature_param" in trained_model.params["dataset_params"]:
+                    trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
                 delete_params = ["num_workers", "pin_memory", "train_start", "train_end", "valid_start", "valid_end", "test_start", "test_end",
                                 "training_path", "validation_path", "test_path", "batch_size"]
                 for param in delete_params:
