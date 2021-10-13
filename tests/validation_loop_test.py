@@ -3,6 +3,7 @@ import torch
 from flood_forecast.basic.linear_regression import SimpleLinearModel, handle_gaussian_loss
 from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.basic.base_line_methods import NaiveBase
+from flood_forecast.custom.custom_activation import _roll_last
 
 
 class TestBasicMethodVal(unittest.TestCase):
@@ -26,7 +27,7 @@ class TestBasicMethodVal(unittest.TestCase):
         self.assertEqual(rep.shape, (4, 128))
 
     def new_test(self):
-        pass
+        _roll_last(torch.rand(43, 4))
 
 if __name__ == '__main__':
     unittest.main()
