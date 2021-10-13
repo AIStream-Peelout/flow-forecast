@@ -27,7 +27,7 @@ class TestBasicMethodVal(unittest.TestCase):
         self.assertEqual(rep.shape, (4, 128))
 
     def new_test(self):
-        _roll_last(torch.rand(43, 4))
+        _roll_last(torch.rand(43, 4), 1)
 
 if __name__ == '__main__':
     unittest.main()
