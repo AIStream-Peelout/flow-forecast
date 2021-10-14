@@ -14,7 +14,8 @@ class TestBasicMethodVal(unittest.TestCase):
         self.assertIsInstance(r, torch.distributions.Normal)
 
     def test_handle_gaussian_loss(self):
-        handle_gaussian_loss((torch.rand(10, 2), torch.rand(10, 2)))
+        result = handle_gaussian_loss((torch.rand(10, 2), torch.rand(10, 2)))
+        print(result)
 
     def test_hano_scaling(self):
         n = NaiveBase(20, 10, 1)
