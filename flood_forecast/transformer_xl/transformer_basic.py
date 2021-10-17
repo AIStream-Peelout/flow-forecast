@@ -137,8 +137,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         encoder_norm = LayerNorm(d_model)
         self.transformer_enc = TransformerEncoder(encoder_layer, n_layers_encoder, encoder_norm)
         self.output_dim_layer = torch.nn.Linear(d_model, output_dim)
-        self.output_seq_length = output_seq_length
-        self.out_length_lay = torch.nn.Linear(seq_length, output_seq_length)
+        self.output_seq_length_n = output_seq_length
+        self.output_seq_length = torch.nn.Linear(seq_length, output_seq_length)
         self.mask = generate_square_subsequent_mask(seq_length)
         self.out_dim = output_dim
         self.mask_it = use_mask
@@ -200,12 +200,12 @@ class CustomTransformerDecoder(torch.nn.Module):
         x = self.output_dim_layer(x)
         # (B, N, L)
         x = x.permute(1, 2, 0)
-        x = self.out_length_lay(x)
+        x = self.output_seq_length(x)
         if self.final_act:
             x = self.final_act(x)
         if self.out_dim > 1:
             return x.permute(0, 2, 1)
-        return x.view(-1, self.output_seq_length)
+        return x.view(-1, self.output_seq_length_n)
 
 
 class SimplePositionalEncoding(torch.nn.Module):
