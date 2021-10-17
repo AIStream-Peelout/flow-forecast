@@ -14,7 +14,7 @@ class NaiveBase(torch.nn.Module):
         self.n_time_series = n_time_series
         self.initial_layer = torch.nn.Linear(n_time_series, 1)
         self.output_layer = torch.nn.Linear(seq_length, output_seq_len)
-        self.metric_dict = {"last": the_last}
+        self.metric_dict = {"last": the_last1}
         self.output_seq_len = output_seq_len
         self.metric_function = self.metric_dict[metric]
 
@@ -31,3 +31,7 @@ def the_last(index_in_tensor: int, the_tensor: torch.Tensor) -> torch.Tensor:
         value = the_tensor[batch_num, -1, -1]
         the_tensor[batch_num, :, -1] = value
     return the_tensor
+
+
+def the_last1(tensor, out_len):
+    return tensor[:, :, -1].unsqueeze(2).repeat(1, 1, out_len)
