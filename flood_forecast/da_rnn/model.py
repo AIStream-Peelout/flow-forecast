@@ -67,7 +67,7 @@ class DARNN(nn.Module):
                                self.probabilistic)
         self.final_act = final_act
         if final_act:
-            self.final_act = activation_dict[final_act](dim=1)
+            self.final_act = activation_dict[final_act]
 
     def forward(self, x: torch.Tensor, meta_data: torch.Tensor = None) -> torch.Tensor:
         """Performs standard forward pass of the DARNN. Special handling of probablistic.
