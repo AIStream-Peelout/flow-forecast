@@ -20,7 +20,7 @@ class TestBasicMethodVal(unittest.TestCase):
     def test_hano_scaling(self):
         n = NaiveBase(20, 10, 1)
         e = n(torch.rand(4, 20, 10))
-        self.assertEqual(e.shape, (4, 1))
+        self.assertEqual(e.shape[1], 1)
 
     def test_ae(self):
         ae = AE(9, 128)
