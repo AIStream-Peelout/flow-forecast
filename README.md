@@ -2,6 +2,8 @@
 ![Example image](https://raw.githubusercontent.com/CoronaWhy/task-ts/master/images/Picture1.png)
 Flow forecast is an open-source deep learning for time series forecasting framework. It provides all the latest state of the art models (transformers, attention models, GRUs) and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and model serving capabilities. Flow Forecast was the first time series framework to feature support for transformer based models and remains the only true end-to-end deep learnig for time series forecasting framework.  Currently [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains this repository. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
+For additional tutorials and examples please see our [tutorials repository](https://github.com/AIStream-Peelout/flow_tutorials).
+
 | branch  | status                                                                                                                                                                                                            |
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://circleci.com/gh/AIStream-Peelout/flow-forecast.svg?style=svg&circle-token=f7be0a4863710165969ba0903fa471f08a347df1)](https://circleci.com/gh/AIStream-Peelout/flow-forecast)                 |
