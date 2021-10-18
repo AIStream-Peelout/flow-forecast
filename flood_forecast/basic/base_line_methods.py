@@ -32,6 +32,5 @@ def the_last(index_in_tensor: int, the_tensor: torch.Tensor) -> torch.Tensor:
         the_tensor[batch_num, :, -1] = value
     return the_tensor
 
-
 def the_last1(tensor, out_len):
     return tensor[:, :, -1].unsqueeze(2).repeat(1, 1, out_len)
