@@ -362,6 +362,13 @@ class AEDataloader(CSVDataLoader):
     def __handle_params__():
         pass
 
+    def get_from_start_date(self, forecast_start: datetime):
+        dt_row = self.original_df[
+            self.original_df["datetime"] == forecast_start
+        ]
+        revised_index = dt_row.index[0]
+        return self.__getitem__(revised_index - self.forecast_history)
+
     def __len__(self):
         return len(self.df.index) - 1 - self.forecast_history
 
