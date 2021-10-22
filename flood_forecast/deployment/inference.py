@@ -159,5 +159,8 @@ def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchFo
         model_params_dict["weight_path"] = weight_path
     model_params_dict["inference_params"]["test_csv_path"] = file_path
     model_params_dict["inference_params"]["dataset_params"]["file_path"] = file_path
+    if "weight_path_add" in model_params_dict:
+        if "excluded_layers" in model_params_dict["weight_path_add"]:
+            del model_params_dict["weight_path_add"]["excluded_layers"] 
     m = PyTorchForecast(model_params_dict["model_name"], file_path, file_path, file_path, model_params_dict)
     return m
