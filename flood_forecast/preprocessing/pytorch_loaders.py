@@ -246,9 +246,7 @@ class CSVTestLoader(CSVDataLoader):
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
-        self.original_df[sort_col1] = self.original_df["datetime"].astype(
-            "datetime64[ns]"
-        )
+        self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
         self.original_df["original_index"] = self.original_df.index
         if len(self.relevant_cols3) > 0:
             self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
