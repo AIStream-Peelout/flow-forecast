@@ -148,11 +148,11 @@ def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchFo
 
     :param model_params_dict: Dictionary of model parameters
     :type model_params_dict: Dict
-    :param file_path: [description]
+    :param file_path: The path to the CSV for running infer
     :type file_path: str
-    :param weight_path: [description]
+    :param weight_path: The path to the model weights (can be GCS)
     :type weight_path: str
-    :return: [description]
+    :return: Returns a PyTorchForecast model initialized with the proper data
     :rtype: PyTorchForecast
     """
     if weight_path:
