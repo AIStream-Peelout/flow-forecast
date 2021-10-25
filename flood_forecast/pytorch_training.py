@@ -123,7 +123,7 @@ def train_transformer_style(
     if model.params["meta_data"]:
         meta_model, meta_representation, meta_loss = handle_meta_data(model)
     if use_wandb:
-        wandb.watch(model.model)
+        wandb.watch(model.model, log='gradients')
     use_decoder = False
     if "use_decoder" in model.params:
         use_decoder = True
