@@ -18,7 +18,7 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
 
     :param trained_model: A PyTorchForecast model that has already been trained. 
     :type trained_model: PyTorchForecast
-    :param params: A dictionary of the trained model parameters
+    :param params: A dictionary of the trained model parameters.
     :type params: Dict
     :param model_type: The type of model. Almost always PyTorch in practice.
     :type model_type: str
