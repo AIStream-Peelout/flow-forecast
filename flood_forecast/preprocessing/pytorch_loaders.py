@@ -253,7 +253,7 @@ class CSVTestLoader(CSVDataLoader):
         dt_row = self.original_df[
             self.original_df["datetime"] == forecast_start
         ]
-        revised_index = dt_row.index[0] - self.start_stamp
+        revised_index = dt_row.index[0]
         return self.__getitem__(revised_index - self.forecast_history)
 
     def __getitem__(self, idx):
@@ -365,7 +365,7 @@ class AEDataloader(CSVDataLoader):
         dt_row = self.original_df[
             self.original_df["datetime"] == forecast_start
         ]
-        revised_index = dt_row.index[0]
+        revised_index = dt_row.index[0] - self.start_stamp
         return self.__getitem__(revised_index - self.forecast_history)
 
     def __len__(self):
