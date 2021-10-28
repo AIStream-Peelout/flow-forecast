@@ -58,7 +58,7 @@ class CSVDataLoader(Dataset):
         df = pd.read_csv(self.local_file_path)
         relevant_cols3 = []
         if sort_column:
-            df[sort_column] = pd.to_datetime(df[sort_column])
+            df[sort_column] = df[sort_column].astype("datetime64[ns]")
             df = df.sort_values(by=sort_column)
             if feature_params:
                 df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
@@ -244,9 +244,7 @@ class CSVTestLoader(CSVDataLoader):
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
-        self.original_df[sort_col1] = self.original_df["datetime"].astype(
-            "datetime64[ns]"
-        )
+        self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
         self.original_df["original_index"] = self.original_df.index
         if len(self.relevant_cols3) > 0:
             self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
@@ -358,9 +356,17 @@ class AEDataloader(CSVDataLoader):
                          end_stamp=end_stamp, sort_column=sort_column, interpolate_param=False, no_scale=no_scale,
                          scaling=scaling)
         self.unsqueeze_dim = unsqueeze_dim
+        self.start_stamp = start_stamp
 
     def __handle_params__():
         pass
+
+    def get_from_start_date(self, forecast_start: datetime):
+        dt_row = self.original_df[
+            self.original_df["datetime"] == forecast_start
+        ]
+        revised_index = dt_row.index[0] - self.start_stamp
+        return self.__getitem__(revised_index - self.forecast_history)
 
     def __len__(self):
         return len(self.df.index) - 1 - self.forecast_history

@@ -148,16 +148,19 @@ def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchFo
 
     :param model_params_dict: Dictionary of model parameters
     :type model_params_dict: Dict
-    :param file_path: [description]
+    :param file_path: The path to the CSV for running infer
     :type file_path: str
-    :param weight_path: [description]
+    :param weight_path: The path to the model weights (can be GCS)
     :type weight_path: str
-    :return: [description]
+    :return: Returns a PyTorchForecast model initialized with the proper data
     :rtype: PyTorchForecast
     """
     if weight_path:
         model_params_dict["weight_path"] = weight_path
     model_params_dict["inference_params"]["test_csv_path"] = file_path
     model_params_dict["inference_params"]["dataset_params"]["file_path"] = file_path
+    if "weight_path_add" in model_params_dict:
+        if "excluded_layers" in model_params_dict["weight_path_add"]:
+            del model_params_dict["weight_path_add"]["excluded_layers"]
     m = PyTorchForecast(model_params_dict["model_name"], file_path, file_path, file_path, model_params_dict)
     return m
