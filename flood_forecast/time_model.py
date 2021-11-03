@@ -118,7 +118,8 @@ class PyTorchForecast(TimeSeriesModel):
         if "frozen_layers" in "weight_path_add":
             for param in self.params["frozen_layers"]:
                 self.model.mod._modules[param].require_grad = False
-
+        elif "decaying_layers" in self.params:
+            pass
 
     def load_model(self, model_base: str, model_params: Dict, weight_path: str = None, strict=True):
         if model_base in pytorch_model_dict:
