@@ -110,7 +110,15 @@ class PyTorchForecast(TimeSeriesModel):
             params_dict: Dict):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
+        if "weight_path_add" in self.params:
+            self._freeze_layers__(self.params["weight_path_add"])
         print("Torch is using " + str(self.device))
+
+    def _freeze_layers__(self, params):
+        if "frozen_layers" in "weight_path_add":
+            for param in self.params["frozen_layers"]:
+                self.model.mod._modules[param].require_grad = False
+
 
     def load_model(self, model_base: str, model_params: Dict, weight_path: str = None, strict=True):
         if model_base in pytorch_model_dict:
