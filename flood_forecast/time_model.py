@@ -116,8 +116,11 @@ class PyTorchForecast(TimeSeriesModel):
 
     def __freeze_layers__(self, params: Dict):
         if "frozen_layers" in params:
+            print("Layers being fro")
             for layer in params["frozen_layers"]:
                 self.model._modules[layer].requires_grad = False
+                for parameter in self.model._modules[layer].parameters():
+                    parameter.requires_grad = False
 
     def load_model(self, model_base: str, model_params: Dict, weight_path: str = None, strict=True):
         if model_base in pytorch_model_dict:
