@@ -15,11 +15,11 @@ from torch.nn import CrossEntropyLoss
 
 
 def handle_meta_data(model: PyTorchForecast):
-    """A function to init models with meta-data
+    """A function to initialize models with meta-data
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initial meta-representation
-    :rtype: tuple(PyTorchForecast, torch.Tensor, )
+    :rtype: tuple(PyTorchForecast, torch.Tensor, float)
     """
     meta_loss = None
     with open(model.params["meta_data"]["path"]) as f:
