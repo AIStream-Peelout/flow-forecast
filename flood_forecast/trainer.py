@@ -61,7 +61,7 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
                 targ_col=thing[1],
                 ci=95,
                 alpha=0.25)
-            wandb.log({"test_plot_" + thing[1]: wandb.Image(test_plot)})
+            wandb.log({"test_plot_" + thing[1]: wandb.Image(test_plot.plotly.io.to_image())})
     else:
         pd.options.plotting.backend = "plotly"
         t = params["dataset_params"]["target_col"][0]
