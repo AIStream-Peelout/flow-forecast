@@ -61,12 +61,12 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
                 targ_col=thing[1],
                 ci=95,
                 alpha=0.25)
-            wandb.log({"test_plot_" + thing[1]: wandb.Image(test_plot.plotly.io.to_image())})
+            wandb.log({"test_plot_" + thing[1]: test_plot})
     else:
         pd.options.plotting.backend = "plotly"
         t = params["dataset_params"]["target_col"][0]
         test_plot = df_train_and_test[[t, "preds"]].plot()
-        wandb.log({"test_plot_" + t: wandb.Image(test_plot)})
+        wandb.log({"test_plot_" + t: test_plot})
     print("Now plotting final plots")
     test_plot_all = go.Figure()
     for relevant_col in params["dataset_params"]["relevant_cols"]:
