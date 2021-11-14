@@ -67,6 +67,7 @@ jobs:
             coverage run -m unittest -v tests/test_deployment.py
             coverage run -m unittest -v tests/test_evaluation.py
             coverage run -m unittest -v tests/validation_loop_test.py
+            coverage run -m unittest -v tests/test_handle_multi_crit.py
 
       - run:
           name: upload

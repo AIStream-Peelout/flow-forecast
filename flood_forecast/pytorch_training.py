@@ -13,8 +13,19 @@ from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from torch.nn import CrossEntropyLoss
 
-def handle_multi_crit(crit_multi, output, labels):
-    pass
+
+def multi_crit(crit_multi, output, labels, valid=None):
+    """
+    """
+    loss = 0.0
+    i = 0
+    for crit in crit_multi:
+        if len(output.shape) == 3:
+            loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
+        else:
+            loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid)
+    summed_loss = loss
+    return summed_loss
 
 
 def handle_meta_data(model: PyTorchForecast):
@@ -136,7 +147,7 @@ def train_transformer_style(
             model,
             opt,
             criterion,
-            data_loader,
+            data_loader,  # s
             takes_target,
             meta_model,
             meta_representation,
@@ -392,7 +403,8 @@ def torch_single_train(model: PyTorchForecast,
             output1 = output
             output = output.mean
             output_std = output1.stddev
-
+        if type(criterion) == list:
+            loss = multi_crit(criterion, output, labels, None, )
         loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
@@ -407,12 +419,6 @@ def torch_single_train(model: PyTorchForecast,
     print("The number of items in train is: " + str(i))
     total_loss = running_loss / float(i)
     return total_loss
-
-
-def multi_step_forecasts_append(self):
-    """Function to handle forecasts that span multiple time steps
-    """
-    pass
 
 
 def compute_validation(validation_loader: DataLoader,
