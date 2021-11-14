@@ -13,6 +13,9 @@ from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from torch.nn import CrossEntropyLoss
 
+def handle_multi_crit(crit_multi, output, labels):
+    pass
+
 
 def handle_meta_data(model: PyTorchForecast):
     """A function to init models with meta-data
