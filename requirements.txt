@@ -1,4 +1,4 @@
-shap==0.39.0
+shap==0.40.0
 scikit-learn==0.24.2
 pandas
 torch
@@ -6,13 +6,12 @@ tb-nightly
 seaborn
 future
 h5py
-wandb==0.12.2
+wandb==0.12.6
 google-cloud
 google-cloud-storage
-pyyaml
 plotly~=5.3.1
-pytz~=2021.1
-setuptools~=58.0.4
+pytz~=2021.3
+setuptools~=58.5.3
 numpy==1.20
 requests
 torchvision>=0.6.0

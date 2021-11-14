@@ -108,7 +108,6 @@ def evaluate_model(
             end_tensor_0 = end_tensor[1]
             end_tensor = end_tensor[0]
             g_loss = True
-        print("transform end tens preform")
         if test_data.scale:
             print("Un-transforming data")
             if probablistic:

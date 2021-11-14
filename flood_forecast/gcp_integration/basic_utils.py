@@ -30,7 +30,7 @@ def upload_file(
 
     :param bucket_name: The name of the bucket
     :type bucket_name: str
-    :param file_name: [description]
+    :param file_name: The name of the file
     :type file_name: str
     :param upload_name: [description]
     :type upload_name: str

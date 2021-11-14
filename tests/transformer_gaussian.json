@@ -15,7 +15,7 @@
       "additional_params":{}
      },
     "dataset_params":
-    { "class":"default",
+    { "class":"default", 
       "num_workers": 2,
        "training_path": "tests/test_data/keag_small.csv",
        "validation_path": "tests/test_data/keag_small.csv",

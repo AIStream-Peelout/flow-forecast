@@ -13,12 +13,12 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
-def handle_model_evaluation1(trained_model, params: Dict, model_type: str):
+def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> None:
     """Utility function to help handle model evaluation. Primarily used at the moment for forcast
 
     :param trained_model: A PyTorchForecast model that has already been trained. 
     :type trained_model: PyTorchForecast
-    :param params: A dictionary of the trained model parameters
+    :param params: A dictionary of the trained model parameters.
     :type params: Dict
     :param model_type: The type of model. Almost always PyTorch in practice.
     :type model_type: str
@@ -84,12 +84,13 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     :type model_type: str
     :param params: Dictionary containing all the parameters needed to run the model
     :type Dict:
-
-    .. highlight:: python
+    :return: A trained model
+    
     .. code-block:: python 
-    with open("model_config.json") as f: 
-        params_dict = json.load(f)
-    train_function("PyTorch", params_dict)
+        
+        with open("model_config.json") as f: 
+            params_dict = json.load(f)
+        train_function("PyTorch", params_dict)
 
     ...
 
@@ -127,7 +128,8 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
                 # noqa: F501
                 trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
                 trained_model.params["inference_params"]["dataset_params"]["scaling"] = trained_model.params["inference_params"]["dataset_params"].pop("scaler")
-                trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
+                if "feature_param" in trained_model.params["dataset_params"]:
+                    trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
                 delete_params = ["num_workers", "pin_memory", "train_start", "train_end", "valid_start", "valid_end", "test_start", "test_end",
                                 "training_path", "validation_path", "test_path", "batch_size"]
                 for param in delete_params:
