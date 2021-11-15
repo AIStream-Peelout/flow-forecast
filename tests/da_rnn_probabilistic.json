@@ -68,4 +68,5 @@
          "decoder_params":{
          "decoder_function": "simple_decode", "unsqueeze_dim": 1, "probabilistic": true}
    }
+
 }
