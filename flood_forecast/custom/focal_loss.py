@@ -11,7 +11,7 @@ import warnings
 def focal_loss(
     input: torch.Tensor,
     target: torch.Tensor,
-    alpha: float = 0.25,
+    alpha: float,
     gamma: float = 2.0,
     reduction: str = 'none',
     eps: Optional[float] = None,
@@ -106,7 +106,8 @@ class FocalLoss(nn.Module):
           will be applied, ``'mean'``: the sum of the output will be divided by
           the number of elements in the output, ``'sum'``: the output will be
           summed.
-        eps: Deprecated: scalar to enforce numerical stability. This is no longer used.
+        eps: Deprecated: scalar to enforce numerical stability. This is no longer
+          used.
     Shape:
         - Input: :math:`(N, C, *)` where C = number of classes.
         - Target: :math:`(N, *)` where each value is
@@ -121,7 +122,7 @@ class FocalLoss(nn.Module):
         >>> output.backward()
     """
 
-    def __init__(self, alpha: float, gamma: float = 2.0, reduction: str = 'none', eps: Optional[float] = None):
+    def __init__(self, alpha: float, gamma: float = 2.0, reduction: str = 'none', eps: Optional[float] = None) -> None:
         super().__init__()
         self.alpha: float = alpha
         self.gamma: float = gamma
