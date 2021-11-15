@@ -21,10 +21,10 @@ Using the library
 **Models currently supported** 
 
 1. Vanilla LSTM (LSTM): A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
-2. Full transformer (simpletransformer in model_dict): The full original transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
+2. Full transformer (SimpleTransformer in model_dict): The full original transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
 3. Simple Multi-Head Attention (MultiHeadSimple): A simple multi-head attention block and linear embedding layers. Suitable for transfer learning.
 4. Transformer with a linear decoder (CustomTransformerDecoder in model_dict): A transformer with n-encoder blocks (this is tunable) and a linear decoder.
-5. [DA-RNN](https://arxiv.org/abs/1704.02971): A well rounded model with which utilizes a LSTM + attention. 
+5. [DA-RNN](https://arxiv.org/abs/1704.02971): (DARNN) A well rounded model with which utilizes a LSTM + attention. 
 6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235) (called DecoderTransformer in model_dict): 
 7. [Transformer XL](https://arxiv.org/abs/1901.02860):
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436) (Informer)
