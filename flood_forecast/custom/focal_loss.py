@@ -132,6 +132,7 @@ class FocalLoss(nn.Module):
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         return focal_loss(input, target, self.alpha, self.gamma, self.reduction, self.eps)
 
+
 def binary_focal_loss_with_logits(
     input: torch.Tensor,
     target: torch.Tensor,

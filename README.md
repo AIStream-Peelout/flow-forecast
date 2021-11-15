@@ -18,7 +18,7 @@ Using the library
 2. Detailed info on training models can be found on the [Wiki](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/364019713/Training+Models).
 3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview) 
 
-**Models currently supported**
+**Models currently supported** 
 
 1. Vanilla LSTM (LSTM): A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
 2. Full transformer (simpletransformer in model_dict): The full original transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
@@ -53,7 +53,7 @@ This task focuses on forecasting a stream's future flow/height (in either cfs or
 ### Task 2 Flood severity forecasting
 Task two focuses on predicting the severity of the flood based on the flood forecast, population information, and topography. Flood severity is defined based on several factors including the number of injuires, property damage, and crop damage.
 
-If you use either the data or code from this repository please us the citation. Additionally please cite the original authors of the models.
+If you use either the data or code from this repository please use the citation below. Additionally please cite the original authors of the models.
 ```
 @misc{godfried2020flowdb,
       title={FlowDB a large scale precipitation, river, and flash flood dataset}, 
