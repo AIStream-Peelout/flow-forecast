@@ -24,7 +24,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
 
 def main():
     """
-    Main meta training function which is called from the command line. Entrypoint for all AutoEncoder models.
+    Main meta training function which is called from the command line. Entrypoint for all the AutoEncoder models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for model training")
     parser.add_argument("-p", "--params", help="Path to the model config file")
