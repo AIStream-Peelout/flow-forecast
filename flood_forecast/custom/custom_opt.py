@@ -306,7 +306,7 @@ class BertAdam(Optimizer):
 
                 # step_size = lr_scheduled * math.sqrt(bias_correction2) / bias_correction1
                 # No bias correction
-                # bias_correction1 = 1 - beta1 ** state['step']
+                # bias_correction1 =  1 - beta1 ** state['step']
                 # bias_correction2 = 1 - beta2 ** state['step']
 
         return loss
