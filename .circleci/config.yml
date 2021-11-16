@@ -202,6 +202,7 @@ jobs:
           command: |
             sudo pip install pipenv
             sudo pip install coverage
+            sudo pip install --upgrade cython
             sudo pip install --upgrade --force-reinstall --quiet -r requirements.txt
             sudo python setup.py develop --no-deps
 
@@ -240,6 +241,7 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install pipenv
+            sudo pip install --upgrade cython
             sudo pip install --force-reinstall --upgrade --quiet -r requirements.txt
             sudo pip install coverage
             sudo python setup.py develop --no-deps
@@ -312,6 +314,7 @@ jobs:
           name: install dependencies
           command: |
             sudo pip install pipenv
+            sudo pip install --upgrade cython
             sudo pip install coverage
             sudo pip install --upgrade --force-reinstall --quiet -r requirements.txt
             sudo python setup.py develop --no-deps
