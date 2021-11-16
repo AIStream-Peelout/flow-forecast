@@ -368,8 +368,6 @@ def torch_single_train(model: PyTorchForecast,
             src = src[0]
             # Assign to avoid other if statement
             trg = trg[0]
-            trg = model.model.pred_len
-            trg[:, -pred_len:, :] = torch.zeros_like(trg[trg, -pred_len, :]).float().to(model.device)
         elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             pass
         src = src.to(model.device)
