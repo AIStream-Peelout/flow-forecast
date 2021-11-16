@@ -366,7 +366,7 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["x_dec"] = trg[1].to(model.device)
             forward_params["x_mark_dec"] = trg[0].to(model.device)
             src = src[0]
-            pred_len = model.pred_len
+            pred_len = model.model.pred_len
             trg = trg[0]
             trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
             # Assign to avoid other if statement
