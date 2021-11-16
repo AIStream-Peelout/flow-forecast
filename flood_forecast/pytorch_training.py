@@ -366,8 +366,10 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["x_dec"] = trg[1].to(model.device)
             forward_params["x_mark_dec"] = trg[0].to(model.device)
             src = src[0]
-            # Assign to avoid other if statement
+            pred_len = model.pred_len
             trg = trg[0]
+            trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
+            # Assign to avoid other if statement
         elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             pass
         src = src.to(model.device)
