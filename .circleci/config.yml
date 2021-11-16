@@ -52,6 +52,7 @@ jobs:
           command: |
             sudo pip install pipenv
             sudo pip install coverage
+            sudo pip install --upgrade cython
             sudo pip install --quiet --force-reinstall  --upgrade -r requirements.txt
             sudo python setup.py develop --no-deps
 
