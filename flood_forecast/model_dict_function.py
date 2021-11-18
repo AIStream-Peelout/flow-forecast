@@ -19,7 +19,7 @@ from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
 
 """
-Utility dictionaries to map a string to a class .
+Utility dictionaries to map a string to a class
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,

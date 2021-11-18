@@ -29,11 +29,11 @@ def multi_crit(crit_multi, output, labels, valid=None):
 
 
 def handle_meta_data(model: PyTorchForecast):
-    """A function to init models with meta-data
+    """A function to initialize models with meta-data
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initial meta-representation
-    :rtype: tuple(PyTorchForecast, torch.Tensor, )
+    :rtype: tuple(PyTorchForecast, torch.Tensor, float)
     """
     meta_loss = None
     with open(model.params["meta_data"]["path"]) as f:
@@ -388,8 +388,10 @@ def torch_single_train(model: PyTorchForecast,
             forward_params["x_dec"] = trg[1].to(model.device)
             forward_params["x_mark_dec"] = trg[0].to(model.device)
             src = src[0]
-            # Assign to avoid other if statement
+            pred_len = model.model.pred_len
             trg = trg[0]
+            trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
+            # Assign to avoid other if statement
         elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             pass
         src = src.to(model.device)
