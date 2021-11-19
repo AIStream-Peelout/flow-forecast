@@ -1,6 +1,6 @@
 import torch
 import torch.optim as optim
-from typing import Type, Dict, List, Union
+from typing import Type, Dict
 from torch.utils.data import DataLoader
 import json
 import wandb
@@ -15,7 +15,7 @@ from torch.nn import CrossEntropyLoss
 
 
 def multi_crit(crit_multi, output, labels, valid=None):
-    """A function to compute the loss for a model with multi_criterion
+    """
     """
     loss = 0.0
     i = 0
@@ -49,26 +49,6 @@ def handle_meta_data(model: PyTorchForecast):
     meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
                                                   model.params["meta_data"]["uuid"], meta_model)
     return meta_model, meta_representation, meta_loss
-
-
-def make_crit(model_params: Dict) -> Union[torch.nn.Module, List]:
-    """A function to create the criterion for training from the parameters
-    :param model_params: The training params Dict block in FF
-    :type model_params: Dict
-    """
-    training_params = model_params
-    criterion_init_params = {}
-    if "criterion_params" in training_params:
-        criterion_init_params = training_params["criterion_params"]
-    if type(training_params["criterion"]) == list:
-        criterion = []
-        i = 0
-        for crit in training_params["criterion"]:
-            res = pytorch_criterion_dict[crit](**criterion_init_params[i])
-            criterion.append(res)
-    else:
-        criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
-    return criterion ,
 
 
 def train_transformer_style(
@@ -111,7 +91,17 @@ def train_transformer_style(
         es = EarlyStopper(model.params["early_stopping"]['patience'])
     opt = pytorch_opt_dict[training_params["optimizer"]](
         model.model.parameters(), **training_params["optim_params"])
-    criterion = make_crit(training_params)
+    criterion_init_params = {}
+    if "criterion_params" in training_params:
+        criterion_init_params = training_params["criterion_params"]
+    if type(training_params["criterion"]) == list:
+        criterion = []
+        i = 0
+        for crit in training_params["criterion"]:
+            res = pytorch_criterion_dict[crit](**criterion_init_params[i])
+            criterion.append(res)
+    else:
+        criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
 
     if "probabilistic" in model.params["model_params"] or "probabilistic" in model.params:
         probabilistic = True
@@ -150,8 +140,9 @@ def train_transformer_style(
     meta_model = None
     meta_representation = None
     meta_loss = None
-    if model.params.get("meta_data") is not None:
-        # model.params["meta_data"] = False
+    if model.params.get("meta_data") is None:
+        model.params["meta_data"] = False
+    if model.params["meta_data"]:
         meta_model, meta_representation, meta_loss = handle_meta_data(model)
     if use_wandb:
         wandb.watch(model.model)
