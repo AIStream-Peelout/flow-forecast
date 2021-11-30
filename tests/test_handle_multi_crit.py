@@ -4,6 +4,7 @@ from torch.nn import BCELoss
 from flood_forecast.custom.focal_loss import FocalLoss
 import torch
 
+
 class TestMulticrit(unittest.TestCase):
     def setUp(self):
         self.crit = [BCELoss(), FocalLoss(0.25)]
