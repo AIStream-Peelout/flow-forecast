@@ -10,7 +10,7 @@ class TestMulticrit(unittest.TestCase):
         self.crit = [BCELoss(), FocalLoss(0.25)]
 
     def test_crit_function(self):
-        r1 = multi_crit(self.crit, torch.rand(4, 1, 5), torch.rand(4, 5))
+        r1 = multi_crit(self.crit, torch.rand(4, 20, 5), torch.rand(4, 20, 5))
         self.assertGreater(r1, 0.25) 
 
 if __name__ == '__main__':
