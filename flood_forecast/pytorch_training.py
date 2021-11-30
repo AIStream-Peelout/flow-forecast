@@ -20,7 +20,6 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
     loss = 0.0
     for crit in crit_multi:
         if len(output.shape) == 3:
-            loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
             if isinstance(crit, FocalLoss):
                 loss += compute_loss(labels[:, 0, i], output[:, :, i], torch.rand(1, 2), crit, valid)
             else:

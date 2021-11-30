@@ -64,7 +64,6 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
         print(out[:, -residual1:, :].shape)
         print(out1[:, i: i + residual1, :n_target].shape)
         out1[:, i: i + residual1, :n_target] = out[:, -residual1:, :]
-        # WTF is this shit? !
         # Need better variable names
         filled_target1 = torch.zeros_like(filled_target[:, 0:forecast_length * 2, :])
         if filled_target1.shape[1] == forecast_length * 2:
