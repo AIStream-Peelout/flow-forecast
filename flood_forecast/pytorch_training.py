@@ -12,21 +12,22 @@ from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from torch.nn import CrossEntropyLoss
+from flood_forecast.custom.focal_loss import FocalLoss
 
 
-def multi_crit(crit_multi, output, labels, valid=None):
-    """A function to compute the loss for a model with multi_criterion
-    """
-    loss = 0.0
+def multi_crit(crit_multi: List, output, labels, valid=None):
     i = 0
+    loss = 0.0
     for crit in crit_multi:
         if len(output.shape) == 3:
             loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
+            if isinstance(crit, FocalLoss):
+                loss += compute_loss(labels[:, 0, i], output[:, :, i], torch.rand(1, 2), crit, valid)
+            else:
+                loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
         else:
             loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid)
     summed_loss = loss
-    return summed_loss
-
 
 def handle_meta_data(model: PyTorchForecast):
     """A function to initialize models with meta-data
@@ -109,10 +110,9 @@ def train_transformer_style(
         print("Pin memory set to true")
     if "early_stopping" in model.params:
         es = EarlyStopper(model.params["early_stopping"]['patience'])
+    criterion = make_crit(training_params)
     opt = pytorch_opt_dict[training_params["optimizer"]](
         model.model.parameters(), **training_params["optim_params"])
-    criterion = make_crit(training_params)
-
     if "probabilistic" in model.params["model_params"] or "probabilistic" in model.params:
         probabilistic = True
     else:

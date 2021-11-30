@@ -11,7 +11,7 @@ class TestMulticrit(unittest.TestCase):
 
     def test_crit_function(self):
         r1 = multi_crit(self.crit, torch.rand(4, 20, 5), torch.rand(4, 20, 5))
-        self.assertGreater(r1, 0.25) 
+        self.assertGreater(r1, 0.25)
 
 if __name__ == '__main__':
     unittest.main()
