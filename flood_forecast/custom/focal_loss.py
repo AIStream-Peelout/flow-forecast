@@ -109,7 +109,7 @@ class FocalLoss(nn.Module):
         eps: Deprecated: scalar to enforce numerical stability. This is no longer
           used.
     Shape:
-        - Input: :math:`(N, C, *)` where C = number of classes.
+        - Input: :math:`(N, *, C)` where C = number of classes.
         - Target: :math:`(N, *)` where each value is
           :math:`0 ≤ targets[i] ≤ C−1`.
     Example:
@@ -130,7 +130,8 @@ class FocalLoss(nn.Module):
         self.eps: Optional[float] = eps
 
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        return focal_loss(input, target, self.alpha, self.gamma, self.reduction, self.eps)
+        i = input.permute(0, 2, 1)
+        return focal_loss(i, target, self.alpha, self.gamma, self.reduction, self.eps)
 
 
 def binary_focal_loss_with_logits(
