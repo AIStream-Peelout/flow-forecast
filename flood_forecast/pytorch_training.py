@@ -11,7 +11,6 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
-from flood_forecast.custom.focal_loss import FocalLoss
 from torch.nn import CrossEntropyLoss
 
 
@@ -22,10 +21,7 @@ def multi_crit(crit_multi, output, labels, valid=None):
     i = 0
     for crit in crit_multi:
         if len(output.shape) == 3:
-            if isinstance(crit, FocalLoss):
-                loss += compute_loss(labels[:, 0, i], output[:, :, i], torch.rand(1, 2), crit, valid)
-            else:
-                loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
+            loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
         else:
             loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid)
     summed_loss = loss
