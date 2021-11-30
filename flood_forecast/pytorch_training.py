@@ -28,6 +28,8 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
         else:
             loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid)
     summed_loss = loss
+    return summed_loss
+
 
 def handle_meta_data(model: PyTorchForecast):
     """A function to initialize models with meta-data
