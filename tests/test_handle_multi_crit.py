@@ -1,21 +1,16 @@
-from torch.nn import MSELoss, BCELoss
 import unittest
 from flood_forecast.pytorch_training import multi_crit
+from torch.nn import BCELoss
 from flood_forecast.custom.focal_loss import FocalLoss
 import torch
 
-
-class TestHandleMultiCrit(unittest.TestCase):
+class TestMulticrit(unittest.TestCase):
     def setUp(self):
-        self.crit_list = [BCELoss(), MSELoss()]
-        self.focal_loss = FocalLoss(0.25)
+        self.crit = [BCELoss(), FocalLoss(0.25)]
 
-    def test_multi_crit(self):
-        l1 = multi_crit(self.crit_list, torch.rand(20, 4, 2), torch.rand(20, 4, 2))
-        self.assertGreater(l1.item(), 2)
+    def test_crit_function(self):
+        r1 = multi_crit(self.crit, torch.rand(4, 20, 5), torch.rand(4, 20, 5))
+        self.assertGreater(r1, 0.25)
 
-    def test_focal_loss(self):
-        pass
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
