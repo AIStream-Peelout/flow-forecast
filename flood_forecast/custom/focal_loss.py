@@ -131,7 +131,7 @@ class FocalLoss(nn.Module):
 
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         if len(target.shape) == 2:
-            target = target[:, 0, :]
+            target = target[:, 0]
         return focal_loss(input, target, self.alpha, self.gamma, self.reduction, self.eps)
 
 

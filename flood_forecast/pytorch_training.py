@@ -439,6 +439,10 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
+def handle_crit_list():
+    pass
+
+
 def compute_validation(validation_loader: DataLoader,
                        model,
                        epoch: int,
