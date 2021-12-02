@@ -61,8 +61,9 @@ def make_crit(model_params: Dict) -> Union[torch.nn.Module, List]:
     if type(training_params["criterion"]) == list:
         criterion = []
         i = 0
-        for crit in training_params["criterion"]:
-            res = pytorch_criterion_dict[crit](**criterion_init_params[i])
+        for crit, param in zip(training_params["criterion"], criterion_init_params):
+            res = pytorch_criterion_dict[crit](**param)
+            i += 1
             criterion.append(res)
     else:
         criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
