@@ -562,11 +562,17 @@ def compute_validation(validation_loader: DataLoader,
                     if len(src.shape) == 2:
                         src = src.unsqueeze(0)
                     src1 = src[:, :, 0:multi_targets]
-                    loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
-                                                      probabilistic, output_std, m=multi_targets)
-                    unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
-                loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std, m=multi_targets)
-                scaled_crit[crit] += loss.item() * len(labels.float())
+                    # to-do fun
+                    if type(crit) == list:
+                        loss = multi_crit(crit, output, labels, validation_dataset)
+                        scaled_crit[crit] += loss.item() * len(labels.float())
+                    else:
+                        loss_unscaled_full = compute_loss(labels, output, src1, crit, validation_dataset,
+                                                          probabilistic, output_std, m=multi_targets)
+                        unscaled_crit[crit] += loss_unscaled_full.item() * len(labels.float())
+                if type(crit) != list:
+                    loss = compute_loss(labels, output, src, crit, False, probabilistic, output_std, m=multi_targets)
+                    scaled_crit[crit] += loss.item() * len(labels.float())
     if use_wandb:
         if loss_unscaled_full:
             scaled = {k.__class__.__name__: v / (len(validation_loader.dataset) - 1) for k, v in scaled_crit.items()}
