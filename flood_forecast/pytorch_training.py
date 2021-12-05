@@ -19,9 +19,9 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
     loss = 0.0
     for crit in crit_multi:
         if len(output.shape) == 3:
-            loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid).item()
+            loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
         else:
-            loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid).item()
+            loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid)
     summed_loss = loss
     return summed_loss
 
@@ -424,14 +424,13 @@ def torch_single_train(model: PyTorchForecast,
             loss = multi_crit(criterion, output, labels, None)
         else:
             loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
-            loss = loss.item()
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
         opt.step()
         if torch.isnan(loss) or loss == float('inf'):
             raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
-        running_loss += loss
+        running_loss += loss.item()
         i += 1
     print("The running loss is: ")
     print(running_loss)
