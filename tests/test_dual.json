@@ -32,7 +32,7 @@
     },
     "training_params":
     {
-       "criterion":["MAPE", "FocalLoss"],
+       "criterion":["MAPE", "CrossEntropyLoss"],
        "criterion_params": [
            {}, {"alpha": 0.25, "gamma": 1}
        ],
