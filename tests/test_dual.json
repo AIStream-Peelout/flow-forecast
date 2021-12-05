@@ -1,6 +1,7 @@
 {                 
     "model_name": "CustomTransformerDecoder",
     "model_type": "PyTorch",
+    "n_targets": 2,
     "model_params": {
       "n_time_series":3,
       "seq_length":5,
