@@ -561,7 +561,7 @@ def compute_validation(validation_loader: DataLoader,
                 labels = targ[:, :, 0:multi_targets]
             validation_dataset = validation_loader.dataset
             for crit in criterion:
-                if validation_dataset.scale:
+                if validation_dataset.scale and not isinstance(crit, List):
                     # Should this also do loss.item() stuff?
                     if len(src.shape) == 2:
                         src = src.unsqueeze(0)
