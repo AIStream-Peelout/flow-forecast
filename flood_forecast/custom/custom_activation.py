@@ -15,7 +15,7 @@ import torch.nn as nn
 from torch.autograd import Function
 
 
-def _make_ix_like(X, dim):
+def _make_ix_like(X: torch.Tensor, dim):
     d = X.size(dim)
     rho = torch.arange(1, d + 1, device=X.device, dtype=X.dtype)
     view = [1] * X.dim()
@@ -33,7 +33,7 @@ def _roll_last(X, dim):
     return X.permute(perm)
 
 
-def _sparsemax_threshold_and_support(X, dim=-1, k=None):
+def _sparsemax_threshold_and_support(X: torch.Tensor, dim=-1, k=None):
     """Core computation for sparsemax: optimal threshold and support size.
     Parameters
     ----------
@@ -136,7 +136,7 @@ def _entmax_threshold_and_support(X, dim=-1, k=None):
 
 class SparsemaxFunction(Function):
     @classmethod
-    def forward(cls, ctx, X, dim=-1, k=None):
+    def forward(cls, ctx: torch.Tensor, X, dim=-1, k=None):
         ctx.dim = dim
         max_val, _ = X.max(dim=dim, keepdim=True)
         X = X - max_val  # same numerical stability trick as softmax
