@@ -26,7 +26,7 @@ def flatten_list_function(input_list: List) -> List:
 
 def make_criterion_functions(crit_list: List) -> List:
     """crit_list should be either dict or list
-    returns a llist
+    returns a list
     """
     final_list = []
     if type(crit_list) == list:
