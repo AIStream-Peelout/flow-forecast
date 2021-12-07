@@ -7,11 +7,7 @@ import torch
 
 class TestMulticrit(unittest.TestCase):
     def setUp(self):
-<<<<<<< Updated upstream
-        self.crit = [BCELoss(), FocalLoss(0.25, reduction="sum")]
-=======
         self.crit = [BCELoss(), FocalLoss(0.25, reduction="sum"), BinaryFocalLossWithLogits(0.25, reduction="mean")]
->>>>>>> Stashed changes
 
     def test_crit_function(self):
         r1 = multi_crit(self.crit, torch.rand(4, 20, 5), torch.ones(4, 20, 5, dtype=torch.int64))
