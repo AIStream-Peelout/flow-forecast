@@ -1,6 +1,6 @@
 import torch
 import torch.optim as optim
-from typing import Type, Dict
+from typing import Type, Dict, List, Union
 from torch.utils.data import DataLoader
 import json
 import wandb
@@ -12,6 +12,18 @@ from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from torch.nn import CrossEntropyLoss
+
+
+def multi_crit(crit_multi: List, output, labels, valid=None):
+    i = 0
+    loss = 0.0
+    for crit in crit_multi:
+        if len(output.shape) == 3:
+            loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
+        else:
+            loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid)
+    summed_loss = loss
+    return summed_loss
 
 
 def handle_meta_data(model: PyTorchForecast):
@@ -35,6 +47,27 @@ def handle_meta_data(model: PyTorchForecast):
     meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
                                                   model.params["meta_data"]["uuid"], meta_model)
     return meta_model, meta_representation, meta_loss
+
+
+def make_crit(model_params: Dict) -> Union[torch.nn.Module, List]:
+    """A function to create the criterion for training from the parameters
+    :param model_params: The training params Dict block in FF
+    :type model_params: Dict
+    """
+    training_params = model_params
+    criterion_init_params = {}
+    if "criterion_params" in training_params:
+        criterion_init_params = training_params["criterion_params"]
+    if type(training_params["criterion"]) == list:
+        criterion = []
+        i = 0
+        for crit, param in zip(training_params["criterion"], criterion_init_params):
+            res = pytorch_criterion_dict[crit](**param)
+            i += 1
+            criterion.append(res)
+    else:
+        criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
+    return criterion
 
 
 def train_transformer_style(
@@ -75,12 +108,9 @@ def train_transformer_style(
         print("Pin memory set to true")
     if "early_stopping" in model.params:
         es = EarlyStopper(model.params["early_stopping"]['patience'])
+    criterion = make_crit(training_params)
     opt = pytorch_opt_dict[training_params["optimizer"]](
         model.model.parameters(), **training_params["optim_params"])
-    criterion_init_params = {}
-    if "criterion_params" in training_params:
-        criterion_init_params = training_params["criterion_params"]
-    criterion = pytorch_criterion_dict[training_params["criterion"]](**criterion_init_params)
     if "probabilistic" in model.params["model_params"] or "probabilistic" in model.params:
         probabilistic = True
     else:
@@ -118,9 +148,8 @@ def train_transformer_style(
     meta_model = None
     meta_representation = None
     meta_loss = None
-    if model.params.get("meta_data") is None:
-        model.params["meta_data"] = False
-    if model.params["meta_data"]:
+    if model.params.get("meta_data") is not None:
+        # model.params["meta_data"] = False
         meta_model, meta_representation, meta_loss = handle_meta_data(model)
     if use_wandb:
         wandb.watch(model.model)
@@ -133,7 +162,7 @@ def train_transformer_style(
             model,
             opt,
             criterion,
-            data_loader,
+            data_loader,  # s
             takes_target,
             meta_model,
             meta_representation,
@@ -391,8 +420,10 @@ def torch_single_train(model: PyTorchForecast,
             output1 = output
             output = output.mean
             output_std = output1.stddev
-
-        loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
+        if type(criterion) == list:
+            loss = multi_crit(criterion, output, labels, None)
+        else:
+            loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
         if loss > 100:
             print("Warning: high loss detected")
         loss.backward()
@@ -408,9 +439,7 @@ def torch_single_train(model: PyTorchForecast,
     return total_loss
 
 
-def multi_step_forecasts_append(self):
-    """Function to handle forecasts that span multiple time steps
-    """
+def handle_crit_list():
     pass
 
 
