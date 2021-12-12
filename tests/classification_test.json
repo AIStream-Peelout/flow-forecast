@@ -31,7 +31,7 @@
     {
        "criterion":"FocalLoss",
        "optimizer": "Adam",
-       "optim_params":
+       "optimizer_params":
        {"alpha": 0.51},
        "lr": 0.3,
        "epochs": 1,
