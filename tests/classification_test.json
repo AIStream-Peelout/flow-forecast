@@ -32,7 +32,7 @@
        "criterion":"FocalLoss",
        "optimizer": "Adam",
        "optim_params":
-       {},
+       {"alpha": 0.51},
        "lr": 0.3,
        "epochs": 1,
        "batch_size":4
