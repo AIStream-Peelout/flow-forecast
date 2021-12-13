@@ -4,6 +4,7 @@ from flood_forecast.custom.dilate_loss import pairwise_distances
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.basic.base_line_methods import NaiveBase
 from flood_forecast.custom.custom_activation import _sparsemax_threshold_and_support, _entmax_threshold_and_support
+from flood_forecast.custom.custom_activation  import SparsemaxFunction
 import unittest
 import torch
 
@@ -83,6 +84,8 @@ class TestLossFunctions(unittest.TestCase):
     def test_sparse_max_runs(self):
         _entmax_threshold_and_support(torch.rand(2, 20, 3))
         _sparsemax_threshold_and_support(torch.rand(2, 30, 3))
+        s = SparsemaxFunction()
+        s(torch.rand(2, 4, 2))
 
 if __name__ == '__main__':
     unittest.main()
