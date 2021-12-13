@@ -130,6 +130,8 @@ class FocalLoss(nn.Module):
         self.eps: Optional[float] = eps
 
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        if len(target.shape) == 3:
+            target = target[:, 0, :]
         if len(target.shape) == 2:
             target = target[:, 0]
         if len(input.shape) == 3:
