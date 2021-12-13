@@ -44,7 +44,7 @@
     },
     "early_stopping":
     {
-       "patience":4
+       "patience":2
 
     },
     "training_params":
