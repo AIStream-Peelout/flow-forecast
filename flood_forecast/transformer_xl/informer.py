@@ -24,7 +24,7 @@ class Informer(nn.Module):
         :type seq_len: int
         :param label_len: The length of the label sequence passed into the decoder (n_time_steps not used forecasted)
         :type label_len: int
-        :param out_len: The predicted number of time steps. forecast_length should equal out_len + label_len
+        :param out_len: The predicted number of time steps.
         :type out_len: int
         :param factor: The multiplicative factor in the probablistic attention mechanism, defaults to 5
         :type factor: int, optional

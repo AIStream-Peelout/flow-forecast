@@ -5,6 +5,7 @@ from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.basic.base_line_methods import NaiveBase
 from flood_forecast.custom.custom_activation import _sparsemax_threshold_and_support, _entmax_threshold_and_support
 from flood_forecast.custom.custom_activation import Sparsemax, Entmax15
+from flood_forecast.custom.focal_loss import FocalLoss
 import unittest
 import torch
 
@@ -79,7 +80,8 @@ class TestLossFunctions(unittest.TestCase):
         self.assertFalse(e.check_loss(n, .8))
 
     def test_dilate_correct(self):
-        pass
+        f = FocalLoss(0.3)
+        f(torch.rand(4, 20, 30), torch.rand(4, 20, 30))
 
     def test_sparse_max_runs(self):
         _entmax_threshold_and_support(torch.rand(2, 20, 3))
