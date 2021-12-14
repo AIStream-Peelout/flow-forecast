@@ -9,7 +9,6 @@ import torch
 import unittest
 
 
-
 class TestLossFunctions(unittest.TestCase):
     def setUp(self):
         self.mase = MASELoss("mean")

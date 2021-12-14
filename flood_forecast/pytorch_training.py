@@ -380,7 +380,6 @@ def torch_single_train(model: PyTorchForecast,
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
-        # Convert to CPU/GPU/TPU
         if meta_data_model:
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
