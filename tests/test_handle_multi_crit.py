@@ -13,5 +13,10 @@ class TestMulticrit(unittest.TestCase):
         r1 = multi_crit(self.crit, torch.rand(4, 20, 5), torch.ones(4, 20, 5, dtype=torch.int64))
         self.assertGreater(r1, 0.25)
 
+    def test_focal_loss(self):
+        f = FocalLoss(0.3)
+        r = f(torch.rand(4, 20, 30), torch.rand(4, 20, 30))
+        self.assertEqual(len(r.shape), 2)
+
 if __name__ == '__main__':
     unittest.main()

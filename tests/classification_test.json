@@ -15,7 +15,7 @@
        "validation_path": "tests/test_data/keag_small.csv",
        "test_path": "tests/test_data/keag_small.csv",
        "sequence_length":6,
-       "batch_size":4,
+       "batch_size":20,
        "forecast_history":6,
        "train_end": 300,
        "valid_start":0,
@@ -29,8 +29,11 @@
 
     "training_params":
     {
-       "criterion":"CrossEntropyLoss",
+       "criterion":"FocalLoss",
        "optimizer": "Adam",
+       "criterion_params":
+            {"alpha": 0.5,
+             "reduction": "sum"},
        "optim_params":
        {},
        "lr": 0.3,
