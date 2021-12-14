@@ -6,7 +6,7 @@ orbs:
 executors:
   python-executor:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.9.1
     working_directory: ~/repo
 
 
@@ -67,6 +67,7 @@ jobs:
             coverage run -m unittest -v tests/test_deployment.py
             coverage run -m unittest -v tests/test_evaluation.py
             coverage run -m unittest -v tests/validation_loop_test.py
+            coverage run -m unittest -v tests/test_handle_multi_crit.py
 
       - run:
           name: upload
@@ -287,6 +288,7 @@ jobs:
             echo -e 'running trainer_custom_encode \n'
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
+            coverage run flood_forecast/trainer.py -p tests/test_dual.json
       - store_test_results:
           path: test-results
 

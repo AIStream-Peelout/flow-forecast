@@ -10,7 +10,7 @@ import pytz
 class JoinTest(unittest.TestCase):
     def setUp(self):
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
-        #  stuff
+        # 1
 
     def test_join_function(self):
         df = pd.read_csv(os.path.join(self.test_data_path, "fake_test_small.csv"), sep="\t")
