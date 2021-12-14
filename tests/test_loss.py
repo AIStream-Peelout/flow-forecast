@@ -5,8 +5,9 @@ from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.basic.base_line_methods import NaiveBase
 from flood_forecast.custom.custom_activation import _sparsemax_threshold_and_support, _entmax_threshold_and_support
 from flood_forecast.custom.custom_activation import Sparsemax, Entmax15
-import unittest
 import torch
+import unittest
+
 
 
 class TestLossFunctions(unittest.TestCase):
