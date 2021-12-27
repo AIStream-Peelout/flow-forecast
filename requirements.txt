@@ -12,7 +12,7 @@ google-cloud-storage
 pyyaml
 plotly~=5.1.0
 pytz~=2021.3
-setuptools~=59.0.1
+setuptools~=60.1.0
 numpy==1.20
 requests
 torchvision>=0.6.0
