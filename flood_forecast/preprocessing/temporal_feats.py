@@ -19,6 +19,8 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     """
     if key == "day_of_week":
         df[key] = df[dt_column].map(lambda x: x.weekday())
+    elif key == "minute":
+        df[key] = df[dt_column].map(lambda x: x.minute)
     elif key == "hour":
         df[key] = df[dt_column].map(lambda x: x.hour)
     elif key == "day":
