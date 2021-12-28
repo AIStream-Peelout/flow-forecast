@@ -81,23 +81,26 @@ class CSVDataLoader(Dataset):
             self.df = self.df[:end_stamp]
         self.unscaled_df = self.df.copy()
         if scaling is not None:
-            print("scaling now")
-            self.scale = scaling.fit(self.df[scaled_cols])
-            temp_df = self.scale.transform(self.df[scaled_cols])
-
-            # We define a second scaler to scale the end output
-            # back to normal as models might not necessarily predict
-            # other present time series values.
-            targ_scale_class = self.scale.__class__
-            self.targ_scaler = targ_scale_class()
-            self.df[target_col] = self.targ_scaler.fit_transform(self.df[target_col])
-
-            self.df[scaled_cols] = temp_df
+            self.__init_scale(scaling, scaled_cols, target_col)
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
         self.df.to_csv("temp_df.csv")
         self.no_scale = no_scale
+
+    def __init_scale_(self, scaling, scaled_cols, target_col):
+        print("scaling now")
+        self.scale = scaling.fit(self.df[scaled_cols])
+        temp_df = self.scale.transform(self.df[scaled_cols])
+
+        # We define a second scaler to scale the end output
+        # back to normal as models might not necessarily predict
+        # other present time series values.
+        targ_scale_class = self.scale.__class__
+        self.targ_scaler = targ_scale_class()
+        self.df[target_col] = self.targ_scaler.fit_transform(self.df[target_col])
+
+        self.df[scaled_cols] = temp_df
 
     def __getitem__(self, idx: int):
         rows = self.df.iloc[idx: self.forecast_history + idx]
