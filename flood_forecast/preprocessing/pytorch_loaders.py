@@ -81,14 +81,14 @@ class CSVDataLoader(Dataset):
             self.df = self.df[:end_stamp]
         self.unscaled_df = self.df.copy()
         if scaling is not None:
-            self.__init_scale(scaling, scaled_cols, target_col)
+            self.__init_scale__(scaling, scaled_cols, target_col)
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
         self.df.to_csv("temp_df.csv")
         self.no_scale = no_scale
 
-    def __init_scale_(self, scaling, scaled_cols, target_col):
+    def __init_scale__(self, scaling, scaled_cols, target_col):
         print("scaling now")
         self.scale = scaling.fit(self.df[scaled_cols])
         temp_df = self.scale.transform(self.df[scaled_cols])
