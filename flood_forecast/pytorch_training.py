@@ -12,6 +12,7 @@ from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from torch.nn import CrossEntropyLoss
+from flood_forecast.series_id_helper import handle_csv_id_output
 
 
 def multi_crit(crit_multi: List, output, labels, valid=None):
@@ -401,7 +402,8 @@ def torch_single_train(model: PyTorchForecast,
             trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
             # Assign to avoid other if statement
         elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
-            pass
+            running_loss += handle_csv_id_output(src, trg)
+            continue
         src = src.to(model.device)
         trg = trg.to(model.device)
         output = model.model(src, **forward_params)
