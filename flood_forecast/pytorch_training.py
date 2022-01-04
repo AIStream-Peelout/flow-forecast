@@ -108,6 +108,8 @@ def train_transformer_style(
         print("Pin memory set to true")
     if "early_stopping" in model.params:
         es = EarlyStopper(model.params["early_stopping"]['patience'])
+    if "shuffle" not in training_params:
+        training_params["shuffle"] = False
     criterion = make_crit(training_params)
     opt = pytorch_opt_dict[training_params["optimizer"]](
         model.model.parameters(), **training_params["optim_params"])
@@ -119,7 +121,7 @@ def train_transformer_style(
     data_loader = DataLoader(
         model.training,
         batch_size=training_params["batch_size"],
-        shuffle=False,
+        shuffle=training_params["shuffle"],
         sampler=None,
         batch_sampler=None,
         num_workers=worker_num,
