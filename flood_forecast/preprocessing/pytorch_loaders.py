@@ -29,7 +29,7 @@ class CSVDataLoader(Dataset):
 
     ):
         """
-        A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
+        A data loader that takes a CSV file and properly batches for use in training/evaluating a PyTorch model
         :param file_path: The path to the CSV file you wish to use.
         :param forecast_history: This is the length of the historical time series data you wish to
                                 utilize for forecasting
