@@ -14,7 +14,7 @@ class TestInterpolationCode(unittest.TestCase):
         self.df_2["datetime"] = pd.to_datetime(self.df_2["datetime"])
 
     def test_back_forward(self):
-        """Test the generation of forward and backward data
+        """Test the generation of forward and backward data interp
         """
         df = back_forward_generic(self.df, ["NumberOfAnimals"])
         self.assertEqual(df.iloc[3]["NumberOfAnimals"], 165)
