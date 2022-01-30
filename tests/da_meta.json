@@ -36,7 +36,7 @@
        "forecast_length":1,
        "train_end": 300,
        "valid_start":301,
-       "valid_end": 402,
+       "valid_end": 404,
        "test_end": 500,
        "target_col": ["cfs"],
        "relevant_cols": ["cfs", "precip", "temp"],
