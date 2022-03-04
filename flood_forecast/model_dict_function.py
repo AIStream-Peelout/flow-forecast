@@ -17,6 +17,7 @@ from flood_forecast.custom.custom_opt import (RMSELoss, MAPELoss, PenalizedMSELo
 from flood_forecast.transformer_xl.transformer_bottleneck import DecoderTransformer
 from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
+from flood_forecast.transformer_xl.dsanet import DSANet
 
 """
 Utility dictionaries to map a string to a class
@@ -32,7 +33,8 @@ pytorch_model_dict = {
     "DARNN": DARNN,
     "DecoderTransformer": DecoderTransformer,
     "BasicAE": AE,
-    "Informer": Informer
+    "Informer": Informer,
+    "DSANet": DSANet
 }
 
 pytorch_criterion_dict = {
