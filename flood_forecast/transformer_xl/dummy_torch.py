@@ -6,7 +6,7 @@ from torch import nn
 
 
 class DummyTorchModel(nn.Module):
-    def __init__(self, forecast_length: int):
+    def __init__(self, forecast_length: int) -> None:
         """A dummy model that will return a tensor of ones (batch_size, forecast_len)
 
         :param forecast_length: The length to forecast
@@ -23,7 +23,7 @@ class DummyTorchModel(nn.Module):
         :param x: Here the data is irrelvant. Only batch_size is grabbed
         :type x: torch.Tensor
         :param mask: [description], defaults to None
-        :type mask: [type], optional
+        :type mask: torch.Tensor, optional
         :return: A tensor with fixed data of one
         :rtype: torch.Tensor
         """

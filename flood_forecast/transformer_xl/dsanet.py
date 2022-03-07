@@ -28,6 +28,7 @@ class ScaledDotProductAttention(nn.Module):
 
         return output, attn
 
+
 class MultiHeadAttention(nn.Module):
     ''' Multi-Head Attention module '''
 
@@ -52,7 +53,6 @@ class MultiHeadAttention(nn.Module):
         nn.init.xavier_normal_(self.fc.weight)
 
         self.dropout = nn.Dropout(dropout)
-
 
     def forward(self, q, k, v):
 
@@ -282,7 +282,8 @@ class AR(nn.Module):
 
 class DSANet(nn.Module):
 
-    def __init__(self, forecast_history, n_time_series, dsa_local, dsanet_n_kernels, dsanet_w_kernals, dsanet_d_model, dsanet_d_inner, dsanet_n_layers, dropout, dsanet_n_head):
+    def __init__(self, forecast_history, n_time_series, dsa_local, dsanet_n_kernels, dsanet_w_kernals, dsanet_d_model,
+                 dsanet_d_inner, dsanet_n_layers, dropout, dsanet_n_head):
         super(DSANet, self).__init__()
 
         # parameters from dataset
@@ -293,8 +294,8 @@ class DSANet(nn.Module):
         self.w_kernel = dsanet_w_kernals
 
         # hyperparameters of model
-        dsanet_d_k = int(dsanet_d_model/dsanet_n_head)
-        dsanet_d_v = int(dsanet_d_model/dsanet_n_head)
+        dsanet_d_k = int(dsanet_d_model / dsanet_n_head)
+        dsanet_d_v = int(dsanet_d_model / dsanet_n_head)
         self.d_model = dsanet_d_model
         self.d_inner = dsanet_d_inner
         self.n_layers = dsanet_n_layers
