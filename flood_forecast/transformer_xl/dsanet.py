@@ -1,10 +1,7 @@
-import os
-import logging
+
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-from torch import optim
-from torch.utils.data import DataLoader
 import numpy as np
 
 
@@ -321,7 +318,7 @@ class DSANet(nn.Module):
 
         self.slsf = Single_Local_SelfAttn_Module(
             window=self.window, local=self.local, n_multiv=self.n_multiv, n_kernels=self.n_kernels,
-            w_kernel=self.w_kernel, d_k =self.d_k, d_v=self.d_v, d_model=self.d_model,
+            w_kernel=self.w_kernel, d_k=self.d_k, d_v=self.d_v, d_model=self.d_model,
             d_inner=self.d_inner, n_layers=self.n_layers, n_head=self.n_head, drop_prob=self.drop_prob)
 
         self.ar = AR(window=self.window)
