@@ -25,6 +25,6 @@ class TestAttention(unittest.TestCase):
         self.assertIsInstance(a, torch.Tensor)
         self.assertEqual(len(a.shape), 4)
         self.assertEqual(a.shape[0], 2)
-    
+
     def test_single_local(self):
         Single_Local_SelfAttn_Module(10, 4, 10, 5, 1, 128, 128, 128, 32, 2, 8)

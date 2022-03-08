@@ -8,7 +8,9 @@
       "dsa_local": 32,
       "dsanet_n_kernels": 4, 
       "dsanet_w_kernals": 1, 
-      "dsanet_d_model":128
+      "dsanet_d_model":128,
+      "dsanet_d_inner": 8
+
    },
    "n_targets":2,
    "dataset_params":
