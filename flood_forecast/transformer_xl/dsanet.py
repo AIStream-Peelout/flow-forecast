@@ -280,7 +280,7 @@ class AR(nn.Module):
 class DSANet(nn.Module):
 
     def __init__(self, forecast_history, n_time_series, dsa_local, dsanet_n_kernels, dsanet_w_kernals, dsanet_d_model,
-                 dsanet_d_inner, dsanet_n_layers, dropout, dsanet_n_head):
+                 dsanet_d_inner, dsanet_n_layers=2, dropout=0.1, dsanet_n_head=8):
         super(DSANet, self).__init__()
 
         # parameters from dataset
