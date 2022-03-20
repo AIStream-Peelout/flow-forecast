@@ -172,7 +172,7 @@ class PyTorchForecast(TimeSeriesModel):
                 print("Wandb stupid error")
                 print(e.__traceback__)
 
-    def __re_add_params__(self, start_end_params, dataset_params, data_path):
+    def __re_add_params__(self, start_end_params: Dict, dataset_params, data_path):
         """
         Function to re-add the params to the model
         """

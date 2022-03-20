@@ -3,7 +3,7 @@
     "use_decoder": true,
     "model_type": "PyTorch",
     "model_params": {
-      "forecast_history":20,
+      "forecast_history":10,
       "n_time_series":3,
       "dsa_local": 2,
       "dsanet_n_kernels": 32, 
