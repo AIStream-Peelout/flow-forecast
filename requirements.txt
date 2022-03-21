@@ -10,7 +10,7 @@ wandb==0.12.11
 google-cloud
 google-cloud-storage
 plotly~=5.6.0
-pytz~=2021.3
+pytz~=2022.1
 setuptools~=60.9.3
 numpy==1.22.3
 requests
