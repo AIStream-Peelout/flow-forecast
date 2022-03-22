@@ -7,8 +7,6 @@ from typing import Dict, List
 
 
 def jitter(points: torch.tensor) -> np.ndarray:
-    """
-    """
     stdev = float(0.01 * (max(points) - min(points)))
     return np.random.randn(len(points)) * stdev
 
