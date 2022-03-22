@@ -156,7 +156,7 @@ class ConvLayer(nn.Module):
 
 class EncoderLayer(nn.Module):
     def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu"):
-        """[summary]
+        """An encoder layer
 
         :param attention: [description]
         :type attention: [type]
