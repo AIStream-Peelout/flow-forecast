@@ -1,6 +1,6 @@
 # Deep learning for time series forecasting
 ![Example image](https://raw.githubusercontent.com/CoronaWhy/task-ts/master/images/Picture1.png)
-Flow forecast is an open-source deep learning for time series forecasting framework. It provides all the latest state of the art models (transformers, attention models, GRUs) and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and model serving capabilities. Flow Forecast was the first time series framework to feature support for transformer based models and remains the only true end-to-end deep learning for time series forecasting framework. Currently, [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains this repository. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
+Flow Forecast (FF) is an open-source deep learning for time series forecasting framework. It provides all the latest state of the art models (transformers, attention models, GRUs) and cutting edge concepts with easy to understand interpretability metrics, cloud provider integration, and model serving capabilities. Flow Forecast was the first time series framework to feature support for transformer based models and remains the only true end-to-end deep learning for time series forecasting framework. Currently, [Task-TS from CoronaWhy](https://github.com/CoronaWhy/task-ts/wiki) primarily maintains this repository. Pull requests are welcome. Historically, this repository provided open source benchmark and codes for flash flood and river flow forecasting. 
 
 For additional tutorials (on Colab) and examples please see our [tutorials repository](https://github.com/AIStream-Peelout/flow_tutorials).
 
@@ -26,7 +26,7 @@ Using the library
 4. Transformer with a linear decoder (CustomTransformerDecoder in model_dict): A transformer with n-encoder blocks (this is tunable) and a linear decoder.
 5. [DA-RNN](https://arxiv.org/abs/1704.02971): (DARNN) A well rounded model with which utilizes a LSTM + attention. 
 6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235) (called DecoderTransformer in model_dict): 
-7. [Transformer XL](https://arxiv.org/abs/1901.02860):
+7. [Transformer XL](https://arxiv.org/abs/1901.02860): Porting Transformer XL for time series.
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436) (Informer)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
 
