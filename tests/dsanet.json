@@ -10,9 +10,9 @@
       "dsanet_w_kernals": 1, 
       "dsanet_d_model":128,
       "dsanet_d_inner": 2048,
-      "dsanet_n_layers": 2,
+      "dsanet_n_layers": 3,
       "dsanet_n_head": 8,
-      "dropout": 0.1
+      "dropout": 0.2
    },
    "n_targets":4,
    "dataset_params":

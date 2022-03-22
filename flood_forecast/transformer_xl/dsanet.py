@@ -343,4 +343,4 @@ class DSANet(nn.Module):
         ar_output = self.ar(x)
         output = sf_output + ar_output
 
-        return output[:, 0]
+        return output
