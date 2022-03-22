@@ -588,7 +588,7 @@ def compute_validation(validation_loader: DataLoader,
         label_list = label_list[:, 0, :]
         mod_output1 = torch.cat(mod_output_list)[:, 0, :]
         fin = label_list.max(dim=1)[1]
-        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output1, classes_to_plot=None, labels=None,
+        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin.cpu(), mod_output1.cpu(), labels=None,
                                                              title="roc_" + str(epoch))})
         wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output1)})
         wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output1.detach().cpu().numpy(),
