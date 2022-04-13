@@ -160,7 +160,7 @@ class EncoderLayer(nn.Module):
 
         :param attention: [description]
         :type attention: [type]
-        :param d_model: [description]
+        :param d_model: [descsription]
         :type d_model: [type]
         :param d_ff: [description], defaults to None
         :type d_ff: [type], optional

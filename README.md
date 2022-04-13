@@ -29,6 +29,7 @@ Using the library
 7. [Transformer XL](https://arxiv.org/abs/1901.02860):
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436) (Informer)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
+10. [DSANet](https://dl.acm.org/doi/10.1145/3357384.3358132)
 
 **Forthcoming Models**
 
