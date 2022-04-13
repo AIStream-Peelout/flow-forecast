@@ -7,6 +7,7 @@ import torch
 
 class TestAttention(unittest.TestCase):
     def setUp(self):
+        """"""
         self.prob_attention = ProbAttention()
         self.full_attention = FullAttention()
         self.triangle = TriangularCausalMask(2, 20)
