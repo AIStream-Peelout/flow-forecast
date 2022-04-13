@@ -29,7 +29,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.assertGreater(x.shape[1], 1)
 
     def test_class(self):
-        """Tests the classification dl module
+        """Tests the classification of a dl module
         """
         x, y = self.data_loader[1]
         self.assertIsInstance(x, torch.Tensor)

@@ -29,6 +29,7 @@ Using the library
 7. [Transformer XL](https://arxiv.org/abs/1901.02860): Porting Transformer XL for time series.
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436) (Informer)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
+10. [DSANet](https://www.semanticscholar.org/paper/DSANet%3A-Dual-Self-Attention-Network-for-Time-Series-Huang-Wang/6645a09c742760144e4ba0a6f6652e429b1bf107)
 
 **Forthcoming Models**
 
