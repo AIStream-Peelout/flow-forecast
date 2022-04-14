@@ -44,7 +44,7 @@
       },
       "lr": 0.03,
       "epochs": 1,
-      "batch_size":4
+      "batch_size":9
    
    },
    "GCS": false,
@@ -59,7 +59,7 @@
   "inference_params":
   {     
         "datetime_start":"2016-05-31",
-         "hours_to_forecast":334, 
+         "hours_to_forecast":100, 
          "test_csv_path":"tests/test_data/keag_small.csv",
          "decoder_params":{
            "decoder_function": "simple_decode", 
