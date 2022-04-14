@@ -54,8 +54,11 @@ class CSVDataLoader(Dataset):
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
         print("interpolate should be below")
-        self.local_file_path = get_data(file_path, gcp_service_key)
-        df = pd.read_csv(self.local_file_path)
+        if isinstance(file_path, str):
+            self.local_file_path = get_data(file_path, gcp_service_key)
+            df = pd.read_csv(self.local_file_path)
+        else:
+            df = file_path
         relevant_cols3 = []
         if sort_column:
             df[sort_column] = df[sort_column].astype("datetime64[ns]")
@@ -230,8 +233,11 @@ class CSVTestLoader(CSVDataLoader):
         if "file_path" not in kwargs:
             kwargs["file_path"] = df_path
         super().__init__(**kwargs)
-        df_path = get_data(df_path)
-        self.original_df = pd.read_csv(df_path)
+        if isinstance(df_path, str):
+            df_path = get_data(df_path)
+            self.original_df = pd.read_csv(df_path)
+        else:
+            self.original_df = df_path
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
         if sort_column_clone:
