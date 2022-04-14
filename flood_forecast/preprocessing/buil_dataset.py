@@ -190,6 +190,8 @@ def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
             destination_file_name=local_temp_filepath,
             service_key_path=gcp_service_key,
         )
+        if str(local_temp_filepath)[-3:] != "csv":
+            return local_temp_filepath
         return pd.read_csv(str(local_temp_filepath))
     else:
         return pd.read_csv(file_path)

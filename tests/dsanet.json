@@ -12,7 +12,7 @@
       "dsanet_d_inner": 2048,
       "dsanet_n_layers": 2,
       "dsanet_n_head": 8,
-      "dropout": 0.1
+      "dropout": 0.11
    },
    "n_targets":4,
    "dataset_params":
