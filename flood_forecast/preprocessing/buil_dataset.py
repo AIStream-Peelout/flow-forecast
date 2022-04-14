@@ -2,8 +2,6 @@ import os
 import re
 from typing import Optional
 from pathlib import Path
-
-from isort import file
 from flood_forecast.preprocessing.closest_station import (
     get_weather_data,
     process_asos_data,
@@ -195,4 +193,4 @@ def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
         )
         return pd.read_csv(str(local_temp_filepath))
     else:
-        return pd.read_csv(file_path)
+        return  pd.read_csv(file_path)

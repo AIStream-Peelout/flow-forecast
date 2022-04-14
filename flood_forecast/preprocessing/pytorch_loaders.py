@@ -223,7 +223,7 @@ class CSVTestLoader(CSVDataLoader):
         **kwargs
     ):
         """
-        :param str df_path:
+        :param str df_path: The path to the CSV file you wish to use or a pandas data-frame .
         A data loader for the test data.
         """
         if "file_path" not in kwargs:
