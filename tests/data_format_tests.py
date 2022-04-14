@@ -46,7 +46,7 @@ class DataQualityTests(unittest.TestCase):
             "station={}&data=tmpf&data=p01m&year1=2019&month1=1&day1=1&year2=2019&month2=1&"
             "day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
         )
-        print(url)
+
         get_weather_data(os.path.join(self.test_data_path, "full_out.json"), {}, url)
         self.assertEqual(1, 1)
 
