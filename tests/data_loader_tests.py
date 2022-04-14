@@ -1,4 +1,3 @@
-from cgi import test
 from flood_forecast.preprocessing.pytorch_loaders import (
     CSVTestLoader,
     CSVDataLoader,
@@ -80,7 +79,10 @@ class DataLoaderTests(unittest.TestCase):
             gcp_service_key=None,  # for CircleCI tests, local test needs key.json
         )
 
-        self.assertTrue(test_loader)
+        self.assertEqual(
+            test_loader.local_file_path,
+            "data/flow_datasets/Afghanistan____.csv",
+        )
 
     def test_ae(self):
         x, y = self.ae_loader[0]
@@ -91,7 +93,7 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(x.shape[0], 30)
         self.assertEqual(x.shape[1], 3)
         self.assertEqual(y.shape[0], 20)
-        # Check first and last dim are not overlapping
+        # Check first and last dim are not overlap
         self.assertFalse(torch.eq(x[29, 0], y[0, 0]))
 
     def test_start_end(self):
