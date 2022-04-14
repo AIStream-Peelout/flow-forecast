@@ -2,8 +2,6 @@ import os
 import re
 from typing import Optional
 from pathlib import Path
-
-from isort import file
 from flood_forecast.preprocessing.closest_station import (
     get_weather_data,
     process_asos_data,
@@ -18,7 +16,6 @@ from flood_forecast.gcp_integration.basic_utils import (
     download_file,
 )
 from flood_forecast.preprocessing.eco_gage_set import eco_gage_set
-
 import json
 from datetime import datetime
 import pytz

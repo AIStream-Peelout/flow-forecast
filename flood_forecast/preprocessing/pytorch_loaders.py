@@ -30,7 +30,7 @@ class CSVDataLoader(Dataset):
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
-        :param file_path: The path to the CSV file you wish to use.
+        :param file_path: The path to the CSV file you wish to use (GCS compatible).
         :param forecast_history: This is the length of the historical time series data you wish to
                                 utilize for forecasting
         :param forecast_length: The number of time steps to forecast ahead (for transformer this must
@@ -223,7 +223,7 @@ class CSVTestLoader(CSVDataLoader):
         **kwargs
     ):
         """
-        :param str df_path:
+        :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame
         A data loader for the test data.
         """
         if "file_path" not in kwargs:
