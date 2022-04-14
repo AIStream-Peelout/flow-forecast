@@ -25,7 +25,7 @@ class InferenceMode(object):
         :type model_params: Dict
         :param csv_path: Path to the CSV test file you want to be used for inference or a Pandas dataframe.
         :type csv_path: str
-        :param weight_path: Path to the model weights
+        :param weight_path: Path to the model weights (.pth file)
         :type weight_path: str
         :param wandb_proj: The name of the WB project leave blank if you don't want to log to Wandb, defaults to None
         :type wandb_proj: str, optionals
@@ -92,14 +92,14 @@ class InferenceMode(object):
 
         :param date: The datetime to start inference
         :type date: datetime
-        :param csv_path: The path to the CSV file you want to use for inference, defaults to None
+        :param csv_path: The path to the CSV file or  you want to use for inference, defaults to None
         :type csv_path: str, optional
-        :param csv_bucket: [description], defaults to None
+        :param csv_bucket: The bucket where the CSV file is located, defaults to None
         :type csv_bucket: str, optional
-        :param save_name: [description], defaults to None
-        :type save_name: [type], optional
-        :param wandb_plot_id: [description], defaults to None
-        :type wandb_plot_id: [type], optional
+        :param save_name: Where to save the output csv, defaults to None
+        :type save_name: str, optional
+        :param wandb_plot_id: The id to save wandb plot as on dashboard, defaults to None
+        :type wandb_plot_id: str, optional
         :return: [description]
         :rtype: tuple(torch.Tensor, torch.Tensor, CSVTestLoader, matplotlib.pyplot.plot)
         """
