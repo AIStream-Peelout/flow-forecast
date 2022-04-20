@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Optional
+from typing import Optional, Union
 from pathlib import Path
 from flood_forecast.preprocessing.closest_station import (
     get_weather_data,
@@ -158,7 +158,7 @@ def create_usgs(meta_data_dir: str, precip_path: str, start: int, end: int):
             )
 
 
-def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
+def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> Union[pd.DataFrame, str]:
     """Extract bucket name and storage object name from file_path
     Args:
         file_path (str): [description]
@@ -193,5 +193,7 @@ def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> str:
         if str(local_temp_filepath)[-3:] != "csv":
             return local_temp_filepath
         return pd.read_csv(str(local_temp_filepath))
-    else:
-        return pd.read_csv(file_path)
+    elif file_path != "csv":
+        return file_path
+    return pd.read_csv(file_path)
+    
