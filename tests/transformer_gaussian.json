@@ -49,7 +49,7 @@
          "mu":0,
          "sigma":0
        },
-       "lr": 0.3,
+       "lr": 0.3256,
        "epochs": 1,
        "batch_size":4
     },
