@@ -30,7 +30,7 @@ class CSVDataLoader(Dataset):
     ):
         """
         A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
-        :param file_path: The path to the CSV file you wish to use (GCS compatible) or a Pandas dataframe.
+        :param file_path: The path to the CSV file you wish to use.
         :param forecast_history: This is the length of the historical time series data you wish to
                                 utilize for forecasting
         :param forecast_length: The number of time steps to forecast ahead (for transformer this must
@@ -54,7 +54,8 @@ class CSVDataLoader(Dataset):
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
         print("interpolate should be below")
-        df = get_data(file_path)
+        self.local_file_path = get_data(file_path, gcp_service_key)
+        df = pd.read_csv(self.local_file_path)
         relevant_cols3 = []
         if sort_column:
             df[sort_column] = df[sort_column].astype("datetime64[ns]")
@@ -223,14 +224,14 @@ class CSVTestLoader(CSVDataLoader):
         **kwargs
     ):
         """
-        :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame
+        :param str df_path:
         A data loader for the test data.
         """
         if "file_path" not in kwargs:
             kwargs["file_path"] = df_path
         super().__init__(**kwargs)
-        df_path1 = df_path
-        self.original_df = get_data(df_path1)
+        df_path = get_data(df_path)
+        self.original_df = pd.read_csv(df_path)
         if interpolate:
             self.original_df = interpolate_dict[interpolate["method"]](self.original_df, **interpolate["params"])
         if sort_column_clone:

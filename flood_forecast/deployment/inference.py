@@ -8,12 +8,10 @@ from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
 import wandb
 import torch
-from typing import Union
-import pandas as pd
 
 
 class InferenceMode(object):
-    def __init__(self, forecast_steps: int, n_samp: int, model_params, csv_path: Union[str, pd.DataFrame], weight_path,
+    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params, csv_path: str, weight_path,
                  wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
@@ -23,9 +21,9 @@ class InferenceMode(object):
         :type num_prediction_samples: int
         :param model_params: A dictionary of model parameters (ideally this should come from saved JSON config file)
         :type model_params: Dict
-        :param csv_path: Path to the CSV test file you want to be used for inference or a Pandas dataframe.
+        :param csv_path: Path to the CSV test file you want to be used for inference. Evem of you aren't using
         :type csv_path: str
-        :param weight_path: Path to the model weights (.pth file)
+        :param weight_path: Path to the model weights
         :type weight_path: str
         :param wandb_proj: The name of the WB project leave blank if you don't want to log to Wandb, defaults to None
         :type wandb_proj: str, optionals
@@ -40,14 +38,14 @@ class InferenceMode(object):
             s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
             self.inference_params["dataset_params"]["scaling"] = s
         self.inference_params["hours_to_forecast"] = forecast_steps
-        self.inference_params["num_prediction_samples"] = n_samp
+        self.inference_params["num_prediction_samples"] = num_prediction_samples
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
             wandb.config.update(model_params, allow_val_change=True)
 
     def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
-        """Performs inference on a CSV file at a specified date-time
+        """Performs inference on a CSV file at a specified datatime
 
         :param some_date: The date you want inference to begin on.
         :param csv_path: A path to a CSV you want to perform inference on, defaults to None
@@ -92,14 +90,14 @@ class InferenceMode(object):
 
         :param date: The datetime to start inference
         :type date: datetime
-        :param csv_path: The path to the CSV file or  you want to use for inference, defaults to None
+        :param csv_path: The path to the CSV file you want to use for inference, defaults to None
         :type csv_path: str, optional
-        :param csv_bucket: The bucket where the CSV file is located, defaults to None
+        :param csv_bucket: [description], defaults to None
         :type csv_bucket: str, optional
-        :param save_name: Where to save the output csv, defaults to None
-        :type save_name: str, optional
-        :param wandb_plot_id: The id to save wandb plot as on dashboard, defaults to None
-        :type wandb_plot_id: str, optional
+        :param save_name: [description], defaults to None
+        :type save_name: [type], optional
+        :param wandb_plot_id: [description], defaults to None
+        :type wandb_plot_id: [type], optional
         :return: [description]
         :rtype: tuple(torch.Tensor, torch.Tensor, CSVTestLoader, matplotlib.pyplot.plot)
         """
