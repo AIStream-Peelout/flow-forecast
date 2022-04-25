@@ -54,7 +54,7 @@
 
        },
        "lr": 0.4,
-       "epochs": 3,
+       "epochs": 1,
        "batch_size":4
 
     },
