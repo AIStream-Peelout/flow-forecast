@@ -78,11 +78,7 @@ class DataLoaderTests(unittest.TestCase):
             interpolate_param=False,
             gcp_service_key=None,  # for CircleCI tests, local test needs key.json
         )
-
-        self.assertEqual(
-            test_loader.local_file_path,
-            "data/flow_datasets/Afghanistan____.csv",
-        )
+        self.assertIsInstance(test_loader, CSVDataLoader)
 
     def test_ae(self):
         x, y = self.ae_loader[0]
