@@ -1,5 +1,5 @@
 shap==0.40.0
-scikit-learn>=1.0.0
+scikit-learn==0.24.2
 pandas
 torch
 tb-nightly
