@@ -6,13 +6,13 @@ tb-nightly
 seaborn
 future
 h5py
-wandb==0.12.11
+wandb==0.12.15
 google-cloud
 google-cloud-storage
 plotly~=5.6.0
 pytz~=2022.1
 setuptools~=62.0.0
-numpy==1.22.3
+numpy>=1.21
 requests
 torchvision>=0.6.0
 mpld3~=0.5
