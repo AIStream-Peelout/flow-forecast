@@ -68,6 +68,7 @@ class InferenceMode(object):
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
+        print("the tensor shape is 2 ")
         print(tensor.shape)
         if test.scale and self.n_targets:
             unscaled = test.inverse_scale(tensor.numpy())
