@@ -149,6 +149,8 @@ class CSVDataLoader(Dataset):
         # print(type(result_data))
         if self.no_scale:
             return torch.from_numpy(result_data_np)
+        print("The shape below")
+        print(result_data.shape)
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )
