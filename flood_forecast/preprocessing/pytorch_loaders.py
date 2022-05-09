@@ -1,4 +1,3 @@
-from unittest import result
 from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
@@ -150,8 +149,6 @@ class CSVDataLoader(Dataset):
         # print(type(result_data))
         if self.no_scale:
             return torch.from_numpy(result_data_np)
-        if len(result_data_np.shape) > 2:
-            result_data = result_data_np[0, :, :]
         print("The shape below")
         print(result_data.shape)
         return torch.from_numpy(

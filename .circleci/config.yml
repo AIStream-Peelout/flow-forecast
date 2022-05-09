@@ -177,7 +177,6 @@ jobs:
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_series_id.py
             coverage run -m unittest -v tests/test_classification2_loader.py
-            coverage run flood_forecast/trainer.py -p tests/dsanet.json
       - run:
           name: upload_stuff
           when: always
@@ -290,6 +289,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
             coverage run flood_forecast/trainer.py -p tests/test_dual.json
+            coverage run flood_forecast/trainer.py -p tests/dsanet.json
       - store_test_results:
           path: test-results
 
