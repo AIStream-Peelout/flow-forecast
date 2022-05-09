@@ -43,7 +43,7 @@ class TimeSeriesModel(ABC):
             self.gcs_client = get_storage_client()
         else:
             self.gcs_client = None
-        self.wandb = self.wandb_init(id=wandb.util.generate_id())
+        self.wandb = self.wandb_init()
         self.crit = make_criterion_functions(params["metrics"])
 
     @abstractmethod
@@ -88,6 +88,7 @@ class TimeSeriesModel(ABC):
     def wandb_init(self):
         if self.params["wandb"]:
             wandb.init(
+                id=wandb.util.generate_id(),
                 project=self.params["wandb"].get("project"),
                 config=self.params,
                 name=self.params["wandb"].get("name"),
