@@ -6,7 +6,7 @@ orbs:
 executors:
   python-executor:
     docker:
-      - image: circleci/python:3.9.1
+      - image: circleci/python:3.10
     working_directory: ~/repo
 
 
