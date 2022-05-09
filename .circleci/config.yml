@@ -406,3 +406,6 @@ workflows:
       - plot_test:
           requires:
             - linting
+      - trainer_test1:
+          requires:
+            - linting
