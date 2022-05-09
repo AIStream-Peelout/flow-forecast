@@ -76,7 +76,7 @@ class InferenceMode(object):
                 df["pred_" + self.targ_cols[i]] = 0
                 print("Shape of unscaled is: ")
                 print(unscaled.shape)
-                df["pred_" + self.targ_cols[i]][forecast_history:] = unscaled[0, :, i].numpy()
+                df["pred_" + self.targ_cols[i]][forecast_history:] = unscaled[:, i].numpy()
         elif test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
             df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
