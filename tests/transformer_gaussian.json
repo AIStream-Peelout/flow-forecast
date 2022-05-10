@@ -49,9 +49,9 @@
          "mu":0,
          "sigma":0
        },
-       "lr": 0.3,
+       "lr": 0.003,
        "epochs": 1,
-       "batch_size":6
+       "batch_size": 3
     },
     "GCS": false,
    
