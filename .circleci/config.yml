@@ -24,7 +24,8 @@ jobs:
           paths:
             - .
   linting:
-    <<: *defaults
+    docker:
+      - image: cimg/python:3.10.3
     steps:
       - attach_workspace:
           at: ~/repo
