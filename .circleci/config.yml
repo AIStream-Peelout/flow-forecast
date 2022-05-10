@@ -7,10 +7,6 @@ executors:
   python-executor:
     docker:
       - image: cimg/python:3.10.4
-      steps:
-        - checkout
-        - run: rm .python-version
-        - run: python --version
     working_directory: ~/repo
 
 
@@ -39,6 +35,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
+            sudo pip install pipenv
             sudo pip install flake8
             flake8 .
 
