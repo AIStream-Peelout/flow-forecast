@@ -36,8 +36,7 @@ jobs:
           name: install dependencies
           command: |
             python --version
-            sudo pip install pipenv
-            sudo pip install flake8
+            sudo pip3.10 install flake8
             flake8 .
 
   evaluator_test:
@@ -52,7 +51,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            sudo pip install pipenv
+            sudo pip3.10 install pipenv
             sudo pip install coverage
             sudo pip install --quiet --force-reinstall  --upgrade -r requirements.txt
             sudo python setup.py develop --no-deps
