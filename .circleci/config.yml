@@ -36,7 +36,7 @@ jobs:
           name: install dependencies
           command: |
             python --version
-            sudo python3 -m pip install flake8
+            sudo pip3.10 install flake8
             flake8 .
 
   evaluator_test:
