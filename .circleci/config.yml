@@ -6,7 +6,11 @@ orbs:
 executors:
   python-executor:
     docker:
-      - image: circleci/python:3.10.4
+      - image: cimg/python:3.10.4
+      steps:
+        - checkout
+        - run: rm .python-version
+        - run: python --version
     working_directory: ~/repo
 
 
