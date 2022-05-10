@@ -35,7 +35,6 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            checkout
             python --version
             sudo pip install pipenv
             sudo pip install flake8
