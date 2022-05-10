@@ -6,7 +6,11 @@ orbs:
 executors:
   python-executor:
     docker:
-      - image: circleci/python:3.10.4
+      - image: cimg/python:3.10.4
+      steps:
+        - checkout
+        - run: rm .python-version
+        - run: python --version
     working_directory: ~/repo
 
 
@@ -322,7 +326,6 @@ jobs:
           name: Trainer1 tests
           when: always
           command: |
-          
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
             coverage run flood_forecast/trainer.py -p tests/test_dual.json

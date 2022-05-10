@@ -293,15 +293,6 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertGreater(total_loss, 752, 000)
         self.assertLess(total_loss, 802000)
 
-    # def test_train_full_transformer(self):
-    #     print("Now begining transformer tests")
-    #     train_transformer_style(self.transformer, self.full_transformer_params["training_params"], True)
-    #     self.assertEqual(1, 1)
-    #
-    # def test_transfom_validation(self):
-    #     # TODO add
-    #     pass
-
     def linear_model_test(self):
         train_transformer_style(
             self.simple_linear_model,
