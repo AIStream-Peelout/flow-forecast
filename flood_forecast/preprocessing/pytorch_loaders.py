@@ -139,12 +139,18 @@ class CSVDataLoader(Dataset):
             if len(result_data.shape) > 2:
                 result_data = result_data.permute(2, 0, 1).reshape(result_data.shape[2], -1)
                 result_data = result_data.permute(1, 0)
+            elif len(result_data.shape) > 1:
+                result_data = result_data
+            else:
+                result_data = result_data.unsqueeze(0)
             result_data_np = result_data.numpy()
         if isinstance(result_data, np.ndarray):
             result_data_np = result_data
         # print(type(result_data))
         if self.no_scale:
             return torch.from_numpy(result_data_np)
+        if len(result_data_np.shape) > 2:
+            result_data_np = result_data_np[0, :, :]
         return torch.from_numpy(
             self.targ_scaler.inverse_transform(result_data_np)
         )

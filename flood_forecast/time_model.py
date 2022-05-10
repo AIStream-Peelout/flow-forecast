@@ -88,6 +88,7 @@ class TimeSeriesModel(ABC):
     def wandb_init(self):
         if self.params["wandb"]:
             wandb.init(
+                id=wandb.util.generate_id(),
                 project=self.params["wandb"].get("project"),
                 config=self.params,
                 name=self.params["wandb"].get("name"),

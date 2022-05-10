@@ -350,9 +350,11 @@ class PyTorchTrainTests(unittest.TestCase):
     def test_scaling_data(self):
         scaled_src, _ = self.model.test_data[0]
         data_unscaled = self.model.test_data.original_df.iloc[0:20]["cfs"].values
+        print("shape bw")
+        print(scaled_src[:, 0].shape)
         inverse_scale = self.model.test_data.inverse_scale(scaled_src[:, 0])
-        self.assertAlmostEqual(inverse_scale.numpy()[0], data_unscaled[0])
-        self.assertAlmostEqual(inverse_scale.numpy()[9], data_unscaled[9])
+        self.assertAlmostEqual(inverse_scale.numpy()[0, 0], data_unscaled[0])
+        self.assertAlmostEqual(inverse_scale.numpy()[0, 9], data_unscaled[9])
 
     def test_compute_loss_no_scaling(self):
         exam = torch.Tensor([4.0]).repeat(2, 20, 5)

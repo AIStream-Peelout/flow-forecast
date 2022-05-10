@@ -23,7 +23,7 @@
        "batch_size":4,
        "forecast_history":5,
        "forecast_length":5,
-       "train_end": 100,
+       "train_end": 102,
        "valid_start":301,
        "valid_end": 401,
        "test_end":400,
@@ -49,9 +49,9 @@
          "mu":0,
          "sigma":0
        },
-       "lr": 0.3,
+       "lr": 0.003,
        "epochs": 1,
-       "batch_size":4
+       "batch_size": 3
     },
     "GCS": false,
    

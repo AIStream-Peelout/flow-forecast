@@ -1,4 +1,4 @@
 [flake8]
-max_line_length=120
-ignore=E305,W504, E126
+max_line_length=121
+ignore=E305,W504,E126
 max-complexity=18
