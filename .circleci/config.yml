@@ -35,6 +35,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
+            rm .python-version
             python --version
             sudo pip install flake8
             flake8 .
