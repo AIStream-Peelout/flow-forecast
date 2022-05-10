@@ -32,7 +32,7 @@ class ModelInterpretabilityTest(unittest.TestCase):
             "project": "repo-flood_forecast",
         },
         "inference_params": {
-            "hours_to_forecast": 31,
+            "hours_to_forecast": 32,
             "datetime_start": datetime(2014, 6, 2, 0),
         },
     }
