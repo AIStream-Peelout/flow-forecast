@@ -88,6 +88,9 @@ class InferenceMode(object):
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
 
+    def infer_now_classification(data=None, save_buck=None, save_name=None, use_torch_script=False):
+        pass
+
     def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
                    save_name=None, wandb_plot_id=None):
         """Function to create plots in inference mode.
