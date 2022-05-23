@@ -19,6 +19,7 @@ class InferenceTests(unittest.TestCase):
         self.multi_path = "gs://flow_datasets/miami_multi.csv"
         self.multi_weight_path = "gs://coronaviruspublicdata/experiments/28_January_202102_14AM_model.pth"
         self.infer_class = InferenceMode(20, 30, self.config_test, self.new_csv_path, self.weight_path, "covid-core")
+        self.infer_classification = InferenceMode(20, 30, self.config_test, self.new_csv_path, self.weight_path, "covid-core")
 
     def test_load_model(self):
         model = load_model(self.config_test, self.new_csv_path, self.weight_path)
@@ -40,6 +41,10 @@ class InferenceTests(unittest.TestCase):
 
     def test_speed(self):
         pass
+
+    def test_infer_classification():
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()

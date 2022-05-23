@@ -3,6 +3,7 @@ from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.explain_model_output import deep_explain_model_heatmap, deep_explain_model_summary_plot
 from flood_forecast.time_model import scaling_function
+from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
@@ -48,7 +49,7 @@ class InferenceMode(object):
 
     def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
         """Performs inference on a CSV file at a specified date-time
-
+        Genera
         :param some_date: The date you want inference to begin on.
         :param csv_path: A path to a CSV you want to perform inference on, defaults to None
         :type csv_path: str, optional
@@ -62,6 +63,7 @@ class InferenceMode(object):
         a dataframe of the prediction samples (e.g. the confidence interval preds)
         :rtype: tuple(pd.DataFrame, torch.Tensor, int, CSVTestLoader, pd.DataFrame)
         """
+        
         forecast_history = self.inference_params["dataset_params"]["forecast_history"]
         self.inference_params["datetime_start"] = some_date
         if csv_path:
@@ -88,8 +90,19 @@ class InferenceMode(object):
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
 
-    def infer_now_classification(data=None, save_buck=None, save_name=None, use_torch_script=False):
-        pass
+    def infer_now_classification(self, data=None, over_lap_seq=True, save_buck=None, save_name=None, use_torch_script=False):
+        """Function to preform classification/anomaly detection on sequences in real-time
+        """
+        if data:
+            self.model.params["dataset_params"]["test_csv_path"] = data
+            loader = GeneralClassificationLoader(self.model.params["dataset_params"], n_classes=self.model.params["n_classes"])
+        else:
+            loader = self.model.test_data
+        seq_list = []
+        if over_lap_seq:
+            for x, y in loader:
+                seq_list.append(self.model.model(x))
+        return seq_list
 
     def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
                    save_name=None, wandb_plot_id=None):
