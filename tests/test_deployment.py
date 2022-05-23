@@ -41,5 +41,9 @@ class InferenceTests(unittest.TestCase):
     def test_speed(self):
         pass
 
+    def test_classification_infer():
+        pass
+
+
 if __name__ == "__main__":
     unittest.main()

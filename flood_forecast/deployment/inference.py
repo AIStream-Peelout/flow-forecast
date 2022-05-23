@@ -2,6 +2,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.explain_model_output import deep_explain_model_heatmap, deep_explain_model_summary_plot
+from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader
 from flood_forecast.time_model import scaling_function
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
@@ -87,6 +88,24 @@ class InferenceMode(object):
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
+
+    def infer_now_classification(self, data=None, over_lap_seq=True, save_buck=None, save_name=None):
+        """Function to preform classification/anomaly detection on sequences in real-time
+        """
+        if data:
+            dataset_params = self.model.params["dataset_params"].copy()
+            dataset_params["class"] = "GeneralClassificationLoader"
+            loader = self.model.make_data_load(data, dataset_params, "custom")
+        else:
+            loader = self.model.test_data
+        seq_list = []
+        if over_lap_seq:
+            for x, y in loader:
+                seq_list.append(self.model.model(x))
+        else:
+            for i in range(0, len(loader), dataset_params["sequence_length"])
+                loader[i]
+        return seq_list
 
     def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
                    save_name=None, wandb_plot_id=None):
