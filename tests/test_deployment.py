@@ -3,7 +3,7 @@ import json
 from flood_forecast.deployment.inference import load_model, convert_to_torch_script, InferenceMode
 import unittest
 from datetime import datetime
-import torch
+# import torch
 
 
 class InferenceTests(unittest.TestCase):
@@ -55,6 +55,7 @@ class InferenceTests(unittest.TestCase):
         self.assertGreater(len(res), 10)
         self.assertLess(res[1].any(), 1)
         self.assertLess(res[2].any(), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
