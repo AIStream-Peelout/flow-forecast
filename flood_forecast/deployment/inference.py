@@ -31,13 +31,13 @@ class InferenceMode(object):
         :param wandb_proj: The name of the WB project leave blank if you don't want to log to Wandb, defaults to None
         :type wandb_proj: str, optionals
         """
-        self.hours_to_forecast = forecast_steps
+        if "inference_params" not in model_params:
+            model_params["inference_params"] = {"dataset_params": {}}
         self.csv_path = csv_path
+        self.hours_to_forecast = forecast_steps
         self.n_targets = model_params.get("n_targets")
         self.targ_cols = model_params["dataset_params"]["target_col"]
         self.model = load_model(model_params.copy(), csv_path, weight_path)
-        if "inference_params" not in model_params:
-            model_params["inference_params"] = {"dataset_params": {}}
         self.inference_params = model_params["inference_params"]
         if "scaling" in self.inference_params["dataset_params"]:
             s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
