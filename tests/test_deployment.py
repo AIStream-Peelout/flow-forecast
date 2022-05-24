@@ -1,5 +1,6 @@
 import os
 import json
+from re import L
 from flood_forecast.deployment.inference import load_model, convert_to_torch_script, InferenceMode
 import unittest
 from datetime import datetime
@@ -18,9 +19,11 @@ class InferenceTests(unittest.TestCase):
         self.weight_path = "gs://coronaviruspublicdata/experiments/01_July_202009_44PM_model.pth"
         self.multi_path = "gs://flow_datasets/miami_multi.csv"
         self.multi_weight_path = "gs://coronaviruspublicdata/experiments/28_January_202102_14AM_model.pth"
-        self.classification_weight_path = ""
+        self.classification_weight_path = "gs://flow_datasets/test_data/model_save/24_May_202202_25PM_model.pth"
         self.ff_class_data_1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_data/ff_test.csv")
-        self.class_infer_path = ""
+        self.class_infer_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "24_May_202202_25PM_1.json")
+        with open(self.class_infer_path) as y:
+            self.infer_class_mod = json.load(y)
         self.infer_class = InferenceMode(20, 30, self.config_test, self.new_csv_path, self.weight_path, "covid-core")
 
     def test_load_model(self):
@@ -45,7 +48,7 @@ class InferenceTests(unittest.TestCase):
         pass
 
     def test_classification_infer(self):
-        m = InferenceMode(1, 1, self.class_infer_path , self.ff_class_data_1, self.classification_weight_path)
+        m = InferenceMode(1, 1, self.infer_class_mod, self.ff_class_data_1, self.classification_weight_path)
         m.infer_now_classification()
 
 
