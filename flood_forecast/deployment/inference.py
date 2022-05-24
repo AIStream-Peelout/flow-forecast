@@ -165,7 +165,7 @@ def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchFo
     return model
 
 
-def convert_to_onnx():
+def convert_to_onnx(model):
     """"""
     pass
 
