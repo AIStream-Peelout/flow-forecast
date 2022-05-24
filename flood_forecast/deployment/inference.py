@@ -2,7 +2,6 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.explain_model_output import deep_explain_model_heatmap, deep_explain_model_summary_plot
-from flood_forecast.preprocessing.pytorch_loaders import GeneralClassificationLoader
 from torch.utils.data import DataLoader
 from flood_forecast.time_model import scaling_function
 # from flood_forecast.preprocessing.buil_dataset import get_data
