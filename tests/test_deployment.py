@@ -45,6 +45,7 @@ class InferenceTests(unittest.TestCase):
                                save_name="tes1/t2.csv", wandb_plot_id="prod_plot")
 
     def test_speed(self):
+        # TODO compare torch script vs model here
         pass
 
     def test_classification_infer(self):

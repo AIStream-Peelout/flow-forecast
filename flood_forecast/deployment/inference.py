@@ -101,6 +101,7 @@ class InferenceMode(object):
             inferL = DataLoader(dataset_1, batch_size=batch_size)
         else:
             loader = self.model.test_data
+            inferL = DataLoader(loader, batch_size=batch_size)
         seq_list = []
         if over_lap_seq:
             for x, y in inferL:
