@@ -108,7 +108,7 @@ class InferenceMode(object):
                 seq_list.append(self.model.model(x))
         else:
             for i in range(0, len(loader), dataset_params["sequence_length"]):
-                loader[i]
+                loader[i]  # TODO finish implementing
         return seq_list
 
     def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
