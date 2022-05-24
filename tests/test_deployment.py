@@ -56,6 +56,5 @@ class InferenceTests(unittest.TestCase):
         self.assertLess(res[1].any(), 1)
         self.assertLess(res[2].any(), 1)
 
-
 if __name__ == "__main__":
     unittest.main()
