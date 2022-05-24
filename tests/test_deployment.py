@@ -1,6 +1,5 @@
 import os
 import json
-from re import L
 from flood_forecast.deployment.inference import load_model, convert_to_torch_script, InferenceMode
 import unittest
 from datetime import datetime
