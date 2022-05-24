@@ -18,9 +18,9 @@ class InferenceTests(unittest.TestCase):
         self.weight_path = "gs://coronaviruspublicdata/experiments/01_July_202009_44PM_model.pth"
         self.multi_path = "gs://flow_datasets/miami_multi.csv"
         self.multi_weight_path = "gs://coronaviruspublicdata/experiments/28_January_202102_14AM_model.pth"
-        self.classification_weight_path = "gs://flow_datasets/test_data/model_save/24_May_202202_25PM_model.pth"
+        self.classification_weight_path = ""
         self.ff_class_data_1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_data/ff_test.csv")
-        self.class_infer_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "24_May_202202_25PM.json")
+        self.class_infer_path = ""
         self.infer_class = InferenceMode(20, 30, self.config_test, self.new_csv_path, self.weight_path, "covid-core")
 
     def test_load_model(self):
@@ -45,7 +45,7 @@ class InferenceTests(unittest.TestCase):
         pass
 
     def test_classification_infer(self):
-        m = InferenceMode(1, 1, self.class_infer_path, self.ff_class_data_1, self.classification_weight_path)
+        m = InferenceMode(1, 1, self.class_infer_path , self.ff_class_data_1, self.classification_weight_path)
         m.infer_now_classification()
 
 
