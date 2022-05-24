@@ -51,10 +51,11 @@ class InferenceTests(unittest.TestCase):
         m = InferenceMode(1, 1, self.infer_class_mod, self.ff_class_data_1, self.classification_weight_path)
         res = m.infer_now_classification()
         self.assertIsInstance(res, list)
-        # self.assertIsInstance(res[0], torch.Tensor)
+        self.assertIsInstance(res[0], torch.Tensor)
         self.assertGreater(len(res), 10)
         self.assertLess(res[1].any(), 1)
         self.assertLess(res[2].any(), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
