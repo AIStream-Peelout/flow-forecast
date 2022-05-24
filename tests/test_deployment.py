@@ -54,8 +54,9 @@ class InferenceTests(unittest.TestCase):
         self.assertIsInstance(res, list)
         self.assertIsInstance(res[0], torch.Tensor)
         self.assertGreater(len(res), 10)
-        self.assertTrue(torch.any(res[0]<1))
-        self.assertTrue(torch.any(res[1]<1))
+        self.assertTrue(torch.any(res[0] < 1))
+        self.assertTrue(torch.any(res[1] < 1))
+
 
 if __name__ == "__main__":
     unittest.main()
