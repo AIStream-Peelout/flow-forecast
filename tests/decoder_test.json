@@ -5,7 +5,7 @@
       "n_time_series":3,
       "seq_length":5,
       "output_seq_length": 1, 
-      "n_layers_encoder": 6
+      "n_layers_encoder": 4
      }, 
     "dataset_params":
     {  "class": "default",

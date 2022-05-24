@@ -2,6 +2,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model
 from flood_forecast.plot_functions import plot_df_test_with_confidence_interval
 from flood_forecast.explain_model_output import deep_explain_model_heatmap, deep_explain_model_summary_plot
+from torch.utils.data import DataLoader
 from flood_forecast.time_model import scaling_function
 # from flood_forecast.preprocessing.buil_dataset import get_data
 from flood_forecast.gcp_integration.basic_utils import upload_file
@@ -30,8 +31,10 @@ class InferenceMode(object):
         :param wandb_proj: The name of the WB project leave blank if you don't want to log to Wandb, defaults to None
         :type wandb_proj: str, optionals
         """
-        self.hours_to_forecast = forecast_steps
+        if "inference_params" not in model_params:
+            model_params["inference_params"] = {"dataset_params": {}}
         self.csv_path = csv_path
+        self.hours_to_forecast = forecast_steps
         self.n_targets = model_params.get("n_targets")
         self.targ_cols = model_params["dataset_params"]["target_col"]
         self.model = load_model(model_params.copy(), csv_path, weight_path)
@@ -87,6 +90,32 @@ class InferenceMode(object):
             df.to_csv("temp3.csv")
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
+
+    def infer_now_classification(self, data=None, over_lap_seq=True, save_buck=None, save_name=None, batch_size=1):
+        """Function to preform classification/anomaly detection on sequences in real-time
+        :param data
+        :type data: Union[pd.DataFrame, str], optional
+        :param over_lap_seq: Whether to increment by one throughout the df or by sequence length
+        :type over_lap_seq: bool,
+        :param batch_size: The batch size to use, defaults to 1
+
+        """
+        if data:
+            dataset_params = self.model.params["dataset_params"].copy()
+            dataset_params["class"] = "GeneralClassificationLoader"
+            dataset_1 = self.model.make_data_load(data, dataset_params, "custom")
+            inferL = DataLoader(dataset_1, batch_size=batch_size)
+        else:
+            loader = self.model.test_data
+            inferL = DataLoader(loader, batch_size=batch_size)
+        seq_list = []
+        if over_lap_seq:
+            for x, y in inferL:
+                seq_list.append(self.model.model(x))
+        else:
+            for i in range(0, len(loader), dataset_params["sequence_length"]):
+                loader[i]  # TODO finish implementing
+        return seq_list
 
     def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
                    save_name=None, wandb_plot_id=None):
@@ -144,6 +173,7 @@ def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchFo
 
 
 def convert_to_onnx():
+    """"""
     pass
 
 
@@ -166,5 +196,6 @@ def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchFo
     if "weight_path_add" in model_params_dict:
         if "excluded_layers" in model_params_dict["weight_path_add"]:
             del model_params_dict["weight_path_add"]["excluded_layers"]
+            # do stuff
     m = PyTorchForecast(model_params_dict["model_name"], file_path, file_path, file_path, model_params_dict)
     return m
