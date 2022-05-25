@@ -50,15 +50,12 @@ class InferenceTests(unittest.TestCase):
 
     def test_classification_infer(self):
         m = InferenceMode(1, 1, self.infer_class_mod, self.ff_class_data_1, self.classification_weight_path)
-        original_df = m.model.test_data.original_df
         res = m.infer_now_classification()
         self.assertIsInstance(res, list)
         self.assertIsInstance(res[0], torch.Tensor)
         self.assertGreater(len(res), 10)
         self.assertTrue(torch.any(res[0] < 1))
         self.assertTrue(torch.any(res[1] < 1))
-        res1 = m.infer_now_classification(original_df)
-        self.assertIsInstance(res1, list)
 
 
 if __name__ == "__main__":

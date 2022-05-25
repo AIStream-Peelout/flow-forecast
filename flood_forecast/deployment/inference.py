@@ -100,7 +100,7 @@ class InferenceMode(object):
         :param batch_size: The batch size to use, defaults to 1
 
         """
-        if data is not None:
+        if data:
             dataset_params = self.model.params["dataset_params"].copy()
             dataset_params["class"] = "GeneralClassificationLoader"
             dataset_1 = self.model.make_data_load(data, dataset_params, "custom")
