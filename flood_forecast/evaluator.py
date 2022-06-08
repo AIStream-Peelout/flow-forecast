@@ -336,13 +336,13 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
     :type csv_test_loader: CSVTestLoader
     :param multi_params: [description]
     :type multi_params: int
-    :param df_pred: The pandas data-frame of the returned prediction
+    :param df_pred: The pandas dataframe of the returned prediction
     :type df_pred: [type]
     :param decoder_param: [description]
     :type decoder_param: bool
     :param history_length: [description]
     :type history_length: int
-    :param num_samples: [description]
+    :param num_samples: The number of samples to generate (i.e. larger ci)
     :type num_samples: int
     :raises ValueError: [description]
     :raises ValueError: [description]

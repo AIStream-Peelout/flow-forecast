@@ -11,3 +11,4 @@ data
 mypy
 .mypy_cache
 *.png
+*sv
