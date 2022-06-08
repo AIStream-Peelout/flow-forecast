@@ -62,6 +62,7 @@ class InferenceTests(unittest.TestCase):
         original_df = m.model.training.original_df
         res = m.infer_now_classification(original_df[1:20])
         self.assertIsInstance(res, list)
+        self.assertGreater(len(res), 1)
 
 
 if __name__ == "__main__":
