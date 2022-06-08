@@ -57,6 +57,13 @@ class InferenceTests(unittest.TestCase):
         self.assertTrue(torch.any(res[0] < 1))
         self.assertTrue(torch.any(res[1] < 1))
 
+    def test_classification_infer_df(self):
+        m = InferenceMode(1, 1, self.infer_class_mod, self.ff_class_data_1, self.classification_weight_path)
+        original_df = m.model.training.original_df
+        res = m.infer_now_classification(original_df[1:99])
+        self.assertIsInstance(res, list)
+        self.assertGreater(len(res), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

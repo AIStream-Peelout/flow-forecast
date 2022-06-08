@@ -93,14 +93,14 @@ class InferenceMode(object):
 
     def infer_now_classification(self, data=None, over_lap_seq=True, save_buck=None, save_name=None, batch_size=1):
         """Function to preform classification/anomaly detection on sequences in real-time
-        :param data
+        :param data: The data to perform inference on
         :type data: Union[pd.DataFrame, str], optional
         :param over_lap_seq: Whether to increment by one throughout the df or by sequence length
         :type over_lap_seq: bool,
         :param batch_size: The batch size to use, defaults to 1
 
         """
-        if data:
+        if data is not None:
             dataset_params = self.model.params["dataset_params"].copy()
             dataset_params["class"] = "GeneralClassificationLoader"
             dataset_1 = self.model.make_data_load(data, dataset_params, "custom")
@@ -173,7 +173,7 @@ def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchFo
 
 
 def convert_to_onnx():
-    """"""
+    """Converts a model to ONNX"""
     pass
 
 

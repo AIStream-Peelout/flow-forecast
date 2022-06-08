@@ -336,7 +336,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
     :type csv_test_loader: CSVTestLoader
     :param multi_params: [description]
     :type multi_params: int
-    :param df_pred: [description]
+    :param df_pred: The pandas data-frame of the returned prediction
     :type df_pred: [type]
     :param decoder_param: [description]
     :type decoder_param: bool

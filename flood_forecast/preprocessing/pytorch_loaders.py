@@ -67,7 +67,6 @@ class CSVDataLoader(Dataset):
         if interpolate:
             df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
         self.df = df[relevant_cols + relevant_cols3].copy()
-        print("Now loading " + file_path)
         self.original_df = df
         self.scale = None
         if scaled_cols is None:
