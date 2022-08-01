@@ -36,7 +36,7 @@ jobs:
           name: install dependencies
           command: |
             python --version
-            pip install flake8
+            pip install flake8==5.0.1
             python -m flake8 .
 
   evaluator_test:
