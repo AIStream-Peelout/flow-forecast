@@ -29,7 +29,7 @@ def da_rnn(train_data: TrainData,
            learning_rate=0.01,
            batch_size=128,
            param_output_path="",
-           save_path: str = None) -> Tuple[dict, DaRnnNet]:
+           save_path: str = "") -> Tuple[dict, DaRnnNet]:
     """
     n_targs: The number of target columns (not steps)
     T: The number timesteps in the window
