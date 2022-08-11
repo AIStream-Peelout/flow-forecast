@@ -66,7 +66,6 @@ class EarlyStopper(object):
             self.best_score = score
             self.counter = 0
         return True
-# s
 
     def save_model_checkpoint(self, model):
         torch.save(model.state_dict(), "checkpoint.pth")

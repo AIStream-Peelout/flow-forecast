@@ -23,14 +23,14 @@ Using the library
 1. Vanilla LSTM (LSTM): A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
 2. Full transformer (SimpleTransformer in model_dict): The full original transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
 3. Simple Multi-Head Attention (MultiHeadSimple): A simple multi-head attention block and linear embedding layers. Suitable for transfer learning.
-4. Transformer with a linear decoder (CustomTransformerDecoder in model_dict): A transformer with n-encoder blocks (this is tunable) and a linear decoder.
+4. Transformer with a linear decoder (CustomTransformerDecoder in model_dict): A transformer with n-encoder blocks (this is tunable) and a linear decoder. Suitable for forecasting, classification or anomaly detection.
 5. [DA-RNN](https://arxiv.org/abs/1704.02971): (DARNN) A well rounded model with which utilizes a LSTM + attention. 
 6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235) (called DecoderTransformer in model_dict): 
 7. [Transformer XL](https://arxiv.org/abs/1901.02860): Porting Transformer XL for time series.
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436) (Informer)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
-10. [DSANet](https://kyonhuang.top/files/DSANet/Huang-DSANet.pdf)
-11. Simple Linear Model (SimpleLinearModel): Essentially a linear regression with a few more layers. Great for rapid prototyping of features and interpretability.
+10. [DSANet](https://kyonhuang.top/files/DSANet/Huang-DSANet.pdf): Model from the DSANet paper.
+11. Simple Linear Model (SimpleLinearModel): Essentially a linear regression model with a few more layers. Great for rapid prototyping of features and interpretability.
 
 **Forthcoming Models**
 
