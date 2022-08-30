@@ -12,3 +12,4 @@ mypy
 .mypy_cache
 *.png
 *.svf
+*.svg
