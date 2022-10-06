@@ -44,7 +44,7 @@ We have a number of models we are planning on releasing soon. [Please check our 
 
 ## Contributing 
 
-For instructions on contributing please see our [contributions page](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/11403276/Contributing) and our [project board](https://github.com/AIStream-Peeloutt/flow-forecast/projects). 
+For instructions on contributing please see our [contributions page](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/11403276/Contributing) and our [project board](https://github.com/AIStream-Peeloutt/flow-forecast/projects/5). 
 
 
 ## Historical River Flow Data  
