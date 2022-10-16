@@ -14,7 +14,7 @@
       "dsanet_n_head": 8,
       "dropout": 0.11
    },
-   "n_targets":4,
+   "n_targets":3,
    "dataset_params":
    {  "class": "default",
       "training_path": "tests/test_data/keag_small.csv",
