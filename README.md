@@ -29,7 +29,7 @@ Using the library
 7. [Transformer XL](https://arxiv.org/abs/1901.02860): Porting Transformer XL for time series.
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436) (Informer)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
-10. [DSANet](https://kyonhuang.top/files/DSANet/Huang-DSANet.pdf): Model from the DSANet paper.
+10. [DSANet](https://kyonhuang.top/files/DSANet/Huang-DSANet.pdf): Model from the DSANet paper with additional optional parameters.
 11. Simple Linear Model (SimpleLinearModel): Essentially a linear regression model with a few more layers. Great for rapid prototyping of features and interpretability.
 
 **Forthcoming Models**
