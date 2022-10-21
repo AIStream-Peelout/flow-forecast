@@ -18,6 +18,7 @@ from flood_forecast.transformer_xl.transformer_bottleneck import DecoderTransfor
 from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.transformer_xl.dsanet import DSANet
+from flood_forecast.basic.gru_vanilla import VanillaGRU
 
 """
 Utility dictionaries to map a string to a class
@@ -34,7 +35,8 @@ pytorch_model_dict = {
     "DecoderTransformer": DecoderTransformer,
     "BasicAE": AE,
     "Informer": Informer,
-    "DSANet": DSANet
+    "DSANet": DSANet,
+    "GRU": 
 }
 
 pytorch_criterion_dict = {
