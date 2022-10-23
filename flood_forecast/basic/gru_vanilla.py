@@ -34,7 +34,7 @@ class VanillaGRU(torch.nn.Module):
 
         :param x: torch of shape
         :type model: torch.Tensor
-        :return: Returns a
+        :return: Returns a tensor of shape (batch_size, forecast_length, n_target) or (batch_size, n_target)
         :rtype: torch.Tensor
         """
         # Initializing hidden state for first input with zeros

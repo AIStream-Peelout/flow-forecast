@@ -5,7 +5,7 @@
     "model_params": {
       "n_time_series":3,
       "hidden_dim": 20,
-      "layer_dim": 1,
+      "num_layers": 1,
       "n_target": 1,
       "dropout": 0.11
    },
