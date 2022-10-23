@@ -36,7 +36,7 @@ pytorch_model_dict = {
     "BasicAE": AE,
     "Informer": Informer,
     "DSANet": DSANet,
-    "GRU": 
+    "GRU": VanillaGRU
 }
 
 pytorch_criterion_dict = {
