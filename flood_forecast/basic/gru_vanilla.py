@@ -2,7 +2,7 @@ import torch
 
 
 class VanillaGRU(torch.nn.Module):
-    def __init__(self, n_time_series: int, hidden_dim: int, layer_dim: int, output_dim: int, dropout: float,
+    def __init__(self, n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float,
                  forecast_length=1, use_hidden=False):
         """
         Simple GRU to preform deep time series forecasting.
@@ -15,7 +15,7 @@ class VanillaGRU(torch.nn.Module):
         super(VanillaGRU, self).__init__()
 
         # Defining the number of layers and the nodes in each layer
-        self.layer_dim = layer_dim
+        self.layer_dim = num_layers
         self.hidden_dim = hidden_dim
         self.hidden = None
         self.use_hidden = use_hidden
@@ -23,11 +23,11 @@ class VanillaGRU(torch.nn.Module):
 
         # GRU layers
         self.gru = torch.nn.GRU(
-            n_time_series, hidden_dim, layer_dim, batch_first=True, dropout=dropout
+            n_time_series, hidden_dim, num_layers, batch_first=True, dropout=dropout
         )
 
         # Fully connected layer
-        self.fc = torch.nn.Linear(hidden_dim, output_dim)
+        self.fc = torch.nn.Linear(hidden_dim, n_target)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function for GRU

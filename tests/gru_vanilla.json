@@ -5,11 +5,10 @@
     "model_params": {
       "n_time_series":3,
       "hidden_dim": 20,
-      "layer_dim": 10,
-      "n_targs": 1,
+      "layer_dim": 1,
+      "n_target": 1,
       "dropout": 0.11
    },
-   "n_targets":4,
    "dataset_params":
    {  "class": "default",
       "training_path": "tests/test_data/keag_small.csv",
