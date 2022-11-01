@@ -3,7 +3,7 @@ import torch
 
 class VanillaGRU(torch.nn.Module):
     def __init__(self, n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float,
-                 forecast_length=1, use_hidden=False, probablistic=False):
+                 forecast_length=1, use_hidden=False, probabilistic=False):
         """
         Simple GRU to preform deep time series forecasting.
 
@@ -22,7 +22,7 @@ class VanillaGRU(torch.nn.Module):
         self.hidden = None
         self.use_hidden = use_hidden
         self.forecast_length = forecast_length
-        self.probablistic = probablistic
+        self.probablistic = probabilistic
 
         # GRU layers
         self.gru = torch.nn.GRU(
