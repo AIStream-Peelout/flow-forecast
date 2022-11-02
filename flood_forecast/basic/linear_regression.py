@@ -99,7 +99,7 @@ def simple_decode(model: Type[torch.nn.Module],
                 elif probabilistic:
                     out_std = out.stddev.detach()
                     out = out.mean.detach()
-                    ys_std_dev.append(out_std[:, 0:residual].unsqueeze(0))
+                    ys_std_dev.append(out_std[:, 0].unsqueeze(0))
                 elif multi_targets < 2:
                     out = out.unsqueeze(2)
             if scaler:
