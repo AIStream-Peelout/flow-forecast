@@ -318,6 +318,8 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         src, output, labels, output_dist = handle_scaling(validation_dataset, src, output, labels,
                                                           probabilistic, m, output_std)
     if probabilistic:
+        if len(labels.shape) != len(output.shape):
+            output = output[:, :, 0]
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS?
     elif isinstance(criterion, MASELoss):
         assert len(labels.shape) == len(output.shape)

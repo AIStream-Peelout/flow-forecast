@@ -16,7 +16,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :type src: torch.Tensor
     :param trg: The target tensor. Should be of dimension (batch_size, time_steps_to_forecast, n_time_series)
     :type trg: torch.Tensor
-    :param forecast_length: The of length of the forecast the model makes at each forward pass. Note this is different
+    :param forecast_length: The of length of the forecast that the model makes at each forward pass. Note is different
     than the dataset param forecast_length. That forecast_length is pred_len + decoder_seq_len..
     :type forecast_length: torch.Tensor
     :param src_temp: The temporal features for the forecast_history steps
