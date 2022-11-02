@@ -315,7 +315,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             output = torch.from_numpy(output)
         if len(output.shape) == 3:
             output = output[:, :, 0]
-            output_std = output[:, :, 0]
+            output_std = output_std[:, :, 0]
         output_dist = torch.distributions.Normal(output, output_std)
     if validation_dataset:
         src, output, labels, output_dist = handle_scaling(validation_dataset, src, output, labels,
