@@ -51,13 +51,18 @@ class VanillaGRU(torch.nn.Module):
 
         # Reshaping the outputs in the shape of (batch_size, seq_length, hidden_size)
         # so that it can fit into the fully connected layer
-        out = out[:, -self.forecast_length:, :]
-
+        if self.forecast_length == 1:
+            out = out[:, -1, :]
+        else:
+            out = out[:, -self.forecast_length:, :]
         # Convert the final state to our desired output shape (batch_size, output_dim)
         out = self.fc(out)
+        # hi
         if self.probablistic:
             mean = out[..., 0][..., None]
             std = torch.clamp(out[..., 1][..., None], min=0.01)
             y_pred = torch.distributions.Normal(mean, std)
             return y_pred
+        if self.fc.out_features == 1:
+            return out[:, :, 0]
         return out
