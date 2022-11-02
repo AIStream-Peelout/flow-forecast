@@ -251,8 +251,8 @@ jobs:
           name: Trainer tests
           when: always
           command: |
-            coverage run flood_forecast/trainer.py -p tests/gru_vanilla.json
             echo -e 'GRU Vanilla test'
+            coverage run flood_forecast/trainer.py -p tests/gru_vanilla.json
             coverage run flood_forecast/trainer.py -p tests/classification_test.json
             coverage run flood_forecast/trainer.py -p tests/test_inf_single.json
             echo -e 'test informer single target'
