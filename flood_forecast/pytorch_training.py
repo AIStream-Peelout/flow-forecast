@@ -313,16 +313,11 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
             output_std = torch.from_numpy(output_std)
         if type(output) != torch.Tensor:
             output = torch.from_numpy(output)
-        if len(output.shape) == 3:
-            output = output[:, :, 0]
-            output_std = output_std[:, :, 0]
         output_dist = torch.distributions.Normal(output, output_std)
     if validation_dataset:
         src, output, labels, output_dist = handle_scaling(validation_dataset, src, output, labels,
                                                           probabilistic, m, output_std)
     if probabilistic:
-        if len(labels.shape) != len(output.shape):
-            output_dist = output_dist[:, :, 0]
         loss = -output_dist.log_prob(labels.float()).sum()  # FIX THIS?
     elif isinstance(criterion, MASELoss):
         assert len(labels.shape) == len(output.shape)
