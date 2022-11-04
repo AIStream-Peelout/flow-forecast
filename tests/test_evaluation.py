@@ -45,7 +45,7 @@ class EvaluationTest(unittest.TestCase):
             "dataset_params": {
                 "forecast_history": 100,
                 "class": "default",
-                "forecast_length": 15,
+                "forecast_length": 20,
                 "relevant_cols": ["cfs", "temp", "precip"],
                 "target_col": ["cfs"],
                 "interpolate": False,
