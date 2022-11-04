@@ -271,6 +271,7 @@ def infer_on_torch_model(
         multi_params=multi_params,
         targs=targ
     )
+
     df_train_and_test["preds"] = 0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:

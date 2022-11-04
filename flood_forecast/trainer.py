@@ -50,7 +50,6 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
             df_train_and_test,
             forecast_start_idx,
             params,)
-        wandb.log({"test_plot_prob": test_plot})
     elif len(df_prediction_samples) > 0:
         for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
             thing[0].to_csv(thing[1] + ".csv")

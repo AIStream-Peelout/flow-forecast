@@ -3,16 +3,14 @@ import torch
 
 class VanillaGRU(torch.nn.Module):
     def __init__(self, n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float,
-                 forecast_length=1, use_hidden=False, probabilistic=False):
+                 forecast_length=1, use_hidden=False):
         """
         Simple GRU to preform deep time series forecasting.
 
-        :param n_time_series: The number of time series present in the data
+        :param n_time_series:
         :type n_time_series:
         :param hidden_dim:
         :type hidden_dim:
-
-        Note for probablistic n_targets must be set to two and actual multiple targs are not supported now.
         """
         super(VanillaGRU, self).__init__()
 
@@ -22,7 +20,6 @@ class VanillaGRU(torch.nn.Module):
         self.hidden = None
         self.use_hidden = use_hidden
         self.forecast_length = forecast_length
-        self.probablistic = probabilistic
 
         # GRU layers
         self.gru = torch.nn.GRU(
@@ -51,15 +48,8 @@ class VanillaGRU(torch.nn.Module):
 
         # Reshaping the outputs in the shape of (batch_size, seq_length, hidden_size)
         # so that it can fit into the fully connected layer
-        out = out[:, -self.forecast_length:, :]
+        out = out[:, -self.forecast_length, :]
 
         # Convert the final state to our desired output shape (batch_size, output_dim)
         out = self.fc(out)
-        if self.probablistic:
-            mean = out[..., 0][..., None]
-            std = torch.clamp(out[..., 1][..., None], min=0.01)
-            y_pred = torch.distributions.Normal(mean, std)
-            return y_pred
-        if self.fc.out_features == 1:
-            return out[:, :, 0]
         return out
