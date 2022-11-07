@@ -9,7 +9,7 @@ class VanillaGRU(torch.nn.Module):
 
         :param n_time_series: The number of time series present in the data
         :type n_time_series:
-        :param hidden_dim: The size of the hidden dim usually a power of 2.
+        :param hidden_dim:
         :type hidden_dim:
 
         Note for probablistic n_targets must be set to two and actual multiple targs are not supported now.

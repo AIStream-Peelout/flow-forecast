@@ -31,7 +31,7 @@ Using the library
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
 10. [DSANet](https://kyonhuang.top/files/DSANet/Huang-DSANet.pdf): Model from the DSANet paper with additional optional parameters.
 11. Simple Linear Model (SimpleLinearModel): Essentially a linear regression model with a few more layers. Great for rapid prototyping of features and interpretability.
-12.  [Vanilla GRU](https://arxiv.org/abs/1406.1078v3) with optional probablistic output layer. Good for multivariate time series forecasting and classification.
+12.  Vanilla GRU with optional probablistic output layer. Good for multivariate time series forecasting and classification.
 
 **Forthcoming Models**
 
