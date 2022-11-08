@@ -591,12 +591,14 @@ def compute_validation(validation_loader: DataLoader,
         print("Plotting test classification metrics")
         label_list = torch.cat(label_list)
         label_list = label_list[:, 0, :].detach().cpu()
-        mod_output1 = torch.cat(mod_output_list)[:, 0, :].detach().cpu().numpy()
+        mod_output1 = torch.cat(mod_output_list)[:, 0, :].detach().cpu()
+        d = torch.nn.Softmax(dim=1)
+        mod_output_final = d(mod_output1).numpy()
         fin = label_list.max(dim=1)[1]
-        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output1, classes_to_plot=None, labels=None,
+        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output_final, classes_to_plot=None, labels=None,
                                                              title="roc_" + str(epoch))})
-        wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output1)})
-        wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output1,
+        wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output_final)})
+        wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output_final,
                    y_true=fin.detach().cpu().numpy(), class_names=None)})
     model.train()
     return list(scaled_crit.values())[0]
