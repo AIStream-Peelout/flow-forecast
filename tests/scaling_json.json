@@ -1,0 +1,68 @@
+{                 
+    "model_name": "CustomTransformerDecoder",
+    "model_type": "PyTorch",
+    "model_params": {
+      "n_time_series":3,
+      "seq_length":5,
+      "output_seq_length": 1, 
+      "n_layers_encoder": 6,
+      "output_dim":2,
+      "final_act":"Swish"
+     },
+     "n_targets":2,
+    "dataset_params":
+    {  "class": "default",
+       "training_path": "tests/test_data/keag_small.csv",
+       "validation_path": "tests/test_data/keag_small.csv",
+       "test_path": "tests/test_data/keag_small.csv",
+       "batch_size":10,
+       "forecast_history":5,
+       "forecast_length":1,
+       "train_end": 100,
+       "valid_start":101,
+       "valid_end": 301,
+       "test_start": 202,
+       "test_end": 290,
+       "no_scale": true,
+       "target_col": ["cfs", "temp"],
+       "relevant_cols": ["cfs", "precip", "temp"],
+       "scaler": "MinMaxScaler",
+       "scaler_params":{
+         "feature_range":[0, 2]
+       },
+       "interpolate": false
+    },
+    "training_params":
+    {
+       "criterion":"MSE",
+       "optimizer": "Adam",
+       "optim_params":
+       {
+       },
+       "lr": 0.3,
+       "epochs": 1,
+       "batch_size":4
+    
+    },
+    "GCS": false,
+    
+    "wandb": {
+       "name": "flood_forecast_circleci",
+       "project": "repo-flood_forecast",
+       "tags": ["dummy_run", "circleci"]
+    },
+    "forward_params":{},
+   "metrics":["MSE"],
+   "inference_params":
+   {     
+         "datetime_start":"2016-05-31",
+          "hours_to_forecast":336, 
+          "test_csv_path":"tests/test_data/keag_small.csv",
+          "decoder_params":{
+            "decoder_function": "simple_decode", 
+            "unsqueeze_dim": 1}
+   }
+       
+   
+}
+    
