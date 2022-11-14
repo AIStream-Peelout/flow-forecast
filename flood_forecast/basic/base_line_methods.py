@@ -19,6 +19,14 @@ class NaiveBase(torch.nn.Module):
         self.metric_function = self.metric_dict[metric]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """_summary_
+
+        Args:
+            x (torch.Tensor): _description_
+
+        Returns:
+            torch.Tensor: _description_
+        """
         return self.metric_function(x, self.output_seq_len)
 
 
