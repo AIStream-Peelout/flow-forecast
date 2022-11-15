@@ -195,6 +195,12 @@ class CSVSeriesIDLoader(CSVDataLoader):
     def __validate_data__in_df(self):
         """Makes sure the data in the data-frame is the proper length for each series
         """
+        if self.return_all_series:
+            len_first = len(self.listed_vals[0])
+            for series in self.listed_vals:
+                series_bool = len(series) == len_first
+                if not series_bool:
+                    raise IndexError("The length of sub-series data-frames are not equal.")
         pass
 
     def __make_unique_dict__(self):
