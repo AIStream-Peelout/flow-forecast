@@ -175,6 +175,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.return_all_series = return_all
         self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
+        self.df.reset_index()
         self.unique_dict = {}
         print("The series id column is:")
         print(self.series_id_col)
