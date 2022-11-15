@@ -189,19 +189,21 @@ class CSVSeriesIDLoader(CSVDataLoader):
             df_list.append(new_df)
         self.listed_vals = df_list
         self.__make_unique_dict__()
+        self.__validate_data__in_df()
         print(self.unique_dict)
         print("unique dict")
 
     def __validate_data__in_df(self):
-        """Makes sure the data in the data-frame is the proper length for each series
+        """Makes sure the data in the data-frame is the proper length for each series e
         """
         if self.return_all_series:
             len_first = len(self.listed_vals[0])
+            print("Length of first series is:" + str(len_first))
             for series in self.listed_vals:
+                print("Length of first series is:" + str(len(series)))
                 series_bool = len(series) == len_first
                 if not series_bool:
                     raise IndexError("The length of sub-series data-frames are not equal.")
-        pass
 
     def __make_unique_dict__(self):
         for i in range(0, len(self.unique_cols)):
