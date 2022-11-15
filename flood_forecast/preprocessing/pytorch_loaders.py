@@ -7,6 +7,7 @@ from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
 from flood_forecast.preprocessing.temporal_feats import feature_fix
+from copy import deepcopy
 
 
 class CSVDataLoader(Dataset):
@@ -168,7 +169,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         :param return_all: Whether to return all items, defaults to True
         :type return_all: bool, optional
         """
-        main_params1 = main_params.copy()
+        main_params1 = deepcopy(main_params)
         if "scaled_cols" not in main_params1:
             main_params1["scaled_cols"] = main_params1["relevant_cols"]
         main_params1["relevant_cols"].append(series_id_col)
