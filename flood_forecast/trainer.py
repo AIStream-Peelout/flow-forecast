@@ -159,7 +159,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
 
 def main():
     """
-    Main fundection which is called from the command line. Entrypoint for training all TS models.
+    Main fundection whichd is called from the command line. Entrypoint for training all TS models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")
