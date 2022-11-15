@@ -168,8 +168,11 @@ class CSVSeriesIDLoader(CSVDataLoader):
         :param return_all: Whether to return all items, defaults to True
         :type return_all: bool, optional
         """
-        main_params["relevant_cols"].append(series_id_col)
-        super().__init__(**main_params)
+        main_params1 = main_params.copy()
+        if "scaled_cols" not in main_params1:
+            main_params1["scaled_cols"] = main_params1["relevant_cols"]
+        main_params1["relevant_cols"].append(series_id_col)
+        super().__init__(**main_params1)
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
