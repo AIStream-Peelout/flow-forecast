@@ -16,7 +16,7 @@
     "dataset_params":
     {  "class": "SeriesIDLoader",
       "series_id_col": "PLANT_ID",
-       "return_method": "?",
+       "return_method": "??",
        "num_workers": 2,
        "training_path": "tests/test_data/solar_small.csv",
        "validation_path": "tests/test_data/solar_small.csv",
