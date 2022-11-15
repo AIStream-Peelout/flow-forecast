@@ -69,3 +69,5 @@ class EarlyStopper(object):
 
     def save_model_checkpoint(self, model):
         torch.save(model.state_dict(), "checkpoint.pth")
+        """_summary_
+        """
