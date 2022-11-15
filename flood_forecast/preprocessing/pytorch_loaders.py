@@ -176,12 +176,20 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
         self.unique_dict = {}
+        print("The series id column is:")
+        print(self.series_id_col)
+        print(self.unique_cols)
         for col in self.unique_cols:
             df_list.append(self.df[self.df[self.series_id_col] == col])
         self.listed_vals = df_list
         self.__make_unique_dict__()
         print(self.unique_dict)
         print("unique dict")
+
+    def __validate_data__in_df(self):
+        """Makes sure the data in the data-frame is the proper length for each series
+        """
+        pass
 
     def __make_unique_dict__(self):
         for i in range(0, len(self.unique_cols)):
@@ -198,7 +206,6 @@ class CSVSeriesIDLoader(CSVDataLoader):
         if self.return_all_series:
             src_list = {}
             targ_list = {}
-            print(self.unique_cols)
             for va in self.listed_vals:
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, :len(self.relevant_cols3) - 1]
                 targ_start_idx = idx + self.forecast_history
