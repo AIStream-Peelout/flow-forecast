@@ -63,3 +63,11 @@ class VanillaGRU(torch.nn.Module):
         if self.fc.out_features == 1:
             return out[:, :, 0]
         return out
+
+
+class GRUAutoEncoder(torch.nn.Module):
+    def __init__(self):
+        pass
+
+    def forward(self, x: torch.Tensor):
+        pass
