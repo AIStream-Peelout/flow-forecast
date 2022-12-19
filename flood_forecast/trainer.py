@@ -166,6 +166,7 @@ def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
     training_conf["dataset_params"]["scaler_params"]["feature_range"] = tuple(training_conf["dataset_params"]["scaler_params"]["feature_range"])
     if "dataset_params" in training_conf["inference_params"]:
         del training_conf["inference_params"]["dataset_params"]
+        print("Fixed dumbass sklearn errors morons should've never changed it")
     return training_conf
 
 
