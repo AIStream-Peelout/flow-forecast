@@ -163,7 +163,7 @@ def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
     :param scaling_params: A list of the scaling params
     :type training_conf: Dict
     """
-    training_conf["dataset_params"]["scaler_params"] = tuple(training_conf["dataset_params"]["scaler_params"]["feature_range"])
+    training_conf["dataset_params"]["scaler_params"]["feature_range"] = tuple(training_conf["dataset_params"]["scaler_params"]["feature_range"])
     if "dataset_params" in training_conf["inference_params"]:
         del training_conf["inference_params"]["dataset_params"]
     return training_conf
@@ -180,7 +180,6 @@ def main():
         training_config = json.load(f)
     if "scaler_params" in training_config["dataset_params"]:
         training_config = correct_stupid_sklearn_error(training_config)
-
     train_function(training_config["model_type"], training_config)
     print("Process is now complete.")
 
