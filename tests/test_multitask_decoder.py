@@ -3,7 +3,7 @@ import torch
 import json
 import unittest
 from flood_forecast.basic.linear_regression import simple_decode
-from flood_forecast.trainer import train_function
+from flood_forecast.trainer import train_function, correct_stupid_sklearn_error
 
 
 class MultitTaskTests(unittest.TestCase):
@@ -19,6 +19,8 @@ class MultitTaskTests(unittest.TestCase):
         cls.keag_path = os.path.join(os.path.dirname(__file__), "test_data", "keag_small.csv")
         if "save_path" in cls.model_params:
             del cls.model_params["save_path"]
+        cls.model_params = correct_stupid_sklearn_error(cls.model_params)
+        cls.model_params3 = correct_stupid_sklearn_error(cls.model_params3)
         # cls.forecast_model2 = train_function("PyTorch", cls.model_params)
 
     def test_decoder_multi_step(self):
