@@ -163,9 +163,9 @@ def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
     :param scaling_params: A list of the scaling params
     :type training_conf: Dict
     """
-    training_conf["dataset_params"]["scaler_params"]["feature_range"] = tuple(training_conf["dataset_params"]["scaler_params"]["feature_ange"])
+    training_conf["dataset_params"]["scaler_params"] = tuple(training_conf["dataset_params"]["scaler_params"])
     if "dataset_params" in training_conf["inference_params"]:
-        del training_conf["inference_params"]["dataset_params"]
+        pass
     return training_conf
 
 
