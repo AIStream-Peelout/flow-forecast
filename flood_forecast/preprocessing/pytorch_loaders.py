@@ -544,3 +544,29 @@ class TemporalTestLoader(CSVTestLoader):
             ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return (src_data, temporal_feat), (tar_temp, trg_data), all_rows_orig, target_idx_start
+
+
+class VariableSequenceLength(CSVDataLoader):
+    def __init__(self, series_marker_column, pad_length=None, **csv_loader_params):
+        """Enables easy loading of time-series with variable length data
+
+        :param series_marker_column: The column that dealinates when an example begins and ends
+        :type series_marker_column: str
+        :param pad_length: If specified the length to truncate sequences at or pad them till
+
+        """
+        super().__init__(**csv_loader_params)
+        self.pad_length = pad_length
+        self.series_marker_column = series_marker_column
+
+    def pad_input_data(self, sequence):
+        """Pads a sequence to a specified length
+        """
+        if self.pad_length > sequence.shape[0]:
+            pad_dim = self.pad_input_data - sequence.shape[0]
+            return torch.nn.functional.pad(0, 0, 0, pad_dim)
+        else:
+            return sequence[self.pad_length, :]
+
+    def __getitem__(self, idx: int):
+        pass
