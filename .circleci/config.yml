@@ -116,6 +116,7 @@ jobs:
             coverage run -m unittest -v tests/test_join.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_preprocessing.py
+            coverage run -m unittest -v tests/test_variable_length.py
 
       - run:
           name: upload_stuff
