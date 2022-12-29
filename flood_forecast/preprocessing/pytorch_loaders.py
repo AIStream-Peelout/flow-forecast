@@ -547,7 +547,7 @@ class TemporalTestLoader(CSVTestLoader):
 
 
 class VariableSequenceLength(CSVDataLoader):
-    def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None):
+    def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification"):
         """Enables easy loading of time-series with variable length data
 
         :param series_marker_column: The column that dealinates when an example begins and ends
@@ -558,6 +558,7 @@ class VariableSequenceLength(CSVDataLoader):
         super().__init__(**csv_loader_params)
         self.pad_length = pad_length
         self.series_marker_column = series_marker_column
+        self.task = task
 
     def get_item_forecast(self, idx):
         pass
@@ -573,7 +574,7 @@ class VariableSequenceLength(CSVDataLoader):
         """
         if self.pad_length > sequence.shape[0]:
             pad_dim = self.pad_length - sequence.shape[0]
-            return torch.nn.functional.pad(0, 0, 0, pad_dim)
+            return torch.nn.functional.pad(sequence, (0, 0, 0, pad_dim))
         else:
             return sequence[self.pad_length, :]
 

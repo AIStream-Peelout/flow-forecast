@@ -50,7 +50,7 @@ def feature_fix(preprocess_params: Dict, dt_column: str, df: pd.DataFrame):
         df, column_names feature_fix(feats_to_add, "datetime")
         print(column_names) # ["cos_month", "sin_month", "day"]
     """
-    print("Running code to add temporal features")
+    print("Running the code to add temporal features")
     column_names = []
     if "datetime_params" in preprocess_params:
         for key, value in preprocess_params["datetime_params"].items():
