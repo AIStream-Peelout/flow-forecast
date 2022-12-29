@@ -24,4 +24,4 @@ class TestVariableLength(unittest.TestCase):
         self.assertEqual(self.loader.pad_input_data(dat).shape[1], 4)
 
     def test_get_item(self):
-        pass
+        self.loader
