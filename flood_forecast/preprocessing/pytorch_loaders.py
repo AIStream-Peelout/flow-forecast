@@ -573,7 +573,7 @@ class VariableSequenceLength(CSVDataLoader):
         """
         if self.pad_length > sequence.shape[0]:
             pad_dim = self.pad_length - sequence.shape[0]
-            return torch.nn.functional.pad(sequence, 0, 0, 0, pad_dim)
+            return torch.nn.functional.pad(0, 0, 0, pad_dim)
         else:
             return sequence[self.pad_length, :]
 
