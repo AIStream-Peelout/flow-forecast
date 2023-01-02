@@ -559,8 +559,6 @@ class VariableSequenceLength(CSVDataLoader):
         self.pad_length = pad_length
         self.series_marker_column = series_marker_column
         self.task = task
-        self.uniques = self.df[series_marker_column].unique()
-        self.grouped_df = self.df.groupby(series_marker_column)
 
     def get_item_forecast(self, idx):
         pass
@@ -568,14 +566,8 @@ class VariableSequenceLength(CSVDataLoader):
     def get_item_classification(self, idx):
         self.df[""]
 
-    def get_item_auto_encoder(self, idx):
-        item = self.grouped_df.get_group(self.uniques[idx])
-        the_seq = torch.from_numpy(item.numpy())
-        if self.pad_length:
-            res = self.pad_input_data(the_seq)
-            return res, res
-        else:
-            return the_seq, the_seq
+    def get_item_auto_encoder():
+        pass
 
     def pad_input_data(self, sequence):
         """Pads a sequence to a specified length
@@ -587,5 +579,4 @@ class VariableSequenceLength(CSVDataLoader):
             return sequence[self.pad_length, :]
 
     def __getitem__(self, idx: int):
-        tasks = {"auto": self.get_item_auto_encoder, "classification": self.get_item_classification}
-        return tasks[self.task](idx)
+        pass

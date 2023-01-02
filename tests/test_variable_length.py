@@ -23,8 +23,5 @@ class TestVariableLength(unittest.TestCase):
         self.assertEqual(self.loader.pad_input_data(dat).shape[0], 100)
         self.assertEqual(self.loader.pad_input_data(dat).shape[1], 4)
 
-    def test_get_ite_auto(self):
-        self.loader.get_item_auto_encoder(0)
-
-    def test_melting(self):
+    def test_get_item(self):
         pass
