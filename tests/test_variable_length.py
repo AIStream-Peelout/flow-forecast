@@ -6,17 +6,17 @@ from flood_forecast.preprocessing.pytorch_loaders import VariableSequenceLength
 class TestVariableLength(unittest.TestCase):
     def setUp(self) -> None:
         self.test_data_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "test_data"
+            os.path.dirname(os.path.abspath(__file__)), "test_data2"
         )
         self.dataset_params = {
-            "file_path": os.path.join(self.test_data_path, "test2.csv"),
+            "file_path": os.path.join(self.test_data_path, "test_csv.csv"),
             "forecast_history": 20,
             "forecast_length": 1,
-            "relevant_cols": ["vel", "obs", "day_of_week"],
+            "relevant_cols": ["playId", "yardlineNumber", "yardsToGo"],
             "target_col": ["vel"],
             "interpolate_param": False,
         }
-        self.loader = VariableSequenceLength("id_col", self.dataset_params, 100)
+        self.loader = VariableSequenceLength("playId", self.dataset_params, 100)
 
     def test_padding(self):
         dat = torch.rand(2, 4)
