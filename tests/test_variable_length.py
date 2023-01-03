@@ -16,7 +16,7 @@ class TestVariableLength(unittest.TestCase):
             "target_col": ["vel"],
             "interpolate_param": False,
         }
-        self.loader = VariableSequenceLength("playId", self.dataset_params, 100)
+        self.loader = VariableSequenceLength("playId", self.dataset_params, 100, "auto")
 
     def test_padding(self):
         dat = torch.rand(2, 4)
