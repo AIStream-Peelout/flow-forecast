@@ -25,3 +25,10 @@ class TestVariableLength(unittest.TestCase):
 
     def test_get_item_classification(self):
         self.loader.get_item_classification(0)
+
+    def test_get_item_auto(self):
+        x, y = self.loader.get_item_auto_encoder(0)
+        self.assertEqual(x.shape[0], 100)
+        self.assertEqual(y.shape[0], 100)
+        self.assertEqual(x.shape[1], 3)
+        self.assertEqual(y.shape[1], 3)
