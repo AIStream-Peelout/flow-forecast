@@ -572,7 +572,7 @@ class VariableSequenceLength(CSVDataLoader):
 
     def get_item_auto_encoder(self, idx):
         item = self.grouped_df.get_group(self.uniques[idx])
-        the_seq = torch.from_numpy(item.numpy())
+        the_seq = torch.from_numpy(item.to_numpy())
         if self.pad_length:
             res = self.pad_input_data(the_seq)
             return res, res
