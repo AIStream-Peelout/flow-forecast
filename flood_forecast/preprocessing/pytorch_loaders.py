@@ -567,8 +567,9 @@ class VariableSequenceLength(CSVDataLoader):
 
     def get_item_classification(self, idx):
         item = self.grouped_df.get_group(self.uniques[idx])
+        item = item.to_numpy()
         label = item[0, -1]
-        return item, label
+        return item[1, :], label
 
     def get_item_auto_encoder(self, idx):
         item = self.grouped_df.get_group(self.uniques[idx])
