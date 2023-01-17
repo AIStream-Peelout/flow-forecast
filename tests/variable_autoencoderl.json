@@ -2,12 +2,11 @@
    "model_name": "MultiAttnHeadSimple",
    "model_type": "PyTorch",
    "model_params": {
-     "number_time_series":2, 
-     "seq_len":6, 
-     "final_layer": "Softmax",
-     "output_seq_len": 1,
-     "output_dim": 9
-    },
+      "n_time_series":3,
+      "seq_length":5,
+      "output_seq_length": 1, 
+      "n_layers_encoder": 6
+     },
     "dataset_params":
     { "class": "VariableLengthLoader",
       "n_classes": 9,

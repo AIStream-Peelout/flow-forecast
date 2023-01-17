@@ -34,4 +34,4 @@ class TestVariableLength(unittest.TestCase):
         self.assertEqual(y.shape[1], 3)
 
     def test_forecast(self):
-        pass
+        self.assertEqual(0, 0)
