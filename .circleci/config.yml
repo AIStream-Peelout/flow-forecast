@@ -329,6 +329,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
             coverage run flood_forecast/trainer.py -p tests/test_dual.json
             coverage run flood_forecast/trainer.py -p tests/dsanet.json
+            coverage run flood_forecast/trainer.py -p tests/variable_autoencoderl.json
       - store_test_results:
           path: test-results
 

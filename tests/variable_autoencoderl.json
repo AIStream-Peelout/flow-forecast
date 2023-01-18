@@ -1,18 +1,19 @@
 {                 
-   "model_name": "MultiAttnHeadSimple",
+   "model_name": "CustomTransformerDecoder",
    "model_type": "PyTorch",
    "model_params": {
       "n_time_series":3,
       "seq_length":5,
       "output_seq_length": 1, 
-      "n_layers_encoder": 6
+      "n_layers_encoder": 6,
+      "squashed_embedding": true
      },
     "dataset_params":
     { "class": "VariableLengthLoader",
       "n_classes": 9,
-       "training_path": "tests/test_data/keag_small.csv",
-       "validation_path": "tests/test_data/keag_small.csv",
-       "test_path": "tests/test_data/keag_small.csv",
+       "training_path": "tests/test_data2/test_csv.csv",
+       "validation_path": "tests/test_data2/test_csv.csv",
+       "test_path": "tests/test_data2/test_csv.csv",
        "sequence_length":6,
        "batch_size":20,
        "forecast_history":6,
@@ -20,22 +21,19 @@
        "valid_start":0,
        "valid_end": 300,
        "test_end": 303,
-       "target_col": ["precip"],
-       "relevant_cols": ["precip", "temp", "cfs"],
+       "target_col": ["playId", "yardlineNumber", "yardsToGo"],
+       "relevant_cols": ["playId", "yardlineNumber", "yardsToGo"],
        "scaler": "StandardScaler", 
        "interpolate": false
     },
 
     "training_params":
     {
-       "criterion":"FocalLoss",
+       "criterion":"MSE",
        "optimizer": "Adam",
-       "criterion_params":
-            {"alpha": 0.5,
-             "reduction": "sum"},
        "optim_params":
        {},
-       "lr": 0.3,
+       "lr": 0.01,
        "epochs": 1,
        "batch_size":4
     },
@@ -47,6 +45,6 @@
        "project": "repo-flood_forecast"
     },
    "forward_params":{},
-   "metrics":["CrossEntropyLoss"]
+   "metrics":["MSE"]
 }
     
