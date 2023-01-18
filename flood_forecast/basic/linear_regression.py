@@ -99,7 +99,7 @@ def simple_decode(model: Type[torch.nn.Module],
                 elif probabilistic:
                     out_std = out.stddev.detach()
                     out = out.mean.detach()
-                    ys_std_dev.append(out_std[:, 0].unsqueeze(0))
+                    ys_std_dev.append(out_std[:, 0:residual])
                 elif multi_targets < 2:
                     out = out.unsqueeze(2)
             if scaler:
@@ -112,6 +112,8 @@ def simple_decode(model: Type[torch.nn.Module],
                 ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
             else:
                 # residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
+                if output_len != out.shape[1]:
+                    raise ValueError("Ouput length should laways equal the out shape")
                 real_target2[:, i:i + residual, 0:multi_targets] = out[:, :residual]
                 src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)

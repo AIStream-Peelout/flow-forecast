@@ -50,6 +50,7 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
             df_train_and_test,
             forecast_start_idx,
             params,)
+        wandb.log({"test_plot_prob": test_plot})
     elif len(df_prediction_samples) > 0:
         for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
             thing[0].to_csv(thing[1] + ".csv")
@@ -155,16 +156,31 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
         raise Exception("Please supply valid model type for forecasting or classification")
     return trained_model
 
+def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
+    """Sklearn for whatever reason decided to only allow scaler params in the form of tuples
+    this was stupid so now we have to convert JSON list to tuple.
+
+    :param scaling_params: A list of the scaling params
+    :type training_conf: Dict
+    """
+    training_conf["dataset_params"]["scaler_params"]["feature_range"] = tuple(training_conf["dataset_params"]["scaler_params"]["feature_range"])
+    if "dataset_params" in training_conf["inference_params"]:
+        del training_conf["inference_params"]["dataset_params"]
+        print("Fixed dumbass sklearn errors morons should've never changed it")
+    return training_conf
+
 
 def main():
     """
-    Main fundection which is called from the command line. Entrypoint for training all TS ML models.
+    Main function which is called from the command line. Entrypoint for training all TS models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")
     args = parser.parse_args()
     with open(args.params) as f:
         training_config = json.load(f)
+    if "scaler_params" in training_config["dataset_params"]:
+        training_config = correct_stupid_sklearn_error(training_config)
     train_function(training_config["model_type"], training_config)
     print("Process is now complete.")
 

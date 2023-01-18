@@ -5,7 +5,7 @@ from flood_forecast.transformer_xl.transformer_xl import TransformerXL
 from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
 from flood_forecast.basic.lstm_vanilla import LSTMForecast
-from flood_forecast.custom.custom_opt import BertAdam
+from flood_forecast.custom.custom_opt import BertAdam, QuantileLoss
 from torch.optim import Adam, SGD
 from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1Loss, CrossEntropyLoss, BCELoss, BCEWithLogitsLoss
 from flood_forecast.basic.linear_regression import simple_decode
@@ -18,6 +18,7 @@ from flood_forecast.transformer_xl.transformer_bottleneck import DecoderTransfor
 from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.transformer_xl.dsanet import DSANet
+from flood_forecast.basic.gru_vanilla import VanillaGRU
 
 """
 Utility dictionaries to map a string to a class
@@ -34,7 +35,8 @@ pytorch_model_dict = {
     "DecoderTransformer": DecoderTransformer,
     "BasicAE": AE,
     "Informer": Informer,
-    "DSANet": DSANet
+    "DSANet": DSANet,
+    "VanillaGRU": VanillaGRU
 }
 
 pytorch_criterion_dict = {
@@ -52,6 +54,7 @@ pytorch_criterion_dict = {
     "NegativeLogLikelihood": NegativeLogLikelihood,
     "BCELossLogits": BCEWithLogitsLoss,
     "FocalLoss": FocalLoss,
+    "QuantileLoss": QuantileLoss,
     "BinaryCrossEntropy": BCELoss}
 
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}

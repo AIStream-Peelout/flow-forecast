@@ -15,7 +15,6 @@
        "batch_size":5,
        "forecast_history":10,
        "forecast_length":2,
-       "shuffle": true,
        "train_end": 201,
        "valid_start":201,
        "valid_end": 220,
