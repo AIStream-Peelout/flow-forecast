@@ -268,7 +268,7 @@ class PyTorchForecast(TimeSeriesModel):
             loader = VariableSequenceLength(dataset_params["series_marker_column"], dataset_params, pad_le)
 
         else:
-            # TODO support custom DataLoader
+            # TODO support other custom DataLoader
             loader = None
         return loader
 
