@@ -552,7 +552,10 @@ class VariableSequenceLength(CSVDataLoader):
 
         :param series_marker_column: The column that dealinates when an example begins and ends
         :type series_marker_column: str
-        :param pad_length: If specified the length to truncate sequences at or pad them till
+        :param pad_length: If specified the length to truncate sequences at or pad them till that length
+        :type pad_length: int
+        :param task: The specific task (e.g. classification, forecasting, auto_encode)
+        :type task: str
 
         """
         super().__init__(**csv_loader_params)
@@ -565,7 +568,7 @@ class VariableSequenceLength(CSVDataLoader):
     def get_item_forecast(self, idx):
         pass
 
-    def get_item_classification(self, idx):
+    def get_item_classification(self, idx: int):
         item = self.grouped_df.get_group(self.uniques[idx])
         item = item.to_numpy()
         label = item[0, -1]
