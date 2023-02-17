@@ -260,11 +260,13 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params["sequence_length"] = dataset_params["sequence_length"]
             loader = GeneralClassificationLoader(start_end_params, dataset_params["n_classes"])
         elif the_class == "VariableSequenceLength":
+            start_end_params = self.__re_add_params__(start_end_params, dataset_params, data_path)
             if "pad_len" in dataset_params:
                 pad_le = dataset_params["pad_len"]
             else:
                 pad_le = None
-            loader = VariableSequenceLength(dataset_params["series_marker_column"], dataset_params, pad_le)
+            loader = VariableSequenceLength(dataset_params["series_marker_column"], start_end_params,
+                                            pad_le, dataset_params["task"])
 
         else:
             # TODO support custom DataLoader
