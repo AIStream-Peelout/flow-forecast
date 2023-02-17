@@ -553,7 +553,6 @@ class VariableSequenceLength(CSVDataLoader):
         :param series_marker_column: The column that dealinates when an example begins and ends
         :type series_marker_column: str
         :param pad_length: If specified the length to truncate sequences at or pad them till
-        :type pad_length: int
 
         """
         super().__init__(**csv_loader_params)
