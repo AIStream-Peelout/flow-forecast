@@ -14,7 +14,7 @@
        "training_path": "tests/test_data2/test_csv.csv",
        "validation_path": "tests/test_data2/test_csv.csv",
        "test_path": "tests/test_data2/test_csv.csv",
-       "sequence_length":6,
+       "forecast_length":6,
        "batch_size":20,
        "forecast_history":6,
        "train_end": 300,
