@@ -571,7 +571,7 @@ class VariableSequenceLength(CSVDataLoader):
     def get_item_classification(self, idx: int):
         item = self.grouped_df.get_group(self.uniques[idx])
         item = item.to_numpy()
-        label = item[0, -1]
+        label = item[0, -1].to_numpy()
         return torch.from_numpy(item[:, :]), torch.from_numpy(label)
 
     def get_item_auto_encoder(self, idx):
