@@ -23,6 +23,7 @@
        "test_end": 303,
        "target_col": ["playId", "yardlineNumber", "yardsToGo"],
        "relevant_cols": ["playId", "yardlineNumber", "yardsToGo"],
+       "series_marker_column":["playId"],
        "scaler": "StandardScaler", 
        "interpolate": false
     },
