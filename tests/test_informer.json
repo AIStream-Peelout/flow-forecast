@@ -53,7 +53,7 @@
        "optimizer": "Adam",
        "optim_params":
        {
-         "lr": 0.04
+         "lr": 0.004
        },
 
        "epochs": 1,

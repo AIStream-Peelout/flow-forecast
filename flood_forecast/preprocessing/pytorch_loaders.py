@@ -570,9 +570,20 @@ class VariableSequenceLength(CSVDataLoader):
 
     def get_item_classification(self, idx: int):
         item = self.grouped_df.get_group(self.uniques[idx])
-        item = item.to_numpy()
-        label = item[0, -1]
-        return torch.from_numpy(item), torch.from_numpy(label)
+        rows = item.iloc[idx: self.forecast_history + idx]
+        targ = item.iloc[idx: self.forecast_history + idx]
+        rows = torch.from_numpy(rows.to_numpy())
+        targ = torch.from_numpy(targ.to_numpy())
+        # Exclude the first row it is the target.
+        src = rows[:, 1:]
+        # Get label of the series sequence
+        targ = targ[-1, 0]
+        targ_labs = torch.zeros(self.n_classes)
+        casted_shit = int(targ.data.tolist())
+        if casted_shit > self.n_classes:
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+        targ_labs[casted_shit] = 1
+        return src.float(), targ_labs.float().unsqueeze(0)
 
     def get_item_auto_encoder(self, idx):
         item = self.grouped_df.get_group(self.uniques[idx])
