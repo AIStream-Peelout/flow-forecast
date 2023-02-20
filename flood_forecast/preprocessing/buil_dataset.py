@@ -49,7 +49,7 @@ def build_weather_csv(
         )
 
 
-# todo fix this function so it does more than open files
+# todo fix this function so it does more than open the files
 # def make_usgs(meta_data_path: str, start, end_index: int):
 #     meta_directory = os.fsencode(meta_data_path)
 #     sorted_list = sorted(os.listdir(meta_directory))
