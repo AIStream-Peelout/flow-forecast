@@ -547,7 +547,8 @@ class TemporalTestLoader(CSVTestLoader):
 
 
 class VariableSequenceLength(CSVDataLoader):
-    def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification"):
+    def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
+                 n_classes=2):
         """Enables easy loading of time-series with variable length data
 
         :param series_marker_column: The column that dealinates when an example begins and ends
@@ -564,6 +565,7 @@ class VariableSequenceLength(CSVDataLoader):
         self.task = task
         self.uniques = self.df[series_marker_column].unique()
         self.grouped_df = self.df.groupby(series_marker_column)
+        self.n_classes = n_classes
 
     def get_item_forecast(self, idx):
         pass
@@ -590,9 +592,9 @@ class VariableSequenceLength(CSVDataLoader):
         the_seq = torch.from_numpy(item.to_numpy())
         if self.pad_length:
             res = self.pad_input_data(the_seq)
-            return res, res
+            return res.to(torch.float32), res.float()
         else:
-            return the_seq, the_seq
+            return the_seq.float(), the_seq.float()
 
     def pad_input_data(self, sequence: int):
         """Pads a sequence to a specified length
