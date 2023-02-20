@@ -168,6 +168,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         return x
 
     def __squashed__embedding(self, x: torch.Tensor):
+        print(x.shape)
+        print("shape above")
         x = x.permute(1, 2, 0)  # (B, N, L)
         x = self.squashed(x)
         x = self.unsquashed(x)
