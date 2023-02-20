@@ -149,7 +149,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
                                                                                            dataset_params)["scaling"]
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
-        if params["dataset_params"]["class"] != "GeneralClassificationLoader":
+        if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] !="VariableSequenceLength":
             handle_model_evaluation1(trained_model, params, model_type)
 
     else:

@@ -18,7 +18,6 @@
        "validation_path": "tests/test_data2/test_csv.csv",
        "test_path": "tests/test_data2/test_csv.csv",
        "forecast_length":6,
-       "batch_size":20,
        "forecast_history":6,
        "train_end": 300,
        "valid_start":0,
@@ -34,6 +33,7 @@
     "training_params":
     {
        "criterion":"MSE",
+       "batch_size":20,
        "optimizer": "Adam",
        "optim_params":
        {},
