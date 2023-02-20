@@ -547,7 +547,8 @@ class TemporalTestLoader(CSVTestLoader):
 
 
 class VariableSequenceLength(CSVDataLoader):
-    def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification"):
+    def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
+                 n_classes=2):
         """Enables easy loading of time-series with variable length data
 
         :param series_marker_column: The column that dealinates when an example begins and ends
@@ -564,6 +565,7 @@ class VariableSequenceLength(CSVDataLoader):
         self.task = task
         self.uniques = self.df[series_marker_column].unique()
         self.grouped_df = self.df.groupby(series_marker_column)
+        self.n_classes = n_classes
 
     def get_item_forecast(self, idx):
         pass
