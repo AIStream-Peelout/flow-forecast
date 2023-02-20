@@ -44,7 +44,7 @@
    
     "wandb": {
        "name": "flood_forecast_circleci",
-       "tags": ["dummy_run", "circleci", "multi_head", "auto_encode"],
+       "tags": ["dummy_run", "circleci", "multi_head", "classification"],
        "project": "repo-flood_forecast"
     },
    "forward_params":{},
