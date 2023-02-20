@@ -608,3 +608,4 @@ class VariableSequenceLength(CSVDataLoader):
     def __getitem__(self, idx: int):
         tasks = {"auto": self.get_item_auto_encoder, "classification": self.get_item_classification}
         return tasks[self.task](idx)
+

@@ -7,7 +7,7 @@
       "hidden_dim": 20,
       "num_layers": 1,
       "n_target": 1,
-      "dropout": 0.121
+      "dropout": 0.11
    },
    "dataset_params":
    {  "class": "default",
