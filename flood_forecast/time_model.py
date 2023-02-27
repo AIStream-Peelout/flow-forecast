@@ -7,7 +7,8 @@ from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
 from flood_forecast.preprocessing.pytorch_loaders import (CSVDataLoader, AEDataloader, TemporalLoader,
-                                                          CSVSeriesIDLoader, GeneralClassificationLoader)
+                                                          CSVSeriesIDLoader, GeneralClassificationLoader,
+                                                          VariableSequenceLength)
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 from flood_forecast.utils import make_criterion_functions
 from flood_forecast.preprocessing.buil_dataset import get_data
@@ -258,6 +259,15 @@ class PyTorchForecast(TimeSeriesModel):
             start_end_params = self.__re_add_params__(start_end_params, dataset_params, data_path)
             start_end_params["sequence_length"] = dataset_params["sequence_length"]
             loader = GeneralClassificationLoader(start_end_params, dataset_params["n_classes"])
+        elif the_class == "VariableSequenceLength":
+            start_end_params = self.__re_add_params__(start_end_params, dataset_params, data_path)
+            if "pad_len" in dataset_params:
+                pad_le = dataset_params["pad_len"]
+            else:
+                pad_le = None
+            loader = VariableSequenceLength(dataset_params["series_marker_column"], start_end_params,
+                                            pad_le, dataset_params["task"])
+
         else:
             # TODO support custom DataLoader
             loader = None
