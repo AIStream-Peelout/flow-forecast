@@ -8,7 +8,7 @@ class VanillaGRU(torch.nn.Module):
         Simple GRU to preform deep time series forecasting.
 
         :param n_time_series: The number of time series present in the data
-        :type n_time_series:
+        :type n_time_series int:
         :param hidden_dim:
         :type hidden_dim:
 

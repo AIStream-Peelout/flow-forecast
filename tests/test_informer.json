@@ -44,7 +44,7 @@
     },
     "early_stopping":
     {
-       "patience":2
+       "patience":3
 
     },
     "training_params":
@@ -53,7 +53,7 @@
        "optimizer": "Adam",
        "optim_params":
        {
-         "lr": 0.04
+         "lr": 0.004
        },
 
        "epochs": 1,
