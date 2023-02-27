@@ -9,9 +9,9 @@ h5py
 wandb==0.13.10
 google-cloud
 google-cloud-storage
-plotly~=5.11.0
+plotly~=5.13.1
 pytz>=2022.1
-setuptools~=66.0.0
+setuptools~=67.4.0
 numpy>=1.21
 requests
 torchvision>=0.6.0
