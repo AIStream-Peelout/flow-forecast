@@ -1,7 +1,7 @@
 shap==0.41.0
 scikit-learn>=1.0.1
 pandas
-torch
+torch==2.0
 tb-nightly
 seaborn
 future
