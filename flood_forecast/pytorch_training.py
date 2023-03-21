@@ -12,6 +12,7 @@ from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from torch.nn import CrossEntropyLoss
+import line_profiler
 
 
 def multi_crit(crit_multi: List, output, labels, valid=None):
