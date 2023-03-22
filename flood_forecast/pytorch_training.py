@@ -16,6 +16,7 @@ import line_profiler
 
 profile = line_profiler.LineProfiler()
 
+
 def multi_crit(crit_multi: List, output, labels, valid=None):
     i = 0
     loss = 0.0
