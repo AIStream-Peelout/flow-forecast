@@ -14,6 +14,7 @@ from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from torch.nn import CrossEntropyLoss
 import line_profiler
 
+profile = line_profiler.LineProfiler()
 
 def multi_crit(crit_multi: List, output, labels, valid=None):
     i = 0
@@ -221,6 +222,7 @@ def train_transformer_style(
     print("test loss:", test)
     model.params["run"] = session_params
     model.save_model(model_filepath, max_epochs)
+    profile.print_stats()
 
 
 def get_meta_representation(column_id: str, uuid: str, meta_model: PyTorchForecast) -> torch.Tensor:
@@ -341,6 +343,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     return loss
 
 
+@profile
 def torch_single_train(model: PyTorchForecast,
                        opt: optim.Optimizer,
                        criterion: Type[torch.nn.modules.loss._Loss],
