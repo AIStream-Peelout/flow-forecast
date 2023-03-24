@@ -40,7 +40,7 @@ class DLinear(nn.Module):
     Decomposition-Linear
     """
     def __init__(self, forecast_history: int, forecast_length: int, individual, enc_in: int):
-        """_summary_
+        """Code from
 
         :param forecast_history: _description_
         :type forecast_history: int
@@ -101,4 +101,7 @@ class DLinear(nn.Module):
             seasonal_output = self.Linear_Seasonal(seasonal_init)
             trend_output = self.Linear_Trend(trend_init)
         x = seasonal_output + trend_output
+
+        print(x.shape)
+        print("Shaped tensor is ")
         return x.permute(0, 2, 1)  # to [Badtch, Output length, Channel]
