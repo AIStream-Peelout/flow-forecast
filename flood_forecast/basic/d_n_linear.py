@@ -40,10 +40,10 @@ class DLinear(nn.Module):
     """
     Decomposition-Linear
     """
-    def __init__(self, seq_len, pred_len, individual, enc_in):
+    def __init__(self, forecast_history, forecast_length, individual, enc_in):
         super(DLinear, self).__init__()
-        self.seq_len = seq_len
-        self.pred_len = pred_len
+        self.seq_len = forecast_history
+        self.pred_len = forecast_length
 
         # Decompsition Kernel Size
         kernel_size = 25
