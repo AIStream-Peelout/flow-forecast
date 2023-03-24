@@ -39,7 +39,7 @@ class DLinear(nn.Module):
     """
     Decomposition-Linear
     """
-    def __init__(self, forecast_history: int, forecast_length: int, individual, enc_in: int):
+    def __init__(self, forecast_history: int, forecast_length: int, individual, enc_in: int, n_targs=1):
         """Code from
 
         :param forecast_history: _description_
@@ -54,6 +54,7 @@ class DLinear(nn.Module):
         super(DLinear, self).__init__()
         self.seq_len = forecast_history
         self.pred_len = forecast_length
+        self.n_targs = n_targs
 
         # Decompsition Kernel Size
         kernel_size = 25
@@ -101,7 +102,8 @@ class DLinear(nn.Module):
             seasonal_output = self.Linear_Seasonal(seasonal_init)
             trend_output = self.Linear_Trend(trend_init)
         x = seasonal_output + trend_output
-
-        print(x.shape)
-        print("Shaped tensor is ")
-        return x.permute(0, 2, 1)  # to [Badtch, Output length, Channel]
+        x = x.permute(0, 2, 1)  # to [Badtch, Output length, Channel]
+        if self.n_targs == 1:
+            return x[:, :, -1]
+        else:
+            return x
