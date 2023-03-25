@@ -1,0 +1,75 @@
+{                  
+    "model_name": "DLinear",
+    "use_decoder": true,
+    "model_type": "PyTorch",
+    "model_params": {
+      "forecast_history":20,
+      "forecast_length": 10,
+      "enc_in": 321,
+      "individual": false
+      
+   },
+   "dataset_params":
+   {  "class": "default",
+      "training_path": "tests/test_data/keag_small.csv",
+      "validation_path": "tests/test_data/keag_small.csv",
+      "test_path": "tests/test_data/keag_small.csv",
+      "batch_size":10,
+      "forecast_history":20,
+      "forecast_length":10,
+      "train_start": 1,
+      "train_end": 300,
+      "valid_start":302,
+      "valid_end": 401,
+      "test_start":50,
+      "test_end": 450,
+      "target_col": ["cfs"],
+      "relevant_cols": ["cfs", "precip", "temp"],
+      "scaler": "StandardScaler", 
+      "interpolate": false
+   },
+   "training_params":
+   {
+      "criterion":"MSE",
+      "optimizer": "Adam",
+      "optim_params":
+      {
+
+      },
+      "lr": 0.03,
+      "epochs": 1,
+      "batch_size":4
+   
+   },
+   "GCS": false,
+   
+   "wandb": {
+      "name": "flood_forecast_circleci",
+      "tags": ["dummy_run", "circleci"],
+      "project": "repo-flood_forecast"
+   },
+   "forward_params":{},
+  "metrics":["MSE"],
+  "inference_params":
+  {     
+        "datetime_start":"2016-05-31",
+         "hours_to_forecast":334, 
+         "test_csv_path":"tests/test_data/keag_small.csv",
+         "decoder_params":{
+           "decoder_function": "simple_decode", 
+           "unsqueeze_dim": 1}
+        ,
+         "dataset_params":{
+            "file_path": "tests/test_data/keag_small.csv",
+            "forecast_history":20,
+            "forecast_length":10,
+            "relevant_cols": ["cfs", "precip", "temp"],
+            "target_col": ["cfs"],
+            "scaling": "StandardScaler",
+            "interpolate_param": false
+         }
+  }
+}
+      
+  
+   

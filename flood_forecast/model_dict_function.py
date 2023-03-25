@@ -19,6 +19,8 @@ from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.transformer_xl.dsanet import DSANet
 from flood_forecast.basic.gru_vanilla import VanillaGRU
+from flood_forecast.basic.d_n_linear import DLinear
+
 
 """
 Utility dictionaries to map a string to a class
@@ -36,7 +38,8 @@ pytorch_model_dict = {
     "BasicAE": AE,
     "Informer": Informer,
     "DSANet": DSANet,
-    "VanillaGRU": VanillaGRU
+    "VanillaGRU": VanillaGRU,
+    "DLinear": DLinear
 }
 
 pytorch_criterion_dict = {

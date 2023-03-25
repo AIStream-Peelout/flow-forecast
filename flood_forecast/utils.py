@@ -6,7 +6,7 @@ from flood_forecast.model_dict_function import pytorch_criterion_dict
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def numpy_to_tvar(x) -> torch.autograd.Variable:
+def numpy_to_tvar(x: torch.Tensor) -> torch.autograd.Variable:
     """ Converts a numpy array into a PyTorch Tensor
 
     :param x: A numpy array you want to convert to a tensor
