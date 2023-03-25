@@ -6,14 +6,14 @@ class NLinear(nn.Module):
     """
     Normalization-Linear
     """
-    def __init__(self, configs):
+    def __init__(self, forecast_history, forecast_length, enc_in=128, individual=False):
         super(NLinear, self).__init__()
-        self.seq_len = configs.seq_len
-        self.pred_len = configs.pred_len
+        self.seq_len = forecast_history
+        self.pred_len = forecast_length
         # Use this line if you want to visualize the weights
         # self.Linear.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
-        self.channels = configs.enc_in
-        self.individual = configs.individual
+        self.channels = enc_in
+        self.individual = individual
         if self.individual:
             self.Linear = nn.ModuleList()
             for i in range(self.channels):
