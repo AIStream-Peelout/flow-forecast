@@ -19,7 +19,7 @@ from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.transformer_xl.dsanet import DSANet
 from flood_forecast.basic.gru_vanilla import VanillaGRU
-from flood_forecast.basic.d_n_linear import DLinear
+from flood_forecast.basic.d_n_linear import DLinear, NLinear
 
 
 """
@@ -39,7 +39,8 @@ pytorch_model_dict = {
     "Informer": Informer,
     "DSANet": DSANet,
     "VanillaGRU": VanillaGRU,
-    "DLinear": DLinear
+    "DLinear": DLinear,
+    "NLinear": NLinear
 }
 
 pytorch_criterion_dict = {
