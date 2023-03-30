@@ -21,3 +21,4 @@ sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
 sphinx
+line_profiler

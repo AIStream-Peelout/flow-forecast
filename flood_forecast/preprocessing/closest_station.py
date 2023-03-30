@@ -14,7 +14,7 @@ def get_closest_gage(
         start_row: int,
         end_row: int):
     # Function that calculates the closest weather stations to gage and stores in JSON
-    # Base u
+    # Base u r
     for row in range(start_row, end_row):
         gage_info = {}
         gage_info["river_id"] = int(gage_df.iloc[row]['id'])
