@@ -6,7 +6,7 @@ class NLinear(nn.Module):
     """
     Normalization-Linear
     """
-    def __init__(self, forecast_history, forecast_length, enc_in=128, individual=False):
+    def __init__(self, forecast_history, forecast_length, enc_in=128, individual=False, n_targs=1):
         super(NLinear, self).__init__()
         self.seq_len = forecast_history
         self.pred_len = forecast_length
@@ -21,18 +21,22 @@ class NLinear(nn.Module):
         else:
             self.Linear = nn.Linear(self.seq_len, self.pred_len)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: [Batch, Input length, Channel]
         seq_last = x[:, -1:, :].detach()
         x = x - seq_last
         if self.individual:
             output = torch.zeros([x.size(0), self.pred_len, x.size(2)], dtype=x.dtype).to(x.device)
             for i in range(self.channels):
+                print(output.shape)
+                print('shpae is ')
                 output[:, :, i] = self.Linear[i](x[:, :, i])
             x = output
         else:
             x = self.Linear(x.permute(0, 2, 1)).permute(0, 2, 1)
         x = x + seq_last
+        if self.n_targs == 1:
+            return x[:, :, -1]
         return x  # [Batch, Output length, Channel]
 
 
