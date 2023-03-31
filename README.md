@@ -32,7 +32,7 @@ Using the library
 10. [DSANet](https://kyonhuang.top/files/DSANet/Huang-DSANet.pdf): Model from the DSANet paper with additional optional parameters.
 11. Simple Linear Model (SimpleLinearModel): Essentially a linear regression model with a few more layers. Great for rapid prototyping of features and interpretability.
 12.  Vanilla GRU with optional probablistic output layer. Good for multivariate time series forecasting and classification.
-13. DLinear and NLinear from the Arxiv paper [Are Transformers Effective for Time Series Forecasting](https://arxiv.org/abs/2205.13504)
+13. DLinear and NLinear from the aaai paper [Are Transformers Effective for Time Series Forecasting](https://arxiv.org/abs/2205.13504)
 14. [Crossformer](https://openreview.net/forum?id=vSVLM2j9eie) ICLR 202
 
 **Forthcoming Models**
