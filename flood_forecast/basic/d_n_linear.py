@@ -14,6 +14,7 @@ class NLinear(nn.Module):
         # self.Linear.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
         self.channels = enc_in
         self.individual = individual
+        self.n_targs = n_targs
         if self.individual:
             self.Linear = nn.ModuleList()
             for i in range(self.channels):
