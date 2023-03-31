@@ -6,7 +6,7 @@ class NLinear(nn.Module):
     """
     Normalization-Linear
     """
-    def __init__(self, forecast_history, forecast_length, enc_in=128, individual=False, n_targs=1):
+    def __init__(self, forecast_history: int, forecast_length: int, enc_in=128, individual=False, n_targs=1):
         super(NLinear, self).__init__()
         self.seq_len = forecast_history
         self.pred_len = forecast_length

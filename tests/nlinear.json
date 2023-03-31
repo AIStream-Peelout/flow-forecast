@@ -6,7 +6,7 @@
       "forecast_history":20,
       "forecast_length": 10,
       "enc_in": 321,
-      "individual": false
+      "individual": true
       
    },
    "dataset_params":
