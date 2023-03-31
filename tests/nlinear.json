@@ -5,7 +5,7 @@
     "model_params": {
       "forecast_history":20,
       "forecast_length": 10,
-      "enc_in": 321,
+      "enc_in": 3,
       "individual": true
       
    },
