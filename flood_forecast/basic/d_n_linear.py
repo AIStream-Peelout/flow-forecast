@@ -9,7 +9,7 @@ class NLinear(nn.Module):
     def __init__(self, forecast_history: int, forecast_length: int, enc_in=128, individual=False, n_targs=1):
         super(NLinear, self).__init__()
         self.seq_len = forecast_history
-        self.pred_len = forecast_length
+        self.pred_len2 = forecast_length
         # Use this line if you want to visualize the weights
         # self.Linear.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
         self.channels = enc_in
@@ -18,16 +18,16 @@ class NLinear(nn.Module):
         if self.individual:
             self.Linear = nn.ModuleList()
             for i in range(self.channels):
-                self.Linear.append(nn.Linear(self.seq_len, self.pred_len))
+                self.Linear.append(nn.Linear(self.seq_len, self.pred_len2))
         else:
-            self.Linear = nn.Linear(self.seq_len, self.pred_len)
+            self.Linear = nn.Linear(self.seq_len, self.pred_len2)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: [Batch, Input length, Channel]
         seq_last = x[:, -1:, :].detach()
         x = x - seq_last
         if self.individual:
-            output = torch.zeros([x.size(0), self.pred_len, x.size(2)], dtype=x.dtype).to(x.device)
+            output = torch.zeros([x.size(0), self.pred_len2, x.size(2)], dtype=x.dtype).to(x.device)
             for i in range(self.channels):
                 print(output.shape)
                 print('shpae is ')
@@ -115,8 +115,8 @@ class DLinear(nn.Module):
             self.Linear_Seasonal = nn.Linear(self.seq_len, self.pred_len2)
             self.Linear_Trend = nn.Linear(self.seq_len, self.pred_len2)
             # Use this two lines if you want to visualize the weights
-            # self.Linear_Seasonal.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
-            # self.Linear_Trend.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
+            # self.Linear_Seasonal.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len2,self.seq_len]))
+            # self.Linear_Trend.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len2,self.seq_len]))
 
     def forward(self, x: torch.Tensor):
         """The
