@@ -21,5 +21,4 @@ sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
 sphinx
-timm==0.3.2
 
