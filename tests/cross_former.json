@@ -7,6 +7,7 @@
       "n_time_series": 3,
       "forecast_length": 10,
       "seg_len": 6
+      
    },
    "dataset_params":
    {  "class": "default",
