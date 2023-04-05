@@ -59,7 +59,7 @@ class Crossformer(nn.Module):
 
         # Decoder
         self.dec_pos_embedding = nn.Parameter(
-            torch.randn(1, data_dim, (self.pad_out_len // seg_len), d_model)
+            torch.randn(1, n_time_series, (self.pad_out_len // seg_len), d_model)
         )
         self.decoder = Decoder(
             seg_len,
