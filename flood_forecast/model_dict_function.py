@@ -40,7 +40,7 @@ pytorch_model_dict = {
     "DSANet": DSANet,
     "VanillaGRU": VanillaGRU,
     "DLinear": DLinear,
-    "NLinear": NLinear
+    "NLinear": NLinear,
 }
 
 pytorch_criterion_dict = {

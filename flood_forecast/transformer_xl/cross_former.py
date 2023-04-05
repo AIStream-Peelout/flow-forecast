@@ -7,9 +7,9 @@ from math import ceil, sqrt
 class Crossformer(nn.Module):
     def __init__(
         self,
-        data_dim,
-        in_len,
-        out_len,
+        n_time_series,
+        forecast_history,
+        forecast_length,
         seg_len,
         win_size=4,
         factor=10,
@@ -22,9 +22,9 @@ class Crossformer(nn.Module):
         device=torch.device("cuda:0"),
     ):
         super(Crossformer, self).__init__()
-        self.data_dim = data_dim
-        self.in_len = in_len
-        self.out_len = out_len
+        self.data_dim = n_time_series
+        self.in_len = forecast_history
+        self.out_len = forecast_length
         self.seg_len = seg_len
         self.merge_win = win_size
 
@@ -33,14 +33,14 @@ class Crossformer(nn.Module):
         self.device = device
 
         # The padding operation to handle invisible sgemnet length
-        self.pad_in_len = ceil(1.0 * in_len / seg_len) * seg_len
-        self.pad_out_len = ceil(1.0 * out_len / seg_len) * seg_len
+        self.pad_in_len = ceil(1.0 * forecast_history / seg_len) * seg_len
+        self.pad_out_len = ceil(1.0 * forecast_length / seg_len) * seg_len
         self.in_len_add = self.pad_in_len - self.in_len
 
         # Embedding
         self.enc_value_embedding = DSW_embedding(seg_len, d_model)
         self.enc_pos_embedding = nn.Parameter(
-            torch.randn(1, data_dim, (self.pad_in_len // seg_len), d_model)
+            torch.randn(1, n_time_series, (self.pad_in_len // seg_len), d_model)
         )
         self.pre_norm = nn.LayerNorm(d_model)
 
