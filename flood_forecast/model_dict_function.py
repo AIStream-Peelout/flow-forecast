@@ -20,6 +20,7 @@ from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.transformer_xl.dsanet import DSANet
 from flood_forecast.basic.gru_vanilla import VanillaGRU
 from flood_forecast.basic.d_n_linear import DLinear, NLinear
+from flood_forecast.transformer_xl.cross_former import Crossformer as Crossformer10
 
 
 """
@@ -40,6 +41,7 @@ pytorch_model_dict = {
     "DSANet": DSANet,
     "VanillaGRU": VanillaGRU,
     "DLinear": DLinear,
+    "Crossformer": Crossformer10,
     "NLinear": NLinear
 }
 

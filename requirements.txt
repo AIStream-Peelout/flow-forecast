@@ -6,12 +6,12 @@ tb-nightly
 seaborn
 future
 h5py
-wandb==0.14.2
+wandb==0.15.0
 google-cloud
 google-cloud-storage
-plotly~=5.13.1
+plotly~=5.14.1
 pytz>=2022.1
-setuptools~=67.6.0
+setuptools~=67.7.0
 numpy>=1.21
 requests
 torchvision>=0.6.0
@@ -21,3 +21,5 @@ sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
 sphinx
+einops
+
