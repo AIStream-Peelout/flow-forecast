@@ -3,7 +3,7 @@
     "use_decoder": true,
     "model_type": "PyTorch",
     "model_params": {
-      "forecast_history":20,
+      "forecast_history":60,
       "n_time_series": 3,
       "forecast_length": 10,
       "seg_len": 6
