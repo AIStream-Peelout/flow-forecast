@@ -7,10 +7,10 @@ from math import ceil, sqrt
 class Crossformer(nn.Module):
     def __init__(
         self,
-        n_time_series,
-        forecast_history,
-        forecast_length,
-        seg_len,
+        n_time_series: int,
+        forecast_history: int,
+        forecast_length: int,
+        seg_len: int,
         win_size=4,
         factor=10,
         d_model=512,
@@ -21,6 +21,36 @@ class Crossformer(nn.Module):
         baseline=False,
         device=torch.device("cuda:0"),
     ):
+        """Crossformer: Transformer Utilizing Cross-Dimension Dependency for Multivariate Time Series Forecasting.
+        https://github.com/Thinklab-SJTU/Crossformer
+
+        :param n_time_series: The total number of time series
+        :type n_time_series: int
+        :param forecast_history: The length of the input sequence
+        :type forecast_history: int
+        :param forecast_length: The number of steps to forecast
+        :type forecast_length: int
+        :param seg_len: Parameter specific to Crossformer, forecast_history must be divisible by seg_len
+        :type seg_len: int
+        :param win_size: _description_, defaults to 4
+        :type win_size: int, optional
+        :param factor: _description_, defaults to 10
+        :type factor: int, optional
+        :param d_model: _description_, defaults to 512
+        :type d_model: int, optional
+        :param d_ff: _description_, defaults to 1024
+        :type d_ff: int, optional
+        :param n_heads: _description_, defaults to 8
+        :type n_heads: int, optional
+        :param e_layers: _description_, defaults to 3
+        :type e_layers: int, optional
+        :param dropout: _description_, defaults to 0.0
+        :type dropout: float, optional
+        :param baseline: _description_, defaults to False
+        :type baseline: bool, optional
+        :param device: _description_, defaults to torch.device("cuda:0")
+        :type device: _type_, optional
+        """
         super(Crossformer, self).__init__()
         self.data_dim = n_time_series
         self.in_len = forecast_history
@@ -72,7 +102,7 @@ class Crossformer(nn.Module):
             factor=factor,
         )
 
-    def forward(self, x_seq):
+    def forward(self, x_seq: torch.Tensor):
         if self.baseline:
             base = x_seq.mean(dim=1, keepdim=True)
         else:
@@ -418,7 +448,7 @@ class TwoStageAttentionLayer(nn.Module):
             nn.Linear(d_model, d_ff), nn.GELU(), nn.Linear(d_ff, d_model)
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         # Cross Time Stage: Directly apply MSA to each dimension
         batch = x.shape[0]
         time_in = rearrange(x, "b ts_d seg_num d_model -> (b ts_d) seg_num d_model")
@@ -454,6 +484,13 @@ class TwoStageAttentionLayer(nn.Module):
 
 class DSW_embedding(nn.Module):
     def __init__(self, seg_len, d_model):
+        """_summary_
+
+        :param seg_len: _description_
+        :type seg_len: _type_
+        :param d_model: _description_
+        :type d_model: _type_
+        """
         super(DSW_embedding, self).__init__()
         self.seg_len = seg_len
 
