@@ -24,7 +24,7 @@ from flood_forecast.transformer_xl.cross_former import Crossformer as Crossforme
 
 
 """
-Utility dictionaries to map a string to a c class
+Utility dictionaries to map a string to a class
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,
