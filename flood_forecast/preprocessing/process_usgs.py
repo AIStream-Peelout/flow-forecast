@@ -79,7 +79,7 @@ def get_timezone_map():
     return timezone_map
 
 
-def process_intermediate_csv(df: pd.DataFrame) -> (pd.DataFrame, int, int, int):
+def process_intermediate_csv(df: pd.DataFrame) -> pd.DataFrame:
     # Remove garbage first row
     # TODO check if more rows are garbage
     df = df.iloc[1:]
