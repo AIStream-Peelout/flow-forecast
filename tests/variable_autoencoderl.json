@@ -38,7 +38,7 @@
        "optim_params":
        {},
        "lr": 0.01,
-       "epochs": 1
+       "epochs": 2
     },
     "GCS": false,
    
