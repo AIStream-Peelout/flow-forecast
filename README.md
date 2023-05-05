@@ -13,7 +13,7 @@ For additional tutorials (on Colab) and examples please see our [tutorials repos
 | CodeFactor| [![CodeFactor](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast/badge)](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast)|
 ## Getting Started 
 
-Using the slibrary
+Using the library
 1. Run `pip install flood-forecast`
 2. Detailed info on training models can be found on the [Wiki](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/364019713/Training+Models).
 3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview) 
