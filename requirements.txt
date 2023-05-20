@@ -1,5 +1,6 @@
 shap==0.41.0
 scikit-learn>=1.0.1
+captum
 pandas
 torch
 tb-nightly
