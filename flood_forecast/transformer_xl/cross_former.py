@@ -137,7 +137,7 @@ class SegMerging(nn.Module):
     we set win_size = 2 in our paper
     """
 
-    def __init__(self, d_model, win_size, norm_layer=nn.LayerNorm):
+    def __init__(self, d_model: int, win_size, norm_layer=nn.LayerNorm):
         super().__init__()
         self.d_model = d_model
         self.win_size = win_size

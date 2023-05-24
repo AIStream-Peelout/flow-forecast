@@ -5,7 +5,7 @@ from flood_forecast.basic.gru_vanilla import GRUVanilla
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 
 
-class TestAttention(unittest.TestCase):
+class TestCaptum(unittest.TestCase):
     def setUp(self):
         # n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float
         self.test_model = GRUVanilla(3, 128, 2, 1, 0.2)
