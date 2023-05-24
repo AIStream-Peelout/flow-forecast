@@ -1,6 +1,5 @@
 from captum.attr import IntegratedGradients, DeepLift, GradientShap, NoiseTunnel, FeatureAblation
 from typing import Tuple, Dict
-import numpy as np
 
 attr_dict = {"IntegratedGradients": IntegratedGradients, "DeepLift": DeepLift, "GradientSHAP": GradientShap,
              "NoiseTunnel": NoiseTunnel, "FeatureAblation": FeatureAblation}
@@ -15,7 +14,7 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
     :type test_loader: _type_
     :param method: _description_
     :type method: _type_
-    :return: Returns a Tuple of attributions and approximation error. This data is used to create plots.
+    :return: d
     :rtype: Tuple
     """
 
@@ -25,7 +24,7 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
     return attributions, approximation_error
 
 
-def make_attribution_plots(x, attributions, approximation_error, feature_names, use_wandb: bool = True):
+def make_attribution_plots(attributions, approximation_error, use_wandb: bool = True):
     """_summary_
 
     :param attributions: _description_
@@ -35,6 +34,4 @@ def make_attribution_plots(x, attributions, approximation_error, feature_names, 
     :param use_wandb: _description_, defaults to True
     :type use_wandb: bool, optional
     """
-    x_axis_data = np.arange(x.shape[1])
-    print(x_axis_data)
-    print("Hello world")
+    pass

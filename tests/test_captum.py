@@ -1,14 +1,14 @@
 import unittest
 import torch
 from flood_forecast.interpretability import run_attribution, make_attribution_plots
-from flood_forecast.basic.gru_vanilla import VanillaGRU
+from flood_forecast.basic.gru_vanilla import GRUVanilla
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 
 
 class TestCaptum(unittest.TestCase):
     def setUp(self):
         # n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float
-        self.test_model = VanillaGRU(3, 128, 2, 1, 0.2)
+        self.test_model = GRUVanilla(3, 128, 2, 1, 0.2)
         self.test_data_loader = CSVDataLoader(
             "tests/data/test_data.csv",
             100,
