@@ -1,6 +1,6 @@
 import unittest
 import torch
-from flood_forecast.interpretability import run_attribution, create_attribution_plots
+from flood_forecast.interpretability import run_attribution, make_attribution_plots
 from flood_forecast.basic.gru_vanilla import GRUVanilla
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 
@@ -26,4 +26,4 @@ class TestCaptum(unittest.TestCase):
     def test_create_attribution_plots(self):
         """_summary_"""
         attributions, approx_error = run_attribution(self.test_model, self.test_data_loader, "IntegratedGradients", {})
-        create_attribution_plots(attributions, approx_error, use_wandb=False)
+        make_attribution_plots(attributions, approx_error, use_wandb=False)
