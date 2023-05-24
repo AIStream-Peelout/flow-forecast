@@ -36,7 +36,7 @@ class Crossformer(nn.Module):
         :type win_size: int, optional
         :param factor: _description_, defaults to 10
         :type factor: int, optional
-        :param d_model: _description_, defaults to 512
+        :param d_model: _description_, sdefaults to 512
         :type d_model: int, optional
         :param d_ff: _description_, defaults to 1024
         :type d_ff: int, optional
