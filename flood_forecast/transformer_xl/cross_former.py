@@ -40,7 +40,7 @@ class Crossformer(nn.Module):
         :type d_model: int, optional
         :param d_ff: _description_, defaults to 1024
         :type d_ff: int, optional
-        :param n_heads: _description_, defaults to 8
+        :param n_heads: The number of heads, defaults to 8
         :type n_heads: int, optional
         :param e_layers: _description_, defaults to 3
         :type e_layers: int, optional
