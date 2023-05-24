@@ -144,7 +144,7 @@ class SegMerging(nn.Module):
         self.linear_trans = nn.Linear(win_size * d_model, d_model)
         self.norm = norm_layer(win_size * d_model)
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x):
         """
         x: B, ts_d, L, d_model
         """
