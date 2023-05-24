@@ -22,3 +22,16 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
     x, y = test_loader[0]
     attributions, approximation_error = attribution_method.attribute(x.unsqueeze(0), **additional_params)
     return attributions, approximation_error
+
+
+def make_attribution_plots(attributions, approximation_error, use_wandb: bool = True):
+    """_summary_
+
+    :param attributions: _description_
+    :type attributions: _type_
+    :param approximation_error: _description_
+    :type approximation_error: _type_
+    :param use_wandb: _description_, defaults to True
+    :type use_wandb: bool, optional
+    """
+    pass

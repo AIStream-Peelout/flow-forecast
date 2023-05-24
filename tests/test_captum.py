@@ -22,3 +22,8 @@ class TestAttention(unittest.TestCase):
         attributions, approx_error = run_attribution(self.test_model, self.test_data_loader, "IntegratedGradients", {})
         self.assertEqual(approx_error.shape, torch.Size([1, 20, 3]))
         self.assertEqual(attributions.shape, torch.Size([1, 20, 3]))
+
+    def test_create_attribution_plots(self):
+        """_summary_"""
+        attributions, approx_error = run_attribution(self.test_model, self.test_data_loader, "IntegratedGradients", {})
+        create_attribution_plots(attributions, approx_error, use_wandb=False)
