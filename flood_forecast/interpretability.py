@@ -25,7 +25,7 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
 
 
 def make_attribution_plots(attributions, approximation_error, use_wandb: bool = True):
-    """TODO implemnt
+    """_summary_
 
     :param attributions: _description_
     :type attributions: _type_
