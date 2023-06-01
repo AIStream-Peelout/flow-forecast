@@ -24,7 +24,7 @@ class Crossformer(nn.Module):
         """Crossformer: Transformer Utilizing Cross-Dimension Dependency for Multivariate Time Series Forecasting.
         https://github.com/Thinklab-SJTU/Crossformer
 
-        :param n_time_series: The total number of time series
+        :param n_time_series: The total number of time series passed to the model
         :type n_time_series: int
         :param forecast_history: The length of the input sequence
         :type forecast_history: int

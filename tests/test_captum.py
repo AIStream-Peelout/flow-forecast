@@ -1,7 +1,7 @@
 import unittest
 import torch
 from flood_forecast.interpretability import run_attribution, make_attribution_plots
-from flood_forecast.basic.gru_vanilla import GRUVanilla
+from flood_forecast.basic.gru_vanilla import VanillaGRU as GRUVanilla
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 
 
