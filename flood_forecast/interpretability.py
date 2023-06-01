@@ -6,9 +6,9 @@ attr_dict = {"IntegratedGradients": IntegratedGradients, "DeepLift": DeepLift, "
 
 
 def run_attribution(model, test_loader, method, additional_params: Dict) -> Tuple:
-    """Function that creates attribution for a model based on Captum.
+    """Function that creates attribution for a model based on Captum library.
     :param model: The deep learning model to be used for attribution. This should be a PyTorch model.
-    :type model: _type_
+    :type model: torch.nn.Module
     :param test_loader: Should be a FF CSVDataLoader or a related sub-class.
     :type test_loader: _type_
     :param method: _description_
@@ -17,6 +17,9 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
     :rtype: Tuple
 
     .. code-block:: python
+
+        from flood_forecast.interpretability import run_attribution
+        model = VanillaGRU(3, 128, 2, 1, 0.2)
 
     ..
     """
@@ -33,7 +36,7 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
 
 
 def make_attribution_plots(attributions, approximation_error, use_wandb: bool = True):
-    """_summary_
+    """Creates the attribution plots and logs them to wandb if use_wandb is True.
 
     :param attributions: _description_
     :type attributions: _type_
