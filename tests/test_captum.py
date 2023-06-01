@@ -1,16 +1,18 @@
 import unittest
 import torch
+import os
 from flood_forecast.interpretability import run_attribution, make_attribution_plots
-from flood_forecast.basic.gru_vanilla import GRUVanilla
+from flood_forecast.basic.gru_vanilla import VanillaGRU
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
 
 
 class TestCaptum(unittest.TestCase):
     def setUp(self):
         # n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float
-        self.test_model = GRUVanilla(3, 128, 2, 1, 0.2)
+        self.test_model = VanillaGRU(3, 128, 2, 1, 0.2)
+        self.test_data_path = self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
         self.test_data_loader = CSVDataLoader(
-            "tests/data/test_data.csv",
+            os.path.join(self.test_data_path, "keag_small.csv"),
             100,
             20,
             "precip",
