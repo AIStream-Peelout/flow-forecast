@@ -10,7 +10,7 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
 
     :param model: The deep learning model to be used for attribution. This should be a PyTorch model.
     :type model: _type_
-    :param test_loader: Should be a FF CSVDataLoader or a related sub-class.
+    :param test_loader: Should be a FF CSVDataLoader or a related subclass.
     :type test_loader: _type_
     :param method: _description_
     :type method: _type_
@@ -20,7 +20,6 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
 
     attribution_method = attr_dict[method](model)
     x, y = test_loader[0]
-    print(attribution_method.attribute(x.unsqueeze(0), **additional_params))
     attributions, approximation_error = attribution_method.attribute(x.unsqueeze(0), **additional_params)
     return attributions, approximation_error
 
