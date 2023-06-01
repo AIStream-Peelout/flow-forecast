@@ -19,7 +19,8 @@ class TestCaptum(unittest.TestCase):
 
     def test_run_attribution(self):
         """_summary_"""
-        attributions, approx_error = run_attribution(self.test_model, self.test_data_loader, "IntegratedGradients", {})
+        attributions, approx_error = run_attribution(self.test_model, self.test_data_loader, "IntegratedGradients",
+                                                     {"return_convergence_delta": True})
         self.assertEqual(approx_error.shape, torch.Size([1, 20, 3]))
         self.assertEqual(attributions.shape, torch.Size([1, 20, 3]))
 
