@@ -38,8 +38,8 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
 def make_attribution_plots(attributions, approximation_error, use_wandb: bool = True):
     """Creates the attribution plots and logs them to wandb if use_wandb is True.
 
-    :param attributions: _description_
-    :type attributions: _type_
+    :param attributions: A tensor of the attributions should be of dimension (batch_size, , n_features).
+    :type attributions: torch.Tensor
     :param approximation_error: _description_
     :type approximation_error: _type_
     :param use_wandb: _description_, defaults to True
