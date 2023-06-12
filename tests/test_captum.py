@@ -4,7 +4,6 @@ import os
 from flood_forecast.interpretability import run_attribution, make_attribution_plots
 from flood_forecast.basic.gru_vanilla import VanillaGRU
 from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader
-from captum.attr import IntegratedGradients
 
 
 class TestCaptum(unittest.TestCase):
@@ -30,7 +29,5 @@ class TestCaptum(unittest.TestCase):
 
     def test_create_attribution_plots(self):
         """_summary_"""
-        attr = IntegratedGradients(self.test_model)
-        attr.attribute(self.test_data_loader)
         attributions, approx_error = run_attribution(self.test_model, self.test_data_loader, "IntegratedGradients", {})
         make_attribution_plots(attributions, approx_error, use_wandb=False)
