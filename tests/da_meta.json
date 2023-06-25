@@ -35,7 +35,7 @@
        "forecast_history":5,
        "forecast_length":1,
        "train_end": 300,
-       "valid_start":333,
+       "valid_start":302,
        "valid_end": 404,
        "test_end": 500,
        "target_col": ["cfs"],

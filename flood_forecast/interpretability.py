@@ -1,6 +1,5 @@
 from captum.attr import IntegratedGradients, DeepLift, GradientShap, NoiseTunnel, FeatureAblation
 from typing import Tuple, Dict
-import numpy as np
 
 attr_dict = {"IntegratedGradients": IntegratedGradients, "DeepLift": DeepLift, "GradientSHAP": GradientShap,
              "NoiseTunnel": NoiseTunnel, "FeatureAblation": FeatureAblation}
@@ -36,22 +35,17 @@ def run_attribution(model, test_loader, method, additional_params: Dict) -> Tupl
     return attributions, approximation_error
 
 
-def make_attribution_plots(attributions, approximation_error, model, x, y, use_wandb: bool = True):
+def make_attribution_plots(model, methods, use_wandb: bool = True):
     """Creates the attribution plots and logs them to wandb if use_wandb is True.
 
     :param attributions: A tensor of the attributions should be of dimension (batch_size, , n_features).
     :type attributions: torch.Tensor
     :param approximation_error: _description_
     :type approximation_error: _type_
-    :param use_wandb: _description_, defaults to True
+    :param use_wandb: _description_, defaults2 to True
     :type use_wandb: bool, optional
     """
-    x_axis_data = np.arange(x.shape[1])
-    x_axis_data_labels = model.params["fea"]
-
-    ig_attr_test_sum = attributions.detach().numpy().sum(0)
-    ig_attr_test_norm_sum = ig_attr_test_sum / np.linalg.norm(ig_attr_test_sum, ord=1)
-
-    lin_weight = model.lin1.weight[0].detach().numpy()
-    y_axis_lin_weight = lin_weight / np.linalg.norm(lin_weight, ord=1)
+    for method in methods:
+        attributions, approx = run_attribution(model.model, model.test_loader, methods, {})
+    # DO PLOTTING HERE
     pass
