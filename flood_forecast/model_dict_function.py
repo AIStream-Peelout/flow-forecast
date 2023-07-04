@@ -19,9 +19,12 @@ from flood_forecast.custom.dilate_loss import DilateLoss
 from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.transformer_xl.dsanet import DSANet
 from flood_forecast.basic.gru_vanilla import VanillaGRU
+from flood_forecast.basic.d_n_linear import DLinear, NLinear
+from flood_forecast.transformer_xl.cross_former import Crossformer as Crossformer10
+
 
 """
-Utility dictionaries to map a string to a class
+Utility dictionaries to map a string to a c class
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,
@@ -36,7 +39,10 @@ pytorch_model_dict = {
     "BasicAE": AE,
     "Informer": Informer,
     "DSANet": DSANet,
-    "VanillaGRU": VanillaGRU
+    "VanillaGRU": VanillaGRU,
+    "DLinear": DLinear,
+    "Crossformer": Crossformer10,
+    "NLinear": NLinear
 }
 
 pytorch_criterion_dict = {

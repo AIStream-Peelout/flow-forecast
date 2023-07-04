@@ -113,7 +113,7 @@ def simple_decode(model: Type[torch.nn.Module],
             else:
                 # residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
                 if output_len != out.shape[1]:
-                    raise ValueError("Ouput length should laways equal the out shape")
+                    raise ValueError("Output length should laways equal the output shape")
                 real_target2[:, i:i + residual, 0:multi_targets] = out[:, :residual]
                 src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)

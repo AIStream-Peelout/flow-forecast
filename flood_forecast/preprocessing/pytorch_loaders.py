@@ -565,3 +565,67 @@ class TemporalTestLoader(CSVTestLoader):
             ].copy()
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return (src_data, temporal_feat), (tar_temp, trg_data), all_rows_orig, target_idx_start
+
+
+class VariableSequenceLength(CSVDataLoader):
+    def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
+                 n_classes=9 + 90):
+        """Enables easy loading of time-series with variable length data
+
+        :param series_marker_column: The column that dealinates when an example begins and ends
+        :type series_marker_column: str
+        :param pad_length: If specified the length to truncate sequences at or pad them till that length
+        :type pad_length: int
+        :param task: The specific task (e.g. classification, forecasting, auto_encode)
+        :type task: str
+
+        """
+        super().__init__(**csv_loader_params)
+        self.pad_length = pad_length
+        self.series_marker_column = series_marker_column
+        self.task = task
+        self.uniques = self.df[series_marker_column].unique()
+        self.grouped_df = self.df.groupby(series_marker_column)
+        self.n_classes = n_classes
+
+    def get_item_forecast(self, idx):
+        pass
+
+    def get_item_classification(self, idx: int):
+        item = self.grouped_df.get_group(self.uniques[idx])
+        rows = item.iloc[idx: self.forecast_history + idx]
+        targ = item.iloc[idx: self.forecast_history + idx]
+        rows = torch.from_numpy(rows.to_numpy())
+        targ = torch.from_numpy(targ.to_numpy())
+        # Exclude the first row it is the target.
+        src = rows[:, 1:]
+        # Get label of the series sequence
+        targ = targ[-1, 0]
+        targ_labs = torch.zeros(self.n_classes)
+        casted_shit = int(targ.data.tolist())
+        if casted_shit > self.n_classes - 1:  # -1 because counting starts at zero
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+        targ_labs[casted_shit] = 1
+        return src.float(), targ_labs.float().unsqueeze(0)
+
+    def get_item_auto_encoder(self, idx):
+        item = self.grouped_df.get_group(self.uniques[idx])
+        the_seq = torch.from_numpy(item.to_numpy())
+        if self.pad_length:
+            res = self.pad_input_data(the_seq)
+            return res.to(torch.float32), res.float()
+        else:
+            return the_seq.float(), the_seq.float()
+
+    def pad_input_data(self, sequence: int):
+        """Pads a sequence to a specified length
+        """
+        if self.pad_length > sequence.shape[0]:
+            pad_dim = self.pad_length - sequence.shape[0]
+            return torch.nn.functional.pad(sequence, (0, 0, 0, pad_dim))
+        else:
+            return sequence[self.pad_length, :]
+
+    def __getitem__(self, idx: int):
+        tasks = {"auto": self.get_item_auto_encoder, "classification": self.get_item_classification}
+        return tasks[self.task](idx)

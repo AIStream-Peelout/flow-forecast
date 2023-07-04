@@ -1,4 +1,4 @@
-shap==0.40.0
+shap==0.41.0
 scikit-learn>=1.0.1
 pandas
 torch
@@ -6,12 +6,12 @@ tb-nightly
 seaborn
 future
 h5py
-wandb==0.13.7
+wandb==0.15.4
 google-cloud
 google-cloud-storage
-plotly~=5.11.0
+plotly~=5.15.0
 pytz>=2022.1
-setuptools~=65.6.3
+setuptools~=68.0.0
 numpy>=1.21
 requests
 torchvision>=0.6.0
@@ -21,3 +21,5 @@ sphinx
 sphinx-rtd-theme
 sphinx-autodoc-typehints
 sphinx
+einops
+
