@@ -23,7 +23,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.data_loader = CSVSeriesIDLoader("n_1", self.dataset_params, "shit")
 
     def test_seriesid(self):
-        """Tests the series_id method for one
+        """Tests the series_id method for one item
         """
         x, y = self.data_loader[0]
         self.assertIsInstance(x, dict)
