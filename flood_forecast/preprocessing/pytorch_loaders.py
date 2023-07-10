@@ -58,7 +58,7 @@ class CSVDataLoader(Dataset):
         df = get_data(file_path)
         relevant_cols3 = []
         if sort_column:
-            df[sort_column] = df[sort_column].astype("datetime64[ns]", format="ISO8601")
+            df[sort_column] = df[sort_column].astype("datetime64[ns]")
             df = df.sort_values(by=sort_column)
             if feature_params:
                 df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
