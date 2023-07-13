@@ -184,6 +184,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         print("The series id column is:")
         print(self.series_id_col)
         print(self.unique_cols)
+        print(self.df)
         for col in self.unique_cols:
             new_df = self.df[self.df[self.series_id_col] == col]
             df_list.append(new_df)
