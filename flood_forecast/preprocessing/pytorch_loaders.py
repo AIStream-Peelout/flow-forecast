@@ -181,13 +181,14 @@ class CSVSeriesIDLoader(CSVDataLoader):
         df_list = []
         self.df = self.df.reset_index()
         self.unique_dict = {}
-        print("The series id column is:")
+        print("The series id column is below:")
         print(self.series_id_col)
         print(self.unique_cols)
-        print(self.df)
+        print(self.df[series_id_col])
         for col in self.unique_cols:
             new_df = self.df[self.df[self.series_id_col] == col]
             df_list.append(new_df)
+            print(new_df)
         self.listed_vals = df_list
         self.__make_unique_dict__()
         self.__validate_data__in_df()
