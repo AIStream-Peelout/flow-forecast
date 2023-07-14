@@ -20,7 +20,6 @@ class TestInterpolationCSVLoader(unittest.TestCase):
             "target_col": ["vel"],
             "interpolate_param": False,
         }
-        # This will fail
         self.data_loader = CSVSeriesIDLoader("n_1", self.dataset_params, "shit")
 
     def test_seriesid(self):

@@ -172,6 +172,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
         main_params1 = deepcopy(main_params)
         if "scaled_cols" not in main_params1:
             main_params1["scaled_cols"] = main_params1["relevant_cols"]
+            print("The scaled cols are below")
+            print(main_params1["scaled_cols"])
         main_params1["relevant_cols"].append(series_id_col)
         super().__init__(**main_params1)
         self.series_id_col = series_id_col
