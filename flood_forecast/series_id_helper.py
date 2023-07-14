@@ -9,7 +9,7 @@ def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion,
     :param trg: A dictionary of target sequences (partitioned by series_id)
     :type trg: torch.Tensor
     :param model: A model that takes both a src and a series_id
-    :type model: torch.nn.Module
+    :type model: torch.nn.Module d
     """
     total_loss = 0.0
     for (k, v), (k2, v2) in zip(src.items(), trg.items()):

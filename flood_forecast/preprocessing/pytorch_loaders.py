@@ -72,6 +72,8 @@ class CSVDataLoader(Dataset):
         self.scale = None
         if scaled_cols is None:
             scaled_cols = relevant_cols
+        print("scaled cols are")
+        print(scaled_cols)
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
         elif start_stamp != 0:
