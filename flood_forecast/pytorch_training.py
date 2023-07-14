@@ -357,7 +357,7 @@ def torch_single_train(model: PyTorchForecast,
     :type model: PyTorchForecast
     :param opt: The optimizer to use in the code
     :type opt: optim.Optimizer
-    :param criterion: [description]
+    :param criterion: [m
     :type criterion: Type[torch.nn.modules.loss._Loss]
     :param data_loader: [description]
     :type data_loader: DataLoader
@@ -407,8 +407,7 @@ def torch_single_train(model: PyTorchForecast,
             trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
             # Assign to avoid other if statement
         elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
-            running_loss += handle_csv_id_output(src, trg)
-            continue
+            running_loss += handle_csv_id_output(src, trg, model, criterion, False, multi_targets)
         src = src.to(model.device)
         trg = trg.to(model.device)
         output = model.model(src, **forward_params)

@@ -6,7 +6,7 @@ def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion,
 
     :param src: A dictionary of src sequences (partitioned by series_id)
     :type src: torch.Tensor
-    :param trg: A dictionary of target sequences (partitioned by series_id)
+    :param trg: A dictionary of target sequences (key as series_id)
     :type trg: torch.Tensor
     :param model: A model that takes both a src and a series_id
     :type model: torch.nn.Module
