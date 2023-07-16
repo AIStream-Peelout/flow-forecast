@@ -13,7 +13,7 @@ def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion,
     """
     total_loss = 0.0
     for (k, v), (k2, v2) in zip(src.items(), trg.items()):
-        output = model(v, k)
+        output = model.model(v, k)
         loss = criterion(output, v2[:, :, :n_targs])
         total_loss += loss.item()
     total_loss /= len(src.keys())

@@ -361,7 +361,7 @@ class AEDataloader(CSVDataLoader):
 
         :param file_path: The path to the file
         :type file_path: str
-        :param relevant_cols: d
+        :param relevant_cols: The relevant columns
         :type relevant_cols: List
         :param scaling: [description], defaults to None
         :type scaling: [type], optional
@@ -487,7 +487,7 @@ class TemporalLoader(CSVDataLoader):
             ## -----------------
             kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1, "shuffle" : False,
             "num_workers" : 1}
-            d = TemporalLoader(time_feats=["year", "month"], kwargs, label_len=1)
+            d = TemporalLoader(time_ feats=["year", "month"], kwargs, label_len=1)
             x, y = d[0]
             print(x[0]) # (tensor([[0.0, 1.0, 2.0, 3.0]]))]),
             print(y[0]) # (tensor([[3.0, 4.0, 5.0, 6.0]]))])
