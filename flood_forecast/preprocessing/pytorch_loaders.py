@@ -228,6 +228,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
             targ_list = {}
             for va in self.listed_vals:
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, :len(self.relevant_cols3) - 1]
+                print(t.shape)
                 targ_start_idx = idx + self.forecast_history
                 idx2 = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
@@ -240,6 +241,9 @@ class CSVSeriesIDLoader(CSVDataLoader):
 
     def __sample_series_id__(idx, series_id):
         pass
+
+    def __len__(self) -> int:
+        return super().__len__()
 
 
 class CSVTestLoader(CSVDataLoader):
@@ -487,7 +491,7 @@ class TemporalLoader(CSVDataLoader):
             ## -----------------
             kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1, "shuffle" : False,
             "num_workers" : 1}
-            d = TemporalLoader(time_ feats=["year", "month"], kwargs, label_len=1)
+            d = TemporalLoader(time_feats=["year", "month"], kwargs, label_len=1)
             x, y = d[0]
             print(x[0]) # (tensor([[0.0, 1.0, 2.0, 3.0]]))]),
             print(y[0]) # (tensor([[3.0, 4.0, 5.0, 6.0]]))])

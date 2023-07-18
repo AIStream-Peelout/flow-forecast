@@ -1,7 +1,8 @@
 import torch
 
 
-def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion, random_sample=False, n_targs=1):
+def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion,
+                         random_sample: bool = False, n_targs: int = 1):
     """A helper function to better handle the output of models with a series_id and compute loss,
 
     :param src: A dictionary of src sequences (partitioned by series_id)
@@ -13,6 +14,8 @@ def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion,
     """
     total_loss = 0.0
     for (k, v), (k2, v2) in zip(src.items(), trg.items()):
+        print("Shape of v below")
+        print(v.shape)
         output = model.model(v, k)
         loss = criterion(output, v2[:, :, :n_targs])
         total_loss += loss.item()
