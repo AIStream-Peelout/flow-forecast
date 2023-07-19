@@ -227,7 +227,9 @@ class CSVSeriesIDLoader(CSVDataLoader):
             src_list = {}
             targ_list = {}
             for va in self.listed_vals:
-                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, :len(self.relevant_cols3) - 1]
+                # idx: self.forecast_history + idx
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
+                print("Shape of t is below")
                 print(t.shape)
                 targ_start_idx = idx + self.forecast_history
                 idx2 = va[self.series_id_col].iloc[0]
