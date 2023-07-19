@@ -1,7 +1,8 @@
 import torch
+from typing import Dict
 
 
-def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion,
+def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model, criterion,
                          random_sample: bool = False, n_targs: int = 1):
     """A helper function to better handle the output of models with a series_id and compute loss,
 
@@ -12,7 +13,7 @@ def handle_csv_id_output(src: torch.Tensor, trg: torch.Tensor, model, criterion,
     :param model: A model that takes both a src and a series_id
     :type model: torch.nn.Module
     """
-    total_loss = 0.0
+    total_loss = 0.00
     for (k, v), (k2, v2) in zip(src.items(), trg.items()):
         print("Shape of v below")
         print(v.shape)
