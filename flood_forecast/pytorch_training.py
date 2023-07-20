@@ -406,10 +406,11 @@ def torch_single_train(model: PyTorchForecast,
             trg = trg[0]
             trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
             # Assign to avoid other if statement
-        elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
+        if "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             running_loss += handle_csv_id_output(src, trg, model, criterion, False, multi_targets)
-        src = src.to(model.device)
-        trg = trg.to(model.device)
+        else:
+            src = src.to(model.device)
+            trg = trg.to(model.device)
         output = model.model(src, **forward_params)
         if hasattr(model.model, "pred_len"):
             multi_targets = mulit_targets_copy
