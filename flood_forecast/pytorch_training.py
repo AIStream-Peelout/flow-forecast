@@ -420,6 +420,8 @@ def torch_single_train(model: PyTorchForecast,
             multi_targets = False
         if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
             labels = trg
+        elif model.params["dataset_params"]["class"] == "CSVSeriesIDLoader":
+            labels = trg
         elif multi_targets == 1:
             labels = trg[:, :, 0]
         elif multi_targets > 1:
