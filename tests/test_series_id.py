@@ -16,9 +16,10 @@ class TestInterpolationCSVLoader(unittest.TestCase):
             "file_path": os.path.join(self.test_data_path, "test2.csv"),
             "forecast_history": 20,
             "forecast_length": 1,
-            "relevant_cols": ["vel", "obs", "day_of_week"],
-            "target_col": ["vel"],
+            "relevant_cols": ["DAILY_YIELD", "DC_POWER", "AC_POWER"],
+            "target_col": ["DAILY_YIELD"],
             "interpolate_param": False,
+            "series_id_col": ["PLANT_ID"],
         }
         self.data_loader = CSVSeriesIDLoader("n_1", self.dataset_params, "shit")
 

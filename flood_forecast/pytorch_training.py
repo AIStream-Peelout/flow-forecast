@@ -411,7 +411,7 @@ def torch_single_train(model: PyTorchForecast,
         else:
             src = src.to(model.device)
             trg = trg.to(model.device)
-        output = model.model(src, **forward_params)
+            output = model.model(src, **forward_params)
         if hasattr(model.model, "pred_len"):
             multi_targets = mulit_targets_copy
             pred_len = model.model.pred_len
