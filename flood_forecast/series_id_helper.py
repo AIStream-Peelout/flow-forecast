@@ -2,7 +2,7 @@ import torch
 from typing import Dict
 
 
-def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model, criterion,
+def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model, criterion, opt,
                          random_sample: bool = False, n_targs: int = 1):
     """A helper function to better handle the output of models with a series_id and compute loss,
 
@@ -20,5 +20,7 @@ def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tens
         output = model.model(v, k)
         loss = criterion(output, v2[:, :, :n_targs])
         total_loss += loss.item()
+        loss.backward()
+        opt.step()
     total_loss /= len(src.keys())
     return total_loss
