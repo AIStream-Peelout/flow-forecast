@@ -408,46 +408,49 @@ def torch_single_train(model: PyTorchForecast,
             # Assign to avoid other if statement
         if "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             running_loss += handle_csv_id_output(src, trg, model, criterion, False, multi_targets)
-            i += 1
         else:
             src = src.to(model.device)
             trg = trg.to(model.device)
             output = model.model(src, **forward_params)
-            if hasattr(model.model, "pred_len"):
-                multi_targets = mulit_targets_copy
-                pred_len = model.model.pred_len
-                output = output[:, :, 0:multi_targets]
-                labels = trg[:, -pred_len:, 0:multi_targets]
-                multi_targets = False
-            if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
-                labels = trg
-            elif model.params["dataset_params"]["class"] == "CSVSeriesIDLoader":
-                labels = trg
-            elif multi_targets == 1:
-                labels = trg[:, :, 0]
-            elif multi_targets > 1:
-                labels = trg[:, :, 0:multi_targets]
-            if probablistic:
-                output1 = output
-                output = output.mean
-                output_std = output1.stddev
-            if type(criterion) == list:
-                loss = multi_crit(criterion, output, labels, None)
-            else:
-                loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
-            if loss > 100:
-                print("Warning: high loss detected")
-            loss.backward()
-            opt.step()
-            if torch.isnan(loss) or loss == float('inf'):
-                raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
-            running_loss += loss.item()
-            i += 1
+        if hasattr(model.model, "pred_len"):
+            multi_targets = mulit_targets_copy
+            pred_len = model.model.pred_len
+            output = output[:, :, 0:multi_targets]
+            labels = trg[:, -pred_len:, 0:multi_targets]
+            multi_targets = False
+        if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
+            labels = trg
+        elif model.params["dataset_params"]["class"] == "CSVSeriesIDLoader":
+            labels = trg
+        elif multi_targets == 1:
+            labels = trg[:, :, 0]
+        elif multi_targets > 1:
+            labels = trg[:, :, 0:multi_targets]
+        if probablistic:
+            output1 = output
+            output = output.mean
+            output_std = output1.stddev
+        if type(criterion) == list:
+            loss = multi_crit(criterion, output, labels, None)
+        else:
+            loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
+        if loss > 100:
+            print("Warning: high loss detected")
+        loss.backward()
+        opt.step()
+        if torch.isnan(loss) or loss == float('inf'):
+            raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
+        running_loss += loss.item()
+        i += 1
     print("The running loss is: ")
     print(running_loss)
     print("The number of items in train is: " + str(i))
     total_loss = running_loss / float(i)
     return total_loss
+
+
+def handle_crit_list():
+    pass
 
 
 def compute_validation(validation_loader: DataLoader,
