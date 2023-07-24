@@ -187,8 +187,6 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.unique_dict = {}
         print("The series id column is below:")
         print(self.series_id_col)
-        print(self.unique_cols)
-        print(self.df[series_id_col])
         for col in self.unique_cols:
             new_df = self.df[self.df[self.series_id_col] == col]
             df_list.append(new_df)
@@ -523,7 +521,7 @@ class TemporalLoader(CSVDataLoader):
 
 
 class TemporalTestLoader(CSVTestLoader):
-    def __init__(self, time_feats, kwargs={}, decoder_step_len=None):
+    def __init__(self, time_feats: List[str], kwargs={}, decoder_step_len=None):
         """A test data-loader class for data in the format of the TemporalLoader.
 
         :param time_feats: The temporal featuers to use in encoding.
@@ -602,7 +600,7 @@ class VariableSequenceLength(CSVDataLoader):
         self.grouped_df = self.df.groupby(series_marker_column)
         self.n_classes = n_classes
 
-    def get_item_forecast(self, idx):
+    def get_item_forecast(self, idx: int):
         pass
 
     def get_item_classification(self, idx: int):

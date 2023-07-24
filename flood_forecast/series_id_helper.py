@@ -24,3 +24,12 @@ def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tens
         opt.step()
     total_loss /= len(src.keys())
     return total_loss
+
+
+def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model, criterion,
+                             random_sample: bool = False, n_targs: int = 1, max_seq_len: int = 100):
+    total_loss = 0.00
+    for (k, v), (k2, v2) in zip(src.items(), trg.items()):
+        output = model.model(v, k)
+        loss = criterion(output, v2[:, :, :n_targs])
+        total_loss += loss.item()
