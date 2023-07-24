@@ -408,7 +408,6 @@ def torch_single_train(model: PyTorchForecast,
             # Assign to avoid other if statement
         if "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             running_loss += handle_csv_id_output(src, trg, model, criterion, opt, False, multi_targets)
-            i += 1
         else:
             src = src.to(model.device)
             trg = trg.to(model.device)
