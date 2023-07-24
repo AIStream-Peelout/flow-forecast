@@ -408,6 +408,7 @@ def torch_single_train(model: PyTorchForecast,
             # Assign to avoid other if statement
         if "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             running_loss += handle_csv_id_output(src, trg, model, criterion, opt, False, multi_targets)
+            i += 1
         else:
             src = src.to(model.device)
             trg = trg.to(model.device)
@@ -513,6 +514,9 @@ def compute_validation(validation_loader: DataLoader,
         label_list = []
         mod_output_list = []
         for src, targ in validation_loader:
+            if validation_loader.dataset.__class__.__name__ == "CSVSeriesIDLoader":
+                # helper function here .
+                pass
             src = src if isinstance(src, list) else src.to(device)
             targ = targ if isinstance(targ, list) else targ.to(device)
             # targ = targ if isinstance(targ, list) else targ.to(device)
