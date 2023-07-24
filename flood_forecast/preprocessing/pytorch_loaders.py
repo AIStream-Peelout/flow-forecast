@@ -244,7 +244,10 @@ class CSVSeriesIDLoader(CSVDataLoader):
         pass
 
     def __len__(self) -> int:
-        return super().__len__()
+        if self.return_all_series:
+            return len(self.listed_vals[0]) - self.forecast_history - self.forecast_length - 1
+        else:
+            raise NotImplementedError("Current code only supports returning all the series at each iteration")
 
 
 class CSVTestLoader(CSVDataLoader):

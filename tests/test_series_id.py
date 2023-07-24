@@ -19,12 +19,11 @@ class TestInterpolationCSVLoader(unittest.TestCase):
             "relevant_cols": ["DAILY_YIELD", "DC_POWER", "AC_POWER"],
             "target_col": ["DAILY_YIELD"],
             "interpolate_param": False,
-            "series_id_col": ["PLANT_ID"],
         }
-        self.data_loader = CSVSeriesIDLoader("n_1", self.dataset_params, "shit")
+        self.data_loader = CSVSeriesIDLoader("PLANT_ID", self.dataset_params, "shit")
 
     def test_seriesid(self):
-        """Tests the series_id method for one item
+        """Tests the series_id method a single item
         """
         x, y = self.data_loader[0]
         self.assertIsInstance(x, dict)
