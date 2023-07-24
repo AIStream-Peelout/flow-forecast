@@ -39,8 +39,13 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         mse1 = MSELoss()
         d1 = DataLoader(self.data_loader, batch_size=2)
         d = DecoderTransformer(3, 8, 4, 128, 20, 0.2, 1, {}, seq_num1=3, forecast_length=1)
+
+        class DummyHolder():
+            def __init__(self, model):
+                self.model = model
+        mod = DummyHolder(d)
         x, y = d1.__iter__().__next__()
-        l1 = handle_csv_id_output(x, y, d, mse1, torch.optim.Adam(d.parameters()))
+        l1 = handle_csv_id_output(x, y, mod, mse1, torch.optim.Adam(d.parameters()))
         self.assertGreater(l1, 0)
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
-from flood_forecast.series_id_helper import handle_csv_id_output
+from flood_forecast.series_id_helper import handle_csv_id_output, handle_csv_id_validation
 from torch.nn import CrossEntropyLoss
 
 
@@ -515,7 +515,7 @@ def compute_validation(validation_loader: DataLoader,
         mod_output_list = []
         for src, targ in validation_loader:
             if validation_loader.dataset.__class__.__name__ == "CSVSeriesIDLoader":
-                # helper function here .
+                loss = handle_csv_id_validation(src, targ, model, criterion, False, multi_targets)
                 pass
             src = src if isinstance(src, list) else src.to(device)
             targ = targ if isinstance(targ, list) else targ.to(device)
