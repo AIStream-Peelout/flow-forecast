@@ -13,7 +13,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
             os.path.dirname(os.path.abspath(__file__)), "test_data"
         )
         self.dataset_params = {
-            "file_path": os.path.join(self.test_data_path, "test2.csv"),
+            "file_path": os.path.join(self.test_data_path, "solar_small.csv"),
             "forecast_history": 20,
             "forecast_length": 1,
             "relevant_cols": ["DAILY_YIELD", "DC_POWER", "AC_POWER"],
