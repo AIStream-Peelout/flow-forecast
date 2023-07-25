@@ -29,9 +29,8 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         x, y = self.data_loader[0]
         self.assertIsInstance(x, dict)
         self.assertIsInstance(y, dict)
-        self.assertGreater(x[2][0, 0], 1)
-        print(x[2].shape)
-        self.assertEqual(x[2].shape[1], 3)
+        self.assertGreater(x[1][0, 0], 1)
+        self.assertEqual(x[1].shape[1], 3)
 
     def test_handle_series_id(self):
         """Tests the handle_series_id method
