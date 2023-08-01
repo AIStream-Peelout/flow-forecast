@@ -515,8 +515,9 @@ def compute_validation(validation_loader: DataLoader,
         mod_output_list = []
         for src, targ in validation_loader:
             if validation_loader.dataset.__class__.__name__ == "CSVSeriesIDLoader":
-                loss = handle_csv_id_validation(src, targ, model, criterion, False, multi_targets)
-                pass
+                scaled_crit = handle_csv_id_validation(src, targ, model, criterion, False, multi_targets)
+                unscaled_crit = {}
+                continue
             src = src if isinstance(src, list) else src.to(device)
             targ = targ if isinstance(targ, list) else targ.to(device)
             # targ = targ if isinstance(targ, list) else targ.to(device)

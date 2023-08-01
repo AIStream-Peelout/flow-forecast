@@ -4,7 +4,7 @@ from typing import Dict, List
 
 def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model, criterion, opt,
                          random_sample: bool = False, n_targs: int = 1):
-    """A helper function to better handle the output of models with a series_id and compute loss,
+    """A helper function to better handle the output of models with a series_id and compute full loss,
 
     :param src: A dictionary of src sequences (partitioned by series_id)
     :type src: torch.Tensor
@@ -28,7 +28,8 @@ def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tens
 
 def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model: torch.nn.Module,
                              criterion: List, random_sample: bool = False, n_targs: int = 1, max_seq_len: int = 100):
-    """"""
+    """
+    """
     losses = [0] * len(criterion)
     for (k, v), (k2, v2) in zip(src.items(), trg.items()):
         output = model(v, k)
@@ -36,3 +37,5 @@ def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.
             loss = critt(output, v2[:, :, :n_targs])
             losses[criterion.index(critt)] += loss.item()
     return losses
+
+# TODO: Add a function to handle the output of a model with a series_id
