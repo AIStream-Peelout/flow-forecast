@@ -28,7 +28,7 @@ def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tens
 
 def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model: torch.nn.Module,
                              criterion: List, random_sample: bool = False, n_targs: int = 1, max_seq_len: int = 100): 
-    """_summary_
+    """Function handles
 
     :param src: _description_
     :type src: Dict[int, torch.Tensor]
@@ -44,8 +44,8 @@ def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.
     :type n_targs: int, optional
     :param max_seq_len: _description_, defaults to 100
     :type max_seq_len: int, optional
-    :return: _description_
-    :rtype: _type_
+    :return: Returns a dictionary of losses for each criterion
+    :rtype: Dict[str, float]
     """
     scaled_crit = dict.fromkeys(criterion, 0)
     losses = [0] * len(criterion)
