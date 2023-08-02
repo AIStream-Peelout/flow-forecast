@@ -5,7 +5,7 @@ class NaiveBase(torch.nn.Module):
     """
     A very simple baseline model that returns
     the fixed value based on the input sequence.
-    No learning used at all a
+    No learning used at all.
     """
 
     def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, metric: str = "last"):
@@ -19,6 +19,14 @@ class NaiveBase(torch.nn.Module):
         self.metric_function = self.metric_dict[metric]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """_summary_
+
+        Args:
+            x (torch.Tensor): _description_
+
+        Returns:
+            torch.Tensor: _description_
+        """
         return self.metric_function(x, self.output_seq_len)
 
 

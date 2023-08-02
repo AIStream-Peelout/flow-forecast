@@ -56,24 +56,11 @@
    "inference_params":
    {     
          "datetime_start":"2016-05-31",
-          "hours_to_forecast":356, 
+          "hours_to_forecast":336, 
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
             "decoder_function": "simple_decode", 
-            "unsqueeze_dim": 1},
-          "dataset_params":{
-             "file_path": "tests/test_data/keag_small.csv",
-             "forecast_history":5,
-             "forecast_length":1,
-             "relevant_cols": ["cfs", "precip", "temp"],
-             "target_col": ["cfs", "temp"],
-             "no_scale": true,
-             "scaling": "MinMaxScaler",
-             "scaler_params":{
-                "feature_range":[0,2]
-             },
-             "interpolate_param": false
-          }
+            "unsqueeze_dim": 1}
    }
        
    

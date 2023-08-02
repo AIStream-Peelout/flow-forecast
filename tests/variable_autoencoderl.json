@@ -37,8 +37,8 @@
        "optimizer": "Adam",
        "optim_params":
        {},
-       "lr": 0.01,
-       "epochs": 1
+       "lr": 0.03,
+       "epochs": 2
     },
     "GCS": false,
    

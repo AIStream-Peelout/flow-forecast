@@ -7,6 +7,7 @@ from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
 from flood_forecast.preprocessing.temporal_feats import feature_fix
+from copy import deepcopy
 
 
 class CSVDataLoader(Dataset):
@@ -71,6 +72,8 @@ class CSVDataLoader(Dataset):
         self.scale = None
         if scaled_cols is None:
             scaled_cols = relevant_cols
+        print("scaled cols are")
+        print(scaled_cols)
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
         elif start_stamp != 0:
@@ -168,20 +171,43 @@ class CSVSeriesIDLoader(CSVDataLoader):
         :param return_all: Whether to return all items, defaults to True
         :type return_all: bool, optional
         """
-        main_params["relevant_cols"].append(series_id_col)
-        super().__init__(**main_params)
+        main_params1 = deepcopy(main_params)
+        if "scaled_cols" not in main_params1:
+            main_params1["scaled_cols"] = main_params1["relevant_cols"].copy()
+            print("The scaled cols are below")
+            print(main_params1["scaled_cols"])
+        main_params1["relevant_cols"].append(series_id_col)
+        super().__init__(**main_params1)
         self.series_id_col = series_id_col
         self.return_method = return_method
         self.return_all_series = return_all
         self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
+        self.df = self.df.reset_index()
         self.unique_dict = {}
+        print("The series id column is below:")
+        print(self.series_id_col)
         for col in self.unique_cols:
-            df_list.append(self.df[self.df[self.series_id_col] == col])
+            new_df = self.df[self.df[self.series_id_col] == col]
+            df_list.append(new_df)
+            print(new_df.columns)
         self.listed_vals = df_list
         self.__make_unique_dict__()
+        self.__validate_data__in_df()
         print(self.unique_dict)
         print("unique dict")
+
+    def __validate_data__in_df(self):
+        """Makes sure the data in the data-frame is the proper length for each series e
+        """
+        if self.return_all_series:
+            len_first = len(self.listed_vals[0])
+            print("Length of first series is:" + str(len_first))
+            for series in self.listed_vals:
+                print("Length of first series is:" + str(len(series)))
+                series_bool = len(series) == len_first
+                if not series_bool:
+                    raise IndexError("The length of sub-series data-frames are not equal.")
 
     def __make_unique_dict__(self):
         for i in range(0, len(self.unique_cols)):
@@ -198,12 +224,13 @@ class CSVSeriesIDLoader(CSVDataLoader):
         if self.return_all_series:
             src_list = {}
             targ_list = {}
-            print(self.unique_cols)
             for va in self.listed_vals:
-                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, :len(self.relevant_cols3) - 1]
+                # We need to exclude the index column on one end and the series id column on the other
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, 1:-1]
+                print(t.shape)
                 targ_start_idx = idx + self.forecast_history
                 idx2 = va[self.series_id_col].iloc[0]
-                targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
+                targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:-1]
                 src_list[self.unique_dict[idx2]] = t
                 targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
@@ -213,6 +240,12 @@ class CSVSeriesIDLoader(CSVDataLoader):
 
     def __sample_series_id__(idx, series_id):
         pass
+
+    def __len__(self) -> int:
+        if self.return_all_series:
+            return len(self.listed_vals[0]) - self.forecast_history - self.forecast_length - 1
+        else:
+            raise NotImplementedError("Current code only supports returning all the series at each iteration")
 
 
 class CSVTestLoader(CSVDataLoader):
@@ -334,7 +367,7 @@ class AEDataloader(CSVDataLoader):
 
         :param file_path: The path to the file
         :type file_path: str
-        :param relevant_cols: d
+        :param relevant_cols: The relevant columns
         :type relevant_cols: List
         :param scaling: [description], defaults to None
         :type scaling: [type], optional
@@ -488,7 +521,7 @@ class TemporalLoader(CSVDataLoader):
 
 
 class TemporalTestLoader(CSVTestLoader):
-    def __init__(self, time_feats, kwargs={}, decoder_step_len=None):
+    def __init__(self, time_feats: List[str], kwargs={}, decoder_step_len=None):
         """A test data-loader class for data in the format of the TemporalLoader.
 
         :param time_feats: The temporal featuers to use in encoding.
@@ -567,7 +600,7 @@ class VariableSequenceLength(CSVDataLoader):
         self.grouped_df = self.df.groupby(series_marker_column)
         self.n_classes = n_classes
 
-    def get_item_forecast(self, idx):
+    def get_item_forecast(self, idx: int):
         pass
 
     def get_item_classification(self, idx: int):
