@@ -204,7 +204,7 @@ def infer_on_torch_model(
 ) -> Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]:
     """
     Function to handle both test evaluation and inference on a test data-frame.
-    :param model: The time series model present
+    :param model: The time series model present in the model zoo
     :param test_csv_path: The path to the test data-frame
     :return:
         df: df including training and test data
@@ -240,6 +240,9 @@ def infer_on_torch_model(
         if "label_len" in model.params["model_params"]:
             test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
+    elif model.params["dataset_params"]["class"] == "CSVSeriesIDLoader":
+        print("CSVSeriesIDLoader not yet supported for inference. But is coming very soon.")
+        exit()
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -339,7 +342,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
     :type df_pred: [type]
     :param decoder_param: [description]
     :type decoder_param: bool
-    :param history_length: [description]
+    :param history_length: The number of historical time-steps
     :type history_length: int
     :param num_samples: The number of samples to generate (i.e. larger ci)
     :type num_samples: int

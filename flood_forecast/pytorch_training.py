@@ -11,6 +11,7 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
+from flood_forecast.series_id_helper import handle_csv_id_output, handle_csv_id_validation
 from torch.nn import CrossEntropyLoss
 
 
@@ -356,7 +357,7 @@ def torch_single_train(model: PyTorchForecast,
     :type model: PyTorchForecast
     :param opt: The optimizer to use in the code
     :type opt: optim.Optimizer
-    :param criterion: [description]
+    :param criterion: [m
     :type criterion: Type[torch.nn.modules.loss._Loss]
     :param data_loader: [description]
     :type data_loader: DataLoader
@@ -405,48 +406,48 @@ def torch_single_train(model: PyTorchForecast,
             trg = trg[0]
             trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
             # Assign to avoid other if statement
-        elif "SeriesIDLoader" == model.params["dataset_params"]["class"]:
-            pass
-        src = src.to(model.device)
-        trg = trg.to(model.device)
-        output = model.model(src, **forward_params)
-        if hasattr(model.model, "pred_len"):
-            multi_targets = mulit_targets_copy
-            pred_len = model.model.pred_len
-            output = output[:, :, 0:multi_targets]
-            labels = trg[:, -pred_len:, 0:multi_targets]
-            multi_targets = False
-        if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
-            labels = trg
-        elif multi_targets == 1:
-            labels = trg[:, :, 0]
-        elif multi_targets > 1:
-            labels = trg[:, :, 0:multi_targets]
-        if probablistic:
-            output1 = output
-            output = output.mean
-            output_std = output1.stddev
-        if type(criterion) == list:
-            loss = multi_crit(criterion, output, labels, None)
+        if "SeriesIDLoader" == model.params["dataset_params"]["class"]:
+            running_loss += handle_csv_id_output(src, trg, model, criterion, opt, False, multi_targets)
+            i += 1
         else:
-            loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
-        if loss > 100:
-            print("Warning: high loss detected")
-        loss.backward()
-        opt.step()
-        if torch.isnan(loss) or loss == float('inf'):
-            raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
-        running_loss += loss.item()
-        i += 1
+            src = src.to(model.device)
+            trg = trg.to(model.device)
+            output = model.model(src, **forward_params)
+            if hasattr(model.model, "pred_len"):
+                multi_targets = mulit_targets_copy
+                pred_len = model.model.pred_len
+                output = output[:, :, 0:multi_targets]
+                labels = trg[:, -pred_len:, 0:multi_targets]
+                multi_targets = False
+            if model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
+                labels = trg
+            elif model.params["dataset_params"]["class"] == "CSVSeriesIDLoader":
+                labels = trg
+            elif multi_targets == 1:
+                labels = trg[:, :, 0]
+            elif multi_targets > 1:
+                labels = trg[:, :, 0:multi_targets]
+            if probablistic:
+                output1 = output
+                output = output.mean
+                output_std = output1.stddev
+            if type(criterion) == list:
+                loss = multi_crit(criterion, output, labels, None)
+            else:
+                loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
+            if loss > 100:
+                print("Warning: high loss detected")
+            loss.backward()
+            opt.step()
+            if torch.isnan(loss) or loss == float('inf'):
+                raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
+            running_loss += loss.item()
+            i += 1
     print("The running loss is: ")
     print(running_loss)
     print("The number of items in train is: " + str(i))
     total_loss = running_loss / float(i)
     return total_loss
-
-
-def handle_crit_list():
-    pass
 
 
 def compute_validation(validation_loader: DataLoader,
@@ -509,6 +510,10 @@ def compute_validation(validation_loader: DataLoader,
         label_list = []
         mod_output_list = []
         for src, targ in validation_loader:
+            if validation_loader.dataset.__class__.__name__ == "CSVSeriesIDLoader":
+                scaled_crit = handle_csv_id_validation(src, targ, model, criterion, False, multi_targets)
+                unscaled_crit = {}
+                continue
             src = src if isinstance(src, list) else src.to(device)
             targ = targ if isinstance(targ, list) else targ.to(device)
             # targ = targ if isinstance(targ, list) else targ.to(device)
@@ -591,12 +596,14 @@ def compute_validation(validation_loader: DataLoader,
         print("Plotting test classification metrics")
         label_list = torch.cat(label_list)
         label_list = label_list[:, 0, :].detach().cpu()
-        mod_output1 = torch.cat(mod_output_list)[:, 0, :].detach().cpu().numpy()
+        mod_output1 = torch.cat(mod_output_list)[:, 0, :].detach().cpu()
+        d = torch.nn.Softmax(dim=1)
+        mod_output_final = d(mod_output1).numpy()
         fin = label_list.max(dim=1)[1]
-        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output1, classes_to_plot=None, labels=None,
+        wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output_final, classes_to_plot=None, labels=None,
                                                              title="roc_" + str(epoch))})
-        wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output1)})
-        wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output1,
+        wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output_final)})
+        wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output_final,
                    y_true=fin.detach().cpu().numpy(), class_names=None)})
     model.train()
     return list(scaled_crit.values())[0]
