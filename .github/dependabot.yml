@@ -12,6 +12,3 @@ updates:
   - dependency-name: torchvision
     versions:
     - 0.8.2
-  - dependency-name: shap
-    versions:
-    - 0.38.1
