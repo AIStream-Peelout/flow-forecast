@@ -27,7 +27,7 @@ def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tens
 
 
 def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model: torch.nn.Module,
-                             criterion: List, random_sample: bool = False, n_targs: int = 1, max_seq_len: int = 100): 
+                             criterion: List, random_sample: bool = False, n_targs: int = 1, max_seq_len: int = 100):
     """Function handles
 
     :param src: _description_
