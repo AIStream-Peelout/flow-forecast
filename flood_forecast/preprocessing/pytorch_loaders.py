@@ -641,3 +641,14 @@ class VariableSequenceLength(CSVDataLoader):
     def __getitem__(self, idx: int):
         tasks = {"auto": self.get_item_auto_encoder, "classification": self.get_item_classification}
         return tasks[self.task](idx)
+
+
+class SeriesIDTestLoader(CSVSeriesIDLoader, CSVTestLoader):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
+        super().__init__(series_id_col, main_params, return_method, return_all)
+    
+    def get_from_start_date(self, forecast_start: datetime):
+        return super().get_from_start_date(forecast_start)
+    
+    def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
+        return super().__getitem__(idx)
