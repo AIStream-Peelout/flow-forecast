@@ -290,7 +290,7 @@ class CSVTestLoader(CSVDataLoader):
     def get_from_start_date(self, forecast_start: datetime, original_df=None):
         if original_df is None:
             original_df = self.original_df
-        dt_row = original_df[ 
+        dt_row = original_df[
             original_df["datetime"] == forecast_start
         ]
         revised_index = dt_row.index[0]
@@ -652,7 +652,6 @@ class SeriesIDTestLoader(CSVSeriesIDLoader, CSVTestLoader):
         self.forecast_total = forecast_total
 
     def get_from_start_date(self, forecast_start: datetime):
-        dt_row = self.original_df[
         return self.__getitem__(forecast_start)
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
