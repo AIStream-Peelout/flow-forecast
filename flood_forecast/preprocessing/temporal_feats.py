@@ -4,17 +4,17 @@ import numpy as np
 
 
 def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
-    """Function to create temporal feature. Uses dict to make val.
+    """Function to create temporal features. Uses dict to make values.
 
     :param key: The datetime feature you would like to create
-    :type key: str 2
+    :type key: str
     :param value: The type of feature you would like to create (cyclical or numerical)
     :type value: str
     :param df: The Pandas dataframe with the datetime
     :type df: pd.DataFrame
     :param dt_column: The name of the datetime column
     :type dt_column: str
-    :return: The dataframe with the newly added column
+    :return: The dataframe with the newly added columns
     :rtype: pd.DataFrame
     """
     if key == "day_of_week":
@@ -41,7 +41,7 @@ def feature_fix(preprocess_params: Dict, dt_column: str, df: pd.DataFrame):
     :type preprocess_params: Dict
     :param dt_column: The column name of the data
     :param df: The dataframe to add the temporal features to
-    :type df: pd.DataFrame
+    :type df: pd.DataFrame.
     :return: Returns the new data-frame and a list of the new column names
     :rtype: Tuple(pd.Dataframe, List[str])
 

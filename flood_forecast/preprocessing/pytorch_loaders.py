@@ -652,7 +652,6 @@ class SeriesIDTestLoader(CSVSeriesIDLoader, CSVTestLoader):
         self.forecast_total = forecast_total
 
     def get_from_start_date(self, forecast_start: datetime):
-        dt_row = self.original_df[
         return self.__getitem__(forecast_start)
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
