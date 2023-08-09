@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 import torch
 from flood_forecast.series_id_helper import handle_csv_id_output
 from flood_forecast.model_dict_function import DecoderTransformer
+from datetime import datetime
 
 
 class TestInterpolationCSVLoader(unittest.TestCase):
@@ -47,8 +48,14 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         l1 = handle_csv_id_output(x, y, mod, mse1, torch.optim.Adam(d.parameters()))
         self.assertGreater(l1, 0)
 
-    def series_test_loader(self):
-        SeriesIDTestLoader("PLANT_ID", )
+    def test_series_test_loader(self):
+        loader_ds1 = SeriesIDTestLoader("PLANT_ID", self.dataset_params, "shit")
+        historical_rows, all_rows_orig, targ_idx = loader_ds1.get_from_start_date(datetime(2020, 8, 1))
+        self.assertEqual(historical_rows.shape[0], 20)
+        self.assertEqual(historical_rows.shape[1], 3)
+        self.assertEqual(all_rows_orig.shape[0], 356)
+        self.assertEqual(all_rows_orig.shape[1], 3)
+        self.assertGreater(targ_idx, 0)
 
 
 if __name__ == '__main__':
