@@ -648,10 +648,29 @@ class VariableSequenceLength(CSVDataLoader):
 
 class SeriesIDTestLoader(CSVSeriesIDLoader, CSVTestLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
-        super().__init__(series_id_col, main_params, return_method, return_all)
+        """_summary_
+
+        :param series_id_col: _description_
+        :type series_id_col: str
+        :param main_params: _description_
+        :type main_params: dict
+        :param return_method: _description_
+        :type return_method: str
+        :param return_all: _description_, defaults to True
+        :type return_all: bool, optional
+        :param forecast_total: _description_, defaults to 336
+        :type forecast_total: int, optional
+        """
+        CSVSeriesIDLoader.__init__(self, series_id_col, main_params, return_method, return_all)
         self.forecast_total = forecast_total
 
-    def get_from_start_date(self, forecast_start: datetime):
+    def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
+        for df in self.listed_vals:
+            dt_row = df[
+                df["datetime"] == forecast_start
+            ]
+            revised_index = dt_row.index[0]
+            return self.__getitem__(revised_index - self.forecast_history)
         return self.__getitem__(forecast_start)
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:

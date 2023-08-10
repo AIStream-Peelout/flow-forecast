@@ -57,6 +57,9 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertEqual(all_rows_orig.shape[1], 3)
         self.assertGreater(targ_idx, 0)
 
+    def test_eval_series_loader(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()
