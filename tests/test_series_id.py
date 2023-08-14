@@ -1,4 +1,5 @@
 from flood_forecast.preprocessing.pytorch_loaders import CSVSeriesIDLoader, SeriesIDTestLoader
+from flood_forecast.evaluator import infer_on_torch_model
 import unittest
 import os
 from torch.nn import MSELoss
@@ -58,6 +59,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertGreater(targ_idx, 0)
 
     def test_eval_series_loader(self):
+        infer_on_torch_model()
         pass
 
 
