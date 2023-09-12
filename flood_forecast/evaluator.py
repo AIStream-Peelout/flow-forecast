@@ -12,7 +12,7 @@ from flood_forecast.explain_model_output import (
 )
 from flood_forecast.model_dict_function import decoding_functions
 from flood_forecast.custom.custom_opt import MASELoss, GaussianLoss
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader, SeriesIDTestLoader
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
 from flood_forecast.temporal_decoding import decoding_function
@@ -241,7 +241,9 @@ def infer_on_torch_model(
             test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     elif model.params["dataset_params"]["class"] == "SeriesIDLoader":
-        print("CSVSeriesIDLoader not yet supported for inference. But is coming very soon.")
+        print("CSVSeriesIDLoader not yet supported for inference, but is coming very soon.")
+        series_id_col = model.params["dataset_params"]["series_id_col"]
+        # csv_series_id_loader = SeriesIDTestLoader(series_id_col, )
         exit()
     else:
         csv_test_loader = CSVTestLoader(
@@ -326,6 +328,10 @@ def infer_on_torch_model(
         df_prediction_arr,
         # df_prediction_samples_std_dev
     )
+
+
+def handle_eval_csv_loader():
+    pass
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
