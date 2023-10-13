@@ -243,7 +243,8 @@ def infer_on_torch_model(
     elif model.params["dataset_params"]["class"] == "SeriesIDLoader":
         print("CSVSeriesIDLoader not yet supported for inference, but is coming very soon.")
         series_id_col = model.params["dataset_params"]["series_id_col"]
-        # csv_series_id_loader = SeriesIDTestLoader(series_id_col, )
+        csv_series_id_loader = SeriesIDTestLoader(series_id_col, model.params["dataset_params"], test_csv_path)
+        handle_eval_csv_loader(csv_series_id_loader)
         exit()
     else:
         csv_test_loader = CSVTestLoader(
@@ -330,7 +331,7 @@ def infer_on_torch_model(
     )
 
 
-def handle_eval_csv_loader():
+def handle_eval_csv_loader(csv_loader_obj: SeriesIDTestLoader):
     pass
 
 
