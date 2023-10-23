@@ -662,6 +662,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader, CSVTestLoader):
         :type forecast_total: int, optional
         """
         CSVSeriesIDLoader.__init__(self, series_id_col, main_params, return_method, return_all)
+        CSVTestLoader.__init__(self, **main_params)
         self.forecast_total = forecast_total
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
