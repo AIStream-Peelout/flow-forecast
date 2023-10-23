@@ -34,6 +34,7 @@ Using the library
 12.  Vanilla GRU with optional probablistic output layer. Good for multivariate time series forecasting and classification.
 13. DLinear and NLinear from the AAAI paper [Are Transformers Effective for Time Series Forecasting](https://arxiv.org/abs/2205.13504)
 14. [Crossformer](https://openreview.net/forum?id=vSVLM2j9eie) from ICLR 2023
+15. Anomaly Transformer
 
 **Forthcoming Models**
 

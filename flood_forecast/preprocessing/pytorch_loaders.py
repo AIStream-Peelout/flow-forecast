@@ -646,7 +646,7 @@ class VariableSequenceLength(CSVDataLoader):
         return tasks[self.task](idx)
 
 
-class SeriesIDTestLoader(CSVSeriesIDLoader, CSVTestLoader):
+class SeriesIDTestLoader(CSVTestLoader, CSVSeriesIDLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
         """_summary_
 
@@ -661,8 +661,8 @@ class SeriesIDTestLoader(CSVSeriesIDLoader, CSVTestLoader):
         :param forecast_total: _description_, defaults to 336
         :type forecast_total: int, optional
         """
+        CSVTestLoader.__init__(self, df_path="", **main_params)
         CSVSeriesIDLoader.__init__(self, series_id_col, main_params, return_method, return_all)
-        CSVTestLoader.__init__(self, **main_params)
         self.forecast_total = forecast_total
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
