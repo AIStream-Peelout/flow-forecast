@@ -661,7 +661,7 @@ class SeriesIDTestLoader(CSVTestLoader, CSVSeriesIDLoader):
         :param forecast_total: _description_, defaults to 336
         :type forecast_total: int, optional
         """
-        CSVTestLoader.__init__(self, df_path="", **main_params)
+        CSVTestLoader.__init__(self, df_path="", forecast_total=forecast_total, **main_params)
         CSVSeriesIDLoader.__init__(self, series_id_col, main_params, return_method, return_all)
         self.forecast_total = forecast_total
 
