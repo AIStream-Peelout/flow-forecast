@@ -23,7 +23,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
             "target_col": ["DAILY_YIELD"],
             "interpolate_param": False,
         }
-        self.data_loader = CSVSeriesIDLoader("PLANT_ID", self.dataset_params, "shit")
+        self.data_loader = CSVSeriesIDLoader("PLANT_ID", self.dataset_params, "r")
 
     def test_seriesid(self):
         """Tests the series_id method a single item
@@ -35,7 +35,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertEqual(x[1].shape[1], 3)
 
     def test_handle_series_id(self):
-        """Tests the handle_series_id method
+        """Tests the handle_series_id method(s)
         """
         mse1 = MSELoss()
         d1 = DataLoader(self.data_loader, batch_size=2)
