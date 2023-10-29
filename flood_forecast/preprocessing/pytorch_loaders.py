@@ -253,9 +253,6 @@ class CSVTestLoader(CSVDataLoader):
         self,
         df_path: str,
         forecast_total: int,
-        use_real_precip=True,
-        use_real_temp=True,
-        target_supplied=True,
         interpolate=False,
         sort_column_clone=None,
         **kwargs
@@ -276,10 +273,6 @@ class CSVTestLoader(CSVDataLoader):
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
-        # TODO these are antiquated delete them
-        self.use_real_temp = use_real_temp
-        self.use_real_precip = use_real_precip
-        self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
         self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
@@ -593,7 +586,7 @@ class VariableSequenceLength(CSVDataLoader):
 
         :param series_marker_column: The column that dealinates when an example begins and ends
         :type series_marker_column: str
-        :param pad_length: If the specified the length to truncate sequences at or pad them till that length
+        :param pad_length: If specified the length to truncate sequences at or pad them till that length
         :type pad_length: int
         :param task: The specific task (e.g. classification, forecasting, auto_encode)
         :type task: str
@@ -667,7 +660,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         """
         super().__init__(series_id_col, main_params, return_method, return_all)
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, kwargs=main_params) for loader_1 in self.listed_vals]
+        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.listed_vals]
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []
