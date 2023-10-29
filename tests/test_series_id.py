@@ -59,7 +59,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertGreater(targ_idx, 0)
 
     def test_eval_series_loader(self):
-        infer_on_torch_model("s") # to-do fill in
+        infer_on_torch_model("s")  # to-do fill in
         pass
 
 

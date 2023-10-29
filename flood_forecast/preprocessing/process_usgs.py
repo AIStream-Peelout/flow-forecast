@@ -8,8 +8,8 @@ import pytz
 
 def make_usgs_data(start_date: datetime, end_date: datetime, site_number: str) -> pd.DataFrame:
     """
-j
     """
+    print('yes')
     base_url = "https://nwis.waterdata.usgs.gov/usa/nwis/uv/?cb_00060=on&cb_00065&format=rdb&"
     full_url = base_url + "site_no=" + site_number + "&period=&begin_date=" + \
         start_date.strftime("%Y-%m-%d") + "&end_date=" + end_date.strftime("%Y-%m-%d")
