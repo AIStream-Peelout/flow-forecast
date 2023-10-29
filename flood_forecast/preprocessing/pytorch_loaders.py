@@ -589,11 +589,11 @@ class TemporalTestLoader(CSVTestLoader):
 class VariableSequenceLength(CSVDataLoader):
     def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
                  n_classes=9 + 90):
-        """Enables easy loading of time-series with variable length data
+        """Enables eas(ier) loading of time-series with variable length data
 
         :param series_marker_column: The column that dealinates when an example begins and ends
         :type series_marker_column: str
-        :param pad_length: If specified the length to truncate sequences at or pad them till that length
+        :param pad_length: If the specified the length to truncate sequences at or pad them till that length
         :type pad_length: int
         :param task: The specific task (e.g. classification, forecasting, auto_encode)
         :type task: str
@@ -667,7 +667,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         """
         super().__init__(series_id_col, main_params, return_method, return_all)
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, 336) for loader_1 in self.listed_vals]
+        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, kwargs=main_params) for loader_1 in self.listed_vals]
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []
