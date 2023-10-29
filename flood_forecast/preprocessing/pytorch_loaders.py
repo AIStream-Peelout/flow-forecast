@@ -247,7 +247,6 @@ class CSVSeriesIDLoader(CSVDataLoader):
         else:
             raise NotImplementedError("Current code only supports returning all the series at each iteration")
 
-
 class CSVTestLoader(CSVDataLoader):
     def __init__(
         self,
@@ -348,6 +347,10 @@ class CSVTestLoader(CSVDataLoader):
         return (
             len(self.df.index) - self.forecast_history - self.forecast_total - 1
         )
+
+
+class TestLoaderABC(CSVTestLoader):
+    pass
 
 
 class AEDataloader(CSVDataLoader):
@@ -646,7 +649,7 @@ class VariableSequenceLength(CSVDataLoader):
         return tasks[self.task](idx)
 
 
-class SeriesIDTestLoader(CSVTestLoader, CSVSeriesIDLoader):
+class SeriesIDTestLoader(CSVSeriesIDLoader, TestLoaderABC):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
         """_summary_
 
