@@ -260,7 +260,6 @@ class CSVTestLoader(CSVDataLoader):
         target_supplied=True,
         interpolate=False,
         sort_column_clone=None,
-        target_supplied=True,
         **kwargs
     ):
         """
@@ -287,7 +286,6 @@ class CSVTestLoader(CSVDataLoader):
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
         self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
         self.original_df["original_index"] = self.original_df.index
-        self.target_supplied1 = target_supplied
         if len(self.relevant_cols3) > 0:
             self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
 
@@ -301,7 +299,7 @@ class CSVTestLoader(CSVDataLoader):
         return self.__getitem__(revised_index - self.forecast_history)
 
     def __getitem__(self, idx):
-        if self.target_supplied1:
+        if self.target_supplied:
             historical_rows = self.df.iloc[idx: self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
@@ -395,7 +393,7 @@ class AEDataloader(CSVDataLoader):
         :param forecast_history: [description], defaults to 1
         :type forecast_history: int, optional
         :param no_scale: [description], defaults to True
-        :type no_scale: bool, optional
+        :type no_scale: bool, optionals
         :param sort_column: [description], defaults to None
         :type sort_column: [type], optional
         """
@@ -556,7 +554,7 @@ class TemporalTestLoader(CSVTestLoader):
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
     def __getitem__(self, idx):
-        if self.target_supplied1:
+        if self.target_supplied:
             historical_rows = self.df.iloc[idx: self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
@@ -671,7 +669,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         """
         super().__init__(series_id_col, main_params, return_method, return_all)
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, kwargs=main_params) for loader_1 in self.listed_vals]
+        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.listed_vals]
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []
