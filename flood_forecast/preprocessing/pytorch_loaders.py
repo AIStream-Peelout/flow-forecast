@@ -26,7 +26,8 @@ class CSVDataLoader(Dataset):
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
-        no_scale=False
+        no_scale=False,
+        preformatted_df=False
 
     ):
         """
@@ -56,6 +57,7 @@ class CSVDataLoader(Dataset):
         self.forecast_length = forecast_length
         print("interpolate should be below")
         df = get_data(file_path)
+        print(df.columns)
         relevant_cols3 = []
         if sort_column:
             df[sort_column] = df[sort_column].astype("datetime64[ns]")
