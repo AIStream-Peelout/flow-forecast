@@ -257,6 +257,7 @@ class CSVTestLoader(CSVDataLoader):
         forecast_total: int,
         interpolate=False,
         sort_column_clone=None,
+        target_supplied=True,
         **kwargs
     ):
         """
@@ -279,6 +280,7 @@ class CSVTestLoader(CSVDataLoader):
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
         self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
         self.original_df["original_index"] = self.original_df.index
+        self.target_supplied1 = target_supplied
         if len(self.relevant_cols3) > 0:
             self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
 
@@ -292,7 +294,7 @@ class CSVTestLoader(CSVDataLoader):
         return self.__getitem__(revised_index - self.forecast_history)
 
     def __getitem__(self, idx):
-        if self.target_supplied:
+        if self.target_supplied1:
             historical_rows = self.df.iloc[idx: self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
@@ -547,7 +549,7 @@ class TemporalTestLoader(CSVTestLoader):
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
     def __getitem__(self, idx):
-        if self.target_supplied:
+        if self.target_supplied1:
             historical_rows = self.df.iloc[idx: self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
