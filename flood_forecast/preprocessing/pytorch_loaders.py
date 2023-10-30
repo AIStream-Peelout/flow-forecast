@@ -284,7 +284,8 @@ class CSVTestLoader(CSVDataLoader):
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
-        print(self.original_df.columns)
+        print("columns are: ")
+        print(self.original_df)
         self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
         self.original_df["original_index"] = self.original_df.index
         if len(self.relevant_cols3) > 0:
@@ -316,7 +317,7 @@ class CSVTestLoader(CSVDataLoader):
     def convert_real_batches(self, the_col: str, rows_to_convert):
         """
         A helper function to return properly divided precip and temp
-        values to be stacked with forecasted cfs.
+        values to be stacked with t forecasted cfs.
         """
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
