@@ -185,11 +185,13 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.return_all_series = return_all
         self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
+        self.df_orig_list = []
         self.df = self.df.reset_index()
         self.unique_dict = {}
         print("The series id column is below:")
         print(self.series_id_col)
         for col in self.unique_cols:
+            self.df_orig_list.append(self.original_df[self.original_df[self.series_id_col] == col])
             new_df = self.df[self.df[self.series_id_col] == col]
             df_list.append(new_df)
             print(new_df.columns)
@@ -658,7 +660,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
         """_summary_
 
-        :param series_id_col: _description_
+        :param series_id_col: _de
         :type series_id_col: str
         :param main_params: _description_
         :type main_params: dict
@@ -671,7 +673,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         """
         super().__init__(series_id_col, main_params, return_method, return_all)
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.listed_vals]
+        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.df_orig_lists]
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []

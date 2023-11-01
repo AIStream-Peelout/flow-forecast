@@ -10,3 +10,4 @@ scaler_dict = {
 
 interpolate_dict = {"back_forward": interpolate_missing_values, "back_forward_generic": back_forward_generic,
                     "forward_back_generic": forward_back_generic}
+print("loaded dicts")
