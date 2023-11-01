@@ -16,6 +16,19 @@ from torch.nn import CrossEntropyLoss
 
 
 def multi_crit(crit_multi: List, output, labels, valid=None):
+    """_summary_
+
+    :param crit_multi: _description_
+    :type crit_multi: List
+    :param output: _description_
+    :type output: _type_
+    :param labels: _description_
+    :type labels: _type_
+    :param valid: _description_, defaults to None
+    :type valid: _type_, optional
+    :return: _description_
+    :rtype: _type_
+    """
     i = 0
     loss = 0.0
     for crit in crit_multi:
@@ -573,7 +586,6 @@ def compute_validation(validation_loader: DataLoader,
             validation_dataset = validation_loader.dataset
             for crit in criterion:
                 if validation_dataset.scale:
-                    # Should this also do loss.item() stuff?
                     if len(src.shape) == 2:
                         src = src.unsqueeze(0)
                     src1 = src[:, :, 0:multi_targets]

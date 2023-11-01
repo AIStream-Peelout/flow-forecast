@@ -26,7 +26,8 @@ class CSVDataLoader(Dataset):
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
-        no_scale=False
+        no_scale=False,
+        preformatted_df=False
 
     ):
         """
@@ -56,6 +57,7 @@ class CSVDataLoader(Dataset):
         self.forecast_length = forecast_length
         print("interpolate should be below")
         df = get_data(file_path)
+        print(df.columns)
         relevant_cols3 = []
         if sort_column:
             df[sort_column] = df[sort_column].astype("datetime64[ns]")
@@ -183,11 +185,13 @@ class CSVSeriesIDLoader(CSVDataLoader):
         self.return_all_series = return_all
         self.unique_cols = self.original_df[series_id_col].dropna().unique().tolist()
         df_list = []
+        self.df_orig_list = []
         self.df = self.df.reset_index()
         self.unique_dict = {}
         print("The series id column is below:")
         print(self.series_id_col)
         for col in self.unique_cols:
+            self.df_orig_list.append(self.original_df[self.original_df[self.series_id_col] == col])
             new_df = self.df[self.df[self.series_id_col] == col]
             df_list.append(new_df)
             print(new_df.columns)
@@ -276,19 +280,24 @@ class CSVTestLoader(CSVDataLoader):
         print("CSV Path below")
         print(df_path)
         self.forecast_total = forecast_total
+        # TODO these are antiquated delete them
         self.use_real_temp = use_real_temp
         self.use_real_precip = use_real_precip
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
+        print("columns are: ")
+        print(self.original_df)
         self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
         self.original_df["original_index"] = self.original_df.index
         if len(self.relevant_cols3) > 0:
             self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
 
-    def get_from_start_date(self, forecast_start: datetime):
-        dt_row = self.original_df[
-            self.original_df["datetime"] == forecast_start
+    def get_from_start_date(self, forecast_start: datetime, original_df=None):
+        if original_df is None:
+            original_df = self.original_df
+        dt_row = original_df[
+            original_df["datetime"] == forecast_start
         ]
         revised_index = dt_row.index[0]
         return self.__getitem__(revised_index - self.forecast_history)
@@ -310,7 +319,7 @@ class CSVTestLoader(CSVDataLoader):
     def convert_real_batches(self, the_col: str, rows_to_convert):
         """
         A helper function to return properly divided precip and temp
-        values to be stacked with forecasted cfs.
+        values to be stacked with t forecasted cfs.
         """
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
@@ -345,6 +354,10 @@ class CSVTestLoader(CSVDataLoader):
         return (
             len(self.df.index) - self.forecast_history - self.forecast_total - 1
         )
+
+
+class TestLoaderABC(CSVTestLoader):
+    pass
 
 
 class AEDataloader(CSVDataLoader):
@@ -384,7 +397,7 @@ class AEDataloader(CSVDataLoader):
         :param forecast_history: [description], defaults to 1
         :type forecast_history: int, optional
         :param no_scale: [description], defaults to True
-        :type no_scale: bool, optional
+        :type no_scale: bool, optionals
         :param sort_column: [description], defaults to None
         :type sort_column: [type], optional
         """
@@ -582,11 +595,11 @@ class TemporalTestLoader(CSVTestLoader):
 class VariableSequenceLength(CSVDataLoader):
     def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
                  n_classes=9 + 90):
-        """Enables easy loading of time-series with variable length data
+        """Enables eas(ier) loading of time-series with variable length data
 
         :param series_marker_column: The column that dealinates when an example begins and ends
         :type series_marker_column: str
-        :param pad_length: If specified the length to truncate sequences at or pad them till that length
+        :param pad_length: If the specified the length to truncate sequences at or pad them till that length
         :type pad_length: int
         :param task: The specific task (e.g. classification, forecasting, auto_encode)
         :type task: str
@@ -641,3 +654,37 @@ class VariableSequenceLength(CSVDataLoader):
     def __getitem__(self, idx: int):
         tasks = {"auto": self.get_item_auto_encoder, "classification": self.get_item_classification}
         return tasks[self.task](idx)
+
+
+class CSVResultsHolder(object):
+    def __init__(self, historical_rows, all_rows_orig, targ_idx) -> None:
+        self.historical_rows = historical_rows
+        self.all_rows_orig = all_rows_orig
+        self.targ_idx = targ_idx
+
+
+class SeriesIDTestLoader(CSVSeriesIDLoader):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
+        """_summary_
+
+        :param series_id_col: _de
+        :type series_id_col: str
+        :param main_params: _description_
+        :type main_params: dict
+        :param return_method: _description_
+        :type return_method: str
+        :param return_all: _description_, defaults to True
+        :type return_all: bool, optional
+        :param forecast_total: _description_, defaults to 336
+        :type forecast_total: int, optional
+        """
+        super().__init__(series_id_col, main_params, return_method, return_all)
+        self.forecast_total = forecast_total
+        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.df_orig_list]
+
+    def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
+        res = []
+        for test_loader in self.csv_test_loaders:
+            test_loader.get_from_start_date(forecast_start, series_id)
+            res.append(test_loader)
+        return res

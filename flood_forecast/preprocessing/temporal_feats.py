@@ -6,15 +6,15 @@ import numpy as np
 def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     """Function to create temporal feature. Uses dict to make val.
 
-    :param key: The datetime feature you would like to create
-    :type key: str 2
+    :param key: The datetime feature you would like to create from the datetime column
+    :type key: str
     :param value: The type of feature you would like to create (cyclical or numerical)
     :type value: str
-    :param df: The Pandas dataframe with the datetime
+    :param df: The Pandas dataframe with the datetime.
     :type df: pd.DataFrame
     :param dt_column: The name of the datetime column
     :type dt_column: str
-    :return: The dataframe with the newly added column
+    :return: The dataframe with the newly added column.
     :rtype: pd.DataFrame
     """
     if key == "day_of_week":
