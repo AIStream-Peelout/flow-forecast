@@ -673,7 +673,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         """
         super().__init__(series_id_col, main_params, return_method, return_all)
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.df_orig_lists]
+        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.df_orig_list]
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []
