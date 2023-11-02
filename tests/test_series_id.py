@@ -8,7 +8,6 @@ import torch
 from flood_forecast.series_id_helper import handle_csv_id_output
 from flood_forecast.model_dict_function import DecoderTransformer
 from datetime import datetime
-import pandas as pd
 
 
 class TestInterpolationCSVLoader(unittest.TestCase):
