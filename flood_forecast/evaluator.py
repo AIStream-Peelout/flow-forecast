@@ -242,8 +242,11 @@ def infer_on_torch_model(
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     elif model.params["dataset_params"]["class"] == "SeriesIDLoader":
         print("CSVSeriesIDLoader not yet supported for inference, but is coming very soon.")
+        print(dataset_params)
         series_id_col = dataset_params.pop("series_id_col")
         return_method = dataset_params.pop("return_method")
+        dataset_params["file_path"] = test_csv_path
+        dataset_params["scaling"] = model.params["dataset_params"]["scaler"]
         csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method)
         handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
         exit()
@@ -343,7 +346,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
         """
         end_tensor = generate_predictions(
             model,
-            df_train_and_test,
+            df_train_and_test, d
             csv_series_id_loader,
             history,
             device,
