@@ -331,8 +331,8 @@ def infer_on_torch_model(
     )
 
 
-def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device, 
-                                    hours_to_forecast, datetime_start):
+def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
+                                    hours_to_forecast: int, datetime_start):
     pass
 
 
