@@ -667,11 +667,11 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
         """_summary_
 
-        :param series_id_col: The column that contains the uuid of the series
+        :param series_id_col: _de
         :type series_id_col: str
-        :param main_params: The dictionary containing all the other parameters to be passed to the CSVSeriesIDLoader
+        :param main_params: _description_
         :type main_params: dict
-        :param return_method: Defines what series_id you want in the returned data in. For instance if you want a list of
+        :param return_method: _description_
         :type return_method: str
         :param return_all: _description_, defaults to True
         :type return_all: bool, optional
