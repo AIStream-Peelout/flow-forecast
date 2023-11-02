@@ -242,7 +242,7 @@ def infer_on_torch_model(
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     elif model.params["dataset_params"]["class"] == "SeriesIDLoader":
         print("CSVSeriesIDLoader not yet supported for inference, but is coming very soon.")
-        series_id_col = model.params["dataset_params"]["series_id_col"]
+        series_id_col = dataset_params.pop("series_id_col")
         csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, "all")
         handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
         exit()
@@ -333,7 +333,27 @@ def infer_on_torch_model(
 
 def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
                                     hours_to_forecast: int, datetime_start):
-    pass
+    data = csv_series_id_loader.get_from_start_date_all(datetime_start)
+    for i in range(0, len(data)):
+        history, df_train_and_test, forecast_start_idx = data[i]
+        print(history)
+        print(df_train_and_test)
+        print(forecast_start_idx)
+        """
+        end_tensor = generate_predictions(
+            model,
+            df_train_and_test,
+            csv_series_id_loader,
+            history,
+            device,
+            forecast_start_idx,
+            model.params["dataset_params"]["forecast_length"],
+            hours_to_forecast,
+            decoder_params=None,
+            multi_params=1
+        )
+        print(end_tensor)"""
+    return
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
