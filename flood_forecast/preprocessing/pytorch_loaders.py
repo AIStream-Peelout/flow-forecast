@@ -685,6 +685,6 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []
         for test_loader in self.csv_test_loaders:
-            # append all four parts
-            res.append(test_loader.get_from_start_date(forecast_start, series_id))
+            test_loader.get_from_start_date(forecast_start, series_id)
+            res.append(test_loader)
         return res
