@@ -243,7 +243,8 @@ def infer_on_torch_model(
     elif model.params["dataset_params"]["class"] == "SeriesIDLoader":
         print("CSVSeriesIDLoader not yet supported for inference, but is coming very soon.")
         series_id_col = dataset_params.pop("series_id_col")
-        csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, "all")
+        return_method = dataset_params.pop("return_method")
+        csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method)
         handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
         exit()
     else:
