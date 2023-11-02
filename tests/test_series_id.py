@@ -51,12 +51,13 @@ class TestInterpolationCSVLoader(unittest.TestCase):
 
     def test_series_test_loader(self):
         loader_ds1 = SeriesIDTestLoader("PLANT_ID", self.dataset_params, "shit")
-        self.assertEqual(loader_ds1.get_from_start_date_all(datetime(2020, 6, 6))[0][0].shape[0], 20)
-        # historical_rows, all_rows_orig, targ_idx = loader_ds1.get_from_start_date_all(datetime(2020, 8, 1))[0]
-        # self.assertEqual(historical_rows.shape[0], 20)
-        # self.assertEqual(historical_rows.shape[1], 3)
-        # self.assertEqual(all_rows_orig.shape[0], 356)
-        # self.assertEqual(all_rows_orig.shape[1], 3)
+        res = loader_ds1.get_from_start_date_all(datetime(2020, 6, 6))
+        self.assertGreater(len(res), 1)
+        historical_rows, all_rows_orig, targ_idx = res[0]
+        self.assertEqual(historical_rows.shape[0], 20)
+        self.assertEqual(historical_rows.shape[1], 3)
+        self.assertEqual(all_rows_orig.shape[0], 356)
+        self.assertEqual(all_rows_orig.shape[1], 3)
         # self.assertGreater(targ_idx, 0)
 
     def test_eval_series_loader(self):
