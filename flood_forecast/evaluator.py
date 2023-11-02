@@ -333,27 +333,7 @@ def infer_on_torch_model(
 
 def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
                                     hours_to_forecast: int, datetime_start):
-    data = csv_series_id_loader.get_from_start_date_all(datetime_start)
-    for i in range(0, len(data)):
-        history, df_train_and_test, forecast_start_idx = data[i]
-        print(history)
-        print(df_train_and_test)
-        print(forecast_start_idx)
-        """
-        end_tensor = generate_predictions(
-            model,
-            df_train_and_test,
-            csv_series_id_loader,
-            history,
-            device,
-            forecast_start_idx,
-            model.params["dataset_params"]["forecast_length"],
-            hours_to_forecast,
-            decoder_params=None,
-            multi_params=1
-        )
-        print(end_tensor)"""
-    return
+    pass
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
