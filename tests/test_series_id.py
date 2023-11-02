@@ -54,8 +54,6 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         loader_ds1 = SeriesIDTestLoader("PLANT_ID", self.dataset_params, "shit")
         res = loader_ds1.get_from_start_date_all(datetime(2020, 6, 6))
         self.assertGreater(len(res), 1)
-        print(res[0])
-        print("the res above")
         historical_rows, all_rows_orig, df_train_test, forecast_start = res[0]
         self.assertEqual(historical_rows.shape[0], 20)
         self.assertEqual(historical_rows.shape[1], 3)
