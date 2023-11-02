@@ -65,7 +65,7 @@ def feature_fix(preprocess_params: Dict, dt_column: str, df: pd.DataFrame):
 
 def cyclical(df: pd.DataFrame, feature_column: str) -> pd.DataFrame:
     """ A function to create cyclical encodings for Pandas data-frames.
-s
+
     :param df: A Pandas Dataframe where you want the dt encoded
     :type df: pd.DataFrame
     :param feature_column: The name of the feature column. Should be either (day_of_week, hour, month, year)
