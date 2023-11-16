@@ -227,7 +227,7 @@ def infer_on_torch_model(
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
     #
-    # If the test dataframe is none use default one supplied in params
+    # If the test dataframe is nonbe use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
     elif model.params["dataset_params"]["class"] == "TemporalLoader":
@@ -247,7 +247,7 @@ def infer_on_torch_model(
         return_method = dataset_params.pop("return_method")
         dataset_params["file_path"] = test_csv_path
         # dataset_params["scaling"] = model.params["dataset_params"]["scaler"]
-        # do stuff 
+        # do stuff
         csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method)
         return handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
     else:
