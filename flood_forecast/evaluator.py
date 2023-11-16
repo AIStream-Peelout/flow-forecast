@@ -338,15 +338,15 @@ def infer_on_torch_model(
 def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
                                     hours_to_forecast: int, datetime_start):
     data = csv_series_id_loader.get_from_start_date_all(datetime_start)
+    end_tensors = []
     for i in range(0, len(data)):
         history, df_train_and_test, forecast_start_idx = data[i]
         print(history)
         print(df_train_and_test)
         print(forecast_start_idx)
-        """
         end_tensor = generate_predictions(
             model,
-            df_train_and_test, d
+            df_train_and_test,
             csv_series_id_loader,
             history,
             device,
@@ -356,7 +356,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
             decoder_params=None,
             multi_params=1
         )
-        print(end_tensor)"""
+        end_tensors.append(end_tensor)
     return
 
 
