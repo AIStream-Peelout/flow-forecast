@@ -247,7 +247,7 @@ def infer_on_torch_model(
         return_method = dataset_params.pop("return_method")
         dataset_params["file_path"] = test_csv_path
         # dataset_params["scaling"] = model.params["dataset_params"]["scaler"]
-        # do stuff
+        # do stuff 
         csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method)
         return handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
     else:
@@ -336,17 +336,17 @@ def infer_on_torch_model(
 
 
 def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
-                                    hours_to_forecast: int, datetime_start):
+                                    hours_to_forecast: int, datetime_start) -> Tuple[List[pd.DataFrame], List]:
     data = csv_series_id_loader.get_from_start_date_all(datetime_start)
+    end_tenor_arr = []
     for i in range(0, len(data)):
         history, df_train_and_test, forecast_start_idx = data[i]
         print(history)
         print(df_train_and_test)
         print(forecast_start_idx)
-        """
         end_tensor = generate_predictions(
             model,
-            df_train_and_test, d
+            df_train_and_test,
             csv_series_id_loader,
             history,
             device,
@@ -356,8 +356,9 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
             decoder_params=None,
             multi_params=1
         )
-        print(end_tensor)"""
-    return
+        print(end_tensor)
+        end_tenor_arr.append(end_tensor)
+    return end_tenor_arr, data
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
