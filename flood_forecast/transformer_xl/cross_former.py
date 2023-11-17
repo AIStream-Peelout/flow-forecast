@@ -24,7 +24,7 @@ class Crossformer(nn.Module):
         """Crossformer: Transformer Utilizing Cross-Dimension Dependency for Multivariate Time Series Forecasting.
         https://github.com/Thinklab-SJTU/Crossformer
 
-        :param n_time_series: The total number of time series
+        :param n_time_series: The total number of time series passed to the model
         :type n_time_series: int
         :param forecast_history: The length of the input sequence
         :type forecast_history: int
@@ -36,11 +36,11 @@ class Crossformer(nn.Module):
         :type win_size: int, optional
         :param factor: _description_, defaults to 10
         :type factor: int, optional
-        :param d_model: _description_, defaults to 512
+        :param d_model: _description_, sdefaults to 512
         :type d_model: int, optional
         :param d_ff: _description_, defaults to 1024
         :type d_ff: int, optional
-        :param n_heads: _description_, defaults to 8
+        :param n_heads: The number of heads, defaults to 8
         :type n_heads: int, optional
         :param e_layers: _description_, defaults to 3
         :type e_layers: int, optional
@@ -137,7 +137,7 @@ class SegMerging(nn.Module):
     we set win_size = 2 in our paper
     """
 
-    def __init__(self, d_model, win_size, norm_layer=nn.LayerNorm):
+    def __init__(self, d_model: int, win_size, norm_layer=nn.LayerNorm):
         super().__init__()
         self.d_model = d_model
         self.win_size = win_size

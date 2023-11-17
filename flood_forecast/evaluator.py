@@ -175,7 +175,7 @@ def evaluate_model(
             idx += 1
             eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
-    # Explain model behaviour using shap
+    # Explain the model behaviour using shap
     if "probabilistic" in inference_params:
         print("Probabilistic explainability currently not supported.")
     elif "n_targets" in model.params:
