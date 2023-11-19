@@ -359,7 +359,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
         )
         print(end_tensor)
         end_tenor_arr.append(end_tensor)
-    return end_tenor_arr, data
+    return data, end_tenor_arr, model.params["forecast_history"], forecast_start_idx, csv_series_id_loader,
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
