@@ -84,7 +84,6 @@ def simple_decode(model: Type[torch.nn.Module],
     lower_out = []
     handle_gauss = False
     for i in range(0, max_seq_len, output_len):
-        print('the shape is')
         print(real_target2.shape)
         residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
         with torch.no_grad():

@@ -341,6 +341,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
     end_tenor_arr = []
     for i in range(0, len(data)):
         history, df_train_and_test, forecast_start_idx = data[i]
+        print("values below here")
         print(history)
         print(df_train_and_test)
         print(forecast_start_idx)
