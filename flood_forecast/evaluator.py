@@ -342,13 +342,13 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
     for i in range(0, len(data)):
         history, df_train_and_test, forecast_start_idx = data[i]
         print("values below here")
-        print(history)
-        print(df_train_and_test)
+        print(history.shape)
+        print(df_train_and_test.columns)
         print(forecast_start_idx)
         end_tensor = generate_predictions(
             model,
             df_train_and_test,
-            csv_series_id_loader,
+            csv_series_id_loader.csv_test_loaders[i],
             history,
             device,
             forecast_start_idx,
