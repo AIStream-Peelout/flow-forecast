@@ -92,7 +92,6 @@ def simple_decode(model: Type[torch.nn.Module],
                 out = model(src)
                 if isinstance(out, tuple):
                     out, up, lower = handle_gaussian_loss(out)
-                    print(up)
                     upper_out.append(up[:, :residual])
                     lower_out.append(lower[:, :residual])
                     handle_gauss = True
@@ -107,6 +106,8 @@ def simple_decode(model: Type[torch.nn.Module],
             if not isinstance(out, torch.Tensor):
                 out = torch.from_numpy(out)
             if output_len == 1:
+                print('src shape')
+                print(src.shape)
                 real_target2[:, i, 0:multi_targets] = out[:, 0]
                 src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
                 ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
