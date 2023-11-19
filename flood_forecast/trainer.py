@@ -30,6 +30,9 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
             params["metrics"],
             params["inference_params"],
             {})
+    if params["dataset_params"]["class"] == "SeriesIDTestLoader":
+        print("SeriesIDTestLoader")
+        return
     wandb.run.summary["test_accuracy"] = test_acc[0]
     df_train_and_test = test_acc[1]
     forecast_start_idx = test_acc[2]

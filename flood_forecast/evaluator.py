@@ -102,6 +102,9 @@ def evaluate_model(
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
+        if model.params["dataset_params"]["class"] == "SeriesIDLoader":
+            print("SeriesIDLoader")
+            exit()
         g_loss = False
         probablistic = True if "probabilistic" in inference_params else False
         if isinstance(end_tensor, tuple) and not probablistic:
