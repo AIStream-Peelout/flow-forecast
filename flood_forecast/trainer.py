@@ -14,7 +14,7 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_probabilistic_confidence_interval)
 
 def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> None:
-    """Utility function to help handle model evaluation. Primarily used at the moment for forcast
+    """Utility function to help handle model evaluation. Primarily used at the moment for forecasting models.
 
     :param trained_model: A PyTorchForecast model that has already been trained. 
     :type trained_model: PyTorchForecast

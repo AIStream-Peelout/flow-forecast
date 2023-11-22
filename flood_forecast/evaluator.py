@@ -76,7 +76,7 @@ def evaluate_model(
     eval_log: Dict,
 ) -> Tuple[Dict, pd.DataFrame, int, pd.DataFrame]:
     """
-    A function to evaluate a model. Called automatically at end of training. 
+    A function to evaluate a model. Called automatically at end of training.
     Can be imported for continuing to evaluate a model in other places as well.
 
 
@@ -101,8 +101,8 @@ def evaluate_model(
             df_predictions,
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
-        # To-do turn this into a general function
         if model.params["dataset_params"]["class"] == "SeriesIDLoader":
+            print("forecast_history", forecast_history)
             eval_logs = []
             for end_tenso in end_tensor:
                 eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tenso)
@@ -146,7 +146,8 @@ def evaluate_model(
                                       "pred_" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
         print(df_train_and_test)
-        eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss, eval_log, end_tensor_0)
+        eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss, eval_log,
+                                  end_tensor_0)
     # Explain model behaviour using shap
     if "probabilistic" in inference_params:
         print("Probabilistic explainability currently not supported.")
@@ -163,7 +164,8 @@ def evaluate_model(
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
 
-def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={}, end_tensor_0=None) -> Dict:
+def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={},
+                   end_tensor_0=None) -> Dict:
     inference_params = model.params["inference_params"]
     for evaluation_metric in model.crit:
         idx = 0
@@ -372,7 +374,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
         )
         print(end_tensor)
         end_tenor_arr.append(end_tensor)
-    return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, []
+    return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, [] # noqa
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
