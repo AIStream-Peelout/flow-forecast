@@ -11,7 +11,7 @@ google-cloud
 google-cloud-storage
 plotly~=5.18.0
 pytz>=2022.1
-setuptools~=68.2.2
+setuptools~=69.0.2
 numpy>=1.21
 requests
 torchvision>=0.6.0
