@@ -76,7 +76,7 @@ def evaluate_model(
     eval_log: Dict,
 ) -> Tuple[Dict, pd.DataFrame, int, pd.DataFrame]:
     """
-    A function to evaluate a model. Called automatically at end of training.
+    A function to evaluate a model. Called automatically at end of training. 
     Can be imported for continuing to evaluate a model in other places as well.
 
 
@@ -103,9 +103,13 @@ def evaluate_model(
         ) = infer_on_torch_model(model, **inference_params)
         # To-do turn this into a general function
         if model.params["dataset_params"]["class"] == "SeriesIDLoader":
-            print("SeriesIDLoader")
-            exit()
+            eval_logs = []
+            for end_tenso in end_tensor:
+                eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tenso)
+                eval_logs.append(eval_log)
+            return eval_logs, df_train_and_test, forecast_start_idx, df_predictions
         g_loss = False
+        end_tensor_0 = None
         probablistic = True if "probabilistic" in inference_params else False
         if isinstance(end_tensor, tuple) and not probablistic:
             end_tensor_0 = end_tensor[1]
@@ -142,6 +146,25 @@ def evaluate_model(
                                       "pred_" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
         print(df_train_and_test)
+        eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss, eval_log, end_tensor_0)
+    # Explain model behaviour using shap
+    if "probabilistic" in inference_params:
+        print("Probabilistic explainability currently not supported.")
+    elif "n_targets" in model.params:
+        print("Multitask forecasting support coming soon")
+    elif g_loss:
+        print("SHAP not yet supported for these models with multiple outputs")
+    else:
+        deep_explain_model_summary_plot(
+            model, test_data, inference_params["datetime_start"]
+        )
+        deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
+
+    return eval_log, df_train_and_test, forecast_start_idx, df_predictions
+
+
+def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={}, end_tensor_0=None) -> Dict:
+    inference_params = model.params["inference_params"]
     for evaluation_metric in model.crit:
         idx = 0
         for target in target_col:
@@ -178,20 +201,7 @@ def evaluate_model(
             idx += 1
             eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
-    # Explain model behaviour using shap
-    if "probabilistic" in inference_params:
-        print("Probabilistic explainability currently not supported.")
-    elif "n_targets" in model.params:
-        print("Multitask forecasting support coming soon")
-    elif g_loss:
-        print("SHAP not yet supported for these models with multiple outputs")
-    else:
-        deep_explain_model_summary_plot(
-            model, test_data, inference_params["datetime_start"]
-        )
-        deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
-
-    return eval_log, df_train_and_test, forecast_start_idx, df_predictions
+    return eval_log
 
 
 def infer_on_torch_model(
@@ -384,7 +394,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
     :param num_samples: The number of samples to generate (i.e. larger ci)
     :type num_samples: int
     :raises ValueError: [description]
-    :raises ValueError: [description]
+    :raises ValueError: [descriptsion]
     :return: Returns an array with different CI predictions
     :rtype: List[pd.DataFrame]
     """
