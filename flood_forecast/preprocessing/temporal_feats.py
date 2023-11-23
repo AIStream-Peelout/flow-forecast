@@ -10,7 +10,7 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     :type key: str
     :param value: The type of feature you would like to create (cyclical or numerical)
     :type value: str
-    :param df: The Pandas dataframe with thes datetime.
+    :param df: The Pandas dataframe with this datetime.
     :type df: pd.DataFrame
     :param dt_column: The name of the datetime column
     :type dt_column: str
@@ -35,7 +35,7 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
 
 
 def feature_fix(preprocess_params: Dict, dt_column: str, df: pd.DataFrame):
-    """Adds temporal features
+    """Adds temporal features to the df.
 
     :param preprocess_params: Dictionary of temporal parameters e.g. {"day":"numerical"}
     :type preprocess_params: Dict
