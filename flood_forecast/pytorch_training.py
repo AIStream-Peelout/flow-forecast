@@ -456,7 +456,7 @@ def torch_single_train(model: PyTorchForecast,
                 raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
             running_loss += loss.item()
             i += 1
-    print("The running loss is: ")
+    print("The running loss iss: ")
     print(running_loss)
     print("The number of items in train is: " + str(i))
     total_loss = running_loss / float(i)
