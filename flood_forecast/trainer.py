@@ -30,7 +30,7 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
             params["metrics"],
             params["inference_params"],
             {})
-    if params["dataset_params"]["class"] == "SeriesIDTestLoader":
+    if params["dataset_params"]["class"] == "SeriesIDLoader":
         print("SeriesIDTestLoader does not support evaluation.")
         return
     wandb.run.summary["test_accuracy"] = test_acc[0]
