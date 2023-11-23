@@ -664,7 +664,7 @@ class CSVResultsHolder(object):
 
 
 class SeriesIDTestLoader(CSVSeriesIDLoader):
-    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, forecast_total=336, return_all=True):
         """_summary_
 
         :param series_id_col: _de
