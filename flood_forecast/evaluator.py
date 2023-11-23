@@ -199,6 +199,8 @@ def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_t
                         end_tensor[:, idx],
                     )
                 else:
+                    print(end_tensor.shape)
+                    print("end tensor shap")
                     s = evaluation_metric_function(
                         labels,
                         end_tensor,
