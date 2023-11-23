@@ -6,7 +6,7 @@ import numpy as np
 def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     """Function to create temporal feature. Uses dict to make val.
 
-    :param key: The datetime feature you would like to create from the datetime column
+    :param key: The datetime feature you would like to create from the datetime column.
     :type key: str
     :param value: The type of feature you would like to create (cyclical or numerical)
     :type value: str

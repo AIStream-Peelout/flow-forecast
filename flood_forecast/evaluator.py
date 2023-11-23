@@ -102,6 +102,7 @@ def evaluate_model(
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
         if model.params["dataset_params"]["class"] == "SeriesIDLoader":
+            print(end_tensor[0].shape)
             print("forecast_history", forecast_history)
             eval_logs = []
             i = 0
@@ -258,6 +259,8 @@ def infer_on_torch_model(
             test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     elif model.params["dataset_params"]["class"] == "SeriesIDLoader":
+        print("forecas thour")
+        print(hours_to_forecast)
         print("CSVSeriesIDLoader not yet supported for inference, but is coming very soon.")
         print(dataset_params)
         series_id_col = dataset_params.pop("series_id_col")
