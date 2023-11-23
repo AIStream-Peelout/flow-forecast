@@ -174,6 +174,9 @@ def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_t
         idx = 0
         for target in target_col:
             labels = torch.from_numpy(df_train_and_test[target][forecast_history:].to_numpy())
+            if labels.shape[0] == 0:
+                print("No labels to evaluate")
+                continue
             evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
@@ -199,8 +202,6 @@ def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_t
                         end_tensor[:, idx],
                     )
                 else:
-                    print(labels.shape)
-                    print("end tensor shap")
                     s = evaluation_metric_function(
                         labels,
                         end_tensor,
