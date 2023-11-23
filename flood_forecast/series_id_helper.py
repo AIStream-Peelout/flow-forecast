@@ -26,9 +26,9 @@ def handle_csv_id_output(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tens
 
 def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.Tensor], model: torch.nn.Module,
                              criterion: List, random_sample: bool = False, n_targs: int = 1, max_seq_len: int = 100):
-    """Function handles
+    """Function handles validation of models with a series_id. Returns a dictionary of losses for each criterion.
 
-    :param src: _description_
+    :param src: The source sequences
     :type src: Dict[int, torchd
     :param trg: _description_
     :type trg: Dict[int, torch.Tensor]
@@ -55,4 +55,4 @@ def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.
             scaled_crit[critt] += loss.item()
     return scaled_crit
 
-# TODO: Add a function to handle the output of a model with a series_id
+
