@@ -54,5 +54,3 @@ def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.
             loss = critt(output, v2[:, :, :n_targs])
             scaled_crit[critt] += loss.item()
     return scaled_crit
-
-
