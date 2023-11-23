@@ -77,7 +77,7 @@ def evaluate_model(
 ) -> Tuple[Dict, pd.DataFrame, int, pd.DataFrame]:
     """
     A function to evaluate a model. Called automatically at end of training.
-    Can be imported for continuing to evaluate a model in other places as well.
+    Can be imported for continuing to evaluate a model in other places as well..
 
 
     .. highlight:: python
