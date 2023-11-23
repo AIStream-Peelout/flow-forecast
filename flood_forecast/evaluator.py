@@ -105,12 +105,10 @@ def evaluate_model(
             print("forecast_history", forecast_history)
             eval_logs = []
             i = 0
-            print("df below")
             for end_tenso in end_tensor:
-                print(df_train_and_test[i])
                 eval_log = run_evaluation(model, df_train_and_test[i], forecast_history, target_col, end_tenso)
                 eval_logs.append(eval_log)
-                i += 1
+                i+=1
             return eval_logs, df_train_and_test, forecast_start_idx, df_predictions
         g_loss = False
         end_tensor_0 = None
