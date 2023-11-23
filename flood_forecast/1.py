@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Callable, Dict, List, Tuple, Type, Union
-
 import numpy as np
 import pandas as pd
 import sklearn.metrics
@@ -101,18 +100,8 @@ def evaluate_model(
             df_predictions,
             # df_prediction_samples_std_dev,
         ) = infer_on_torch_model(model, **inference_params)
-        if model.params["dataset_params"]["class"] == "SeriesIDLoader":
-            print(end_tensor[0].shape)
-            print("forecast_history", forecast_history)
-            eval_logs = []
-            i = 0
-            for end_tenso in end_tensor:
-                eval_log = run_evaluation(model, df_train_and_test[i][1], forecast_history, target_col, end_tenso)
-                eval_logs.append(eval_log)
-                i += 1
-            return eval_logs, df_train_and_test, forecast_start_idx, df_predictions
+        # To-do turn this into a general function
         g_loss = False
-        end_tensor_0 = None
         probablistic = True if "probabilistic" in inference_params else False
         if isinstance(end_tensor, tuple) and not probablistic:
             end_tensor_0 = end_tensor[1]
@@ -149,34 +138,10 @@ def evaluate_model(
                                       "pred_" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
         print(df_train_and_test)
-        eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss, eval_log,
-                                  end_tensor_0)
-    # Explain model behaviour using shap
-    if "probabilistic" in inference_params:
-        print("Probabilistic explainability currently not supported.")
-    elif "n_targets" in model.params:
-        print("Multitask forecasting support coming soon")
-    elif g_loss:
-        print("SHAP not yet supported for these models with multiple outputs")
-    else:
-        deep_explain_model_summary_plot(
-            model, test_data, inference_params["datetime_start"]
-        )
-        deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
-
-    return eval_log, df_train_and_test, forecast_start_idx, df_predictions
-
-
-def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={},
-                   end_tensor_0=None) -> Dict:
-    inference_params = model.params["inference_params"]
     for evaluation_metric in model.crit:
         idx = 0
         for target in target_col:
             labels = torch.from_numpy(df_train_and_test[target][forecast_history:].to_numpy())
-            if labels.shape[0] == 0:
-                print("No labels to evaluate")
-                continue
             evaluation_metric_function = evaluation_metric
             if "probabilistic" in inference_params:
                 s = evaluation_metric_function(
@@ -209,7 +174,20 @@ def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_t
             idx += 1
             eval_log[target + "_" + evaluation_metric.__class__.__name__] = s
 
-    return eval_log
+    # Explain model behaviour using shap
+    if "probabilistic" in inference_params:
+        print("Probabilistic explainability currently not supported.")
+    elif "n_targets" in model.params:
+        print("Multitask forecasting support coming soon")
+    elif g_loss:
+        print("SHAP not yet supported for these models with multiple outputs")
+    else:
+        deep_explain_model_summary_plot(
+            model, test_data, inference_params["datetime_start"]
+        )
+        deep_explain_model_heatmap(model, test_data, inference_params["datetime_start"])
+
+    return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
 
 def infer_on_torch_model(
@@ -248,7 +226,7 @@ def infer_on_torch_model(
     forecast_length = model.params["dataset_params"]["forecast_length"]
     sort_column2 = None
     #
-    # If the test dataframe is nonbe use default one supplied in params
+    # If the test dataframe is none use default one supplied in params
     if test_csv_path is None:
         csv_test_loader = model.test_data
     elif model.params["dataset_params"]["class"] == "TemporalLoader":
@@ -262,17 +240,11 @@ def infer_on_torch_model(
             test_idx = model.params["model_params"]["label_len"] - model.params["dataset_params"]["forecast_length"]
         csv_test_loader = TemporalTestLoader(model.params["dataset_params"]["temporal_feats"], input_dict, test_idx)
     elif model.params["dataset_params"]["class"] == "SeriesIDLoader":
-        print("forecas thour")
-        print(hours_to_forecast)
         print("CSVSeriesIDLoader not yet supported for inference, but is coming very soon.")
-        print(dataset_params)
-        series_id_col = dataset_params.pop("series_id_col")
-        return_method = dataset_params.pop("return_method")
-        dataset_params["file_path"] = test_csv_path
-        # dataset_params["scaling"] = model.params["dataset_params"]["scaler"]
-        # do stufF
-        csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method, hours_to_forecast, True)
-        return handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
+        series_id_col = model.params["dataset_params"]["series_id_col"]
+        csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, "all")
+        handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
+        exit()
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -359,30 +331,28 @@ def infer_on_torch_model(
 
 
 def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
-                                    hours_to_forecast: int, datetime_start) -> Tuple[List[pd.DataFrame], List]:
+                                    hours_to_forecast: int, datetime_start):
     data = csv_series_id_loader.get_from_start_date_all(datetime_start)
-    end_tenor_arr = []
     for i in range(0, len(data)):
         history, df_train_and_test, forecast_start_idx = data[i]
-        print("values below here")
-        print(history.shape)
-        print(df_train_and_test.columns)
+        print(history)
+        print(df_train_and_test)
         print(forecast_start_idx)
+        """
         end_tensor = generate_predictions(
             model,
             df_train_and_test,
-            csv_series_id_loader.csv_test_loaders[i],
+            csv_series_id_loader,
             history,
             device,
             forecast_start_idx,
             model.params["dataset_params"]["forecast_length"],
             hours_to_forecast,
-            decoder_params=model.params["inference_params"]["decoder_params"],
+            decoder_params=None,
             multi_params=1
         )
-        print(end_tensor)
-        end_tenor_arr.append(end_tensor)
-    return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, [] # noqa
+        print(end_tensor)"""
+    return
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
@@ -404,7 +374,7 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
     :param num_samples: The number of samples to generate (i.e. larger ci)
     :type num_samples: int
     :raises ValueError: [description]
-    :raises ValueError: [descriptsion]
+    :raises ValueError: [description]
     :return: Returns an array with different CI predictions
     :rtype: List[pd.DataFrame]
     """

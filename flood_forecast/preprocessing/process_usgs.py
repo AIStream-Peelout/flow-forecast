@@ -7,9 +7,17 @@ import pytz
 
 
 def make_usgs_data(start_date: datetime, end_date: datetime, site_number: str) -> pd.DataFrame:
+    """_summary_
+
+    :param start_date: _description_
+    :type start_date: datetime
+    :param end_date: _description_
+    :type end_date: datetime
+    :param site_number: _description_
+    :type site_number: str
+    :return: _description_
+    :rtype: pd.DataFrame
     """
-    """
-    print('yes')
     base_url = "https://nwis.waterdata.usgs.gov/usa/nwis/uv/?cb_00060=on&cb_00065&format=rdb&"
     full_url = base_url + "site_no=" + site_number + "&period=&begin_date=" + \
         start_date.strftime("%Y-%m-%d") + "&end_date=" + end_date.strftime("%Y-%m-%d")
@@ -60,7 +68,7 @@ def df_label(usgs_text: str) -> str:
 
 def create_csv(file_path: str, params_names: dict, site_number: str):
     """
-    Function that creates the final version of the CSV files
+    Function that creates the final version of the CSV files .
     """
     df = pd.read_csv(file_path, sep="\t")
     for key, value in params_names.items():

@@ -14,7 +14,7 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_probabilistic_confidence_interval)
 
 def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> None:
-    """Utility function to help handle model evaluation. Primarily used at the moment for forcast
+    """Utility function to help handle model evaluation. Primarily used at the moment for forecasting models.
 
     :param trained_model: A PyTorchForecast model that has already been trained. 
     :type trained_model: PyTorchForecast
@@ -30,6 +30,9 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
             params["metrics"],
             params["inference_params"],
             {})
+    if params["dataset_params"]["class"] == "SeriesIDLoader":
+        print("SeriesIDTestLoader does not support evaluation.")
+        return
     wandb.run.summary["test_accuracy"] = test_acc[0]
     df_train_and_test = test_acc[1]
     forecast_start_idx = test_acc[2]

@@ -399,22 +399,22 @@ workflows:
             - setup_and_install
       - evaluator_test:
           requires:
-            - linting
+            - setup_and_install
       - data_quality_test:
           requires:
-            - linting
+            - setup_and_install
       - model_basic_test:
           requires:
-            - linting
+           - setup_and_install
       - decoder_test:
           requires:
-            - linting
+            - setup_and_install
       - trainer_test:
           requires:
             - linting
       - plot_test:
           requires:
-            - linting
+            - setup_and_install
       - trainer_test1:
           requires:
-            - linting
+            - setup_and_install

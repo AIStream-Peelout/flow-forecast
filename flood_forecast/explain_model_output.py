@@ -19,10 +19,9 @@ BACKGROUND_BATCH_SIZE = 5
 
 def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -> Tuple[torch.Tensor, int]:
     """
-
     :param dl: The test data-loader. Should be passed directly
     :type dl: Union[CSVTestLoader, TemporalTestLoader]
-    :param dl_class: A string that is the name of DL passef from the params file.
+    :param dl_class: A string that is the name of DL passef from the params file
     :type dl_class: str
     :param datetime_start: The start datetime for the forecast
     :type datetime_start: datetime

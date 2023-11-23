@@ -664,7 +664,7 @@ class CSVResultsHolder(object):
 
 
 class SeriesIDTestLoader(CSVSeriesIDLoader):
-    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True, forecast_total=336):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, forecast_total=336, return_all=True):
         """_summary_
 
         :param series_id_col: _de
@@ -679,12 +679,12 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         :type forecast_total: int, optional
         """
         super().__init__(series_id_col, main_params, return_method, return_all)
+        print("forecast_total is: " + str(forecast_total))
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, 336, **main_params) for loader_1 in self.df_orig_list]
+        self.csv_test_loaders = [CSVTestLoader(loader_1, forecast_total, **main_params) for loader_1 in self.df_orig_list]
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []
         for test_loader in self.csv_test_loaders:
-            test_loader.get_from_start_date(forecast_start, series_id)
-            res.append(test_loader)
+            res.append(test_loader.get_from_start_date(forecast_start, series_id))
         return res

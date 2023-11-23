@@ -5,7 +5,6 @@ import torch
 
 class TestTransformerDecoderEmbedding(unittest.TestCase):
     def setUp(self):
-        "0"
         self.transformer_encoder = CustomTransformerDecoder(20, 20, 5, output_dim=5, squashed_embedding=True)
 
     def test_custom_full(self):
