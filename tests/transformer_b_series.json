@@ -58,7 +58,7 @@
        "tags": ["dummy_run", "circleci"]
     },
     "forward_params":{},
-   "metrics":["DilateLoss"],
+   "metrics":["MSE"],
    "inference_params":
    {
          "datetime_start":"2020-06-06",
