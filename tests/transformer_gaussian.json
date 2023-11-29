@@ -50,7 +50,7 @@
          "sigma":0
        },
        "lr": 0.003,
-       "epochs": 1,
+       "epochs": 2,
        "batch_size": 3
     },
     "GCS": false,
