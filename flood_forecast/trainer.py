@@ -80,7 +80,9 @@ def handle_core_eval(trained_model, params: Dict, model_type: str):
         params["inference_params"],
         {})
     if params["dataset_params"]["class"] == "SeriesIDLoader":
-        for i in range(len(test_acc)):
+        data = test_acc[1]
+        for i in range(len(data)):
+            tuple_for_eval = (test_acc[0][i], data[i][1], data[i][2], data[i][3], )
             handle_model_evaluation1(test_acc[i], params)
     else:
         handle_model_evaluation1(test_acc, params)
@@ -158,7 +160,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
         if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] !="VariableSequenceLength":
-            handle_model_evaluation1(trained_model, params, model_type)
+            handle_core_eval(trained_model, params, model_type)
 
     else:
         raise Exception("Please supply valid model type for forecasting or classification")
