@@ -272,7 +272,11 @@ def infer_on_torch_model(
         # dataset_params["scaling"] = model.params["dataset_params"]["scaler"]
         # do stufF
         csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method, hours_to_forecast, True)
-        return handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
+        # data is a list of tuples (history, df_train_and_test, forecast_start_idx)
+        # returns data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, []
+        vals = handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
+        for i in range(0, len(vals[0])):
+            return handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0]) # noqa
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -281,6 +285,7 @@ def infer_on_torch_model(
             sort_column_clone=sort_column2,
             interpolate=dataset_params["interpolate_param"]
         )
+    # TODO move bottom to
     model.model.eval()
     targ = False
     if model.params["dataset_params"]["class"] == "TemporalLoader":
@@ -304,6 +309,18 @@ def infer_on_torch_model(
         multi_params=multi_params,
         targs=targ
     )
+    return handle_later_ev(model, df_train_and_test, end_tensor, model.params, csv_test_loader, multi_params, forecast_start_idx, history)
+
+
+def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx, history):
+    targ = False
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # chceck
+    decoder_params = params["inference_params"]["decoder_params"]
+    history_length = params["dataset_params"]["forecast_history"]
+    forecast_length = params["dataset_params"]["forecast_length"]
+    hours_to_forecast = params["inference_params"]["hours_to_forecast"]
+    num_prediction_samples = params["inference_params"].get("num_prediction_samples")
     df_train_and_test["preds"] = 0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
@@ -312,10 +329,10 @@ def infer_on_torch_model(
             print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             try:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                                      "std_dev"] = end_tensor[1][0].numpy().tolist()
+                                    "std_dev"] = end_tensor[1][0].numpy().tolist()
             except Exception as e:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                                      "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
+                                    "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
                 print(e)
     else:
         df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor.numpy().tolist()
@@ -380,7 +397,6 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
             decoder_params=model.params["inference_params"]["decoder_params"],
             multi_params=1
         )
-        print(end_tensor)
         end_tenor_arr.append(end_tensor)
     return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, [] # noqa
 
@@ -471,7 +487,7 @@ def generate_predictions(
     :type forecast_length: int
     :param hours_to_forecast: The number of time_steps to forecast in future
     :type hours_to_forecast: int
-    :param decoder_params: The parameters the decoder function takes.
+    :param decoder_params: The parameters the decoder function takes..
     :type decoder_params: Dict
     :param multi_params: n_targets, defaults to 1
     :type multi_params: int, optional

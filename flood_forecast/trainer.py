@@ -158,7 +158,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
         if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] !="VariableSequenceLength":
-            handle_model_evaluation1(trained_model, params, model_type)
+            handle_core_eval(trained_model, params, model_type)
 
     else:
         raise Exception("Please supply valid model type for forecasting or classification")
