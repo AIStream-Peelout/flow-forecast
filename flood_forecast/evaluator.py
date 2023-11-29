@@ -281,7 +281,6 @@ def infer_on_torch_model(
             sort_column_clone=sort_column2,
             interpolate=dataset_params["interpolate_param"]
         )
-    # TODO mov
     model.model.eval()
     targ = False
     if model.params["dataset_params"]["class"] == "TemporalLoader":
@@ -381,6 +380,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
             decoder_params=model.params["inference_params"]["decoder_params"],
             multi_params=1
         )
+        print(end_tensor)
         end_tenor_arr.append(end_tensor)
     return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, [] # noqa
 
