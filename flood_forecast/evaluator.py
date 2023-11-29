@@ -106,6 +106,7 @@ def evaluate_model(
             print("forecast_history", forecast_history)
             eval_logs = []
             i = 0
+            print(df_train_and_test)
             for end_tenso in end_tensor:
                 eval_log = run_evaluation(model, df_train_and_test[i][1], forecast_history, target_col, end_tenso)
                 eval_logs.append(eval_log)

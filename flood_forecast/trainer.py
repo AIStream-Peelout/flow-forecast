@@ -80,8 +80,9 @@ def handle_core_eval(trained_model, params: Dict, model_type: str):
         params["inference_params"],
         {})
     if params["dataset_params"]["class"] == "SeriesIDLoader":
-        for i in range(len(test_acc)):
-            handle_model_evaluation1(test_acc[i], params)
+       data = test_acc[1]
+       for i in range(len(data)):
+            tuple_for_eval = (test_acc[0][i], data[i][1], data[i][2], data[i][3])
     else:
         handle_model_evaluation1(test_acc, params)
 
