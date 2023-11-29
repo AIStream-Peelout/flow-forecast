@@ -13,7 +13,7 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
-def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> None:
+def handle_model_evaluation1(test_acc, params: Dict) -> None:
     """Utility function to help handle model evaluation. Primarily used at the moment for forecasting models.
 
     :param trained_model: A PyTorchForecast model that has already been trained. 
@@ -23,16 +23,6 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
     :param model_type: The type of model. Almost always PyTorch in practice.
     :type model_type: str
     """
-    test_acc = evaluate_model(
-            trained_model,
-            model_type,
-            params["dataset_params"]["target_col"],
-            params["metrics"],
-            params["inference_params"],
-            {})
-    if params["dataset_params"]["class"] == "SeriesIDLoader":
-        print("SeriesIDTestLoader does not support evaluation.")
-        return
     wandb.run.summary["test_accuracy"] = test_acc[0]
     df_train_and_test = test_acc[1]
     forecast_start_idx = test_acc[2]
@@ -80,6 +70,21 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
                 y=df_train_and_test[relevant_col],
                 name=relevant_col))
     wandb.log({"test_plot_all": test_plot_all})
+
+def handle_core_eval(trained_model, params: Dict, model_type: str):
+    test_acc = evaluate_model(
+        trained_model,
+        model_type,
+        params["dataset_params"]["target_col"],
+        params["metrics"],
+        params["inference_params"],
+        {})
+    if params["dataset_params"]["class"] == "SeriesIDLoader":
+        for i in range(len(test_acc)):
+            handle_model_evaluation1(test_acc[i], params)
+    else:
+        handle_model_evaluation1(test_acc, params)
+
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
