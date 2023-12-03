@@ -22,7 +22,7 @@
        "batch_size":10,
        "forecast_history":5,
        "forecast_length":1,
-       "train_end": 100,
+       "train_end": 101,
        "valid_start":301,
        "valid_end": 401,
        "test_end":400,
