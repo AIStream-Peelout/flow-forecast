@@ -6,7 +6,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model, evaluate_model
 import torch
 import numpy
-# Set random seed for same
+# Set random seed for same .
 numpy.random.seed(0)
 torch.manual_seed(0)
 

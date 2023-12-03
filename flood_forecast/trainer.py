@@ -72,6 +72,15 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
     wandb.log({"test_plot_all": test_plot_all})
 
 def handle_core_eval(trained_model, params: Dict, model_type: str):
+    """_summary_
+
+    :param trained_model: _description_
+    :type trained_model: _type_
+    :param params: _description_
+    :type params: Dict
+    :param model_type: _description_
+    :type model_type: str
+    """
     test_acc = evaluate_model(
         trained_model,
         model_type,
@@ -82,7 +91,8 @@ def handle_core_eval(trained_model, params: Dict, model_type: str):
     if params["dataset_params"]["class"] == "SeriesIDLoader":
        data = test_acc[1]
        for i in range(len(data)):
-            tuple_for_eval = (test_acc[0][i], data[i][1], data[i][2], data[i][3])
+            tuple_for_eval = (test_acc[0][i], test_acc[1][i], test_acc[2][i], test_acc[3][i])
+            handle_model_evaluation1(tuple_for_eval, params)
     else:
         handle_model_evaluation1(test_acc, params)
 
