@@ -92,7 +92,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
-    :param params: Dictionary containing all the parameters needed to run the model
+    :param params: Dictionary containing all the parameters needed to run the model.
     :type Dict:
     :return: A trained model
     

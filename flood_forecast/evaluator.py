@@ -338,7 +338,7 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
     targ = False
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # chceck
-    print("These are the params": + str(params))
+    print("These are the params " + str(params))
     decoder_params = params["inference_params"]["decoder_params"]
     history_length = params["dataset_params"]["forecast_history"]
     forecast_length = params["dataset_params"]["forecast_length"]
