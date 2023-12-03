@@ -108,7 +108,7 @@ def evaluate_model(
             i = 0
             print(df_train_and_test)
             for end_tenso in end_tensor:
-                eval_log = run_evaluation(model, df_train_and_test[i][1], forecast_history, target_col, end_tenso)
+                eval_log = run_evaluation(model, df_train_and_test[i], forecast_history, target_col, end_tenso)
                 eval_logs.append(eval_log)
                 i += 1
             return eval_logs, df_train_and_test, forecast_start_idx, df_predictions
@@ -276,8 +276,20 @@ def infer_on_torch_model(
         # data is a list of tuples (history, df_train_and_test, forecast_start_idx)
         # returns data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, []
         vals = handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
+        df_train_and_test_arr = []
+        end_tensor_arr = []
+        history_length,
+        forecast_start_idx_arr = []
+        csv_test_loader,
+        df_prediction_arr = []
+
         for i in range(0, len(vals[0])):
-            return handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0]) # noqa
+            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0]) # noqa
+            df_train_and_test_arr.append(df_train_and_test)
+            end_tensor_arr.append(end_tensor)
+            forecast_start_idx_arr.append(forecast_start_idx)
+            df_prediction_arr.append(df_prediction)
+        return df_train_and_test_arr, end_tensor_arr, history_length, forecast_start_idx_arr, csv_test_loader, df_prediction_arr # noqa
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
