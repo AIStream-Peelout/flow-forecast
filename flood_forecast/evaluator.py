@@ -287,9 +287,7 @@ def infer_on_torch_model(
         vals = handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
         df_train_and_test_arr = []
         end_tensor_arr = []
-        history_length,
         forecast_start_idx_arr = []
-        csv_test_loader,
         df_prediction_arr = []
 
         for i in range(0, len(vals[0])):

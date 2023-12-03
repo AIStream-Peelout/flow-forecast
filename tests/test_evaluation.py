@@ -6,6 +6,7 @@ from flood_forecast.time_model import PyTorchForecast
 from flood_forecast.evaluator import infer_on_torch_model, evaluate_model
 import torch
 import numpy
+# Set random seed for same
 numpy.random.seed(0)
 torch.manual_seed(0)
 
@@ -31,8 +32,9 @@ class EvaluationTest(unittest.TestCase):
                 "interpolate": False,
             },
             "wandb": False,
-            "inference_params": {"hours_to_forecast": 15},
-        }
+            "inference_params": {"hours_to_forecast": 15, "decoder_params": 
+                                 {"decoder_function": "simple_decode", "unsqueeze_dim": 1}},
+             }
         self.model_linear_params = {
             "model_name": "SimpleLinearModel",
             "metrics": ["MSE", "MAPE"],
