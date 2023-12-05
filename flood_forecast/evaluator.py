@@ -19,7 +19,7 @@ from flood_forecast.temporal_decoding import decoding_function
 
 """
 This module contains functions for evaluating models. Basic logic flow:
-1. `evaluate_model` is called from `trainer.py` at the end of training. It calls `infer_on_torch_model` which does the actual inference. # noqa
+1. `evaluate_model` is called from `trainer.py` at the end of training. It calls `infer_on_torch_model` which does the actual inference.
 2. `infer_on_torch_model` calls `generate_predictions` which calls `generate_decoded_predictions` or `generate_predictions_non_decoded` depending on whether the model uses a decoder or not.
 3. `generate_decoded_predictions` calls `decoding_functions` which calls `greedy_decode` or `beam_decode` depending on the decoder function specified in the config file.
 4. The returned value from `generate_decoded_predictions` is then used to calculate the evaluation metrics in `run_evaluation`.
@@ -329,14 +329,13 @@ def infer_on_torch_model(
         multi_params=multi_params,
         targs=targ
     )
-    return handle_later_ev(model, df_train_and_test, end_tensor, model.params, csv_test_loader, multi_params,
-                           forecast_start_idx, history)
+    return handle_later_ev(model, df_train_and_test, end_tensor, model.params, csv_test_loader, multi_params, forecast_start_idx, history)
 
 
-def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx, 
-                    history):
+def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx, history):
     targ = False
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # chceck
     print("These are the params " + str(params))
     decoder_params = params["inference_params"]["decoder_params"]
     history_length = params["dataset_params"]["forecast_history"]
@@ -351,10 +350,10 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
             print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             try:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                                      "std_dev"] = end_tensor[1][0].numpy().tolist()
+                                    "std_dev"] = end_tensor[1][0].numpy().tolist()
             except Exception as e:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                                      "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
+                                    "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
                 print(e)
     else:
         df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor.numpy().tolist()
@@ -475,8 +474,6 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
         df_prediction_arr.append(df_pred)
     if len(df_prediction_arr) < 1:
         raise ValueError("Error length of the prediction array must be one or greater")
-    print("prediction_arar")
-    print(df_prediction_arr[0].shape)
     return df_prediction_arr
 
 
