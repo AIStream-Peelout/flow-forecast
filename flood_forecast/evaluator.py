@@ -19,7 +19,7 @@ from flood_forecast.temporal_decoding import decoding_function
 
 """
 This module contains functions for evaluating models. Basic logic flow:
-1. `evaluate_model` is called from `trainer.py` at the end of training. It calls `infer_on_torch_model` which does the actual inference.
+1. `evaluate_model` is called from `trainer.py` at the end of training. It calls `infer_on_torch_model` which does the actual inference. # noqa
 2. `infer_on_torch_model` calls `generate_predictions` which calls `generate_decoded_predictions` or `generate_predictions_non_decoded` depending on whether the model uses a decoder or not.
 3. `generate_decoded_predictions` calls `decoding_functions` which calls `greedy_decode` or `beam_decode` depending on the decoder function specified in the config file.
 4. The returned value from `generate_decoded_predictions` is then used to calculate the evaluation metrics in `run_evaluation`.
@@ -283,20 +283,21 @@ def infer_on_torch_model(
         # do stufF
         csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method, hours_to_forecast, True)
         # data is a list of tuples (history, df_train_and_test, forecast_start_idx)
-        # returns data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, []
+        # returns data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, 
+        # csv_series_id_loader, []
         vals = handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
         df_train_and_test_arr = []
         end_tensor_arr = []
         forecast_start_idx_arr = []
-        df_prediction_arr = []
+        df_prediction_arr_1 = []
 
         for i in range(0, len(vals[0])):
             df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0]) # noqa
             df_train_and_test_arr.append(df_train_and_test)
             end_tensor_arr.append(end_tensor)
             forecast_start_idx_arr.append(forecast_start_idx)
-            df_prediction_arr.append(df_prediction)
-        return df_train_and_test_arr, end_tensor_arr, history_length, forecast_start_idx_arr, csv_test_loader, df_prediction_arr # noqa
+            df_prediction_arr_1.append(df_prediction)
+        return df_train_and_test_arr, end_tensor_arr, history_length, forecast_start_idx_arr, csv_test_loader, df_prediction_arr_1 # noqa
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -329,15 +330,18 @@ def infer_on_torch_model(
         multi_params=multi_params,
         targs=targ
     )
-    return handle_later_ev(model, df_train_and_test, end_tensor, model.params, csv_test_loader, multi_params, forecast_start_idx, history)
+    return handle_later_ev(model, df_train_and_test, end_tensor, model.params, csv_test_loader, multi_params,
+                           forecast_start_idx, history)
 
 
-def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx, history):
+def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
+                    history):
     targ = False
+    decoder_params = None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # chceck
     print("These are the params " + str(params))
-    decoder_params = params["inference_params"]["decoder_params"]
+    if "decoder_params" in params["inference_params"]:
+        decoder_params = params["inference_params"]["decoder_params"]
     history_length = params["dataset_params"]["forecast_history"]
     forecast_length = params["dataset_params"]["forecast_length"]
     hours_to_forecast = params["inference_params"]["hours_to_forecast"]
@@ -350,10 +354,10 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
             print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             try:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                                    "std_dev"] = end_tensor[1][0].numpy().tolist()
+                                      "std_dev"] = end_tensor[1][0].numpy().tolist()
             except Exception as e:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
-                                    "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
+                                      "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
                 print(e)
     else:
         df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor.numpy().tolist()
