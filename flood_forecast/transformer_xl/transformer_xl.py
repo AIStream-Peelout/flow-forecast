@@ -14,7 +14,7 @@ class MultiHeadAttention(nn.Module):
         self.d_input = d_input
         self.d_inner = d_inner
         self.n_heads = n_heads
-        # this layer applies the linear transformation required
+        # this layer applies the linear transformation required/
         # for the keys and values for all heads at once for efficiency
         self.linear_kv = nn.Linear(
             d_input,
