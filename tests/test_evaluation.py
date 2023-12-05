@@ -131,7 +131,6 @@ class EvaluationTest(unittest.TestCase):
             "test_csv_path": os.path.join(self.test_path2, "keag_small.csv"),
             "num_prediction_samples": 100,
         }
-        self.model.params["inference_params"] = inference_params
         model_result = evaluate_model(
             self.model, "PyTorch", ["cfs"], ["MSE", "L1"], inference_params, {}
         )
