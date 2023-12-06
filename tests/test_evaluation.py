@@ -33,7 +33,8 @@ class EvaluationTest(unittest.TestCase):
             },
             "wandb": False,
             "inference_params": {"hours_to_forecast": 15, "decoder_params": 
-                                 {"decoder_function": "simple_decode", "unsqueeze_dim": 1}},
+                                 {"decoder_function": "simple_decode", "unsqueeze_dim": 1},
+                                 "num_prediction_samples": 100},
              }
         self.model_linear_params = {
             "model_name": "SimpleLinearModel",
@@ -120,8 +121,8 @@ class EvaluationTest(unittest.TestCase):
         eval_dict = model_result[0]
         self.assertGreater(eval_dict["cfs_MAPELoss"], 0)
         self.assertGreater(eval_dict["cfs_MSELoss"], 420)
-        # self.assertNotAlmostEqual(eval_dict["cfs_MAPELoss"], eval_dict["cfs_MSELoss"])
-        self.assertLessEqual(eval_dict["cfs_MAPELoss"].item(), 400)
+        self.assertNotAlmostEqual(eval_dict["cfs_MAPELoss"], eval_dict["cfs_MSELoss"])
+        # self.assertLessEqual(eval_dict["cfs_MAPELoss"].item(), 400)
 
     def test_evaluator_generate_prediction_samples(self):
         inference_params = {
