@@ -193,7 +193,7 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
-        self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))
+        self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))  # a
 
     def test_linear_decoder(self):
         decoder_params = {"decoder_function": "simple_decode", "unsqueeze_dim": 1}
