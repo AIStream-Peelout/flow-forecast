@@ -426,7 +426,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
     return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, [] # noqa
 
 
-def  handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
+def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
     """Handles the CI confidence interval
 
@@ -454,8 +454,7 @@ def  handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestL
         if "probabilistic" in decoder_param:
             prediction_samples = prediction_samples[0]
         if multi_params == 1:
-            if csv_test_loader.scale:
-                predict = csv_test_loader.inverse_scale(prediction_samples).numpy()
+            predict = csv_test_loader.inverse_scale(prediction_samples).numpy()
             prediction_samples = predict
             df_pred.iloc[history_length:] = prediction_samples
             df_prediction_arr.append(df_pred)
