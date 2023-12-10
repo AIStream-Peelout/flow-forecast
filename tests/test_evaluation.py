@@ -32,7 +32,7 @@ class EvaluationTest(unittest.TestCase):
                 "interpolate": False,
             },
             "wandb": False,
-            "inference_params": {"hours_to_forecast": 15, "decoder_params":
+            "inference_params": {"hours_to_forecast": 15, "decoder_params": 
                                  {"decoder_function": "simple_decode", "unsqueeze_dim": 1},
                                  "num_prediction_samples": 100},
              }
