@@ -151,7 +151,7 @@ class CSVDataLoader(Dataset):
         if isinstance(result_data, np.ndarray):
             result_data_np = result_data
         # print(type(result_data))
-        if self.no_scale:
+        if self.no_scale or self.scale is None:
             return torch.from_numpy(result_data_np)
         if len(result_data_np.shape) > 2:
             result_data_np = result_data_np[0, :, :]

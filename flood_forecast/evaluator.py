@@ -17,6 +17,15 @@ from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
 from flood_forecast.temporal_decoding import decoding_function
 
+"""
+This module contains functions for evaluating models. Basic logic flow:
+1. `evaluate_model` is called from `trainer.py` at the end of training. It calls `infer_on_torch_model` which does the actual inference. # noqa
+2. `infer_on_torch_model` calls `generate_predictions` which calls `generate_decoded_predictions` or `generate_predictions_non_decoded` depending on whether the model uses a decoder or not.
+3. `generate_decoded_predictions` calls `decoding_functions` which calls `greedy_decode` or `beam_decode` depending on the decoder function specified in the config file.
+4. The returned value from `generate_decoded_predictions` is then used to calculate the evaluation metrics in `run_evaluation`.
+5. `run_evaluation` returns the evaluation metrics to `evaluate_model` which returns them to `trainer.py`.
+"""
+
 
 def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
@@ -106,8 +115,9 @@ def evaluate_model(
             print("forecast_history", forecast_history)
             eval_logs = []
             i = 0
+            print(df_train_and_test)
             for end_tenso in end_tensor:
-                eval_log = run_evaluation(model, df_train_and_test[i][1], forecast_history, target_col, end_tenso)
+                eval_log = run_evaluation(model, df_train_and_test[i], forecast_history, target_col, end_tenso)
                 eval_logs.append(eval_log)
                 i += 1
             return eval_logs, df_train_and_test, forecast_start_idx, df_predictions
@@ -272,7 +282,22 @@ def infer_on_torch_model(
         # dataset_params["scaling"] = model.params["dataset_params"]["scaler"]
         # do stufF
         csv_series_id_loader = SeriesIDTestLoader(series_id_col, dataset_params, return_method, hours_to_forecast, True)
-        return handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
+        # data is a list of tuples (history, df_train_and_test, forecast_start_idx)
+        # returns data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx,
+        # csv_series_id_loader, []
+        vals = handle_evaluation_series_loader(csv_series_id_loader, model, device, hours_to_forecast, datetime_start)
+        df_train_and_test_arr = []
+        end_tensor_arr = []
+        forecast_start_idx_arr = []
+        df_prediction_arr_1 = []
+
+        for i in range(0, len(vals[0])):
+            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0]) # noqa
+            df_train_and_test_arr.append(df_train_and_test)
+            end_tensor_arr.append(end_tensor)
+            forecast_start_idx_arr.append(forecast_start_idx)
+            df_prediction_arr_1.append(df_prediction)
+        return df_train_and_test_arr, end_tensor_arr, history_length, forecast_start_idx_arr, csv_test_loader, df_prediction_arr_1 # noqa
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -281,6 +306,7 @@ def infer_on_torch_model(
             sort_column_clone=sort_column2,
             interpolate=dataset_params["interpolate_param"]
         )
+    # TODO move bottom to
     model.model.eval()
     targ = False
     if model.params["dataset_params"]["class"] == "TemporalLoader":
@@ -304,6 +330,22 @@ def infer_on_torch_model(
         multi_params=multi_params,
         targs=targ
     )
+    return handle_later_ev(model, df_train_and_test, end_tensor, model.params, csv_test_loader, multi_params,
+                           forecast_start_idx, history)
+
+
+def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
+                    history):
+    targ = False
+    decoder_params = None
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("These are the params " + str(params))
+    if "decoder_params" in params["inference_params"]:
+        decoder_params = params["inference_params"]["decoder_params"]
+    history_length = params["dataset_params"]["forecast_history"]
+    forecast_length = params["dataset_params"]["forecast_length"]
+    hours_to_forecast = params["inference_params"]["hours_to_forecast"]
+    num_prediction_samples = params["inference_params"].get("num_prediction_samples")
     df_train_and_test["preds"] = 0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
@@ -380,7 +422,6 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
             decoder_params=model.params["inference_params"]["decoder_params"],
             multi_params=1
         )
-        print(end_tensor)
         end_tenor_arr.append(end_tensor)
     return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, [] # noqa
 
@@ -413,7 +454,6 @@ def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLo
         if "probabilistic" in decoder_param:
             prediction_samples = prediction_samples[0]
         if multi_params == 1:
-            print(type(prediction_samples))
             predict = csv_test_loader.inverse_scale(prediction_samples).numpy()
             prediction_samples = predict
             df_pred.iloc[history_length:] = prediction_samples
@@ -471,7 +511,7 @@ def generate_predictions(
     :type forecast_length: int
     :param hours_to_forecast: The number of time_steps to forecast in future
     :type hours_to_forecast: int
-    :param decoder_params: The parameters the decoder function takes.
+    :param decoder_params: The parameters the decoder function takes..
     :type decoder_params: Dict
     :param multi_params: n_targets, defaults to 1
     :type multi_params: int, optional
@@ -647,7 +687,7 @@ def generate_prediction_samples(
     targs=False
 ) -> np.ndarray:
     """
-    ss
+    Generates
     """
     pred_samples = []
     std_dev_samples = []

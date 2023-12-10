@@ -13,7 +13,7 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
-def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> None:
+def handle_model_evaluation1(test_acc, params: Dict) -> None:
     """Utility function to help handle model evaluation. Primarily used at the moment for forecasting models.
 
     :param trained_model: A PyTorchForecast model that has already been trained. 
@@ -23,16 +23,6 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
     :param model_type: The type of model. Almost always PyTorch in practice.
     :type model_type: str
     """
-    test_acc = evaluate_model(
-            trained_model,
-            model_type,
-            params["dataset_params"]["target_col"],
-            params["metrics"],
-            params["inference_params"],
-            {})
-    if params["dataset_params"]["class"] == "SeriesIDLoader":
-        print("SeriesIDTestLoader does not support evaluation.")
-        return
     wandb.run.summary["test_accuracy"] = test_acc[0]
     df_train_and_test = test_acc[1]
     forecast_start_idx = test_acc[2]
@@ -81,12 +71,38 @@ def handle_model_evaluation1(trained_model, params: Dict, model_type: str) -> No
                 name=relevant_col))
     wandb.log({"test_plot_all": test_plot_all})
 
+def handle_core_eval(trained_model, params: Dict, model_type: str):
+    """_summary_
+
+    :param trained_model: _description_
+    :type trained_model: _type_
+    :param params: _description_
+    :type params: Dict
+    :param model_type: _description_
+    :type model_type: str
+    """
+    test_acc = evaluate_model(
+        trained_model,
+        model_type,
+        params["dataset_params"]["target_col"],
+        params["metrics"],
+        params["inference_params"],
+        {})
+    if params["dataset_params"]["class"] == "SeriesIDLoader":
+       data = test_acc[1]
+       for i in range(len(data)):
+            tuple_for_eval = (test_acc[0][i], test_acc[1][i], test_acc[2][i], test_acc[3][i])
+            handle_model_evaluation1(tuple_for_eval, params)
+    else:
+        handle_model_evaluation1(test_acc, params)
+
+
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
     
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
-    :param params: Dictionary containing all the parameters needed to run the model
+    :param params: Dictionary containing all the parameters needed to run the model.
     :type Dict:
     :return: A trained model
     
@@ -153,7 +169,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
         if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] !="VariableSequenceLength":
-            handle_model_evaluation1(trained_model, params, model_type)
+            handle_core_eval(trained_model, params, model_type)
 
     else:
         raise Exception("Please supply valid model type for forecasting or classification")
