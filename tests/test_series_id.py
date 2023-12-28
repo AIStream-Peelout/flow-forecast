@@ -59,7 +59,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         print(all_rows_orig)
         # self.assertIsInstance(all_rows_orig, pd.DataFrame)
         self.assertGreater(forecast_start, 0)
-        # self.assertIsInstance(df_train_test, pd.DataFrame)
+        # self.assertIsInstance(df_train_test, pd.DataFrame).
 
     def test_eval_series_loader(self):
         # infer_on_torch_model("s")  # to-do fill in
