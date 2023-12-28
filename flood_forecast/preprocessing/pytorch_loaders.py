@@ -229,15 +229,17 @@ class CSVSeriesIDLoader(CSVDataLoader):
         if self.return_all_series:
             src_list = {}
             targ_list = {}
+            s = 0
             for va in self.listed_vals:
                 # We need to exclude the index column on one end and the series id column on the other
                 t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
                 print(t.shape)
                 targ_start_idx = idx + self.forecast_history
-                idx2 = va[self.series_id_col].iloc[0]
+                # idx2 = va[self.series_id_col].iloc[0]
                 targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:-1]
-                src_list[self.unique_dict[idx2]] = t
-                targ_list[self.unique_dict[idx2]] = targ
+                src_list[self.unique_dict[s]] = t
+                targ_list[self.unique_dict[s]] = targ
+                s+=1
             return src_list, targ_list
         else:
             raise NotImplementedError
