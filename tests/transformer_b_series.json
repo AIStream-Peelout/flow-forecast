@@ -7,7 +7,7 @@
       "forecast_history":5,
       "n_embd": 1, 
       "num_layer": 5,
-      "dropout":0.00001,
+      "dropout":0.0001,
       "q_len": 1,
       "scale_att": false,
       "forecast_length": 1,
