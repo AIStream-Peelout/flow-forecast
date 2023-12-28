@@ -193,7 +193,6 @@ class CSVSeriesIDLoader(CSVDataLoader):
         for col in self.unique_cols:
             self.df_orig_list.append(self.original_df[self.original_df[self.series_id_col] == col])
             new_df = self.df[self.df[self.series_id_col] == col]
-            new_df = new_df.drop(columns=[self.series_id_col])
             df_list.append(new_df)
             print(new_df.columns)
         self.listed_vals = df_list
