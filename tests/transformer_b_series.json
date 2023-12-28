@@ -48,7 +48,7 @@
        },
        "lr": 0.01,
        "epochs": 1,
-       "batch_size":4
+       "batch_size":5
     },
     "GCS": false,
    

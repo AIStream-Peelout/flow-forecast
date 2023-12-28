@@ -193,6 +193,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         for col in self.unique_cols:
             self.df_orig_list.append(self.original_df[self.original_df[self.series_id_col] == col])
             new_df = self.df[self.df[self.series_id_col] == col]
+            new_df = new_df.drop(columns=[self.series_id_col])
             df_list.append(new_df)
             print(new_df.columns)
         self.listed_vals = df_list
@@ -230,7 +231,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
             targ_list = {}
             for va in self.listed_vals:
                 # We need to exclude the index column on one end and the series id column on the other
-                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, 1:-1]
+                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)
                 print(t.shape)
                 targ_start_idx = idx + self.forecast_history
                 idx2 = va[self.series_id_col].iloc[0]
