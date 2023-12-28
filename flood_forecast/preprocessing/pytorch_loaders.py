@@ -233,11 +233,14 @@ class CSVSeriesIDLoader(CSVDataLoader):
 
                 targ_start_idx = idx + self.forecast_history
                 idx2 = va[self.series_id_col].iloc[0]
-                va_returned = va[va.columns.difference([self.series_id_col], sort=False)]
-                t = torch.Tensor(va_returned.iloc[idx: self.forecast_history + idx].values)[:, 1:]
-                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:]
+                va_returned = va[va.columns.difference([self.series_id_col])]
+                t = torch.Tensor(va_returned.iloc[idx: self.forecast_history + idx].values)
+                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())
                 src_list[self.unique_dict[idx2]] = t
                 targ_list[self.unique_dict[idx2]] = targ
+                print("The shape is: ")
+                print(t.shape)
+                print(targ.shape)
             return src_list, targ_list
         else:
             raise NotImplementedError

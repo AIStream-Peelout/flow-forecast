@@ -28,7 +28,7 @@ def decoding_function(model, src: torch.Tensor, trg: torch.Tensor, forecast_leng
     :type unknown_cols_st: List[str]
     :param decoder_seq_len: The length of the sequence passed into the decoder
     :type decoder_seq_len: int
-    :param max_len: The total number of time steps to forecast. This is the total number of time steps
+    :param max_len: The total number of time steps to forecas
     :type max_len: int
     :return: The forecasted values of shape (batch_size, max_len, n_targets)
     :rtype: torch.Tensor
