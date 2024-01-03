@@ -49,7 +49,7 @@ class Crossformer(nn.Module):
         :param baseline: _description_, defaults to False
         :type baseline: bool, optional
         :param device: _description_, defaults to torch.device("cuda:0")
-        :type device: _type_, optional
+        :type device: str, optional
         """
         super(Crossformer, self).__init__()
         self.data_dim = n_time_series

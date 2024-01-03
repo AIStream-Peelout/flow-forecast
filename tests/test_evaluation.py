@@ -119,7 +119,7 @@ class EvaluationTest(unittest.TestCase):
         eval_dict = model_result[0]
         self.assertGreater(eval_dict["cfs_MAPELoss"], 0)
         self.assertGreater(eval_dict["cfs_MSELoss"], 420)
-        self.assertNotAlmostEqual(eval_dict["cfs_MAPELoss"], eval_dict["cfs_MSELoss"])
+        self.assertNotAlmostEqual(eval_dict["cfs_MAPELoss"].item(), eval_dict["cfs_MSELoss"].item())
         # self.assertLessEqual(eval_dict["cfs_MAPELoss"].item(), 400)
 
     def test_evaluator_generate_prediction_samples(self):
@@ -163,6 +163,7 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
+        print(model_result_1)
         self.assertFalse(model_result_1[1]["preds"].equals(model_result_2[1]["preds"]))
 
     def test_evaluator_df_preds_with_scaling_not_equal_without_scaling(self):
@@ -191,6 +192,7 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
+        print(model_result_1)
         self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))
 
     def test_linear_decoder(self):
