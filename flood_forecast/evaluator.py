@@ -368,7 +368,7 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
         model.model.train()  # sets mode to train so the dropout layers will be touched
         assert num_prediction_samples > 0
         if csv_test_loader.__class__.__name__ == "SeriesIDTestLoader":
-            raise NotImplementedError("SeriesIDTestLoader not yet supported for predictions")
+            raise NotImplementedError("SeriesIDTestLoader not yet supported for predictions.")
         prediction_samples = generate_prediction_samples(
             model,
             df_train_and_test,
