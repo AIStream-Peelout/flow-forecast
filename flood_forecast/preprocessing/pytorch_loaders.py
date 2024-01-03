@@ -235,7 +235,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
                 idx2 = va[self.series_id_col].iloc[0]
                 va_returned = va[va.columns.difference([self.series_id_col], sort=False)]
                 t = torch.Tensor(va_returned.iloc[idx: self.forecast_history + idx].values)[:, 1:]
-                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:]
+                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:] # noqa
                 src_list[self.unique_dict[idx2]] = t
                 targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
@@ -668,11 +668,11 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, forecast_total=336, return_all=True):
         """_summary_
 
-        :param series_id_col: _de
+        :param series_id_col: The column that contains the series_id
         :type series_id_col: str
-        :param main_params: _description_
+        :param main_params: The core params used to instantiate the CSVSeriesIDLoader
         :type main_params: dict
-        :param return_method: _description_
+        :param return_method: _description_D
         :type return_method: str
         :param return_all: _description_, defaults to True
         :type return_all: bool, optional
