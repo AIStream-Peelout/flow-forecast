@@ -163,7 +163,6 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
-        print("res bel")
         print(model_result_1)
         self.assertFalse(model_result_1[1]["preds"].equals(model_result_2[1]["preds"]))
 
@@ -193,7 +192,6 @@ class EvaluationTest(unittest.TestCase):
             inference_params_with_scaling,
             {},
         )
-        print("res bel")
         print(model_result_1)
         self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))
 
