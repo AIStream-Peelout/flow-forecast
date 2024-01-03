@@ -8,7 +8,7 @@ from flood_forecast.preprocessing.interpolate_preprocess import interpolate_miss
 
 class DataQualityTests(unittest.TestCase):
     def setUp(self):
-        # These are historical tests.
+        # These are historical tests
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
 
     def test_intermediate_csv(self):
