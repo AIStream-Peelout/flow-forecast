@@ -230,11 +230,12 @@ class CSVSeriesIDLoader(CSVDataLoader):
             targ_list = {}
             for va in self.listed_vals:
                 # We need to exclude the index column on one end and the series id column on the other
-                t = torch.Tensor(va.iloc[idx: self.forecast_history + idx].values)[:, 1:-1]
-                print(t.shape)
+
                 targ_start_idx = idx + self.forecast_history
                 idx2 = va[self.series_id_col].iloc[0]
-                targ = torch.Tensor(va.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:-1]
+                va_returned = va[va.columns.difference([self.series_id_col], sort=False)]
+                t = torch.Tensor(va_returned.iloc[idx: self.forecast_history + idx].values)[:, 1:]
+                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:] # noqa
                 src_list[self.unique_dict[idx2]] = t
                 targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
@@ -249,7 +250,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         if self.return_all_series:
             return len(self.listed_vals[0]) - self.forecast_history - self.forecast_length - 1
         else:
-            raise NotImplementedError("Current code only supports returning all the series at each iteration")
+            raise NotImplementedError("Current code only supports returning all the series at once at each iteration")
 
 
 class CSVTestLoader(CSVDataLoader):
@@ -667,11 +668,11 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, forecast_total=336, return_all=True):
         """_summary_
 
-        :param series_id_col: _de
+        :param series_id_col: The column that contains the series_id
         :type series_id_col: str
-        :param main_params: _description_
+        :param main_params: The core params used to instantiate the CSVSeriesIDLoader
         :type main_params: dict
-        :param return_method: _description_
+        :param return_method: _description_D
         :type return_method: str
         :param return_all: _description_, defaults to True
         :type return_all: bool, optional
