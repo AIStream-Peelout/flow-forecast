@@ -4,6 +4,10 @@
     "model_type": "PyTorch",
     "model_params": {
       "n_time_series":3,
+      "forecast_history": 20,
+      "forecast_length": 2,
+      "d_model": 8,
+      "use_norm": true
    
    },
    "n_targets":2,
