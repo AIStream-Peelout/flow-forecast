@@ -14,14 +14,14 @@ class ITransformer(nn.Module):
 
     def __init__(self, forecast_history, forecast_length, d_model, embed, dropout, n_heads=8, use_norm=True,
                  e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=True):
-        """_summary_
+        """The complete iTransformer model.
 
-        :param forecast_history: _description_
-        :type forecast_history: _type_
-        :param forecast_length: _description_
-        :type forecast_length: _type_
-        :param d_model: _description_
-        :type d_model: _type_
+        :param forecast_history: The number of historical steps to use for forecasting
+        :type forecast_history: int
+        :param forecast_length: The length of the forecast the model outputs.
+        :type forecast_length: int
+        :param d_model: The embedding dimension of the model. For the paper the authors used 512.
+        :type d_model: int
         :param embed: _description_
         :type embed: _type_
         :param dropout: _description_
@@ -34,11 +34,11 @@ class ITransformer(nn.Module):
         :type e_layers: int, optional
         :param d_ff: _description_, defaults to 512
         :type d_ff: int, optional
-        :param freq: _description_, defaults to 'h'
+        :param freq: The frequency of the time series data, defaults to 'h' for hourly
         :type freq: str, optional
-        :param activation: _description_, defaults to 'gelu'
+        :param activation: The activation, defaults to 'gelu'
         :type activation: str, optional
-        :param factor: _description_, defaults to 1
+        :param factor: _descripstion_, defaults to 1
         :type factor: int, optional
         :param output_attention: _description_, defaults to True
         :type output_attention: bool, optional

@@ -6,6 +6,8 @@
       "n_time_series":3,
       "forecast_history": 96,
       "forecast_length": 96,
+      "embed": "timeF",
+      "dropout": 0.1,
       "d_model": 512,
       "use_norm": true
    
