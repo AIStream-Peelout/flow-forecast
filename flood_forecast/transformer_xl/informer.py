@@ -156,6 +156,19 @@ class ConvLayer(nn.Module):
 
 class EncoderLayer(nn.Module):
     def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu"):
+        """[summary]
+
+        :param attention: [description]
+        :type attention: [type]
+        :param d_model: [description]
+        :type d_model: [type]
+        :param d_ff: [description], defaults to None
+        :type d_ff: [type], optional
+        :param dropout: [description], defaults to 0.1
+        :type dropout: float, optional
+        :param activation: [description], defaults to "relu"
+        :type activation: str, optional
+        """
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.attention = attention
@@ -166,19 +179,18 @@ class EncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
 
-    def forward(self, x, attn_mask=None, tau=None, delta=None):
-        new_x, attn = self.attention(
+    def forward(self, x, attn_mask=None):
+        # x [B, L, D]
+        x = x + self.dropout(self.attention(
             x, x, x,
-            attn_mask=attn_mask,
-            tau=tau, delta=delta
-        )
-        x = x + self.dropout(new_x)
+            attn_mask=attn_mask
+        ))
 
         y = x = self.norm1(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1, 1))))
         y = self.dropout(self.conv2(y).transpose(-1, 1))
 
-        return self.norm2(x + y), attn
+        return self.norm2(x + y)
 
 
 class Encoder(nn.Module):
