@@ -20,6 +20,7 @@ from flood_forecast.meta_models.basic_ae import AE
 from flood_forecast.transformer_xl.dsanet import DSANet
 from flood_forecast.basic.gru_vanilla import VanillaGRU
 from flood_forecast.basic.d_n_linear import DLinear, NLinear
+from flood_forecast.transformer_xl.itransformer import ITransformer
 from flood_forecast.transformer_xl.cross_former import Crossformer as Crossformer10
 from torchtsmixer import TSMixer
 from torchtsmixer import TSMixerExt
@@ -46,7 +47,8 @@ pytorch_model_dict = {
     "Crossformer": Crossformer10,
     "NLinear": NLinear,
     "TSMixer": TSMixer,
-    "TSMixerExt": TSMixerExt
+    "TSMixerExt": TSMixerExt,
+    "ITransformer": ITransformer
 }
 
 pytorch_criterion_dict = {
