@@ -22,4 +22,4 @@ sphinx-rtd-theme
 sphinx-autodoc-typehints
 sphinx
 einops
-
+pytorch-tsmixer
