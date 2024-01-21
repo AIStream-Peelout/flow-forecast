@@ -543,7 +543,7 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         :,
                         0]
-                elif type(model).__name__ == "Informer":
+                elif type(model).__name__ == "Informer" or type(model).__name__ == "ITransformer":
                     multi_targets = multi_targs1
                     filled_targ = targ[1].clone()
                     pred_len = model.pred_len
@@ -574,7 +574,7 @@ def compute_validation(validation_loader: DataLoader,
                 else:
                     output = model(src.float())
                     mod_output_list.append(output)
-            if type(model).__name__ == "Informer":
+            if type(model).__name__ == "Informer" or type(model).__name__ == "ITransformer":
                 output = output[:, :, 0:multi_targets]
             elif classification:
                 labels = targ
