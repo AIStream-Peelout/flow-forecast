@@ -23,7 +23,7 @@
        "label_len":10,
        "forecast_length":2,
        "train_end": 200,
-       "valid_start":180,
+       "valid_start":191,
        "valid_end": 290,
        "test_start":299,
        "test_end": 400,
