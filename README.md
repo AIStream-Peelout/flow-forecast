@@ -35,6 +35,7 @@ Using the library
 13. DLinear and NLinear from the AAAI paper [Are Transformers Effective for Time Series Forecasting](https://arxiv.org/abs/2205.13504)
 14. [Crossformer](https://openreview.net/forum?id=vSVLM2j9eie) from ICLR 2023
 15. Anomaly Transformer
+16. TSMixer
 
 **Forthcoming Models**
 
