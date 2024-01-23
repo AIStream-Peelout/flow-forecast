@@ -6,13 +6,14 @@ from flood_forecast.transformer_xl.attn import FullAttention, AttentionLayer
 from flood_forecast.transformer_xl.data_embedding import DataEmbedding_inverted
 import numpy as np
 
+
 class ITransformer(nn.Module):
     """
     Paper link: https://arxiv.org/abs/2310.06625.
     """
 
     def __init__(self, forecast_history, forecast_length, d_model, embed, dropout, n_heads=8, use_norm=True,
-                 e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=False):
+                 e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=True):
         """The complete iTransformer model.
 
         :param forecast_history: The number of historical steps to use for forecasting
@@ -90,7 +91,7 @@ class ITransformer(nn.Module):
             stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
             x_enc /= stdev
 
-        _, _, N = x_enc.shape # B L N
+        _, _, N = x_enc.shape  # B L N
         # B: batch_size;    E: d_model; 
         # L: seq_len;       S: pred_len;
         # N: number of variate (tokens), can also includes covariates
@@ -104,7 +105,9 @@ class ITransformer(nn.Module):
         enc_out = self.encoder(enc_out, attn_mask=None)
 
         # B N E -> B N S -> B S N 
-        dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N] # filter the covariates
+        print(enc_out.shape)
+        print("shape abov")
+        dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N]  # filter the covariates
 
         if self.use_norm:
             # De-Normalization from Non-stationary Transformer

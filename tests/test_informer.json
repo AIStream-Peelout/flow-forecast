@@ -41,7 +41,7 @@
             "hour":"numerical"
          }
      }
-    },
+    }, 
     "early_stopping":
     {
        "patience":3
