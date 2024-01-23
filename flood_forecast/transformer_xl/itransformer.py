@@ -6,14 +6,13 @@ from flood_forecast.transformer_xl.attn import FullAttention, AttentionLayer
 from flood_forecast.transformer_xl.data_embedding import DataEmbedding_inverted
 import numpy as np
 
-
 class ITransformer(nn.Module):
     """
     Paper link: https://arxiv.org/abs/2310.06625.
     """
 
     def __init__(self, forecast_history, forecast_length, d_model, embed, dropout, n_heads=8, use_norm=True,
-                 e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=True):
+                 e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=False):
         """The complete iTransformer model.
 
         :param forecast_history: The number of historical steps to use for forecasting
