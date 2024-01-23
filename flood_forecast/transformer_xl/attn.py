@@ -13,7 +13,7 @@ class FullAttention(nn.Module):
         self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def forward(self, queries, keys, values, attn_mask):
+    def forward(self, queries, keys, values, attn_mask, delta=NOne, tau=None):
         """Computes full self attention
 
         :param queries: The query for self-attention. Will have shape (batch_size, )
@@ -139,7 +139,7 @@ class AttentionLayer(nn.Module):
         self.out_projection = nn.Linear(d_values * n_heads, d_model)
         self.n_heads = n_heads
 
-    def forward(self, queries, keys, values, attn_mask):
+    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
         B, L, _ = queries.shape
         _, S, _ = keys.shape
         H = self.n_heads
@@ -152,6 +152,8 @@ class AttentionLayer(nn.Module):
             queries,
             keys,
             values,
-            attn_mask
+            attn_mask,
+            tau=tau,
+            delta=delta
         ).view(B, L, -1)
         return self.out_projection(out)

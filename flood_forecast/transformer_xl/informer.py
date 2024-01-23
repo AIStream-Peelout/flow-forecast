@@ -145,7 +145,7 @@ class ConvLayer(nn.Module):
         self.activation = nn.ELU()
         self.maxPool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = self.downConv(x.permute(0, 2, 1))
         x = self.norm(x)
         x = self.activation(x)
