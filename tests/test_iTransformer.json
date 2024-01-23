@@ -23,7 +23,7 @@
        "forecast_length": 96,
        "train_end": 200,
        "valid_start":180,
-       "valid_end": 290,
+       "valid_end": 390,
        "test_start":299,
        "test_end": 400,
        "target_col": ["cfs", "precip"],
