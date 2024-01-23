@@ -22,15 +22,15 @@ class ITransformer(nn.Module):
         :type forecast_length: int
         :param d_model: The embedding dimension of the model. For the paper the authors used 512.
         :type d_model: int
-        :param embed: _description_
-        :type embed: _type_
-        :param dropout: _description_
-        :type dropout: _type_
-        :param n_heads: _description_, defaults to 8
+        :param embed: THe embedding type to use. For the paper the authors used 'fixed'.
+        :type embed: str
+        :param dropout: The dropout for the model.
+        :type dropout: float
+        :param n_heads: Number of heads for the attention, defaults to 8
         :type n_heads: int, optional
-        :param use_norm: _description_, defaults to True
+        :param use_norm: Whether to use normalization, defaults to True
         :type use_norm: bool, optional
-        :param e_layers: _description_, defaults to 3
+        :param e_layers: The number of embedding layers, defaults to 3
         :type e_layers: int, optional
         :param d_ff: _description_, defaults to 512
         :type d_ff: int, optional
@@ -38,9 +38,9 @@ class ITransformer(nn.Module):
         :type freq: str, optional
         :param activation: The activation, defaults to 'gelu'
         :type activation: str, optional
-        :param factor: _descripstion_, defaults to 1
+        :param factor: =n_, defaults to 1
         :type factor: int, optional
-        :param output_attention: _description_, defaults to True
+        :param output_attention: Whether to output the scores, defaults to True
         :type output_attention: bool, optional
         """
         class_strategy = 'projection'

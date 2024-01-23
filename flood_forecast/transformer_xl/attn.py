@@ -13,7 +13,7 @@ class FullAttention(nn.Module):
         self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def forward(self, queries, keys, values, attn_mask, delta=NOne, tau=None):
+    def forward(self, queries, keys, values, attn_mask, delta=None, tau=None):
         """Computes full self attention
 
         :param queries: The query for self-attention. Will have shape (batch_size, )
