@@ -311,6 +311,8 @@ def infer_on_torch_model(
     targ = False
     if model.params["dataset_params"]["class"] == "TemporalLoader":
         history, targ, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
+        if model.__class__.__name__ != "Informer":
+            targ = False
     else:
         (
             history,
