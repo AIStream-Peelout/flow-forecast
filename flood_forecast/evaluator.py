@@ -648,7 +648,7 @@ def generate_decoded_predictions(
             src0 = src[0]
             trg = targs
             if "label_len" not in model.params["model_params"]:
-                label_len = model.params["dataset_params"]["forecast_length"]
+                decoder_seq_len = model.params["dataset_params"]["forecast_length"]
             else:
                 decoder_seq_len = model.params["model_params"]["label_len"]
             end_tensor = decoding_function(model.model, src0, trg[1], model.params["dataset_params"]["forecast_length"],
