@@ -13,7 +13,7 @@ class ITransformer(nn.Module):
     """
 
     def __init__(self, forecast_history, forecast_length, d_model, embed, dropout, n_heads=8, use_norm=True,
-                 e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=True):
+                 e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=True, targs=1):
         """The complete iTransformer model.
 
         :param forecast_history: The number of historical steps to use for forecasting
@@ -69,6 +69,7 @@ class ITransformer(nn.Module):
             norm_layer=torch.nn.LayerNorm(d_model)
         )
         self.projector = nn.Linear(d_model, self.pred_len, bias=True)
+        self.c_out = targs
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         """_summary_

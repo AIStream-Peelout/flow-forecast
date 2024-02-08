@@ -534,7 +534,7 @@ def generate_predictions(
         # hours_to_forecast 336
         # greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
         # greedy_decode(model, src:torch.Tensor, max_len:int,
-        # real_target:torch.Tensor, start_symbol:torch.Tensor,
+        # real_target:torch.Tensor, start_symbol:torch.Tensor
         # unsqueeze_dim=1, device='cpu')
         end_tensor = generate_decoded_predictions(
             model,
