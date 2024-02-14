@@ -27,7 +27,7 @@
        "valid_end": 500,
        "test_start":299,
        "test_end": 500,
-       "target_col": ["cfs", "precip", "temp"],
+       "target_col": ["cfs", "precip"],
        "relevant_cols": ["cfs", "precip", "temp"],
        "scaler": "StandardScaler", 
        "sort_column":"datetime",
