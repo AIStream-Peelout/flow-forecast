@@ -18,7 +18,7 @@ class SimpleTransformer(torch.nn.Module):
             dropout=0.1,
             forward_dim=2048,
             sigmoid=False):
-        """A full transformer model
+        """A full transformer model.
 
         :param number_time_series: The total number of time series present
             (e.g. n_feature_time_series + n_targets)

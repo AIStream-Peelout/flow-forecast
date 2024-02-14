@@ -11,7 +11,7 @@
       "use_norm": true
    
    },
-   "n_targets":2,
+   "n_targets":3,
     "dataset_params":
     { "class": "TemporalLoader",
       "temporal_feats": ["month", "day", "day_of_week", "hour"],
@@ -19,6 +19,7 @@
        "validation_path": "tests/test_data/keag_small.csv",
        "test_path": "tests/test_data/keag_small.csv",
        "batch_size":100,
+       "targs": 3,
        "forecast_history":96,
        "forecast_length": 96,
        "train_end": 200,
