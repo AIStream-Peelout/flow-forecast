@@ -651,6 +651,8 @@ def generate_decoded_predictions(
                 decoder_seq_len = model.params["dataset_params"]["forecast_length"]
             else:
                 decoder_seq_len = model.params["model_params"]["label_len"]
+            print("Target shap")
+            print(trg[1].shape)
             end_tensor = decoding_function(model.model, src0, trg[1], model.params["dataset_params"]["forecast_length"],
                                            src[1], trg[0], 1, decoder_seq_len, hours_to_forecast, device)
         else:
