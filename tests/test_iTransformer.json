@@ -83,7 +83,7 @@
              "forecast_history":96,
              "forecast_length":96,
              "relevant_cols": ["cfs", "precip", "temp"],
-             "target_col": ["cfs", "precip"],
+             "target_col": ["cfs", "precip", "temp"],
              "scaling": "StandardScaler",
              "interpolate_param": false,
              "feature_params":
