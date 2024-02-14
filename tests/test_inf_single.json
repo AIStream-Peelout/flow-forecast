@@ -10,7 +10,7 @@
       "label_len":10, 
       "out_len":2,
       "factor":2
-   },
+   }, 
     "dataset_params":
     { "class": "TemporalLoader",
       "temporal_feats": ["month", "day", "day_of_week", "hour"],
