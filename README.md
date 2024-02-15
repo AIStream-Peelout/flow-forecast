@@ -4,7 +4,7 @@ Flow Forecast (FF) is an open-source deep learning for time series forecasting f
 
 For additional tutorials and examples please see our [tutorials repository](https://github.com/AIStream-Peelout/flow_tutorials).
 
-| branch  | status                                                                                                                                                                                                            |
+| branch  | status                                                                                                                    $$                                                                                        |
 | ---     | ---                                                                                                                                                                                                               |
 | master  | [![CircleCI](https://dl.circleci.com/status-badge/img/gh/AIStream-Peelout/flow-forecast/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/AIStream-Peelout/flow-forecast/tree/master)                |              |
 | Build PY| ![Upload Python Package](https://github.com/AIStream-Peelout/flow-forecast/workflows/Upload%20Python%20Package/badge.svg)|
