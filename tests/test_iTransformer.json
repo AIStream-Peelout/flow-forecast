@@ -8,7 +8,8 @@
       "embed": "timeF",
       "dropout": 0.1,
       "d_model": 512,
-      "use_norm": true
+      "use_norm": true,
+      "targs": 3
    
    },
    "n_targets":3,
@@ -19,7 +20,6 @@
        "validation_path": "tests/test_data/keag_small.csv",
        "test_path": "tests/test_data/keag_small.csv",
        "batch_size":100,
-       "targs": 3,
        "forecast_history":96,
        "forecast_length": 96,
        "train_end": 200,
