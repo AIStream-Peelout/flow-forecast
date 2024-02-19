@@ -520,7 +520,7 @@ def generate_predictions(
     :return: The forecasted values for the time-series in a tensor
     :rtype: torch.Tensor
     """
-    if targs:
+    if targs or model.params["dataset_params"]["class"] == "TemporalLoader":
         history_dim = history
     else:
         history_dim = history.unsqueeze(0).to(model.device)

@@ -169,7 +169,7 @@ class scale_block(nn.Module):
     """
     We can use one segment merging layer followed by multiple TSA layers in each scale
     the parameter `depth' determines the number of TSA layers used in each scale
-    We set depth = 1 in the paper
+    We set depth = 1 in the paper .
     """
 
     def __init__(

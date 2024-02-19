@@ -4,6 +4,7 @@ import numpy as np
 from math import sqrt
 from einops import rearrange
 
+
 class TriangularCausalMask():
     def __init__(self, B, L, device="cpu"):
         mask_shape = [B, 1, L, L]
@@ -27,6 +28,42 @@ class ProbMask():
     @property
     def mask(self):
         return self._mask
+
+
+# Code implementation from https://github.com/thuml/Flowformer
+class FlowAttention(nn.Module):
+    def __init__(self, attention_dropout=0.1):
+        super(FlowAttention, self).__init__()
+        self.dropout = nn.Dropout(attention_dropout)
+
+    def kernel_method(self, x):
+        return torch.sigmoid(x)
+
+    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
+        queries = queries.transpose(1, 2)
+        keys = keys.transpose(1, 2)
+        values = values.transpose(1, 2)
+        # kernel
+        queries = self.kernel_method(queries)
+        keys = self.kernel_method(keys)
+        # incoming and outgoing
+        normalizer_row = 1.0 / (torch.einsum("nhld,nhd->nhl", queries + 1e-6, keys.sum(dim=2) + 1e-6))
+        normalizer_col = 1.0 / (torch.einsum("nhsd,nhd->nhs", keys + 1e-6, queries.sum(dim=2) + 1e-6))
+        # reweighting
+        normalizer_row_refine = (
+            torch.einsum("nhld,nhd->nhl", queries + 1e-6, (keys * normalizer_col[:, :, :, None]).sum(dim=2) + 1e-6))
+        normalizer_col_refine = (
+            torch.einsum("nhsd,nhd->nhs", keys + 1e-6, (queries * normalizer_row[:, :, :, None]).sum(dim=2) + 1e-6))
+        # competition and allocation
+        normalizer_row_refine = torch.sigmoid(
+            normalizer_row_refine * (float(queries.shape[2]) / float(keys.shape[2])))
+        normalizer_col_refine = torch.softmax(normalizer_col_refine, dim=-1) * keys.shape[2]  # B h L vis
+        # multiply
+        kv = keys.transpose(-2, -1) @ (values * normalizer_col_refine[:, :, :, None])
+        x = (((queries @ kv) * normalizer_row[:, :, :, None]) * normalizer_row_refine[:, :, :, None]).transpose(1,
+                                                                                                                2).contiguous()
+        return x, None
+
 
 # Code implementation from https://github.com/shreyansh26/FlashAttention-PyTorch
 class FlashAttention(nn.Module):
