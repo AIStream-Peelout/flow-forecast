@@ -21,8 +21,8 @@ class ProbMask():
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
         _mask_ex = _mask[None, None, :].expand(B, H, L, scores.shape[-1])
         indicator = _mask_ex[torch.arange(B)[:, None, None],
-                    torch.arange(H)[None, :, None],
-                    index, :].to(device)
+                             torch.arange(H)[None, :, None],
+                             index, :].to(device)
         self._mask = indicator.view(scores.shape).to(device)
 
     @property
@@ -214,8 +214,8 @@ class ProbAttention(nn.Module):
 
         # use the reduced Q to calculate Q_K
         Q_reduce = Q[torch.arange(B)[:, None, None],
-                   torch.arange(H)[None, :, None],
-                   M_top, :]  # factor*ln(L_q)
+                     torch.arange(H)[None, :, None],
+                     M_top, :]  # factor*ln(L_q)
         Q_K = torch.matmul(Q_reduce, K.transpose(-2, -1))  # factor*ln(L_q)*L_k
 
         return Q_K, M_top
