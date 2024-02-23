@@ -9,6 +9,7 @@ from flood_forecast.custom.custom_activation import _roll_last
 class TestBasicMethodVal(unittest.TestCase):
 
     def test_simple_linear_prob(self):
+        # hi
         s = SimpleLinearModel(9, 3, 1, True)
         r = s(torch.rand(4, 9, 3))
         self.assertIsInstance(r, torch.distributions.Normal)
