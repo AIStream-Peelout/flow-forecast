@@ -308,7 +308,6 @@ def infer_on_torch_model(
         )
     # TODO move bottom to
     model.model.eval()
-    # Why is that not working?
     targ = False
     if model.params["dataset_params"]["class"] == "TemporalLoader":
         history, targ, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
@@ -644,7 +643,7 @@ def generate_decoded_predictions(
             .unsqueeze(0)
             .to(model.device)
         )
-        if targs is not None:
+        if targs:
             src = history_dim
             src0 = src[0]
             trg = targs
