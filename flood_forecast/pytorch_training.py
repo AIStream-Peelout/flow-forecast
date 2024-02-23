@@ -16,6 +16,7 @@ from torch.nn import CrossEntropyLoss
 
 TEMPORAL_FEATS_MODELS = ["ITransformer", "Informer"]
 
+
 def multi_crit(crit_multi: List, output, labels, valid=None):
     """_summary_
 
@@ -575,7 +576,7 @@ def compute_validation(validation_loader: DataLoader,
                 else:
                     output = model(src.float())
                     mod_output_list.append(output)
-            if type(model).__name__ in TEMPORAL_FEATS_MODELS: # "=" 
+            if type(model).__name__ in TEMPORAL_FEATS_MODELS:
                 output = output[:, :, 0:multi_targets]
             elif classification:
                 labels = targ
