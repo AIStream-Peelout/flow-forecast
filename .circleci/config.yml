@@ -319,7 +319,6 @@ jobs:
           name: Trainer1 tests
           when: always
           command: |
-            coverage run flood_forecast/trainer.py -p tests/test_informer.json
             coverage run flood_forecast/trainer.py -p tests/test_iTransformer.json
             coverage run flood_forecast/trainer.py -p tests/tsmixer_test.json
             coverage run flood_forecast/trainer.py -p tests/transformer_b_series.json

@@ -292,7 +292,7 @@ def infer_on_torch_model(
         df_prediction_arr_1 = []
 
         for i in range(0, len(vals[0])):
-            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0]) # noqa
+            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0], datetime_start=datetime_start) # noqa
             df_train_and_test_arr.append(df_train_and_test)
             end_tensor_arr.append(end_tensor)
             forecast_start_idx_arr.append(forecast_start_idx)
@@ -335,7 +335,7 @@ def infer_on_torch_model(
 
 
 def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
-                    history):
+                    history, datetime_start):
     targ = False
     decoder_params = None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -369,6 +369,8 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
         assert num_prediction_samples > 0
         if csv_test_loader.__class__.__name__ == "SeriesIDTestLoader":
             raise NotImplementedError("SeriesIDTestLoader not yet supported for predictions.")
+        if model.params["dataset_params"]["class"] == "TemporalLoader":
+            history, targ, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
         prediction_samples = generate_prediction_samples(
             model,
             df_train_and_test,
