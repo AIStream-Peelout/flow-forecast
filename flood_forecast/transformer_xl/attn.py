@@ -99,8 +99,8 @@ class FlashAttention(nn.Module):
         Tr = len(Q_BLOCKS)
         Tc = len(K_BLOCKS)
 
-        O_BLOCKS = list(torch.split(O, Q_BLOCK_SIZE, dim=2))
-        l_BLOCKS = list(torch.split(l, Q_BLOCK_SIZE, dim=2))
+        O_BLOCKS = list(torch.split(O1, Q_BLOCK_SIZE, dim=2))
+        l_BLOCKS = list(torch.split(l3, Q_BLOCK_SIZE, dim=2))
         m_BLOCKS = list(torch.split(m, Q_BLOCK_SIZE, dim=2))
 
         for j in range(Tc):
@@ -143,13 +143,13 @@ class FlashAttention(nn.Module):
                 m_BLOCKS[i] = mi_new
 
         O = torch.cat(O_BLOCKS, dim=2)
-        l = torch.cat(l_BLOCKS, dim=2)
+        l3 = torch.cat(l_BLOCKS, dim=2)
         m = torch.cat(m_BLOCKS, dim=2)
-        return O, l, m
+        return O, l3, m
 
     def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
         res = \
-            self.flash_attention_forward(queries.permute(0, 2, 1, 3), keys.permute(0, 2, 1, 3), values.permute(0, 2, 1, 3),
+            self.flash_attention_forward(queries.permute(0, 2, 1, 3), keys.permute(0, 2, 1, 3), values.permute(0, 2, 1, 3), # noqa
                                          attn_mask)[0]
         return res.permute(0, 2, 1, 3).contiguous(), None
 
