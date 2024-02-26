@@ -60,7 +60,8 @@ class FlowAttention(nn.Module):
         normalizer_col_refine = torch.softmax(normalizer_col_refine, dim=-1) * keys.shape[2]  # B h L vis
         # multiply
         kv = keys.transpose(-2, -1) @ (values * normalizer_col_refine[:, :, :, None])
-        x = (((queries @ kv) * normalizer_row[:, :, :, None]) * normalizer_row_refine[:, :, :, None]).transpose(1, 2).contiguous()
+        x = (((queries @ kv) * normalizer_row[:, :, :, None]) *
+             normalizer_row_refine[:, :, :, None]).transpose(1, 2).contiguous()
         return x, None
 
 
@@ -78,12 +79,12 @@ class FlashAttention(nn.Module):
         NEG_INF = -1e10  # -infinity
         EPSILON = 1e-10
         # mask = torch.randint(0, 2, (128, 8)).to(device='cuda')
-        O = torch.zeros_like(Q, requires_grad=True)
-        l = torch.zeros(Q.shape[:-1])[..., None]
+        O1 = torch.zeros_like(Q, requires_grad=True)
+        l3 = torch.zeros(Q.shape[:-1])[..., None]
         m = torch.ones(Q.shape[:-1])[..., None] * NEG_INF
 
-        O = O.to(device='cuda')
-        l = l.to(device='cuda')
+        O1 = O1.to(device='cuda')
+        l3 = l3.to(device='cuda')
         m = m.to(device='cuda')
 
         Q_BLOCK_SIZE = min(BLOCK_SIZE, Q.shape[-1])
@@ -148,8 +149,8 @@ class FlashAttention(nn.Module):
 
     def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
         res = \
-        self.flash_attention_forward(queries.permute(0, 2, 1, 3), keys.permute(0, 2, 1, 3), values.permute(0, 2, 1, 3),
-                                     attn_mask)[0]
+            self.flash_attention_forward(queries.permute(0, 2, 1, 3), keys.permute(0, 2, 1, 3), values.permute(0, 2, 1, 3),
+                                         attn_mask)[0]
         return res.permute(0, 2, 1, 3).contiguous(), None
 
 
@@ -242,8 +243,8 @@ class ProbAttention(nn.Module):
         attn = torch.softmax(scores, dim=-1)  # nn.Softmax(dim=-1)(scores)
 
         context_in[torch.arange(B)[:, None, None],
-        torch.arange(H)[None, :, None],
-        index, :] = torch.matmul(attn, V).type_as(context_in)
+                   torch.arange(H)[None, :, None],
+                   index, :] = torch.matmul(attn, V).type_as(context_in)
         if self.output_attention:
             attns = (torch.ones([B, H, L_V, L_V]) /
                      L_V).type_as(attn).to(attn.device)
@@ -326,6 +327,7 @@ class ReformerLayer(nn.Module):
     def __init__(self, attention, d_model, n_heads, d_keys=None,
                  d_values=None, causal=False, bucket_size=4, n_hashes=4):
         super().__init__()
+        import LSHSelfAttention
         self.bucket_size = bucket_size
         self.attn = LSHSelfAttention(
             dim=d_model,
