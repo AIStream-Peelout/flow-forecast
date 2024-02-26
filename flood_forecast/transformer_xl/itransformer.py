@@ -1,10 +1,8 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from flood_forecast.transformer_xl.informer import Encoder, EncoderLayer
 from flood_forecast.transformer_xl.attn import FullAttention, AttentionLayer
 from flood_forecast.transformer_xl.data_embedding import DataEmbedding_inverted
-import numpy as np
 
 
 class ITransformer(nn.Module):
@@ -64,7 +62,7 @@ class ITransformer(nn.Module):
                     d_ff,
                     dropout=dropout,
                     activation=activation
-                ) for l in range(e_layers)
+                ) for el in range(e_layers)
             ],
             norm_layer=torch.nn.LayerNorm(d_model)
         )
@@ -93,19 +91,19 @@ class ITransformer(nn.Module):
             x_enc /= stdev
 
         _, _, N = x_enc.shape  # B L N
-        # B: batch_size;    E: d_model; 
+        # B: batch_size;    E: d_model;
         # L: seq_len;       S: pred_len;
         # N: number of variate (tokens), can also includes covariates
 
         # Embedding
         # B L N -> B N E                (B L N -> B L E in the vanilla Transformer)
         enc_out = self.enc_embedding(x_enc, x_mark_enc)  # covariates (e.g timestamp) can be also embedded as tokens
-        
         # B N E -> B N E                (B L E -> B L E in the vanilla Transformer)
-        # the dimensions of embedded time series has been inverted, and then processed by native attn, layernorm and ffn modules
+        # the dimensions of embedded time series has been inverted, and then processed by native attn,
+        # layernorm and ffn modules
         enc_out = self.encoder(enc_out, attn_mask=None)
 
-        # B N E -> B N S -> B S N 
+        # B N E -> B N S -> B S N
         print(enc_out[0].shape)
         print("shape abov")
         dec_out = self.projector(enc_out[0]).permute(0, 2, 1)[:, :, :N]  # filter the covariates
