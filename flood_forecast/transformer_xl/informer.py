@@ -124,9 +124,10 @@ class Informer(nn.Module):
         """
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out, _ = self.encoder(enc_out, attn_mask=enc_self_mask)
-        print(enc_out.shape)
+        print(enc_out)
         print("thing above")
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
+        print(dec_out)
         dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
         dec_out = self.projection(dec_out)
         # dec_out = self.end_conv1(dec_out)
@@ -224,6 +225,21 @@ class DecoderLayer(nn.Module):
         self.activation = F.relu if activation == "relu" else F.gelu
 
     def forward(self, x, cross, x_mask=None, cross_mask=None) -> torch.Tensor:
+        """_summary_
+
+        :param x: _description_
+        :type x: _type_
+        :param cross: _description_
+        :type cross: _type_
+        :param x_mask: _description_, defaults to None
+        :type x_mask: _type_, optional
+        :param cross_mask: _description_, defaults to None
+        :type cross_mask: _type_, optional
+        :return: _description_
+        :rtype: torch.Tensor
+        """
+        print('x below')
+        # print(x)
         x = x + self.dropout(self.self_attention(
             x, x, x,
             attn_mask=x_mask
