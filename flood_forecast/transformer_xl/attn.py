@@ -21,8 +21,8 @@ class ProbMask():
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
         _mask_ex = _mask[None, None, :].expand(B, H, L, scores.shape[-1])
         indicator = _mask_ex[torch.arange(B)[:, None, None],
-                    torch.arange(H)[None, :, None],
-                    index, :].to(device)
+                             torch.arange(H)[None, :, None],
+                             index, :].to(device)
         self._mask = indicator.view(scores.shape).to(device)
 
     @property
@@ -60,8 +60,7 @@ class FlowAttention(nn.Module):
         normalizer_col_refine = torch.softmax(normalizer_col_refine, dim=-1) * keys.shape[2]  # B h L vis
         # multiply
         kv = keys.transpose(-2, -1) @ (values * normalizer_col_refine[:, :, :, None])
-        x = (((queries @ kv) * normalizer_row[:, :, :, None]) * normalizer_row_refine[:, :, :, None]).transpose(1,
-                                                                                                                2).contiguous()
+        x = (((queries @ kv) * normalizer_row[:, :, :, None]) * normalizer_row_refine[:, :, :, None]).transpose(1, 2).contiguous()
         return x, None
 
 
@@ -214,8 +213,8 @@ class ProbAttention(nn.Module):
 
         # use the reduced Q to calculate Q_K
         Q_reduce = Q[torch.arange(B)[:, None, None],
-                   torch.arange(H)[None, :, None],
-                   M_top, :]  # factor*ln(L_q)
+                     torch.arange(H)[None, :, None],
+                     M_top, :]  # factor*ln(L_q)
         Q_K = torch.matmul(Q_reduce, K.transpose(-2, -1))  # factor*ln(L_q)*L_k
 
         return Q_K, M_top
@@ -263,7 +262,7 @@ class ProbAttention(nn.Module):
         values = values.transpose(2, 1)
 
         U_part = self.factor * \
-                 np.ceil(np.log(L_K)).astype('int').item()  # c*ln(L_k)
+            np.ceil(np.log(L_K)).astype('int').item()  # c*ln(L_k)
         u = self.factor * \
             np.ceil(np.log(L_Q)).astype('int').item()  # c*ln(L_q)
 
