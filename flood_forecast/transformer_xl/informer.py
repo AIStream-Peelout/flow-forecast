@@ -84,7 +84,7 @@ class Informer(nn.Module):
         self.decoder = Decoder(
             [
                 DecoderLayer(
-                    AttentionLayer(FullAttention(True, factor, attention_dropout=dropout),
+                    AttentionLayer(Attn(True, factor, attention_dropout=dropout),
                                    d_model, n_heads),
                     AttentionLayer(FullAttention(False, factor, attention_dropout=dropout),
                                    d_model, n_heads),
@@ -240,10 +240,11 @@ class DecoderLayer(nn.Module):
         """
         print('x below')
         print(type(x))
-        x = x + self.dropout(self.self_attention(
+        res, attn = self.dropout(self.self_attention(
             x, x, x,
             attn_mask=x_mask
         ))
+        x = x + res
         x = self.norm1(x)
 
         x = x + self.dropout(self.cross_attention(

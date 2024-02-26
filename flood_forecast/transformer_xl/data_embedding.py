@@ -129,7 +129,7 @@ class TemporalEmbedding(nn.Module):
 
 
 class DataEmbedding(nn.Module):
-    def __init__(self, c_in, d_model, embed_type='fixed', data=4, dropout=0.1):
+    def __init__(self, c_in: int, d_model, embed_type='fixed', data=4, dropout=0.1):
         super(DataEmbedding, self).__init__()
 
         self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
@@ -138,23 +138,24 @@ class DataEmbedding(nn.Module):
 
         self.dropout = nn.Dropout(p=dropout)
 
-    def forward(self, x, x_mark):
+    def forward(self, x, x_mark) -> torch.Tensor:
         x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
         return self.dropout(x)
 
+
 class DataEmbedding_inverted(nn.Module):
-    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+    def __init__(self, c_in, d_model: int, embed_type='fixed', freq='h', dropout=0.1):
         super(DataEmbedding_inverted, self).__init__()
         self.value_embedding = nn.Linear(c_in, d_model)
         self.dropout = nn.Dropout(p=dropout)
 
-    def forward(self, x, x_mark):
+    def forward(self, x, x_mark) -> torch:
         x = x.permute(0, 2, 1)
         # x: [Batch Variate Time]
         if x_mark is None:
             x = self.value_embedding(x)
         else:
             # the potential to take covariates (e.g. timestamps) as tokens
-            x = self.value_embedding(torch.cat([x, x_mark.permute(0, 2, 1)], 1)) 
-        # x: [Batch Variate d_model]
+            x = self.value_embedding(torch.cat([x, x_mark.permute(0, 2, 1)], 1))
+        # x: [Batch Variate d_model] t
         return self.dropout(x)
