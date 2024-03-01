@@ -14,7 +14,7 @@
       "training_path": "tests/test_data/keag_small.csv",
       "validation_path": "tests/test_data/keag_small.csv",
       "test_path": "tests/test_data/keag_small.csv",
-      "batch_size":5,
+      "batch_size":10,
       "forecast_history":20,
       "forecast_length":10,
       "train_start": 1,
@@ -30,7 +30,6 @@
    },
    "training_params":
    {
-      "batch_size":5,
       "criterion":"MSE",
       "optimizer": "Adam",
       "optim_params":

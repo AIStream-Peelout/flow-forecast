@@ -36,7 +36,7 @@ Using the library
 14. [Crossformer](https://openreview.net/forum?id=vSVLM2j9eie) from ICLR 2023
 15. Anomaly Transformer
 16. TSMixer
-17. Inverted Transformer + Various Attention Mechanisms
+17. Invertered Transformer + Various Attention Mechanisms
 
 **Forthcoming Models**
 
