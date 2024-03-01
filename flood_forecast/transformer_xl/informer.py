@@ -124,7 +124,10 @@ class Informer(nn.Module):
         """
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out, _ = self.encoder(enc_out, attn_mask=enc_self_mask)
+        print(type(enc_out))
+        print("thing above")
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
+        print(type(dec_out))
         dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
         dec_out = self.projection(dec_out)
         # dec_out = self.end_conv1(dec_out)
