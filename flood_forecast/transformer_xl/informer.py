@@ -240,10 +240,11 @@ class DecoderLayer(nn.Module):
         """
         print('x below')
         print(type(x))
-        res, attn = self.dropout(self.self_attention(
+        x, attn = self.self_attention(
             x, x, x,
             attn_mask=x_mask
-        ))
+        )
+        res = self.dropout(x)
         x = x + res
         x = self.norm1(x)
 
