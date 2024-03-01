@@ -95,7 +95,7 @@ class ITransformer(nn.Module):
         # L: seq_len;       S: pred_len;
         # N: number of variate (tokens), can also includes covariates
 
-        # Embedding
+        # Embedding.
         # B L N -> B N E                (B L N -> B L E in the vanilla Transformer)
         enc_out = self.enc_embedding(x_enc, x_mark_enc)  # covariates (e.g timestamp) can be also embedded as tokens
         # B N E -> B N E                (B L E -> B L E in the vanilla Transformer)
@@ -104,8 +104,6 @@ class ITransformer(nn.Module):
         enc_out = self.encoder(enc_out, attn_mask=None)
 
         # B N E -> B N S -> B S N
-        print(enc_out[0].shape)
-        print("shape abov")
         dec_out = self.projector(enc_out[0]).permute(0, 2, 1)[:, :, :N]  # filter the covariates
 
         if self.use_norm:
