@@ -29,8 +29,6 @@ class NLinear(nn.Module):
         if self.individual:
             output = torch.zeros([x.size(0), self.pred_len2, x.size(2)], dtype=x.dtype).to(x.device)
             for i in range(self.channels):
-                print(output.shape)
-                print('shpae is ')
                 output[:, :, i] = self.Linear[i](x[:, :, i])
             x = output
         else:
