@@ -28,7 +28,7 @@ class TestInformer(unittest.TestCase):
                 }
 
     def test_informer(self):
-        # Format should be (batch_size, seq_len, n_time_series) (batch_size, seq_len,,).
+        # Format should be (batch_size, seq_len, n_time_series) (batch_size, seq_len, n)
         result = self.informer(torch.rand(2, 20, 3), torch.rand(2, 20, 4), torch.rand(2, 20, 3), torch.rand(2, 20, 4))
         self.assertEqual(len(result.shape), 3)
         self.assertEqual(result.shape[0], 2)

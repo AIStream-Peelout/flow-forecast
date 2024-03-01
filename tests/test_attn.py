@@ -16,16 +16,16 @@ class TestAttention(unittest.TestCase):
         #   B, L, H, D (where B is batch_size, L is sequence length, H is number of heads, and D is embedding dim)
         a = torch.rand(2, 20, 8, 30)
         r = self.prob_attention(torch.rand(2, 20, 8, 30), a, torch.rand(2, 20, 8, 30), self.triangle)
-        self.assertGreater(len(r.shape), 2)
-        self.assertIsInstance(r, torch.Tensor)
+        self.assertGreater(len(r[0].shape), 2)
+        self.assertIsInstance(r[0], torch.Tensor)
 
     def test_full_attn(self):
         # Tests the full attention mechanism and
         t = torch.rand(2, 20, 8, 30)
         a = self.full_attention(torch.rand(2, 20, 8, 30), t, t, self.triangle)
-        self.assertIsInstance(a, torch.Tensor)
-        self.assertEqual(len(a.shape), 4)
-        self.assertEqual(a.shape[0], 2)
+        self.assertIsInstance(a[0], torch.Tensor)
+        self.assertEqual(len(a[0].shape), 4)
+        self.assertEqual(a[0].shape[0], 2)
 
     def test_single_local(self):
         Single_Local_SelfAttn_Module(10, 4, 10, 5, 1, 128, 128, 128, 32, 2, 8)
