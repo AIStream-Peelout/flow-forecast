@@ -104,8 +104,6 @@ class ITransformer(nn.Module):
         enc_out = self.encoder(enc_out, attn_mask=None)
 
         # B N E -> B N S -> B S N
-        print(enc_out[0].shape)
-        print("shape abov")
         dec_out = self.projector(enc_out[0]).permute(0, 2, 1)[:, :, :N]  # filter the covariates
 
         if self.use_norm:
