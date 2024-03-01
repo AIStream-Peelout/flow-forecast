@@ -238,8 +238,6 @@ class DecoderLayer(nn.Module):
         :return: _description_
         :rtype: torch.Tensor
         """
-        print('x below')
-        print(type(x))
         x, attn = self.self_attention(
             x, x, x,
             attn_mask=x_mask
@@ -247,7 +245,6 @@ class DecoderLayer(nn.Module):
         res = self.dropout(x)
         x = x + res
         x = self.norm1(x)
-
         x = x + self.dropout(self.cross_attention(
             x, cross, cross,
             attn_mask=cross_mask
