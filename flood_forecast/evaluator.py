@@ -292,7 +292,7 @@ def infer_on_torch_model(
         df_prediction_arr_1 = []
 
         for i in range(0, len(vals[0])):
-            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0]) # noqa
+            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0], datetime_start=datetime_start) # noqa
             df_train_and_test_arr.append(df_train_and_test)
             end_tensor_arr.append(end_tensor)
             forecast_start_idx_arr.append(forecast_start_idx)
@@ -331,11 +331,11 @@ def infer_on_torch_model(
         targs=targ
     )
     return handle_later_ev(model, df_train_and_test, end_tensor, model.params, csv_test_loader, multi_params,
-                           forecast_start_idx, history)
+                           forecast_start_idx, history, datetime_start)
 
 
 def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
-                    history):
+                    history, datetime_start):
     targ = False
     decoder_params = None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -369,6 +369,8 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
         assert num_prediction_samples > 0
         if csv_test_loader.__class__.__name__ == "SeriesIDTestLoader":
             raise NotImplementedError("SeriesIDTestLoader not yet supported for predictions.")
+        if model.params["dataset_params"]["class"] == "TemporalLoader":
+            history, targ, df_train_and_test, forecast_start_idx = csv_test_loader.get_from_start_date(datetime_start)
         prediction_samples = generate_prediction_samples(
             model,
             df_train_and_test,
@@ -520,7 +522,7 @@ def generate_predictions(
     :return: The forecasted values for the time-series in a tensor
     :rtype: torch.Tensor
     """
-    if targs:
+    if targs or model.params["dataset_params"]["class"] == "TemporalLoader":
         history_dim = history
     else:
         history_dim = history.unsqueeze(0).to(model.device)
@@ -534,7 +536,7 @@ def generate_predictions(
         # hours_to_forecast 336
         # greedy_decode(model, src, sequence_size, targ, src, device=device)[:, :, 0]
         # greedy_decode(model, src:torch.Tensor, max_len:int,
-        # real_target:torch.Tensor, start_symbol:torch.Tensor,
+        # real_target:torch.Tensor, start_symbol:torch.Tensor
         # unsqueeze_dim=1, device='cpu')
         end_tensor = generate_decoded_predictions(
             model,
@@ -647,7 +649,10 @@ def generate_decoded_predictions(
             src = history_dim
             src0 = src[0]
             trg = targs
-            decoder_seq_len = model.params["model_params"]["label_len"]
+            if "label_len" not in model.params["model_params"]:
+                decoder_seq_len = model.params["dataset_params"]["forecast_length"]
+            else:
+                decoder_seq_len = model.params["model_params"]["label_len"]
             end_tensor = decoding_function(model.model, src0, trg[1], model.params["dataset_params"]["forecast_length"],
                                            src[1], trg[0], 1, decoder_seq_len, hours_to_forecast, device)
         else:

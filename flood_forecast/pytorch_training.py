@@ -14,6 +14,8 @@ from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from flood_forecast.series_id_helper import handle_csv_id_output, handle_csv_id_validation
 from torch.nn import CrossEntropyLoss
 
+TEMPORAL_FEATS_MODELS = ["ITransformer", "Informer"]
+
 
 def multi_crit(crit_multi: List, output, labels, valid=None):
     """_summary_
@@ -543,7 +545,7 @@ def compute_validation(validation_loader: DataLoader,
                         :,
                         :,
                         0]
-                elif type(model).__name__ == "Informer":
+                elif type(model).__name__ in TEMPORAL_FEATS_MODELS:
                     multi_targets = multi_targs1
                     filled_targ = targ[1].clone()
                     pred_len = model.pred_len
@@ -574,7 +576,7 @@ def compute_validation(validation_loader: DataLoader,
                 else:
                     output = model(src.float())
                     mod_output_list.append(output)
-            if type(model).__name__ == "Informer":
+            if type(model).__name__ in TEMPORAL_FEATS_MODELS:
                 output = output[:, :, 0:multi_targets]
             elif classification:
                 labels = targ

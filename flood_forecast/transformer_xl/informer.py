@@ -84,7 +84,7 @@ class Informer(nn.Module):
         self.decoder = Decoder(
             [
                 DecoderLayer(
-                    AttentionLayer(FullAttention(True, factor, attention_dropout=dropout),
+                    AttentionLayer(Attn(True, factor, attention_dropout=dropout),
                                    d_model, n_heads),
                     AttentionLayer(FullAttention(False, factor, attention_dropout=dropout),
                                    d_model, n_heads),
@@ -123,9 +123,11 @@ class Informer(nn.Module):
         :rtype: torch.Tensor
         """
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        enc_out = self.encoder(enc_out, attn_mask=enc_self_mask)
-
+        enc_out, _ = self.encoder(enc_out, attn_mask=enc_self_mask)
+        print(type(enc_out))
+        print("thing above")
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
+        print(type(dec_out))
         dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
         dec_out = self.projection(dec_out)
         # dec_out = self.end_conv1(dec_out)
@@ -145,7 +147,7 @@ class ConvLayer(nn.Module):
         self.activation = nn.ELU()
         self.maxPool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = self.downConv(x.permute(0, 2, 1))
         x = self.norm(x)
         x = self.activation(x)
@@ -156,19 +158,6 @@ class ConvLayer(nn.Module):
 
 class EncoderLayer(nn.Module):
     def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu"):
-        """[summary]
-
-        :param attention: [description]
-        :type attention: [type]
-        :param d_model: [description]
-        :type d_model: [type]
-        :param d_ff: [description], defaults to None
-        :type d_ff: [type], optional
-        :param dropout: [description], defaults to 0.1
-        :type dropout: float, optional
-        :param activation: [description], defaults to "relu"
-        :type activation: str, optional
-        """
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.attention = attention
@@ -179,18 +168,19 @@ class EncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
 
-    def forward(self, x, attn_mask=None):
-        # x [B, L, D]
-        x = x + self.dropout(self.attention(
+    def forward(self, x, attn_mask=None, tau=None, delta=None):
+        new_x, attn = self.attention(
             x, x, x,
-            attn_mask=attn_mask
-        ))
+            attn_mask=attn_mask,
+            tau=tau, delta=delta
+        )
+        x = x + self.dropout(new_x)
 
         y = x = self.norm1(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1, 1))))
         y = self.dropout(self.conv2(y).transpose(-1, 1))
 
-        return self.norm2(x + y)
+        return self.norm2(x + y), attn
 
 
 class Encoder(nn.Module):
@@ -200,21 +190,23 @@ class Encoder(nn.Module):
         self.conv_layers = nn.ModuleList(conv_layers) if conv_layers is not None else None
         self.norm = norm_layer
 
-    def forward(self, x, attn_mask=None):
-        # x [B, L, D]
+    def forward(self, x, attn_mask=None, tau=None, delta=None):
+        attns = []
         if self.conv_layers is not None:
-            for attn_layer, conv_layer in zip(self.attn_layers, self.conv_layers):
-                x = attn_layer(x, attn_mask=attn_mask)
+            for i, (attn_layer, conv_layer) in enumerate(zip(self.attn_layers, self.conv_layers)):
+                delta = delta if i == 0 else None
+                x, attn = attn_layer(x, attn_mask=attn_mask, tau=tau, delta=delta)
                 x = conv_layer(x)
-            x = self.attn_layers[-1](x)
+                attns.append(attn)
+            x, attn = self.attn_layers[-1](x, tau=tau, delta=None)
+            attns.append(attn)
         else:
             for attn_layer in self.attn_layers:
-                x = attn_layer(x, attn_mask=attn_mask)
-
+                x, attn = attn_layer(x, attn_mask=attn_mask, tau=tau, delta=delta)
+                attns.append(attn)
         if self.norm is not None:
             x = self.norm(x)
-
-        return x
+        return x, attns
 
 
 class DecoderLayer(nn.Module):
@@ -233,16 +225,31 @@ class DecoderLayer(nn.Module):
         self.activation = F.relu if activation == "relu" else F.gelu
 
     def forward(self, x, cross, x_mask=None, cross_mask=None) -> torch.Tensor:
-        x = x + self.dropout(self.self_attention(
+        """_summary_
+
+        :param x: _description_
+        :type x: _type_
+        :param cross: _description_
+        :type cross: _type_
+        :param x_mask: _description_, defaults to None
+        :type x_mask: _type_, optional
+        :param cross_mask: _description_, defaults to None
+        :type cross_mask: _type_, optional
+        :return: _description_
+        :rtype: torch.Tensor
+        """
+        x, attn = self.self_attention(
             x, x, x,
             attn_mask=x_mask
-        ))
+        )
+        res = self.dropout(x)
+        x = x + res
         x = self.norm1(x)
-
-        x = x + self.dropout(self.cross_attention(
+        x, attn = self.cross_attention(
             x, cross, cross,
             attn_mask=cross_mask
-        ))
+        )
+        x = x + self.dropout(x)
 
         y = x = self.norm2(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1, 1))))

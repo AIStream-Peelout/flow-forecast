@@ -7,7 +7,6 @@
       "forecast_length": 10,
       "enc_in": 321,
       "individual": false
-      
    },
    "dataset_params":
    {  "class": "default",

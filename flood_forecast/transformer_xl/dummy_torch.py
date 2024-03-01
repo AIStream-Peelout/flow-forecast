@@ -7,7 +7,7 @@ from torch import nn
 
 class DummyTorchModel(nn.Module):
     def __init__(self, forecast_length: int) -> None:
-        """A dummy model that will return a tensor of ones (batch_size, forecast_len)
+        """A dummy model that will return a tensor of ones (batch_size, forecast_len).
 
         :param forecast_length: The length to forecast
         :type forecast_length: int

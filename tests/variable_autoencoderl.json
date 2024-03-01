@@ -19,7 +19,7 @@
        "test_path": "tests/test_data2/test_csv.csv",
        "forecast_length":6,
        "forecast_history":6,
-       "train_end": 300,
+       "train_end": 301,
        "valid_start":0,
        "valid_end": 300,
        "test_end": 303,
@@ -37,7 +37,7 @@
        "optimizer": "Adam",
        "optim_params":
        {},
-       "lr": 0.001,
+       "lr": 0.01,
        "epochs": 3
     },
     "GCS": false,
