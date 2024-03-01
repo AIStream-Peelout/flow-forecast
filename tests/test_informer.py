@@ -60,7 +60,7 @@ class TestInformer(unittest.TestCase):
         d = DataEmbedding(3, 128)
         embedding = d(result[0][0].unsqueeze(0), temporal_src_embd.unsqueeze(0))
         self.assertEqual(embedding.shape[2], 128)
-        i = Informer(3, 3, 3, 5, 5, out_len=4, factor=1)
+        i = Informer(3, 3, 3, 5, 5, out_len=4, factor=5)
         r0 = result[0][0].unsqueeze(0)
         r1 = result[0][1].unsqueeze(0)
         r3 = result[1][1].unsqueeze(0)
