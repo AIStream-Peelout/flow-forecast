@@ -6,6 +6,6 @@ numpy
 torch
 plotly
 google-cloud-storage
-sklearn
+scikit-learn
 wandb
 shap
