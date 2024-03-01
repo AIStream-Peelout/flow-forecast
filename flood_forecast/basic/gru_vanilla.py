@@ -5,7 +5,7 @@ class VanillaGRU(torch.nn.Module):
     def __init__(self, n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float,
                  forecast_length=1, use_hidden=False, probabilistic=False):
         """
-        Simple GRU to preform deep time series forecasting.
+        Simple GRU to preform deep time series forecasting/classification.
 
         :param n_time_series: The number of time series present in the data
         :type n_time_series int:
