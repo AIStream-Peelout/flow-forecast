@@ -245,10 +245,11 @@ class DecoderLayer(nn.Module):
         res = self.dropout(x)
         x = x + res
         x = self.norm1(x)
-        x = x + self.dropout(self.cross_attention(
+        x, attn = self.cross_attention(
             x, cross, cross,
             attn_mask=cross_mask
-        ))
+        )
+        x = x + self.dropout(x)
 
         y = x = self.norm2(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1, 1))))
