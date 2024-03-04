@@ -16,6 +16,10 @@ class TriangularCausalMask():
         return self._mask
 
 
+class AnomalyAttention():
+    pass
+
+
 class ProbMask():
     def __init__(self, B, H, L, index, scores, device="cpu"):
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
@@ -29,7 +33,7 @@ class ProbMask():
     def mask(self):
         return self._mask
 
-
+# 
 # Code implementation from https://github.com/thuml/Flowformer
 class FlowAttention(nn.Module):
     def __init__(self, attention_dropout=0.1):
