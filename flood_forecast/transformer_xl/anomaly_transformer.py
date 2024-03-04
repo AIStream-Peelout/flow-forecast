@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flood_forecast.transformer_xl.attn import AnomalyAttention
 
 
 class EncoderLayer(nn.Module):
