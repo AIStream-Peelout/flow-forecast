@@ -5,7 +5,7 @@ from torch.nn import MultiheadAttention
 
 class MergingModel(torch.nn.Module):
     def __init__(self, method: str, other_params: Dict):
-        """A model meant to help merge meta-data with the temporal data
+        """A model meant to help merge meta-data with the temporal data.
 
         :param method: The method you want to use (Bilinear, Bilinear2, MultiAttn, Concat)
         :type method: str

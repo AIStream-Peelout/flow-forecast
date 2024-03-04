@@ -227,7 +227,6 @@ jobs:
           path: test-results
           destination: test-results-decoder
 
-
   trainer_test:
     <<: *defaults
     steps:
@@ -319,6 +318,7 @@ jobs:
           name: Trainer1 tests
           when: always
           command: |
+            coverage run flood_forecast/trainer.py -p tests/anomaly_transformer.json
             coverage run flood_forecast/trainer.py -p tests/test_informer.json
             coverage run flood_forecast/trainer.py -p tests/test_iTransformer.json
             coverage run flood_forecast/trainer.py -p tests/tsmixer_test.json

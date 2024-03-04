@@ -50,7 +50,7 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(result[0][1].shape[1], 4)
         self.assertEqual(result[0][0].shape[1], 3)
         self.assertEqual(result[0][1].shape[0], 5)
-        # Test output right order
+        # Test output right order. This is a bit of a hacky test.
         temporal_src_embd = result[0][1]
         second = temporal_src_embd[2, :]
         self.assertEqual(second[0], 5)
@@ -60,6 +60,7 @@ class TestInformer(unittest.TestCase):
         d = DataEmbedding(3, 128)
         embedding = d(result[0][0].unsqueeze(0), temporal_src_embd.unsqueeze(0))
         self.assertEqual(embedding.shape[2], 128)
+        # Until fixed
         """
         i = Informer(3, 3, 3, 5, 5, out_len=4, factor=1)
         r0 = result[0][0].unsqueeze(0)
@@ -127,6 +128,7 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(d.shape[1], 336)
 
     def test_t_loade2(self):
+        # a.
         s_wargs = {
                     "file_path": "tests/test_data/keag_small.csv",
                     "forecast_history": 39,
