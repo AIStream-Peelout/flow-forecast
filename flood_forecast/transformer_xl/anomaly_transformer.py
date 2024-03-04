@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from flood_forecast.transformer_xl.attn import AnomalyAttention, AttentionLayer
-from data_embedding import DataEmbedding
+from flood_forecast.transformer_xl.data_embedding import DataEmbedding
 
 
 class EncoderLayer(nn.Module):
@@ -73,7 +73,7 @@ class AnomalyTransformer(nn.Module):
                     d_ff,
                     dropout=dropout,
                     activation=activation
-                ) for l1 in range(e_layers)
+                ) for l in range(e_layers)
             ],
             norm_layer=torch.nn.LayerNorm(d_model)
         )
