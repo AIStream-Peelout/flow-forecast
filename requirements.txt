@@ -1,4 +1,4 @@
-shap==0.42.1
+shap==0.45.0
 scikit-learn>=1.0.1
 pandas
 torch
