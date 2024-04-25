@@ -2,7 +2,6 @@
     "model_name": "AnomalyTransformer",
     "model_type": "PyTorch",
     "model_params": {
-       "input_shape":3,
        "win_size": 100,
        "c_out": 3,
        "enc_in": 3
@@ -26,7 +25,7 @@
     {
        "criterion":"MSE",
        "optimizer": "Adam",
-       "lr": 0.3,
+       "lr": 0.03,
        "epochs": 1,
        "batch_size":4,
        "optim_params":
@@ -38,7 +37,7 @@
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
-       "tags": ["dummy_run", "circleci", "ae"]
+       "tags": ["dummy_run", "circleci", "anomaly"]
     },
    "metrics":["MSE"],
 
