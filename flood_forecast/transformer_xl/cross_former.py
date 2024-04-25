@@ -125,8 +125,8 @@ class Crossformer(nn.Module):
             repeat=batch_size,
         )
         predict_y = self.decoder(dec_in, enc_out)
-
-        return base + predict_y[:, : self.out_len, :]
+        result = base + predict_y[:, : self.out_len, :]
+        return result[:, :, :self.n_targs]
 
 
 class SegMerging(nn.Module):
