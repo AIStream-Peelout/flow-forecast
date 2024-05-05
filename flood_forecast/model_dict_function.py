@@ -7,7 +7,7 @@ from flood_forecast.basic.linear_regression import SimpleLinearModel
 from flood_forecast.basic.lstm_vanilla import LSTMForecast
 from flood_forecast.custom.custom_opt import BertAdam, QuantileLoss
 from torch.optim import Adam, SGD
-from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1Loss, CrossEntropyLoss, BCELoss, BCEWithLogitsLoss
+from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1Loss, CrossEntropyLoss, BCELoss, BCEWithLogitsLoss, KDivLoss
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.custom.focal_loss import FocalLoss
@@ -69,7 +69,8 @@ pytorch_criterion_dict = {
     "BCELossLogits": BCEWithLogitsLoss,
     "FocalLoss": FocalLoss,
     "QuantileLoss": QuantileLoss,
-    "BinaryCrossEntropy": BCELoss}
+    "BinaryCrossEntropy": BCELoss,
+    "KLDivLoss": KDivLoss}
 
 decoding_functions = {"greedy_decode": greedy_decode, "simple_decode": simple_decode}
 

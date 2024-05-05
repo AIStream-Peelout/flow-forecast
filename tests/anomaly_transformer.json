@@ -23,7 +23,7 @@
     },
     "training_params":
     {
-       "criterion":"MSE",
+       "criterion":"KLDivLoss",
        "optimizer": "Adam",
        "lr": 0.03,
        "epochs": 1,
