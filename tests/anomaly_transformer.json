@@ -14,7 +14,7 @@
        "test_path": "tests/test_data/keag_small.csv",
        "batch_size":4,
        "forecast_history": 100,
-       "train_end": 100,
+       "train_end": 200,
        "valid_start":301,
        "valid_end": 401,
        "relevant_cols": ["cfs", "precip", "temp"],
