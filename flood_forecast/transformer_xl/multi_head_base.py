@@ -5,7 +5,7 @@ from flood_forecast.transformer_xl.transformer_basic import SimplePositionalEnco
 
 
 class MultiAttnHeadSimple(torch.nn.Module):
-    """A simple multi-head attention model inspired by Vas.,wani et al."""
+    """A simple multi-head attention model inspired by Vaswani et al."""
 
     def __init__(
             self,
