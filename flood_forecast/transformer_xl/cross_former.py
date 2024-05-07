@@ -19,7 +19,6 @@ class Crossformer(nn.Module):
         e_layers=3,
         dropout=0.0,
         baseline=False,
-        n_targs=None,
         device=torch.device("cuda:0"),
     ):
         """Crossformer: Transformer Utilizing Cross-Dimension Dependency for Multivariate Time Series Forecasting.
@@ -58,7 +57,6 @@ class Crossformer(nn.Module):
         self.out_len = forecast_length
         self.seg_len = seg_len
         self.merge_win = win_size
-        self.n_targs = n_time_series if n_targs is None else n_targs
 
         self.baseline = baseline
 
@@ -128,9 +126,7 @@ class Crossformer(nn.Module):
         )
         predict_y = self.decoder(dec_in, enc_out)
 
-        result = base + predict_y[:, : self.out_len, :]
-        res = result[:, :, :self.n_targs]
-        return res
+        return base + predict_y[:, : self.out_len, :]
 
 
 class SegMerging(nn.Module):

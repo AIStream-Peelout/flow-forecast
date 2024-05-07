@@ -334,7 +334,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/dsanet.json
             echo -e 'running trainer_decoder_test \n'
             coverage run flood_forecast/trainer.py -p tests/decoder_test.json
-            echo -e 'running trainer_full_transformer_test'
+            echo -e 'running trainer_full_transformer_test \n'
             coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
         
       - store_test_results:
