@@ -64,6 +64,7 @@ of datasets. This documentation describes the internal Python code that makes up
   :caption: TransformerXL:
 
   dummy_torch
+  itransformer
   lower_upper_config
   multi_head_base
   transformer_basic
