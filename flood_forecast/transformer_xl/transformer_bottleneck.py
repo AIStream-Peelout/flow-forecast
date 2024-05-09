@@ -268,10 +268,6 @@ class TransformerModel(nn.Module):
             embedding_sum = torch.zeros(batch_size, length)
             embedding_sum = embedding_sum.fill_(series_id).type(torch.LongTensor).to(self.device)
             embedding_sum = self.id_embed(embedding_sum)
-        print("shape below")
-        print(embedding_sum.shape)
-        print(x.shape)
-        print(series_id)
         position = torch.tensor(torch.arange(length), dtype=torch.long).to(self.device)
         po_embedding = self.po_embed(position)
         embedding_sum[:] = po_embedding

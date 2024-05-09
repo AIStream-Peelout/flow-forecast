@@ -526,7 +526,6 @@ def generate_predictions(
         history_dim = history
     else:
         history_dim = history.unsqueeze(0).to(model.device)
-    print("Add debugging crap below")
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
             model, df, test_data, history_dim, forecast_length, hours_to_forecast,
@@ -615,8 +614,6 @@ def generate_predictions_non_decoded(
         end_tensor = torch.cat(all_tensor, axis=0).to("cpu").detach()[:-remainder]
     else:
         end_tensor = torch.cat(all_tensor, axis=0).to("cpu").detach()
-
-    print(end_tensor.shape)  # Dimension now is (n_time_steps_to_forecast_steps)!! i.e [16]
     return end_tensor
 
 
