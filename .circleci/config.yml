@@ -6,7 +6,7 @@ orbs:
 executors:
   python-executor:
     docker:
-      - image: cimg/python:3.10.3
+      - image: cimg/python:3.11.1
     working_directory: ~/repo
 
 
@@ -274,14 +274,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/probabilistic_linear_regression_test.json
             echo -e 'running meta-data fusion'
             coverage run flood_forecast/trainer.py -p tests/meta_data_test.json
-            echo -e 'running da_rnn_test \n'
-            coverage run flood_forecast/trainer.py -p tests/da_rnn.json
-            echo -e 'running auto test \n'
-            coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
-            echo -e 'running trainer_lstm_test \n '
-            coverage run flood_forecast/trainer.py -p tests/lstm_test.json
-            echo -e 'running trainer_multi_test \n'
-            coverage run flood_forecast/trainer.py -p tests/multi_test.json
+
       - store_test_results:
           path: test-results
 
@@ -333,10 +326,6 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
             coverage run flood_forecast/trainer.py -p tests/test_dual.json
             coverage run flood_forecast/trainer.py -p tests/dsanet.json
-            echo -e 'running trainer_decoder_test \n'
-            coverage run flood_forecast/trainer.py -p tests/decoder_test.json
-            echo -e 'running trainer_full_transformer_test \n'
-            coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
         
       - store_test_results:
           path: test-results
@@ -344,6 +333,54 @@ jobs:
       - store_artifacts:
           path: test-results
           destination: test-results-trainer2
+      
+      - run:
+          name: upload results
+          when: always
+          command: bash <(curl -s https://codecov.io/bash) -cF python
+
+trainer_test2:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: requirements-v2-{{ .Branch }}-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: install dependencies
+          command: |
+             pip install pipenv
+             pip install --force-reinstall --upgrade --quiet -r requirements.txt
+             pip install coverage
+             python setup.py develop --no-deps
+      - save_cache:
+          key: requirements-v2-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - ~/.local
+
+      - run:
+          name: Trainer tests 2
+          when: always
+          command: |
+            echo -e 'running trainer_lstm_test \n '
+            coverage run flood_forecast/trainer.py -p tests/lstm_test.json
+            echo -e 'running trainer_multi_test \n'
+            coverage run flood_forecast/trainer.py -p tests/multi_test.json
+            echo -e 'running trainer_full_transformer_test \n'
+            coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
+            echo -e 'running da_rnn_test \n'
+            coverage run flood_forecast/trainer.py -p tests/da_rnn.json
+            echo -e 'running auto test \n'
+            coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
+            echo -e 'running trainer_decoder_test \n'
+            coverage run flood_forecast/trainer.py -p tests/decoder_test.json
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+          destination: test-results-trainer
       
       - run:
           name: upload results
@@ -421,3 +458,7 @@ workflows:
       - trainer_test1:
           requires:
             - setup_and_install
+      -trainer_test2:
+          requires:
+            - setup_and_install
+        

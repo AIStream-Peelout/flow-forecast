@@ -27,7 +27,7 @@ from torchtsmixer import TSMixerExt
 
 
 """
-Utility dictionaries to map a string to a c class
+Utility dictionaries to map a string to a class
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,
