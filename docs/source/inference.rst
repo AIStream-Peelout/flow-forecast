@@ -1,8 +1,9 @@
 Inference
 =========================
 
-The Flow Forecast Inference API makes it easy to run inference on trained PyTorchForecast modules. To use this code you 
-need three main files: your model's configuration file, a CSV containing your data, and a path to your model weights.
+This API makes it easy to run inference on trained PyTorchForecast modules. To use this code you 
+need three main files: your model's configuration file, a CSV containing your data, and a path to 
+your model weights.
 
 .. code-block:: python
    :caption: example initialization
