@@ -254,11 +254,13 @@ jobs:
           command: |
             echo -e 'GRU Vanilla test'
             coverage run flood_forecast/trainer.py -p tests/gru_vanilla.json
+            echo -e 'Running classification test'
             coverage run flood_forecast/trainer.py -p tests/classification_test.json
+            echo -e 'Running informer single test'
             coverage run flood_forecast/trainer.py -p tests/test_inf_single.json
-            echo -e 'test informer single target'
-            echo -e 'test multi informer'
+            echo -e 'Running transformer_gaussian test'
             coverage run flood_forecast/trainer.py -p tests/transformer_gaussian.json
+            echo -e 'Running multi_decoder_test.json'
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
             echo -e 'training multi-task-decoder'
             coverage run flood_forecast/trainer.py -p tests/multitask_decoder.json
@@ -314,17 +316,29 @@ jobs:
           command: |
             echo -e 'running test_informer \n'
             coverage run flood_forecast/trainer.py -p tests/test_informer.json
+            echo -e 'running test_iTransformer \n'
             coverage run flood_forecast/trainer.py -p tests/test_iTransformer.json
+            echo -e 'running tsmixer_test \n'
             coverage run flood_forecast/trainer.py -p tests/tsmixer_test.json
+            echo -e 'running transformer_b_series.json \n'
             coverage run flood_forecast/trainer.py -p tests/transformer_b_series.json
+            echo -e 'running crossfroer.json \n'
             coverage run flood_forecast/trainer.py -p tests/cross_former.json
+            echo -e 'running nlinear.json \n'
             coverage run flood_forecast/trainer.py -p tests/nlinear.json
+            echo -e 'running dsanet_3\n'
             coverage run flood_forecast/trainer.py -p tests/dsanet_3.json
+            echo -e 'running variable_autoencoderl.json\n'
             coverage run flood_forecast/trainer.py -p tests/variable_autoencoderl.json
+            echo -e 'running dlinear\n'
             coverage run flood_forecast/trainer.py -p tests/dlinear.json
+            echo -e 'running custom_encode.json\n'
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
+            echo -e 'running multi_decoder_test \n'
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
+            echo -e 'test_dual \n'
             coverage run flood_forecast/trainer.py -p tests/test_dual.json
+            echo -e 'running dsanet \n'
             coverage run flood_forecast/trainer.py -p tests/dsanet.json
         
       - store_test_results:
@@ -371,9 +385,9 @@ jobs:
               coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
               echo -e 'running da_rnn_test \n'
               coverage run flood_forecast/trainer.py -p tests/da_rnn.json
-              echo -e 'running auto test \n'
+              echo -e 'running auto_encoder \n'
               coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
-              echo -e 'running trainer_decoder_test \n'
+              echo -e 'running trainer_decoder_test   \n'
               coverage run flood_forecast/trainer.py -p tests/decoder_test.json
         - store_test_results:
             path: test-results

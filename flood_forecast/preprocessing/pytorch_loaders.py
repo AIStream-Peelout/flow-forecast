@@ -197,7 +197,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
             print(new_df.columns)
         self.listed_vals = df_list
         self.__make_unique_dict__()
-        self.__validate_data__in_df()
+        if return_all:
+            self.__validate_data__in_df()
         print(self.unique_dict)
         print("unique dict")
 
@@ -665,7 +666,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         :type series_id_col: str
         :param main_params: The core params used to instantiate the CSVSeriesIDLoader
         :type main_params: dict
-        :param return_method: What method to return to.
+        :param return_method: The method of return
         :type return_method: str
         :param return_all: _description_, defaults to True
         :type return_all: bool, optional

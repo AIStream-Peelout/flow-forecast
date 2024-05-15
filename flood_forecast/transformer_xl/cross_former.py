@@ -47,7 +47,7 @@ class Crossformer(nn.Module):
         :type e_layers: int, optional
         :param dropout: The amount of dropout to use when training the model, defaults to 0.0
         :type dropout: float, optional
-        :param baseline: A boolean of whether to use mean of past time series , defaults to False
+        :param baseline: A boolean of whether to use mean of the past time series , defaults to False
         :type baseline: bool, optional
         :param device: _description_, defaults to torch.device("cuda:0")
         :type device: str, optional
