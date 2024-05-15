@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import math
+# This class contains methods to create embeddings used with models.
 
 
 class PositionalEmbedding(nn.Module):

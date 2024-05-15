@@ -29,7 +29,7 @@ class Crossformer(nn.Module):
         :type n_time_series: int
         :param forecast_history: The length of the input sequence
         :type forecast_history: int
-        :param forecast_length: The number of steps to forecast
+        :param forecast_length: The number of future time steps to forecast in one forward pass.
         :type forecast_length: int
         :param seg_len: Parameter specific to Crossformer, forecast_history must be divisible by seg_len
         :type seg_len: int
@@ -37,17 +37,17 @@ class Crossformer(nn.Module):
         :type win_size: int, optional
         :param factor: _description_, defaults to 10
         :type factor: int, optional
-        :param d_model: _description_, defaults to 512
+        :param d_model: The embedding dimension of the model, defaults to 512
         :type d_model: int, optional
         :param d_ff: _description_, defaults to 1024
         :type d_ff: int, optional
         :param n_heads: The number of heads in the multi-head attention mechanism, defaults to 8
         :type n_heads: int, optional
-        :param e_layers: The number of encoder layers, defaults to 3
+        :param e_layers: The number of encoder layers, defaults to 3.
         :type e_layers: int, optional
         :param dropout: The amount of dropout to use when training the model, defaults to 0.0
         :type dropout: float, optional
-        :param baseline: A boolean of whether to use mean of past time series , defaults to False
+        :param baseline: A boolean of whether to use mean of past time series, defaults to False
         :type baseline: bool, optional
         :param device: _description_, defaults to torch.device("cuda:0")
         :type device: str, optional
@@ -129,6 +129,7 @@ class Crossformer(nn.Module):
         predict_y = self.decoder(dec_in, enc_out)
 
         result = base + predict_y[:, : self.out_len, :]
+        # Slice the tensor to only include the number of targets
         res = result[:, :, :self.n_targs]
         return res
 
@@ -148,7 +149,7 @@ class SegMerging(nn.Module):
         self.linear_trans = nn.Linear(win_size * d_model, d_model)
         self.norm = norm_layer(win_size * d_model)
 
-    def forward(self, x):
+    def forward(self, x) -> torch.Tensor:
         """
         x: B, ts_d, L, d_model
         """
