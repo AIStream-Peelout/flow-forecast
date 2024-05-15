@@ -197,7 +197,8 @@ class CSVSeriesIDLoader(CSVDataLoader):
             print(new_df.columns)
         self.listed_vals = df_list
         self.__make_unique_dict__()
-        self.__validate_data__in_df()
+        if return_all:
+            self.__validate_data__in_df()
         print(self.unique_dict)
         print("unique dict")
 
@@ -644,7 +645,7 @@ class VariableSequenceLength(CSVDataLoader):
             return the_seq.float(), the_seq.float()
 
     def pad_input_data(self, sequence: int):
-        """Pads a sequence to a specified length
+        """Pads a sequence to a specified length.
         """
         if self.pad_length > sequence.shape[0]:
             pad_dim = self.pad_length - sequence.shape[0]
@@ -657,13 +658,6 @@ class VariableSequenceLength(CSVDataLoader):
         return tasks[self.task](idx)
 
 
-class CSVResultsHolder(object):
-    def __init__(self, historical_rows, all_rows_orig, targ_idx) -> None:
-        self.historical_rows = historical_rows
-        self.all_rows_orig = all_rows_orig
-        self.targ_idx = targ_idx
-
-
 class SeriesIDTestLoader(CSVSeriesIDLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, forecast_total=336, return_all=True):
         """_summary_
@@ -672,11 +666,11 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         :type series_id_col: str
         :param main_params: The core params used to instantiate the CSVSeriesIDLoader
         :type main_params: dict
-        :param return_method: _description_D
+        :param return_method: The method of return
         :type return_method: str
         :param return_all: _description_, defaults to True
         :type return_all: bool, optional
-        :param forecast_total: _description_, defaults to 336
+        :param forecast_total: The total length to forecast, defaults to 336
         :type forecast_total: int, optional
         """
         super().__init__(series_id_col, main_params, return_method, return_all)

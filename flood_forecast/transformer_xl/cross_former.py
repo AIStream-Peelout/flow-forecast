@@ -33,7 +33,7 @@ class Crossformer(nn.Module):
         :type forecast_length: int
         :param seg_len: Parameter specific to Crossformer, forecast_history must be divisible by seg_len
         :type seg_len: int
-        :param win_size: _description_, defaults to 4
+        :param win_size: The window size for the segment merge mechanism, defaults to 4 (original paper used 2)
         :type win_size: int, optional
         :param factor: _description_, defaults to 10
         :type factor: int, optional
@@ -41,13 +41,13 @@ class Crossformer(nn.Module):
         :type d_model: int, optional
         :param d_ff: _description_, defaults to 1024
         :type d_ff: int, optional
-        :param n_heads: _description_, defaults to 8
+        :param n_heads: The number of heads in the multi-head attention mechanism, defaults to 8
         :type n_heads: int, optional
-        :param e_layers: _description_, defaults to 3
+        :param e_layers: The number of encoder layers, defaults to 3
         :type e_layers: int, optional
-        :param dropout: _description_, defaults to 0.0
+        :param dropout: The amount of dropout to use when training the model, defaults to 0.0
         :type dropout: float, optional
-        :param baseline: _description_, defaults to False
+        :param baseline: A boolean of whether to use mean of the past time series , defaults to False
         :type baseline: bool, optional
         :param device: _description_, defaults to torch.device("cuda:0")
         :type device: str, optional

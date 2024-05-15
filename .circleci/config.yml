@@ -6,7 +6,7 @@ orbs:
 executors:
   python-executor:
     docker:
-      - image: cimg/python:3.10.3
+      - image: cimg/python:3.11
     working_directory: ~/repo
 
 
@@ -254,11 +254,13 @@ jobs:
           command: |
             echo -e 'GRU Vanilla test'
             coverage run flood_forecast/trainer.py -p tests/gru_vanilla.json
+            echo -e 'Running classification test'
             coverage run flood_forecast/trainer.py -p tests/classification_test.json
+            echo -e 'Running informer single test'
             coverage run flood_forecast/trainer.py -p tests/test_inf_single.json
-            echo -e 'test informer single target'
-            echo -e 'test multi informer'
+            echo -e 'Running transformer_gaussian test'
             coverage run flood_forecast/trainer.py -p tests/transformer_gaussian.json
+            echo -e 'Running multi_decoder_test.json'
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
             echo -e 'training multi-task-decoder'
             coverage run flood_forecast/trainer.py -p tests/multitask_decoder.json
@@ -274,14 +276,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/probabilistic_linear_regression_test.json
             echo -e 'running meta-data fusion'
             coverage run flood_forecast/trainer.py -p tests/meta_data_test.json
-            echo -e 'running da_rnn_test \n'
-            coverage run flood_forecast/trainer.py -p tests/da_rnn.json
-            echo -e 'running auto test \n'
-            coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
-            echo -e 'running trainer_lstm_test \n '
-            coverage run flood_forecast/trainer.py -p tests/lstm_test.json
-            echo -e 'running trainer_multi_test \n'
-            coverage run flood_forecast/trainer.py -p tests/multi_test.json
+
       - store_test_results:
           path: test-results
 
@@ -319,23 +314,32 @@ jobs:
           name: Trainer1 tests
           when: always
           command: |
+            echo -e 'running test_informer \n'
             coverage run flood_forecast/trainer.py -p tests/test_informer.json
+            echo -e 'running test_iTransformer \n'
             coverage run flood_forecast/trainer.py -p tests/test_iTransformer.json
+            echo -e 'running tsmixer_test \n'
             coverage run flood_forecast/trainer.py -p tests/tsmixer_test.json
+            echo -e 'running transformer_b_series.json \n'
             coverage run flood_forecast/trainer.py -p tests/transformer_b_series.json
+            echo -e 'running crossfroer.json \n'
             coverage run flood_forecast/trainer.py -p tests/cross_former.json
+            echo -e 'running nlinear.json \n'
             coverage run flood_forecast/trainer.py -p tests/nlinear.json
+            echo -e 'running dsanet_3\n'
             coverage run flood_forecast/trainer.py -p tests/dsanet_3.json
+            echo -e 'running variable_autoencoderl.json\n'
             coverage run flood_forecast/trainer.py -p tests/variable_autoencoderl.json
+            echo -e 'running dlinear\n'
             coverage run flood_forecast/trainer.py -p tests/dlinear.json
+            echo -e 'running custom_encode.json\n'
             coverage run flood_forecast/trainer.py -p tests/custom_encode.json
+            echo -e 'running multi_decoder_test \n'
             coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
+            echo -e 'test_dual \n'
             coverage run flood_forecast/trainer.py -p tests/test_dual.json
+            echo -e 'running dsanet \n'
             coverage run flood_forecast/trainer.py -p tests/dsanet.json
-            echo -e 'running trainer_decoder_test \n'
-            coverage run flood_forecast/trainer.py -p tests/decoder_test.json
-            echo -e 'running trainer_full_transformer_test'
-            coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
         
       - store_test_results:
           path: test-results
@@ -348,6 +352,54 @@ jobs:
           name: upload results
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
+
+  trainer_test2:
+      <<: *defaults
+      steps:
+        - attach_workspace:
+            at: ~/repo
+        - restore_cache:  # ensure this step occurs *before* installing dependencies
+            key: requirements-v2-{{ .Branch }}-{{ checksum "requirements.txt" }}
+
+        - run:
+            name: install dependencies
+            command: |
+              pip install pipenv
+              pip install --force-reinstall --upgrade --quiet -r requirements.txt
+              pip install coverage
+              python setup.py develop --no-deps
+        - save_cache:
+            key: requirements-v2-{{ .Branch }}-{{ checksum "requirements.txt" }}
+            paths:
+              - ~/.local
+
+        - run:
+            name: Trainer tests 2
+            when: always
+            command: |
+              echo -e 'running trainer_lstm_test \n '
+              coverage run flood_forecast/trainer.py -p tests/lstm_test.json
+              echo -e 'running trainer_multi_test \n'
+              coverage run flood_forecast/trainer.py -p tests/multi_test.json
+              echo -e 'running trainer_full_transformer_test \n'
+              coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
+              echo -e 'running da_rnn_test \n'
+              coverage run flood_forecast/trainer.py -p tests/da_rnn.json
+              echo -e 'running auto_encoder \n'
+              coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
+              echo -e 'running trainer_decoder_test   \n'
+              coverage run flood_forecast/trainer.py -p tests/decoder_test.json
+        - store_test_results:
+            path: test-results
+
+        - store_artifacts:
+            path: test-results
+            destination: test-results-trainer
+        
+        - run:
+            name: upload results
+            when: always
+            command: bash <(curl -s https://codecov.io/bash) -cF python
 
   plot_test:
     <<: *defaults
@@ -420,3 +472,7 @@ workflows:
       - trainer_test1:
           requires:
             - setup_and_install
+      - trainer_test2:
+          requires:
+            - setup_and_install
+        

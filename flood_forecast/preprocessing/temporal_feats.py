@@ -14,7 +14,7 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
     :type df: pd.DataFrame
     :param dt_column: The name of the datetime column
     :type dt_column: str
-    :return: The dataframe with the newly added column.
+    :return: The dataframe with the newly added columns.
     :rtype: pd.DataFrame
     """
     if key == "day_of_week":
