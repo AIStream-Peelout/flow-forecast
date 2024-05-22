@@ -1,6 +1,57 @@
 import torch
 import torch.nn as nn
 import math
+from einops import rearrange, repeat
+from math import pi
+
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, freq_type="lucidrains", **kwargs):
+        super().__init__()
+        self.dim = dim
+        self.freq_type = freq_type
+        if freq_type == "lucidrains":
+            scales = torch.linspace(1.0, kwargs["max_freq"] / 2, self.dim // 4)
+        elif freq_type == "vaswani":
+            scales = 1 / (
+                kwargs["base"] ** (torch.arange(0, self.dim, 4).float() / self.dim)
+            )
+        else:
+            NotImplementedError(
+                f"Only 'lucidrains' and 'vaswani' frequencies are implemented, but you chose {freq_type}."
+            )
+        self.register_buffer("scales", scales)
+
+    def forward(self, coords: torch.Tensor):
+        """
+        Assumes that coordinates do not change throughout the batches.
+        Args:
+            coords (torch.Tensor): Coordinates of shape [B, 2, H, W]
+        """
+        seq_x = coords[:, 0, 0, :]
+        seq_x = seq_x.unsqueeze(-1)
+        seq_y = coords[:, 1, :, 0]
+        seq_y = seq_y.unsqueeze(-1)
+
+        scales = self.scales[(*((None, None)), Ellipsis)]
+        scales = scales.to(coords)
+
+        if self.freq_type == "lucidrains":
+            seq_x = seq_x * scales * pi
+            seq_y = seq_y * scales * pi
+        elif self.freq_type == "vaswani":
+            seq_x = seq_x * scales
+            seq_y = seq_y * scales
+
+        x_sinu = repeat(seq_x, "b i d -> b i j d", j=seq_y.shape[1])
+        y_sinu = repeat(seq_y, "b j d -> b i j d", i=seq_x.shape[1])
+
+        sin = torch.cat((x_sinu.sin(), y_sinu.sin()), dim=-1)
+        cos = torch.cat((x_sinu.cos(), y_sinu.cos()), dim=-1)
+
+        sin, cos = map(lambda t: rearrange(t, "b i j d -> b (i j) d"), (sin, cos))
+        sin, cos = map(lambda t: repeat(t, "b n d -> b n (d j)", j=2), (sin, cos))
+        return sin, cos
 
 
 class PositionalEmbedding(nn.Module):
