@@ -7,7 +7,7 @@ import torch
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 from torch import einsum, nn
-from flood_forecast.transformer_xl.attn import SelfAttention, CrossAttention
+from flood_forecast.transformer_xl.attn import SelfAttention, CrossAttention, PreNorm, CrossPreNorm, FeedForward
 from flood_forecast.transformer_xl.data_embedding import PositionalEncoding2D, AxialRotaryEmbedding
 
 

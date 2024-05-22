@@ -4,6 +4,7 @@ import numpy as np
 from math import sqrt
 from einops import rearrange
 import torch.nn.functional as F
+import einsum
 
 
 class TriangularCausalMask():
