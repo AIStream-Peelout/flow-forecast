@@ -7,7 +7,7 @@ import torch
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 from torch import einsum, nn
-from src.models.modules.attention_modules import *
+from flood_forecast.transformer_xl.attn import SelfAttention, CrossAttention
 from flood_forecast.transformer_xl.data_embedding import PositionalEncoding2D, AxialRotaryEmbedding
 
 
@@ -240,6 +240,7 @@ class RoCrossViViT(nn.Module):
         decoder_dim_head: int = 128,
         **kwargs,
     ):
+
         super().__init__()
         assert (
             ctx_masking_ratio >= 0 and ctx_masking_ratio < 1
