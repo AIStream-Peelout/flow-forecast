@@ -155,6 +155,7 @@ jobs:
           name: Model basic tests
           when: always
           command: |
+            coverage run -m unittest -v tests/multi_modal_tests/test_cross_vivit.py
             coverage run -m unittest -v tests/test_series_id.py
             coverage run -m unittest -v tests/test_squashed.py
             bash <(curl -s https://codecov.io/bash) -cF python
