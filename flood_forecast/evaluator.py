@@ -157,7 +157,7 @@ def evaluate_model(
                 df_train_and_test["pred_" + target_col[0]] = 0
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
                                       "pred_" + target_col[0]] = end_tensor_list
-        print("Current historical dataframe ")
+        print("Current historical dataframe:")
         print(df_train_and_test)
         eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss, eval_log,
                                   end_tensor_0)
