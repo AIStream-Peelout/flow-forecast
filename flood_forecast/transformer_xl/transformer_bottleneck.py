@@ -39,7 +39,7 @@ from typing import Dict
 from flood_forecast.transformer_xl.lower_upper_config import activation_dict
 
 
-def gelu(x):
+def gelu(x: torch.Tensor):
     return 0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
 
 
