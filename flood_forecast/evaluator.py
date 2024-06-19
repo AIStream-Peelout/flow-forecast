@@ -157,7 +157,7 @@ def evaluate_model(
                 df_train_and_test["pred_" + target_col[0]] = 0
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
                                       "pred_" + target_col[0]] = end_tensor_list
-        print("Current historical dataframe")
+        print("Current historical dataframe ")
         print(df_train_and_test)
         eval_log = run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss, eval_log,
                                   end_tensor_0)
@@ -165,9 +165,9 @@ def evaluate_model(
     if "probabilistic" in inference_params:
         print("Probabilistic explainability currently not supported.")
     elif "n_targets" in model.params:
-        print("Multitask forecasting support coming soon.")
+        print("Multitask forecasting support coming soon")
     elif g_loss:
-        print("SHAP not yet supported for these models with multiple outputs.")
+        print("SHAP not yet supported for these models with multiple outputs")
     else:
         deep_explain_model_summary_plot(
             model, test_data, inference_params["datetime_start"]
