@@ -143,7 +143,7 @@ def evaluate_model(
                 else:
                     end_tensor = test_data.inverse_scale(end_tensor.detach().reshape(-1, 1))
                 end_tensor_list = flatten_list_function(end_tensor.numpy().tolist())
-                end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape?
+                end_tensor = end_tensor.squeeze(1)  # Removing extra dim from reshape.?
             history_length = model.params["dataset_params"]["forecast_history"]
             if "n_targets" in model.params:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
