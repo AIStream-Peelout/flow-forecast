@@ -146,8 +146,8 @@ def deep_explain_model_summary_plot(
         hist.cpu().numpy(), names=["batches", "observations", "features"]
     )
 
-    shap_values = deep_explainer.shap_values(history, check_additivity=False)
-    shap_values = fix_shap_values(shap_values, history, check_additivity=False)
+    shap_values = deep_explainer.shap_values(history)
+    shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
         shap_values = np.expand_dims(shap_values, axis=0)
