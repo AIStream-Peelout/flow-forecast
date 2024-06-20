@@ -61,7 +61,7 @@ def get_model_r2_score(
 ):
     """
 
-    model_evaluate_function should call any necessary preprocessing
+    model_evaluate_function should call any necessary preprocessing.
     """
     test_river_data, baseline_mse = stream_baseline(river_flow_df, forecast_column)
 
