@@ -5,7 +5,7 @@ import math
 
 class PositionalEmbedding(nn.Module):
     def __init__(self, d_model, max_len=5000):
-        """[summary]
+        """Creates the positional embeddings 
 
         :param d_model: [description]
         :type d_model: int
@@ -68,6 +68,13 @@ class TokenEmbedding(nn.Module):
 
 class FixedEmbedding(nn.Module):
     def __init__(self, c_in: torch.Tensor, d_model):
+        """_summary_
+
+        :param c_in: _description_
+        :type c_in: torch.Tensor
+        :param d_model: _description_
+        :type d_model: _type_
+        """
         super(FixedEmbedding, self).__init__()
 
         w = torch.zeros(c_in, d_model).float()
@@ -130,6 +137,19 @@ class TemporalEmbedding(nn.Module):
 
 class DataEmbedding(nn.Module):
     def __init__(self, c_in: int, d_model, embed_type='fixed', data=4, dropout=0.1):
+        """Creates a an embedding based on the input
+
+        :param c_in: _description_
+        :type c_in: int
+        :param d_model: _description_
+        :type d_model: _type_
+        :param embed_type: _description_, defaults to 'fixed'
+        :type embed_type: str, optional
+        :param data: _description_, defaults to 4
+        :type data: int, optional
+        :param dropout: _description_, defaults to 0.1
+        :type dropout: float, optional
+        """
         super(DataEmbedding, self).__init__()
 
         self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)

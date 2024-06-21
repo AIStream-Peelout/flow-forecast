@@ -235,7 +235,7 @@ def deep_explain_model_heatmap(
     # heatmap one prediction sequence at datetime_start
     # (seq_len*forecast_len) per fop feature
     to_explain = history
-    shap_values = deep_explainer.shap_values(to_explain)
+    shap_values = deep_explainer.shap_values(to_explain, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:

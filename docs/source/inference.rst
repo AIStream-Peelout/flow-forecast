@@ -1,7 +1,7 @@
 Inference
 =========================
 
-This API makes it easy to run inference on trained PyTorchForecast modules. To use this code you 
+The inference API makes it easy to run inference on trained PyTorchForecast modules. To use this code you 
 need three main files: your model's configuration file, a CSV containing your data, and a path to 
 your model weights.
 

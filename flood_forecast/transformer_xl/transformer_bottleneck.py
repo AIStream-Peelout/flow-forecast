@@ -54,6 +54,27 @@ ACT_FNS = {
 
 class Attention(nn.Module):
     def __init__(self, n_head, n_embd, win_len, scale, q_len, sub_len, sparse=None, attn_pdrop=0.1, resid_pdrop=0.1):
+        """_summary_
+
+        :param n_head: _description_
+        :type n_head: _type_
+        :param n_embd: _description_
+        :type n_embd: _type_
+        :param win_len: _description_
+        :type win_len: _type_
+        :param scale: _description_
+        :type scale: _type_
+        :param q_len: _description_
+        :type q_len: _type_
+        :param sub_len: _description_
+        :type sub_len: _type_
+        :param sparse: _description_, defaults to None
+        :type sparse: _type_, optional
+        :param attn_pdrop: _description_, defaults to 0.1
+        :type attn_pdrop: float, optional
+        :param resid_pdrop: _description_, defaults to 0.1
+        :type resid_pdrop: float, optional
+        """
         super(Attention, self).__init__()
 
         if (sparse):

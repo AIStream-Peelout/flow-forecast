@@ -38,7 +38,7 @@ class ITransformer(nn.Module):
         :type activation: str, optional
         :param factor: =n_, defaults to 1
         :type factor: int, optional
-        :param output_attention: Whether to output the scores, defaults to True
+        :param output_attention: Whether to output the scores, defaults to True.
         :type output_attention: bool, optional
         """
         class_strategy = 'projection'
