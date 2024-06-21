@@ -4,8 +4,8 @@ import math
 
 
 class PositionalEmbedding(nn.Module):
-    def __init__(self, d_model, max_len=5000):
-        """Creates the positional embeddings 
+    def __init__(self, d_model: int, max_len=5000):
+        """Creates the positional embeddings.
 
         :param d_model: [description]
         :type d_model: int
@@ -26,8 +26,8 @@ class PositionalEmbedding(nn.Module):
         pe = pe.unsqueeze(0)
         self.register_buffer('pe', pe)
 
-    def forward(self, x):
-        """[summary]
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Performs the forward pass of the positional embedding by calling pe.
 
         :param x: [description]
         :type x: [type]
@@ -39,7 +39,7 @@ class PositionalEmbedding(nn.Module):
 
 class TokenEmbedding(nn.Module):
     def __init__(self, c_in: int, d_model: int):
-        """Create the token embedding
+        """Create token embeddings for a specific input in a certain dimension.
 
         :param c_in: [description]
         :type c_in: [type]
