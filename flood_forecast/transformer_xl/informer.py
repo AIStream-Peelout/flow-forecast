@@ -224,7 +224,7 @@ class DecoderLayer(nn.Module):
     def forward(self, x, cross, x_mask=None, cross_mask=None) -> torch.Tensor:
         """_summary_
 
-        :param x: _description_
+        :param x: The input tensor
         :type x: _type_
         :param cross: _description_
         :type cross: _type_
@@ -256,6 +256,13 @@ class DecoderLayer(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(self, layers, norm_layer=None):
+        """_summary_
+
+        :param layers: _description_
+        :type layers: _type_
+        :param norm_layer: _description_, defaults to None
+        :type norm_layer: _type_, optional
+        """
         super(Decoder, self).__init__()
         self.layers = nn.ModuleList(layers)
         self.norm = norm_layer
