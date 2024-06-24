@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 import numpy as np
 import shap
 import torch
-
 import wandb
 from flood_forecast.plot_functions import (
     plot_shap_value_heatmaps,
@@ -27,7 +26,7 @@ def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -
     :type datetime_start: datetime
     :param device: Typical device should be either cpu or cuda
     :type device: str
-    :return: Returns a tuple containing either a..
+    :return: Returns a tuple containing either a list of tensors or a single tensor, and an integer
     :rtype: Tuple[torch.Tensor, int]
     """
     if dl_class == "TemporalLoader":
@@ -105,11 +104,11 @@ def deep_explain_model_summary_plot(
     if isinstance(history, list):
         model.model = model.model.to("cpu")
         deep_explainer = shap.DeepExplainer(model.model, history)
-        shap_values = deep_explainer.shap_values(history)
+        shap_values = deep_explainer.shap_values(history, check_additivity=False)
         s_values_list.append(shap_values)
     else:
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
-        shap_values = deep_explainer.shap_values(background_tensor)
+        shap_values = deep_explainer.shap_values(background_tensor, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     # shap_values needs to be 4-dimensional
@@ -147,7 +146,7 @@ def deep_explain_model_summary_plot(
         hist.cpu().numpy(), names=["batches", "observations", "features"]
     )
 
-    shap_values = deep_explainer.shap_values(history)
+    shap_values = deep_explainer.shap_values(history, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
@@ -216,11 +215,11 @@ def deep_explain_model_heatmap(
     s_values_list = []
     if isinstance(history, list):
         deep_explainer = shap.DeepExplainer(model.model, history)
-        shap_values = deep_explainer.shap_values(history)
+        shap_values = deep_explainer.shap_values(history, check_additivity=False)
         s_values_list.append(shap_values)
     else:
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
-        shap_values = deep_explainer.shap_values(background_tensor)
+        shap_values = deep_explainer.shap_values(background_tensor, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)  # forecast_len x N x L x M
     if len(shap_values.shape) != 4:
@@ -236,7 +235,7 @@ def deep_explain_model_heatmap(
     # heatmap one prediction sequence at datetime_start
     # (seq_len*forecast_len) per fop feature
     to_explain = history
-    shap_values = deep_explainer.shap_values(to_explain)
+    shap_values = deep_explainer.shap_values(to_explain, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
     shap_values = np.stack(shap_values)
     if len(shap_values.shape) != 4:
