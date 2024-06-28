@@ -58,7 +58,7 @@ class InferenceMode(object):
         :param save_buck: The GCP bucket where you want to save predictions, defaults to None
         :type save_buck: str, optional
         :param save_name: The name of the file to save the Pandas data-frame to GCP as, defaults to None
-        :type save_name: str, optional
+        :type save_name: str, Optional
         :param use_torch_script: Optional parameter which allows you to use a saved torch script version of your model.
         :return: Returns a tuple consisting of the Pandas dataframe with predictions + history,
         the prediction tensor, a tensor of the historical values, the forecast start index, the test loader, and the
@@ -71,8 +71,6 @@ class InferenceMode(object):
             self.inference_params["test_csv_path"] = csv_path
             self.inference_params["dataset_params"]["file_path"] = csv_path
         df, tensor, history, forecast_start, test, samples = infer_on_torch_model(self.model, **self.inference_params)
-        print("the tensor shape is 2 ")
-        print(tensor.shape)
         if test.scale and self.n_targets:
             unscaled = test.inverse_scale(tensor.numpy())
             for i in range(0, self.n_targets):
