@@ -200,7 +200,6 @@ class CrossTransformer(nn.Module):
             src_pos_emb: Positional embedding of source sequence's tokens of shape [B, N, D]
             tgt_pos_emb: Positional embedding of target sequence's tokens of shape [B, M, D]
         """
-
         attention_scores = {}
         for i in range(len(self.cross_layers)):
             cattn, cff = self.cross_layers[i]
