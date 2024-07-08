@@ -1,14 +1,24 @@
 """
 Adapted from: https://github.com/lucidrains/vit-pytorch/blob/main/vit_pytorch/rvt.py
 """
+
 import random
 from typing import List, Tuple, Union
 import torch
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 from torch import einsum, nn
-from flood_forecast.transformer_xl.attn import SelfAttention, CrossAttention, PreNorm, CrossPreNorm, FeedForward
-from flood_forecast.transformer_xl.data_embedding import PositionalEncoding2D, AxialRotaryEmbedding
+from flood_forecast.transformer_xl.attn import (
+    SelfAttention,
+    CrossAttention,
+    PreNorm,
+    CrossPreNorm,
+    FeedForward,
+)
+from flood_forecast.transformer_xl.data_embedding import (
+    PositionalEncoding2D,
+    AxialRotaryEmbedding,
+)
 
 
 class Attention(nn.Module):
@@ -64,7 +74,7 @@ class Transformer(nn.Module):
                 )
             )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         """
         Args:
             x: Input tensor of shape [B, T, C]
@@ -89,6 +99,30 @@ class VisionTransformer(nn.Module):
         use_rotary: bool = True,
         use_glu: bool = True,
     ):
+        """The Video Vision Transformer (e.g. VIVIT) of the CrossVIVIT model. This model is based on the Arxiv paper:
+        https://arxiv.org/abs/2103.15691. The below implementation has a few specific CrossVIVIT specific parameters
+        like whether to use the rotary.
+        :param dim: The embedding dimension. The authors generally use 384 for training the large model.
+        :type dim: int
+        :param depth: The number of blocks to create. Commonly set to 4.
+        :type depth: int
+        :param heads: The number of heads in the multi-head-attention mechanism. Usually set to a multiple of eight.
+        :type heads: int
+        :param dim_head: The dimension of the inputs to the head.
+        :type dim_head: int
+        :param mlp_dim: _description_
+        :type mlp_dim: int
+        :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
+        (120, 120), 120.
+        :type image_size: Union[List[int], Tuple[int], int]
+        :param dropout: The amount of dropout to use throughout the model defaults to 0.0
+        :type dropout: float, optional
+        :param use_rotary: Whether to use rotary positional embeddings, defaults to True
+        :type use_rotary: bool, optional
+        :param use_glu: _description_, defaults to True
+        :type use_glu: bool, optional
+        """
+
         super().__init__()
         self.image_size = image_size
 
