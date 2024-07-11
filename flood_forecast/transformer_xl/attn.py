@@ -493,7 +493,7 @@ class CrossAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, src: torch.Tensor, src_pos_emb, tgt, tgt_pos_emb):
+    def forward(self, src, src_pos_emb, tgt, tgt_pos_emb):
 
         q = self.to_q(tgt)
 
