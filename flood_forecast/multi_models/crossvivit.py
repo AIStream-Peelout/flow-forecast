@@ -104,7 +104,7 @@ class VisionTransformer(nn.Module):
         like whether to use the rotary.
         :param dim: The embedding dimension. The authors generally use 384 for training the large model.
         :type dim: int
-        :param depth: The number of blocks to create. Commonly set to 4.
+        :param depth: The number of blocks to create. Commonly set to 4 for most tasks.
         :type depth: int
         :param heads: The number of heads in the multi-head-attention mechanism. Usually set to a multiple of eight.
         :type heads: int
