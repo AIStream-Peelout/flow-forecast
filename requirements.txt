@@ -24,4 +24,4 @@ sphinx
 einops
 pytorch-tsmixer
 einsum
-torchtyping
+jaxtyping

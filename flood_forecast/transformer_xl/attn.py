@@ -2,29 +2,31 @@ import torch
 import torch.nn as nn
 import numpy as np
 from math import sqrt
-from einops import rearrange
+from einops import rearrange, repeat
 import torch.nn.functional as F
 import einsum
 
 
-class TriangularCausalMask():
+class TriangularCausalMask:
     def __init__(self, B, L, device="cpu"):
         mask_shape = [B, 1, L, L]
         with torch.no_grad():
-            self._mask = torch.triu(torch.ones(mask_shape, dtype=torch.bool), diagonal=1).to(device)
+            self._mask = torch.triu(
+                torch.ones(mask_shape, dtype=torch.bool), diagonal=1
+            ).to(device)
 
     @property
     def mask(self):
         return self._mask
 
 
-class ProbMask():
+class ProbMask:
     def __init__(self, B, H, L, index, scores, device="cpu"):
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
         _mask_ex = _mask[None, None, :].expand(B, H, L, scores.shape[-1])
-        indicator = _mask_ex[torch.arange(B)[:, None, None],
-                             torch.arange(H)[None, :, None],
-                             index, :].to(device)
+        indicator = _mask_ex[
+            torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], index, :
+        ].to(device)
         self._mask = indicator.view(scores.shape).to(device)
 
     @property
@@ -49,27 +51,53 @@ class FlowAttention(nn.Module):
         queries = self.kernel_method(queries)
         keys = self.kernel_method(keys)
         # incoming and outgoing
-        normalizer_row = 1.0 / (torch.einsum("nhld,nhd->nhl", queries + 1e-6, keys.sum(dim=2) + 1e-6))
-        normalizer_col = 1.0 / (torch.einsum("nhsd,nhd->nhs", keys + 1e-6, queries.sum(dim=2) + 1e-6))
+        normalizer_row = 1.0 / (
+            torch.einsum("nhld,nhd->nhl", queries + 1e-6, keys.sum(dim=2) + 1e-6)
+        )
+        normalizer_col = 1.0 / (
+            torch.einsum("nhsd,nhd->nhs", keys + 1e-6, queries.sum(dim=2) + 1e-6)
+        )
         # reweighting
-        normalizer_row_refine = (
-            torch.einsum("nhld,nhd->nhl", queries + 1e-6, (keys * normalizer_col[:, :, :, None]).sum(dim=2) + 1e-6))
-        normalizer_col_refine = (
-            torch.einsum("nhsd,nhd->nhs", keys + 1e-6, (queries * normalizer_row[:, :, :, None]).sum(dim=2) + 1e-6))
+        normalizer_row_refine = torch.einsum(
+            "nhld,nhd->nhl",
+            queries + 1e-6,
+            (keys * normalizer_col[:, :, :, None]).sum(dim=2) + 1e-6,
+        )
+        normalizer_col_refine = torch.einsum(
+            "nhsd,nhd->nhs",
+            keys + 1e-6,
+            (queries * normalizer_row[:, :, :, None]).sum(dim=2) + 1e-6,
+        )
         # competition and allocation
         normalizer_row_refine = torch.sigmoid(
-            normalizer_row_refine * (float(queries.shape[2]) / float(keys.shape[2])))
-        normalizer_col_refine = torch.softmax(normalizer_col_refine, dim=-1) * keys.shape[2]  # B h L vis
+            normalizer_row_refine * (float(queries.shape[2]) / float(keys.shape[2]))
+        )
+        normalizer_col_refine = (
+            torch.softmax(normalizer_col_refine, dim=-1) * keys.shape[2]
+        )  # B h L vis
         # multiply
         kv = keys.transpose(-2, -1) @ (values * normalizer_col_refine[:, :, :, None])
-        x = (((queries @ kv) * normalizer_row[:, :, :, None]) *
-             normalizer_row_refine[:, :, :, None]).transpose(1, 2).contiguous()
+        x = (
+            (
+                ((queries @ kv) * normalizer_row[:, :, :, None])
+                * normalizer_row_refine[:, :, :, None]
+            )
+            .transpose(1, 2)
+            .contiguous()
+        )
         return x, None
 
 
 # Code implementation from https://github.com/shreyansh26/FlashAttention-PyTorch
 class FlashAttention(nn.Module):
-    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+    def __init__(
+        self,
+        mask_flag=True,
+        factor=5,
+        scale=None,
+        attention_dropout=0.1,
+        output_attention=False,
+    ):
         super(FlashAttention, self).__init__()
         self.scale = scale
         self.mask_flag = mask_flag
@@ -85,9 +113,9 @@ class FlashAttention(nn.Module):
         l3 = torch.zeros(Q.shape[:-1])[..., None]
         m = torch.ones(Q.shape[:-1])[..., None] * NEG_INF
 
-        O1 = O1.to(device='cuda')
-        l3 = l3.to(device='cuda')
-        m = m.to(device='cuda')
+        O1 = O1.to(device="cuda")
+        l3 = l3.to(device="cuda")
+        m = m.to(device="cuda")
 
         Q_BLOCK_SIZE = min(BLOCK_SIZE, Q.shape[-1])
         KV_BLOCK_SIZE = BLOCK_SIZE
@@ -120,27 +148,31 @@ class FlashAttention(nn.Module):
                 scale = 1 / np.sqrt(Q.shape[-1])
                 Qi_scaled = Qi * scale
 
-                S_ij = torch.einsum('... i d, ... j d -> ... i j', Qi_scaled, Kj)
+                S_ij = torch.einsum("... i d, ... j d -> ... i j", Qi_scaled, Kj)
                 if mask is not None:
                     # Masking
-                    maskj_temp = rearrange(maskj, 'b j -> b 1 1 j')
+                    maskj_temp = rearrange(maskj, "b j -> b 1 1 j")
                     S_ij = torch.where(maskj_temp > 0, S_ij, NEG_INF)
 
                 m_block_ij, _ = torch.max(S_ij, dim=-1, keepdims=True)
                 P_ij = torch.exp(S_ij - m_block_ij)
                 if mask is not None:
                     # Masking
-                    P_ij = torch.where(maskj_temp > 0, P_ij, 0.)
+                    P_ij = torch.where(maskj_temp > 0, P_ij, 0.0)
 
                 l_block_ij = torch.sum(P_ij, dim=-1, keepdims=True) + EPSILON
 
-                P_ij_Vj = torch.einsum('... i j, ... j d -> ... i d', P_ij, Vj)
+                P_ij_Vj = torch.einsum("... i j, ... j d -> ... i d", P_ij, Vj)
 
                 mi_new = torch.maximum(m_block_ij, mi)
-                li_new = torch.exp(mi - mi_new) * li + torch.exp(m_block_ij - mi_new) * l_block_ij
+                li_new = (
+                    torch.exp(mi - mi_new) * li
+                    + torch.exp(m_block_ij - mi_new) * l_block_ij
+                )
 
                 O_BLOCKS[i] = (li / li_new) * torch.exp(mi - mi_new) * Oi + (
-                        torch.exp(m_block_ij - mi_new) / li_new) * P_ij_Vj
+                    torch.exp(m_block_ij - mi_new) / li_new
+                ) * P_ij_Vj
                 l_BLOCKS[i] = li_new
                 m_BLOCKS[i] = mi_new
 
@@ -150,14 +182,24 @@ class FlashAttention(nn.Module):
         return O, l3, m
 
     def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
-        res = \
-            self.flash_attention_forward(queries.permute(0, 2, 1, 3), keys.permute(0, 2, 1, 3), values.permute(0, 2, 1, 3), # noqa
-                                         attn_mask)[0]
+        res = self.flash_attention_forward(
+            queries.permute(0, 2, 1, 3),
+            keys.permute(0, 2, 1, 3),
+            values.permute(0, 2, 1, 3),  # noqa
+            attn_mask,
+        )[0]
         return res.permute(0, 2, 1, 3).contiguous(), None
 
 
 class FullAttention(nn.Module):
-    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+    def __init__(
+        self,
+        mask_flag=True,
+        factor=5,
+        scale=None,
+        attention_dropout=0.1,
+        output_attention=False,
+    ):
         super(FullAttention, self).__init__()
         self.scale = scale
         self.mask_flag = mask_flag
@@ -167,7 +209,7 @@ class FullAttention(nn.Module):
     def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
-        scale = self.scale or 1. / sqrt(E)
+        scale = self.scale or 1.0 / sqrt(E)
 
         scores = torch.einsum("blhe,bshe->bhls", queries, keys)
 
@@ -188,7 +230,14 @@ class FullAttention(nn.Module):
 
 # Code implementation from https://github.com/zhouhaoyi/Informer2020
 class ProbAttention(nn.Module):
-    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+    def __init__(
+        self,
+        mask_flag=True,
+        factor=5,
+        scale=None,
+        attention_dropout=0.1,
+        output_attention=False,
+    ):
         super(ProbAttention, self).__init__()
         self.factor = factor
         self.scale = scale
@@ -205,19 +254,17 @@ class ProbAttention(nn.Module):
         K_expand = K.unsqueeze(-3).expand(B, H, L_Q, L_K, E)
         # real U = U_part(factor*ln(L_k))*L_q
         index_sample = torch.randint(L_K, (L_Q, sample_k))
-        K_sample = K_expand[:, :, torch.arange(
-            L_Q).unsqueeze(1), index_sample, :]
-        Q_K_sample = torch.matmul(
-            Q.unsqueeze(-2), K_sample.transpose(-2, -1)).squeeze()
+        K_sample = K_expand[:, :, torch.arange(L_Q).unsqueeze(1), index_sample, :]
+        Q_K_sample = torch.matmul(Q.unsqueeze(-2), K_sample.transpose(-2, -1)).squeeze()
 
         # find the Top_k query with sparisty measurement
         M = Q_K_sample.max(-1)[0] - torch.div(Q_K_sample.sum(-1), L_K)
         M_top = M.topk(n_top, sorted=False)[1]
 
         # use the reduced Q to calculate Q_K
-        Q_reduce = Q[torch.arange(B)[:, None, None],
-                     torch.arange(H)[None, :, None],
-                     M_top, :]  # factor*ln(L_q)
+        Q_reduce = Q[
+            torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], M_top, :
+        ]  # factor*ln(L_q)
         Q_K = torch.matmul(Q_reduce, K.transpose(-2, -1))  # factor*ln(L_q)*L_k
 
         return Q_K, M_top
@@ -227,11 +274,10 @@ class ProbAttention(nn.Module):
         if not self.mask_flag:
             # V_sum = V.sum(dim=-2)
             V_sum = V.mean(dim=-2)
-            contex = V_sum.unsqueeze(-2).expand(B, H,
-                                                L_Q, V_sum.shape[-1]).clone()
+            contex = V_sum.unsqueeze(-2).expand(B, H, L_Q, V_sum.shape[-1]).clone()
         else:  # use mask
             # requires that L_Q == L_V, i.e. for self-attention only
-            assert (L_Q == L_V)
+            assert L_Q == L_V
             contex = V.cumsum(dim=-2)
         return contex
 
@@ -244,14 +290,14 @@ class ProbAttention(nn.Module):
 
         attn = torch.softmax(scores, dim=-1)  # nn.Softmax(dim=-1)(scores)
 
-        context_in[torch.arange(B)[:, None, None],
-                   torch.arange(H)[None, :, None],
-                   index, :] = torch.matmul(attn, V).type_as(context_in)
+        context_in[
+            torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], index, :
+        ] = torch.matmul(attn, V).type_as(context_in)
         if self.output_attention:
-            attns = (torch.ones([B, H, L_V, L_V]) /
-                     L_V).type_as(attn).to(attn.device)
-            attns[torch.arange(B)[:, None, None], torch.arange(H)[
-                                                  None, :, None], index, :] = attn
+            attns = (torch.ones([B, H, L_V, L_V]) / L_V).type_as(attn).to(attn.device)
+            attns[
+                torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], index, :
+            ] = attn
             return (context_in, attns)
         else:
             return (context_in, None)
@@ -264,33 +310,30 @@ class ProbAttention(nn.Module):
         keys = keys.transpose(2, 1)
         values = values.transpose(2, 1)
 
-        U_part = self.factor * \
-            np.ceil(np.log(L_K)).astype('int').item()  # c*ln(L_k)
-        u = self.factor * \
-            np.ceil(np.log(L_Q)).astype('int').item()  # c*ln(L_q)
+        U_part = self.factor * np.ceil(np.log(L_K)).astype("int").item()  # c*ln(L_k)
+        u = self.factor * np.ceil(np.log(L_Q)).astype("int").item()  # c*ln(L_q)
 
         U_part = U_part if U_part < L_K else L_K
         u = u if u < L_Q else L_Q
 
-        scores_top, index = self._prob_QK(
-            queries, keys, sample_k=U_part, n_top=u)
+        scores_top, index = self._prob_QK(queries, keys, sample_k=U_part, n_top=u)
 
         # add scale factor
-        scale = self.scale or 1. / sqrt(D)
+        scale = self.scale or 1.0 / sqrt(D)
         if scale is not None:
             scores_top = scores_top * scale
         # get the context
         context = self._get_initial_context(values, L_Q)
         # update the context with selected top_k queries
         context, attn = self._update_context(
-            context, values, scores_top, index, L_Q, attn_mask)
+            context, values, scores_top, index, L_Q, attn_mask
+        )
 
         return context.contiguous(), attn
 
 
 class AttentionLayer(nn.Module):
-    def __init__(self, attention, d_model, n_heads, d_keys=None,
-                 d_values=None):
+    def __init__(self, attention, d_model, n_heads, d_keys=None, d_values=None):
         super(AttentionLayer, self).__init__()
 
         d_keys = d_keys or (d_model // n_heads)
@@ -313,12 +356,7 @@ class AttentionLayer(nn.Module):
         values = self.value_projection(values).view(B, S, H, -1)
 
         out, attn = self.inner_attention(
-            queries,
-            keys,
-            values,
-            attn_mask,
-            tau=tau,
-            delta=delta
+            queries, keys, values, attn_mask, tau=tau, delta=delta
         )
         out = out.view(B, L, -1)
 
@@ -326,17 +364,27 @@ class AttentionLayer(nn.Module):
 
 
 class ReformerLayer(nn.Module):
-    def __init__(self, attention, d_model, n_heads, d_keys=None,
-                 d_values=None, causal=False, bucket_size=4, n_hashes=4):
+    def __init__(
+        self,
+        attention,
+        d_model,
+        n_heads,
+        d_keys=None,
+        d_values=None,
+        causal=False,
+        bucket_size=4,
+        n_hashes=4,
+    ):
         super().__init__()
         import LSHSelfAttention
+
         self.bucket_size = bucket_size
         self.attn = LSHSelfAttention(
             dim=d_model,
             heads=n_heads,
             bucket_size=bucket_size,
             n_hashes=n_hashes,
-            causal=causal
+            causal=causal,
         )
 
     def fit_length(self, queries):
@@ -347,13 +395,16 @@ class ReformerLayer(nn.Module):
         else:
             # fill the time series
             fill_len = (self.bucket_size * 2) - (N % (self.bucket_size * 2))
-            return torch.cat([queries, torch.zeros([B, fill_len, C]).to(queries.device)], dim=1)
+            return torch.cat(
+                [queries, torch.zeros([B, fill_len, C]).to(queries.device)], dim=1
+            )
 
     def forward(self, queries, keys, values, attn_mask, tau, delta):
         # in Reformer: defalut queries=keys
         B, N, C = queries.shape
         queries = self.attn(self.fit_length(queries))[:, :N, :]
         return queries, None
+
 
 def rotate_every_two(x):
     x = rearrange(x, "... (d j) -> ... d j", j=2)
@@ -428,7 +479,7 @@ class SelfAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, x, pos_emb):
+    def forward(self, x: torch.Tensor, pos_emb: torch.Tensor):
         """
         Args:
             x: Sequence of shape [B, N, D]
@@ -443,7 +494,7 @@ class SelfAttention(nn.Module):
         )
 
         if self.use_rotary:
-
+            # Used to map dimensions from dimension. Currently, getting (512, 128) when expecting 3-D tensor.
             sin, cos = map(
                 lambda t: repeat(t, "b n d -> (b h) n d", h=self.heads), pos_emb
             )
@@ -471,7 +522,7 @@ class CrossAttention(nn.Module):
     def __init__(
         self,
         dim: int,
-        heads: int =8,
+        heads: int = 8,
         dim_head: int = 64,
         dropout: int = 0.0,
         use_rotary: bool = True,
@@ -493,8 +544,7 @@ class CrossAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, src, src_pos_emb, tgt, tgt_pos_emb):
-
+    def forward(self, src: torch.Tensor, src_pos_emb, tgt, tgt_pos_emb):
         q = self.to_q(tgt)
 
         qkv = (q, *self.to_kv(src).chunk(2, dim=-1))
@@ -504,7 +554,7 @@ class CrossAttention(nn.Module):
         )
 
         if self.use_rotary:
-            # apply 2d rotary embeddings to queries and keys
+            # apply 2-d rotary embeddings to queries and keys
 
             sin_src, cos_src = map(
                 lambda t: repeat(t, "b n d -> (b h) n d", h=self.heads), src_pos_emb
@@ -531,4 +581,3 @@ class CrossAttention(nn.Module):
         out = einsum("b i j, b j d -> b i d", attn, v)
         out = rearrange(out, "(b h) n d -> b n (h d)", h=self.heads)
         return self.to_out(out), attn
-
