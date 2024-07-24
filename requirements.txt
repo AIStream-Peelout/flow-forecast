@@ -9,7 +9,7 @@ h5py
 wandb==0.17.2
 google-cloud
 google-cloud-storage
-plotly~=5.20.0
+plotly~=5.23.0
 pytz>=2022.1
 setuptools~=69.5.1
 numpy==1.26
