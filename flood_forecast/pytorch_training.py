@@ -22,7 +22,7 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
 
     :param crit_multi: _description_
     :type crit_multi: List
-    :param output: _description_
+    :param output: _descaription_
     :type output: _type_
     :param labels: _description_
     :type labels: _type_
@@ -106,7 +106,6 @@ def train_transformer_style(
     :type forward_params: Dict, optional
     :param model_filepath: The file path to load modeel weights from, defaults to "model_save"
     :type model_filepath: str, optional
-    :raises ValueError: Has an error
     """
     use_wandb = model.wandb
     es = None

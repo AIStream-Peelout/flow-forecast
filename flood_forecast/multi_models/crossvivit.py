@@ -154,15 +154,15 @@ class VisionTransformer(nn.Module):
     def forward(
         self,
         src: Float[torch.Tensor, "batch_size image_dim context_length"],
-        src_pos_emb: Float[torch.Tensor, "batch_size image_dim context_length"],
-    ):
+        src_pos_emb: Tuple[Float[torch.Tensor, "batch_size image_dim/2 context_length"], Float[torch.Tensor, "batch_size image_dim/2 context_length"]]
+    ) -> Tuple[Float[torch.Tensor, "batch_size image_dim context_length"], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]]]:
         """
         Performs the following computation in each layer:
             1. Self-Attention on the source sequence
             2. FFN on the source sequence.
         Args:
-            src: Source sequence of shape [B, N, D]
-            src_pos_emb: Positional embedding of source sequence's tokens of shape [B, N, D]
+            src: Source sequence of shape [B, N, D].
+            src_pos_emb: Positional embedding tuple (sin, cos) of source sequence's tokens of shape [B, N, D]
         """
 
         attention_scores = {}
