@@ -1,12 +1,10 @@
-from typing import Tuple
-
 import torch
 import torch.nn as nn
 import numpy as np
 from math import sqrt
 from einops import rearrange, repeat
 import torch.nn.functional as F
-from torch import einsum
+import einsum
 
 
 class TriangularCausalMask:
@@ -460,7 +458,7 @@ class FeedForward(nn.Module):
 class SelfAttention(nn.Module):
     def __init__(
         self,
-        dim: int,
+        dim,
         heads=8,
         dim_head=64,
         dropout=0.0,
@@ -481,11 +479,11 @@ class SelfAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, x: torch.Tensor, pos_emb: Tuple[torch.Tensor, torch.Tensor]):
+    def forward(self, x: torch.Tensor, pos_emb: torch.Tensor):
         """
         Args:
             x: Sequence of shape [B, N, D]
-            pos_emb: Positional embedding of sequence's tokens of shape [B, N, D/2]
+            pos_emb: Positional embedding of sequence's tokens of shape [B, N, D]
         """
 
         q = self.to_q(x)
