@@ -18,7 +18,7 @@ TEMPORAL_FEATS_MODELS = ["ITransformer", "Informer"]
 
 
 def multi_crit(crit_multi: List, output, labels, valid=None):
-    """_summary_
+    """Used for computing the loss when there are multiple criteria.
 
     :param crit_multi: _description_
     :type crit_multi: List

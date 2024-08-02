@@ -7,7 +7,7 @@ import numpy as np
 
 
 class AxialRotaryEmbedding(nn.Module):
-    def __init__(self, dim, freq_type="lucidrains", **kwargs):
+    def __init__(self, dim: int, freq_type="lucidrains", **kwargs):
         super().__init__()
         self.dim = dim
         self.freq_type = freq_type
@@ -57,11 +57,11 @@ class AxialRotaryEmbedding(nn.Module):
 
 class PositionalEmbedding(nn.Module):
     def __init__(self, d_model, max_len=5000):
-        """[summary]
+        """Create the positional embedding for use in the transformer and attention mechanisms.
 
-        :param d_model: [description]
+        :param d_model: The dimension of the positional embedding.
         :type d_model: int
-        :param max_len: [description], defaults to 5000
+        :param max_len: The max length of the forecast_history, defaults to 5000
         :type max_len: int, optional
         """
         super(PositionalEmbedding, self).__init__()
