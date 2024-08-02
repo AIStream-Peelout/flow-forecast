@@ -120,7 +120,7 @@ class VisionTransformer(nn.Module):
         :type dropout: float, optional
         :param use_rotary: Whether to use rotary positional embeddings, defaults to True
         :type use_rotary: bool, optional
-        :param use_glu: _description_, defaults to True
+        :param use_glu: Weather to use gated linear units , defaults to True
         :type use_glu: bool, optional
         """
 

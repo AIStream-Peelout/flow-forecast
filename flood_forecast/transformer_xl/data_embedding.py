@@ -222,7 +222,7 @@ def get_emb(sin_inp):
 
 
 class PositionalEncoding2D(nn.Module):
-    def __init__(self, channels):
+    def __init__(self, channels: int):
         """
         :param channels: The last dimension of the tensor you want to apply pos emb to.
         """
@@ -235,7 +235,6 @@ class PositionalEncoding2D(nn.Module):
 
     def forward(self, coords):
         """
-        :param tensor: A 4d tensor of size (batch_size, ch, x, y)
         :param coords: A 4d tensor of size (batch_size, num_coords, x, y)
         :return: Positional Encoding Matrix of size (batch_size, x, y, ch)
         """
