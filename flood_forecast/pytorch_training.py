@@ -22,7 +22,7 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
 
     :param crit_multi: _description_
     :type crit_multi: List
-    :param output: _descaription_
+    :param output:
     :type output: _type_
     :param labels: _description_
     :type labels: _type_

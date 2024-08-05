@@ -4,7 +4,7 @@ import numpy as np
 from math import sqrt
 from einops import rearrange, repeat
 import torch.nn.functional as F
-import einsum
+from torch import einsum
 
 
 class TriangularCausalMask:
@@ -458,12 +458,20 @@ class FeedForward(nn.Module):
 class SelfAttention(nn.Module):
     def __init__(
         self,
-        dim,
-        heads=8,
-        dim_head=64,
-        dropout=0.0,
-        use_rotary=True,
+        dim: int,
+        heads: int = 8,
+        dim_head: int = 64,
+        dropout: float = 0.0,
+        use_rotary: bool = True,
     ):
+        """
+        The self-attention mechanism used in the CrossVIVIT model. It is currently not used in other models and could
+        likely be consolidated with those self-attention mechanisms.
+        :param dim: [description]
+        :type dim: [type]
+        :param heads: [description]
+        :type heads: [type]
+        """
         super().__init__()
         inner_dim = dim_head * heads
         self.use_rotary = use_rotary

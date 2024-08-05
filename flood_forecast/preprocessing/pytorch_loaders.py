@@ -164,7 +164,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
         """A data-loader for a CSV file that contains a series ID column.
 
-        :param series_id_col: The id
+        :param series_id_col: The id column of the series you want to forecast.
         :type series_id_col: str
         :param main_params: The central set of parameters
         :type main_params: dict
@@ -241,8 +241,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
                 targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
         else:
-            raise NotImplementedError
-        return super().__getitem__(idx)
+            raise NotImplementedError("Current code only supports returning all the series at once at each iteration")
 
     def __sample_series_id__(idx, series_id):
         pass

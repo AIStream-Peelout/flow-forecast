@@ -233,9 +233,9 @@ class PositionalEncoding2D(nn.Module):
         inv_freq = 1.0 / (10000 ** (torch.arange(0, channels, 2).float() / channels))
         self.register_buffer("inv_freq", inv_freq)
 
-    def forward(self, coords):
+    def forward(self, coords: torch.Tensor)-> torch.Tensor:
         """
-        :param tensor: A 4d tensor of size (batch_size, ch, x, y)
+        :param coords: A 4d tensor of size (batch_size, ch, x, y)
         :param coords: A 4d tensor of size (batch_size, num_coords, x, y)
         :return: Positional Encoding Matrix of size (batch_size, x, y, ch)
         """
