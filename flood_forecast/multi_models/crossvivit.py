@@ -105,13 +105,13 @@ class VisionTransformer(nn.Module):
         like whether to use the rotary embedding.
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         :type dim: int
-        :param depth: The number of transformer blocks to create. Commonly set to 4 for most tasks.
+        :param depth: The number of transformer blocks to create. Commonly set to four for most tasks.
         :type depth: int
         :param heads: The number of heads in the multi-head-attention mechanism. Usually set to a multiple of eight.
         :type heads: int
         :param dim_head: The dimension of the inputs to the head.
         :type dim_head: int
-        :param mlp_dim: _description_
+        :param mlp_dim: The dimension that the multi-head perceptron should output.
         :type mlp_dim: int
         :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
         (120, 120), 120.
@@ -431,7 +431,7 @@ class RoCrossViViT(nn.Module):
         ts_coords: torch.Tensor,
         time_coords: torch.Tensor,
         mask: bool = True,
-    ):
+    ) -> Tuple[Float[torch.Tensor, "batch_size image_dim num_mlp_heads"], Float[torch.Tensor, "batch_size image_dim num_mlp_heads"], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]]]:
         """
         Args:
             ctx (torch.Tensor): Context frames of shape [B, T, C, H, W]
