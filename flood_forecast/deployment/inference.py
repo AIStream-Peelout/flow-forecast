@@ -18,7 +18,7 @@ class InferenceMode(object):
                  wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
-        :param forecasts_steps: Number of time-steps to forecast (doesn't have to be hours)
+        :param forecast_steps: Number of time-steps to forecast (doesn't have to be hours)
         :type forecast_steps: int
         :param num_prediction_samples: Number of prediction samples
         :type num_prediction_samples: int

@@ -21,13 +21,11 @@ class CSVDataLoader(Dataset):
         scaling=None,
         start_stamp: int = 0,
         end_stamp: int = None,
-        gcp_service_key: Optional[str] = None,
         interpolate_param: bool = False,
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
         no_scale=False,
-        preformatted_df=False
 
     ):
         """
@@ -282,8 +280,6 @@ class CSVTestLoader(CSVDataLoader):
         print(df_path)
         self.forecast_total = forecast_total
         # TODO these are antiquated delete them
-        self.use_real_temp = use_real_temp
-        self.use_real_precip = use_real_precip
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
@@ -355,11 +351,6 @@ class CSVTestLoader(CSVDataLoader):
         return (
             len(self.df.index) - self.forecast_history - self.forecast_total - 1
         )
-
-
-class TestLoaderABC(CSVTestLoader):
-    pass
-
 
 class AEDataloader(CSVDataLoader):
     def __init__(

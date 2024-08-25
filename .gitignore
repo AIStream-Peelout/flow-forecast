@@ -13,3 +13,9 @@ mypy
 *.png
 *.svf
 *.svg
+.idea/flow-forecast.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/misc.xml
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/workspace.xml

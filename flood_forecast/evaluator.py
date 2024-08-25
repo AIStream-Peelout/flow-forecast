@@ -1,3 +1,13 @@
+"""
+Author: Isaac Godfried
+Description:
+    This module contains functions for evaluating models. The basic logic flow is as follows:
+    1. `evaluate_model` is called from `trainer.py` at the end of training. It calls `infer_on_torch_model` which does the actual inference. # noqa
+    2. `infer_on_torch_model` calls `generate_predictions` which calls `generate_decoded_predictions` or `generate_predictions_non_decoded` depending on whether the model uses a decoder or not.
+    3. `generate_decoded_predictions` calls `decoding_functions` which calls `greedy_decode` or `beam_decode` depending on the decoder function specified in the config file.
+    4. The returned value from `generate_decoded_predictions` is then used to calculate the evaluation metrics in `run_evaluation`.
+    5. `run_evaluation` returns the evaluation metrics to `evaluate_model` which returns them to `trainer.py`.
+"""
 from datetime import datetime
 from typing import Callable, Dict, List, Tuple, Type, Union
 
@@ -16,15 +26,6 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, Temporal
 from flood_forecast.time_model import TimeSeriesModel
 from flood_forecast.utils import flatten_list_function
 from flood_forecast.temporal_decoding import decoding_function
-
-"""
-This module contains functions for evaluating models. Basic logic flow:
-1. `evaluate_model` is called from `trainer.py` at the end of training. It calls `infer_on_torch_model` which does the actual inference. # noqa
-2. `infer_on_torch_model` calls `generate_predictions` which calls `generate_decoded_predictions` or `generate_predictions_non_decoded` depending on whether the model uses a decoder or not.
-3. `generate_decoded_predictions` calls `decoding_functions` which calls `greedy_decode` or `beam_decode` depending on the decoder function specified in the config file.
-4. The returned value from `generate_decoded_predictions` is then used to calculate the evaluation metrics in `run_evaluation`.
-5. `run_evaluation` returns the evaluation metrics to `evaluate_model` which returns them to `trainer.py`.
-"""
 
 
 def stream_baseline(
@@ -61,7 +62,7 @@ def get_model_r2_score(
 ):
     """
 
-    model_evaluate_function should call any necessary preprocessing.
+    model_evaluate_function should call any necessary preprocessing
     """
     test_river_data, baseline_mse = stream_baseline(river_flow_df, forecast_column)
 
@@ -334,7 +335,7 @@ def infer_on_torch_model(
                            forecast_start_idx, history, datetime_start)
 
 
-def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
+def handle_laxer_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
                     history, datetime_start):
     targ = False
     decoder_params = None

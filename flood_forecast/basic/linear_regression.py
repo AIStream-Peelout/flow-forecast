@@ -4,7 +4,7 @@ from typing import Type
 
 class SimpleLinearModel(torch.nn.Module):
     """
-    A very simple baseline model to resolve some of the
+    A very simple baseline linear model to resolve some of the
     difficulties with bugs in the various train/validation loops
     in code. Has only two layers.
     """

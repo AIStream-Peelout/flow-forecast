@@ -20,7 +20,7 @@ class TestCrossVivVit(unittest.TestCase):
             ts_length=10,
             out_dim=1,
             dropout=0.0,
-            **{"max_freq": 12}
+            axial_kwargs={"max_freq": 12}
         )
     def test_positional_encoding_forward(self):
         """

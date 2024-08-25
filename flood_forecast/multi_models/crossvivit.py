@@ -3,7 +3,7 @@ Adapted from: https://github.com/lucidrains/vit-pytorch/blob/main/vit_pytorch/rv
 """
 
 import random
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Any, Dict
 import torch
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
@@ -24,6 +24,9 @@ from flood_forecast.transformer_xl.data_embedding import (
 
 class Attention(nn.Module):
     def __init__(self, dim, heads=8, dim_head=64, dropout=0.0):
+        """
+
+        """
         super().__init__()
         inner_dim = dim_head * heads
         project_out = not (heads == 1 and dim_head == dim)
@@ -168,7 +171,6 @@ class VisionTransformer(nn.Module):
         attention_scores = {}
         for i in range(len(self.blocks)):
             self_attn, sff = self.blocks[i]
-
             out, self_attn_scores = self_attn(src, pos_emb=src_pos_emb)
             attention_scores["self_attention"] = self_attn_scores
             src = out + src
@@ -190,6 +192,11 @@ class CrossTransformer(nn.Module):
         use_rotary: bool = True,
         use_glu: bool = True,
     ):
+        """
+        Computes the Cross-Attention between the source and target sequences.
+        :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
+        :type dim: int
+        """
         super().__init__()
         self.image_size = image_size
         self.cross_layers = nn.ModuleList([])
@@ -272,8 +279,17 @@ class RoCrossViViT(nn.Module):
         decoder_depth: int = 4,
         decoder_heads: int = 6,
         decoder_dim_head: int = 128,
-        **kwargs,
+        axial_kwargs: Dict[str, Any] = {},
     ):
+        """
+        The CrossViViT model from the CrossVIVIT paper. This model is based on the Arxiv paper: https://arxiv.org/abs/2103.14899
+        :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
+        (120, 120), 120.
+        :type image_size: Union[List[int], Tuple[int], int]
+        :param patch_size: The patch size defined can be defined either as a list or a tuple (e.g. [8, 8]) this could allow
+        you to have patches of varying sizes such as (8, 16).
+        :type patch_size: Union[List[int], Tuple[int]]
+        """
 
         super().__init__()
         assert (
@@ -319,7 +335,7 @@ class RoCrossViViT(nn.Module):
             ),
             nn.Linear(patch_dim, dim),
         )
-        self.enc_pos_emb = AxialRotaryEmbedding(dim_head, freq_type, **kwargs)
+        self.enc_pos_emb = AxialRotaryEmbedding(dim_head, freq_type, **axial_kwargs)
         self.ts_embedding = nn.Linear(self.ts_channels, dim)
         self.ctx_encoder = VisionTransformer(
             dim,
@@ -425,7 +441,7 @@ class RoCrossViViT(nn.Module):
 
     def forward(
         self,
-        ctx: torch.Tensor,
+        video_ctx: torch.Tensor,
         ctx_coords: torch.Tensor,
         ts: torch.Tensor,
         ts_coords: torch.Tensor,
@@ -434,7 +450,7 @@ class RoCrossViViT(nn.Module):
     ) -> Tuple[Float[torch.Tensor, "batch_size image_dim num_mlp_heads"], Float[torch.Tensor, "batch_size image_dim num_mlp_heads"], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]]]:
         """
         Args:
-            ctx (torch.Tensor): Context frames of shape [B, T, C, H, W]
+            video_ctx (torch.Tensor): Context frames of shape [B, T, C, H, W]
             ctx_coords (torch.Tensor): Coordinates of context frames of shape [B, 2, H, W]
             ts (torch.Tensor): Station timeseries of shape [B, T, C]
             ts_coords (torch.Tensor): Station coordinates of shape [B, 2, 1, 1]
@@ -443,29 +459,30 @@ class RoCrossViViT(nn.Module):
         Returns:
 
         """
-        B, T, _, H, W = ctx.shape
+        B, T, _, H, W = video_ctx.shape
         time_coords = self.time_coords_encoder(time_coords)
 
-        ctx = torch.cat([ctx, time_coords], axis=2)
+        video_ctx = torch.cat([video_ctx, time_coords], axis=2)
         ts = torch.cat([ts, time_coords[..., 0, 0]], axis=-1)
 
-        ctx = rearrange(ctx, "b t c h w -> (b t) c h w")
+        # Rearranges the video_ctx to the format
+        video_ctx = rearrange(video_ctx, "b t c h w -> (b t) c h w")
 
         ctx_coords = repeat(ctx_coords, "b c h w -> (b t) c h w", t=T)
         ts_coords = repeat(ts_coords, "b c h w -> (b t) c h w", t=T)
         src_enc_pos_emb = self.enc_pos_emb(ctx_coords)
         tgt_pos_emb = self.enc_pos_emb(ts_coords)
 
-        ctx = self.to_patch_embedding(ctx)  # BT, N, D
+        video_ctx = self.to_patch_embedding(video_ctx)  # BT, N, D
         if self.pe_type == "learned":
-            ctx = ctx + self.pe_ctx
+            video_ctx = video_ctx + self.pe_ctx
         elif self.pe_type == "sine":
             pe = self.pe_ctx(ctx_coords)
             pe = rearrange(pe, "b h w c -> b (h w) c")
-            ctx = ctx + pe
+            video_ctx = video_ctx + pe
         if self.ctx_masking_ratio > 0 and mask:
             p = self.ctx_masking_ratio * random.random()
-            ctx, _, ids_restore, ids_keep = self.random_masking(ctx, p)
+            video_ctx, _, ids_restore, ids_keep = self.random_masking(video_ctx, p)
             src_enc_pos_emb = tuple(
                 torch.gather(
                     pos_emb,
@@ -474,7 +491,7 @@ class RoCrossViViT(nn.Module):
                 )
                 for pos_emb in src_enc_pos_emb
             )
-        latent_ctx, self_attention_scores = self.ctx_encoder(ctx, src_enc_pos_emb)
+        latent_ctx, self_attention_scores = self.ctx_encoder(video_ctx, src_enc_pos_emb)
 
         ts = self.ts_embedding(ts)
         if self.ts_masking_ratio > 0 and mask:

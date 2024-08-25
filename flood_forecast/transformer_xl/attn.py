@@ -532,7 +532,7 @@ class CrossAttention(nn.Module):
         dim: int,
         heads: int = 8,
         dim_head: int = 64,
-        dropout: int = 0.0,
+        dropout: float = 0.0,
         use_rotary: bool = True,
     ):
         """
