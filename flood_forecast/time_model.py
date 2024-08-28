@@ -17,10 +17,8 @@ import wandb
 
 class TimeSeriesModel(ABC):
     """
-    An abstract class used to handle different configurations
-    of models + hyperparams for training, test, and predict functions.
-    This class assumes that data is already split into test train
-    and validation at this point.
+    An abstract class used to handle different configurations of models + hyperparams for training, test, and predict
+    functions. This class assumes that data is already split into test train and validation at this point.
     """
 
     def __init__(
@@ -30,6 +28,19 @@ class TimeSeriesModel(ABC):
             validation_data: str,
             test_data: str,
             params: Dict):
+        """
+        Initializes the TimeSeriesModel class with certain attributes
+        :param model_base: The name of the model to load. This should be a key in the model_dict in the
+        pytorch_model_dict located in model_dict_function.py
+        :type model_base: str
+        :param training_data: The path to the training data file
+        :type training_data: str
+        :param validation_data: The path to the validation data file
+        :type validation_data: str
+        :param test_data: The path to the test data file
+        :type test_data: str
+        :param params: A dictionary of parameters to pass to the model
+        """
         self.params = params
         if "weight_path" in params:
             params["weight_path"] = get_data(params["weight_path"])
@@ -50,8 +61,11 @@ class TimeSeriesModel(ABC):
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:
         """
-        This function should load and return the model
-        this will vary based on the underlying framework used
+        This function should load and return the model. This will vary based on the underlying framework used.
+        :param model_base: The name of the model to load
+        :type model_base: str
+        :param model_params: A dictionary of parameters to pass to the model
+        :param weight_path: The path to the weights to load
         """
         raise NotImplementedError
 
@@ -269,7 +283,6 @@ class PyTorchForecast(TimeSeriesModel):
                                             pad_le, dataset_params["task"])
 
         else:
-            # TODO support custom DataLoader
             loader = None
         return loader
 

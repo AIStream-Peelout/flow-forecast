@@ -26,7 +26,8 @@ class TestCrossVivVit(unittest.TestCase):
         """
             Test the positional encoding forward pass with a PositionalEncoding2D layer.
         """
-        positional_encoding = PositionalEncoding2D(dim=128)
+        positional_encoding = PositionalEncoding2D(channels=2)
+        # Coordinates with format [B, 2, H, W]
         coords = torch.rand(5, 2, 32, 32)
         output = positional_encoding(coords)
         self.assertEqual(output.shape, (5, 32, 32, 128))
@@ -62,6 +63,14 @@ class TestCrossVivVit(unittest.TestCase):
         self.self_attention = SelfAttention(dim=128, use_rotary=True)
         self.self_attention(torch.rand(5, 512, 128), (torch.rand(5, 512, 64), torch.rand(5, 512, 64)))
 
+    def test_neRF_embedding(self):
+        """
+            Test the NeRF embedding layer.
+        """
+        nerf_embedding = NeRF_embedding(n_layers=128)
+        coords = torch.rand(5, 2, 32, 32)
+        output = nerf_embedding(coords)
+        self.assertEqual(output.shape, (5, 32, 32, 128))
 
 if __name__ == '__main__':
     unittest.main()
