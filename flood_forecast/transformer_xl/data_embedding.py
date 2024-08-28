@@ -1,9 +1,12 @@
+from typing import List
+
 import torch
 import torch.nn as nn
 import math
 from einops import rearrange, repeat
 from math import pi
 import numpy as np
+from jaxtyping import Float
 
 
 class AxialRotaryEmbedding(nn.Module):
@@ -222,40 +225,64 @@ def get_emb(sin_inp):
 
 
 class PositionalEncoding2D(nn.Module):
-    def __init__(self, channels):
-        """
-        :param channels: The last dimension of the tensor you want to apply pos emb to.
-        """
+    """
+    Applies 2D positional encoding to a 4D input tensor.
+
+    This module generates a positional encoding for 2D data (like images or feature maps)
+    using a combination of sine and cosine functions at different frequencies.
+
+    :param channels: The last dimension of the tensor you want to apply positional embedding to.
+    :type channels: int
+    """
+
+    def __init__(self, channels: int):
         super(PositionalEncoding2D, self).__init__()
         self.org_channels = channels
-        channels = int(np.ceil(channels / 4) * 2)
-        self.channels = channels
-        inv_freq = 1.0 / (10000 ** (torch.arange(0, channels, 2).float() / channels))
+        self.channels = int(np.ceil(channels / 4) * 2)
+
+        # Calculate inverse frequencies
+        inv_freq = 1.0 / (10000 ** (torch.arange(0, self.channels, 2).float() / self.channels))
         self.register_buffer("inv_freq", inv_freq)
 
-    def forward(self, coords: torch.Tensor)-> torch.Tensor:
+    def forward(self, coords: torch.Tensor) -> torch.Tensor:
         """
-        :param coords: A 4d tensor of size (batch_size, ch, x, y)
-        :param coords: A 4d tensor of size (batch_size, num_coords, x, y)
-        :return: Positional Encoding Matrix of size (batch_size, x, y, ch)
+        Forward pass of the module.
+
+        :param coords: A 4D tensor of size (batch_size, num_coords, x, y) representing the coordinates.
+        :type coords: torch.Tensor
+        :return: Positional Encoding Matrix of size (batch_size, x, y, channels*2)
+        :rtype: torch.Tensor
+        :raises RuntimeError: If the input tensor is not 4D.
         """
         if len(coords.shape) != 4:
-            raise RuntimeError("The input tensor has to be 4d!")
+            raise RuntimeError("The input tensor must be 4D!")
 
-        batch_size, _, x, y = coords.shape
-        self.cached_penc = None
-        pos_x = coords[:, 0, 0, :].type(self.inv_freq.type())  # batch, width
-        pos_y = coords[:, 1, :, 0].type(self.inv_freq.type())  # batch, height
+        batch_size, _, height, width = coords.shape
+
+        # Extract x and y coordinates
+        # Shape: (batch_size, width)
+        pos_x = coords[:, 0, 0, :].type(self.inv_freq.type())
+        # Shape: (batch_size, height)
+        pos_y = coords[:, 1, :, 0].type(self.inv_freq.type())
+
+        # Calculate sin of scaled coordinates
+        # Shape: (batch_size, width, channels/2)
         sin_inp_x = torch.einsum("bi,j->bij", pos_x, self.inv_freq)
+        # Shape: (batch_size, height, channels/2)
         sin_inp_y = torch.einsum("bi,j->bij", pos_y, self.inv_freq)
-        emb_x = get_emb(sin_inp_x).unsqueeze(2)
-        emb_y = get_emb(sin_inp_y).unsqueeze(1)
-        emb = torch.zeros(
-            (batch_size, x, y, self.channels * 2), device=coords.device
-        ).type(coords.type())
-        emb[:, :, :, : self.channels] = emb_x
-        emb[:, :, :, self.channels : 2 * self.channels] = emb_y
 
+        # Get embeddings for x and y
+        # Shape: (batch_size, width, 1, channels)
+        emb_x = get_emb(sin_inp_x).unsqueeze(2)
+        # Shape: (batch_size, 1, height, channels)
+        emb_y = get_emb(sin_inp_y).unsqueeze(1)
+
+        # Combine x and y embeddings
+        # Shape: (batch_size, height, width, channels*2)
+        emb = torch.zeros((batch_size, height, width, self.channels * 2),
+                          device=coords.device).type(coords.type())
+        emb[:, :, :, :self.channels] = emb_x
+        emb[:, :, :, self.channels:2*self.channels] = emb_y
         return emb
 
 class NeRF_embedding(nn.Module):
@@ -280,21 +307,21 @@ class NeRF_embedding(nn.Module):
 
 
 class CyclicalEmbedding(nn.Module):
-    def __init__(self, frequencies: list = [12, 31, 24, 60]):
+    def __init__(self, frequencies: List[int] = [12, 31, 24, 60]):
         super().__init__()
         self.frequencies = frequencies
         self.dim = len(self.frequencies) * 2
 
-    def forward(self, time_coords: torch.Tensor):
+    def forward(self, time_series_data: torch.Tensor) -> Float[torch.Tensor, "batch_size, time_steps, n_time_series"]:
         """
         Args:
-            time_coords (torch.Tensor): Time coordinates of shape [B, T, C, H, W]
+            time_series_data (torch.Tensor): Time coordinates of shape [B, T, C, H, W]
         """
         embeddings = []
         for i, frequency in enumerate(self.frequencies):
             embeddings += [
-                torch.sin(2 * torch.pi * time_coords[:, :, i] / frequency),
-                torch.cos(2 * torch.pi * time_coords[:, :, i] / frequency),
+                torch.sin(2 * torch.pi * time_series_data[:, :, i] / frequency),
+                torch.cos(2 * torch.pi * time_series_data[:, :, i] / frequency),
             ]
         embeddings = torch.stack(embeddings, axis=2)
         return embeddings

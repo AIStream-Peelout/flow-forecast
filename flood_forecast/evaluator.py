@@ -335,7 +335,7 @@ def infer_on_torch_model(
                            forecast_start_idx, history, datetime_start)
 
 
-def handle_laxer_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
+def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
                     history, datetime_start):
     targ = False
     decoder_params = None

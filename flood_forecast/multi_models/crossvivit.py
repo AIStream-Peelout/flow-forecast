@@ -8,7 +8,7 @@ import torch
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 from torch import einsum, nn
-from jaxtyping import Float
+from jaxtyping import Float, Bool
 from flood_forecast.transformer_xl.attn import (
     SelfAttention,
     CrossAttention,
@@ -18,7 +18,7 @@ from flood_forecast.transformer_xl.attn import (
 )
 from flood_forecast.transformer_xl.data_embedding import (
     PositionalEncoding2D,
-    AxialRotaryEmbedding,
+    AxialRotaryEmbedding, CyclicalEmbedding,
 )
 
 
@@ -258,7 +258,7 @@ class RoCrossViViT(nn.Module):
         self,
         image_size: Union[List[int], Tuple[int]],
         patch_size: Union[List[int], Tuple[int]],
-        time_coords_encoder: nn.Module,
+        time_coords_encoder: CyclicalEmbedding,
         dim: int = 128,
         depth: int = 4,
         heads: int = 4,
@@ -282,13 +282,18 @@ class RoCrossViViT(nn.Module):
         axial_kwargs: Dict[str, Any] = {},
     ):
         """
-        The CrossViViT model from the CrossVIVIT paper. This model is based on the Arxiv paper: https://arxiv.org/abs/2103.14899
+        The CrossViViT model from the CrossVIVIT paper. This model is based on the Arxiv paper: https://arxiv.org/abs/2103.14899.
+        In order to simplify understanding we have included comments in the forward pass detailing the different sections of the
+        paper that the code corresponds to.
         :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
         (120, 120), 120.
         :type image_size: Union[List[int], Tuple[int], int]
-        :param patch_size: The patch size defined can be defined either as a list or a tuple (e.g. [8, 8]) this could allow
+        :param patch_size: The patch size defined can be defined either as a list or a tuple (e.g. [8, 8]) this could allow.
         you to have patches of varying sizes such as (8, 16).
         :type patch_size: Union[List[int], Tuple[int]]
+        :param time_coords_encoder: The time coordinates encoder to use for the model.
+        :type time_coords_encoder: CyclicalEmbedding
+        :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         """
 
         super().__init__()
@@ -410,10 +415,11 @@ class RoCrossViViT(nn.Module):
             nn.Linear(dim, num_mlp_heads),
         )
 
-    def random_masking(self, x, mask_ratio):
+    @staticmethod
+    def random_masking(x, mask_ratio):
         """
         Perform per-sample random masking by per-sample shuffling.
-        Per-sample shuffling is done by argsort random noise.
+        Per-sample shuffling is done by arg-sort random noise.
         x: [N, L, D], sequence
         """
         N, L, D = x.shape  # batch, length, dim
@@ -434,100 +440,136 @@ class RoCrossViViT(nn.Module):
         # generate the binary mask: 0 is keep, 1 is remove
         mask = torch.ones([N, L], device=x.device)
         mask[:, :len_keep] = 0
-        # unshuffle to get the binary mask
+        # un-shuffle to get the binary mask
         mask = torch.gather(mask, dim=1, index=ids_restore)
 
         return x_masked, mask, ids_restore, ids_keep
 
     def forward(
         self,
-        video_ctx: torch.Tensor,
-        ctx_coords: torch.Tensor,
-        ts: torch.Tensor,
-        ts_coords: torch.Tensor,
-        time_coords: torch.Tensor,
-        mask: bool = True,
-    ) -> Tuple[Float[torch.Tensor, "batch_size image_dim num_mlp_heads"], Float[torch.Tensor, "batch_size image_dim num_mlp_heads"], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]]]:
+        video_context: Float[torch.Tensor, "batch time ctx_channels height width"],
+        context_coords: Float[torch.Tensor, "batch 2 height width"],
+        timeseries: Float[torch.Tensor, "batch time ts_channels"],
+        timeseries_spatial_coordinates: Float[torch.Tensor, "batch 2 1 1"],
+        ts_positional_encoding: Float[torch.Tensor, "batch time time_encoding_dim height width"],
+        apply_masking: Bool[torch.Tensor, "1"] = True,
+    ) -> Tuple[
+        Float[torch.Tensor, "batch time num_mlp_heads out_dim"],
+        Float[torch.Tensor, "batch time num_mlp_heads"],
+        Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]],
+        Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]]
+    ]:
         """
-        Args:
-            video_ctx (torch.Tensor): Context frames of shape [B, T, C, H, W]
-            ctx_coords (torch.Tensor): Coordinates of context frames of shape [B, 2, H, W]
-            ts (torch.Tensor): Station timeseries of shape [B, T, C]
-            ts_coords (torch.Tensor): Station coordinates of shape [B, 2, 1, 1]
-            time_coords (torch.Tensor): Time coordinates of shape [B, T, C, H, W]
-            mask (bool): Whether to mask or not. Useful for inference
-        Returns:
+        Forward pass of the RoCrossViViT model.
 
+        :param video_context: PyTorch tensor of the video context frames
+        :type video_context: Float[torch.Tensor, "batch time ctx_channels height width"]
+        :param context_coords: PyTorch tensor of coordinates of the context frames
+        :type context_coords: Float[torch.Tensor, "batch 2 height width"]
+        :param timeseries: The timeseries measurements
+        :type timeseries: Float[torch.Tensor, "batch time ts_channels"]
+        :param timeseries_spatial_coordinates: The coordinates of the station where the timeseries measurement was taken
+        :param ts_positional_encoding: Time coordinates
+        :param apply_masking: Whether to apply masking (useful for inference)
+        :return: Tuple of (outputs, quantile_mask, self_attention_scores, cross_attention_scores)
         """
-        B, T, _, H, W = video_ctx.shape
-        time_coords = self.time_coords_encoder(time_coords)
+        batch_size, time_steps, _, height, width = video_context.shape
+        # (Likely discussed in Section 3.1 or 3.2, where the authors describe input preprocessing)
+        encoded_time = self.time_coords_encoder(ts_positional_encoding)
 
-        video_ctx = torch.cat([video_ctx, time_coords], axis=2)
-        ts = torch.cat([ts, time_coords[..., 0, 0]], axis=-1)
+        # Concatenate encoded time to video context and timeseries
+        # (Likely discussed in Section 3.2, where the authors describe how different inputs are combined)
+        video_context_with_time = torch.cat([video_context, encoded_time], dim=2)
+        timeseries_with_time = torch.cat([timeseries, encoded_time[..., 0, 0]], dim=-1)
 
-        # Rearranges the video_ctx to the format
-        video_ctx = rearrange(video_ctx, "b t c h w -> (b t) c h w")
+        # Reshape video context for processing
+        # (Likely discussed in Section 3.2, where the authors describe the tokenization process)
+        flattened_video_context = rearrange(video_context_with_time, 'b t c h w -> (b t) c h w')
 
-        ctx_coords = repeat(ctx_coords, "b c h w -> (b t) c h w", t=T)
-        ts_coords = repeat(ts_coords, "b c h w -> (b t) c h w", t=T)
-        src_enc_pos_emb = self.enc_pos_emb(ctx_coords)
-        tgt_pos_emb = self.enc_pos_emb(ts_coords)
+        # Repeat coordinates for each time step
+        # (Likely discussed in Section 3.1, where the authors describe how spatial information is incorporated)
+        repeated_context_coords = repeat(context_coords, 'b c h w -> (b t) c h w', t=time_steps)
+        repeated_ts_coords = repeat(timeseries_spatial_coordinates, 'b c h w -> (b t) c h w', t=time_steps)
 
-        video_ctx = self.to_patch_embedding(video_ctx)  # BT, N, D
+        # Generate positional embeddings
+        # (Likely discussed in Section 3.1, subsection on Rotary Positional Embedding)
+        context_pos_embedding = self.enc_pos_emb(repeated_context_coords)
+        timeseries_pos_embedding = self.enc_pos_emb(repeated_ts_coords)
+
+        # Embed video context
+        # (Likely discussed in Section 3.2, subsection on context encoding)
+        embedded_video_context = self.to_patch_embedding(flattened_video_context)
+
+        # Apply positional encoding
+        # (Likely discussed in Section 3.1, subsection on positional encoding types)
         if self.pe_type == "learned":
-            video_ctx = video_ctx + self.pe_ctx
+            embedded_video_context = embedded_video_context + self.pe_ctx
         elif self.pe_type == "sine":
-            pe = self.pe_ctx(ctx_coords)
-            pe = rearrange(pe, "b h w c -> b (h w) c")
-            video_ctx = video_ctx + pe
-        if self.ctx_masking_ratio > 0 and mask:
-            p = self.ctx_masking_ratio * random.random()
-            video_ctx, _, ids_restore, ids_keep = self.random_masking(video_ctx, p)
-            src_enc_pos_emb = tuple(
-                torch.gather(
-                    pos_emb,
-                    dim=1,
-                    index=ids_keep.unsqueeze(-1).repeat(1, 1, pos_emb.shape[-1]),
-                )
-                for pos_emb in src_enc_pos_emb
-            )
-        latent_ctx, self_attention_scores = self.ctx_encoder(video_ctx, src_enc_pos_emb)
+            pe = self.pe_ctx(repeated_context_coords)
+            pe = rearrange(pe, 'b h w c -> b (h w) c')
+            embedded_video_context = embedded_video_context + pe
 
-        ts = self.ts_embedding(ts)
-        if self.ts_masking_ratio > 0 and mask:
-            p = self.ts_masking_ratio * random.random()
-            ts, _, ids_restore, ids_keep = self.random_masking(ts, p)
-            mask_tokens = self.ts_mask_token.repeat(ts.shape[0], T - ts.shape[1], 1)
-            ts = torch.cat([ts, mask_tokens], dim=1)
-            ts = torch.gather(
-                ts, dim=1, index=ids_restore.unsqueeze(-1).repeat(1, 1, ts.shape[2])
+        # Apply masking to video context if specified
+        # (Likely discussed in Section 3.2, subsection on regularization techniques)
+        if self.ctx_masking_ratio > 0 and apply_masking:
+            mask_ratio = self.ctx_masking_ratio * torch.rand(1).item()
+            embedded_video_context, _, _, keep_indices = self.random_masking(embedded_video_context, mask_ratio)
+            context_pos_embedding = tuple(
+                torch.gather(pos_emb, dim=1, index=keep_indices.unsqueeze(-1).repeat(1, 1, pos_emb.shape[-1]))
+                for pos_emb in context_pos_embedding
             )
 
-        latent_ts = self.ts_encoder(ts)
-        latent_ts = rearrange(latent_ts, "b t c -> (b t) c").unsqueeze(1)
+        # Encode video context
+        # (Likely discussed in Section 3.2, subsection on context encoding)
+        encoded_context, self_attention_scores = self.ctx_encoder(embedded_video_context, context_pos_embedding)
 
+        # Embed and potentially mask timeseries
+        # (Likely discussed in Section 3.2, subsection on timeseries encoding)
+        embedded_timeseries = self.ts_embedding(timeseries_with_time)
+        if self.ts_masking_ratio > 0 and apply_masking:
+            mask_ratio = self.ts_masking_ratio * torch.rand(1).item()
+            embedded_timeseries, _, restore_indices, _ = self.random_masking(embedded_timeseries, mask_ratio)
+            mask_tokens = self.ts_mask_token.repeat(embedded_timeseries.shape[0],
+                                                    time_steps - embedded_timeseries.shape[1], 1)
+            embedded_timeseries = torch.cat([embedded_timeseries, mask_tokens], dim=1)
+            embedded_timeseries = torch.gather(
+                embedded_timeseries, dim=1,
+                index=restore_indices.unsqueeze(-1).repeat(1, 1, embedded_timeseries.shape[2])
+            )
+
+        # Encode timeseries
+        # (Likely discussed in Section 3.2, subsection on timeseries encoding)
+        encoded_timeseries = self.ts_encoder(embedded_timeseries)
+        encoded_timeseries = rearrange(encoded_timeseries, 'b t c -> (b t) c').unsqueeze(1)
+
+        # Apply positional encoding to encoded timeseries
+        # (Likely discussed in Section 3.1, subsection on positional encoding types)
         if self.pe_type == "learned":
-            latent_ts = latent_ts + self.pe_ts
+            encoded_timeseries = encoded_timeseries + self.pe_ts
         elif self.pe_type == "sine":
-            pe = self.pe_ts(ts_coords)
-            pe = rearrange(pe, "b h w c -> b (h w) c")
-            latent_ts = latent_ts + pe
-        latent_ts, cross_attention_scores = self.mixer(
-            latent_ctx, latent_ts, src_enc_pos_emb, tgt_pos_emb
+            pe = self.pe_ts(repeated_ts_coords)
+            pe = rearrange(pe, 'b h w c -> b (h w) c')
+            encoded_timeseries = encoded_timeseries + pe
+
+        # Mix context and timeseries
+        # (Likely discussed in Section 3.2, subsection on cross-attention or mixing)
+        mixed_timeseries, cross_attention_scores = self.mixer(
+            encoded_context, encoded_timeseries, context_pos_embedding, timeseries_pos_embedding
         )
-        latent_ts = latent_ts.squeeze(1)
-        latent_ts = self.ts_enctodec(rearrange(latent_ts, "(b t) c -> b t c", b=B))
+        mixed_timeseries = mixed_timeseries.squeeze(1)
+        decoder_input = self.ts_enctodec(rearrange(mixed_timeseries, '(b t) c -> b t c', b=batch_size))
 
-        y = self.temporal_transformer(latent_ts)
+        # Apply temporal transformer
+        # (Likely discussed in Section 3.2, subsection on temporal modeling)
+        transformed_timeseries = self.temporal_transformer(decoder_input)
 
-        # Handles the multiple MLP heads
-        outputs = []
-        for i in range(self.num_mlp_heads):
-            mlp = self.mlp_heads[i]
-            output = mlp(y)
-            outputs.append(output)
-        outputs = torch.stack(outputs, dim=2)
+        # Generate outputs for each MLP head
+        # (Likely discussed in Section 3.3, subsection on output generation)
+        outputs = torch.stack([mlp(transformed_timeseries) for mlp in self.mlp_heads], dim=2)
 
-        quantile_mask = self.quantile_masker(rearrange(y.detach(), "b t c -> b c t"))
+        # Generate quantile mask
+        # (Likely discussed in Section 3.3, subsection on uncertainty estimation)
+        quantile_mask = self.quantile_masker(rearrange(transformed_timeseries.detach(), 'b t c -> b c t'))
 
-        return (outputs, quantile_mask, self_attention_scores, cross_attention_scores)
+        return outputs, quantile_mask, self_attention_scores, cross_attention_scores
+
