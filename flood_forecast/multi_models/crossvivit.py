@@ -560,7 +560,7 @@ class RoCrossViViT(nn.Module):
         decoder_input = self.ts_enctodec(rearrange(mixed_timeseries, '(b t) c -> b t c', b=batch_size))
 
         # Apply temporal transformer
-        # (Likely discussed in Section 3.2, subsection on temporal modeling)
+        # (Discussed in Section 3.2, subsection on temporal modeling)
         transformed_timeseries = self.temporal_transformer(decoder_input)
 
         # Generate outputs for each MLP head
@@ -568,7 +568,7 @@ class RoCrossViViT(nn.Module):
         outputs = torch.stack([mlp(transformed_timeseries) for mlp in self.mlp_heads], dim=2)
 
         # Generate quantile mask
-        # (Likely discussed in Section 3.3, subsection on uncertainty estimation)
+        # (Discussed in Section 3.3, subsection on uncertainty estimation)
         quantile_mask = self.quantile_masker(rearrange(transformed_timeseries.detach(), 'b t c -> b c t'))
 
         return outputs, quantile_mask, self_attention_scores, cross_attention_scores

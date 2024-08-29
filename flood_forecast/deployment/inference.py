@@ -14,15 +14,15 @@ import pandas as pd
 
 
 class InferenceMode(object):
-    def __init__(self, forecast_steps: int, n_samp: int, model_params, csv_path: Union[str, pd.DataFrame], weight_path,
+    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params, csv_path: Union[str, pd.DataFrame], weight_path,
                  wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
         :param forecast_steps: Number of time-steps to forecast (doesn't have to be hours)
         :type forecast_steps: int
-        :param num_prediction_samples: Number of prediction samples
+        :param num_prediction_samples: The number of prediction samples
         :type num_prediction_samples: int
-        :param model_params: A dictionary of model parameters (ideally this should come from saved JSON config file)
+        :param model_params: A dictionafry of model parameters (ideally this should come from saved JSON config file)
         :type model_params: Dict
         :param csv_path: Path to the CSV test file you want to be used for inference or a Pandas dataframe.
         :type csv_path: str
@@ -43,7 +43,7 @@ class InferenceMode(object):
             s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
             self.inference_params["dataset_params"]["scaling"] = s
         self.inference_params["hours_to_forecast"] = forecast_steps
-        self.inference_params["num_prediction_samples"] = n_samp
+        self.inference_params["num_prediction_samples"] = num_prediction_samples
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)

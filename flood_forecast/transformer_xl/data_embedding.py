@@ -312,7 +312,7 @@ class CyclicalEmbedding(nn.Module):
         self.frequencies = frequencies
         self.dim = len(self.frequencies) * 2
 
-    def forward(self, time_series_data: torch.Tensor) -> Float[torch.Tensor, "batch_size, time_steps, n_time_series"]:
+    def forward(self, time_series_data: torch.Tensor) -> Float[torch.Tensor, "batch_size time_steps n_time_series"]:
         """
         Args:
             time_series_data (torch.Tensor): Time coordinates of shape [B, T, C, H, W]
