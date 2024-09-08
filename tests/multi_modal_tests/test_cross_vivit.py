@@ -12,12 +12,12 @@ class TestCrossVivVit(unittest.TestCase):
             patch_size=(8, 8),
             time_coords_encoder=CyclicalEmbedding(),
             ctx_channels=12,
-            ts_channels=12,
+            num_time_series=12,
             dim=128,
             depth=4,
             heads=4,
             mlp_ratio=4,
-            ts_length=10,
+            forecast_history=10,
             out_dim=1,
             dropout=0.0,
             axial_kwargs={"max_freq": 12}
@@ -30,7 +30,7 @@ class TestCrossVivVit(unittest.TestCase):
         # Coordinates with format [B, 2, H, W]
         coords = torch.rand(5, 2, 32, 32)
         output = positional_encoding(coords)
-        self.assertEqual(output.shape, (5, 32, 32, 128))
+        self.assertEqual(output.shape, (5, 32, 32, 4))
 
     def test_vivit_model(self):
         self.vivit_model = VisionTransformer(128, 5, 8, 128, 128, [512, 512, 512], dropout=0.1)
@@ -46,14 +46,20 @@ class TestCrossVivVit(unittest.TestCase):
             ts_coords (torch.Tensor): Station coordinates of shape [B, 2, 1, 1]
             time_coords (torch.Tensor): Time coordinates of shape [B, T, C, H, W]
             mask (bool): Whether to mask or not. Useful for inference.
+        video_context: Float[torch.Tensor, "batch time ctx_channels height width"],
+        context_coords: Float[torch.Tensor, "batch 2 height width"],
+        timeseries: Float[torch.Tensor, "batch time num_time_series"],
+        timeseries_spatial_coordinates: Float[torch.Tensor, "batch 2 1 1"],
+        ts_positional_encoding
         """
         # Construct a context tensor this tensor will
         ctx_tensor = torch.rand(5, 10, 12, 120, 120)
         ctx_coords = torch.rand(5, 2, 120, 120)
         ts = torch.rand(5, 10, 12)
-        time_coords = torch.rand(5, 10, 12, 120, 120)
+        time_coords1 = torch.rand(5, 10, 4, 120, 120)
         ts_coords = torch.rand(5, 2, 1, 1)
-        x = self.crossvivit(ctx_tensor, ctx_coords, ts, ts_coords, time_coords=time_coords, mask=True)
+        x = self.crossvivit(video_context=ctx_tensor, context_coords=ctx_coords, timeseries=ts, timeseries_spatial_coordinates=ts_coords,
+                            ts_positional_encoding=time_coords1)
         self.assertEqual(x[0].shape, (1, 1000))
 
     def test_self_attention_dims(self):

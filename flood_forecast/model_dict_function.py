@@ -28,7 +28,7 @@ from torchtsmixer import TSMixerExt
 
 
 """
-Utility dictionaries to map a string to a class.
+Utility dictionaries to map a string to a class in the flood_forecast package.
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,

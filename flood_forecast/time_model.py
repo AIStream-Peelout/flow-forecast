@@ -29,7 +29,7 @@ class TimeSeriesModel(ABC):
             test_data: str,
             params: Dict):
         """
-        Initializes the TimeSeriesModel class with certain attributes
+        Initializes the TimeSeriesModel class with certain attributes.
         :param model_base: The name of the model to load. This should be a key in the model_dict in the
         pytorch_model_dict located in model_dict_function.py
         :type model_base: str
@@ -81,8 +81,9 @@ class TimeSeriesModel(ABC):
     @abstractmethod
     def save_model(self, output_path: str):
         """
-        Saves a model to a specific path along with a configuration report
-        of the parameters and data info.
+        Saves a model to a specific path along with a configuration report of the parameters and data info.
+        :param output_path: The path to save the model to (should be a directory)
+        :type output_path: str
         """
         raise NotImplementedError
 
@@ -101,6 +102,9 @@ class TimeSeriesModel(ABC):
                 wandb.config.update({"gcs_m_path_" + str(epoch) + file_type: online_path})
 
     def wandb_init(self):
+        """
+        Initializes wandb if the params dict contains the wandb key or if sweep is present.
+        """
         if self.params["wandb"]:
             wandb.init(
                 id=wandb.util.generate_id(),
@@ -287,8 +291,10 @@ class PyTorchForecast(TimeSeriesModel):
         return loader
 
 
-def scaling_function(start_end_params, dataset_params):
-    in_dataset_params = False
+def scaling_function(start_end_params: Dict, dataset_params: Dict) -> Dict:
+    """
+
+    """
     if "scaler" in dataset_params:
         in_dataset_params = "scaler"
     elif "scaling" in dataset_params:

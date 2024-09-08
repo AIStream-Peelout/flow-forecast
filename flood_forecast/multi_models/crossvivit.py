@@ -264,8 +264,8 @@ class RoCrossViViT(nn.Module):
         heads: int = 4,
         mlp_ratio: int = 4,
         ctx_channels: int = 3,
-        ts_channels: int = 3,
-        ts_length: int = 48,
+        num_time_series: int = 3,
+        forecast_history: int = 48,
         out_dim: int = 1,
         dim_head: int = 64,
         dropout: float = 0.0,
@@ -288,7 +288,7 @@ class RoCrossViViT(nn.Module):
         :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
         (120, 120), 120.
         :type image_size: Union[List[int], Tuple[int], int]
-        :param patch_size: The patch size defined can be defined either as a list or a tuple (e.g. [8, 8]) this could allow.
+        :param patch_size: The patch size defined can be defined either as a list or a tuple (e.g. [8, 8]) this could allow
         you to have patches of varying sizes such as (8, 16).
         :type patch_size: Union[List[int], Tuple[int]]
         :param time_coords_encoder: The time coordinates encoder to use for the model.
@@ -308,7 +308,7 @@ class RoCrossViViT(nn.Module):
         ], f"pe_type must be 'rope', 'sine', 'learned' or None but you provided {pe_type}"
         self.time_coords_encoder = time_coords_encoder
         self.ctx_channels = ctx_channels
-        self.ts_channels = ts_channels
+        self.ts_channels = num_time_series
         if hasattr(self.time_coords_encoder, "dim"):
             self.ctx_channels += self.time_coords_encoder.dim
             self.ts_channels += self.time_coords_encoder.dim
@@ -374,7 +374,7 @@ class RoCrossViViT(nn.Module):
 
         self.ts_encoder = Transformer(
             dim,
-            ts_length,
+            forecast_history,
             depth,
             heads,
             dim_head,
@@ -384,7 +384,7 @@ class RoCrossViViT(nn.Module):
         self.ts_enctodec = nn.Linear(dim, decoder_dim)
         self.temporal_transformer = Transformer(
             decoder_dim,
-            ts_length,
+            forecast_history,
             decoder_depth,
             decoder_heads,
             decoder_dim_head,
@@ -447,11 +447,11 @@ class RoCrossViViT(nn.Module):
 
     def forward(
         self,
-        video_context: Float[torch.Tensor, "batch time ctx_channels height width"],
+        video_context: Float[torch.Tensor, "batch time_steps ctx_channels height width"],
         context_coords: Float[torch.Tensor, "batch 2 height width"],
-        timeseries: Float[torch.Tensor, "batch time ts_channels"],
+        timeseries: Float[torch.Tensor, "batch time_steps num_time_series"],
         timeseries_spatial_coordinates: Float[torch.Tensor, "batch 2 1 1"],
-        ts_positional_encoding: Float[torch.Tensor, "batch time time_encoding_dim height width"],
+        ts_positional_encoding: Float[torch.Tensor, "batch time_steps time_encoding_dim height width"],
         apply_masking: Bool[torch.Tensor, "1"] = True,
     ) -> Tuple[
         Float[torch.Tensor, "batch time num_mlp_heads out_dim"],
@@ -462,14 +462,18 @@ class RoCrossViViT(nn.Module):
         """
         Forward pass of the RoCrossViViT model.
 
-        :param video_context: PyTorch tensor of the video context frames
-        :type video_context: Float[torch.Tensor, "batch time ctx_channels height width"]
-        :param context_coords: PyTorch tensor of coordinates of the context frames
+        :param video_context: PyTorch tensor of the video context frames. It will have shape [B, T, C, H, W] where B is
+        the batch_size, T is the number of time steps, C is the number of channels (generally 3 red, green, and blue),
+        H is the height of the image and W is the width image.
+        :type video_context: Float[torch.Tensor, "batch time_steps ctx_channels height width"]
+        :param context_coords: PyTorch tensor of coordinates of the context frames.
         :type context_coords: Float[torch.Tensor, "batch 2 height width"]
-        :param timeseries: The timeseries measurements
-        :type timeseries: Float[torch.Tensor, "batch time ts_channels"]
+        :param timeseries: The timeseries measurements themselves.
+        :type timeseries: Float[torch.Tensor, "batch time num_time_series"]
         :param timeseries_spatial_coordinates: The coordinates of the station where the timeseries measurement was taken
-        :param ts_positional_encoding: Time coordinates
+        :param ts_positional_encoding: Time coordinates for the temporal component of the time series (e.g. month, day,
+         hour, minute). Therefore, shape will be [batch_size, time_steps, 4, height, width]. As the time encoding dim
+         will be 4.
         :param apply_masking: Whether to apply masking (useful for inference)
         :return: Tuple of (outputs, quantile_mask, self_attention_scores, cross_attention_scores)
         """

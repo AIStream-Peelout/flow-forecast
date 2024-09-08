@@ -244,15 +244,18 @@ class PositionalEncoding2D(nn.Module):
         inv_freq = 1.0 / (10000 ** (torch.arange(0, self.channels, 2).float() / self.channels))
         self.register_buffer("inv_freq", inv_freq)
 
-    def forward(self, coords: torch.Tensor) -> torch.Tensor:
+    def forward(self, coords: Float[torch.Tensor, "batch_size x y channels"]) -> Float[torch.Tensor, "batch_size height width channels"]:
         """
-        Forward pass of the module.
+        Forward pass of the PositionalEncoding2D module.
 
         :param coords: A 4D tensor of size (batch_size, num_coords, x, y) representing the coordinates.
         :type coords: torch.Tensor
         :return: Positional Encoding Matrix of size (batch_size, x, y, channels*2)
         :rtype: torch.Tensor
         :raises RuntimeError: If the input tensor is not 4D.
+
+        :return a positional encoding for the input coordinate tensor also.
+        :rtype: Float[torch.Tensor, "batch_size height width channels"]
         """
         if len(coords.shape) != 4:
             raise RuntimeError("The input tensor must be 4D!")
@@ -308,14 +311,19 @@ class NeRF_embedding(nn.Module):
 
 class CyclicalEmbedding(nn.Module):
     def __init__(self, frequencies: List[int] = [12, 31, 24, 60]):
+        """
+        Creates a cyclical embedding for time series data.
+        """
         super().__init__()
         self.frequencies = frequencies
         self.dim = len(self.frequencies) * 2
 
     def forward(self, time_series_data: torch.Tensor) -> Float[torch.Tensor, "batch_size time_steps n_time_series"]:
         """
-        Args:
-            time_series_data (torch.Tensor): Time coordinates of shape [B, T, C, H, W]
+        :param time_series_data: A tensor of the time series data [batch_size, time_steps, n_time_series]
+        :type time_series_data: torch.Tensor
+        :return: The embeddings of the time series data in cyclical form [batch_size, time_steps, n_time_series, dim]
+        :rtype: torch.Tensor
         """
         embeddings = []
         for i, frequency in enumerate(self.frequencies):
