@@ -5,6 +5,7 @@ from math import sqrt
 from einops import rearrange, repeat
 import torch.nn.functional as F
 from torch import einsum
+from typing import Tuple
 
 
 class TriangularCausalMask:
@@ -198,15 +199,24 @@ class FullAttention(nn.Module):
         factor=5,
         scale=None,
         attention_dropout=0.1,
-        output_attention=False,
     ):
+        """
+        The full attention mechanism currently used by the Informer and ITransformer models.
+        :param mask_flag: Whether to mask the attention mechanism.
+        :type mask_flag: bool
+        :param factor: The factor to use in the attention mechanism.
+        :type factor: int
+        :param scale: The scale to use in the attention mechanism.
+        :type scale: Union[float, None]
+        :param attention_dropout: The dropout to use in the attention mechanism.
+        :type attention_dropout: float
+        """
         super(FullAttention, self).__init__()
         self.scale = scale
         self.mask_flag = mask_flag
-        self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
+    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None) -> Tuple[torch.Tensor, torch.Tensor]:
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
         scale = self.scale or 1.0 / sqrt(E)
@@ -222,10 +232,7 @@ class FullAttention(nn.Module):
         A = self.dropout(torch.softmax(scale * scores, dim=-1))
         V = torch.einsum("bhls,bshd->blhd", A, values)
 
-        if self.output_attention:
-            return (V.contiguous(), A)
-        else:
-            return (V.contiguous(), None)
+        return V.contiguous(), A
 
 
 # Code implementation from https://github.com/zhouhaoyi/Informer2020
@@ -467,7 +474,7 @@ class SelfAttention(nn.Module):
         """
         The self-attention mechanism used in the CrossVIVIT model. It is currently not used in other models and could
         likely be consolidated with those self-attention mechanisms.
-        :param dim: [description]
+        :param dim: The input dimension of the sequence.
         :type dim: [type]
         :param heads: [description]
         :type heads: [type]
@@ -487,7 +494,7 @@ class SelfAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, x: torch.Tensor, pos_emb: torch.Tensor):
+    def forward(self, x: torch.Tensor, pos_emb: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
             x: Sequence of shape [B, N, D]
@@ -502,7 +509,7 @@ class SelfAttention(nn.Module):
         )
 
         if self.use_rotary:
-            # Used to map dimensions from dimension. Currently, getting (512, 128) when expecting 3-D tensor.
+            # Used to map dimensions from dimension
             sin, cos = map(
                 lambda t: repeat(t, "b n d -> (b h) n d", h=self.heads), pos_emb
             )

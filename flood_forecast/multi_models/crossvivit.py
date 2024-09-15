@@ -23,8 +23,9 @@ from flood_forecast.transformer_xl.data_embedding import (
 
 
 class Attention(nn.Module):
-    def __init__(self, dim, heads=8, dim_head=64, dropout=0.0):
+    def __init__(self, dim: int, heads: int = 8, dim_head: int = 64, dropout: float = 0.0):
         """
+        The attention mechanism for CrossVIVIT model.
 
         """
         super().__init__()
@@ -280,6 +281,7 @@ class RoCrossViViT(nn.Module):
         decoder_heads: int = 6,
         decoder_dim_head: int = 128,
         axial_kwargs: Dict[str, Any] = {},
+        video_cat_dim: int = 1,
     ):
         """
         The CrossViViT model from the CrossVIVIT paper. This model is based on the Arxiv paper: https://arxiv.org/abs/2103.14899.
@@ -294,6 +296,11 @@ class RoCrossViViT(nn.Module):
         :param time_coords_encoder: The time coordinates encoder to use for the model.
         :type time_coords_encoder: CyclicalEmbedding
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
+        :type dim: int
+        :param depth: The number of transformer blocks to create. Commonly set to four for most tasks.
+        :type depth: int
+        :param heads: The number of heads in the multi-head-attention mechanism. Usually set to a multiple of eight.
+        :type heads: int
         """
 
         super().__init__()
@@ -319,6 +326,7 @@ class RoCrossViViT(nn.Module):
         self.ts_masking_ratio = ts_masking_ratio
         self.num_mlp_heads = num_mlp_heads
         self.pe_type = pe_type
+        self.video_cat_dim = video_cat_dim
 
         for i in range(2):
             ims = self.image_size[i]
@@ -483,7 +491,7 @@ class RoCrossViViT(nn.Module):
 
         # Concatenate encoded time to video context and timeseries
         # (Likely discussed in Section 3.2, where the authors describe how different inputs are combined)
-        video_context_with_time = torch.cat([video_context, encoded_time], dim=2)
+        video_context_with_time = torch.cat([video_context, encoded_time], dim=self.video_cat_dim)
         timeseries_with_time = torch.cat([timeseries, encoded_time[..., 0, 0]], dim=-1)
 
         # Reshape video context for processing

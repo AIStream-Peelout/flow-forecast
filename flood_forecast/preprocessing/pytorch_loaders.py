@@ -266,6 +266,7 @@ class CSVTestLoader(CSVDataLoader):
         """
         :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame
         A data loader for the test data.
+        :type df_path: str
         """
         if "file_path" not in kwargs:
             kwargs["file_path"] = df_path
@@ -280,6 +281,8 @@ class CSVTestLoader(CSVDataLoader):
         print(df_path)
         self.forecast_total = forecast_total
         # TODO these are antiquated delete them
+        self.use_real_precip = use_real_precip
+        self.use_real_temp = use_real_temp
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"

@@ -32,8 +32,7 @@ def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
 ) -> Tuple[pd.DataFrame, float]:
     """
-    Function to compute the baseline MSE
-    by using the mean value from the train data.
+    Function to compute the baseline MSE by using the mean value from the train data.
     """
     total_length = len(river_flow_df.index)
     train_river_data = river_flow_df[: total_length - hours_forecast]
@@ -44,14 +43,6 @@ def stream_baseline(
         test_river_data[forecast_column], test_river_data["predicted_baseline"]
     )
     return test_river_data, round(mse_baseline, ndigits=3)
-
-
-def plot_r2(river_flow_preds: pd.DataFrame) -> float:
-    """
-    We assume at this point river_flow_preds already has
-    a predicted_baseline and a predicted_model column
-    """
-    pass
 
 
 def get_model_r2_score(

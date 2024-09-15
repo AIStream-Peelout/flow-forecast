@@ -20,6 +20,7 @@ class TestCrossVivVit(unittest.TestCase):
             forecast_history=10,
             out_dim=1,
             dropout=0.0,
+            video_cat_dim=2,
             axial_kwargs={"max_freq": 12}
         )
     def test_positional_encoding_forward(self):
@@ -60,7 +61,7 @@ class TestCrossVivVit(unittest.TestCase):
         ts_coords = torch.rand(5, 2, 1, 1)
         x = self.crossvivit(video_context=ctx_tensor, context_coords=ctx_coords, timeseries=ts, timeseries_spatial_coordinates=ts_coords,
                             ts_positional_encoding=time_coords1)
-        self.assertEqual(x[0].shape, (1, 1000))
+        self.assertEqual(x[0].shape, (5, 10, 1, 1))
 
     def test_self_attention_dims(self):
         """
@@ -77,6 +78,7 @@ class TestCrossVivVit(unittest.TestCase):
         coords = torch.rand(5, 2, 32, 32)
         output = nerf_embedding(coords)
         self.assertEqual(output.shape, (5, 32, 32, 128))
+
 
 if __name__ == '__main__':
     unittest.main()
