@@ -56,8 +56,8 @@ class ITransformer(nn.Module):
             [
                 EncoderLayer(
                     AttentionLayer(
-                        FullAttention(mask_flag=False, factor=factor, attention_dropout=dropout,
-                                      ), d_model=d_model, n_heads=n_heads),
+                        FullAttention(False, factor, attention_dropout=dropout,
+                                      output_attention=output_attention), d_model, n_heads),
                     d_model,
                     d_ff,
                     dropout=dropout,
