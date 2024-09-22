@@ -80,8 +80,8 @@ class FlowAttention(nn.Module):
         kv = keys.transpose(-2, -1) @ (values * normalizer_col_refine[:, :, :, None])
         x = (
             (
-                ((queries @ kv) * normalizer_row[:, :, :, None])
-                * normalizer_row_refine[:, :, :, None]
+                ((queries @ kv) * normalizer_row[:, :, :, None]) *
+                normalizer_row_refine[:, :, :, None]
             )
             .transpose(1, 2)
             .contiguous()
@@ -167,8 +167,8 @@ class FlashAttention(nn.Module):
 
                 mi_new = torch.maximum(m_block_ij, mi)
                 li_new = (
-                    torch.exp(mi - mi_new) * li
-                    + torch.exp(m_block_ij - mi_new) * l_block_ij
+                    torch.exp(mi - mi_new) * li +
+                    torch.exp(m_block_ij - mi_new) * l_block_ij
                 )
 
                 O_BLOCKS[i] = (li / li_new) * torch.exp(mi - mi_new) * Oi + (

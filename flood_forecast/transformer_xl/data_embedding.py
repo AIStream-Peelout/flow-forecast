@@ -244,7 +244,8 @@ class PositionalEncoding2D(nn.Module):
         inv_freq = 1.0 / (10000 ** (torch.arange(0, self.channels, 2).float() / self.channels))
         self.register_buffer("inv_freq", inv_freq)
 
-    def forward(self, coords: Float[torch.Tensor, "batch_size x y channels"]) -> Float[torch.Tensor, "batch_size height width channels"]:
+    def forward(self, coords: Float[torch.Tensor, "batch_size x y channels"]
+                ) -> Float[torch.Tensor, "batch_size height width channels"]:
         """
         Forward pass of the PositionalEncoding2D module.
 
@@ -285,8 +286,9 @@ class PositionalEncoding2D(nn.Module):
         emb = torch.zeros((batch_size, height, width, self.channels * 2),
                           device=coords.device).type(coords.type())
         emb[:, :, :, :self.channels] = emb_x
-        emb[:, :, :, self.channels:2*self.channels] = emb_y
+        emb[:, :, :, self.channels:2 * self.channels] = emb_y
         return emb
+
 
 class NeRF_embedding(nn.Module):
     def __init__(self, n_layers: int = 5):

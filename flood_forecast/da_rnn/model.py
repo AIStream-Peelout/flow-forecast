@@ -37,7 +37,6 @@ class DARNN(nn.Module):
             gru_lstm=True,
             probabilistic=False,
             final_act=None):
-
         """For model benchmark information see link on side https://rb.gy/koozff
 
         :param n_time_series: Number of time series present in input

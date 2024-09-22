@@ -317,6 +317,7 @@ class NegativeLogLikelihood(torch.nn.Module):
     target -> True y
     output -> predicted distribution
     """
+
     def __init__(self):
         super().__init__()
 

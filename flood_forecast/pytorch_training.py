@@ -93,7 +93,6 @@ def train_transformer_style(
         forward_params: Dict = {},
         model_filepath: str = "model_save",
         class2=False) -> None:
-
     """Function to train any PyTorchForecast model
 
     :param model:  A properly wrapped PyTorchForecast model

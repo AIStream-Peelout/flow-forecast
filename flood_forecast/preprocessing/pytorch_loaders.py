@@ -234,7 +234,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
                 idx2 = va[self.series_id_col].iloc[0]
                 va_returned = va[va.columns.difference([self.series_id_col], sort=False)]
                 t = torch.Tensor(va_returned.iloc[idx: self.forecast_history + idx].values)[:, 1:]
-                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:] # noqa
+                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:]  # noqa
                 src_list[self.unique_dict[idx2]] = t
                 targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
@@ -355,6 +355,7 @@ class CSVTestLoader(CSVDataLoader):
             len(self.df.index) - self.forecast_history - self.forecast_total - 1
         )
 
+
 class AEDataloader(CSVDataLoader):
     def __init__(
             self,
@@ -433,7 +434,7 @@ class GeneralClassificationLoader(CSVDataLoader):
         :param params: The standard dictionary for a dataloader (see CSVDataLoader)
         :type params: Dict
         :param n_classes: The number of classes in the problem
-        """ # noqa
+        """  # noqa
         self.n_classes = n_classes
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
@@ -455,7 +456,7 @@ class GeneralClassificationLoader(CSVDataLoader):
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
         if casted_shit > self.n_classes:
-            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes))  # noqa
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
@@ -624,7 +625,7 @@ class VariableSequenceLength(CSVDataLoader):
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
         if casted_shit > self.n_classes - 1:  # -1 because counting starts at zero
-            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes))  # noqa
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
@@ -669,7 +670,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         super().__init__(series_id_col, main_params, return_method, return_all)
         print("forecast_total is: " + str(forecast_total))
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, forecast_total, **main_params) for loader_1 in self.df_orig_list] # noqa
+        self.csv_test_loaders = [CSVTestLoader(loader_1, forecast_total, **main_params) for loader_1 in self.df_orig_list]  # noqa
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []

@@ -284,12 +284,12 @@ def infer_on_torch_model(
         df_prediction_arr_1 = []
 
         for i in range(0, len(vals[0])):
-            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0], datetime_start=datetime_start) # noqa
+            df_train_and_test, end_tensor, history_length, forecast_start_idx, csv_test_loader, df_prediction = handle_later_ev(model, vals[0][i][1], vals[1][i], model.params, csv_series_id_loader, multi_params, vals[0][i][2], vals[0][i][0], datetime_start=datetime_start)  # noqa
             df_train_and_test_arr.append(df_train_and_test)
             end_tensor_arr.append(end_tensor)
             forecast_start_idx_arr.append(forecast_start_idx)
             df_prediction_arr_1.append(df_prediction)
-        return df_train_and_test_arr, end_tensor_arr, history_length, forecast_start_idx_arr, csv_test_loader, df_prediction_arr_1 # noqa
+        return df_train_and_test_arr, end_tensor_arr, history_length, forecast_start_idx_arr, csv_test_loader, df_prediction_arr_1  # noqa
     else:
         csv_test_loader = CSVTestLoader(
             test_csv_path,
@@ -419,7 +419,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
             multi_params=1
         )
         end_tenor_arr.append(end_tensor)
-    return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, [] # noqa
+    return data, end_tenor_arr, model.params["dataset_params"]["forecast_history"], forecast_start_idx, csv_series_id_loader, []  # noqa
 
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,

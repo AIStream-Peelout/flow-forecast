@@ -171,7 +171,6 @@ class VisionTransformer(nn.Module):
         :param src: Source sequence. By this point the shape of the code will be
         :type src: Float[torch.Tensor, "batch_t_steps variable_sequence_length model_dim"]
         :param src_pos_emb: Positional embedding of source sequence's tokens of shape [batch_t_steps, variable_sequence_length, model_dim/2]
-
         """
 
         attention_scores = {}

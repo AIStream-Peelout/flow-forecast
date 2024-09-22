@@ -14,8 +14,8 @@ import pandas as pd
 
 
 class InferenceMode(object):
-    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params, csv_path: Union[str, pd.DataFrame], weight_path,
-                 wandb_proj: str = None, torch_script=False):
+    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params,
+                 csv_path: Union[str, pd.DataFrame], weight_path, wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
         :param forecast_steps: Number of time-steps to forecast (doesn't have to be hours)
