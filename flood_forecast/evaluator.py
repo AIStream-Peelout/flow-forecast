@@ -31,9 +31,7 @@ from flood_forecast.temporal_decoding import decoding_function
 def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
 ) -> Tuple[pd.DataFrame, float]:
-    """
-    Function to compute the baseline MSE by using the mean value from the train data.
-    """
+    """Function to compute the baseline MSE by using the mean value from the train data."""
     total_length = len(river_flow_df.index)
     train_river_data = river_flow_df[: total_length - hours_forecast]
     test_river_data = river_flow_df[total_length - hours_forecast:]
@@ -51,10 +49,7 @@ def get_model_r2_score(
     forecast_column: str,
     hours_forecast=336,
 ):
-    """
-
-    model_evaluate_function should call any necessary preprocessing
-    """
+    """model_evaluate_function should call any necessary preprocessing."""
     test_river_data, baseline_mse = stream_baseline(river_flow_df, forecast_column)
 
 
@@ -76,10 +71,8 @@ def evaluate_model(
     inference_params: Dict,
     eval_log: Dict,
 ) -> Tuple[Dict, pd.DataFrame, int, pd.DataFrame]:
-    """
-    A function to evaluate a model. Called automatically at end of training.
-    Can be imported for continuing to evaluate a model in other places as well.
-
+    """A function to evaluate a model. Called automatically at end of training. Can be imported for continuing to evaluate
+    a model in other places as well.
 
     .. highlight:: python
     .. code-block:: python
@@ -225,8 +218,8 @@ def infer_on_torch_model(
     probabilistic: bool = False,
     criterion_params: Dict = None
 ) -> Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]:
-    """
-    Function to handle both test evaluation and inference on a test data-frame.
+    """Function to handle both test evaluation and inference on a test data-frame.
+
     :param model: The time series model present in the model zoo
     :param test_csv_path: The path to the test data-frame
     :return:
@@ -424,7 +417,7 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
-    """Handles the CI confidence interval
+    """Handles the CI confidence interval.
 
     :param prediction_samples: The number of predictions to generate
     :type prediction_samples: torch.Tensor
@@ -489,7 +482,7 @@ def generate_predictions(
     targs=False,
     multi_params: int = 1
 ) -> torch.Tensor:
-    """A function to generate the actual model prediction
+    """A function to generate the actual model prediction.
 
     :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
@@ -551,7 +544,7 @@ def generate_predictions_non_decoded(
     forecast_length: int,
     hours_to_forecast: int,
 ) -> torch.Tensor:
-    """Generates predictions for the models that do not use a decoder
+    """Generates predictions for the models that do not use a decoder.
 
     :param model: A PyTorchForecast
     :type model: Type[TimeSeriesModel]
@@ -682,9 +675,7 @@ def generate_prediction_samples(
     multi_params=1,
     targs=False
 ) -> np.ndarray:
-    """
-    Generates
-    """
+    """Generates."""
     pred_samples = []
     std_dev_samples = []
     probabilistic = False

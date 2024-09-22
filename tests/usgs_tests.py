@@ -19,9 +19,7 @@ class DataQualityTests(unittest.TestCase):
         self.assertLess(min_flow, 1600)
 
     def test_tz_interpolate_fix(self):
-        """
-        Additional function to test data interpolation
-        """
+        """Additional function to test data interpolation."""
         file_path = os.path.join(self.test_data_path, "river_test_sm.csv")
         test_d = pd.read_csv(file_path)
         revised_df = fix_timezones(test_d)

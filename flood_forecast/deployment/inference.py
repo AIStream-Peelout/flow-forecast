@@ -50,7 +50,7 @@ class InferenceMode(object):
             wandb.config.update(model_params, allow_val_change=True)
 
     def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
-        """Performs inference on a CSV file at a specified date-time
+        """Performs inference on a CSV file at a specified date-time.
 
         :param some_date: The date you want inference to begin on.
         :param csv_path: A path to a CSV you want to perform inference on, defaults to None
@@ -92,13 +92,13 @@ class InferenceMode(object):
         return df, tensor, history, forecast_start, test, samples
 
     def infer_now_classification(self, data=None, over_lap_seq=True, save_buck=None, save_name=None, batch_size=1):
-        """Function to preform classification/anomaly detection on sequences in real-time
+        """Function to preform classification/anomaly detection on sequences in real-time.
+
         :param data: The data to perform inference on
         :type data: Union[pd.DataFrame, str], optional
         :param over_lap_seq: Whether to increment by one throughout the df or by sequence length
         :type over_lap_seq: bool,
         :param batch_size: The batch size to use, defaults to 1
-
         """
         if data is not None:
             dataset_params = self.model.params["dataset_params"].copy()
@@ -149,7 +149,7 @@ class InferenceMode(object):
 
 
 def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchForecast:
-    """Function to convert PyTorch model to torch script and save
+    """Function to convert PyTorch model to torch script and save.
 
     :param model: The PyTorchForecast model you wish to convert
     :type model: PyTorchForecast
@@ -173,7 +173,7 @@ def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchFo
 
 
 def convert_to_onnx():
-    """Converts a model to ONNX"""
+    """Converts a model to ONNX."""
     pass
 
 

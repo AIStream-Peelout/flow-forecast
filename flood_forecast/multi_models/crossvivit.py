@@ -1,6 +1,4 @@
-"""
-Adapted from: https://github.com/lucidrains/vit-pytorch/blob/main/vit_pytorch/rvt.py
-"""
+"""Adapted from: https://github.com/lucidrains/vit-pytorch/blob/main/vit_pytorch/rvt.py."""
 
 import random
 from typing import List, Tuple, Union, Any, Dict
@@ -27,10 +25,7 @@ class Attention(nn.Module):
     def __init__(
         self, dim: int, heads: int = 8, dim_head: int = 64, dropout: float = 0.0
     ):
-        """
-        The attention mechanism for CrossVIVIT model.
-
-        """
+        """The attention mechanism for CrossVIVIT model."""
         super().__init__()
         inner_dim = dim_head * heads
         project_out = not (heads == 1 and dim_head == dim)
@@ -109,6 +104,7 @@ class VisionTransformer(nn.Module):
         """The Video Vision Transformer (e.g. VIVIT) of the CrossVIVIT model. This model is based on the Arxiv paper:
         https://arxiv.org/abs/2103.15691. The below implementation has a few specific CrossVIVIT specific parameters
         like whether to use the rotary embedding.
+
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         :type dim: int
         :param depth: The number of transformer blocks to create. Commonly set to four for most tasks.
@@ -197,8 +193,8 @@ class CrossTransformer(nn.Module):
         use_rotary: bool = True,
         use_glu: bool = True,
     ):
-        """
-        Computes the Cross-Attention between the source and target sequences.
+        """Computes the Cross-Attention between the source and target sequences.
+
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         :type dim: int
         """
@@ -235,9 +231,9 @@ class CrossTransformer(nn.Module):
         src_pos_emb: torch.Tensor,
         tgt_pos_emb: torch.Tensor,
     ):
-        """
-        Performs the following computation in each layer:
-            1. Self-Attention on the source sequence
+        """Performs the following computation in each layer:
+
+        1. Self-Attention on the source sequence
             2. FFN on the source sequence
             3. Cross-Attention between target and source sequence
             4. FFN on the target sequence
@@ -287,10 +283,10 @@ class RoCrossViViT(nn.Module):
         axial_kwargs: Dict[str, Any] = {},
         video_cat_dim: int = 1,
     ):
-        """
-        The CrossViViT model from the CrossVIVIT paper. This model is based on the Arxiv paper: https://arxiv.org/abs/2103.14899.
-        In order to simplify understanding we have included comments in the forward pass detailing the different sections of the
-        paper that the code corresponds to.
+        """The CrossViViT model from the CrossVIVIT paper. This model is based on the Arxiv paper:
+        https://arxiv.org/abs/2103.14899. In order to simplify understanding we have included comments in the forward pass
+        detailing the different sections of the paper that the code corresponds to.
+
         :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
         (120, 120), 120.
         :type image_size: Union[List[int], Tuple[int], int]
@@ -428,8 +424,8 @@ class RoCrossViViT(nn.Module):
 
     @staticmethod
     def random_masking(x, mask_ratio):
-        """
-        Perform per-sample random masking by per-sample shuffling.
+        """Perform per-sample random masking by per-sample shuffling.
+
         Per-sample shuffling is done by arg-sort random noise.
         x: [N, L, D], sequence
         """
@@ -474,8 +470,7 @@ class RoCrossViViT(nn.Module):
         Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]],
         Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]],
     ]:
-        """
-        Forward pass of the RoCrossViViT model.
+        """Forward pass of the RoCrossViViT model.
 
         :param video_context: PyTorch tensor of the video context frames. It will have shape [B, T, C, H, W] where B is
         the batch_size, T is the number of time steps, C is the number of channels (generally 3 red, green, and blue),

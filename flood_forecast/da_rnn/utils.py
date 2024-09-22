@@ -28,7 +28,6 @@ def setup_log(tag='VOC_TOPICS'):
 
 
 def save_or_show_plot(file_nm: str, save: bool, save_path=""):
-
     if save:
         plt.savefig(os.path.join(save_path, file_nm))
     else:

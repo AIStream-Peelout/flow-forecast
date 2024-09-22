@@ -29,9 +29,7 @@ class TestCrossVivVit(unittest.TestCase):
         )
 
     def test_positional_encoding_forward(self):
-        """
-        Test the positional encoding forward pass with a PositionalEncoding2D layer.
-        """
+        """Test the positional encoding forward pass with a PositionalEncoding2D layer."""
         positional_encoding = PositionalEncoding2D(channels=2)
         # Coordinates with format [B, 2, H, W]
         coords = torch.rand(5, 2, 32, 32)
@@ -39,9 +37,7 @@ class TestCrossVivVit(unittest.TestCase):
         self.assertEqual(output.shape, (5, 32, 32, 4))
 
     def test_vivit_model(self):
-        """
-        Tests the Vision Video Transformer VIVIT model with simulated image data.
-        """
+        """Tests the Vision Video Transformer VIVIT model with simulated image data."""
         self.vivit_model = VisionTransformer(
             dim=128, depth=5, heads=8, dim_head=128, mlp_dim=128, dropout=0.1
         )
@@ -51,9 +47,9 @@ class TestCrossVivVit(unittest.TestCase):
         assert out[0].shape == (5, 512, 128)
 
     def test_forward(self):
-        """
-        This tests the forward pass of the RoCrossVIVIT model from the CrossVIVIT paper.
-            ctx (torch.Tensor): Context frames of shape [batch_size, number_time_stamps, number_channels, height, wid] this r is a very long line
+        """This tests the forward pass of the RoCrossVIVIT model from the CrossVIVIT paper.
+
+        ctx (torch.Tensor): Context frames of shape [batch_size, number_time_stamps, number_channels, height, wid]
             ctx_coords (torch.Tensor): Coordinates of context frames of shape [B, 2, H, W]
             ts (torch.Tensor): Station timeseries of shape [B, T, C]
             ts_coords (torch.Tensor): Station coordinates of shape [B, 2, 1, 1]
@@ -81,22 +77,18 @@ class TestCrossVivVit(unittest.TestCase):
         self.assertEqual(x[0].shape, (5, 10, 1, 1))
 
     def test_self_attention_dims(self):
-        """
-        Test the self attention layer with the correct dimensions.
-        """
+        """Test the self attention layer with the correct dimensions."""
         self.self_attention = SelfAttention(dim=128, use_rotary=True)
         self.self_attention(
             torch.rand(5, 512, 128), (torch.rand(5, 512, 64), torch.rand(5, 512, 64))
         )
 
     def test_neRF_embedding(self):
-        """
-        Test the NeRF embedding layer.
-        """
+        """Test the NeRF embedding layer."""
         nerf_embedding = NeRF_embedding(n_layers=128)
         coords = torch.rand(5, 2, 32, 32)
         output = nerf_embedding(coords)
-        self.assertEqual(output.shape, (5, 32, 32, 128))
+        self.assertEqual(output.shape, (5, 512, 32, 32))
 
 
 if __name__ == "__main__":

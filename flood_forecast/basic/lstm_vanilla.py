@@ -2,9 +2,9 @@ import torch
 
 
 class LSTMForecast(torch.nn.Module):
-    """
-    A very simple baseline LSTM model that returns
-    an output sequence given a multi-dimensional input seq. Inspired by the StackOverflow link below.
+    """A very simple baseline LSTM model that returns an output sequence given a multi-dimensional input seq.
+
+    Inspired by the StackOverflow link below.
     https://stackoverflow.com/questions/56858924/multivariate-input-lstm-in-pytorch
     """
 

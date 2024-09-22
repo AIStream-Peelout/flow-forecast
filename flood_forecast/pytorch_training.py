@@ -43,7 +43,8 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
 
 
 def handle_meta_data(model: PyTorchForecast):
-    """A function to initialize models with meta-data
+    """A function to initialize models with meta-data.
+
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initial meta-representation
@@ -66,7 +67,8 @@ def handle_meta_data(model: PyTorchForecast):
 
 
 def make_crit(model_params: Dict) -> Union[torch.nn.Module, List]:
-    """A function to create the criterion for training from the parameters
+    """A function to create the criterion for training from the parameters.
+
     :param model_params: The training params Dict block in FF
     :type model_params: Dict
     """
@@ -93,7 +95,7 @@ def train_transformer_style(
         forward_params: Dict = {},
         model_filepath: str = "model_save",
         class2=False) -> None:
-    """Function to train any PyTorchForecast model
+    """Function to train any PyTorchForecast model.
 
     :param model:  A properly wrapped PyTorchForecast model
     :type model: PyTorchForecast
@@ -287,7 +289,7 @@ def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probab
 
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, m=1):
-    """Function for computing the loss
+    """Function for computing the loss.
 
     :param labels: The real values for the target. Shape can be variable but should follow (batch_size, time)
     :type labels: torch.Tensor
@@ -307,7 +309,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     :type m: int, optional
     :return: Returns the computed loss
     :rtype: float
-"""
+    """
     if isinstance(criterion, GaussianLoss):
         if len(output[0].shape) > 2:
             g_loss = GaussianLoss(output[0][:, :, 0], output[1][:, :, 0])
@@ -477,7 +479,7 @@ def compute_validation(validation_loader: DataLoader,
                        val_or_test="validation_loss",
                        probabilistic=False,
                        classification=False) -> float:
-    """Function to compute the validation loss metrics
+    """Function to compute the validation loss metrics.
 
     :param validation_loader: The data-loader of either validation or test-data
     :type validation_loader: DataLoader

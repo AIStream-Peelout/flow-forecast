@@ -6,7 +6,7 @@ import numpy as np
 
 
 class ScaledDotProductAttention(nn.Module):
-    ''' Scaled Dot-Product Attention '''
+    """Scaled Dot-Product Attention."""
 
     def __init__(self, temperature, attn_dropout=0.1):
         super().__init__()
@@ -27,7 +27,7 @@ class ScaledDotProductAttention(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
-    ''' Multi-Head Attention module '''
+    """Multi-Head Attention module."""
 
     def __init__(self, n_head, d_model, d_k, d_v, dropout=0.1):
         super().__init__()
@@ -81,7 +81,7 @@ class MultiHeadAttention(nn.Module):
 
 
 class PositionwiseFeedForward(nn.Module):
-    ''' A two-feed-forward-layer module '''
+    """A two-feed-forward-layer module."""
 
     def __init__(self, d_in, d_hid, dropout=0.1):
         super().__init__()
@@ -101,7 +101,7 @@ class PositionwiseFeedForward(nn.Module):
 
 
 class EncoderLayer(nn.Module):
-    ''' Compose with two layers '''
+    """Compose with two layers."""
 
     def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1):
         super(EncoderLayer, self).__init__()
@@ -119,7 +119,7 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    ''' Compose with three layers '''
+    """Compose with three layers."""
 
     def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1):
         super(DecoderLayer, self).__init__()
@@ -309,9 +309,7 @@ class DSANet(nn.Module):
     # MODEL SETUP
     # ---------------------
     def __build_model(self):
-        """
-        Layout model
-        """
+        """Layout model."""
         self.sgsf = Single_Global_SelfAttn_Module(
             window=self.window, n_multiv=self.n_multiv, n_kernels=self.n_kernels,
             w_kernel=self.w_kernel, d_k=self.d_k, d_v=self.d_v, d_model=self.d_model,
@@ -331,9 +329,7 @@ class DSANet(nn.Module):
     # TRAINING
     # ---------------------
     def forward(self, x):
-        """
-        No special modification required for lightning, define as you normally would
-        """
+        """No special modification required for lightning, define as you normally would."""
         sgsf_output, *_ = self.sgsf(x)
         slsf_output, *_ = self.slsf(x)
         sf_output = torch.cat((sgsf_output, slsf_output), 2)

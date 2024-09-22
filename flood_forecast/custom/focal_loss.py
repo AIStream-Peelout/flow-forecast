@@ -16,8 +16,8 @@ def focal_loss(
     reduction: str = 'none',
     eps: Optional[float] = None,
 ) -> torch.Tensor:
-    r"""Criterion that computes Focal loss.
-    According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+    r"""Criterion that computes Focal loss. According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     Where:
@@ -92,8 +92,8 @@ def focal_loss(
 
 
 class FocalLoss(nn.Module):
-    r"""Criterion that computes Focal loss.
-    According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+    r"""Criterion that computes Focal loss. According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     Where:
@@ -149,6 +149,7 @@ def binary_focal_loss_with_logits(
     eps: Optional[float] = None,
 ) -> torch.Tensor:
     r"""Function that computes Binary Focal loss.
+
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     where:
@@ -209,8 +210,8 @@ def binary_focal_loss_with_logits(
 
 
 class BinaryFocalLossWithLogits(nn.Module):
-    r"""Criterion that computes Focal loss.
-    According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+    r"""Criterion that computes Focal loss. According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     where:

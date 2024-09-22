@@ -4,8 +4,7 @@ import torch
 class VanillaGRU(torch.nn.Module):
     def __init__(self, n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float,
                  forecast_length=1, use_hidden=False, probabilistic=False):
-        """
-        Simple GRU to preform deep time series forecasting.
+        """Simple GRU to preform deep time series forecasting.
 
         :param n_time_series: The number of time series present in the data
         :type n_time_series int:
@@ -33,7 +32,7 @@ class VanillaGRU(torch.nn.Module):
         self.fc = torch.nn.Linear(hidden_dim, n_target)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward function for GRU
+        """Forward function for GRU.
 
         :param x: torch of shape
         :type model: torch.Tensor

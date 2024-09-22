@@ -21,17 +21,21 @@ def warmup_cosine(x, warmup=0.002):
 
 
 def warmup_constant(x, warmup=0.002):
-    """ Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
-        Learning rate is 1. afterwards. """
+    """Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
+
+    Learning rate is 1. afterwards.
+    """
     if x < warmup:
         return x / warmup
     return 1.0
 
 
 def warmup_linear(x, warmup=0.002):
-    """ Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th
-        (as provided to BertAdam) training step.
-        After `t_total`-th training step, learning rate is zero. """
+    """Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th (as provided to
+    BertAdam) training step.
+
+    After `t_total`-th training step, learning rate is zero.
+    """
     if x < warmup:
         return x / warmup
     return max((x - 1.) / (warmup - 1.), 0)
@@ -46,9 +50,7 @@ SCHEDULES = {
 
 class MASELoss(torch.nn.Module):
     def __init__(self, baseline_method):
-        """
-        This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)
-        """
+        """This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)"""
         super(MASELoss, self).__init__()
         self.method_dict = {"mean": lambda x, y: torch.mean(x, 1).unsqueeze(1).repeat(1, y[1], 1)}
         self.baseline_method = self.method_dict[baseline_method]
@@ -76,12 +78,12 @@ class MASELoss(torch.nn.Module):
 
 
 class RMSELoss(torch.nn.Module):
-    '''
-    Returns RMSE using:
+    """Returns RMSE using:
+
     target -> True y
     output -> Prediction by model
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
-    '''
+    """
 
     def __init__(self, variance_penalty=0.0):
         super().__init__()
@@ -105,11 +107,10 @@ class RMSELoss(torch.nn.Module):
 
 
 class MAPELoss(torch.nn.Module):
-    '''
-    Returns MAPE using:
-    target -> True y
-    output -> Predtion by model
-    '''
+    """Returns MAPE using:
+
+    target -> True y output -> Predtion by model
+    """
 
     def __init__(self, variance_penalty=0.0):
         super().__init__()
@@ -124,12 +125,12 @@ class MAPELoss(torch.nn.Module):
 
 
 class PenalizedMSELoss(torch.nn.Module):
-    '''
-    Returns MSE using:
+    """Returns MSE using:
+
     target -> True y
     output -> Predtion by model
     source: https://discuss.pytorch.org/t/rmse-loss-function/16540/3
-    '''
+    """
 
     def __init__(self, variance_penalty=0.0):
         super().__init__()
@@ -144,9 +145,7 @@ class PenalizedMSELoss(torch.nn.Module):
 # Add custom loss function
 class GaussianLoss(torch.nn.Module):
     def __init__(self, mu=0, sigma=0):
-        """Compute the negative log likelihood of Gaussian Distribution
-        From https://arxiv.org/abs/1907.00235
-        """
+        """Compute the negative log likelihood of Gaussian Distribution From https://arxiv.org/abs/1907.00235."""
         super(GaussianLoss, self).__init__()
         self.mu = mu
         self.sigma = sigma
@@ -157,7 +156,7 @@ class GaussianLoss(torch.nn.Module):
 
 
 class QuantileLoss(torch.nn.Module):
-    """From https://medium.com/the-artificial-impostor/quantile-regression-part-2-6fdbc26b2629"""
+    """From https://medium.com/the-artificial-impostor/quantile-regression-part-2-6fdbc26b2629."""
 
     def __init__(self, quantiles):
         super().__init__()
@@ -181,6 +180,7 @@ class QuantileLoss(torch.nn.Module):
 
 class BertAdam(Optimizer):
     """Implements BERT version of Adam algorithm with weight decay fix.
+
     Params:
         lr: learning rate
         warmup: portion of t_total for the warmup, -1  means no warmup. Default: -1
@@ -232,6 +232,7 @@ class BertAdam(Optimizer):
 
     def step(self, closure=None):
         """Performs a single optimization step.
+
         Arguments:
             closure (callable, optional): A closure that reevaluates the model
                 and returns the loss.
@@ -313,18 +314,13 @@ class BertAdam(Optimizer):
 
 
 class NegativeLogLikelihood(torch.nn.Module):
-    """
-    target -> True y
-    output -> predicted distribution
-    """
+    """target -> True y output -> predicted distribution."""
 
     def __init__(self):
         super().__init__()
 
     def forward(self, output: torch.distributions, target: torch.Tensor):
-        """
-        calculates NegativeLogLikelihood
-        """
+        """calculates NegativeLogLikelihood."""
         return -output.log_prob(target).sum()
 
 

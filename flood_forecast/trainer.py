@@ -100,7 +100,7 @@ def handle_core_eval(trained_model, params: Dict, model_type: str):
 
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
-    """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
+    """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model.
 
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
@@ -193,8 +193,8 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
 
 
 def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
-    """Sklearn for whatever reason decided to only allow scaler params in the form of tuples
-    this was stupid so now we have to convert JSON list to tuple.
+    """Sklearn for whatever reason decided to only allow scaler params in the form of tuples this was stupid so now we
+    have to convert JSON list to tuple.
 
     :param scaling_params: A list of the scaling params
     :type training_conf: Dict
@@ -208,8 +208,9 @@ def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
 
 
 def main():
-    """
-    Main function which is called from the command line. Entrypoint for training all TS models.
+    """Main function which is called from the command line.
+
+    Entrypoint for training all TS models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")

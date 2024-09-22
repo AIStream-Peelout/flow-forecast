@@ -9,9 +9,7 @@ from flood_forecast.trainer import train_function, correct_stupid_sklearn_error
 class MultitTaskTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        """
-        Modules to test model inference.
-        """
+        """Modules to test model inference."""
         with open(os.path.join(os.path.dirname(__file__), "multi_decoder_test.json")) as a:
             cls.model_params = json.load(a)
         with open(os.path.join(os.path.dirname(__file__), "multitask_decoder.json")) as a:

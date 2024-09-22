@@ -6,9 +6,7 @@ from flood_forecast.transformer_xl.data_embedding import DataEmbedding_inverted
 
 
 class ITransformer(nn.Module):
-    """
-    Paper link: https://arxiv.org/abs/2310.06625.
-    """
+    """Paper link: https://arxiv.org/abs/2310.06625."""
 
     def __init__(self, forecast_history, forecast_length, d_model, embed, dropout, n_heads=8, use_norm=True,
                  e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=True, targs=1):
@@ -56,8 +54,7 @@ class ITransformer(nn.Module):
             [
                 EncoderLayer(
                     AttentionLayer(
-                        FullAttention(False, factor, attention_dropout=dropout,
-                                      output_attention=output_attention), d_model, n_heads),
+                        FullAttention(False, factor, attention_dropout=dropout), d_model, n_heads),
                     d_model,
                     d_ff,
                     dropout=dropout,

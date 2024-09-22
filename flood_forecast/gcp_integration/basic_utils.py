@@ -7,10 +7,8 @@ import os
 def get_storage_client(
     service_key_path: Optional[str] = None,
 ) -> storage.Client:
-    """
-    Utility function to return a properly authenticated GCS
-    storage client whether working in Colab, CircleCI, Dataverse, or other environments.
-    """
+    """Utility function to return a properly authenticated GCS storage client whether working in Colab, CircleCI,
+    Dataverse, or other environments."""
     if service_key_path is None:
         if os.environ["ENVIRONMENT_GCP"] == "Colab":
             return storage.Client(project=os.environ["GCP_PROJECT"])

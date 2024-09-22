@@ -28,8 +28,8 @@ class CSVDataLoader(Dataset):
         no_scale=False,
 
     ):
-        """
-        A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
+        """A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model.
+
         :param file_path: The path to the CSV file you wish to use (GCS compatible) or a Pandas dataframe.
         :param forecast_history: This is the length of the historical time series data you wish to
                                 utilize for forecasting
@@ -126,7 +126,7 @@ class CSVDataLoader(Dataset):
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
     ) -> torch.Tensor:
-        """Un-does the scaling of the data
+        """Un-does the scaling of the data.
 
         :param result_data: The data you want to unscale can handle multiple data types.
         :type result_data: Union[torch.Tensor, pd.Series, np.ndarray]
@@ -201,8 +201,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         print("unique dict")
 
     def __validate_data__in_df(self):
-        """Makes sure the data in the data-frame is the proper length for each series e
-        """
+        """Makes sure the data in the data-frame is the proper length for each series e."""
         if self.return_all_series:
             len_first = len(self.listed_vals[0])
             print("Length of first series is:" + str(len_first))
@@ -317,10 +316,7 @@ class CSVTestLoader(CSVDataLoader):
             return historical_rows.float(), all_rows_orig, target_idx_start
 
     def convert_real_batches(self, the_col: str, rows_to_convert):
-        """
-        A helper function to return properly divided precip and temp
-        values to be stacked with t forecasted cfs.
-        """
+        """A helper function to return properly divided precip and temp values to be stacked with t forecasted cfs."""
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
             the_column[
@@ -333,8 +329,7 @@ class CSVTestLoader(CSVDataLoader):
     def convert_history_batches(
         self, the_col: Union[str, List[str]], rows_to_convert: pd.DataFrame
     ):
-        """A helper function to return dataframe in batches of
-        size (history_len, num_features)
+        """A helper function to return dataframe in batches of size (history_len, num_features)
 
         Args:
             the_col (str): column names
@@ -370,9 +365,8 @@ class AEDataloader(CSVDataLoader):
             forecast_history=1,
             no_scale=True,
             sort_column=None):
-        """A data loader class for autoencoders. Overrides __len__ and __getitem__ from generic dataloader.
-           Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
-           Same parameters as before.
+        """A data loader class for autoencoders. Overrides __len__ and __getitem__ from generic dataloader. Also defaults
+        forecast_history and forecast_length to 1. Since AE will likely only use one row. Same parameters as before.
 
         :param file_path: The path to the file
         :type file_path: str
@@ -591,7 +585,7 @@ class TemporalTestLoader(CSVTestLoader):
 class VariableSequenceLength(CSVDataLoader):
     def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
                  n_classes=9 + 90):
-        """Enables eas(ier) loading of time-series with variable length data
+        """Enables eas(ier) loading of time-series with variable length data.
 
         :param series_marker_column: The column that dealinates when an example begins and ends
         :type series_marker_column: str
@@ -599,7 +593,6 @@ class VariableSequenceLength(CSVDataLoader):
         :type pad_length: int
         :param task: The specific task (e.g. classification, forecasting, auto_encode)
         :type task: str
-
         """
         super().__init__(**csv_loader_params)
         self.pad_length = pad_length
@@ -639,8 +632,7 @@ class VariableSequenceLength(CSVDataLoader):
             return the_seq.float(), the_seq.float()
 
     def pad_input_data(self, sequence: int):
-        """Pads a sequence to a specified length.
-        """
+        """Pads a sequence to a specified length."""
         if self.pad_length > sequence.shape[0]:
             pad_dim = self.pad_length - sequence.shape[0]
             return torch.nn.functional.pad(sequence, (0, 0, 0, pad_dim))

@@ -24,8 +24,8 @@ def make_data(
         "cfs",
         "temp",
         "precip"]) -> TrainData:
-    """
-    Returns full preprocessed data.
+    """Returns full preprocessed data.
+
     Does not split train/test that must be done later.
     """
     final_df = pd.read_csv(csv_path)

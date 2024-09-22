@@ -200,8 +200,8 @@ class FullAttention(nn.Module):
         scale=None,
         attention_dropout=0.1,
     ):
-        """
-        The full attention mechanism currently used by the Informer and ITransformer models.
+        """The full attention mechanism currently used by the Informer and ITransformer models.
+
         :param mask_flag: Whether to mask the attention mechanism.
         :type mask_flag: bool
         :param factor: The factor to use in the attention mechanism.
@@ -471,9 +471,9 @@ class SelfAttention(nn.Module):
         dropout: float = 0.0,
         use_rotary: bool = True,
     ):
-        """
-        The self-attention mechanism used in the CrossVIVIT model. It is currently not used in other models and could
+        """The self-attention mechanism used in the CrossVIVIT model. It is currently not used in other models and could
         likely be consolidated with those self-attention mechanisms.
+
         :param dim: The input dimension of the sequence.
         :type dim: [type]
         :param heads: [description]
@@ -542,8 +542,7 @@ class CrossAttention(nn.Module):
         dropout: float = 0.0,
         use_rotary: bool = True,
     ):
-        """
-        """
+        """"""
         super().__init__()
         inner_dim = dim_head * heads
         self.use_rotary = use_rotary

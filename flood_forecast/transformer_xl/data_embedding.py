@@ -27,8 +27,8 @@ class AxialRotaryEmbedding(nn.Module):
         self.register_buffer("scales", scales)
 
     def forward(self, coords: torch.Tensor):
-        """
-        Assumes that coordinates do not change throughout the batches.
+        """Assumes that coordinates do not change throughout the batches.
+
         Args:
             coords (torch.Tensor): Coordinates of shape [B, 2, H, W]
         """
@@ -94,7 +94,7 @@ class PositionalEmbedding(nn.Module):
 
 class TokenEmbedding(nn.Module):
     def __init__(self, c_in: int, d_model: int):
-        """Create the token embedding
+        """Create the token embedding.
 
         :param c_in: [description]
         :type c_in: [type]
@@ -110,7 +110,7 @@ class TokenEmbedding(nn.Module):
                 nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='leaky_relu')
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Create the token embedding
+        """Create the token embedding.
 
         :param x: The tensor passed to create the token embedding
         :type x: torch.Tensor
@@ -143,7 +143,7 @@ class FixedEmbedding(nn.Module):
 
 class TemporalEmbedding(nn.Module):
     def __init__(self, d_model, embed_type='fixed', lowest_level=4):
-        """A class to create
+        """A class to create.
 
         :param d_model: The model embedding dimension
         :type d_model: int
@@ -166,7 +166,8 @@ class TemporalEmbedding(nn.Module):
             setattr(self, list(lowest_level_map.keys())[i], list(lowest_level_map.values())[i])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Creates the datetime embedding component
+        """Creates the datetime embedding component.
+
         :param x: A PyTorch tensor of shape (batch_size, seq_len, n_feats).
         n_feats is formatted in the following manner.
         following way ()
@@ -217,16 +218,13 @@ class DataEmbedding_inverted(nn.Module):
 
 
 def get_emb(sin_inp):
-    """
-    Gets a base embedding for one dimension with sin and cos intertwined
-    """
+    """Gets a base embedding for one dimension with sin and cos intertwined."""
     emb = torch.stack((sin_inp.sin(), sin_inp.cos()), dim=-1)
     return torch.flatten(emb, -2, -1)
 
 
 class PositionalEncoding2D(nn.Module):
-    """
-    Applies 2D positional encoding to a 4D input tensor.
+    """Applies 2D positional encoding to a 4D input tensor.
 
     This module generates a positional encoding for 2D data (like images or feature maps)
     using a combination of sine and cosine functions at different frequencies.
@@ -246,8 +244,7 @@ class PositionalEncoding2D(nn.Module):
 
     def forward(self, coords: Float[torch.Tensor, "batch_size x y channels"]
                 ) -> Float[torch.Tensor, "batch_size height width channels"]:
-        """
-        Forward pass of the PositionalEncoding2D module.
+        """Forward pass of the PositionalEncoding2D module.
 
         :param coords: A 4D tensor of size (batch_size, num_coords, x, y) representing the coordinates.
         :type coords: torch.Tensor
@@ -296,10 +293,10 @@ class NeRF_embedding(nn.Module):
         self.n_layers = n_layers
         self.dim = self.n_layers * 4
 
-    def forward(self, spatial_coords: torch.Tensor):
+    def forward(self, spatial_coords: torch.Tensor) -> Float[torch.Tensor, "batch_size dim*4 height width"]:
         """
         Args:
-            spatial_coords (torch.Tensor): Spatial coordinates of shape [B, 2, H, W]
+            spatial_coords (torch.Tensor): Spatial coordinates of shape [B, H, W, D]
         """
         embeddings = []
         for i in range(self.n_layers):
@@ -313,9 +310,7 @@ class NeRF_embedding(nn.Module):
 
 class CyclicalEmbedding(nn.Module):
     def __init__(self, frequencies: List[int] = [12, 31, 24, 60]):
-        """
-        Creates a cyclical embedding for time series data.
-        """
+        """Creates a cyclical embedding for time series data."""
         super().__init__()
         self.frequencies = frequencies
         self.dim = len(self.frequencies) * 2

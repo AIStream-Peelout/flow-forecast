@@ -16,9 +16,10 @@ import wandb
 
 
 class TimeSeriesModel(ABC):
-    """
-    An abstract class used to handle different configurations of models + hyperparams for training, test, and predict
-    functions. This class assumes that data is already split into test train and validation at this point.
+    """An abstract class used to handle different configurations of models + hyperparams for training, test, and predict
+    functions.
+
+    This class assumes that data is already split into test train and validation at this point.
     """
 
     def __init__(
@@ -28,8 +29,8 @@ class TimeSeriesModel(ABC):
             validation_data: str,
             test_data: str,
             params: Dict):
-        """
-        Initializes the TimeSeriesModel class with certain attributes.
+        """Initializes the TimeSeriesModel class with certain attributes.
+
         :param model_base: The name of the model to load. This should be a key in the model_dict in the
         pytorch_model_dict located in model_dict_function.py
         :type model_base: str
@@ -60,8 +61,8 @@ class TimeSeriesModel(ABC):
 
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:
-        """
-        This function should load and return the model. This will vary based on the underlying framework used.
+        """This function should load and return the model. This will vary based on the underlying framework used.
+
         :param model_base: The name of the model to load
         :type model_base: str
         :param model_params: A dictionary of parameters to pass to the model
@@ -71,26 +72,23 @@ class TimeSeriesModel(ABC):
 
     @abstractmethod
     def make_data_load(self, data_path, params: Dict, loader_type: str) -> object:
-        """
-        Initializes a data loader based on the provided data_path.
-        This may be as simple as a pandas dataframe or as complex as
-        a custom PyTorch data loader.
+        """Initializes a data loader based on the provided data_path.
+
+        This may be as simple as a pandas dataframe or as complex as a custom PyTorch data loader.
         """
         raise NotImplementedError
 
     @abstractmethod
     def save_model(self, output_path: str):
-        """
-        Saves a model to a specific path along with a configuration report of the parameters and data info.
+        """Saves a model to a specific path along with a configuration report of the parameters and data info.
+
         :param output_path: The path to save the model to (should be a directory)
         :type output_path: str
         """
         raise NotImplementedError
 
     def upload_gcs(self, save_path: str, name: str, file_type: str, epoch=0, bucket_name=None):
-        """
-        Function to upload model checkpoints to GCS
-        """
+        """Function to upload model checkpoints to GCS."""
         if self.gcs_client:
             if bucket_name is None:
                 bucket_name = os.environ["MODEL_BUCKET"]
@@ -102,9 +100,7 @@ class TimeSeriesModel(ABC):
                 wandb.config.update({"gcs_m_path_" + str(epoch) + file_type: online_path})
 
     def wandb_init(self):
-        """
-        Initializes wandb if the params dict contains the wandb key or if sweep is present.
-        """
+        """Initializes wandb if the params dict contains the wandb key or if sweep is present."""
         if self.params["wandb"]:
             wandb.init(
                 id=wandb.util.generate_id(),
@@ -170,9 +166,7 @@ class PyTorchForecast(TimeSeriesModel):
         return model
 
     def save_model(self, final_path: str, epoch: int) -> None:
-        """
-        Function to save a model to a given file path
-        """
+        """Function to save a model to a given file path."""
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
@@ -193,9 +187,7 @@ class PyTorchForecast(TimeSeriesModel):
                 print(e.__traceback__)
 
     def __re_add_params__(self, start_end_params: Dict, dataset_params, data_path):
-        """
-        Function to re-add the params to the model
-        """
+        """Function to re-add the params to the model."""
         start_end_params["file_path"] = data_path
         start_end_params["forecast_history"] = dataset_params["forecast_history"]
         start_end_params["forecast_length"] = dataset_params["forecast_length"]
@@ -292,9 +284,7 @@ class PyTorchForecast(TimeSeriesModel):
 
 
 def scaling_function(start_end_params: Dict, dataset_params: Dict) -> Dict:
-    """
-
-    """
+    """"""
     if "scaler" in dataset_params:
         in_dataset_params = "scaler"
     elif "scaling" in dataset_params:

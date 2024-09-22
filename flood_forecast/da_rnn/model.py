@@ -37,7 +37,7 @@ class DARNN(nn.Module):
             gru_lstm=True,
             probabilistic=False,
             final_act=None):
-        """For model benchmark information see link on side https://rb.gy/koozff
+        """For model benchmark information see link on side https://rb.gy/koozff.
 
         :param n_time_series: Number of time series present in input
         :type n_time_series: int
@@ -91,8 +91,8 @@ class DARNN(nn.Module):
 
 
 def init_hidden(x, hidden_size: int) -> torch.autograd.Variable:
-    """
-    Train the initial value of the hidden state:
+    """Train the initial value of the hidden state:
+
     https://r2rt.com/non-zero-initial-states-for-recurrent-neural-networks.html
     """
     return Variable(torch.zeros(1, x.size(0), hidden_size)).to(x.device)

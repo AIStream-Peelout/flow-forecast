@@ -35,7 +35,7 @@ def create_feature(key: str, value: str, df: pd.DataFrame, dt_column: str):
 
 
 def feature_fix(preprocess_params: Dict, dt_column: str, df: pd.DataFrame):
-    """Adds temporal features
+    """Adds temporal features.
 
     :param preprocess_params: Dictionary of temporal parameters e.g. {"day":"numerical"}
     :type preprocess_params: Dict
@@ -64,7 +64,7 @@ def feature_fix(preprocess_params: Dict, dt_column: str, df: pd.DataFrame):
 
 
 def cyclical(df: pd.DataFrame, feature_column: str) -> pd.DataFrame:
-    """ A function to create cyclical encodings for Pandas data-frames.
+    """A function to create cyclical encodings for Pandas data-frames.
 
     :param df: A Pandas Dataframe where you want the dt encoded
     :type df: pd.DataFrame

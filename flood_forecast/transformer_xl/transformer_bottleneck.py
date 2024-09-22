@@ -1,6 +1,5 @@
-"""
-This code is based on huggingface,
-https://github.com/huggingface/pytorch-openai-transformer-lm/blob/master/model_pytorch.py
+"""This code is based on huggingface, https://github.com/huggingface/pytorch-openai-transformer-
+lm/blob/master/model_pytorch.py.
 
 MIT License
 
@@ -23,7 +22,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OFS CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 """
 # Arxiv Link https://arxiv.org/pdf/1907.00235.pdf
 
@@ -222,7 +220,7 @@ class Block(nn.Module):
 
 
 class TransformerModel(nn.Module):
-    """ Transformer model """
+    """Transformer model."""
 
     def __init__(self, n_time_series, n_head, sub_len, num_layer, n_embd,
                  forecast_history: int, dropout: float, scale_att, q_len, additional_params: Dict, seq_num=None):

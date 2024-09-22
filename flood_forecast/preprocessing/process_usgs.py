@@ -67,9 +67,7 @@ def df_label(usgs_text: str) -> str:
 
 
 def create_csv(file_path: str, params_names: dict, site_number: str):
-    """
-    Function that creates the final version of the CSV files .
-    """
+    """Function that creates the final version of the CSV files ."""
     df = pd.read_csv(file_path, sep="\t")
     for key, value in params_names.items():
         df[value] = df[key]

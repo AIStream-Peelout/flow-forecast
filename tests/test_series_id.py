@@ -26,8 +26,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.data_loader = CSVSeriesIDLoader("PLANT_ID", self.dataset_params, "r")
 
     def test_seriesid(self):
-        """Tests the series_id method a single item.
-        """
+        """Tests the series_id method a single item."""
         x, y = self.data_loader[0]
         self.assertIsInstance(x, dict)
         self.assertIsInstance(y, dict)
@@ -35,8 +34,7 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertEqual(x[1].shape[1], 3)
 
     def test_handle_series_id(self):
-        """Tests the handle_series_id method(s)
-        """
+        """Tests the handle_series_id method(s)"""
         mse1 = MSELoss()
         d1 = DataLoader(self.data_loader, batch_size=2)
         d = DecoderTransformer(3, 8, 4, 128, 20, 0.2, 1, {}, seq_num1=3, forecast_length=1)

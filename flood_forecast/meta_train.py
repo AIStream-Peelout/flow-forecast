@@ -6,7 +6,7 @@ from flood_forecast.time_model import PyTorchForecast
 
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
-    """ Function to train meta data-models"""
+    """Function to train meta data-models."""
     params["forward_params"] = {}
     dataset_params = params["dataset_params"]
     if "forecast_history" not in dataset_params:
@@ -23,8 +23,9 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
 
 
 def main():
-    """
-    Main meta training function which is called from the command line. Entrypoint for all AutoEncoder models.
+    """Main meta training function which is called from the command line.
+
+    Entrypoint for all AutoEncoder models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for model training")
     parser.add_argument("-p", "--params", help="Path to the model config file")
