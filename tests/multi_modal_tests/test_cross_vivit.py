@@ -53,7 +53,7 @@ class TestCrossVivVit(unittest.TestCase):
     def test_forward(self):
         """
         This tests the forward pass of the RoCrossVIVIT model from the CrossVIVIT paper.
-            ctx (torch.Tensor): Context frames of shape [batch_size, number_time_stamps, number_channels, height, wid] this is a very long line
+            ctx (torch.Tensor): Context frames of shape [batch_size, number_time_stamps, number_channels, height, wid] this r is a very long line
             ctx_coords (torch.Tensor): Coordinates of context frames of shape [B, 2, H, W]
             ts (torch.Tensor): Station timeseries of shape [B, T, C]
             ts_coords (torch.Tensor): Station coordinates of shape [B, 2, 1, 1]
