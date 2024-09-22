@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fed11ced-c777-4db5-9ac9-1c12dcf84a69" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.pre-commit-config.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flood_forecast/multi_models/crossvivit.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/multi_models/crossvivit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flood_forecast/preprocessing/pytorch_loaders.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/preprocessing/pytorch_loaders.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flood_forecast/pytorch_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/pytorch_training.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flood_forecast/transformer_xl/attn.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/transformer_xl/attn.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flood_forecast/transformer_xl/data_embedding.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/transformer_xl/data_embedding.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/mult_modal_tests/test_cross_vivit.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/mult_modal_tests/test_cross_vivit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/multi_modal_tests/test_cross_vivit.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/multi_modal_tests/test_cross_vivit.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,31 +34,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.executor": "Run",
-    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward.executor": "Run",
-    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding.executor": "Run",
-    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding_forward.executor": "Run",
-    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_self_attention_dims.executor": "Run",
-    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_vivit_model.executor": "Run",
-    "Python tests.Python tests for test_ro_crossvivit.TestRoCrossViViT.executor": "Run",
-    "Python tests.Python tests for test_variable_length.TestVariableLength.executor": "Run",
-    "Python tests.Python tests in test_cross_vivit.py.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.google.cloudcode.ide_session_index": "20240803_0000",
-    "git-widget-placeholder": "multimodal__models",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.stylelint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.stylelint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.black.configuration.BlackFormatterConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding_forward.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_self_attention_dims.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_vivit_model.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_ro_crossvivit.TestRoCrossViViT.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_variable_length.TestVariableLength.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_cross_vivit.py.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.google.cloudcode.ide_session_index&quot;: &quot;20240803_0000&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;multimodal__models&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.black.configuration.BlackFormatterConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward">
     <configuration name="Python tests for test_cross_vivit.TestCrossVivVit.test_forward" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="flow-forecast" />
@@ -176,24 +174,8 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/flood_forecast/multi_models/crossvivit.py</url>
-          <line>171</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/flood_forecast/multi_models/crossvivit.py</url>
-          <line>448</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/flow_forecast$.coverage" NAME=" Coverage Results" MODIFIED="1722743373763" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/mult_modal_tests" />
+    <SUITE FILE_PATH="coverage/flow_forecast$.coverage" NAME=" Coverage Results" MODIFIED="1726973631787" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/multi_modal_tests" />
     <SUITE FILE_PATH="coverage/flow_forecast$pytest_for_test_variable_length_TestVariableLength.coverage" NAME="pytest for test_variable_length.TestVariableLength Coverage Results" MODIFIED="1719601329459" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/flow_forecast$test_cross_vivit.coverage" NAME="test_cross_vivit Coverage Results" MODIFIED="1719601296779" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/mult_modal_tests" />
   </component>

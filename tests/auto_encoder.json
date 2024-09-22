@@ -1,4 +1,4 @@
-{                 
+{
     "model_name": "BasicAE",
     "model_type": "PyTorch",
     "model_params": {
@@ -17,7 +17,7 @@
        "valid_start":301,
        "valid_end": 401,
        "relevant_cols": ["cfs", "precip", "temp"],
-       "scaler": "StandardScaler", 
+       "scaler": "StandardScaler",
        "interpolate": false
     },
     "training_params":
@@ -32,7 +32,7 @@
        }
     },
     "GCS": false,
-    
+
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
@@ -45,4 +45,3 @@
 
    }
 }
-    

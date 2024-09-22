@@ -11,21 +11,21 @@ For additional tutorials and examples please see our [tutorials repository](http
 | Documentation | [![Documentation Status](https://readthedocs.org/projects/flow-forecast/badge/?version=latest)](https://flow-forecast.readthedocs.io/en/latest/)|
 | CodeCov| [![codecov](https://codecov.io/gh/AIStream-Peelout/flow-forecast/branch/master/graph/badge.svg)](https://codecov.io/gh/AIStream-Peelout/flow-forecast)|
 | CodeFactor| [![CodeFactor](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast/badge)](https://www.codefactor.io/repository/github/aistream-peelout/flow-forecast)|
-## Getting Started 
+## Getting Started
 
 Using the library
 1. Run `pip install flood-forecast`
 2. Detailed info on training models can be found on the [Wiki](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/364019713/Training+Models).
-3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview) 
+3. Check out our [Confluence Documentation](https://flow-forecast.atlassian.net/wiki/spaces/FF/overview)
 
-**Models currently supported** 
+**Models currently supported**
 
-1. Vanilla LSTM (LSTM): A basic LSTM that is suitable for multivariate time series forecasting and transfer learning. 
-2. Full transformer (SimpleTransformer in model_dict): The full original transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference. 
+1. Vanilla LSTM (LSTM): A basic LSTM that is suitable for multivariate time series forecasting and transfer learning.
+2. Full transformer (SimpleTransformer in model_dict): The full original transformer with all 8 encoder and decoder blocks. Requires passing the target in at inference.
 3. Simple Multi-Head Attention (MultiHeadSimple): A simple multi-head attention block and linear embedding layers. Suitable for transfer learning.
 4. Transformer with a linear decoder (CustomTransformerDecoder in model_dict): A transformer with n-encoder blocks (this is tunable) and a linear decoder. Suitable for forecasting, classification or anomaly detection.
-5. [DA-RNN](https://arxiv.org/abs/1704.02971): (DARNN) A well rounded model with which utilizes a LSTM + attention. 
-6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235) (called DecoderTransformer in model_dict): 
+5. [DA-RNN](https://arxiv.org/abs/1704.02971): (DARNN) A well rounded model with which utilizes a LSTM + attention.
+6. [Enhancing the Locality and Breaking the Memory Bottleneck of Transformer on Time Series Forecasting](https://arxiv.org/abs/1907.00235) (called DecoderTransformer in model_dict):
 7. [Transformer XL](https://arxiv.org/abs/1901.02860): Porting Transformer XL for time series.
 8. [Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436) (Informer)
 9. [DeepAR](https://arxiv.org/abs/1704.04110)
@@ -44,19 +44,19 @@ We have a number of models we are planning on releasing soon. [Please check our 
 
 **Integrations**
 
-[Google Cloud Platform](https://github.com/AIStream-Peelout/flow-forecast/wiki/Cloud-Provider-Integration) 
+[Google Cloud Platform](https://github.com/AIStream-Peelout/flow-forecast/wiki/Cloud-Provider-Integration)
 
 [Weights and Biases](https://www.wandb.com/)
 
-## Contributing 
+## Contributing
 
-For instructions on contributing please see our [contributions page](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/11403276/Contributing) and our [project board](https://github.com/AIStream-Peeloutt/flow-forecast/projects/5). 
+For instructions on contributing please see our [contributions page](https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/11403276/Contributing) and our [project board](https://github.com/AIStream-Peeloutt/flow-forecast/projects/5).
 
 
-## Historical River Flow Data  
+## Historical River Flow Data
 
-### Task 1 Stream Flow Forecasting 
-This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index. 
+### Task 1 Stream Flow Forecasting
+This task focuses on forecasting a stream's future flow/height (in either cfs or feet respectively) given factors such as current flow, temperature, and precipitation. In the future we plan on adding more variables that help with the stream flow prediction such as snow pack data and the surrounding soil moisture index.
 
 ### Task 2 Flood severity forecasting
 Task two focuses on predicting the severity of the flood based on the flood forecast, population information, and topography. Flood severity is defined based on several factors including the number of injuires, property damage, and crop damage.
@@ -64,7 +64,7 @@ Task two focuses on predicting the severity of the flood based on the flood fore
 If you use either the data or code from this repository please use the citation below. Additionally please cite the original authors of the models.
 ```
 @misc{godfried2020flowdb,
-      title={FlowDB a large scale precipitation, river, and flash flood dataset}, 
+      title={FlowDB a large scale precipitation, river, and flash flood dataset},
       author={Isaac Godfried and Kriti Mahajan and Maggie Wang and Kevin Li and Pranjalya Tiwari},
       year={2020},
       eprint={2012.11154},
@@ -72,4 +72,3 @@ If you use either the data or code from this repository please use the citation 
       primaryClass={cs.AI}
 }
 ```
- 

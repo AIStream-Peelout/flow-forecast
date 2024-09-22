@@ -1,13 +1,13 @@
 Inference
 =========================
 
-This API makes it easy to run inference on trained PyTorchForecast modules. To use this code you 
-need three main files: your model's configuration file, a CSV containing your data, and a path to 
+This API makes it easy to run inference on trained PyTorchForecast modules. To use this code you
+need three main files: your model's configuration file, a CSV containing your data, and a path to
 your model weights.
 
 .. code-block:: python
    :caption: example initialization
-   
+
    import json
    from datetime import datetime
    from flood_forecast.deployment.inference import InferenceMode
@@ -17,7 +17,7 @@ your model weights.
      config_test = json.load(y)
    infer_model = InferenceMode(336, 30, config_test, new_water_data_path, weight_path, "river")
 
-.. code-block:: python 
+.. code-block:: python
     :caption: example plotting
 
 .. automodule:: flood_forecast.deployment.inference

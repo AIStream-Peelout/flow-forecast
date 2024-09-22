@@ -1,11 +1,11 @@
-{                 
+{
     "model_name": "DecoderTransformer",
     "model_type": "PyTorch",
     "model_params": {
       "n_time_series":5,
       "n_head": 8,
       "forecast_history":5,
-      "n_embd": 1, 
+      "n_embd": 1,
       "num_layer": 5,
       "dropout": 0.000001,
       "q_len": 1,
@@ -30,13 +30,13 @@
        "test_end":400,
        "target_col": ["DAILY_YIELD"],
        "relevant_cols": ["DAILY_YIELD", "DC_POWER", "AC_POWER"],
-       "scaler": "RobustScaler", 
+       "scaler": "RobustScaler",
        "no_scale": true,
        "interpolate": false,
        "sort_column":"datetime",
        "feature_param":
        {"datetime_params":{
-          "hour":"cyclical" 
+          "hour":"cyclical"
        }}
     },
     "training_params":
@@ -51,7 +51,7 @@
        "batch_size":5
     },
     "GCS": false,
-   
+
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
@@ -62,10 +62,10 @@
    "inference_params":
    {
          "datetime_start":"2020-06-06",
-          "hours_to_forecast":4, 
+          "hours_to_forecast":4,
           "test_csv_path":"tests/test_data/solar_small.csv",
           "decoder_params":{
-            "decoder_function": "simple_decode", 
-            "unsqueeze_dim": 1} 
+            "decoder_function": "simple_decode",
+            "unsqueeze_dim": 1}
    }
 }

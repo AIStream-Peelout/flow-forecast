@@ -18,12 +18,15 @@ from flood_forecast.transformer_xl.attn import (
 )
 from flood_forecast.transformer_xl.data_embedding import (
     PositionalEncoding2D,
-    AxialRotaryEmbedding, CyclicalEmbedding,
+    AxialRotaryEmbedding,
+    CyclicalEmbedding,
 )
 
 
 class Attention(nn.Module):
-    def __init__(self, dim: int, heads: int = 8, dim_head: int = 64, dropout: float = 0.0):
+    def __init__(
+        self, dim: int, heads: int = 8, dim_head: int = 64, dropout: float = 0.0
+    ):
         """
         The attention mechanism for CrossVIVIT model.
 
@@ -99,9 +102,8 @@ class VisionTransformer(nn.Module):
         heads: int,
         dim_head: int,
         mlp_dim: int,
-        image_size: Union[List[int], Tuple[int], int],
         dropout: float = 0.0,
-        use_rotary: bool = True,
+        use_rope: bool = True,
         use_glu: bool = True,
     ):
         """The Video Vision Transformer (e.g. VIVIT) of the CrossVIVIT model. This model is based on the Arxiv paper:
@@ -117,19 +119,15 @@ class VisionTransformer(nn.Module):
         :type dim_head: int
         :param mlp_dim: The dimension that the multi-head perceptron should output.
         :type mlp_dim: int
-        :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
-        (120, 120), 120.
-        :type image_size: Union[List[int], Tuple[int], int]
         :param dropout: The amount of dropout to use throughout the model defaults to 0.0
         :type dropout: float, optional
-        :param use_rotary: Whether to use rotary positional embeddings, defaults to True
-        :type use_rotary: bool, optional
+        :param use_rope: Whether to use rotary positional embeddings, defaults to True
+        :type use_rope: bool, optional
         :param use_glu: Weather to use gated linear units , defaults to True
         :type use_glu: bool, optional
         """
 
         super().__init__()
-        self.image_size = image_size
 
         self.blocks = nn.ModuleList([])
 
@@ -144,7 +142,7 @@ class VisionTransformer(nn.Module):
                                 heads=heads,
                                 dim_head=dim_head,
                                 dropout=dropout,
-                                use_rotary=use_rotary,
+                                use_rotary=use_rope,
                             ),
                         ),
                         PreNorm(
@@ -157,16 +155,23 @@ class VisionTransformer(nn.Module):
 
     def forward(
         self,
-        src: Float[torch.Tensor, "batch_size image_dim context_length"],
-        src_pos_emb: Tuple[Float[torch.Tensor, "batch_size image_dim/2 context_length"], Float[torch.Tensor, "batch_size image_dim/2 context_length"]]
-    ) -> Tuple[Float[torch.Tensor, "batch_size image_dim context_length"], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]]]:
+        src: Float[torch.Tensor, "batch_size variable_sequence_length model_dim"],
+        src_pos_emb: Tuple[
+            Float[torch.Tensor, "batch_t_steps variable_sequence_length model_dim/2"],
+            Float[torch.Tensor, "batch_size image_dim/2 context_length"],
+        ],
+    ) -> Tuple[
+        Float[torch.Tensor, "batch_size image_dim context_length"],
+        dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]],
+    ]:
         """
         Performs the following computation in each layer:
             1. Self-Attention on the source sequence
             2. FFN on the source sequence.
-        Args:
-            src: Source sequence of shape [B, N, D].
-            src_pos_emb: Positional embedding tuple (sin, cos) of source sequence's tokens of shape [B, N, D]
+        :param src: Source sequence. By this point the shape of the code will be
+        :type src: Float[torch.Tensor, "batch_t_steps variable_sequence_length model_dim"]
+        :param src_pos_emb: Positional embedding of source sequence's tokens of shape [batch_t_steps, variable_sequence_length, model_dim/2]
+
         """
 
         attention_scores = {}
@@ -351,15 +356,14 @@ class RoCrossViViT(nn.Module):
         self.enc_pos_emb = AxialRotaryEmbedding(dim_head, freq_type, **axial_kwargs)
         self.ts_embedding = nn.Linear(self.ts_channels, dim)
         self.ctx_encoder = VisionTransformer(
-            dim,
-            depth,
-            heads,
-            dim_head,
-            dim * mlp_ratio,
-            image_size,
-            dropout,
-            pe_type == "rope",
-            use_glu,
+            dim=dim,
+            depth=depth,
+            heads=heads,
+            dim_head=dim_head,
+            mlp_dim=dim * mlp_ratio,
+            dropout=dropout,
+            use_rope=True if pe_type == "rope" else False,
+            use_glu=use_glu,
         )
         if pe_type == "learned":
             self.pe_ctx = nn.Parameter(torch.randn(1, num_patches, dim))
@@ -455,17 +459,21 @@ class RoCrossViViT(nn.Module):
 
     def forward(
         self,
-        video_context: Float[torch.Tensor, "batch time_steps ctx_channels height width"],
+        video_context: Float[
+            torch.Tensor, "batch time_steps ctx_channels height width"
+        ],
         context_coords: Float[torch.Tensor, "batch 2 height width"],
         timeseries: Float[torch.Tensor, "batch time_steps num_time_series"],
         timeseries_spatial_coordinates: Float[torch.Tensor, "batch 2 1 1"],
-        ts_positional_encoding: Float[torch.Tensor, "batch time_steps time_encoding_dim height width"],
+        ts_positional_encoding: Float[
+            torch.Tensor, "batch time_steps time_encoding_dim height width"
+        ],
         apply_masking: Bool[torch.Tensor, "1"] = True,
     ) -> Tuple[
         Float[torch.Tensor, "batch time num_mlp_heads out_dim"],
         Float[torch.Tensor, "batch time num_mlp_heads"],
         Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]],
-        Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]]
+        Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]],
     ]:
         """
         Forward pass of the RoCrossViViT model.
@@ -490,18 +498,25 @@ class RoCrossViViT(nn.Module):
         encoded_time = self.time_coords_encoder(ts_positional_encoding)
 
         # Concatenate encoded time to video context and timeseries
-        # (Likely discussed in Section 3.2, where the authors describe how different inputs are combined)
-        video_context_with_time = torch.cat([video_context, encoded_time], dim=self.video_cat_dim)
+        video_context_with_time = torch.cat(
+            [video_context, encoded_time], dim=self.video_cat_dim
+        )
         timeseries_with_time = torch.cat([timeseries, encoded_time[..., 0, 0]], dim=-1)
 
         # Reshape video context for processing
         # (Likely discussed in Section 3.2, where the authors describe the tokenization process)
-        flattened_video_context = rearrange(video_context_with_time, 'b t c h w -> (b t) c h w')
+        flattened_video_context = rearrange(
+            video_context_with_time, "b t c h w -> (b t) c h w"
+        )
 
         # Repeat coordinates for each time step
         # (Likely discussed in Section 3.1, where the authors describe how spatial information is incorporated)
-        repeated_context_coords = repeat(context_coords, 'b c h w -> (b t) c h w', t=time_steps)
-        repeated_ts_coords = repeat(timeseries_spatial_coordinates, 'b c h w -> (b t) c h w', t=time_steps)
+        repeated_context_coords = repeat(
+            context_coords, "b c h w -> (b t) c h w", t=time_steps
+        )
+        repeated_ts_coords = repeat(
+            timeseries_spatial_coordinates, "b c h w -> (b t) c h w", t=time_steps
+        )
 
         # Generate positional embeddings
         # (Likely discussed in Section 3.1, subsection on Rotary Positional Embedding)
@@ -509,7 +524,8 @@ class RoCrossViViT(nn.Module):
         timeseries_pos_embedding = self.enc_pos_emb(repeated_ts_coords)
 
         # Embed video context
-        # (Likely discussed in Section 3.2, subsection on context encoding)
+        # This is the uniform sampling described in the paper for the video context. It would be here that we would
+        # likely substitute to tublet.
         embedded_video_context = self.to_patch_embedding(flattened_video_context)
 
         # Apply positional encoding
@@ -518,41 +534,59 @@ class RoCrossViViT(nn.Module):
             embedded_video_context = embedded_video_context + self.pe_ctx
         elif self.pe_type == "sine":
             pe = self.pe_ctx(repeated_context_coords)
-            pe = rearrange(pe, 'b h w c -> b (h w) c')
+            pe = rearrange(pe, "b h w c -> b (h w) c")
             embedded_video_context = embedded_video_context + pe
 
         # Apply masking to video context if specified
         # (Likely discussed in Section 3.2, subsection on regularization techniques)
         if self.ctx_masking_ratio > 0 and apply_masking:
             mask_ratio = self.ctx_masking_ratio * torch.rand(1).item()
-            embedded_video_context, _, _, keep_indices = self.random_masking(embedded_video_context, mask_ratio)
+            embedded_video_context, _, _, keep_indices = self.random_masking(
+                embedded_video_context, mask_ratio
+            )
             context_pos_embedding = tuple(
-                torch.gather(pos_emb, dim=1, index=keep_indices.unsqueeze(-1).repeat(1, 1, pos_emb.shape[-1]))
+                torch.gather(
+                    pos_emb,
+                    dim=1,
+                    index=keep_indices.unsqueeze(-1).repeat(1, 1, pos_emb.shape[-1]),
+                )
                 for pos_emb in context_pos_embedding
             )
 
         # Encode video context
         # (Likely discussed in Section 3.2, subsection on context encoding)
-        encoded_context, self_attention_scores = self.ctx_encoder(embedded_video_context, context_pos_embedding)
+        encoded_context, self_attention_scores = self.ctx_encoder(
+            embedded_video_context, context_pos_embedding
+        )
 
         # Embed and potentially mask timeseries
         # (Likely discussed in Section 3.2, subsection on timeseries encoding)
         embedded_timeseries = self.ts_embedding(timeseries_with_time)
         if self.ts_masking_ratio > 0 and apply_masking:
             mask_ratio = self.ts_masking_ratio * torch.rand(1).item()
-            embedded_timeseries, _, restore_indices, _ = self.random_masking(embedded_timeseries, mask_ratio)
-            mask_tokens = self.ts_mask_token.repeat(embedded_timeseries.shape[0],
-                                                    time_steps - embedded_timeseries.shape[1], 1)
+            embedded_timeseries, _, restore_indices, _ = self.random_masking(
+                embedded_timeseries, mask_ratio
+            )
+            mask_tokens = self.ts_mask_token.repeat(
+                embedded_timeseries.shape[0],
+                time_steps - embedded_timeseries.shape[1],
+                1,
+            )
             embedded_timeseries = torch.cat([embedded_timeseries, mask_tokens], dim=1)
             embedded_timeseries = torch.gather(
-                embedded_timeseries, dim=1,
-                index=restore_indices.unsqueeze(-1).repeat(1, 1, embedded_timeseries.shape[2])
+                embedded_timeseries,
+                dim=1,
+                index=restore_indices.unsqueeze(-1).repeat(
+                    1, 1, embedded_timeseries.shape[2]
+                ),
             )
 
         # Encode timeseries
         # (Likely discussed in Section 3.2, subsection on timeseries encoding)
         encoded_timeseries = self.ts_encoder(embedded_timeseries)
-        encoded_timeseries = rearrange(encoded_timeseries, 'b t c -> (b t) c').unsqueeze(1)
+        encoded_timeseries = rearrange(
+            encoded_timeseries, "b t c -> (b t) c"
+        ).unsqueeze(1)
 
         # Apply positional encoding to encoded timeseries
         # (Likely discussed in Section 3.1, subsection on positional encoding types)
@@ -560,16 +594,21 @@ class RoCrossViViT(nn.Module):
             encoded_timeseries = encoded_timeseries + self.pe_ts
         elif self.pe_type == "sine":
             pe = self.pe_ts(repeated_ts_coords)
-            pe = rearrange(pe, 'b h w c -> b (h w) c')
+            pe = rearrange(pe, "b h w c -> b (h w) c")
             encoded_timeseries = encoded_timeseries + pe
 
         # Mix context and timeseries
         # (Likely discussed in Section 3.2, subsection on cross-attention or mixing)
         mixed_timeseries, cross_attention_scores = self.mixer(
-            encoded_context, encoded_timeseries, context_pos_embedding, timeseries_pos_embedding
+            encoded_context,
+            encoded_timeseries,
+            context_pos_embedding,
+            timeseries_pos_embedding,
         )
         mixed_timeseries = mixed_timeseries.squeeze(1)
-        decoder_input = self.ts_enctodec(rearrange(mixed_timeseries, '(b t) c -> b t c', b=batch_size))
+        decoder_input = self.ts_enctodec(
+            rearrange(mixed_timeseries, "(b t) c -> b t c", b=batch_size)
+        )
 
         # Apply temporal transformer
         # (Discussed in Section 3.2, subsection on temporal modeling)
@@ -577,11 +616,14 @@ class RoCrossViViT(nn.Module):
 
         # Generate outputs for each MLP head
         # (Likely discussed in Section 3.3, subsection on output generation)
-        outputs = torch.stack([mlp(transformed_timeseries) for mlp in self.mlp_heads], dim=2)
+        outputs = torch.stack(
+            [mlp(transformed_timeseries) for mlp in self.mlp_heads], dim=2
+        )
 
         # Generate quantile mask
         # (Discussed in Section 3.3, subsection on uncertainty estimation)
-        quantile_mask = self.quantile_masker(rearrange(transformed_timeseries.detach(), 'b t c -> b c t'))
+        quantile_mask = self.quantile_masker(
+            rearrange(transformed_timeseries.detach(), "b t c -> b c t")
+        )
 
         return outputs, quantile_mask, self_attention_scores, cross_attention_scores
-

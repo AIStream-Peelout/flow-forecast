@@ -1,10 +1,10 @@
-{                 
+{
    "model_name": "CustomTransformerDecoder",
    "model_type": "PyTorch",
    "model_params": {
       "n_time_series":3,
       "seq_length":6,
-      "output_seq_length": 6, 
+      "output_seq_length": 6,
       "output_dim": 3,
       "n_layers_encoder": 2,
       "squashed_embedding": true
@@ -26,7 +26,7 @@
        "target_col": ["playId", "yardlineNumber", "yardsToGo"],
        "relevant_cols": ["playId", "yardlineNumber", "yardsToGo"],
        "series_marker_column":"playId",
-       "scaler": "StandardScaler", 
+       "scaler": "StandardScaler",
        "interpolate": false
     },
     "n_targets":3,
@@ -41,7 +41,7 @@
        "epochs": 3
     },
     "GCS": false,
-   
+
     "wandb": {
        "name": "flood_forecast_circleci",
        "tags": ["dummy_run", "circleci", "multi_head", "classification"],
@@ -50,4 +50,3 @@
    "forward_params":{},
    "metrics":["MSE"]
 }
-    

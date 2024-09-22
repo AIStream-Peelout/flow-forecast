@@ -1,9 +1,9 @@
-{                 
+{
    "model_name": "MultiAttnHeadSimple",
    "model_type": "PyTorch",
    "model_params": {
-     "number_time_series":2, 
-     "seq_len":6, 
+     "number_time_series":2,
+     "seq_len":6,
      "final_layer": "Softmax",
      "output_seq_len": 1,
      "output_dim": 9
@@ -23,7 +23,7 @@
        "test_end": 303,
        "target_col": ["precip"],
        "relevant_cols": ["precip", "temp", "cfs"],
-       "scaler": "StandardScaler", 
+       "scaler": "StandardScaler",
        "interpolate": false
     },
 
@@ -41,7 +41,7 @@
        "batch_size":4
     },
     "GCS": false,
-   
+
     "wandb": {
        "name": "flood_forecast_circleci",
        "tags": ["dummy_run", "circleci", "multi_head", "classification"],
@@ -50,4 +50,3 @@
    "forward_params":{},
    "metrics":["CrossEntropyLoss"]
 }
-    

@@ -455,7 +455,7 @@ class GeneralClassificationLoader(CSVDataLoader):
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
         if casted_shit > self.n_classes:
-            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
@@ -624,7 +624,7 @@ class VariableSequenceLength(CSVDataLoader):
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
         if casted_shit > self.n_classes - 1:  # -1 because counting starts at zero
-            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
