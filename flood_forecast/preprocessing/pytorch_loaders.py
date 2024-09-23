@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import Dict, Tuple, Union, Optional, List
+from typing import Dict, Tuple, Union, List
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
