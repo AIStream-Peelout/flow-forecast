@@ -4,6 +4,7 @@ import numpy as np
 from math import sqrt
 from einops import rearrange, repeat
 import torch.nn.functional as F
+from jaxtyping import Float
 from torch import einsum
 from typing import Tuple
 
@@ -542,7 +543,16 @@ class CrossAttention(nn.Module):
         dropout: float = 0.0,
         use_rotary: bool = True,
     ):
-        """"""
+        """
+        This is the CrossAttention module primarily used in the CrossVIVIT paper. It is currently not used in other
+        models but may in the future be incorporated into other multi-modal models.
+        :param dim: The input dimension of the sequence.
+        :type dim: int
+        :param heads: The number of heads for the attention mechanism.
+        :type heads: int
+        :param dim_head: The dimension of the heads.
+        :type dim_head: int
+        """
         super().__init__()
         inner_dim = dim_head * heads
         self.use_rotary = use_rotary
@@ -558,7 +568,7 @@ class CrossAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, src: torch.Tensor, src_pos_emb, tgt, tgt_pos_emb):
+    def forward(self, src: Float[torch.Tensor, ""], src_pos_emb, tgt, tgt_pos_emb):
         q = self.to_q(tgt)
 
         qkv = (q, *self.to_kv(src).chunk(2, dim=-1))

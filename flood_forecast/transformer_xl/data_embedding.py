@@ -10,7 +10,15 @@ from jaxtyping import Float
 
 
 class AxialRotaryEmbedding(nn.Module):
-    def __init__(self, dim: int, freq_type="lucidrains", **kwargs):
+    def __init__(self, dim: int, freq_type: str = "lucidrains", **kwargs: dict):
+        """
+        :param dim: The dimension of the input tensor.
+        :type dim: int
+        :param freq_type: The frequency type to use. Either 'lucidrains' or 'vaswani', defaults to 'lucidrains'
+        :type freq_type: str, optional
+        :param **kwargs: The keyword arguments for the frequency type.
+        :type **kwargs: dict
+        """
         super().__init__()
         self.dim = dim
         self.freq_type = freq_type

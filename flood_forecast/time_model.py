@@ -17,9 +17,7 @@ import wandb
 
 class TimeSeriesModel(ABC):
     """An abstract class used to handle different configurations of models + hyperparams for training, test, and predict
-    functions.
-
-    This class assumes that data is already split into test train and validation at this point.
+    functions. This class assumes that data is already split into test train and validation at this point.
     """
 
     def __init__(

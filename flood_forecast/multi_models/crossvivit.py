@@ -24,7 +24,16 @@ class Attention(nn.Module):
     def __init__(
         self, dim: int, heads: int = 8, dim_head: int = 64, dropout: float = 0.0
     ):
-        """The attention mechanism for CrossVIVIT model."""
+        """The attention mechanism for the CrossVIVIT model.
+        :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
+        :type dim: int
+        :param heads: The number of heads in the multi-head-attention mechanism. Usually set to a multiple of eight.
+        :type heads: int
+        :param dim_head: The dimension of the inputs to the head.
+        :type dim_head: int
+        :param dropout: The amount of dropout to use throughout the model defaults to 0.0
+        :type dropout: float, optional
+        """
         super().__init__()
         inner_dim = dim_head * heads
         project_out = not (heads == 1 and dim_head == dim)
@@ -40,7 +49,11 @@ class Attention(nn.Module):
             else nn.Identity()
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        The forward pass of the attention mechanism.
+
+        """
         b, n, _, h = *x.shape, self.heads  # noqa
         qkv = self.to_qkv(x).chunk(3, dim=-1)
         q, k, v = map(lambda t: rearrange(t, "b n (h d) -> b h n d", h=h), qkv)
@@ -296,16 +309,52 @@ class RoCrossViViT(nn.Module):
         :type time_coords_encoder: CyclicalEmbedding
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         :type dim: int
-        :param depth: The number of transformer blocks to create. Commonly set to four for most tasks...
+        :param depth: The number of transformer blocks to create. Commonly set to four for most tasks.
         :type depth: int
         :param heads: The number of heads in the multi-head-attention mechanism. Usually set to a multiple of eight.
         :type heads: int
+        :param mlp_ratio: The ratio of the multi-layer perceptron to the embedding dimension.
+        :type mlp_ratio: int
+        :param ctx_channels: The number of channels in the context frames. This is generally 3 for RGB images.
+        :type ctx_channels: int
+        :param num_time_series: The number of time series measurements present including the target.
+        :type num_time_series: int
+        :param forecast_history: The number of historical steps to use for forecasting.
+        :type forecast_history: int
+        :param out_dim: The output dimension of the model. Outputs will be in format [batch_size, time_steps, out_dim]
+        :type out_dim: int
+        :param dim_head: The dimension of the inputs to the head.
+        :type dim_head: int
+        :param dropout: The amount of dropout to use throughout the model defaults to 0.0
+        :type dropout: float, optional
+        :param freq_type: The type of frequency encoding to use. This can be either 'lucidrains' or 'sine'.
+        :type freq_type: str, optional
+        :param pe_type: The type of positional encoding to use. This can be 'rope', 'sine', 'learned' or None.
+        :type pe_type: str, optional
+        :param num_mlp_heads: The number of MLP heads to use for the output.
+        :type num_mlp_heads: int
+        :param use_glu: Whether to use gated linear units , defaults to True
+        :type use_glu: bool, optional
+        :param ctx_masking_ratio: The ratio of the context frames to mask. This is used for regularization.
+        :type ctx_masking_ratio: float
+        :param ts_masking_ratio: The ratio of the time series measurements to mask. This is used for regularization.
+        :type ts_masking_ratio: float
+        :param decoder_dim: The dimension of the decoder. This is generally 128 for most tasks.
+        :type decoder_dim: int
+        :param decoder_depth: The depth of the decoder. This is generally 4 for most tasks.
+        :type decoder_depth: int
+        :param decoder_heads: The number of heads in the decoder. This is generally 6 for most tasks.
+        :type decoder_heads: int
+        :param decoder_dim_head: The dimension of the inputs to the head in the decoder.
+        :type decoder_dim_head: int
+        :param axial_kwargs: The keyword arguments for the axial rotary embedding.
+        :type axial_kwargs: Dict[str, Any]
         """
 
         super().__init__()
         assert (
             ctx_masking_ratio >= 0 and ctx_masking_ratio < 1
-        ), "ctx_masking_ratio must be in [0,1)"
+        ), "ctx_masking_ratio must be in [0,1]"
         assert pe_type in [
             "rope",
             "sine",
@@ -315,6 +364,7 @@ class RoCrossViViT(nn.Module):
         self.time_coords_encoder = time_coords_encoder
         self.ctx_channels = ctx_channels
         self.ts_channels = num_time_series
+        # Calculate the total number of channel
         if hasattr(self.time_coords_encoder, "dim"):
             self.ctx_channels += self.time_coords_encoder.dim
             self.ts_channels += self.time_coords_encoder.dim
@@ -326,7 +376,7 @@ class RoCrossViViT(nn.Module):
         self.num_mlp_heads = num_mlp_heads
         self.pe_type = pe_type
         self.video_cat_dim = video_cat_dim
-
+        # Check image dimensions are divisible by patch size
         for i in range(2):
             ims = self.image_size[i]
             ps = self.patch_size[i]
@@ -334,7 +384,7 @@ class RoCrossViViT(nn.Module):
                 ims % ps == 0
             ), "Image dimensions must be divisible by the patch size."
 
-        patch_dim = self.ctx_channels * self.patch_size[0] * self.patch_size[1]
+        patch_intermediate_dim = self.ctx_channels * self.patch_size[0] * self.patch_size[1]
         num_patches = (self.image_size[0] // self.patch_size[0]) * (
             self.image_size[1] // self.patch_size[1]
         )
@@ -345,7 +395,7 @@ class RoCrossViViT(nn.Module):
                 p1=self.patch_size[0],
                 p2=self.patch_size[1],
             ),
-            nn.Linear(patch_dim, dim),
+            nn.Linear(patch_intermediate_dim, dim),
         )
         self.enc_pos_emb = AxialRotaryEmbedding(dim_head, freq_type, **axial_kwargs)
         self.ts_embedding = nn.Linear(self.ts_channels, dim)
@@ -487,7 +537,7 @@ class RoCrossViViT(nn.Module):
         :return: Tuple of (outputs, quantile_mask, self_attention_scores, cross_attention_scores)
         """
         batch_size, time_steps, _, height, width = video_context.shape
-        # (Likely discussed in Section 3.1 or 3.2, where the authors describe input preprocessing)
+        # Add coordinates to the time series
         encoded_time = self.time_coords_encoder(ts_positional_encoding)
 
         # Concatenate encoded time to video context and timeseries
@@ -518,11 +568,10 @@ class RoCrossViViT(nn.Module):
 
         # Embed video context
         # This is the uniform sampling described in the paper for the video context. It would be here that we would
-        # likely substitute to tublet.
+        # substitute to using Tubelet sampling method.
         embedded_video_context = self.to_patch_embedding(flattened_video_context)
 
         # Apply positional encoding
-        # (Likely discussed in Section 3.1, subsection on positional encoding types)
         if self.pe_type == "learned":
             embedded_video_context = embedded_video_context + self.pe_ctx
         elif self.pe_type == "sine":
