@@ -561,7 +561,7 @@ class CrossAttention(nn.Module):
 
         self.attend = nn.Softmax(dim=-1)
         self.dropout = nn.Dropout(dropout)
-
+        # Maps the input dimension to the inner dimension
         self.to_q = nn.Linear(dim, inner_dim, bias=False)
 
         self.to_kv = nn.Linear(dim, inner_dim * 2, bias=False)
@@ -569,6 +569,10 @@ class CrossAttention(nn.Module):
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
     def forward(self, src: Float[torch.Tensor, ""], src_pos_emb, tgt, tgt_pos_emb):
+        """
+        Performs the forward pass of the CrossAttention module.
+
+        """
         q = self.to_q(tgt)
 
         qkv = (q, *self.to_kv(src).chunk(2, dim=-1))

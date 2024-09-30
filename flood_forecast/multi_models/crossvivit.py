@@ -210,6 +210,7 @@ class CrossTransformer(nn.Module):
 
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         :type dim: int
+
         """
         super().__init__()
         self.image_size = image_size
@@ -244,17 +245,28 @@ class CrossTransformer(nn.Module):
         src_pos_emb: torch.Tensor,
         tgt_pos_emb: torch.Tensor,
     ):
-        """Performs the following computation in each layer:
+        """
+        :param src: Source sequence of shape [B, N, D]. In the case of CrossVIVIT. src is the encoded video_ctx. Where
+        B is the batch_size*forecast_history,  N is the number_of_patches after random masking is applied and D is the
+        dimension of the model. In other use cases this might differ.
+        :type src: torch.Tensor
+        :param tgt: Target sequence of shape [B, M, D]. In the case of CrossVIVIT. tgt is the encoded_timeseries. Where
+        B is the batch_size*forecast_history, M is usually one and D is the dimension of the model. In other use cases
+        this might differ.
+        :type tgt: torch.Tensor
+        :param src_pos_emb: Positional embedding of source sequence's tokens of shape [B, N, D]
+        :type src_pos_emb: torch.Tensor
+        :param tgt_pos_emb: Positional embedding of target sequence's tokens of shape [B, M, D]
+        :type tgt_pos_emb: torch.Tensor
+        :return: Tuple of (tgt, attention_scores)
+        :rtype: Tuple[torch.Tensor, Dict[str, torch.Tensor]]
 
+
+        Performs the following computation in each layer:
         1. Self-Attention on the source sequence
             2. FFN on the source sequence
             3. Cross-Attention between target and source sequence
             4. FFN on the target sequence
-        Args:
-            src: Source sequence of shape [B, N, D]
-            tgt: Target sequence of shape [B, M, D]
-            src_pos_emb: Positional embedding of source sequence's tokens of shape [B, N, D]
-            tgt_pos_emb: Positional embedding of target sequence's tokens of shape [B, M, D]
         """
         attention_scores = {}
         for i in range(len(self.cross_layers)):
@@ -263,7 +275,6 @@ class CrossTransformer(nn.Module):
             attention_scores["cross_attention"] = cattn_scores
             tgt = out + tgt
             tgt = cff(tgt) + tgt
-
         return tgt, attention_scores
 
 
@@ -581,6 +592,7 @@ class RoCrossViViT(nn.Module):
 
         # Apply masking to video context if specified
         # (Likely discussed in Section 3.2, subsection on regularization techniques)
+        # Prior to masking embedded_video_context it has shape [batch_size*forecast_history, num_patches, dim],
         if self.ctx_masking_ratio > 0 and apply_masking:
             mask_ratio = self.ctx_masking_ratio * torch.rand(1).item()
             embedded_video_context, _, _, keep_indices = self.random_masking(
@@ -667,5 +679,4 @@ class RoCrossViViT(nn.Module):
         quantile_mask = self.quantile_masker(
             rearrange(transformed_timeseries.detach(), "b t c -> b c t")
         )
-
         return outputs, quantile_mask, self_attention_scores, cross_attention_scores

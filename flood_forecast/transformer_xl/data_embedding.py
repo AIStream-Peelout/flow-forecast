@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple, Any
 
 import torch
 import torch.nn as nn
@@ -34,11 +34,10 @@ class AxialRotaryEmbedding(nn.Module):
             )
         self.register_buffer("scales", scales)
 
-    def forward(self, coords: torch.Tensor):
+    def forward(self, coords: Float[torch.Tensor, "batch_size*time_series 2 1 1"]) -> Tuple[Any, Any]:
         """Assumes that coordinates do not change throughout the batches.
-
-        Args:
-            coords (torch.Tensor): Coordinates of shape [B, 2, H, W]
+        :param coords: The coordinates to embed. We assume these will be of shape batch_shape*time_series. The last two dimensions are the x and y coordinates.
+        :type coords: torch.Tensor
         """
         seq_x = coords[:, 0, 0, :]
         seq_x = seq_x.unsqueeze(-1)

@@ -263,9 +263,11 @@ class CSVTestLoader(CSVDataLoader):
         **kwargs
     ):
         """
+        A data loader for the test data and plotting code it is a subclass of CSVDataLoader.
         :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame
-        A data loader for the test data.
         :type df_path: str
+        :param int forecast_total: The total length of the forecast
+        :type forecast_total: int
         """
         if "file_path" not in kwargs:
             kwargs["file_path"] = df_path

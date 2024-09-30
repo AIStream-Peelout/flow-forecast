@@ -282,7 +282,12 @@ class PyTorchForecast(TimeSeriesModel):
 
 
 def scaling_function(start_end_params: Dict, dataset_params: Dict) -> Dict:
-    """"""
+    """
+    Function to scale the data based on the parameters in the dataset_params dict
+    :param start_end_params: The start_end_params dictionary
+    :param dataset_params: The dataset_params dictionary
+    :return: The start_end_params dictionary
+    """
     if "scaler" in dataset_params:
         in_dataset_params = "scaler"
     elif "scaling" in dataset_params:
