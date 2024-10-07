@@ -674,7 +674,7 @@ class RoCrossViViT(nn.Module):
             [mlp(transformed_timeseries) for mlp in self.mlp_heads], dim=2
         )
 
-        # Generate quantile mask
+        # Generate quantile masks
         # (Discussed in Section 3.3, subsection on uncertainty estimation)
         quantile_mask = self.quantile_masker(
             rearrange(transformed_timeseries.detach(), "b t c -> b c t")
