@@ -70,6 +70,9 @@ class Attention(nn.Module):
 
 class Transformer(nn.Module):
     def __init__(self, dim, num_frames, depth, heads, dim_head, mlp_dim, dropout=0.0):
+        """
+
+        """
         super().__init__()
         self.layers = nn.ModuleList([])
         self.norm = nn.LayerNorm(dim)

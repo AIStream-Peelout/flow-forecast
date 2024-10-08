@@ -268,6 +268,7 @@ class CSVTestLoader(CSVDataLoader):
         :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame.
         :type df_path: str
         :param int forecast_total: The total length of the forecast.
+        :
         :type forecast_total: int
         """
         if "file_path" not in kwargs:

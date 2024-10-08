@@ -14,7 +14,8 @@ class AxialRotaryEmbedding(nn.Module):
         """
         :param dim: The dimension of the input tensor.
         :type dim: int
-        :param freq_type: The frequency type to use. Either 'lucidrains' or 'vaswani', defaults to 'lucidrains'
+        :param freq_type: The frequency type to use. Either 'lucidrains' or 'vaswani', defaults to 'lucidrains' For info
+        on the frequency types
         :type freq_type: str, optional
         :param **kwargs: The keyword arguments for the frequency type.
         :type **kwargs: dict
@@ -36,7 +37,8 @@ class AxialRotaryEmbedding(nn.Module):
 
     def forward(self, coords: Float[torch.Tensor, "batch_size*time_series 2 1 1"]) -> Tuple[Any, Any]:
         """Assumes that coordinates do not change throughout the batches.
-        :param coords: The coordinates to embed. We assume these will be of shape batch_shape*time_series. The last two dimensions are the x and y coordinates.
+        :param coords: The coordinates to embed. We assume these will be of shape batch_shape*time_series. The last two
+        dimensions are the x and y coordinates.
         :type coords: torch.Tensor
         """
         seq_x = coords[:, 0, 0, :]
@@ -193,6 +195,8 @@ class TemporalEmbedding(nn.Module):
 
 class DataEmbedding(nn.Module):
     def __init__(self, c_in: int, d_model, embed_type='fixed', data=4, dropout=0.1):
+        #
+        #
         super(DataEmbedding, self).__init__()
 
         self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
@@ -202,17 +206,18 @@ class DataEmbedding(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark) -> torch.Tensor:
+        #
         x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
         return self.dropout(x)
 
 
 class DataEmbedding_inverted(nn.Module):
-    def __init__(self, c_in, d_model: int, embed_type='fixed', freq='h', dropout=0.1):
+    def __init__(self, c_in, d_model: int, dropout=0.1):
         super(DataEmbedding_inverted, self).__init__()
         self.value_embedding = nn.Linear(c_in, d_model)
         self.dropout = nn.Dropout(p=dropout)
 
-    def forward(self, x, x_mark) -> torch:
+    def forward(self, x, x_mark) -> torch.Tensor:
         x = x.permute(0, 2, 1)
         # x: [Batch Variate Time]
         if x_mark is None:
@@ -224,7 +229,7 @@ class DataEmbedding_inverted(nn.Module):
         return self.dropout(x)
 
 
-def get_emb(sin_inp):
+def get_emb(sin_inp: torch.Tensor) -> torch.Tensor:
     """Gets a base embedding for one dimension with sin and cos intertwined."""
     emb = torch.stack((sin_inp.sin(), sin_inp.cos()), dim=-1)
     return torch.flatten(emb, -2, -1)
