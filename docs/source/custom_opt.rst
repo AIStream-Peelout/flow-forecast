@@ -1,4 +1,4 @@
-Custom Optimizers and more
+Custom Optimizers
 ====================
 
 .. automodule:: flood_forecast.custom.custom_opt
