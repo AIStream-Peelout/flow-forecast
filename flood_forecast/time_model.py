@@ -16,11 +16,8 @@ import wandb
 
 
 class TimeSeriesModel(ABC):
-    """
-    An abstract class used to handle different configurations
-    of models + hyperparams for training, test, and predict functions.
-    This class assumes that data is already split into test train
-    and validation at this point.
+    """An abstract class used to handle different configurations of models + hyperparams for training, test, and predict
+    functions. This class assumes that data is already split into test train and validation at this point.
     """
 
     def __init__(
@@ -30,13 +27,26 @@ class TimeSeriesModel(ABC):
             validation_data: str,
             test_data: str,
             params: Dict):
+        """Initializes the TimeSeriesModel class with certain attributes.
+
+        :param model_base: The name of the model to load. This MUST be a key in the model_dic
+        model_dict_function.py.
+        :type model_base: str
+        :param training_data: The path to the training data file
+        :type training_data: str
+        :param validation_data: The path to the validation data file
+        :type validation_data: str
+        :param test_data: The path to the test data file
+        :type test_data: str
+        :param params: A dictionary of parameters to pass to the model
+        """
         self.params = params
         if "weight_path" in params:
+            # If weight_path is present it means we are loading an existing model rather than training from scratch.
             params["weight_path"] = get_data(params["weight_path"])
             self.model = self.load_model(model_base, params["model_params"], params["weight_path"])
         else:
             self.model = self.load_model(model_base, params["model_params"])
-        # params["dataset_params"]["forecast_test_len"] = params["inference_params"]["hours_to_forecast"]
         self.training = self.make_data_load(training_data, params["dataset_params"], "train")
         self.validation = self.make_data_load(validation_data, params["dataset_params"], "valid")
         self.test_data = self.make_data_load(test_data, params["dataset_params"], "test")
@@ -49,32 +59,43 @@ class TimeSeriesModel(ABC):
 
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:
-        """
-        This function should load and return the model
-        this will vary based on the underlying framework used
+        """This function should load and return the model. This will vary based on the underlying framework used.
+
+        :param model_base: The name of the model to load. This should be a key in the model_dict.
+        :type model_base: str
+        :param model_params: A dictionary of parameters to pass to the model
+        :param weight_path: The path to the weights to load
         """
         raise NotImplementedError
 
     @abstractmethod
     def make_data_load(self, data_path, params: Dict, loader_type: str) -> object:
-        """
-        Intializes a data loader based on the provided data_path.
-        This may be as simple as a pandas dataframe or as complex as
-        a custom PyTorch data loader.
+        """Initializes a data loader based on the provided data_path.
+
+        This may be as simple as a pandas dataframe or as complex as a custom PyTorch data loader.
         """
         raise NotImplementedError
 
     @abstractmethod
     def save_model(self, output_path: str):
-        """
-        Saves a model to a specific path along with a configuration report
-        of the parameters and data info.
+        """Saves a model to a specific path along with a configuration report of the parameters and data info.
+
+        :param output_path: The path to save the model to (should be a directory)
+        :type output_path: str
         """
         raise NotImplementedError
 
     def upload_gcs(self, save_path: str, name: str, file_type: str, epoch=0, bucket_name=None):
-        """
-        Function to upload model checkpoints to GCS
+        """Function to upload model checkpoints to GCS.
+        :param save_path: The path of the file to save to GCS.
+        :type save_path: str
+        :param name: The name you want to save the file as.
+        :type name: str
+        :param file_type: The type of file you are saving.
+        :type file_type: str
+        :param epoch: The epoch number that saving occured at.
+        :type epoch: int
+        :param bucket_name: The name of the bucket to save the file to on GCS.
         """
         if self.gcs_client:
             if bucket_name is None:
@@ -86,7 +107,11 @@ class TimeSeriesModel(ABC):
             if self.wandb:
                 wandb.config.update({"gcs_m_path_" + str(epoch) + file_type: online_path})
 
-    def wandb_init(self):
+    def wandb_init(self) -> bool:
+        """Initializes wandb if the params dict contains the wandb key or if sweep is present.
+        :return: True if wandb is initialized, False otherwise.
+        :rtype: bool
+        """
         if self.params["wandb"]:
             wandb.init(
                 id=wandb.util.generate_id(),
@@ -117,8 +142,9 @@ class PyTorchForecast(TimeSeriesModel):
             self.__freeze_layers__(params_dict["weight_path_add"])
 
     def __freeze_layers__(self, params: Dict):
+        """Function to freeze layers in the model."""
         if "frozen_layers" in params:
-            print("Layers being fro")
+            print("Layers being frozen")
             for layer in params["frozen_layers"]:
                 self.model._modules[layer].requires_grad = False
                 for parameter in self.model._modules[layer].parameters():
@@ -152,9 +178,7 @@ class PyTorchForecast(TimeSeriesModel):
         return model
 
     def save_model(self, final_path: str, epoch: int) -> None:
-        """
-        Function to save a model to a given file path
-        """
+        """Function to save a model to a given file path."""
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
@@ -175,9 +199,7 @@ class PyTorchForecast(TimeSeriesModel):
                 print(e.__traceback__)
 
     def __re_add_params__(self, start_end_params: Dict, dataset_params, data_path):
-        """
-        Function to re-add the params to the model
-        """
+        """Function to re-add the params to the model."""
         start_end_params["file_path"] = data_path
         start_end_params["forecast_history"] = dataset_params["forecast_history"]
         start_end_params["forecast_length"] = dataset_params["forecast_length"]
@@ -269,13 +291,17 @@ class PyTorchForecast(TimeSeriesModel):
                                             pad_le, dataset_params["task"])
 
         else:
-            # TODO support custom DataLoader
             loader = None
         return loader
 
 
-def scaling_function(start_end_params, dataset_params):
-    in_dataset_params = False
+def scaling_function(start_end_params: Dict, dataset_params: Dict) -> Dict:
+    """
+    Function to scale the data based on the parameters in the dataset_params dict
+    :param start_end_params: The start_end_params dictionary
+    :param dataset_params: The dataset_params dictionary
+    :return: The start_end_params dictionary
+    """
     if "scaler" in dataset_params:
         in_dataset_params = "scaler"
     elif "scaling" in dataset_params:

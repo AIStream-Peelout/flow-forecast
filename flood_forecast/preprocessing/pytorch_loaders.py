@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 import torch
-from typing import Dict, Tuple, Union, Optional, List
+from typing import Dict, Tuple, Union, List
 from flood_forecast.pre_dict import interpolate_dict
 from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
@@ -21,17 +21,15 @@ class CSVDataLoader(Dataset):
         scaling=None,
         start_stamp: int = 0,
         end_stamp: int = None,
-        gcp_service_key: Optional[str] = None,
         interpolate_param: bool = False,
         sort_column=None,
         scaled_cols=None,
         feature_params=None,
         no_scale=False,
-        preformatted_df=False
 
     ):
-        """
-        A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
+        """A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model.
+
         :param file_path: The path to the CSV file you wish to use (GCS compatible) or a Pandas dataframe.
         :param forecast_history: This is the length of the historical time series data you wish to
                                 utilize for forecasting
@@ -42,10 +40,12 @@ class CSVDataLoader(Dataset):
         :param scaling: (highly reccomended) If provided should be a subclass of sklearn.base.BaseEstimator
         and sklearn.base.TransformerMixin) i.e StandardScaler,  MaxAbsScaler, MinMaxScaler, etc) Note without
         a scaler the loss is likely to explode and cause infinite loss which will corrupt weights
-        :param start_stamp int: Optional if you want to only use part of a CSV for training, validation
+        :param start_stamp: Optional if you want to only use part of a CSV for training, validation
                                 or testing supply these
-        :param end_stamp int: Optional if you want to only use part of a CSV for training, validation,
-                            or testing supply these
+        :type start_stamp: int, optional
+        :param end_stamp: Optional if you want to only use part of a CSV for training, validation,
+                          or testing supply these
+        :type end_stamp: int, optional
         :param sort_column str: The column to sort the time series on prior to forecast.
         :param scaled_cols: The columns you want scaling applied to (if left blank will default to all columns)
         :param feature_params: These are the datetime features you want to create.
@@ -122,13 +122,13 @@ class CSVDataLoader(Dataset):
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
 
-    def __sample_and_track_series__(self, idx, series_id=None):
+    def __sample_and_track_series__(self, idx: int, series_id=None):
         pass
 
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
     ) -> torch.Tensor:
-        """Un-does the scaling of the data
+        """Un-does the scaling of the data.
 
         :param result_data: The data you want to unscale can handle multiple data types.
         :type result_data: Union[torch.Tensor, pd.Series, np.ndarray]
@@ -161,16 +161,16 @@ class CSVDataLoader(Dataset):
 
 
 class CSVSeriesIDLoader(CSVDataLoader):
-    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
+    def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all: bool = True):
         """A data-loader for a CSV file that contains a series ID column.
 
-        :param series_id_col: The id
+        :param series_id_col: The id column of the series you want to forecast.
         :type series_id_col: str
         :param main_params: The central set of parameters
         :type main_params: dict
-        :param return_method: The method of return
+        :param return_method: The method of return (e.g. all series at once, one at a time, or a random sample)
         :type return_method: str
-        :param return_all: Whether to return all items, defaults to True
+        :param return_all: Whether to return all items if set to True then __validate_data_in_df__, defaults to True
         :type return_all: bool, optional
         """
         main_params1 = deepcopy(main_params)
@@ -203,8 +203,7 @@ class CSVSeriesIDLoader(CSVDataLoader):
         print("unique dict")
 
     def __validate_data__in_df(self):
-        """Makes sure the data in the data-frame is the proper length for each series e
-        """
+        """Makes sure the data in the data-frame is the proper length for each series."""
         if self.return_all_series:
             len_first = len(self.listed_vals[0])
             print("Length of first series is:" + str(len_first))
@@ -231,18 +230,16 @@ class CSVSeriesIDLoader(CSVDataLoader):
             targ_list = {}
             for va in self.listed_vals:
                 # We need to exclude the index column on one end and the series id column on the other
-
                 targ_start_idx = idx + self.forecast_history
                 idx2 = va[self.series_id_col].iloc[0]
                 va_returned = va[va.columns.difference([self.series_id_col], sort=False)]
                 t = torch.Tensor(va_returned.iloc[idx: self.forecast_history + idx].values)[:, 1:]
-                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:] # noqa
+                targ = torch.Tensor(va_returned.iloc[targ_start_idx: targ_start_idx + self.forecast_length].to_numpy())[:, 1:]  # noqa
                 src_list[self.unique_dict[idx2]] = t
                 targ_list[self.unique_dict[idx2]] = targ
             return src_list, targ_list
         else:
-            raise NotImplementedError
-        return super().__getitem__(idx)
+            raise NotImplementedError("Current code only supports returning all the series at once at each iteration")
 
     def __sample_series_id__(idx, series_id):
         pass
@@ -267,8 +264,12 @@ class CSVTestLoader(CSVDataLoader):
         **kwargs
     ):
         """
-        :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame
-        A data loader for the test data.
+        A data loader for the test data and plotting code it is a subclass of CSVDataLoader.
+        :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame.
+        :type df_path: str
+        :param int forecast_total: The total length of the forecast.
+        :
+        :type forecast_total: int
         """
         if "file_path" not in kwargs:
             kwargs["file_path"] = df_path
@@ -283,8 +284,8 @@ class CSVTestLoader(CSVDataLoader):
         print(df_path)
         self.forecast_total = forecast_total
         # TODO these are antiquated delete them
-        self.use_real_temp = use_real_temp
         self.use_real_precip = use_real_precip
+        self.use_real_temp = use_real_temp
         self.target_supplied = target_supplied
         # Convert back to datetime and save index
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
@@ -309,7 +310,7 @@ class CSVTestLoader(CSVDataLoader):
             historical_rows = self.df.iloc[idx: self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
-            # targ_rows = self.df.iloc[
+            # targ_rows = self.df.ilo c[
             #     target_idx_start : self.forecast_total + target_idx_start
             # ]
             all_rows_orig = self.original_df.iloc[
@@ -319,10 +320,7 @@ class CSVTestLoader(CSVDataLoader):
             return historical_rows.float(), all_rows_orig, target_idx_start
 
     def convert_real_batches(self, the_col: str, rows_to_convert):
-        """
-        A helper function to return properly divided precip and temp
-        values to be stacked with t forecasted cfs.
-        """
+        """A helper function to return properly divided precip and temp values to be stacked with t forecasted cfs."""
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
             the_column[
@@ -335,8 +333,7 @@ class CSVTestLoader(CSVDataLoader):
     def convert_history_batches(
         self, the_col: Union[str, List[str]], rows_to_convert: pd.DataFrame
     ):
-        """A helper function to return dataframe in batches of
-        size (history_len, num_features)
+        """A helper function to return dataframe in batches of size (history_len, num_features)
 
         Args:
             the_col (str): column names
@@ -358,10 +355,6 @@ class CSVTestLoader(CSVDataLoader):
         )
 
 
-class TestLoaderABC(CSVTestLoader):
-    pass
-
-
 class AEDataloader(CSVDataLoader):
     def __init__(
             self,
@@ -376,9 +369,8 @@ class AEDataloader(CSVDataLoader):
             forecast_history=1,
             no_scale=True,
             sort_column=None):
-        """A data loader class for autoencoders. Overrides __len__ and __getitem__ from generic dataloader.
-           Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
-           Same parameters as before.
+        """A data loader class for autoencoders. Overrides __len__ and __getitem__ from generic dataloader. Also defaults
+        forecast_history and forecast_length to 1. Since AE will likely only use one row. Same parameters as before.
 
         :param file_path: The path to the file
         :type file_path: str
@@ -440,7 +432,7 @@ class GeneralClassificationLoader(CSVDataLoader):
         :param params: The standard dictionary for a dataloader (see CSVDataLoader)
         :type params: Dict
         :param n_classes: The number of classes in the problem
-        """ # noqa
+        """  # noqa
         self.n_classes = n_classes
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
@@ -462,7 +454,7 @@ class GeneralClassificationLoader(CSVDataLoader):
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
         if casted_shit > self.n_classes:
-            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes))  # noqa
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
@@ -597,7 +589,7 @@ class TemporalTestLoader(CSVTestLoader):
 class VariableSequenceLength(CSVDataLoader):
     def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
                  n_classes=9 + 90):
-        """Enables eas(ier) loading of time-series with variable length data
+        """Enables eas(ier) loading of time-series with variable length data.
 
         :param series_marker_column: The column that dealinates when an example begins and ends
         :type series_marker_column: str
@@ -605,7 +597,6 @@ class VariableSequenceLength(CSVDataLoader):
         :type pad_length: int
         :param task: The specific task (e.g. classification, forecasting, auto_encode)
         :type task: str
-
         """
         super().__init__(**csv_loader_params)
         self.pad_length = pad_length
@@ -631,7 +622,7 @@ class VariableSequenceLength(CSVDataLoader):
         targ_labs = torch.zeros(self.n_classes)
         casted_shit = int(targ.data.tolist())
         if casted_shit > self.n_classes - 1:  # -1 because counting starts at zero
-            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes)) # noqa 
+            raise ValueError("The class " + str(casted_shit) + " is greater than the number of classes " + str(self.n_classes))  # noqa
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
@@ -645,8 +636,7 @@ class VariableSequenceLength(CSVDataLoader):
             return the_seq.float(), the_seq.float()
 
     def pad_input_data(self, sequence: int):
-        """Pads a sequence to a specified length.
-        """
+        """Pads a sequence to a specified length."""
         if self.pad_length > sequence.shape[0]:
             pad_dim = self.pad_length - sequence.shape[0]
             return torch.nn.functional.pad(sequence, (0, 0, 0, pad_dim))
@@ -676,7 +666,7 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         super().__init__(series_id_col, main_params, return_method, return_all)
         print("forecast_total is: " + str(forecast_total))
         self.forecast_total = forecast_total
-        self.csv_test_loaders = [CSVTestLoader(loader_1, forecast_total, **main_params) for loader_1 in self.df_orig_list] # noqa
+        self.csv_test_loaders = [CSVTestLoader(loader_1, forecast_total, **main_params) for loader_1 in self.df_orig_list]  # noqa
 
     def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
         res = []

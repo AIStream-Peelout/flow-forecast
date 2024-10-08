@@ -1,3 +1,4 @@
+from flood_forecast.multi_models.crossvivit import RoCrossViViT
 from flood_forecast.transformer_xl.multi_head_base import MultiAttnHeadSimple
 from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, CustomTransformerDecoder
 from flood_forecast.transformer_xl.informer import Informer
@@ -27,7 +28,7 @@ from torchtsmixer import TSMixerExt
 
 
 """
-Utility dictionaries to map a string to a class
+Utility dictionaries to map a string to a class in the flood_forecast package.
 """
 pytorch_model_dict = {
     "MultiAttnHeadSimple": MultiAttnHeadSimple,
@@ -48,7 +49,8 @@ pytorch_model_dict = {
     "NLinear": NLinear,
     "TSMixer": TSMixer,
     "TSMixerExt": TSMixerExt,
-    "ITransformer": ITransformer
+    "ITransformer": ITransformer,
+    "CrossVIVIT": RoCrossViViT,
 }
 
 pytorch_criterion_dict = {

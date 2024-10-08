@@ -1,14 +1,14 @@
-{                 
+{
     "model_name": "CustomTransformerDecoder",
     "model_type": "PyTorch",
     "model_params": {
       "n_time_series":3,
       "seq_length":5,
-      "output_seq_length": 1, 
+      "output_seq_length": 1,
       "n_layers_encoder": 6,
       "output_dim":1,
       "final_act":"Swish"
-     }, 
+     },
     "dataset_params":
     {  "class": "default",
        "training_path": "tests/test_data/keag_small.csv",
@@ -41,10 +41,10 @@
        "lr": 0.3,
        "epochs": 1,
        "batch_size":4
-    
+
     },
     "GCS": false,
-    
+
     "wandb": {
        "name": "flood_forecast_circleci",
        "project": "repo-flood_forecast",
@@ -53,13 +53,13 @@
     "forward_params":{},
    "metrics":["MSE"],
    "inference_params":
-   {     
+   {
          "datetime_start":"2016-05-31",
          "num_prediction_samples":10,
-          "hours_to_forecast":336, 
+          "hours_to_forecast":336,
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
-            "decoder_function": "simple_decode", 
+            "decoder_function": "simple_decode",
             "unsqueeze_dim": 1},
           "dataset_params":{
              "file_path": "tests/test_data/keag_small.csv",
@@ -74,7 +74,6 @@
              "interpolate_param": false
           }
    }
-       
-   
+
+
 }
-    

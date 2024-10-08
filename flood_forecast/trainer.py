@@ -13,10 +13,11 @@ from flood_forecast.plot_functions import (
     plot_df_test_with_confidence_interval,
     plot_df_test_with_probabilistic_confidence_interval)
 
+
 def handle_model_evaluation1(test_acc, params: Dict) -> None:
     """Utility function to help handle model evaluation. Primarily used at the moment for forecasting models.
 
-    :param trained_model: A PyTorchForecast model that has already been trained. 
+    :param trained_model: A PyTorchForecast model that has already been trained.
     :type trained_model: PyTorchForecast
     :param params: A dictionary of the trained model parameters.
     :type params: Dict
@@ -28,7 +29,7 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
     forecast_start_idx = test_acc[2]
     df_prediction_samples = test_acc[3]
     mae = (df_train_and_test.loc[forecast_start_idx:, "preds"] -
-            df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
+           df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
     inverse_mae = 1 / mae
     i = 0
     for df in df_prediction_samples:
@@ -71,6 +72,7 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
                 name=relevant_col))
     wandb.log({"test_plot_all": test_plot_all})
 
+
 def handle_core_eval(trained_model, params: Dict, model_type: str):
     """_summary_
 
@@ -89,8 +91,8 @@ def handle_core_eval(trained_model, params: Dict, model_type: str):
         params["inference_params"],
         {})
     if params["dataset_params"]["class"] == "SeriesIDLoader":
-       data = test_acc[1]
-       for i in range(len(data)):
+        data = test_acc[1]
+        for i in range(len(data)):
             tuple_for_eval = (test_acc[0][i], test_acc[1][i], test_acc[2][i], test_acc[3][i])
             handle_model_evaluation1(tuple_for_eval, params)
     else:
@@ -98,23 +100,23 @@ def handle_core_eval(trained_model, params: Dict, model_type: str):
 
 
 def train_function(model_type: str, params: Dict) -> PyTorchForecast:
-    """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model
-    
+    """Function to train a Model(TimeSeriesModel) or da_rnn. Will return the trained model.
+
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
     :param params: Dictionary containing all the parameters needed to run the model.
     :type Dict:
     :return: A trained model
-    
-    .. code-block:: python 
-        
-        with open("model_config.json") as f: 
+
+    .. code-block:: python
+
+        with open("model_config.json") as f:
             params_dict = json.load(f)
         train_function("PyTorch", params_dict)
 
     ...
 
-    For information on what this params_dict should include see `Confluence pages <https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/92864513/Getting+Started>`_ on training models. 
+    For information on what this params_dict should include see `Confluence pages <https://flow-forecast.atlassian.net/wiki/spaces/FF/pages/92864513/Getting+Started>`_ on training models.
     """
     dataset_params = params["dataset_params"]
     if model_type == "da_rnn":
@@ -146,12 +148,26 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
                 trained_model.params["inference_params"]["dataset_params"] = trained_model.params["dataset_params"].copy()
                 del trained_model.params["inference_params"]["dataset_params"]["class"]
                 # noqa: F501
-                trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop("interpolate")
-                trained_model.params["inference_params"]["dataset_params"]["scaling"] = trained_model.params["inference_params"]["dataset_params"].pop("scaler")
+                trained_model.params["inference_params"]["dataset_params"]["interpolate_param"] = trained_model.params["inference_params"]["dataset_params"].pop(
+                    "interpolate")
+                trained_model.params["inference_params"]["dataset_params"]["scaling"] = trained_model.params["inference_params"]["dataset_params"].pop(
+                    "scaler")
                 if "feature_param" in trained_model.params["dataset_params"]:
-                    trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop("feature_param")
-                delete_params = ["num_workers", "pin_memory", "train_start", "train_end", "valid_start", "valid_end", "test_start", "test_end",
-                                "training_path", "validation_path", "test_path", "batch_size"]
+                    trained_model.params["inference_params"]["dataset_params"]["feature_params"] = trained_model.params["inference_params"]["dataset_params"].pop(
+                        "feature_param")
+                delete_params = [
+                    "num_workers",
+                    "pin_memory",
+                    "train_start",
+                    "train_end",
+                    "valid_start",
+                    "valid_end",
+                    "test_start",
+                    "test_end",
+                    "training_path",
+                    "validation_path",
+                    "test_path",
+                    "batch_size"]
                 for param in delete_params:
                     if param in trained_model.params["inference_params"]["dataset_params"]:
                         del trained_model.params["inference_params"]["dataset_params"][param]
@@ -168,21 +184,23 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
                                                                                            dataset_params)["scaling"]
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
-        if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] !="VariableSequenceLength":
+        if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] != "VariableSequenceLength":
             handle_core_eval(trained_model, params, model_type)
 
     else:
         raise Exception("Please supply valid model type for forecasting or classification")
     return trained_model
 
+
 def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
-    """Sklearn for whatever reason decided to only allow scaler params in the form of tuples
-    this was stupid so now we have to convert JSON list to tuple.
+    """Sklearn for whatever reason decided to only allow scaler params in the form of tuples this was stupid so now we
+    have to convert JSON list to tuple.
 
     :param scaling_params: A list of the scaling params
     :type training_conf: Dict
     """
-    training_conf["dataset_params"]["scaler_params"]["feature_range"] = tuple(training_conf["dataset_params"]["scaler_params"]["feature_range"])
+    training_conf["dataset_params"]["scaler_params"]["feature_range"] = tuple(
+        training_conf["dataset_params"]["scaler_params"]["feature_range"])
     if "dataset_params" in training_conf["inference_params"]:
         del training_conf["inference_params"]["dataset_params"]
         print("Fixed dumbass sklearn errors morons should've never changed it")
@@ -190,8 +208,9 @@ def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
 
 
 def main():
-    """
-    Main function which is called from the command line. Entrypoint for training all TS models.
+    """Main function which is called from the command line.
+
+    Entrypoint for training all TS models.
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")
@@ -202,6 +221,7 @@ def main():
         training_config = correct_stupid_sklearn_error(training_config)
     train_function(training_config["model_type"], training_config)
     print("Process is now complete.")
+
 
 if __name__ == "__main__":
     main()

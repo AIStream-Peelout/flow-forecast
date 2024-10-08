@@ -5,8 +5,7 @@ from flood_forecast.plot_functions import calculate_confidence_intervals, plot_d
 
 
 class PlotFunctionsTest(unittest.TestCase):
-    """ Tests the plot functions
-    """
+    """Tests the plot functions."""
     df_test = pd.DataFrame({
         'preds': [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
         'target_col': [4.0, 5.0, 6.0, 7.0, 8.0, 9.0]

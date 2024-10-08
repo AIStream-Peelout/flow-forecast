@@ -155,6 +155,7 @@ jobs:
           name: Model basic tests
           when: always
           command: |
+            coverage run -m unittest -v tests/multi_modal_tests/test_cross_vivit.py
             coverage run -m unittest -v tests/test_series_id.py
             coverage run -m unittest -v tests/test_squashed.py
             bash <(curl -s https://codecov.io/bash) -cF python
@@ -283,7 +284,7 @@ jobs:
       - store_artifacts:
           path: test-results
           destination: test-results-trainer
-      
+
       - run:
           name: upload results
           when: always
@@ -340,14 +341,14 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/test_dual.json
             echo -e 'running dsanet \n'
             coverage run flood_forecast/trainer.py -p tests/dsanet.json
-        
+
       - store_test_results:
           path: test-results
 
       - store_artifacts:
           path: test-results
           destination: test-results-trainer2
-      
+
       - run:
           name: upload results
           when: always
@@ -395,7 +396,7 @@ jobs:
         - store_artifacts:
             path: test-results
             destination: test-results-trainer
-        
+
         - run:
             name: upload results
             when: always
@@ -475,4 +476,3 @@ workflows:
       - trainer_test2:
           requires:
             - setup_and_install
-        

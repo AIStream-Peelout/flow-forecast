@@ -32,7 +32,7 @@ class TestDARNN(unittest.TestCase):
             self.assertIsNotNone(dnn_network)
 
     def test_resume_ckpt(self):
-        """ This test is dependent on test_train_model succeding"""
+        """This test is dependent on test_train_model succeding."""
         config, da = da_rnn(self.preprocessed_data, 1, 64)
         with tempfile.TemporaryDirectory() as checkpoint:
             torch.save(da.encoder.state_dict(), os.path.join(checkpoint, "encoder.pth"))

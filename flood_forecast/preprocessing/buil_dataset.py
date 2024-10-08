@@ -70,10 +70,10 @@ def create_visited():
 
 
 def get_eco_netset(directory_path: str) -> set:
-    """
-    Econet data was supplied to us by the NC State climate office. They gave
-    us a directory of CSV files in following format `LastName_First_station_id_Hourly.txt`
-    This code simply constructs a set of stations based on what is in the folder.
+    """Econet data was supplied to us by the NC State climate office.
+
+    They gave us a directory of CSV files in following format `LastName_First_station_id_Hourly.txt` This code simply
+    constructs a set of stations based on what is in the folder.
     """
     directory = os.fsencode(directory_path)
     print(sorted(os.listdir(directory)))

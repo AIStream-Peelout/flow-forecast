@@ -14,15 +14,15 @@ import pandas as pd
 
 
 class InferenceMode(object):
-    def __init__(self, forecast_steps: int, n_samp: int, model_params, csv_path: Union[str, pd.DataFrame], weight_path,
-                 wandb_proj: str = None, torch_script=False):
+    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params,
+                 csv_path: Union[str, pd.DataFrame], weight_path, wandb_proj: str = None, torch_script=False):
         """Class to handle inference for models,
 
-        :param forecasts_steps: Number of time-steps to forecast (doesn't have to be hours)
+        :param forecast_steps: Number of time-steps to forecast (doesn't have to be hours)
         :type forecast_steps: int
-        :param num_prediction_samples: Number of prediction samples
+        :param num_prediction_samples: The number of prediction samples
         :type num_prediction_samples: int
-        :param model_params: A dictionary of model parameters (ideally this should come from saved JSON config file)
+        :param model_params: A dictionafry of model parameters (ideally this should come from saved JSON config file)
         :type model_params: Dict
         :param csv_path: Path to the CSV test file you want to be used for inference or a Pandas dataframe.
         :type csv_path: str
@@ -43,14 +43,14 @@ class InferenceMode(object):
             s = scaling_function({}, self.inference_params["dataset_params"])["scaling"]
             self.inference_params["dataset_params"]["scaling"] = s
         self.inference_params["hours_to_forecast"] = forecast_steps
-        self.inference_params["num_prediction_samples"] = n_samp
+        self.inference_params["num_prediction_samples"] = num_prediction_samples
         if wandb_proj:
             date = datetime.now()
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
             wandb.config.update(model_params, allow_val_change=True)
 
     def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
-        """Performs inference on a CSV file at a specified date-time
+        """Performs inference on a CSV file at a specified date-time.
 
         :param some_date: The date you want inference to begin on.
         :param csv_path: A path to a CSV you want to perform inference on, defaults to None
@@ -92,13 +92,13 @@ class InferenceMode(object):
         return df, tensor, history, forecast_start, test, samples
 
     def infer_now_classification(self, data=None, over_lap_seq=True, save_buck=None, save_name=None, batch_size=1):
-        """Function to preform classification/anomaly detection on sequences in real-time
+        """Function to preform classification/anomaly detection on sequences in real-time.
+
         :param data: The data to perform inference on
         :type data: Union[pd.DataFrame, str], optional
         :param over_lap_seq: Whether to increment by one throughout the df or by sequence length
         :type over_lap_seq: bool,
         :param batch_size: The batch size to use, defaults to 1
-
         """
         if data is not None:
             dataset_params = self.model.params["dataset_params"].copy()
@@ -149,7 +149,7 @@ class InferenceMode(object):
 
 
 def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchForecast:
-    """Function to convert PyTorch model to torch script and save
+    """Function to convert PyTorch model to torch script and save.
 
     :param model: The PyTorchForecast model you wish to convert
     :type model: PyTorchForecast
@@ -173,7 +173,7 @@ def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchFo
 
 
 def convert_to_onnx():
-    """Converts a model to ONNX"""
+    """Converts a model to ONNX."""
     pass
 
 

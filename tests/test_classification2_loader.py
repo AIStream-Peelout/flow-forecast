@@ -20,8 +20,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.data_loader = GeneralClassificationLoader(self.dataset_params.copy(), 7)
 
     def test_classification_return(self):
-        """Tests the series_id method for one
-        """
+        """Tests the series_id method for one."""
         x, y = self.data_loader[0]
         self.assertIsInstance(x, torch.Tensor)
         self.assertIsInstance(y, torch.Tensor)
@@ -29,8 +28,7 @@ class TestGeneralClassificationCSVLoader(unittest.TestCase):
         self.assertGreater(x.shape[1], 1)
 
     def test_class(self):
-        """Tests the classification of a dl module
-        """
+        """Tests the classification of a dl module."""
         x, y = self.data_loader[1]
         self.assertIsInstance(x, torch.Tensor)
         self.assertIsInstance(y, torch.Tensor)

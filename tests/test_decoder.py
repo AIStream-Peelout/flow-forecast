@@ -48,10 +48,7 @@ class TestDecoding(unittest.TestCase):
         self.assertEqual(result.shape, torch.Size([30, 1, 128]))
 
     def test_for_leakage(self):
-        """
-        Simple test to check that raw target data does NOT
-        leak during validation steps.
-        """
+        """Simple test to check that raw target data does NOT leak during validation steps."""
         src, trg = next(iter(self.validation_loader))
         trg_mem = trg.clone().detach()
         result = greedy_decode(self.model, src, 20, trg)

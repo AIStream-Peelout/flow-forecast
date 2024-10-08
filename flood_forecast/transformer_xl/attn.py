@@ -2,27 +2,33 @@ import torch
 import torch.nn as nn
 import numpy as np
 from math import sqrt
-from einops import rearrange
+from einops import rearrange, repeat
+import torch.nn.functional as F
+from jaxtyping import Float
+from torch import einsum
+from typing import Tuple
 
 
-class TriangularCausalMask():
+class TriangularCausalMask:
     def __init__(self, B, L, device="cpu"):
         mask_shape = [B, 1, L, L]
         with torch.no_grad():
-            self._mask = torch.triu(torch.ones(mask_shape, dtype=torch.bool), diagonal=1).to(device)
+            self._mask = torch.triu(
+                torch.ones(mask_shape, dtype=torch.bool), diagonal=1
+            ).to(device)
 
     @property
     def mask(self):
         return self._mask
 
 
-class ProbMask():
+class ProbMask:
     def __init__(self, B, H, L, index, scores, device="cpu"):
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
         _mask_ex = _mask[None, None, :].expand(B, H, L, scores.shape[-1])
-        indicator = _mask_ex[torch.arange(B)[:, None, None],
-                             torch.arange(H)[None, :, None],
-                             index, :].to(device)
+        indicator = _mask_ex[
+            torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], index, :
+        ].to(device)
         self._mask = indicator.view(scores.shape).to(device)
 
     @property
@@ -47,27 +53,53 @@ class FlowAttention(nn.Module):
         queries = self.kernel_method(queries)
         keys = self.kernel_method(keys)
         # incoming and outgoing
-        normalizer_row = 1.0 / (torch.einsum("nhld,nhd->nhl", queries + 1e-6, keys.sum(dim=2) + 1e-6))
-        normalizer_col = 1.0 / (torch.einsum("nhsd,nhd->nhs", keys + 1e-6, queries.sum(dim=2) + 1e-6))
+        normalizer_row = 1.0 / (
+            torch.einsum("nhld,nhd->nhl", queries + 1e-6, keys.sum(dim=2) + 1e-6)
+        )
+        normalizer_col = 1.0 / (
+            torch.einsum("nhsd,nhd->nhs", keys + 1e-6, queries.sum(dim=2) + 1e-6)
+        )
         # reweighting
-        normalizer_row_refine = (
-            torch.einsum("nhld,nhd->nhl", queries + 1e-6, (keys * normalizer_col[:, :, :, None]).sum(dim=2) + 1e-6))
-        normalizer_col_refine = (
-            torch.einsum("nhsd,nhd->nhs", keys + 1e-6, (queries * normalizer_row[:, :, :, None]).sum(dim=2) + 1e-6))
+        normalizer_row_refine = torch.einsum(
+            "nhld,nhd->nhl",
+            queries + 1e-6,
+            (keys * normalizer_col[:, :, :, None]).sum(dim=2) + 1e-6,
+        )
+        normalizer_col_refine = torch.einsum(
+            "nhsd,nhd->nhs",
+            keys + 1e-6,
+            (queries * normalizer_row[:, :, :, None]).sum(dim=2) + 1e-6,
+        )
         # competition and allocation
         normalizer_row_refine = torch.sigmoid(
-            normalizer_row_refine * (float(queries.shape[2]) / float(keys.shape[2])))
-        normalizer_col_refine = torch.softmax(normalizer_col_refine, dim=-1) * keys.shape[2]  # B h L vis
+            normalizer_row_refine * (float(queries.shape[2]) / float(keys.shape[2]))
+        )
+        normalizer_col_refine = (
+            torch.softmax(normalizer_col_refine, dim=-1) * keys.shape[2]
+        )  # B h L vis
         # multiply
         kv = keys.transpose(-2, -1) @ (values * normalizer_col_refine[:, :, :, None])
-        x = (((queries @ kv) * normalizer_row[:, :, :, None]) *
-             normalizer_row_refine[:, :, :, None]).transpose(1, 2).contiguous()
+        x = (
+            (
+                ((queries @ kv) * normalizer_row[:, :, :, None]) *
+                normalizer_row_refine[:, :, :, None]
+            )
+            .transpose(1, 2)
+            .contiguous()
+        )
         return x, None
 
 
 # Code implementation from https://github.com/shreyansh26/FlashAttention-PyTorch
 class FlashAttention(nn.Module):
-    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+    def __init__(
+        self,
+        mask_flag=True,
+        factor=5,
+        scale=None,
+        attention_dropout=0.1,
+        output_attention=False,
+    ):
         super(FlashAttention, self).__init__()
         self.scale = scale
         self.mask_flag = mask_flag
@@ -83,9 +115,9 @@ class FlashAttention(nn.Module):
         l3 = torch.zeros(Q.shape[:-1])[..., None]
         m = torch.ones(Q.shape[:-1])[..., None] * NEG_INF
 
-        O1 = O1.to(device='cuda')
-        l3 = l3.to(device='cuda')
-        m = m.to(device='cuda')
+        O1 = O1.to(device="cuda")
+        l3 = l3.to(device="cuda")
+        m = m.to(device="cuda")
 
         Q_BLOCK_SIZE = min(BLOCK_SIZE, Q.shape[-1])
         KV_BLOCK_SIZE = BLOCK_SIZE
@@ -118,27 +150,31 @@ class FlashAttention(nn.Module):
                 scale = 1 / np.sqrt(Q.shape[-1])
                 Qi_scaled = Qi * scale
 
-                S_ij = torch.einsum('... i d, ... j d -> ... i j', Qi_scaled, Kj)
+                S_ij = torch.einsum("... i d, ... j d -> ... i j", Qi_scaled, Kj)
                 if mask is not None:
                     # Masking
-                    maskj_temp = rearrange(maskj, 'b j -> b 1 1 j')
+                    maskj_temp = rearrange(maskj, "b j -> b 1 1 j")
                     S_ij = torch.where(maskj_temp > 0, S_ij, NEG_INF)
 
                 m_block_ij, _ = torch.max(S_ij, dim=-1, keepdims=True)
                 P_ij = torch.exp(S_ij - m_block_ij)
                 if mask is not None:
                     # Masking
-                    P_ij = torch.where(maskj_temp > 0, P_ij, 0.)
+                    P_ij = torch.where(maskj_temp > 0, P_ij, 0.0)
 
                 l_block_ij = torch.sum(P_ij, dim=-1, keepdims=True) + EPSILON
 
-                P_ij_Vj = torch.einsum('... i j, ... j d -> ... i d', P_ij, Vj)
+                P_ij_Vj = torch.einsum("... i j, ... j d -> ... i d", P_ij, Vj)
 
                 mi_new = torch.maximum(m_block_ij, mi)
-                li_new = torch.exp(mi - mi_new) * li + torch.exp(m_block_ij - mi_new) * l_block_ij
+                li_new = (
+                    torch.exp(mi - mi_new) * li +
+                    torch.exp(m_block_ij - mi_new) * l_block_ij
+                )
 
                 O_BLOCKS[i] = (li / li_new) * torch.exp(mi - mi_new) * Oi + (
-                        torch.exp(m_block_ij - mi_new) / li_new) * P_ij_Vj
+                    torch.exp(m_block_ij - mi_new) / li_new
+                ) * P_ij_Vj
                 l_BLOCKS[i] = li_new
                 m_BLOCKS[i] = mi_new
 
@@ -148,24 +184,43 @@ class FlashAttention(nn.Module):
         return O, l3, m
 
     def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
-        res = \
-            self.flash_attention_forward(queries.permute(0, 2, 1, 3), keys.permute(0, 2, 1, 3), values.permute(0, 2, 1, 3), # noqa
-                                         attn_mask)[0]
+        res = self.flash_attention_forward(
+            queries.permute(0, 2, 1, 3),
+            keys.permute(0, 2, 1, 3),
+            values.permute(0, 2, 1, 3),  # noqa
+            attn_mask,
+        )[0]
         return res.permute(0, 2, 1, 3).contiguous(), None
 
 
 class FullAttention(nn.Module):
-    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+    def __init__(
+        self,
+        mask_flag=True,
+        factor=5,
+        scale=None,
+        attention_dropout=0.1,
+    ):
+        """The full attention mechanism currently used by the Informer and ITransformer models.
+
+        :param mask_flag: Whether to mask the attention mechanism.
+        :type mask_flag: bool
+        :param factor: The factor to use in the attention mechanism.
+        :type factor: int
+        :param scale: The scale to use in the attention mechanism.
+        :type scale: Union[float, None]
+        :param attention_dropout: The dropout to use in the attention mechanism.
+        :type attention_dropout: float
+        """
         super(FullAttention, self).__init__()
         self.scale = scale
         self.mask_flag = mask_flag
-        self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
+    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None) -> Tuple[torch.Tensor, torch.Tensor]:
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
-        scale = self.scale or 1. / sqrt(E)
+        scale = self.scale or 1.0 / sqrt(E)
 
         scores = torch.einsum("blhe,bshe->bhls", queries, keys)
 
@@ -178,15 +233,19 @@ class FullAttention(nn.Module):
         A = self.dropout(torch.softmax(scale * scores, dim=-1))
         V = torch.einsum("bhls,bshd->blhd", A, values)
 
-        if self.output_attention:
-            return (V.contiguous(), A)
-        else:
-            return (V.contiguous(), None)
+        return V.contiguous(), A
 
 
 # Code implementation from https://github.com/zhouhaoyi/Informer2020
 class ProbAttention(nn.Module):
-    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+    def __init__(
+        self,
+        mask_flag=True,
+        factor=5,
+        scale=None,
+        attention_dropout=0.1,
+        output_attention=False,
+    ):
         super(ProbAttention, self).__init__()
         self.factor = factor
         self.scale = scale
@@ -203,19 +262,17 @@ class ProbAttention(nn.Module):
         K_expand = K.unsqueeze(-3).expand(B, H, L_Q, L_K, E)
         # real U = U_part(factor*ln(L_k))*L_q
         index_sample = torch.randint(L_K, (L_Q, sample_k))
-        K_sample = K_expand[:, :, torch.arange(
-            L_Q).unsqueeze(1), index_sample, :]
-        Q_K_sample = torch.matmul(
-            Q.unsqueeze(-2), K_sample.transpose(-2, -1)).squeeze()
+        K_sample = K_expand[:, :, torch.arange(L_Q).unsqueeze(1), index_sample, :]
+        Q_K_sample = torch.matmul(Q.unsqueeze(-2), K_sample.transpose(-2, -1)).squeeze()
 
         # find the Top_k query with sparisty measurement
         M = Q_K_sample.max(-1)[0] - torch.div(Q_K_sample.sum(-1), L_K)
         M_top = M.topk(n_top, sorted=False)[1]
 
         # use the reduced Q to calculate Q_K
-        Q_reduce = Q[torch.arange(B)[:, None, None],
-                     torch.arange(H)[None, :, None],
-                     M_top, :]  # factor*ln(L_q)
+        Q_reduce = Q[
+            torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], M_top, :
+        ]  # factor*ln(L_q)
         Q_K = torch.matmul(Q_reduce, K.transpose(-2, -1))  # factor*ln(L_q)*L_k
 
         return Q_K, M_top
@@ -225,11 +282,10 @@ class ProbAttention(nn.Module):
         if not self.mask_flag:
             # V_sum = V.sum(dim=-2)
             V_sum = V.mean(dim=-2)
-            contex = V_sum.unsqueeze(-2).expand(B, H,
-                                                L_Q, V_sum.shape[-1]).clone()
+            contex = V_sum.unsqueeze(-2).expand(B, H, L_Q, V_sum.shape[-1]).clone()
         else:  # use mask
             # requires that L_Q == L_V, i.e. for self-attention only
-            assert (L_Q == L_V)
+            assert L_Q == L_V
             contex = V.cumsum(dim=-2)
         return contex
 
@@ -242,14 +298,14 @@ class ProbAttention(nn.Module):
 
         attn = torch.softmax(scores, dim=-1)  # nn.Softmax(dim=-1)(scores)
 
-        context_in[torch.arange(B)[:, None, None],
-                   torch.arange(H)[None, :, None],
-                   index, :] = torch.matmul(attn, V).type_as(context_in)
+        context_in[
+            torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], index, :
+        ] = torch.matmul(attn, V).type_as(context_in)
         if self.output_attention:
-            attns = (torch.ones([B, H, L_V, L_V]) /
-                     L_V).type_as(attn).to(attn.device)
-            attns[torch.arange(B)[:, None, None], torch.arange(H)[
-                                                  None, :, None], index, :] = attn
+            attns = (torch.ones([B, H, L_V, L_V]) / L_V).type_as(attn).to(attn.device)
+            attns[
+                torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], index, :
+            ] = attn
             return (context_in, attns)
         else:
             return (context_in, None)
@@ -262,33 +318,30 @@ class ProbAttention(nn.Module):
         keys = keys.transpose(2, 1)
         values = values.transpose(2, 1)
 
-        U_part = self.factor * \
-            np.ceil(np.log(L_K)).astype('int').item()  # c*ln(L_k)
-        u = self.factor * \
-            np.ceil(np.log(L_Q)).astype('int').item()  # c*ln(L_q)
+        U_part = self.factor * np.ceil(np.log(L_K)).astype("int").item()  # c*ln(L_k)
+        u = self.factor * np.ceil(np.log(L_Q)).astype("int").item()  # c*ln(L_q)
 
         U_part = U_part if U_part < L_K else L_K
         u = u if u < L_Q else L_Q
 
-        scores_top, index = self._prob_QK(
-            queries, keys, sample_k=U_part, n_top=u)
+        scores_top, index = self._prob_QK(queries, keys, sample_k=U_part, n_top=u)
 
         # add scale factor
-        scale = self.scale or 1. / sqrt(D)
+        scale = self.scale or 1.0 / sqrt(D)
         if scale is not None:
             scores_top = scores_top * scale
         # get the context
         context = self._get_initial_context(values, L_Q)
         # update the context with selected top_k queries
         context, attn = self._update_context(
-            context, values, scores_top, index, L_Q, attn_mask)
+            context, values, scores_top, index, L_Q, attn_mask
+        )
 
         return context.contiguous(), attn
 
 
 class AttentionLayer(nn.Module):
-    def __init__(self, attention, d_model, n_heads, d_keys=None,
-                 d_values=None):
+    def __init__(self, attention, d_model, n_heads, d_keys=None, d_values=None):
         super(AttentionLayer, self).__init__()
 
         d_keys = d_keys or (d_model // n_heads)
@@ -311,12 +364,7 @@ class AttentionLayer(nn.Module):
         values = self.value_projection(values).view(B, S, H, -1)
 
         out, attn = self.inner_attention(
-            queries,
-            keys,
-            values,
-            attn_mask,
-            tau=tau,
-            delta=delta
+            queries, keys, values, attn_mask, tau=tau, delta=delta
         )
         out = out.view(B, L, -1)
 
@@ -324,17 +372,27 @@ class AttentionLayer(nn.Module):
 
 
 class ReformerLayer(nn.Module):
-    def __init__(self, attention, d_model, n_heads, d_keys=None,
-                 d_values=None, causal=False, bucket_size=4, n_hashes=4):
+    def __init__(
+        self,
+        attention,
+        d_model,
+        n_heads,
+        d_keys=None,
+        d_values=None,
+        causal=False,
+        bucket_size=4,
+        n_hashes=4,
+    ):
         super().__init__()
         import LSHSelfAttention
+
         self.bucket_size = bucket_size
         self.attn = LSHSelfAttention(
             dim=d_model,
             heads=n_heads,
             bucket_size=bucket_size,
             n_hashes=n_hashes,
-            causal=causal
+            causal=causal,
         )
 
     def fit_length(self, queries):
@@ -345,10 +403,209 @@ class ReformerLayer(nn.Module):
         else:
             # fill the time series
             fill_len = (self.bucket_size * 2) - (N % (self.bucket_size * 2))
-            return torch.cat([queries, torch.zeros([B, fill_len, C]).to(queries.device)], dim=1)
+            return torch.cat(
+                [queries, torch.zeros([B, fill_len, C]).to(queries.device)], dim=1
+            )
 
     def forward(self, queries, keys, values, attn_mask, tau, delta):
         # in Reformer: defalut queries=keys
         B, N, C = queries.shape
         queries = self.attn(self.fit_length(queries))[:, :N, :]
         return queries, None
+
+
+def rotate_every_two(x):
+    x = rearrange(x, "... (d j) -> ... d j", j=2)
+    x1, x2 = x.unbind(dim=-1)
+    x = torch.stack((-x2, x1), dim=-1)
+    return rearrange(x, "... d j -> ... (d j)")
+
+
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):
+        super().__init__()
+        self.norm = nn.LayerNorm(dim)
+        self.fn = fn
+
+    def forward(self, x, **kwargs):
+        return self.fn(self.norm(x), **kwargs)
+
+
+class CrossPreNorm(nn.Module):
+    def __init__(self, dim, fn):
+        super().__init__()
+        self.norm_src = nn.LayerNorm(dim)
+        self.norm_tgt = nn.LayerNorm(dim)
+        self.fn = fn
+
+    def forward(self, ctx, src_pos_emb, ts, tgt_pos_emb):
+        return self.fn(self.norm_src(ctx), src_pos_emb, self.norm_tgt(ts), tgt_pos_emb)
+
+
+class GEGLU(nn.Module):
+    def forward(self, x):
+        x, gates = x.chunk(2, dim=-1)
+        return F.gelu(gates) * x
+
+
+class FeedForward(nn.Module):
+    def __init__(self, dim, hidden_dim, dropout=0.0, use_glu=True):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(dim, hidden_dim * 2 if use_glu else hidden_dim),
+            GEGLU() if use_glu else nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, dim),
+            nn.Dropout(dropout),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
+class SelfAttention(nn.Module):
+    def __init__(
+        self,
+        dim: int,
+        heads: int = 8,
+        dim_head: int = 64,
+        dropout: float = 0.0,
+        use_rotary: bool = True,
+    ):
+        """The self-attention mechanism used in the CrossVIVIT model. It is currently not used in other models and could
+        likely be consolidated with those self-attention mechanisms.
+
+        :param dim: The input dimension of the sequence.
+        :type dim: [type]
+        :param heads: [description]
+        :type heads: [type]
+        """
+        super().__init__()
+        inner_dim = dim_head * heads
+        self.use_rotary = use_rotary
+        self.heads = heads
+        self.scale = dim_head**-0.5
+
+        self.attend = nn.Softmax(dim=-1)
+        self.dropout = nn.Dropout(dropout)
+
+        self.to_q = nn.Linear(dim, inner_dim, bias=False)
+
+        self.to_kv = nn.Linear(dim, inner_dim * 2, bias=False)
+
+        self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
+
+    def forward(self, x: torch.Tensor, pos_emb: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Args:
+            x: Sequence of shape [B, N, D]
+            pos_emb: Positional embedding of sequence's tokens of shape [B, N, D]
+        """
+
+        q = self.to_q(x)
+
+        qkv = (q, *self.to_kv(x).chunk(2, dim=-1))
+        q, k, v = map(
+            lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=self.heads), qkv
+        )
+
+        if self.use_rotary:
+            # Used to map dimensions from dimension
+            sin, cos = map(
+                lambda t: repeat(t, "b n d -> (b h) n d", h=self.heads), pos_emb
+            )
+            dim_rotary = sin.shape[-1]
+
+            # handle the case where rotary dimension < head dimension
+
+            (q, q_pass), (k, k_pass) = map(
+                lambda t: (t[..., :dim_rotary], t[..., dim_rotary:]), (q, k)
+            )
+            q, k = map(lambda t: (t * cos) + (rotate_every_two(t) * sin), (q, k))
+            q, k = map(lambda t: torch.cat(t, dim=-1), ((q, q_pass), (k, k_pass)))
+
+        dots = einsum("b i d, b j d -> b i j", q, k) * self.scale
+
+        attn = self.attend(dots)
+        attn = self.dropout(attn)
+
+        out = einsum("b i j, b j d -> b i d", attn, v)
+        out = rearrange(out, "(b h) n d -> b n (h d)", h=self.heads)
+        return self.to_out(out), attn
+
+
+class CrossAttention(nn.Module):
+    def __init__(
+        self,
+        dim: int,
+        heads: int = 8,
+        dim_head: int = 64,
+        dropout: float = 0.0,
+        use_rotary: bool = True,
+    ):
+        """
+        This is the CrossAttention module primarily used in the CrossVIVIT paper. It is currently not used in other
+        models but may in the future be incorporated into other multi-modal models.
+        :param dim: The input dimension of the sequence.
+        :type dim: int
+        :param heads: The number of heads for the attention mechanism.
+        :type heads: int
+        :param dim_head: The dimension of the heads.
+        :type dim_head: int
+        """
+        super().__init__()
+        inner_dim = dim_head * heads
+        self.use_rotary = use_rotary
+        self.heads = heads
+        self.scale = dim_head**-0.5
+
+        self.attend = nn.Softmax(dim=-1)
+        self.dropout = nn.Dropout(dropout)
+        # Maps the input dimension to the inner dimension
+        self.to_q = nn.Linear(dim, inner_dim, bias=False)
+
+        self.to_kv = nn.Linear(dim, inner_dim * 2, bias=False)
+
+        self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
+
+    def forward(self, src: Float[torch.Tensor, ""], src_pos_emb, tgt, tgt_pos_emb):
+        """
+        Performs the forward pass of the CrossAttention module.
+
+        """
+        q = self.to_q(tgt)
+
+        qkv = (q, *self.to_kv(src).chunk(2, dim=-1))
+
+        q, k, v = map(
+            lambda t: rearrange(t, "b n (h d) -> (b h) n d", h=self.heads), qkv
+        )
+
+        if self.use_rotary:
+            # apply 2-d rotary embeddings to queries and keys
+
+            sin_src, cos_src = map(
+                lambda t: repeat(t, "b n d -> (b h) n d", h=self.heads), src_pos_emb
+            )
+            sin_tgt, cos_tgt = map(
+                lambda t: repeat(t, "b n d -> (b h) n d", h=self.heads), tgt_pos_emb
+            )
+            dim_rotary = sin_src.shape[-1]
+
+            # handle the case where rotary dimension < head dimension
+
+            (q, q_pass), (k, k_pass) = map(
+                lambda t: (t[..., :dim_rotary], t[..., dim_rotary:]), (q, k)
+            )
+            q = (q * cos_tgt) + (rotate_every_two(q) * sin_tgt)
+            k = (k * cos_src) + (rotate_every_two(k) * sin_src)
+            q, k = map(lambda t: torch.cat(t, dim=-1), ((q, q_pass), (k, k_pass)))
+
+        dots = einsum("b i d, b j d -> b i j", q, k) * self.scale
+
+        attn = self.attend(dots)
+        attn = self.dropout(attn)
+
+        out = einsum("b i j, b j d -> b i d", attn, v)
+        out = rearrange(out, "(b h) n d -> b n (h d)", h=self.heads)
+        return self.to_out(out), attn

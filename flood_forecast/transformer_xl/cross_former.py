@@ -134,8 +134,8 @@ class Crossformer(nn.Module):
 
 
 class SegMerging(nn.Module):
-    """
-    Segment Merging Layer.
+    """Segment Merging Layer.
+
     The adjacent `win_size' segments in each dimension will be merged into one segment to
     get representation of a coarser scale
     we set win_size = 2 in our paper
@@ -206,9 +206,7 @@ class scale_block(nn.Module):
 
 
 class Encoder(nn.Module):
-    """
-    The Encoder of Crossformer.
-    """
+    """The Encoder of Crossformer."""
 
     def __init__(
         self,
@@ -256,9 +254,7 @@ class Encoder(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    """
-    The decoder layer of Crossformer, each layer will make a prediction at its scale
-    """
+    """The decoder layer of Crossformer, each layer will make a prediction at its scale."""
 
     def __init__(
         self,
@@ -315,9 +311,7 @@ class DecoderLayer(nn.Module):
 
 
 class Decoder(nn.Module):
-    """
-    The decoder of Crossformer, making the final prediction by adding up predictions at each scale
-    """
+    """The decoder of Crossformer, making the final prediction by adding up predictions at each scale."""
 
     def __init__(
         self,
@@ -366,9 +360,7 @@ class Decoder(nn.Module):
 
 
 class FullAttention(nn.Module):
-    """
-    The Attention operation
-    """
+    """The Attention operation."""
 
     def __init__(self, scale=None, attention_dropout=0.1):
         super(FullAttention, self).__init__()
@@ -387,9 +379,7 @@ class FullAttention(nn.Module):
 
 
 class AttentionLayer(nn.Module):
-    """
-    The Multi-head Self-Attention (MSA) Layer
-    """
+    """The Multi-head Self-Attention (MSA) Layer."""
 
     def __init__(
         self, d_model, n_heads, d_keys=None, d_values=None, mix=True, dropout=0.1
@@ -425,10 +415,7 @@ class AttentionLayer(nn.Module):
 
 
 class TwoStageAttentionLayer(nn.Module):
-    """
-    The Two Stage Attention (TSA) Layer
-    input/output shape: [batch_size, Data_dim(D), Seg_num(L), d_model]
-    """
+    """The Two Stage Attention (TSA) Layer input/output shape: [batch_size, Data_dim(D), Seg_num(L), d_model]"""
 
     def __init__(self, seg_num, factor, d_model, n_heads, d_ff=None, dropout=0.1):
         super(TwoStageAttentionLayer, self).__init__()

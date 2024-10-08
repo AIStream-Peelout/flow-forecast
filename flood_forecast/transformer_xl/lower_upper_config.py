@@ -23,9 +23,7 @@ def variable_forecast_layer(layer_type, layer_params):
 
 
 class PositionwiseFeedForward(nn.Module):
-    ''' A two-feed-forward-layer module
-    Taken from DSANET repos
-     '''
+    """A two-feed-forward-layer module Taken from DSANET repos."""
 
     def __init__(self, d_in, d_hid, dropout=0.1):
         super().__init__()

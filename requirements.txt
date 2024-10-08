@@ -23,3 +23,5 @@ sphinx-autodoc-typehints
 sphinx
 einops
 pytorch-tsmixer
+einsum
+jaxtyping

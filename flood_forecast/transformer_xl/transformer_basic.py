@@ -176,10 +176,8 @@ class CustomTransformerDecoder(torch.nn.Module):
         return x
 
     def forward(self, x: torch.Tensor, meta_data=None) -> torch.Tensor:
-        """
-        Performs forward pass on tensor of (batch_size, sequence_length, n_time_series)
-        Return tensor of dim (batch_size, output_seq_length)
-        """
+        """Performs forward pass on tensor of (batch_size, sequence_length, n_time_series) Return tensor of dim
+        (batch_size, output_seq_length)"""
         x = self.dense_shape(x)
         if type(meta_data) == torch.Tensor:
             # batch_size = x.shape[0]
@@ -221,7 +219,7 @@ class SimplePositionalEncoding(torch.nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Creates a basic positional encoding"""
+        """Creates a basic positional encoding."""
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
@@ -237,8 +235,8 @@ def greedy_decode(
         multi_targets=1,
         probabilistic=False,
         scaler=None):
-    """
-    Mechanism to sequentially decode the model
+    """Mechanism to sequentially decode the model.
+
     :src The Historical time series values
     :real_target The real values (they should be masked), however if you want can include known real values.
     :returns torch.Tensor

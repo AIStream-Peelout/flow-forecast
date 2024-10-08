@@ -7,7 +7,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def numpy_to_tvar(x: torch.Tensor) -> torch.autograd.Variable:
-    """ Converts a numpy array into a PyTorch Tensor
+    """Converts a numpy array into a PyTorch Tensor.
 
     :param x: A numpy array you want to convert to a PyTorch tensor
     :type x: torch.Tensor
@@ -18,15 +18,14 @@ def numpy_to_tvar(x: torch.Tensor) -> torch.autograd.Variable:
 
 
 def flatten_list_function(input_list: List) -> List:
-    """
-    A function to flatten a list.
-    """
+    """A function to flatten a list."""
     return [item for sublist in input_list for item in sublist]
 
 
 def make_criterion_functions(crit_list: List) -> List:
-    """crit_list should be either dict or list. If dict, then it should be a dictionary of the form .
-    returns a list
+    """crit_list should be either dict or list.
+
+    If dict, then it should be a dictionary of the form . returns a list
     """
     final_list = []
     if type(crit_list) == list:

@@ -40,10 +40,7 @@ def get_closest_gage(
 
 
 def haversine(lon1, lat1, lon2, lat2):
-    """
-    Calculate the great circle distance between two points
-    on the earth (specified in decimal degrees)
-    """
+    """Calculate the great circle distance between two points on the earth (specified in decimal degrees)"""
     # convert decimal degrees to radians
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
@@ -57,10 +54,7 @@ def haversine(lon1, lat1, lon2, lat2):
 
 
 def get_weather_data(file_path: str, econet_gages: Set, base_url: str):
-    """
-    Function that retrieves if station has weather
-    data for a specific gage either from ASOS or ECONet
-    """
+    """Function that retrieves if station has weather data for a specific gage either from ASOS or ECONet."""
     # Base URL
     # "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station={}&data=tmpf&data=p01m&year1=2019&month1=1&day1=1&year2=2019&month2=1&day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
 
@@ -93,10 +87,9 @@ def format_dt(date_time_str: str) -> datetime:
 
 
 def convert_temp(temparature: str) -> float:
-    """
-    Note here temp could be a number or 'M'
-    which stands for missing. We use 50 at the moment
-    to fill missing values.
+    """Note here temp could be a number or 'M' which stands for missing.
+
+    We use 50 at the moment to fill missing values.
     """
     try:
         return float(temparature)
@@ -105,10 +98,7 @@ def convert_temp(temparature: str) -> float:
 
 
 def process_asos_data(file_path: str, base_url: str) -> Dict:
-    """
-    Function that saves the ASOS data to CSV
-    uses output of get weather data.
-    """
+    """Function that saves the ASOS data to CSV uses output of get weather data."""
     with open(file_path) as f:
         gage_data = json.load(f)
         for station in gage_data["stations"]:

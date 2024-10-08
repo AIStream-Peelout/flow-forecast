@@ -5,7 +5,7 @@ from torch.nn import MultiheadAttention
 
 class MergingModel(torch.nn.Module):
     def __init__(self, method: str, other_params: Dict):
-        """A model meant to help merge meta-data with the temporal data
+        """A model meant to help merge meta-data with the temporal data.
 
         :param method: The method you want to use (Bilinear, Bilinear2, MultiAttn, Concat)
         :type method: str
@@ -25,8 +25,7 @@ class MergingModel(torch.nn.Module):
         self.method = method
 
     def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor):
-        """
-        Performs the forward pass on both meta and temporal data. Returns merged tensor.
+        """Performs the forward pass on both meta and temporal data. Returns merged tensor.
 
         :param temporal_data: The temporal data should be in shape (batch_size, n_time_series, n_feats)
         :type temporal_data: torch.Tensor
@@ -57,7 +56,7 @@ class MergingModel(torch.nn.Module):
 class Concatenation(torch.nn.Module):
     def __init__(self, cat_dim: int, repeat: bool = True, use_layer: bool = False,
                  combined_d: int = 1, out_shape: int = 1):
-        """A function to combine two tensors together via concantenation
+        """A function to combine two tensors together via concantenation.
 
         :param cat_dim: The dimension that you want to concatenate along (e.g. 0, 1, 2)
         :type cat_dim: int

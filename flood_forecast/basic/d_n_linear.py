@@ -3,9 +3,8 @@ import torch.nn as nn
 
 
 class NLinear(nn.Module):
-    """
-    Normalization-Linear
-    """
+    """Normalization-Linear."""
+
     def __init__(self, forecast_history: int, forecast_length: int, enc_in=128, individual=False, n_targs=1):
         super(NLinear, self).__init__()
         self.seq_len = forecast_history
@@ -40,9 +39,8 @@ class NLinear(nn.Module):
 
 
 class MovingAvg(nn.Module):
-    """
-    Moving average block to highlight the trend of time series
-    """
+    """Moving average block to highlight the trend of time series."""
+
     def __init__(self, kernel_size, stride):
         super(MovingAvg, self).__init__()
         self.kernel_size = kernel_size
@@ -59,9 +57,8 @@ class MovingAvg(nn.Module):
 
 
 class SeriesDecomp(nn.Module):
-    """
-    Series decomposition block
-    """
+    """Series decomposition block."""
+
     def __init__(self, kernel_size):
         super(SeriesDecomp, self).__init__()
         self.moving_avg = MovingAvg(kernel_size, stride=1)
@@ -73,11 +70,10 @@ class SeriesDecomp(nn.Module):
 
 
 class DLinear(nn.Module):
-    """
-    Decomposition-Linear
-    """
+    """Decomposition-Linear."""
+
     def __init__(self, forecast_history: int, forecast_length: int, individual, enc_in: int, n_targs=1):
-        """Code from
+        """Code from.
 
         :param forecast_history: _description_
         :type forecast_history: int
@@ -117,7 +113,7 @@ class DLinear(nn.Module):
             # self.Linear_Trend.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len2,self.seq_len]))
 
     def forward(self, x: torch.Tensor):
-        """The
+        """The.
 
         :param x: PyTorch tensor of size [Batch, Input length, Channel]
         :type x: _type_

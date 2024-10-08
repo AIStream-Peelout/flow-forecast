@@ -6,10 +6,7 @@ from torch.autograd import Function
 
 class DilateLoss(torch.nn.Module):
     def __init__(self, gamma=0.001, alpha=0.5):
-        """
-        Dilate loss function originally from
-        https://github.com/manjot4/NIPS-Reproducibility-Challenge
-        """
+        """Dilate loss function originally from https://github.com/manjot4/NIPS-Reproducibility-Challenge."""
         super().__init__()
         self.gamma = gamma
         self.alpha = alpha
@@ -69,7 +66,6 @@ def pairwise_distances(x, y=None):
 
 @jit(nopython=True)
 def compute_softdtw(D, gamma):
-
     N = D.shape[0]
     M = D.shape[1]
     R = np.zeros((N + 2, M + 2)) + 1e8

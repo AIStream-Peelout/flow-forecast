@@ -10,8 +10,8 @@ from datetime import datetime
 
 
 class DataLoaderTests(unittest.TestCase):
-    """
-    Class to test data loader functionality for the code mod.
+    """Class to test data loader functionality for the code mod.
+
     Specifically, reuturn types and indexing to make sure there is no overlap.
     """
 

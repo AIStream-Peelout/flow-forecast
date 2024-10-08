@@ -18,10 +18,7 @@ def loop_through(
         use_transfer: bool = True,
         start_index: int = 0,
         end_index: int = 25) -> None:
-    """
-    Function that makes and executes a set of config files
-    This is since we have over 9k files and.
-    """
+    """Function that makes and executes a set of config files This is since we have over 9k files and."""
     if not os.path.exists("model_save"):
         os.mkdir("model_save")
     sorted_dir_list = sorted(os.listdir(data_dir))

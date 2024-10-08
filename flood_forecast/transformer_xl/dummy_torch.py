@@ -1,6 +1,4 @@
-"""
-A small dummy model specifically for unit and integration testing purposes
-"""
+"""A small dummy model specifically for unit and integration testing purposes."""
 import torch
 from torch import nn
 
@@ -18,7 +16,7 @@ class DummyTorchModel(nn.Module):
         self.linear_test_layer = nn.Linear(3, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """The forward pass for the dummy model
+        """The forward pass for the dummy model.
 
         :param x: Here the data is irrelvant. Only batch_size is grabbed
         :type x: torch.Tensor

@@ -3,10 +3,10 @@ from typing import Type
 
 
 class SimpleLinearModel(torch.nn.Module):
-    """
-    A very simple baseline model to resolve some of the
-    difficulties with bugs in the various train/validation loops
-    in code. Has only two layers.
+    """A very simple baseline linear model to resolve some of the difficulties with bugs in the various train/validation
+    loops in code.
+
+    Has only two layers.
     """
 
     def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, probabilistic: bool = False):
