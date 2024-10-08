@@ -105,7 +105,7 @@ def train_transformer_style(
     :type takes_target: bool, optional
     :param forward_params: [description], defaults to {}
     :type forward_params: Dict, optional
-    :param model_filepath: The file path to load modeel weights from, defaults to "model_save"
+    :param model_filepath: The file path to load model weights from, defaults to "model_save"
     :type model_filepath: str, optional
     """
     use_wandb = model.wandb

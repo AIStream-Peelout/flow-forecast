@@ -222,5 +222,6 @@ def main():
     train_function(training_config["model_type"], training_config)
     print("Process is now complete.")
 
+
 if __name__ == "__main__":
     main()
