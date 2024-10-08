@@ -4,10 +4,8 @@ sphinx-autodoc-typehints
 pandas
 numpy
 torch
-matplotlib
 plotly
 google-cloud-storage
 scikit-learn
 wandb
 shap
-einops

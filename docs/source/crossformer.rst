@@ -1,4 +1,4 @@
 Crossformer
 =========================
-.. automodule:: flood_forecast.transformer_xl.cross_former
+.. automodule:: flood_forecast.transformer_xl.crossformer
     :members:
