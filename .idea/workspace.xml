@@ -5,13 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fed11ced-c777-4db5-9ac9-1c12dcf84a69" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/docs/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/basic_ae.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/basic_ae.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/basic_utils.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/basic_utils.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/crossformer.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/crossformer.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/custom_opt.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/custom_opt.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/explain_model_output.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/explain_model_output.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flood_forecast/preprocessing/pytorch_loaders.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/preprocessing/pytorch_loaders.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flood_forecast/multimodal_models/lanistr.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flood_forecast/multimodal_models/prediff.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/model_dict_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/model_dict_function.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/multi_models/crossvivit.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/multimodal_models/crossvivit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/time_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/time_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/multi_modal_tests/test_cross_vivit.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/multi_modal_tests/test_cross_vivit.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,31 +37,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding_forward.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_self_attention_dims.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_vivit_model.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_ro_crossvivit.TestRoCrossViViT.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_variable_length.TestVariableLength.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_cross_vivit.py.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;com.google.cloudcode.ide_session_index&quot;: &quot;20240803_0000&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.black.configuration.BlackFormatterConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding_forward.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_self_attention_dims.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_vivit_model.executor": "Run",
+    "Python tests.Python tests for test_ro_crossvivit.TestRoCrossViViT.executor": "Run",
+    "Python tests.Python tests for test_variable_length.TestVariableLength.executor": "Run",
+    "Python tests.Python tests in test_cross_vivit.py.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.google.cloudcode.ide_session_index": "20240803_0000",
+    "git-widget-placeholder": "more__multimodal__models",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.stylelint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.stylelint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.black.configuration.BlackFormatterConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward">
     <configuration name="Python tests for test_cross_vivit.TestCrossVivVit.test_forward" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="flow-forecast" />
@@ -156,8 +156,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.18034.82" />
-        <option value="bundled-python-sdk-975db3bf15a3-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.18034.82" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.19072.16" />
+        <option value="bundled-python-sdk-8336bb23522e-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.19072.16" />
       </set>
     </attachedChunks>
   </component>
@@ -171,6 +171,8 @@
       <updated>1720330545131</updated>
       <workItem from="1720330546359" duration="60505000" />
       <workItem from="1722134062965" duration="34853000" />
+      <workItem from="1728526740239" duration="3004000" />
+      <workItem from="1728776723634" duration="14701000" />
     </task>
     <servers />
   </component>
