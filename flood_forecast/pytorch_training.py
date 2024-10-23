@@ -1,3 +1,5 @@
+import logging
+
 import torch
 import torch.optim as optim
 from typing import Type, Dict, List, Union
@@ -118,10 +120,10 @@ def train_transformer_style(
         num_targets = model.params["n_targets"]
     if "num_workers" in dataset_params:
         worker_num = dataset_params["num_workers"]
-        print("using " + str(worker_num))
+        logging.log(logging.INFO, "Using " + str(worker_num) + " workers")
     if "pin_memory" in dataset_params:
         pin_memory = dataset_params["pin_memory"]
-        print("Pin memory set to true")
+        logging.log(logging.INFO, "Set pin memory ")
     if "early_stopping" in model.params:
         es = EarlyStopper(model.params["early_stopping"]['patience'])
     if "shuffle" not in training_params:

@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 
 
 class LANISTRMultiModalForPreTraining(nn.Module):

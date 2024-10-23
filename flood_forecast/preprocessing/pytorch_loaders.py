@@ -8,6 +8,7 @@ from flood_forecast.preprocessing.buil_dataset import get_data
 from datetime import datetime
 from flood_forecast.preprocessing.temporal_feats import feature_fix
 from copy import deepcopy
+import logging
 
 
 class CSVDataLoader(Dataset):
@@ -56,17 +57,16 @@ class CSVDataLoader(Dataset):
         interpolate = interpolate_param
         self.forecast_history = forecast_history
         self.forecast_length = forecast_length
-        print("interpolate should be below")
+        logging.log(logging.INFO, "Now loading the CSV file from: " + file_path)
         df = get_data(file_path)
-        print(df.columns)
+        logging.log(logging.INFO, "Found the following columns in the CSV file: " + str(df.columns))
         relevant_cols3 = []
         if sort_column:
             df[sort_column] = df[sort_column].astype("datetime64[ns]")
             df = df.sort_values(by=sort_column)
             if feature_params:
                 df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
-                print("Created datetime feature columns are: ")
-        print(relevant_cols3)
+                logging.log(logging.INFO, "Created the following columns: " + str(relevant_cols3))
         self.relevant_cols3 = relevant_cols3
         if interpolate:
             df = interpolate_dict[interpolate["method"]](df, **interpolate["params"])
@@ -75,7 +75,7 @@ class CSVDataLoader(Dataset):
         self.scale = None
         if scaled_cols is None:
             scaled_cols = relevant_cols
-        print("scaled cols are")
+        # logging.log(logging.INFO, "The scaled columns are: " + str(scaled_cols))
         print(scaled_cols)
         if start_stamp != 0 and end_stamp is not None:
             self.df = self.df[start_stamp:end_stamp]
@@ -661,7 +661,7 @@ class VariableSequenceLength(CSVDataLoader):
 
 class SeriesIDTestLoader(CSVSeriesIDLoader):
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, forecast_total=336, return_all=True):
-        """_summary_
+        """A test loader for generating
 
         :param series_id_col: The column that contains the series_id
         :type series_id_col: str
