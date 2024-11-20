@@ -41,7 +41,7 @@ class CSVDataLoader(Dataset):
                                 equal history_length)
         :param relevant_cols: Supply column names you wish to predict in the forecast (others will not be used)
         :param target_col: The target column or columns you to predict. If you only have one still use a list ['cfs']
-        :param scaling: (highly reccomended) If provided should be a subclass of sklearn.base.BaseEstimator
+        :param scaling: (highly recommended) If provided should be a subclass of sklearn.base.BaseEstimator
         and sklearn.base.TransformerMixin) i.e StandardScaler,  MaxAbsScaler, MinMaxScaler, etc) Note without
         a scaler the loss is likely to explode and cause infinite loss which will corrupt weights
         :param start_stamp int: Optional if you want to only use part of a CSV for training, validation
@@ -684,3 +684,8 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         for test_loader in self.csv_test_loaders:
             res.append(test_loader.get_from_start_date(forecast_start, series_id))
         return res
+
+
+class UniformMultiModalLoader(object):
+
+    pass
