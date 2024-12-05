@@ -206,7 +206,7 @@ class scale_block(nn.Module):
 
 
 class Encoder(nn.Module):
-    """The Encoder of Crossformer."""
+    """The Encoder of Crossformer model."""
 
     def __init__(
         self,

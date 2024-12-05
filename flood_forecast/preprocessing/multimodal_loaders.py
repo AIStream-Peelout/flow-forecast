@@ -19,12 +19,14 @@ class ImageSequenceHelper:
             transform: Optional[transforms.Compose] = None,
             cloud_config: Optional[Dict] = None
     ):
-        """Initialize the image sequence helper
+        """Initialize the image sequence helper ad performs manipulations on the images.
+        :param cache_dir: Directory to cache downloaded images
+        :type cache_dir: str
+        :param transform: Image transformation pipeline
+        :type transform: transforms.Compose
+        :param cloud_config: Configuration for cloud storage
+        :type cloud_config: Dict
 
-        Args:
-            cache_dir: Directory to cache downloaded files
-            transform: Torchvision transforms to apply to images
-            cloud_config: Configuration for cloud storage access
         """
         self.cache_dir = cache_dir if cache_dir else "./.cache"
         self.transform = transform if transform else transforms.Compose([
