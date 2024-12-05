@@ -94,7 +94,7 @@ class UniformMultiModalLoader(CSVDataLoader):
 
     def __init__(
             self,
-            main_params: Dict[str, Any],
+            csv_data_loader_params: Dict[str, Any],
             image_config: Optional[Dict[str, Any]] = None,
             text_config: Optional[Dict[str, Any]] = None
     ):
@@ -105,7 +105,7 @@ class UniformMultiModalLoader(CSVDataLoader):
         :param text_config: Configuration for text modality
 
         """
-        super().__init__(**main_params)
+        super().__init__(**csv_data_loader_params)
 
         # Initialize image helper if image config is provided
         self.image_helper = None
