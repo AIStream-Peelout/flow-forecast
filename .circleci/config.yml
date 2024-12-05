@@ -75,7 +75,7 @@ jobs:
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
 
-      - store_tests_results:
+      - store_test_results:
           path: tests-results
 
       - store_artifacts:
@@ -123,7 +123,7 @@ jobs:
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
 
-      - store_tests_results:
+      - store_test_results:
           path: tests-results
 
       - store_artifacts:

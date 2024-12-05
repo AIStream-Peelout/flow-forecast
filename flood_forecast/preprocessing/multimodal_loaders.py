@@ -11,7 +11,7 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVDataLoader, CSVTestL
 
 
 class ImageSequenceHelper:
-    """Helper class to handle loading and processing of image sequences"""
+    """Helper class to handle loading and processing of image sequences."""
 
     def __init__(
             self,
@@ -188,7 +188,7 @@ class UniformMultiModalTestLoader(CSVTestLoader):
             image_config: Optional[Dict[str, Any]] = None,
             **kwargs
     ):
-        """Initialize the test loader
+        """Initialize the test loader.
 
         Args:
             df_path: Path to the CSV file
