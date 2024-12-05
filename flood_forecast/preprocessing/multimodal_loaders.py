@@ -98,16 +98,12 @@ class UniformMultiModalLoader(CSVDataLoader):
             image_config: Optional[Dict[str, Any]] = None,
             text_config: Optional[Dict[str, Any]] = None
     ):
-        """Initialize the UniformMultiModal data loader
+        """Initializes the UniformMultiModal data loader class
+        :param main_params: Parameters for the base CSVDataLoader. This should
+        :type main_params: Dict[str, Any]
+        :param image_config: Configuration for image modality
+        :param text_config: Configuration for text modality
 
-        Args:
-            main_params: Parameters for the base CSVDataLoader
-            image_config: Configuration for image modality, should include:
-                - path_col: Column name containing image paths
-                - cache_dir: Directory to cache images
-                - fill_method: Method to handle missing images
-                - transform: Optional torchvision transforms
-            text_config: Configuration for text modality (future extension)
         """
         super().__init__(**main_params)
 

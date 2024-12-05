@@ -65,10 +65,10 @@ jobs:
           name: Evaluator tests
           when: always
           command: |
-            coverage run -m unittest -v tests/test_deployment.py
-            coverage run -m unittest -v tests/test_evaluation.py
-            coverage run -m unittest -v tests/validation_loop_test.py
-            coverage run -m unittest -v tests/test_handle_multi_crit.py
+            coverage run -m unittest -v test/test_json_config/test_deployment.py
+            coverage run -m unittest -v test/test_json_config/test_evaluation.py
+            coverage run -m unittest -v test/test_json_config/validation_loop_test.py
+            coverage run -m unittest -v test/test_json_config/test_handle_multi_crit.py
 
       - run:
           name: upload
@@ -107,16 +107,16 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
-            coverage run -m unittest -v tests/test_multitask_decoder.py
+            coverage run -m unittest -v test/test_json_config/test_multitask_decoder.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/data_format_tests.py
+            coverage run -m unittest -v test/test_json_config/data_format_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/usgs_tests.py
+            coverage run -m unittest -v test/test_json_config/usgs_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_join.py
+            coverage run -m unittest -v test/test_json_config/test_join.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_preprocessing.py
-            coverage run -m unittest -v tests/test_variable_length.py
+            coverage run -m unittest -v test/test_json_config/test_preprocessing.py
+            coverage run -m unittest -v test/test_json_config/test_variable_length.py
 
       - run:
           name: upload_stuff
@@ -155,29 +155,29 @@ jobs:
           name: Model basic tests
           when: always
           command: |
-            coverage run -m unittest -v tests/multi_modal_tests/test_cross_vivit.py
-            coverage run -m unittest -v tests/test_series_id.py
-            coverage run -m unittest -v tests/test_squashed.py
+            coverage run -m unittest -v test/test_json_config/multi_modal_test/test_json_config/test_cross_vivit.py
+            coverage run -m unittest -v test/test_json_config/test_series_id.py
+            coverage run -m unittest -v test/test_json_config/test_squashed.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_attn.py
+            coverage run -m unittest -v test/test_json_config/test_attn.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_informer.py
+            coverage run -m unittest -v test/test_json_config/test_informer.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_meta_pr.py
+            coverage run -m unittest -v test/test_json_config/test_meta_pr.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/time_model_test.py
+            coverage run -m unittest -v test/test_json_config/time_model_test.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/data_loader_tests.py
+            coverage run -m unittest -v test/test_json_config/data_loader_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_da_rnn.py
+            coverage run -m unittest -v test/test_json_config/test_da_rnn.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_loss.py
+            coverage run -m unittest -v test/test_json_config/test_loss.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_merging_models.py
+            coverage run -m unittest -v test/test_json_config/test_merging_models.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/pytorc_train_tests.py
+            coverage run -m unittest -v test/test_json_config/pytorc_train_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_classification2_loader.py
+            coverage run -m unittest -v test/test_json_config/test_classification2_loader.py
       - run:
           name: upload_stuff
           when: always
@@ -214,7 +214,7 @@ jobs:
       - run:
           name: Decoder tests
           when: always
-          command: coverage run -m unittest -v tests/test_decoder.py
+          command: coverage run -m unittest -v test/test_json_config/test_decoder.py
 
       - run:
           name: upload_stuff
@@ -254,29 +254,29 @@ jobs:
           when: always
           command: |
             echo -e 'GRU Vanilla test'
-            coverage run flood_forecast/trainer.py -p tests/gru_vanilla.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/gru_vanilla.json
             echo -e 'Running classification test'
-            coverage run flood_forecast/trainer.py -p tests/classification_test.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/classification_test.json
             echo -e 'Running informer single test'
-            coverage run flood_forecast/trainer.py -p tests/test_inf_single.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/test_inf_single.json
             echo -e 'Running transformer_gaussian test'
-            coverage run flood_forecast/trainer.py -p tests/transformer_gaussian.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/transformer_gaussian.json
             echo -e 'Running multi_decoder_test.json'
-            coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/multi_decoder_test.json
             echo -e 'training multi-task-decoder'
-            coverage run flood_forecast/trainer.py -p tests/multitask_decoder.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/multitask_decoder.json
             echo -e 'running da-meta data unit test'
-            coverage run flood_forecast/trainer.py -p tests/da_meta.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/da_meta.json
             echo -e 'running transformer bottleneck'
-            coverage run flood_forecast/trainer.py -p tests/transformer_bottleneck.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/transformer_bottleneck.json
             echo -e 'running da_rnn probabilistic test'
-            coverage run flood_forecast/trainer.py -p tests/da_rnn_probabilistic.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/da_rnn_probabilistic.json
             echo -e 'running lstm probabilistic test'
-            coverage run flood_forecast/trainer.py -p tests/lstm_probabilistic_test.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/lstm_probabilistic_test.json
             echo -e 'running probabilistic linear reg test'
-            coverage run flood_forecast/trainer.py -p tests/probabilistic_linear_regression_test.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/probabilistic_linear_regression_test.json
             echo -e 'running meta-data fusion'
-            coverage run flood_forecast/trainer.py -p tests/meta_data_test.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/meta_data_test.json
 
       - store_test_results:
           path: test-results
@@ -316,31 +316,31 @@ jobs:
           when: always
           command: |
             echo -e 'running test_informer \n'
-            coverage run flood_forecast/trainer.py -p tests/test_informer.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/test_informer.json
             echo -e 'running test_iTransformer \n'
-            coverage run flood_forecast/trainer.py -p tests/test_iTransformer.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/test_iTransformer.json
             echo -e 'running tsmixer_test \n'
-            coverage run flood_forecast/trainer.py -p tests/tsmixer_test.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/tsmixer_test.json
             echo -e 'running transformer_b_series.json \n'
-            coverage run flood_forecast/trainer.py -p tests/transformer_b_series.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/transformer_b_series.json
             echo -e 'running crossfroer.json \n'
-            coverage run flood_forecast/trainer.py -p tests/cross_former.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/cross_former.json
             echo -e 'running nlinear.json \n'
-            coverage run flood_forecast/trainer.py -p tests/nlinear.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/nlinear.json
             echo -e 'running dsanet_3\n'
-            coverage run flood_forecast/trainer.py -p tests/dsanet_3.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/dsanet_3.json
             echo -e 'running variable_autoencoderl.json\n'
-            coverage run flood_forecast/trainer.py -p tests/variable_autoencoderl.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/variable_autoencoderl.json
             echo -e 'running dlinear\n'
-            coverage run flood_forecast/trainer.py -p tests/dlinear.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/dlinear.json
             echo -e 'running custom_encode.json\n'
-            coverage run flood_forecast/trainer.py -p tests/custom_encode.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/custom_encode.json
             echo -e 'running multi_decoder_test \n'
-            coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/multi_decoder_test.json
             echo -e 'test_dual \n'
-            coverage run flood_forecast/trainer.py -p tests/test_dual.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/test_dual.json
             echo -e 'running dsanet \n'
-            coverage run flood_forecast/trainer.py -p tests/dsanet.json
+            coverage run flood_forecast/trainer.py -p test/test_json_config/dsanet.json
 
       - store_test_results:
           path: test-results
@@ -379,17 +379,17 @@ jobs:
             when: always
             command: |
               echo -e 'running trainer_lstm_test \n '
-              coverage run flood_forecast/trainer.py -p tests/lstm_test.json
+              coverage run flood_forecast/trainer.py -p test/test_json_config/lstm_test.json
               echo -e 'running trainer_multi_test \n'
-              coverage run flood_forecast/trainer.py -p tests/multi_test.json
+              coverage run flood_forecast/trainer.py -p test/test_json_config/multi_test.json
               echo -e 'running trainer_full_transformer_test \n'
-              coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
+              coverage run flood_forecast/trainer.py -p  test/test_json_config/full_transformer.json
               echo -e 'running da_rnn_test \n'
-              coverage run flood_forecast/trainer.py -p tests/da_rnn.json
+              coverage run flood_forecast/trainer.py -p test/test_json_config/da_rnn.json
               echo -e 'running auto_encoder \n'
-              coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
+              coverage run flood_forecast/meta_train.py -p test/test_json_config/auto_encoder.json
               echo -e 'running trainer_decoder_test   \n'
-              coverage run flood_forecast/trainer.py -p tests/decoder_test.json
+              coverage run flood_forecast/trainer.py -p test/test_json_config/decoder_test.json
         - store_test_results:
             path: test-results
 
@@ -427,9 +427,9 @@ jobs:
           name: plot tests
           when: always
           command: |
-            coverage run -m unittest -v tests/test_plot.py
+            coverage run -m unittest -v test/test_json_config/test_plot.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_explain_model_output.py
+            coverage run -m unittest -v test/test_json_config/test_explain_model_output.py
       - run:
           name: upload_stuff
           when: always
