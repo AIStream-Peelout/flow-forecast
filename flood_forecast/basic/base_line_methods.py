@@ -18,13 +18,13 @@ class NaiveBase(torch.nn.Module):
         self.metric_function = self.metric_dict[metric]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """_summary_
+        """The forward pass of the NaieveModel
 
-        Args:
-            x (torch.Tensor): _description_
+        param x: The input tensor of shape (batch_size, seq_len, n_time_series)
+        type x: torch.Tensor
 
         Returns:
-            torch.Tensor: _description_
+            torch.Tensor: The output tensor of shape (batch_size, output_seq_len, 1)
         """
         return self.metric_function(x, self.output_seq_len)
 

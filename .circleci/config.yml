@@ -221,7 +221,7 @@ jobs:
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
 
-      - store_tests_results:
+      - store_test_results:
           path: tests-results
 
       - store_artifacts:
@@ -278,7 +278,7 @@ jobs:
             echo -e 'running meta-data fusion'
             coverage run flood_forecast/trainer.py -p tests/tests_json_config/meta_data_tests.json
 
-      - store_tests_results:
+      - store_test_results:
           path: tests-results
 
       - store_artifacts:
@@ -342,7 +342,7 @@ jobs:
             echo -e 'running dsanet \n'
             coverage run flood_forecast/trainer.py -p tests/tests_json_config/dsanet.json
 
-      - store_tests_results:
+      - store_test_results:
           path: tests-results
 
       - store_artifacts:
@@ -390,7 +390,7 @@ jobs:
               coverage run flood_forecast/meta_train.py -p tests/tests_json_config/auto_encoder.json
               echo -e 'running trainer_decoder_tests   \n'
               coverage run flood_forecast/trainer.py -p tests/tests_json_config/decoder_tests.json
-        - store_tests_results:
+        - store_test_results:
             path: tests-results
 
         - store_artifacts:
@@ -435,7 +435,7 @@ jobs:
           when: always
           command: bash <(curl -s https://codecov.io/bash) -cF python
 
-      - store_tests_results:
+      - store_test_results:
           path: tests-results
 
       - store_artifacts:
