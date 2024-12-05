@@ -99,8 +99,8 @@ class UniformMultiModalLoader(CSVDataLoader):
             text_config: Optional[Dict[str, Any]] = None
     ):
         """Initializes the UniformMultiModal data loader class
-        :param main_params: Parameters for the base CSVDataLoader. This should
-        :type main_params: Dict[str, Any]
+        :param csv_data_loader_params: Parameters for the base CSVDataLoader. This should
+        :type csv_data_loader_params: Dict[str, Any]
         :param image_config: Configuration for image modality
         :param text_config: Configuration for text modality
 

@@ -1,14 +1,21 @@
+import os
 import unittest
+
+from sklearn.preprocessing import StandardScaler
+
 from flood_forecast.preprocessing.multimodal_loaders import UniformMultiModalLoader
 
 
 class TestUniformMultiModalLoader(unittest.TestCase):
     def setUp(self):
         core_parameters = {
-            "csv_path": "tests/test_data/test_multimodal.csv",
+            "file_path": "test_data2/multimodal_data.csv",
             "forecast_history": 10,
             "forecast_length": 5,
-
+            "target_col": "cfs",
+            "relevant_cols": ["cfs", "height"],
+            "scaling": StandardScaler(),
+            "interpolate_param": False
 
         }
         text_config = {
