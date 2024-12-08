@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class NLinear(nn.Module):
-    """Normalization-Linear fixing."""
+    """Normalization of Linear fixing."""
 
     def __init__(self, forecast_history: int, forecast_length: int, enc_in=128, individual=False, n_targs=1):
         super(NLinear, self).__init__()
