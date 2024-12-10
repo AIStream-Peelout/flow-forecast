@@ -65,10 +65,10 @@ jobs:
           name: Evaluator tests
           when: always
           command: |
-            coverage run -m unittest-v tests/test_json_config/tests_deployment.py
-            coverage run -m unittest-v tests/test_json_config/tests_evaluation.py
-            coverage run -m unittest-v tests/test_json_config/validation_loop_tests.py
-            coverage run -m unittest-v tests/test_json_config/tests_handle_multi_crit.py
+            coverage run -m unittest -v tests/test_json_config/tests_deployment.py
+            coverage run -m unittest -v tests/test_json_config/tests_evaluation.py
+            coverage run -m unittest -v tests/test_json_config/validation_loop_tests.py
+            coverage run -m unittest -v tests/test_json_config/tests_handle_multi_crit.py
 
       - run:
           name: upload
@@ -107,16 +107,16 @@ jobs:
       - run:
           name: Data Quality tests
           command: |
-            coverage run -m unittest-v tests/test_json_config/tests_multitask_decoder.py
+            coverage run -m unittest -v tests/test_json_config/tests_multitask_decoder.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/data_format_tests.py
+            coverage run -m unittest -v tests/test_json_config/data_format_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/usgs_tests.py
+            coverage run -m unittest -v tests/test_json_config/usgs_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_join.py
+            coverage run -m unittest -v tests/test_json_config/tests_join.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_preprocessing.py
-            coverage run -m unittest-v tests/test_json_config/tests_variable_length.py
+            coverage run -m unittest -v tests/test_json_config/tests_preprocessing.py
+            coverage run -m unittest -v tests/test_json_config/tests_variable_length.py
 
       - run:
           name: upload_stuff
@@ -155,29 +155,29 @@ jobs:
           name: Model basic tests
           when: always
           command: |
-            coverage run -m unittest-v tests/test_json_config/multi_modal_tests/test_json_config/tests_cross_vivit.py
-            coverage run -m unittest-v tests/test_json_config/tests_series_id.py
-            coverage run -m unittest-v tests/test_json_config/tests_squashed.py
+            coverage run -m unittest -v tests/test_json_config/multi_modal_tests/test_json_config/tests_cross_vivit.py
+            coverage run -m unittest -v tests/test_json_config/tests_series_id.py
+            coverage run -m unittest -v tests/test_json_config/tests_squashed.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_attn.py
+            coverage run -m unittest -v tests/test_json_config/tests_attn.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_informer.py
+            coverage run -m unittest -v tests/test_json_config/tests_informer.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_meta_pr.py
+            coverage run -m unittest -v tests/test_json_config/tests_meta_pr.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/time_model_tests.py
+            coverage run -m unittest -v tests/test_json_config/time_model_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/data_loader_tests.py
+            coverage run -m unittest -v tests/test_json_config/data_loader_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_da_rnn.py
+            coverage run -m unittest -v tests/test_json_config/tests_da_rnn.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_loss.py
+            coverage run -m unittest -v tests/test_json_config/tests_loss.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_merging_models.py
+            coverage run -m unittest -v tests/test_json_config/tests_merging_models.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/pytorc_train_tests.py
+            coverage run -m unittest -v tests/test_json_config/pytorc_train_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_classification2_loader.py
+            coverage run -m unittest -v tests/test_json_config/tests_classification2_loader.py
       - run:
           name: upload_stuff
           when: always
@@ -325,7 +325,7 @@ jobs:
             coverage run flood_forecast/trainer.py -p tests/test_json_config/transformer_b_series.json
             echo -e 'running crossformer.json \n'
             coverage run flood_forecast/trainer.py -p tests/test_json_config/cross_former.json
-            echo -e 'running nlinear.json \n'
+            echo -e 'running n-linear.json \n'
             coverage run flood_forecast/trainer.py -p tests/test_json_config/nlinear.json
             echo -e 'running dsanet_3\n'
             coverage run flood_forecast/trainer.py -p tests/test_json_config/dsanet_3.json
@@ -427,9 +427,9 @@ jobs:
           name: plot tests
           when: always
           command: |
-            coverage run -m unittest-v tests/test_json_config/tests_plot.py
+            coverage run -m unittest -v tests/test_json_config/tests_plot.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest-v tests/test_json_config/tests_explain_model_output.py
+            coverage run -m unittest -v tests/test_json_config/tests_explain_model_output.py
       - run:
           name: upload_stuff
           when: always
