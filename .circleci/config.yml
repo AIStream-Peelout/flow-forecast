@@ -113,8 +113,8 @@ jobs:
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/usgs_tests.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_json_config/test_preprocessing.py
-            coverage run -m unittest -v tests/test_json_config/test_variable_length.py
+            coverage run -m unittest -v tests/test_preprocessing.py
+            coverage run -m unittest -v tests/test_variable_length.py
 
       - run:
           name: upload_stuff
@@ -157,9 +157,9 @@ jobs:
             coverage run -m unittest -v tests/test_series_id.py
             coverage run -m unittest -v tests/test_squashed.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_json_config/tests_attn.py
+            coverage run -m unittest -v tests/test_attn.py
             bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_json_config/tests_informer.py
+            coverage run -m unittest -v tests/test_informer.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_json_config/tests_meta_pr.py
             bash <(curl -s https://codecov.io/bash) -cF python
