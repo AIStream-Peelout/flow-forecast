@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class NLinear(nn.Module):
-    """Normalization-Linear."""
+    """Normalization of Linear fixing."""
 
     def __init__(self, forecast_history: int, forecast_length: int, enc_in=128, individual=False, n_targs=1):
         super(NLinear, self).__init__()
@@ -113,11 +113,11 @@ class DLinear(nn.Module):
             # self.Linear_Trend.weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len2,self.seq_len]))
 
     def forward(self, x: torch.Tensor):
-        """The.
+        """The forward pass of the D-Linear model.
 
         :param x: PyTorch tensor of size [Batch, Input length, Channel]
         :type x: _type_
-        :return: _description_
+        :return: Returns the output tensor of size [Batch, Output length, Channel]
         :rtype: _type_
         """
         seasonal_init, trend_init = self.decompsition(x)

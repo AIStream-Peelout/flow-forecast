@@ -31,7 +31,8 @@ from flood_forecast.temporal_decoding import decoding_function
 def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
 ) -> Tuple[pd.DataFrame, float]:
-    """Function to compute the baseline MSE by using the mean value from the train data."""
+    """Function to compute the baseline MSE by using the mean value from the train data.
+    """
     total_length = len(river_flow_df.index)
     train_river_data = river_flow_df[: total_length - hours_forecast]
     test_river_data = river_flow_df[total_length - hours_forecast:]
@@ -162,8 +163,9 @@ def evaluate_model(
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
 
-def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={},
-                   end_tensor_0=None) -> Dict:
+def run_evaluation(model, df_train_and_test: pd.DataFrame, forecast_history, target_col: str, end_tensor, g_loss=False,
+                   eval_log: Dict = {}, end_tensor_0=None) -> Dict:
+    """Function to run evaluation on the model."""
     inference_params = model.params["inference_params"]
     for evaluation_metric in model.crit:
         idx = 0
