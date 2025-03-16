@@ -29,8 +29,7 @@ class TimeSeriesModel(ABC):
             params: Dict):
         """Initializes the TimeSeriesModel class with certain attributes.
 
-        :param model_base: The name of the model to load. This MUST be a key in the model_dic
-        model_dict_function.py.
+        :param model_base: The name of the model to load. This MUST be a key in the model_dict model_dict_function.py.
         :type model_base: str
         :param training_data: The path to the training data file
         :type training_data: str
@@ -87,6 +86,7 @@ class TimeSeriesModel(ABC):
 
     def upload_gcs(self, save_path: str, name: str, file_type: str, epoch=0, bucket_name=None):
         """Function to upload model checkpoints to GCS.
+
         :param save_path: The path of the file to save to GCS.
         :type save_path: str
         :param name: The name you want to save the file as.
@@ -108,7 +108,8 @@ class TimeSeriesModel(ABC):
                 wandb.config.update({"gcs_m_path_" + str(epoch) + file_type: online_path})
 
     def wandb_init(self) -> bool:
-        """Initializes wandb if the params dict contains the wandb key or if sweep is present.
+        """ Initializes wandb if the params dict contains the wandb key or if sweep is present.
+
         :return: True if wandb is initialized, False otherwise.
         :rtype: bool
         """
@@ -178,7 +179,14 @@ class PyTorchForecast(TimeSeriesModel):
         return model
 
     def save_model(self, final_path: str, epoch: int) -> None:
-        """Function to save a model to a given file path."""
+        """Function to save a model to a given file path.
+
+        :param final_path: The path to save the model to.
+        :type final_path: str
+        :param epoch: The epoch number to save the model at.
+        :type epoch: int
+
+        """
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")

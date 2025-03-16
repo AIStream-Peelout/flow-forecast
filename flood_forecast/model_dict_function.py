@@ -1,4 +1,4 @@
-from flood_forecast.multi_models.crossvivit import RoCrossViViT
+from flood_forecast.multimodal_models.crossvivit import RoCrossViViT
 from flood_forecast.transformer_xl.multi_head_base import MultiAttnHeadSimple
 from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, CustomTransformerDecoder
 from flood_forecast.transformer_xl.informer import Informer

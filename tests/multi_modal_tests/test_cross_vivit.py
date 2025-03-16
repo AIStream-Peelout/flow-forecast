@@ -1,6 +1,6 @@
 import unittest
 import torch
-from flood_forecast.multi_models.crossvivit import RoCrossViViT, VisionTransformer
+from flood_forecast.multimodal_models.crossvivit import RoCrossViViT, VisionTransformer
 from flood_forecast.transformer_xl.attn import SelfAttention
 from flood_forecast.transformer_xl.data_embedding import (
     CyclicalEmbedding,
