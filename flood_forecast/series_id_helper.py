@@ -28,21 +28,21 @@ def handle_csv_id_validation(src: Dict[int, torch.Tensor], trg: Dict[int, torch.
                              criterion: List, random_sample: bool = False, n_targs: int = 1, max_seq_len: int = 100):
     """Function handles validation of models with a series_id. Returns a dictionary of losses for each criterion.
 
-    :param src: The source sequences
-    :type src: Dict[int, torchd
-    :param trg: _description_
+    :param src: A dictionary of source sequences with series_id as key and the torch.Tensor as the value.
+    :type src: Dict[int, torch.Tensor]
+    :param trg: A dictionary of target sequences with series_id as key and the torch.Tensor as the value.
     :type trg: Dict[int, torch.Tensor]
     :param model: _description_
     :type model: torch.nn.Module
-    :param criterion: _description_
+    :param criterion: The criterion use for computing the validation loss.
     :type criterion: List
-    :param random_sample: _description_, defaults to False
+    :param random_sample: Whether to randomly sample from the source and target sequences, defaults to False
     :type random_sample: bool, optional
-    :param n_targs: _description_, defaults to 1
+    :param n_targs: The number of forecasting targets, defaults to 1
     :type n_targs: int, optional
-    :param max_seq_len: _description_, defaults to 100
+    :param max_seq_len: The max length, that can possibly be generated, defaults to 100
     :type max_seq_len: int, optional
-    :return: Returns a dictionary of losses for each criterion
+    :return: Returns a dictionary of losses for each criterion for each series_id
     :rtype: Dict[str, float]
     """
     scaled_crit = dict.fromkeys(criterion, 0)
