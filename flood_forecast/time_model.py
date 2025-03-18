@@ -135,15 +135,13 @@ class PyTorchForecast(TimeSeriesModel):
             validation_data,
             test_data,
             params_dict: Dict):
-        """
-        """
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
         print("Torch is using " + str(self.device))
         if "weight_path_add" in params_dict:
             self.__freeze_layers__(params_dict["weight_path_add"])
 
-    def __freeze_layers__(self, params: Dict) -> None:
+    def __freeze_layers__(self, params: Dict):
         """Function to freeze layers in the model."""
         if "frozen_layers" in params:
             print("Layers being frozen")
@@ -162,10 +160,10 @@ class PyTorchForecast(TimeSeriesModel):
                         excluded_layers = self.params["weight_path_add"]["excluded_layers"]
                         for layer in excluded_layers:
                             del checkpoint[layer]
-                        print("Successfully deleted layers")
+                        print("sucessfully deleted layers")
                     strict = False
                 model.load_state_dict(checkpoint, strict=strict)
-                print("Weights successfully loaded")
+                print("Weights sucessfully loaded")
             model.to(self.device)
             # TODO create a general loop to convert all model tensor params to device
             if hasattr(model, "mask"):
@@ -180,11 +178,7 @@ class PyTorchForecast(TimeSeriesModel):
         return model
 
     def save_model(self, final_path: str, epoch: int) -> None:
-        """Function to save a model to a given file path.
-        :param final_path: The path to save the model to (should be a directory).
-        :type final_path: str
-        :param epoch: The epoch number that saving occurs at.
-        """
+        """Function to save a model to a given file path."""
         if not os.path.exists(final_path):
             os.mkdir(final_path)
         time_stamp = datetime.now().strftime("%d_%B_%Y%I_%M%p")
