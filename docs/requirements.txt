@@ -6,7 +6,7 @@ tb-nightly
 seaborn
 future
 h5py
-wandb==0.19.3
+wandb==0.19.6
 google-cloud
 google-cloud-storage
 plotly~=5.24.0
