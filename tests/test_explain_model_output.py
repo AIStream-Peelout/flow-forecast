@@ -12,6 +12,13 @@ from flood_forecast.time_model import PyTorchForecast
 
 
 class ModelInterpretabilityTest(unittest.TestCase):
+    """
+    Test suite for validating model interpretability functions such as
+    explanation heatmaps, summary plots, and data loader handling for
+    different PyTorchForecast models.
+    
+    Includes tests for MultiAttnHeadSimple, LSTM, and SimpleLinearModel.
+    """
     test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
     test_path2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
     model_params: dict = {
@@ -112,6 +119,15 @@ class ModelInterpretabilityTest(unittest.TestCase):
     )
 
     def test_deep_explain_model_summary_plot(self):
+        """
+        Tests the generation of model explanation summary plots for
+        various models using a CSV test loader.
+
+        Verifies that the plotting functions run without errors by
+        checking basic assertions.
+        :return: None
+        :rtype: None
+        """
         deep_explain_model_summary_plot(
             model=self.model, csv_test_loader=self.csv_test_loader
         )
@@ -125,6 +141,14 @@ class ModelInterpretabilityTest(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_deep_explain_model_heatmap(self):
+        """
+        Tests the generation of model explanation heatmaps for
+        various models using a CSV test loader.
+
+        Validates that the heatmap function executes correctly without errors.
+        :return: None
+        :rtype: None
+        """
         deep_explain_model_heatmap(
             model=self.model, csv_test_loader=self.csv_test_loader
         )
@@ -138,6 +162,15 @@ class ModelInterpretabilityTest(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def test_handle_dl(self):
+        """
+        Tests the handling of data loaders and the output formatting for
+        both CSVTestLoader and TemporalTestLoader.
+
+        Confirms that the outputs are of the expected types, such as
+        tuple and list, when processed by handle_dl_output.
+        :return: None
+        :rtype: None
+        """
         params_dict = {}
         params_dict["kwargs"] = {
              "file_path": "tests/test_data/keag_small.csv",

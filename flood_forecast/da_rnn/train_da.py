@@ -31,9 +31,29 @@ def da_rnn(train_data: TrainData,
            param_output_path="",
            save_path: str = "") -> Tuple[dict, DaRnnNet]:
     """
-    n_targs: The number of target columns (not steps)
-    T: The number timesteps in the window
+    Initializes and loads the Data Attention Recurrent Neural Network (DA-RNN) model,
+    its optimizers, and the training configuration.
 
+    :param train_data: Contains the features and targets for training and validation.
+    :type train_data: flood_forecast.da_rnn.custom_types.TrainData
+    :param n_targs: The number of target columns (not steps).
+    :type n_targs: int
+    :param encoder_hidden_size: The size of the hidden state in the encoder GRU.
+    :type encoder_hidden_size: int
+    :param decoder_hidden_size: The size of the hidden state in the decoder GRU.
+    :type decoder_hidden_size: int
+    :param T: The number of timesteps in the look-back window.
+    :type T: int
+    :param learning_rate: The initial learning rate for the Adam optimizers.
+    :type learning_rate: float
+    :param batch_size: The batch size used for training.
+    :type batch_size: int
+    :param param_output_path: Directory path to save the encoder and decoder argument JSON files.
+    :type param_output_path: str
+    :param save_path: Path to a directory containing previously saved 'encoder.pth' and 'decoder.pth' files for resuming training.
+    :type save_path: str
+    :return: A tuple containing the training configuration and the initialized DA-RNN network wrapper.
+    :rtype: typing.Tuple[dict, flood_forecast.da_rnn.custom_types.DaRnnNet]
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Using device: " + str(device))
@@ -88,6 +108,28 @@ def train(
         save_plots=True,
         wandb=False,
         tensorboard=False):
+    """
+    The main training loop for the DA-RNN model.
+
+    :param net: The initialized DA-RNN network wrapper containing the encoder, decoder, and optimizers.
+    :type net: flood_forecast.da_rnn.custom_types.DaRnnNet
+    :param train_data: The dataset container with features and targets.
+    :type train_data: flood_forecast.da_rnn.custom_types.TrainData
+    :param t_cfg: The training configuration object containing constants like T, batch size, and loss function.
+    :type t_cfg: flood_forecast.da_rnn.custom_types.TrainConfig
+    :param train_config: Unused placeholder.
+    :type train_config: str
+    :param n_epochs: The number of epochs to train the model for.
+    :type n_epochs: int
+    :param save_plots: If True, save the prediction plots to disk; otherwise, display them.
+    :type save_plots: bool
+    :param wandb: If True, log metrics and plots to Weights & Biases.
+    :type wandb: bool
+    :param tensorboard: If True, log metrics to TensorBoard.
+    :type tensorboard: bool
+    :return: A tuple containing a list of loss history ([iter_losses, epoch_losses]) and the trained network object.
+    :rtype: typing.Tuple[typing.List[numpy.ndarray, numpy.ndarray], flood_forecast.da_rnn.custom_types.DaRnnNet]
+    """
     if wandb:
         import wandb
     iter_per_epoch = int(np.ceil(t_cfg.train_size * 1. / t_cfg.batch_size))
@@ -154,6 +196,19 @@ def train(
 
 
 def prep_train_data(batch_idx: np.ndarray, t_cfg: TrainConfig, train_data: TrainData) -> Tuple:
+    """
+    Prepares a batch of training data by slicing the features (X), historical targets (y_history),
+    and target (y_target) based on the given batch indices and look-back window (T).
+
+    :param batch_idx: A numpy array of indices indicating the start point of each sequence in the batch.
+    :type batch_idx: numpy.ndarray
+    :param t_cfg: The training configuration object containing constants like T.
+    :type t_cfg: flood_forecast.da_rnn.custom_types.TrainConfig
+    :param train_data: The dataset container with features and targets.
+    :type train_data: flood_forecast.da_rnn.custom_types.TrainData
+    :return: A tuple containing the batched features (X), historical targets (y_history), and true targets (y_target).
+    :rtype: typing.Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]
+    """
     feats = np.zeros((len(batch_idx), t_cfg.T - 1, train_data.feats.shape[1]))
     y_history = np.zeros((len(batch_idx), t_cfg.T - 1, train_data.targs.shape[1]))
     y_target = train_data.targs[batch_idx + t_cfg.T]
@@ -167,6 +222,21 @@ def prep_train_data(batch_idx: np.ndarray, t_cfg: TrainConfig, train_data: Train
 
 
 def adjust_learning_rate(net: DaRnnNet, n_iter: int) -> None:
+    """
+    Adjusts the learning rate of the encoder and decoder optimizers based on the number of iterations.
+    The learning rate is reduced by 10% every 10,000 iterations.
+
+    # TODO: Where did this Learning Rate adjustment schedule come from?
+    # Should be modified to use Cosine Annealing with warm restarts
+    # https://www.jeremyjordan.me/nn-learning-rate/
+
+    :param net: The DA-RNN network wrapper.
+    :type net: flood_forecast.da_rnn.custom_types.DaRnnNet
+    :param n_iter: The current total number of training iterations.
+    :type n_iter: int
+    :return: None
+    :rtype: None
+    """
     # TODO: Where did this Learning Rate adjustment schedule come from?
     # Should be modified to use Cosine Annealing with warm restarts
     # https://www.jeremyjordan.me/nn-learning-rate/
@@ -176,7 +246,23 @@ def adjust_learning_rate(net: DaRnnNet, n_iter: int) -> None:
             dec_params['lr'] = dec_params['lr'] * 0.9
 
 
-def train_iteration(t_net: DaRnnNet, loss_func: typing.Callable, X, y_history, y_target):
+def train_iteration(t_net: DaRnnNet, loss_func: typing.Callable, X, y_history, y_target) -> float:
+    """
+    Performs a single training step: forward pass, loss calculation, backward pass, and optimizer steps.
+
+    :param t_net: The DA-RNN network wrapper.
+    :type t_net: flood_forecast.da_rnn.custom_types.DaRnnNet
+    :param loss_func: The loss function to use for calculating error (e.g., nn.MSELoss).
+    :type loss_func: typing.Callable
+    :param X: The input features batch (numpy array).
+    :type X: numpy.ndarray
+    :param y_history: The historical targets batch (numpy array).
+    :type y_history: numpy.ndarray
+    :param y_target: The true target values batch (numpy array).
+    :type y_target: numpy.ndarray
+    :return: The calculated loss value for the current iteration.
+    :rtype: float
+    """
     t_net.enc_opt.zero_grad()
     t_net.dec_opt.zero_grad()
     input_weighted, input_encoded = t_net.encoder(numpy_to_tvar(X))
@@ -198,7 +284,25 @@ def predict(
         train_size: int,
         batch_size: int,
         T: int,
-        on_train=False):
+        on_train=False) -> np.ndarray:
+    """
+    Generates predictions for either the training set or the validation/test set.
+
+    :param t_net: The trained DA-RNN network wrapper.
+    :type t_net: flood_forecast.da_rnn.custom_types.DaRnnNet
+    :param t_dat: The full dataset container with features and targets.
+    :type t_dat: flood_forecast.da_rnn.custom_types.TrainData
+    :param train_size: The number of data points used for training. Determines the split point for predictions.
+    :type train_size: int
+    :param batch_size: The batch size to use during prediction.
+    :type batch_size: int
+    :param T: The number of timesteps in the look-back window.
+    :type T: int
+    :param on_train: If True, calculate predictions for the training set; otherwise, calculate for the validation/test set.
+    :type on_train: bool
+    :return: A numpy array of predicted target values.
+    :rtype: numpy.ndarray
+    """
     out_size = t_dat.targs.shape[1]
     if on_train:
         y_pred = np.zeros((train_size - T + 1, out_size))

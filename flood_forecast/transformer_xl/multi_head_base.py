@@ -17,7 +17,26 @@ class MultiAttnHeadSimple(torch.nn.Module):
             dropout=0.1,
             output_dim=1,
             final_layer=False):
+        """
+        Initializes the MultiAttnHeadSimple model.
 
+        :param number_time_series: The number of features (M) in the time series data. This is the input dimension for the initial linear layer.
+        :type number_time_series: int
+        :param seq_len: The input sequence length (L).
+        :type seq_len: int
+        :param output_seq_len: The desired output sequence length for forecasting. If None, the output length is seq_len.
+        :type output_seq_len: int or None
+        :param d_model: The dimension of the model's intermediate representations. This is the embedding dimension for the MultiheadAttention.
+        :type d_model: int
+        :param num_heads: The number of attention heads in the MultiheadAttention.
+        :type num_heads: int
+        :param dropout: The dropout value for the MultiheadAttention layer.
+        :type dropout: float
+        :param output_dim: The output dimension of the final linear layer (number of output features per time step).
+        :type output_dim: int
+        :param final_layer: The activation function name to apply to the output. It is looked up in `activation_dict`.
+        :type final_layer: str or bool
+        """
         super().__init__()
         self.dense_shape = torch.nn.Linear(number_time_series, d_model)
         self.pe = SimplePositionalEncoding(d_model)
@@ -35,9 +54,15 @@ class MultiAttnHeadSimple(torch.nn.Module):
 
     def forward(self, x: torch.Tensor, mask=None) -> torch.Tensor:
         """
-        :param: x torch.Tensor: of shape (B, L, M)
-        Where B is the batch size, L is the sequence length and M is the number of time
-        :return: a tensor of dimension (B, forecast_length)
+        Performs the forward pass of the model.
+
+        :param x: The input tensor of shape (B, L, M).
+        :type x: torch.Tensor
+        :param mask: An optional mask tensor for the attention mechanism.
+        :type mask: torch.Tensor or None
+        :return: A tensor of dimension (B, forecast_length * output_dim) if forecast_length is set, or (B * L, output_dim) otherwise.
+                 If forecast_length is set and sigmoid is applied, the output is of shape (B, forecast_length, output_dim).
+        :rtype: torch.Tensor
         """
         x = self.dense_shape(x)
         x = self.pe(x)

@@ -8,8 +8,8 @@ from flood_forecast.transformer_xl.data_embedding import DataEmbedding_inverted
 class ITransformer(nn.Module):
     """Paper link: https://arxiv.org/abs/2310.06625."""
 
-    def __init__(self, forecast_history, forecast_length, d_model, embed, dropout, n_heads=8, use_norm=True,
-                 e_layers=3, d_ff=512, freq='h', activation='gelu', factor=1, output_attention=True, targs=1):
+    def __init__(self, forecast_history: int, forecast_length: int, d_model: int, embed: str, dropout: float, n_heads: int = 8, use_norm: bool = True,
+                 e_layers: int = 3, d_ff: int = 512, freq: str = 'h', activation: str = 'gelu', factor: int = 1, output_attention: bool = True, targs: int = 1):
         """The complete iTransformer model.
 
         :param forecast_history: The number of historical steps to use for forecasting
@@ -23,21 +23,23 @@ class ITransformer(nn.Module):
         :param dropout: The dropout for the model.
         :type dropout: float
         :param n_heads: Number of heads for the attention, defaults to 8
-        :type n_heads: int, optional
+        :type n_heads: int
         :param use_norm: Whether to use normalization, defaults to True
-        :type use_norm: bool, optional
+        :type use_norm: bool
         :param e_layers: The number of embedding layers, defaults to 3
-        :type e_layers: int, optional
-        :param d_ff: _description_, defaults to 512
-        :type d_ff: int, optional
+        :type e_layers: int
+        :param d_ff: The dimension of the feedforward network in the encoder layers, defaults to 512
+        :type d_ff: int
         :param freq: The frequency of the time series data, defaults to 'h' for hourly
-        :type freq: str, optional
-        :param activation: The activation, defaults to 'gelu'
-        :type activation: str, optional
-        :param factor: =n_, defaults to 1
-        :type factor: int, optional
-        :param output_attention: Whether to output the scores, defaults to True
-        :type output_attention: bool, optional
+        :type freq: str
+        :param activation: The activation function, defaults to 'gelu'
+        :type activation: str
+        :param factor: The attention factor, defaults to 1
+        :type factor: int
+        :param output_attention: Whether to output the attention scores, defaults to True
+        :type output_attention: bool
+        :param targs: The number of target variables (output channels), defaults to 1
+        :type targs: int
         """
         class_strategy = 'projection'
         super(ITransformer, self).__init__()
@@ -66,19 +68,19 @@ class ITransformer(nn.Module):
         self.projector = nn.Linear(d_model, self.pred_len, bias=True)
         self.c_out = targs
 
-    def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
-        """_summary_
+    def forecast(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor, x_mark_dec: torch.Tensor) -> torch.Tensor:
+        """Performs the forward pass for forecasting, including normalization and de-normalization.
 
-        :param x_enc: _description_
-        :type x_enc: _type_
-        :param x_mark_enc: _description_
-        :type x_mark_enc: _type_
-        :param x_dec: _description_
-        :type x_dec: _type_
-        :param x_mark_dec: _description_
-        :type x_mark_dec: _type_
-        :return: _description_
-        :rtype: _type_
+        :param x_enc: The input historical time series data. Shape: (batch_size, seq_len, num_variates)
+        :type x_enc: torch.Tensor
+        :param x_mark_enc: The time features for the input data. Shape: (batch_size, seq_len, num_time_features)
+        :type x_mark_enc: torch.Tensor
+        :param x_dec: Placeholder for decoder input (not used in iTransformer). Shape: (batch_size, label_len + pred_len, num_variates)
+        :type x_dec: torch.Tensor
+        :param x_mark_dec: Placeholder for time features for decoder input (not used in iTransformer). Shape: (batch_size, label_len + pred_len, num_time_features)
+        :type x_mark_dec: torch.Tensor
+        :return: The forecasted time series. Shape: (batch_size, pred_len, num_variates)
+        :rtype: torch.Tensor
         """
         if self.use_norm:
             # Normalization from Non-stationary Transformer
@@ -88,20 +90,20 @@ class ITransformer(nn.Module):
             x_enc /= stdev
 
         _, _, N = x_enc.shape  # B L N
-        # B: batch_size;    E: d_model;
-        # L: seq_len;       S: pred_len;
+        # B: batch_size;      E: d_model;
+        # L: seq_len;         S: pred_len;
         # N: number of variate (tokens), can also includes covariates
 
         # Embedding
-        # B L N -> B N E                (B L N -> B L E in the vanilla Transformer)
+        # B L N -> B N E              (B L N -> B L E in the vanilla Transformer)
         enc_out = self.enc_embedding(x_enc, x_mark_enc)  # covariates (e.g timestamp) can be also embedded as tokens
-        # B N E -> B N E                (B L E -> B L E in the vanilla Transformer)
+        # B N E -> B N E              (B L E -> B L E in the vanilla Transformer)
         # the dimensions of embedded time series has been inverted, and then processed by native attn,
         # layernorm and ffn modules
-        enc_out = self.encoder(enc_out, attn_mask=None)
+        enc_out, attns = self.encoder(enc_out, attn_mask=None)
 
         # B N E -> B N S -> B S N
-        dec_out = self.projector(enc_out[0]).permute(0, 2, 1)[:, :, :N]  # filter the covariates
+        dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N]  # filter the covariates
 
         if self.use_norm:
             # De-Normalization from Non-stationary Transformer
@@ -110,21 +112,21 @@ class ITransformer(nn.Module):
 
         return dec_out
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-        """_summary_
+    def forward(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor, x_mark_dec: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
+        """The main forward pass of the ITransformer model.
 
-        :param x_enc: _description_
-        :type x_enc: _type_
-        :param x_mark_enc: _description_
-        :type x_mark_enc: _type_
-        :param x_dec: _description_
-        :type x_dec: _type_
-        :param x_mark_dec: _description_
-        :type x_mark_dec: _type_
-        :param mask: _description_, defaults to None
-        :type mask: _type_, optional
-        :return: _description_
-        :rtype: _type_
+        :param x_enc: The input historical time series data. Shape: (batch_size, seq_len, num_variates)
+        :type x_enc: torch.Tensor
+        :param x_mark_enc: The time features for the input data. Shape: (batch_size, seq_len, num_time_features)
+        :type x_mark_enc: torch.Tensor
+        :param x_dec: Placeholder for decoder input (not used in iTransformer). Shape: (batch_size, label_len + pred_len, num_variates)
+        :type x_dec: torch.Tensor
+        :param x_mark_dec: Placeholder for time features for decoder input (not used in iTransformer). Shape: (batch_size, label_len + pred_len, num_time_features)
+        :type x_mark_dec: torch.Tensor
+        :param mask: The attention mask, defaults to None
+        :type mask: torch.Tensor, optional
+        :return: The final output forecast. Shape: (batch_size, pred_len, num_variates)
+        :rtype: torch.Tensor
         """
         dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
         return dec_out[:, -self.pred_len:, :]  # [B, L, D]

@@ -16,7 +16,14 @@ class PlotFunctionsTest(unittest.TestCase):
     })
     df_preds_empty = pd.DataFrame(index=[0, 1, 2, 3, 4, 5])
 
-    def test_calculate_confidence_intervals(self):
+    def test_calculate_confidence_intervals(self) -> None:
+        """
+        Tests `calculate_confidence_intervals` to ensure it returns appropriate lower and upper quantiles.
+        
+        :return: None
+        :rtype: None
+        """
+
         ci_lower, ci_upper = 0.025, 0.975
         df_quantiles = calculate_confidence_intervals(
             self.df_preds, self.df_test['preds'], ci_lower, ci_upper)
@@ -26,19 +33,43 @@ class PlotFunctionsTest(unittest.TestCase):
         self.assertTrue((df_quantiles[ci_lower] <= self.df_test['preds']).all())
         self.assertTrue((df_quantiles[ci_upper] >= self.df_test['preds']).all())
 
-    def test_calculate_confidence_intervals_df_preds_empty(self):
+    def test_calculate_confidence_intervals_df_preds_empty(self) -> None:
+        """
+        Tests `calculate_confidence_intervals` when the prediction DataFrame is empty.
+        Verifies that the result contains only NaN values in quantile columns.
+        
+        :return: None
+        :rtype: None
+        """
+
         ci_lower, ci_upper = 0.025, 0.975
         df_quantiles = calculate_confidence_intervals(
             self.df_preds_empty, self.df_test['preds'], ci_lower, ci_upper)
         self.assertTrue(df_quantiles[ci_lower].isna().all())
         self.assertTrue(df_quantiles[ci_upper].isna().all())
 
-    def test_plot_df_test_with_confidence_interval(self):
+    def test_plot_df_test_with_confidence_interval(self) -> None:
+        """
+        Tests `plot_df_test_with_confidence_interval` with valid prediction data.
+        Ensures the returned object is a Plotly Figure.
+        
+        :return: None
+        :rtype: None
+        """
+
         params = {'dataset_params': {'target_col': ['target_col']}}
         fig = plot_df_test_with_confidence_interval(self.df_test, self.df_preds, 0, params, "target_col", 95)
         self.assertIsInstance(fig, go.Figure)
 
-    def test_plot_df_test_with_confidence_interval_df_preds_empty(self):
+    def test_plot_df_test_with_confidence_interval_df_preds_empty(self) -> None:
+        """
+        Tests `plot_df_test_with_confidence_interval` when the prediction DataFrame is empty.
+        Confirms that a valid Plotly Figure is still returned.
+        
+        :return: None
+        :rtype: None
+        """
+
         params = {'dataset_params': {'target_col': ['target_col']}}
         fig = plot_df_test_with_confidence_interval(
             self.df_test, self.df_preds_empty, 0, params, "target_col", 95)

@@ -3,11 +3,22 @@ from typing import Type
 
 
 class SimpleLinearModel(torch.nn.Module):
-    """A very simple baseline linear model to resolve some of the difficulties with bugs in the various train/validation
+    """
+    A very simple baseline linear model to resolve some of the difficulties with bugs in the various train/validation
     loops in code.
 
     Has only two layers.
+
+    :param seq_length:  Length of the input sequence
+     :type seq_length: int
+     :param n_time_series:  Number of time series channels
+     :type n_time_series: int
+     :param output_seq_len:  Number of output time steps to forecast
+     :type output_seq_len: int
+     :param probabilistic: Whether to output a probabilistic forecast
+     :type probabilistic: bool
     """
+
 
     def __init__(self, seq_length: int, n_time_series: int, output_seq_len=1, probabilistic: bool = False):
         super().__init__()
@@ -23,8 +34,12 @@ class SimpleLinearModel(torch.nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        x: A tensor of dimension (B, L, M) where
-        B is the batch size, L is the length of the sequence
+        Forward pass of the model.
+
+        :param x: Input tensor of shape (B, L, M)
+        :type x: torch.Tensor
+        :return: Output tensor or Normal distribution if probabilistic
+        :rtype: torch.Tensor or torch.distributions.Normal
         """
         x = self.initial_layer(x)
         x = x.permute(0, 2, 1)
@@ -38,11 +53,31 @@ class SimpleLinearModel(torch.nn.Module):
 
 
 def handle_gaussian_loss(out: tuple):
+    """
+    Processes Gaussian output by averaging mean and standard deviation.
+
+    :param out: Tuple containing two output tensors (mean, std)
+    :type out: tuple
+    :return: Averaged output, mean, and std tensors
+    :rtype: tuple
+    """
     out1 = torch.mean(torch.stack([out[0], out[1]]), dim=0)
     return out1, out[0], out[1]
 
 
 def handle_no_scaling(scaler: torch.utils.data.Dataset, out: torch.Tensor, multi_targets: int):
+    """
+    Applies inverse transformation using scaler to the output.
+
+    :param scaler: Dataset containing target scaler
+    :type scaler: torch.utils.data.Dataset
+    :param out: Output tensor to be transformed
+    :type out: torch.Tensor
+    :param multi_targets: Number of target series
+    :type multi_targets: int
+    :return: Transformed output
+    :rtype: numpy.ndarray
+    """
     if multi_targets == 1:
         out = out.detach().cpu().reshape(-1, 1)
     if len(out.shape) > 2:
@@ -65,15 +100,36 @@ def simple_decode(model: Type[torch.nn.Module],
                   probabilistic: bool = False,
                   scaler=None) -> torch.Tensor:
     """
-    :model a PyTorch model to be used for decoding
-    :src the source tensor
-    :the max length sequence to return
-    :real_target the actual target values we want to forecast (don't worry they are masked)
-    :start_symbol used to match the function signature of greedy_decode not ever used here though.
-    :output_len potentially used to forecast multiple steps at once. Not implemented yet though.
-    :device used to to match function signature
-    :multi_task int: Multitask return will always be (batch_size, output_len, multi_targets)
-    :returns a torch.Tensor of dimension (B, max_seq_len, M)
+    Decodes output sequence from the model using a greedy-like autoregressive approach.
+
+    :param model: PyTorch model to be used for decoding
+    :type model: Type[torch.nn.Module]
+    :param src: Source input tensor of shape (B, L, M)
+    :type src: torch.Tensor
+    :param max_seq_len: Maximum length of sequence to forecast
+    :type max_seq_len: int
+    :param real_target: Ground truth tensor used during decoding
+    :type real_target: torch.Tensor
+    :param start_symbol: Placeholder for API compatibility (not used)
+    :type start_symbol: Any
+    :param output_len: Length of model output per forward pass
+    :type output_len: int
+    :param device: Device used for model (default: 'cpu')
+    :type device: str
+    :param unsqueeze_dim: Dimension along which to unsqueeze input
+    :type unsqueeze_dim: int
+    :param meta_data: Optional metadata passed to the model
+    :type meta_data: Any
+    :param multi_targets: Number of target variables
+    :type multi_targets: int
+    :param use_real_target: Whether to use the real target during decoding (default: True)
+    :type use_real_target: bool
+    :param probabilistic: Whether the model outputs a probabilistic distribution
+    :type probabilistic: bool
+    :param scaler: Optional scaler for inverse transforming the output
+    :type scaler: Any
+    :return: Forecasted tensor(s) depending on model output mode (standard or probabilistic)
+    :rtype: torch.Tensor or tuple
     """
     real_target = real_target.float()
     real_target2 = real_target.clone()

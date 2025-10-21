@@ -2,16 +2,33 @@ import torch
 
 
 class VanillaGRU(torch.nn.Module):
+    """
+    Simple GRU model for deep time series forecasting.
+
+    Note: For probabilistic forecasting, `n_target` must be set to 2.
+    Multiple targets are not supported in probabilistic mode.
+    """
     def __init__(self, n_time_series: int, hidden_dim: int, num_layers: int, n_target: int, dropout: float,
                  forecast_length=1, use_hidden=False, probabilistic=False):
-        """Simple GRU to preform deep time series forecasting.
+        """
+        Simple GRU to perform deep time series forecasting.
 
-        :param n_time_series: The number of time series present in the data
-        :type n_time_series int:
-        :param hidden_dim:
-        :type hidden_dim:
-
-        Note for probablistic n_targets must be set to two and actual multiple targs are not supported now.
+        :param n_time_series: The number of input time series features
+         :type n_time_series: int
+        :param hidden_dim: Number of features in the hidden state of the GRU
+         :type hidden_dim: int
+        :param num_layers: Number of recurrent layers in the GRU
+         :type num_layers: int
+        :param n_target: Number of output targets
+         :type n_target: int
+        :param dropout: Dropout probability for GRU layers (except last)
+         :type dropout: float
+        :param forecast_length: Number of future time steps to forecast (default is 1)
+         :type forecast_length: int, optional
+        :param use_hidden: Whether to reuse the hidden state between batches (default is False)
+         :type use_hidden: bool, optional
+        :param probabilistic: Whether to output probabilistic forecasts as Normal distributions (default is False)
+         :type probabilistic: bool, optional
         """
         super(VanillaGRU, self).__init__()
 
@@ -32,12 +49,14 @@ class VanillaGRU(torch.nn.Module):
         self.fc = torch.nn.Linear(hidden_dim, n_target)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward function for GRU.
+        """
+        Forward function for GRU.
 
-        :param x: torch of shape
-        :type model: torch.Tensor
-        :return: Returns a tensor of shape (batch_size, forecast_length, n_target) or (batch_size, n_target)
-        :rtype: torch.Tensor
+        :param x: Input tensor of shape (batch_size, sequence_length, n_time_series)
+         :type x: torch.Tensor
+        :return: Returns a tensor of shape (batch_size, forecast_length, n_target) or (batch_size, n_target),
+                 or a Normal distribution if probabilistic=True
+         :rtype: torch.Tensor or torch.distributions.Normal
         """
         # Initializing hidden state for first input with zeros
         if self.hidden is not None and self.use_hidden:

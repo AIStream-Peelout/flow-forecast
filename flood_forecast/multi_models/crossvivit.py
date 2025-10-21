@@ -25,6 +25,7 @@ class Attention(nn.Module):
         self, dim: int, heads: int = 8, dim_head: int = 64, dropout: float = 0.0
     ):
         """The attention mechanism for the CrossVIVIT model.
+        
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         :type dim: int
         :param heads: The number of heads in the multi-head-attention mechanism. Usually set to a multiple of eight.
@@ -32,7 +33,7 @@ class Attention(nn.Module):
         :param dim_head: The dimension of the inputs to the head.
         :type dim_head: int
         :param dropout: The amount of dropout to use throughout the model defaults to 0.0
-        :type dropout: float, optional
+        :type dropout: float
         """
         super().__init__()
         inner_dim = dim_head * heads
@@ -50,9 +51,12 @@ class Attention(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        The forward pass of the attention mechanism.
-
+        """The forward pass of the attention mechanism.
+        
+        :param x: Input tensor of shape $[B, N, D]$ (batch size, sequence length, dimension).
+        :type x: torch.Tensor
+        :return: Output tensor of shape $[B, N, D]$.
+        :rtype: torch.Tensor
         """
         b, n, _, h = *x.shape, self.heads  # noqa
         qkv = self.to_qkv(x).chunk(3, dim=-1)
@@ -69,9 +73,23 @@ class Attention(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, dim, num_frames, depth, heads, dim_head, mlp_dim, dropout=0.0):
-        """
+    def __init__(self, dim: int, num_frames: int, depth: int, heads: int, dim_head: int, mlp_dim: int, dropout: float = 0.0):
+        """The standard Transformer encoder block.
 
+        :param dim: The embedding dimension.
+        :type dim: int
+        :param num_frames: The sequence length for positional embedding.
+        :type num_frames: int
+        :param depth: The number of transformer blocks.
+        :type depth: int
+        :param heads: The number of heads in the multi-head-attention mechanism.
+        :type heads: int
+        :param dim_head: The dimension of the inputs to the head.
+        :type dim_head: int
+        :param mlp_dim: The dimension that the multi-head perceptron should output.
+        :type mlp_dim: int
+        :param dropout: The amount of dropout to use throughout the model defaults to 0.0
+        :type dropout: float
         """
         super().__init__()
         self.layers = nn.ModuleList([])
@@ -92,10 +110,13 @@ class Transformer(nn.Module):
                 )
             )
 
-    def forward(self, x: torch.Tensor):
-        """
-        Args:
-            x: Input tensor of shape [B, T, C]
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """The forward pass of the Transformer.
+        
+        :param x: Input tensor of shape $[B, T, C]$ (batch size, time steps, channel/dimension).
+        :type x: torch.Tensor
+        :return: Output tensor of shape $[B, T, C]$ after normalization.
+        :rtype: torch.Tensor
         """
         x += self.pos_embedding
         for attn, ff in self.layers:
@@ -131,11 +152,11 @@ class VisionTransformer(nn.Module):
         :param mlp_dim: The dimension that the multi-head perceptron should output.
         :type mlp_dim: int
         :param dropout: The amount of dropout to use throughout the model defaults to 0.0
-        :type dropout: float, optional
+        :type dropout: float
         :param use_rope: Whether to use rotary positional embeddings, defaults to True
-        :type use_rope: bool, optional
+        :type use_rope: bool
         :param use_glu: Weather to use gated linear units , defaults to True
-        :type use_glu: bool, optional
+        :type use_glu: bool
         """
 
         super().__init__()
@@ -175,14 +196,17 @@ class VisionTransformer(nn.Module):
         Float[torch.Tensor, "batch_size image_dim context_length"],
         dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]],
     ]:
-        """
+        """Performs the encoding of the source sequence (video context).
+
         Performs the following computation in each layer:
             1. Self-Attention on the source sequence
             2. FFN on the source sequence.
-        :param src: Source sequence. By this point the shape of the code will be
+        :param src: Source sequence of shape $[B, N, D]$ where $B$ is batch size, $N$ is sequence length, and $D$ is model dimension.
         :type src: Float[torch.Tensor, "batch_t_steps variable_sequence_length model_dim"]
-        :param src_pos_emb: Positional embedding of source sequence's tokens of shape [batch_t_steps,
-        variable_sequence_length, model_dim/2]
+        :param src_pos_emb: Positional embedding of source sequence's tokens. The tuple contains two tensors, both related to positional information for query/key.
+        :type src_pos_emb: Tuple[Float[torch.Tensor, "batch_t_steps variable_sequence_length model_dim/2"], Float[torch.Tensor, "batch_size image_dim/2 context_length"]]
+        :return: A tuple containing the encoded source sequence and a dictionary of attention scores.
+        :rtype: Tuple[Float[torch.Tensor, "batch_size image_dim context_length"], dict[str, Float[torch.Tensor, "batch_size image_dim context_length"]]]
         """
 
         attention_scores = {}
@@ -213,7 +237,22 @@ class CrossTransformer(nn.Module):
 
         :param dim: The embedding dimension. The authors generally use a dimension of 384 for training the large models.
         :type dim: int
-
+        :param depth: The number of transformer blocks to create.
+        :type depth: int
+        :param heads: The number of heads in the multi-head-attention mechanism.
+        :type heads: int
+        :param dim_head: The dimension of the inputs to the head.
+        :type dim_head: int
+        :param mlp_dim: The dimension that the multi-head perceptron should output.
+        :type mlp_dim: int
+        :param image_size: The image size defined as a list, tuple or single int (e.g. [120, 120], (120, 120), 120.
+        :type image_size: Union[List[int], Tuple[int], int]
+        :param dropout: The amount of dropout to use throughout the model defaults to 0.0
+        :type dropout: float
+        :param use_rotary: Whether to use rotary positional embeddings, defaults to True.
+        :type use_rotary: bool
+        :param use_glu: Whether to use gated linear units , defaults to True.
+        :type use_glu: bool
         """
         super().__init__()
         self.image_size = image_size
@@ -247,29 +286,23 @@ class CrossTransformer(nn.Module):
         tgt: torch.Tensor,
         src_pos_emb: torch.Tensor,
         tgt_pos_emb: torch.Tensor,
-    ):
-        """
-        :param src: Source sequence of shape [B, N, D]. In the case of CrossVIVIT. src is the encoded video_ctx. Where
-        B is the batch_size*forecast_history,  N is the number_of_patches after random masking is applied and D is the
-        dimension of the model. In other use cases this might differ.
-        :type src: torch.Tensor
-        :param tgt: Target sequence of shape [B, M, D]. In the case of CrossVIVIT. tgt is the encoded_timeseries. Where
-        B is the batch_size*forecast_history, M is usually one and D is the dimension of the model. In other use cases
-        this might differ.
-        :type tgt: torch.Tensor
-        :param src_pos_emb: Positional embedding of source sequence's tokens of shape [B, N, D]
-        :type src_pos_emb: torch.Tensor
-        :param tgt_pos_emb: Positional embedding of target sequence's tokens of shape [B, M, D]
-        :type tgt_pos_emb: torch.Tensor
-        :return: Tuple of (tgt, attention_scores)
-        :rtype: Tuple[torch.Tensor, Dict[str, torch.Tensor]]
-
+    ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
+        """Performs the cross-attention between source (video context) and target (timeseries) sequences.
 
         Performs the following computation in each layer:
-        1. Self-Attention on the source sequence
-            2. FFN on the source sequence
-            3. Cross-Attention between target and source sequence
-            4. FFN on the target sequence
+        1. Cross-Attention between target and source sequence
+        2. FFN on the target sequence
+
+        :param src: Source sequence of shape $[B, N, D]$. In the case of CrossVIVIT, src is the encoded video context.
+        :type src: torch.Tensor
+        :param tgt: Target sequence of shape $[B, M, D]$. In the case of CrossVIVIT, tgt is the encoded timeseries.
+        :type tgt: torch.Tensor
+        :param src_pos_emb: Positional embedding of source sequence's tokens.
+        :type src_pos_emb: torch.Tensor
+        :param tgt_pos_emb: Positional embedding of target sequence's tokens.
+        :type tgt_pos_emb: torch.Tensor
+        :return: Tuple of (tgt, attention_scores), where tgt is the mixed timeseries.
+        :rtype: Tuple[torch.Tensor, Dict[str, torch.Tensor]]
         """
         attention_scores = {}
         for i in range(len(self.cross_layers)):
@@ -313,11 +346,10 @@ class RoCrossViViT(nn.Module):
         """The CrossViViT model from the CrossVIVIT paper. This model is based on the Arxiv paper:
         https://arxiv.org/abs/2103.14899. In order to simplify understanding we have included comments in the forward
         pass detailing the different sections of the paper that the code corresponds to.
-        :param image_size: The image size defined can be defined either as a list, tuple or single int (e.g. [120, 120]
-        (120, 120), 120.
-        :type image_size: Union[List[int], Tuple[int], int]
-        :param patch_size: The patch size defined can be defined either as a list or a tuple (e.g. [8, 8]) this could
-        allow you to have patches of varying sizes such as (8, 16).
+
+        :param image_size: The image size defined as a list, tuple or single int (e.g. [120, 120], (120, 120), 120.
+        :type image_size: Union[List[int], Tuple[int]]
+        :param patch_size: The patch size defined as a list or a tuple (e.g. [8, 8]).
         :type patch_size: Union[List[int], Tuple[int]]
         :param time_coords_encoder: The time coordinates encoder to use for the model.
         :type time_coords_encoder: CyclicalEmbedding
@@ -335,20 +367,20 @@ class RoCrossViViT(nn.Module):
         :type num_time_series: int
         :param forecast_history: The number of historical steps to use for forecasting.
         :type forecast_history: int
-        :param out_dim: The output dimension of the model. Outputs will be in format [batch_size, time_steps, out_dim]
+        :param out_dim: The output dimension of the model. Outputs will be in format [batch_size, time_steps, out_dim].
         :type out_dim: int
         :param dim_head: The dimension of the inputs to the head.
         :type dim_head: int
         :param dropout: The amount of dropout to use throughout the model defaults to 0.0
-        :type dropout: float, optional
+        :type dropout: float
         :param freq_type: The type of frequency encoding to use. This can be either 'lucidrains' or 'sine'.
-        :type freq_type: str, optional
+        :type freq_type: str
         :param pe_type: The type of positional encoding to use. This can be 'rope', 'sine', 'learned' or None.
-        :type pe_type: str, optional
+        :type pe_type: str
         :param num_mlp_heads: The number of MLP heads to use for the output.
         :type num_mlp_heads: int
-        :param use_glu: Whether to use gated linear units , defaults to True
-        :type use_glu: bool, optional
+        :param use_glu: Whether to use gated linear units , defaults to True.
+        :type use_glu: bool
         :param ctx_masking_ratio: The ratio of the context frames to mask. This is used for regularization.
         :type ctx_masking_ratio: float
         :param ts_masking_ratio: The ratio of the time series measurements to mask. This is used for regularization.
@@ -363,6 +395,8 @@ class RoCrossViViT(nn.Module):
         :type decoder_dim_head: int
         :param axial_kwargs: The keyword arguments for the axial rotary embedding.
         :type axial_kwargs: Dict[str, Any]
+        :param video_cat_dim: The dimension along which to concatenate the time encoding to the video context.
+        :type video_cat_dim: int
         """
 
         super().__init__()
@@ -486,11 +520,17 @@ class RoCrossViViT(nn.Module):
         )
 
     @staticmethod
-    def random_masking(x, mask_ratio):
+    def random_masking(x: torch.Tensor, mask_ratio: float) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Perform per-sample random masking by per-sample shuffling.
 
         Per-sample shuffling is done by arg-sort random noise.
-        x: [N, L, D], sequence
+        
+        :param x: Input sequence of shape $[N, L, D]$ (batch, length, dim).
+        :type x: torch.Tensor
+        :param mask_ratio: The ratio of tokens to mask.
+        :type mask_ratio: float
+        :return: Tuple of (masked sequence, binary mask, restoration indices, kept indices).
+        :rtype: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         """
         N, L, D = x.shape  # batch, length, dim
         len_keep = int(L * (1 - mask_ratio))
@@ -535,20 +575,20 @@ class RoCrossViViT(nn.Module):
     ]:
         """Forward pass of the RoCrossViViT model.
 
-        :param video_context: PyTorch tensor of the video context frames. It will have shape [B, T, C, H, W] where B is
-        the batch_size, T is the number of time steps, C is the number of channels (generally 3 red, green, and blue),
-        H is the height of the image and W is the width image.
+        :param video_context: PyTorch tensor of the video context frames. It will have shape $[B, T, C, H, W]$.
         :type video_context: Float[torch.Tensor, "batch time_steps ctx_channels height width"]
         :param context_coords: PyTorch tensor of coordinates of the context frames.
         :type context_coords: Float[torch.Tensor, "batch 2 height width"]
-        :param timeseries: The timeseries measurements themselves.
-        :type timeseries: Float[torch.Tensor, "batch time num_time_series"]
-        :param timeseries_spatial_coordinates: The coordinates of the station where the timeseries measurement was taken
-        :param ts_positional_encoding: Time coordinates for the temporal component of the time series (e.g. month, day,
-         hour, minute). Therefore, shape will be [batch_size, time_steps, 4, height, width]. As the time encoding dim
-         will be 4.
-        :param apply_masking: Whether to apply masking (useful for inference)
-        :return: Tuple of (outputs, quantile_mask, self_attention_scores, cross_attention_scores)
+        :param timeseries: The timeseries measurements themselves of shape $[B, T, M]$.
+        :type timeseries: Float[torch.Tensor, "batch time_steps num_time_series"]
+        :param timeseries_spatial_coordinates: The coordinates of the station where the timeseries measurement was taken of shape $[B, 2, 1, 1]$.
+        :type timeseries_spatial_coordinates: Float[torch.Tensor, "batch 2 1 1"]
+        :param ts_positional_encoding: Time coordinates for the temporal component of the time series (e.g. month, day, hour, minute).
+        :type ts_positional_encoding: Float[torch.Tensor, "batch time_steps time_encoding_dim height width"]
+        :param apply_masking: Whether to apply masking (useful for inference). Defaults to True.
+        :type apply_masking: Bool[torch.Tensor, "1"]
+        :return: Tuple of (outputs, quantile_mask, self_attention_scores, cross_attention_scores).
+        :rtype: Tuple[Float[torch.Tensor, "batch time num_mlp_heads out_dim"], Float[torch.Tensor, "batch time num_mlp_heads"], Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]], Dict[str, Float[torch.Tensor, "batch num_heads seq_len seq_len"]]]
         """
         batch_size, time_steps, _, height, width = video_context.shape
         # Add coordinates to the time series

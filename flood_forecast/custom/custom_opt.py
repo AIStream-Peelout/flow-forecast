@@ -15,27 +15,51 @@ logger = logging.getLogger(__name__)
 
 
 def warmup_cosine(x, warmup=0.002):
+    """
+    Cosine-based warmup learning rate schedule.
+
+    :param x: Progress ratio (usually step / total_steps).
+    :type x: float
+    :param warmup: Proportion of steps used for warmup.
+    :type warmup: float
+    :return: Learning rate multiplier.
+    :rtype: float
+    """
+
     if x < warmup:
         return x / warmup
     return 0.5 * (1.0 + torch.cos(math.pi * x))
 
 
 def warmup_constant(x, warmup=0.002):
-    """Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
-
-    Learning rate is 1. afterwards.
     """
+    Constant learning rate schedule with linear warmup.
+
+    :param x: Progress ratio (usually step / total_steps).
+    :type x: float
+    :param warmup: Proportion of steps used for warmup.
+    :type warmup: float
+    :return: Learning rate multiplier.
+    :rtype: float
+    """
+
     if x < warmup:
         return x / warmup
     return 1.0
 
 
 def warmup_linear(x, warmup=0.002):
-    """Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th (as provided to
-    BertAdam) training step.
-
-    After `t_total`-th training step, learning rate is zero.
     """
+    Linear learning rate schedule with warmup and linear decay to 0.
+
+    :param x: Progress ratio (usually step / total_steps).
+    :type x: float
+    :param warmup: Proportion of steps used for warmup.
+    :type warmup: float
+    :return: Learning rate multiplier.
+    :rtype: float
+    """
+
     if x < warmup:
         return x / warmup
     return max((x - 1.) / (warmup - 1.), 0)
@@ -50,12 +74,33 @@ SCHEDULES = {
 
 class MASELoss(torch.nn.Module):
     def __init__(self, baseline_method):
-        """This implements the MASE loss function (e.g. MAE_MODEL/MAE_NAIEVE)"""
+        """
+        Initializes MASELoss with a baseline method.
+
+        :param baseline_method: Baseline method to compare against (e.g. "mean").
+        :type baseline_method: str
+        """
+
         super(MASELoss, self).__init__()
         self.method_dict = {"mean": lambda x, y: torch.mean(x, 1).unsqueeze(1).repeat(1, y[1], 1)}
         self.baseline_method = self.method_dict[baseline_method]
 
     def forward(self, target: torch.Tensor, output: torch.Tensor, train_data: torch.Tensor, m=1) -> torch.Tensor:
+        """
+        Computes the Mean Absolute Scaled Error (MASE) loss.
+
+        :param target: Ground truth tensor.
+        :type target: torch.Tensor
+        :param output: Model output predictions.
+        :type output: torch.Tensor
+        :param train_data: Historical training data used for naive baseline.
+        :type train_data: torch.Tensor
+        :param m: Seasonal periodicity (default is 1).
+        :type m: int
+        :return: MASE loss value.
+        :rtype: torch.Tensor
+        """
+
         # Ugh why can't all tensors have batch size... Fixes for modern
         if len(train_data.shape) < 3:
             train_data = train_data.unsqueeze(0)
@@ -86,11 +131,29 @@ class RMSELoss(torch.nn.Module):
     """
 
     def __init__(self, variance_penalty=0.0):
+        """
+        Initializes RMSELoss with optional variance penalty.
+
+        :param variance_penalty: Coefficient for standard deviation penalty.
+        :type variance_penalty: float
+        """
+
         super().__init__()
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
     def forward(self, output: torch.Tensor, target: torch.Tensor):
+        """
+        Computes the Root Mean Squared Error (RMSE), with optional variance penalty.
+
+        :param output: Model output predictions.
+        :type output: torch.Tensor
+        :param target: Ground truth tensor.
+        :type target: torch.Tensor
+        :return: RMSE loss (plus optional variance penalty).
+        :rtype: torch.Tensor
+        """
+
         if len(output) > 1:
 
             diff = torch.sub(target, output)
@@ -113,10 +176,28 @@ class MAPELoss(torch.nn.Module):
     """
 
     def __init__(self, variance_penalty=0.0):
+        """
+        Initializes MAPELoss with optional variance penalty.
+
+        :param variance_penalty: Coefficient for standard deviation penalty.
+        :type variance_penalty: float
+        """
+
         super().__init__()
         self.variance_penalty = variance_penalty
 
     def forward(self, output: torch.Tensor, target: torch.Tensor):
+        """
+        Computes the Mean Absolute Percentage Error (MAPE), with optional variance penalty.
+
+        :param output: Model output predictions.
+        :type output: torch.Tensor
+        :param target: Ground truth values.
+        :type target: torch.Tensor
+        :return: MAPE loss (plus optional variance penalty).
+        :rtype: torch.Tensor
+        """
+
         if len(output) > 1:
             return torch.mean(torch.abs(torch.sub(target, output) / target)) + \
                 self.variance_penalty * torch.std(torch.sub(target, output))
@@ -133,11 +214,29 @@ class PenalizedMSELoss(torch.nn.Module):
     """
 
     def __init__(self, variance_penalty=0.0):
+        """
+        Initializes PenalizedMSELoss with optional variance penalty.
+
+        :param variance_penalty: Coefficient for standard deviation penalty.
+        :type variance_penalty: float
+        """
+
         super().__init__()
         self.mse = torch.nn.MSELoss()
         self.variance_penalty = variance_penalty
 
     def forward(self, output: torch.Tensor, target: torch.Tensor):
+        """
+        Computes the Mean Squared Error (MSE), with optional variance penalty.
+
+        :param output: Model output predictions.
+        :type output: torch.Tensor
+        :param target: Ground truth tensor.
+        :type target: torch.Tensor
+        :return: Penalized MSE loss.
+        :rtype: torch.Tensor
+        """
+
         return self.mse(target, output) + \
             self.variance_penalty * torch.std(torch.sub(target, output))
 
@@ -145,12 +244,29 @@ class PenalizedMSELoss(torch.nn.Module):
 # Add custom loss function
 class GaussianLoss(torch.nn.Module):
     def __init__(self, mu=0, sigma=0):
-        """Compute the negative log likelihood of Gaussian Distribution From https://arxiv.org/abs/1907.00235."""
+        """
+        Initializes GaussianLoss with fixed distribution parameters.
+
+        :param mu: Mean of the Gaussian distribution.
+        :type mu: float
+        :param sigma: Standard deviation of the Gaussian distribution.
+        :type sigma: float
+        """
+
         super(GaussianLoss, self).__init__()
         self.mu = mu
         self.sigma = sigma
 
     def forward(self, x: torch.Tensor):
+        """
+        Computes negative log-likelihood for a Gaussian distribution.
+
+        :param x: Input tensor (samples).
+        :type x: torch.Tensor
+        :return: Average negative log-likelihood over batch.
+        :rtype: torch.Tensor
+        """
+
         loss = - tdist.Normal(self.mu, self.sigma).log_prob(x)
         return torch.sum(loss) / (loss.size(0) * loss.size(1))
 
@@ -159,10 +275,28 @@ class QuantileLoss(torch.nn.Module):
     """From https://medium.com/the-artificial-impostor/quantile-regression-part-2-6fdbc26b2629."""
 
     def __init__(self, quantiles):
+        """
+        Initializes QuantileLoss with a list of quantiles.
+
+        :param quantiles: List of quantiles to use for loss computation.
+        :type quantiles: list or torch.Tensor
+        """
+
         super().__init__()
         self.quantiles = quantiles
 
     def forward(self, preds, target):
+        """
+        Computes the quantile loss across multiple quantiles.
+
+        :param preds: Predicted quantile values, shape (batch_size, num_quantiles).
+        :type preds: torch.Tensor
+        :param target: Ground truth values, shape (batch_size,).
+        :type target: torch.Tensor
+        :return: Total quantile loss over the batch.
+        :rtype: torch.Tensor
+        """
+
         assert not target.requires_grad
         assert preds.size(0) == target.size(0)
         losses = []
@@ -197,6 +331,31 @@ class BertAdam(Optimizer):
     def __init__(self, params, lr=required, warmup=-1, t_total=-1, schedule='warmup_linear',
                  b1=0.9, b2=0.999, e=1e-6, weight_decay=0.01,
                  max_grad_norm=1.0):
+        """
+        Initializes the BertAdam optimizer with warmup and weight decay options.
+
+        :param params: Model parameters to optimize.
+        :type params: iterable
+        :param lr: Learning rate.
+        :type lr: float
+        :param warmup: Proportion of warmup steps (-1 for no warmup).
+        :type warmup: float
+        :param t_total: Total training steps (-1 for constant lr).
+        :type t_total: int
+        :param schedule: Warmup schedule type (e.g., "warmup_linear").
+        :type schedule: str
+        :param b1: Exponential decay rate for first moment.
+        :type b1: float
+        :param b2: Exponential decay rate for second moment.
+        :type b2: float
+        :param e: Term added to denominator for numerical stability.
+        :type e: float
+        :param weight_decay: Weight decay coefficient.
+        :type weight_decay: float
+        :param max_grad_norm: Max gradient norm for clipping.
+        :type max_grad_norm: float
+        """
+
         if lr is not required and lr < 0.0:
             raise ValueError("Invalid learning rate: {} - should be >= 0.0".format(lr))
         if schedule not in SCHEDULES:
@@ -215,6 +374,14 @@ class BertAdam(Optimizer):
         super(BertAdam, self).__init__(params, defaults)
 
     def get_lr(self) -> List:
+        """
+        Computes the current learning rates for all parameter groups, applying
+        a warmup schedule if specified.
+
+        :return: A list of current learning rates, one per parameter group.
+        :rtype: List[float]
+        """
+
         lr = []
         for group in self.param_groups:
             for p in group['params']:
@@ -231,12 +398,16 @@ class BertAdam(Optimizer):
         return lr
 
     def step(self, closure=None):
-        """Performs a single optimization step.
-
-        Arguments:
-            closure (callable, optional): A closure that reevaluates the model
-                and returns the loss.
         """
+        Performs a single optimization step using the BERT-adapted Adam optimizer,
+        including gradient clipping, weight decay, and optional warmup scheduling.
+
+        :param closure: Optional closure that reevaluates the model and returns the loss.
+        :type closure: Callable, optional
+        :return: The loss if closure is provided, otherwise None.
+        :rtype: float or None
+        """
+
         loss = None
         if closure is not None:
             loss = closure()
@@ -317,17 +488,42 @@ class NegativeLogLikelihood(torch.nn.Module):
     """target -> True y output -> predicted distribution."""
 
     def __init__(self):
+        """
+        Initializes NegativeLogLikelihood loss module.
+        """
+
         super().__init__()
 
     def forward(self, output: torch.distributions, target: torch.Tensor):
-        """calculates NegativeLogLikelihood."""
+
+        """
+        Computes the negative log-likelihood from predicted distributions.
+
+        :param output: Predicted probability distribution (e.g., Normal, Poisson).
+        :type output: torch.distributions.Distribution
+        :param target: Ground truth samples.
+        :type target: torch.Tensor
+        :return: Total negative log-likelihood loss.
+        :rtype: torch.Tensor
+        """
+
         return -output.log_prob(target).sum()
 
 
 def l1_regularizer(model, lambda_l1=0.01):
     """
+    Applies L1 regularization to the model weights.
+
     source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
+    
+    :param model: The model to regularize.
+    :type model: torch.nn.Module
+    :param lambda_l1: Regularization strength.
+    :type lambda_l1: float
+    :return: L1 regularization loss.
+    :rtype: torch.Tensor
     """
+
     lossl1 = 0
     for model_param_name, model_param_value in model.named_parameters():
         if model_param_name.endswith('weight'):
@@ -337,7 +533,16 @@ def l1_regularizer(model, lambda_l1=0.01):
 
 def orth_regularizer(model, lambda_orth=0.01):
     """
+    Applies orthogonality regularization to the model weights.
+
     source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
+
+    :param model: The model to regularize.
+    :type model: torch.nn.Module
+    :param lambda_orth: Regularization strength.
+    :type lambda_orth: float
+    :return: Orthogonality regularization loss.
+    :rtype: torch.Tensor
     """
     lossorth = 0
     for model_param_name, model_param_value in model.named_parameters():

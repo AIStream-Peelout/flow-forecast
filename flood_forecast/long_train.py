@@ -4,10 +4,21 @@ import os
 import argparse
 import traceback
 from flood_forecast.trainer import train_function
-from typing import List
+from typing import List, Dict, Any, Optional
 
 
-def split_on_letter(s: str) -> List:
+def split_on_letter(s: str) -> List[str]:
+    """
+    Splits a string into a non-letter prefix and the rest of the string starting with a letter.
+
+    This is used to separate the gage ID (numeric part) from the station ID (alphanumeric part)
+    in a string like "123456A".
+
+    :param s: The input string, typically a combination of a numeric ID and a station identifier.
+    :type s: str
+    :return: A list containing two strings: the non-letter prefix and the remaining string.
+    :rtype: List[str]
+    """
     match = re.compile(r"[^\W\d]").search(s)
     return [s[:match.start()], s[match.start():]]
 
@@ -18,7 +29,25 @@ def loop_through(
         use_transfer: bool = True,
         start_index: int = 0,
         end_index: int = 25) -> None:
-    """Function that makes and executes a set of config files This is since we have over 9k files and."""
+    """
+    Function that makes and executes a set of config files for training across multiple data files.
+
+    It iterates through data files, creates a configuration, and initiates training for each file,
+    optionally using transfer learning by loading the latest saved weights.
+
+    :param data_dir: The directory containing the flow data CSV files.
+    :type data_dir: str
+    :param interrmittent_gcs: Placeholder for intermittent GCS functionality (unused in the current logic).
+    :type interrmittent_gcs: bool
+    :param use_transfer: Flag to indicate whether to use the latest saved weights for transfer learning.
+    :type use_transfer: bool
+    :param start_index: The starting index of the sorted data file list to begin processing.
+    :type start_index: int
+    :param end_index: The ending index (exclusive) of the sorted data file list to stop processing.
+    :type end_index: int
+    :return: None
+    :rtype: None
+    """
     if not os.path.exists("model_save"):
         os.mkdir("model_save")
     sorted_dir_list = sorted(os.listdir(data_dir))
@@ -52,7 +81,21 @@ def loop_through(
             print(e)
 
 
-def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_path: str = None):
+def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_path: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Generates a configuration dictionary for the flood forecasting model training.
+
+    :param flow_file_path: The file path to the flow data (used for training, validation, and testing).
+    :type flow_file_path: str
+    :param gage_id: The numeric gage ID for W&B logging.
+    :type gage_id: str
+    :param station_id: The alphanumeric station ID for W&B logging and tags.
+    :type station_id: str
+    :param weight_path: Optional path to a pre-trained model weight file for transfer learning. Defaults to None.
+    :type weight_path: Optional[str]
+    :return: A dictionary representing the complete model configuration.
+    :rtype: Dict[str, Any]
+    """
     the_config = {
         "model_name": "MultiAttnHeadSimple",
         "model_type": "PyTorch",
@@ -103,6 +146,14 @@ def make_config_file(flow_file_path: str, gage_id: str, station_id: str, weight_
 
 
 def main():
+    """
+    The main function to set up argument parsing for data path specification.
+
+    This function initializes an ArgumentParser but currently does not fully implement argument reading or action.
+
+    :return: None
+    :rtype: None
+    """
     parser = argparse.ArgumentParser(description="Argument parsing for training and evaluation")
     parser.add_argument("-p", "--path", help="Data path")
 
