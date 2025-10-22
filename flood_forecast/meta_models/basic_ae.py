@@ -29,18 +29,20 @@ class AE(nn.Module):
     def forward(self, features: torch.Tensor) -> torch.Tensor:
         """
         Runs the full forward pass on the model from input features to reconstructed output.
-        In practice this will only be done during training.
+        In practice, this will only be done during training.
 
         :param features: The input tensor of data features, typically of shape (batch_size, input_shape).
         :type features: torch.Tensor
         :return: The reconstructed output tensor, with the same shape as the input (batch_size, input_shape).
         :rtype: torch.Tensor
 
-        .. code-block:: python
-            auto_model = AE(10, 4)
-            x = torch.rand(2, 10) # batch_size, n_features
-            result = auto_model(x)
-            print(result.shape) # (2, 10)
+        Example:
+            .. code-block:: python
+
+                auto_model = AE(10, 4)
+                x = torch.rand(2, 10)  # batch_size, n_features
+                result = auto_model(x)
+                print(result.shape)  # (2, 10)
         """
         activation = self.encoder_hidden_layer(features)
         activation = torch.relu(activation)

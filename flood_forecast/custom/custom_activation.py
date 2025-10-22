@@ -145,7 +145,7 @@ class SparsemaxFunction(Function):
     """
     @classmethod
     def forward(cls, ctx, X, dim=-1, k=None):
-         """
+        """
         Forward pass of sparsemax.
 
         :param ctx: Context to save tensors for backward pass.
@@ -332,7 +332,7 @@ class Entmax15(nn.Module):
         super(Entmax15, self).__init__()
 
     def forward(self, X: torch.Tensor):
-         """
+        """
         Applies entmax15 to input tensor.
 
         :param X: Input tensor.

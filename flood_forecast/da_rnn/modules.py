@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from torch.nn import functional as tf
-
+from typing import Tuple, List, Dict
 
 def init_hidden(x: torch.Tensor, hidden_size: int) -> torch.autograd.Variable:
     """
@@ -11,11 +11,11 @@ def init_hidden(x: torch.Tensor, hidden_size: int) -> torch.autograd.Variable:
     https://r2rt.com/non-zero-initial-states-for-recurrent-neural-networks.html
 
     :param x: The input tensor to determine the batch size and device.
-     :type x: torch.Tensor
-     :param hidden_size: The dimension of the hidden state.
-     :type hidden_size: int
-      :return: The initialized hidden state variable.
-      :rtype: torch.autograd.Variable
+    :type x: torch.Tensor
+    :param hidden_size: The dimension of the hidden state.
+    :type hidden_size: int
+    :return: The initialized hidden state variable.
+    :rtype: torch.autograd.Variable
     """
     return Variable(torch.zeros(1, x.size(0), hidden_size)).to(x.device)
 
@@ -28,13 +28,13 @@ class Encoder(nn.Module):
         This encoder includes an input attention mechanism.
 
         :param input_size: Number of underlying factors (features), e.g., 81.
-         :type input_size: int
-         :param hidden_size: Dimension of the hidden state.
-         :type hidden_size: int
-         :param T: Number of time steps (sequence length), e.g., 10.
-         :type T: int
-          :return: None
-          :rtype: None
+        :type input_size: int
+        :param hidden_size: Dimension of the hidden state.
+        :type hidden_size: int
+        :param T: Number of time steps (sequence length), e.g., 10.
+        :type T: int
+        :return: None
+        :rtype: None
         """
         super(Encoder, self).__init__()
         self.input_size = input_size
@@ -51,9 +51,9 @@ class Encoder(nn.Module):
         and the final encoded hidden states.
 
         :param input_data: The core feature data (batch_size, T - 1, input_size).
-         :type input_data: torch.Tensor
-          :return: A tuple containing the weighted input and the final encoded hidden states (batch_size, T - 1, hidden_size).
-          :rtype: Tuple[torch.Tensor, torch.Tensor]
+        :type input_data: torch.Tensor
+        :return: A tuple containing the weighted input and the final encoded hidden states (batch_size, T - 1, hidden_size).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
         """
         # input_data: (batch_size, T - 1, input_size)
         device = input_data.device
@@ -110,15 +110,15 @@ class Decoder(nn.Module):
         This decoder includes a temporal attention mechanism.
 
         :param encoder_hidden_size: Dimension of the encoder's hidden state.
-         :type encoder_hidden_size: int
-         :param decoder_hidden_size: Dimension of the decoder's hidden state.
-         :type decoder_hidden_size: int
-         :param T: Number of time steps (sequence length).
-         :type T: int
-         :param out_feats: Number of output features, defaults to 1.
-         :type out_feats: int, optional
-          :return: None
-          :rtype: None
+        :type encoder_hidden_size: int
+        :param decoder_hidden_size: Dimension of the decoder's hidden state.
+        :type decoder_hidden_size: int
+        :param T: Number of time steps (sequence length).
+        :type T: int
+        :param out_feats: Number of output features, defaults to 1.
+        :type out_feats: int, optional
+        :return: None
+        :rtype: None
         """
         super(Decoder, self).__init__()
 
@@ -142,11 +142,11 @@ class Decoder(nn.Module):
         weights and the final prediction.
 
         :param input_encoded: The final encoded hidden states from the Encoder (batch_size, T - 1, encoder_hidden_size).
-         :type input_encoded: torch.Tensor
-         :param y_history: The history of the target variable (batch_size, T - 1, 1).
-         :type y_history: torch.Tensor
-          :return: The final predicted output (batch_size, out_feats).
-          :rtype: torch.Tensor
+        :type input_encoded: torch.Tensor
+        :param y_history: The history of the target variable (batch_size, T - 1, 1).
+        :type y_history: torch.Tensor
+        :return: The final predicted output (batch_size, out_feats).
+        :rtype: torch.Tensor
         """
         # input_encoded: (batch_size, T - 1, encoder_hidden_size)
         # y_history: (batch_size, T - 1, 1) - where 1 is out_feats

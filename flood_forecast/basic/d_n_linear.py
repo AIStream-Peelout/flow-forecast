@@ -22,7 +22,7 @@ class NLinear(nn.Module):
     """
 
     def __init__(self, forecast_history: int, forecast_length: int, enc_in=128, individual=False, n_targs=1):
-         """
+        """
         Initialize the NLinear model.
 
         :param forecast_history: Length of the input sequence
@@ -56,9 +56,9 @@ class NLinear(nn.Module):
         Forward pass of the NLinear model.
 
         :param x:  Input tensor of shape (batch_size, input_length, channels)
-         :type x: torch.Tensor
-          :return: Forecast tensor of shape (batch_size, forecast_length) or (batch_size, forecast_length, channels)
-          :rtype: torch.Tensor
+        :type x: torch.Tensor
+        :return: Forecast tensor of shape (batch_size, forecast_length) or (batch_size, forecast_length, channels)
+        :rtype: torch.Tensor
         """
         # x: [Batch, Input length, Channel]
         seq_last = x[:, -1:, :].detach()
@@ -77,13 +77,13 @@ class NLinear(nn.Module):
 
 
 class MovingAvg(nn.Module):
-     """
+    """
     Moving average block to highlight the trend of time series.
 
     :param kernel_size:  Size of the averaging window
-     :type kernel_size: int
-     :param stride:  Stride of the moving average
-     :type stride: int
+    :type kernel_size: int
+    :param stride:  Stride of the moving average
+    :type stride: int
     """
 
     def __init__(self, kernel_size, stride):
@@ -91,9 +91,9 @@ class MovingAvg(nn.Module):
         Initialize the MovingAvg block.
 
         :param kernel_size: Size of the averaging window
-         :type kernel_size: int
+        :type kernel_size: int
         :param stride: Stride of the moving average
-         :type stride: int
+        :type stride: int
         """
         super(MovingAvg, self).__init__()
         self.kernel_size = kernel_size
@@ -104,9 +104,9 @@ class MovingAvg(nn.Module):
         Forward pass of the MovingAvg block.
 
         :param x:  Input tensor of shape (batch_size, sequence_length, channels)
-         :type x: torch.Tensor
-          :return: Smoothed tensor with highlighted trends
-          :rtype: torch.Tensor
+        :type x: torch.Tensor
+        :return: Smoothed tensor with highlighted trends
+        :rtype: torch.Tensor
         """
         # padding on the both ends of time series
         front = x[:, 0:1, :].repeat(1, (self.kernel_size - 1) // 2, 1)
@@ -122,7 +122,7 @@ class SeriesDecomp(nn.Module):
     Series decomposition block for separating trend and residual components.
 
     :param kernel_size:  Size of the moving average window
-     :type kernel_size: int
+    :type kernel_size: int
     """
 
     def __init__(self, kernel_size):
@@ -130,7 +130,7 @@ class SeriesDecomp(nn.Module):
         Initialize the SeriesDecomp block.
 
         :param kernel_size: Size of the moving average window
-         :type kernel_size: int
+        :type kernel_size: int
         """
         super(SeriesDecomp, self).__init__()
         self.moving_avg = MovingAvg(kernel_size, stride=1)
@@ -140,9 +140,9 @@ class SeriesDecomp(nn.Module):
         Forward pass of the SeriesDecomp block.
 
         :param x:  Input tensor of shape (batch_size, sequence_length, channels)
-         :type x: torch.Tensor
-          :return: Tuple of residual and trend tensors
-          :rtype: tuple[torch.Tensor, torch.Tensor]
+        :type x: torch.Tensor
+        :return: Tuple of residual and trend tensors
+        :rtype: tuple[torch.Tensor, torch.Tensor]
         """
         moving_mean = self.moving_avg(x)
         res = x - moving_mean
@@ -157,15 +157,15 @@ class DLinear(nn.Module):
     and combines the results for the final forecast.
 
     :param forecast_history:  Length of the input sequence
-     :type forecast_history: int
-     :param forecast_length:  Number of time steps to forecast
-     :type forecast_length: int
-     :param individual:  Whether to use separate linear layers per channel
-     :type individual: bool
-     :param enc_in:  Number of input channels
-     :type enc_in: int
-     :param n_targs:  Number of target channels to output
-     :type n_targs: int
+    :type forecast_history: int
+    :param forecast_length:  Number of time steps to forecast
+    :type forecast_length: int
+    :param individual:  Whether to use separate linear layers per channel
+    :type individual: bool
+    :param enc_in:  Number of input channels
+    :type enc_in: int
+    :param n_targs:  Number of target channels to output
+    :type n_targs: int
     """
 
     def __init__(self, forecast_history: int, forecast_length: int, individual, enc_in: int, n_targs=1):
@@ -173,15 +173,15 @@ class DLinear(nn.Module):
         Initialize the DLinear model.
 
         :param forecast_history: Length of the input sequence
-         :type forecast_history: int
+        :type forecast_history: int
         :param forecast_length: Number of time steps to forecast
-         :type forecast_length: int
+        :type forecast_length: int
         :param individual: Whether to use separate linear layers per channel
-         :type individual: bool
+        :type individual: bool
         :param enc_in: Number of input channels
-         :type enc_in: int
+        :type enc_in: int
         :param n_targs: Number of target channels to output
-         :type n_targs: int
+        :type n_targs: int
         """
         super(DLinear, self).__init__()
         self.seq_len = forecast_history
@@ -216,9 +216,9 @@ class DLinear(nn.Module):
         Forward pass of the DLinear model.
 
         :param x:  Input tensor of shape (batch_size, input_length, channels)
-         :type x: torch.Tensor
-          :return: Forecast tensor of shape (batch_size, forecast_length, channels) or (batch_size, forecast_length)
-          :rtype: torch.Tensor
+        :type x: torch.Tensor
+        :return: Forecast tensor of shape (batch_size, forecast_length, channels) or (batch_size, forecast_length)
+        :rtype: torch.Tensor
         """
         seasonal_init, trend_init = self.decompsition(x)
         seasonal_init, trend_init = seasonal_init.permute(0, 2, 1), trend_init.permute(0, 2, 1)

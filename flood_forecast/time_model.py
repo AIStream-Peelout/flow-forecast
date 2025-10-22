@@ -16,7 +16,8 @@ import wandb
 
 
 class TimeSeriesModel(ABC):
-    """An abstract class used to handle different configurations of models + hyperparams for training, test, and predict
+    """
+    An abstract class used to handle different configurations of models + hyperparams for training, test, and predict
     functions. This class assumes that data is already split into test train and validation at this point.
     """
 
@@ -27,7 +28,8 @@ class TimeSeriesModel(ABC):
             validation_data: str,
             test_data: str,
             params: Dict):
-        """Initializes the TimeSeriesModel class with certain attributes.
+        """
+        Initializes the TimeSeriesModel class with certain attributes.
 
         :param model_base: The name of the model to load. This MUST be a key in the model_dic
         model_dict_function.py.
@@ -62,7 +64,8 @@ class TimeSeriesModel(ABC):
 
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:
-        """This function should load and return the model. This will vary based on the underlying framework used.
+        """
+        This function should load and return the model. This will vary based on the underlying framework used.
 
         :param model_base: The name of the model to load. This should be a key in the model_dict.
         :type model_base: str
@@ -77,7 +80,8 @@ class TimeSeriesModel(ABC):
 
     @abstractmethod
     def make_data_load(self, data_path: str, params: Dict, loader_type: str) -> object:
-        """Initializes a data loader based on the provided data_path and parameters.
+        """
+        Initializes a data loader based on the provided data_path and parameters.
 
         This may be as simple as a pandas dataframe or as complex as a custom PyTorch data loader.
 
@@ -104,7 +108,8 @@ class TimeSeriesModel(ABC):
         raise NotImplementedError
 
     def upload_gcs(self, save_path: str, name: str, file_type: str, epoch: int = 0, bucket_name: str = None) -> None:
-        """Function to upload model checkpoints to GCS.
+        """
+        Function to upload model checkpoints to GCS.
 
         :param save_path: The local path of the file to save to GCS.
         :type save_path: str
@@ -130,7 +135,8 @@ class TimeSeriesModel(ABC):
                 wandb.config.update({"gcs_m_path_" + str(epoch) + file_type: online_path})
 
     def wandb_init(self) -> bool:
-        """Initializes wandb if the params dict contains the "wandb" key or if "sweep" is present.
+        """
+        Initializes wandb if the params dict contains the "wandb" key or if "sweep" is present.
 
         :return: True if wandb is initialized, False otherwise.
         :rtype: bool
@@ -158,7 +164,8 @@ class PyTorchForecast(TimeSeriesModel):
             validation_data: str,
             test_data: str,
             params_dict: Dict):
-        """Initializes the PyTorchForecast class, setting up the device and calling the parent constructor.
+        """
+        Initializes the PyTorchForecast class, setting up the device and calling the parent constructor.
 
         :param model_base: The name of the model to load.
         :type model_base: str
@@ -180,7 +187,8 @@ class PyTorchForecast(TimeSeriesModel):
             self.__freeze_layers__(params_dict["weight_path_add"])
 
     def __freeze_layers__(self, params: Dict) -> None:
-        """Function to freeze layers in the model based on parameters.
+        """
+        Function to freeze layers in the model based on parameters.
 
         :param params: A dictionary containing the "frozen_layers" key with a list of layer names to freeze.
         :type params: Dict
@@ -195,7 +203,8 @@ class PyTorchForecast(TimeSeriesModel):
                     parameter.requires_grad = False
 
     def load_model(self, model_base: str, model_params: Dict, weight_path: str = None, strict: bool = True) -> torch.nn.Module:
-        """Loads a PyTorch model, optionally loads weights, and moves it to the appropriate device.
+        """
+        Loads a PyTorch model, optionally loads weights, and moves it to the appropriate device.
 
         :param model_base: The name of the model to load, must be a key in pytorch_model_dict.
         :type model_base: str
@@ -236,7 +245,8 @@ class PyTorchForecast(TimeSeriesModel):
         return model
 
     def save_model(self, final_path: str, epoch: int) -> None:
-        """Function to save a PyTorch model's state dictionary and its configuration parameters to a given file path.
+        """
+        Function to save a PyTorch model's state dictionary and its configuration parameters to a given file path.
 
         It also handles uploading to GCS and logging the save path to W&B if configured.
 
@@ -267,7 +277,8 @@ class PyTorchForecast(TimeSeriesModel):
                 print(e.__traceback__)
 
     def __re_add_params__(self, start_end_params: Dict, dataset_params: Dict, data_path: str) -> Dict:
-        """Function to re-add the data path and core dataset parameters to the start_end_params dictionary.
+        """
+        Function to re-add the data path and core dataset parameters to the start_end_params dictionary.
 
         This is used for certain data loaders that need these parameters.
 
@@ -293,7 +304,8 @@ class PyTorchForecast(TimeSeriesModel):
             dataset_params: Dict,
             loader_type: str,
             the_class: str = "default") -> object:
-        """Initializes a PyTorch data loader based on the provided data_path and dataset parameters.
+        """
+        Initializes a PyTorch data loader based on the provided data_path and dataset parameters.
 
         The specific loader class is determined by the "class" key in dataset_params.
 

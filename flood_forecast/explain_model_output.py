@@ -12,7 +12,7 @@ from flood_forecast.plot_functions import (
     plot_summary_shap_values_over_time_series,
 )
 from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
-s
+
 BACKGROUND_BATCH_SIZE = 5
 
 

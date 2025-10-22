@@ -15,7 +15,7 @@ from flood_forecast.da_rnn.modules import Encoder, Decoder
 from flood_forecast.da_rnn.custom_types import DaRnnNet, TrainData, TrainConfig
 from flood_forecast.da_rnn.utils import numpy_to_tvar
 from torch.utils.tensorboard import SummaryWriter
-
+from typing import Tuple, List, Dict
 
 logger = utils.setup_log()
 logger.info(f"Using computation device: {device}")

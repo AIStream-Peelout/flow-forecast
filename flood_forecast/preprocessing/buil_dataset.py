@@ -20,6 +20,7 @@ import json
 from datetime import datetime
 import pytz
 import pandas as pd
+from typing import Tuple
 
 
 def build_weather_csv(

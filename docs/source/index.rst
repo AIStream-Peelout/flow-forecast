@@ -1,19 +1,18 @@
-.. Flow Forecast documentation master file, created by
-   sphinx-quickstart on Sun Aug  2 16:20:18 2020.
+.. Flow Forecast documentation master file
+   Created by sphinx-quickstart
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 Welcome to Flow Forecast's documentation!
 =========================================
 
-Flow Forecast is a deep learning for time series forecasting framework written in PyTorch. Flow Forecast makes it easy to train PyTorch Forecast models on a wide variety
-of datasets. This documentation describes the internal Python code that makes up Flow Forecast.
-
-.. automodule:: flood_forecast
+Flow Forecast is a deep learning framework for time series forecasting written in PyTorch.
+It makes it easy to train PyTorch Forecast models on a wide variety of datasets.
+This documentation describes the internal Python code that makes up Flow Forecast.
 
 .. toctree::
    :maxdepth: 2
-   :caption: General:
+   :caption: Core Modules:
 
    evaluator
    long_train
@@ -24,69 +23,85 @@ of datasets. This documentation describes the internal Python code that makes up
    trainer
    explain_model_output
    utils
+   basic_ae
+   crossformer
+   custom_types
+   d_linear
+   meta_models
+   modules
+   train_da
+   training_utils
+   utils_da
+
 
 .. automodule:: flood_forecast.deployment
+   :members:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Deployment
+   :caption: Deployment:
 
    inference
 
 .. automodule:: flood_forecast.preprocessing
+   :members:
 
 .. toctree::
-  :maxdepth: 2
-  :caption: Preprocessing:
+   :maxdepth: 2
+   :caption: Preprocessing:
 
-  interpolate_preprocess
-  buil_dataset
-  closest_station
-  data_converter
-  preprocess_da_rnn
-  preprocess_metadata
-  process_usgs
-  pytorch_loaders
-  temporal_feats
+   interpolate_preprocess
+   buil_dataset
+   closest_station
+   data_converter
+   preprocess_da_rnn
+   preprocess_metadata
+   process_usgs
+   pytorch_loaders
+   temporal_feats
 
 .. automodule:: flood_forecast.custom
+   :members:
 
 .. toctree::
-  :maxdepth: 2
-  :caption: Custom:
+   :maxdepth: 2
+   :caption: Custom:
 
-  custom_opt
+   custom_opt
 
 .. automodule:: flood_forecast.transformer_xl
+   :members:
 
 .. toctree::
-  :maxdepth: 2
-  :caption: TransformerXL:
+   :maxdepth: 2
+   :caption: TransformerXL:
 
-  dummy_torch
-  itransformer
-  lower_upper_config
-  multi_head_base
-  transformer_basic
-  transformer_xl
-  transformer_bottleneck
-  informer
+   dummy_torch
+   itransformer
+   lower_upper_config
+   multi_head_base
+   transformer_basic
+   transformer_xl
+   transformer_bottleneck
+   informer
 
 .. automodule:: flood_forecast.gcp_integration
+   :members:
 
 .. toctree::
-  :maxdepth: 3
-  :caption: GCP Integration:
+   :maxdepth: 3
+   :caption: GCP Integration:
 
-  basic_utils
+   basic_utils
 
 .. automodule:: flood_forecast.da_rnn
+   :members:
 
 .. toctree::
-  :maxdepth: 3
-  :caption: DA RNN:
-  model
+   :maxdepth: 3
+   :caption: DA RNN:
 
+   model
 
 Indices and tables
 ==================

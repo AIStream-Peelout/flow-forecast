@@ -31,7 +31,8 @@ from flood_forecast.temporal_decoding import decoding_function
 def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
 ) -> Tuple[pd.DataFrame, float]:
-    """Function to compute the baseline MSE by using the mean value from the train data.
+    """
+    Function to compute the baseline MSE by using the mean value from the train data.
 
     :param river_flow_df: The dataframe containing the river flow data.
     :type river_flow_df: pd.DataFrame
@@ -59,7 +60,8 @@ def get_model_r2_score(
     forecast_column: str,
     hours_forecast=336,
 ):
-    """model_evaluate_function should call any necessary preprocessing.
+    """
+    model_evaluate_function should call any necessary preprocessing.
 
     :param river_flow_df: The dataframe containing the river flow data.
     :type river_flow_df: pd.DataFrame
@@ -76,7 +78,8 @@ def get_model_r2_score(
 
 
 def get_r2_value(model_mse, baseline_mse):
-    """Calculates the R2 score given the model's MSE and the baseline's MSE.
+    """
+    Calculates the R2 score given the model's MSE and the baseline's MSE.
 
     :param model_mse: The Mean Squared Error of the forecasting model.
     :type model_mse: float
@@ -89,7 +92,8 @@ def get_r2_value(model_mse, baseline_mse):
 
 
 def get_value(the_path: str) -> None:
-    """Reads a CSV, computes the stream baseline, and prints the R2 value for a hardcoded model MSE.
+    """
+    Reads a CSV, computes the stream baseline, and prints the R2 value for a hardcoded model MSE.
 
     :param the_path: The file path to the CSV data.
     :type the_path: str
@@ -109,32 +113,48 @@ def evaluate_model(
     inference_params: Dict,
     eval_log: Dict,
 ) -> Tuple[Dict, pd.DataFrame, int, pd.DataFrame]:
-    """A function to evaluate a model. Called automatically at end of training. Can be imported for continuing to evaluate
-    a model in other places as well.
+    """
+    Evaluate a trained model and compute performance metrics.
 
-    .. highlight:: python
-    .. code-block:: python
+    This function is typically called automatically at the end of training,
+    but it can also be imported and used independently for evaluating a model.
 
-        from flood_forecast.evaluator import evaluate_model
-        forecast_model = PyTorchForecast(config_file)
-        e_log, df_train_test, f_idx, df_preds = evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
-        print(e_log) # {"MSE":0.2, "MAPE":0.1}
-        print(df_train_test) # will print a pandas dataframe
-        ...
+    Example:
+        .. code-block:: python
 
-    :param model: The time series model instance.
+            from flood_forecast.evaluator import evaluate_model
+
+            forecast_model = PyTorchForecast(config_file)
+            e_log, df_train_test, f_idx, df_preds = evaluate_model(
+                forecast_model,
+                model_type="PyTorch",
+                target_col=["cfs"],
+                evaluation_metrics=["MSE", "MAPE"],
+                inference_params={},
+                eval_log={}
+            )
+            print(e_log)           # {'MSE': 0.2, 'MAPE': 0.1}
+            print(df_train_test)   # pandas DataFrame with predictions and ground truth
+
+    :param model: The time series model instance to evaluate.
     :type model: Type[TimeSeriesModel]
     :param model_type: The type of the model (e.g., "PyTorch").
     :type model_type: str
-    :param target_col: A list of the target column names to evaluate.
+    :param target_col: List of target column names to evaluate.
     :type target_col: List[str]
-    :param evaluation_metrics: A list of evaluation metrics to compute.
+    :param evaluation_metrics: List of evaluation metrics to compute.
     :type evaluation_metrics: List
-    :param inference_params: A dictionary of parameters for the inference process.
+    :param inference_params: Dictionary containing parameters for inference.
     :type inference_params: Dict
-    :param eval_log: A dictionary to store initial evaluation logs.
+    :param eval_log: Dictionary to store initial evaluation logs or existing results.
     :type eval_log: Dict
-    :return: A tuple containing the evaluation log dictionary, the dataframe with train/test and predictions, the forecast start index, and the prediction samples dataframe.
+    :return: 
+        A tuple containing:
+
+        - **eval_log** (*Dict*): Dictionary of computed evaluation metrics.
+        - **df_train_and_test** (*pd.DataFrame*): DataFrame with training, test, and prediction data.
+        - **forecast_start_idx** (*int*): Index indicating where the forecast period begins.
+        - **df_predictions** (*pd.DataFrame*): DataFrame containing model predictions.
     :rtype: Tuple[Dict, pd.DataFrame, int, pd.DataFrame]
     """
     if model_type == "PyTorch":
@@ -216,7 +236,8 @@ def evaluate_model(
 
 def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={},
                    end_tensor_0=None) -> Dict:
-    """Calculates the evaluation metrics based on the model predictions.
+    """
+    Calculates the evaluation metrics based on the model predictions.
 
     :param model: The time series model instance.
     :type model: Type[TimeSeriesModel]
@@ -291,7 +312,8 @@ def infer_on_torch_model(
     probabilistic: bool = False,
     criterion_params: Dict = None
 ) -> Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]:
-    """Function to handle both test evaluation and inference on a test data-frame.
+    """
+    Function to handle both test evaluation and inference on a test data-frame.
 
     :param model: The time series model present in the model zoo.
     :type model: Type[TimeSeriesModel]
@@ -403,7 +425,8 @@ def infer_on_torch_model(
 
 def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
                     history, datetime_start):
-    """Helper function to finalize the evaluation data structure after initial inference.
+    """
+    Helper function to finalize the evaluation data structure after initial inference.
 
     This function adds the 'preds' column to the dataframe, handles probabilistic predictions,
     and calls `generate_prediction_samples` if required.
@@ -499,7 +522,8 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
 
 def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
                                     hours_to_forecast: int, datetime_start) -> Tuple[List[pd.DataFrame], List]:
-    """Handles inference and prediction generation for SeriesIDLoader datasets.
+    """
+    Handles inference and prediction generation for SeriesIDLoader datasets.
 
     :param csv_series_id_loader: The SeriesIDTestLoader instance.
     :type csv_series_id_loader: SeriesIDTestLoader
@@ -540,7 +564,8 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
-    """Handles the confidence interval (CI) and prediction samples for multi-target or single-target forecasting.
+    """
+    Handles the confidence interval (CI) and prediction samples for multi-target or single-target forecasting.
 
     :param prediction_samples: The tensor containing the prediction samples.
     :type prediction_samples: torch.Tensor
@@ -605,7 +630,8 @@ def generate_predictions(
     targs=False,
     multi_params: int = 1
 ) -> torch.Tensor:
-    """A function to generate the actual model prediction.
+    """
+    A function to generate the actual model prediction.
 
     :param model: A PyTorchForecast model instance.
     :type model: Type[TimeSeriesModel]
@@ -669,7 +695,8 @@ def generate_predictions_non_decoded(
     forecast_length: int,
     hours_to_forecast: int,
 ) -> torch.Tensor:
-    """Generates predictions for the models that do not use a decoder.
+    """
+    Generates predictions for the models that do not use a decoder.
 
     This function typically handles iterative forecasting where the model's output
     is fed back as part of the input for the next step.
@@ -741,7 +768,8 @@ def generate_decoded_predictions(
     multi_targets: int = 1,
     targs: Union[bool, torch.Tensor] = False
 ) -> torch.Tensor:
-    """Generates predictions for decoder-based models (e.g., Transformer).
+    """
+    Generates predictions for decoder-based models (e.g., Transformer).
 
     :param model: A PyTorchForecast model instance.
     :type model: Type[TimeSeriesModel]
@@ -826,7 +854,8 @@ def generate_prediction_samples(
     multi_params=1,
     targs=False
 ) -> np.ndarray:
-    """Generates multiple prediction samples for uncertainty estimation (e.g., Monte Carlo Dropout).
+    """
+    Generates multiple prediction samples for uncertainty estimation (e.g., Monte Carlo Dropout).
 
     :param model: A PyTorchForecast model instance.
     :type model: Type[TimeSeriesModel]
