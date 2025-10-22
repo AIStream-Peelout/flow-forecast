@@ -11,7 +11,14 @@ from datetime import datetime
 
 
 class TestInterpolationCSVLoader(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
+        """
+        Sets up the test environment by initializing dataset parameters and creating a CSVSeriesIDLoader instance.
+        
+        :return: None
+        :rtype: None
+        """
+
         self.test_data_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "test_data"
         )
@@ -25,7 +32,15 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         }
         self.data_loader = CSVSeriesIDLoader("PLANT_ID", self.dataset_params, "r")
 
-    def test_seriesid(self):
+    def test_seriesid(self) -> None:
+        """
+        Tests accessing a single data item from the CSVSeriesIDLoader.
+        Verifies the types of the returned features and targets and checks feature dimensions.
+        
+        :return: None
+        :rtype: None
+        """
+
         """Tests the series_id method a single item."""
         x, y = self.data_loader[0]
         self.assertIsInstance(x, dict)
@@ -33,7 +48,15 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         # self.assertGreater(x[1][0, 0], 1) redo test later
         self.assertEqual(x[1].shape[1], 3)
 
-    def test_handle_series_id(self):
+    def test_handle_series_id(self) -> None:
+        """
+        Tests handling of series ID output using a dummy model with DecoderTransformer.
+        Runs one batch through handle_csv_id_output and verifies loss is greater than zero.
+        
+        :return: None
+        :rtype: None
+        """
+
         """Tests the handle_series_id method(s)"""
         mse1 = MSELoss()
         d1 = DataLoader(self.data_loader, batch_size=2)
@@ -47,7 +70,15 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         l1 = handle_csv_id_output(x, y, mod, mse1, torch.optim.Adam(d.parameters()))
         self.assertGreater(l1, 0)
 
-    def test_series_test_loader(self):
+    def test_series_test_loader(self) -> None:
+        """
+        Tests the SeriesIDTestLoader's ability to fetch data starting from a specific date.
+        Checks the dimensions of historical data, and verifies forecast start index.
+        
+        :return: None
+        :rtype: None
+        """
+
         loader_ds1 = SeriesIDTestLoader("PLANT_ID", self.dataset_params, "shit")
         res = loader_ds1.get_from_start_date_all(datetime(2020, 6, 6))
         self.assertGreater(len(res), 1)
@@ -59,7 +90,15 @@ class TestInterpolationCSVLoader(unittest.TestCase):
         self.assertGreater(forecast_start, 0)
         # self.assertIsInstance(df_train_test, pd.DataFrame)
 
-    def test_eval_series_loader(self):
+    def test_eval_series_loader(self) -> None:
+        """
+        Placeholder test for evaluating the series loader with a torch model.
+        Currently does nothing and always passes.
+        
+        :return: None
+        :rtype: None
+        """
+
         # infer_on_torch_model("s")  # to-do fill in
         self.assertFalse(False)
         pass

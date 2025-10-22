@@ -6,7 +6,16 @@ from torch.autograd import Function
 
 class DilateLoss(torch.nn.Module):
     def __init__(self, gamma=0.001, alpha=0.5):
-        """Dilate loss function originally from https://github.com/manjot4/NIPS-Reproducibility-Challenge."""
+        """
+        Dilate loss function originally from https://github.com/manjot4/NIPS-Reproducibility-Challenge.
+
+        :param gamma: Parameter for the Soft-DTW calculation.
+        :type gamma: float
+        :param alpha: Weighting factor between the shape loss and the temporal loss.
+        :type alpha: float
+        :return: None
+        :rtype: None
+        """
         super().__init__()
         self.gamma = gamma
         self.alpha = alpha
@@ -14,9 +23,14 @@ class DilateLoss(torch.nn.Module):
 
     def forward(self, targets: torch.Tensor, outputs: torch.Tensor):
         """
-        :targets: tensor of dimension (batch_size, out_seq_len, 1)
-        :outputs: tensor of dimension (batch_size, out_seq_len, 1)
-        :returns a tuple of dimension (torch.Tensor)
+        Computes the Dilate Loss between targets and outputs.
+
+        :param targets: The ground truth tensor of time series.
+         :type targets: torch.Tensor
+         :param outputs: The predicted tensor of time series.
+         :type outputs: torch.Tensor
+          :return: The total Dilate loss, a weighted sum of shape and temporal losses.
+          :rtype: torch.Tensor
         """
         outputs = outputs.float()
         targets = targets.float()
@@ -44,14 +58,17 @@ class DilateLoss(torch.nn.Module):
         return loss
 
 
-def pairwise_distances(x, y=None):
-    '''
-    Input: x is a Nxd matrix
-           y is an optional Mxd matirx
-    Output: dist is a NxM matrix where dist[i,j] is the square norm between x[i,:] and y[j,:]
-            if y is not given then use 'y=x'.
-    i.e. dist[i,j] = ||x[i,:]-y[j,:]||^2
-    '''
+def pairwise_distances(x: torch.Tensor, y: torch.Tensor = None) -> torch.Tensor:
+    """
+    Computes the square of the Euclidean distance between all pairs of vectors.
+
+    :param x: A tensor of dimension (Nxd).
+     :type x: torch.Tensor
+     :param y: An optional tensor of dimension (Mxd). If None, y=x is used.
+     :type y: torch.Tensor or None
+      :return: A tensor of dimension (NxM) where dist[i,j] is the square norm between x[i,:] and y[j,:].
+      :rtype: torch.Tensor
+    """
     x_norm = (x**2).sum(1).view(-1, 1)
     if y is not None:
         y_t = torch.transpose(y, 0, 1)
@@ -65,7 +82,17 @@ def pairwise_distances(x, y=None):
 
 
 @jit(nopython=True)
-def compute_softdtw(D, gamma):
+def compute_softdtw(D: np.ndarray, gamma: float) -> np.ndarray:
+    """
+    Computes the Soft Dynamic Time Warping (Soft-DTW) distance matrix.
+
+    :param D: The pairwise distance matrix (cost matrix).
+     :type D: np.ndarray
+     :param gamma: The smoothing parameter for the soft minimum.
+     :type gamma: float
+      :return: The accumulated cost matrix R, where R[N, M] is the Soft-DTW distance.
+      :rtype: np.ndarray
+    """
     N = D.shape[0]
     M = D.shape[1]
     R = np.zeros((N + 2, M + 2)) + 1e8
@@ -83,7 +110,19 @@ def compute_softdtw(D, gamma):
 
 
 @jit(nopython=True)
-def compute_softdtw_backward(D_, R, gamma):
+def compute_softdtw_backward(D_: np.ndarray, R: np.ndarray, gamma: float) -> np.ndarray:
+    """
+    Computes the gradient of the Soft-DTW loss with respect to the cost matrix D (the E matrix).
+
+    :param D_: The pairwise distance matrix (cost matrix).
+     :type D_: np.ndarray
+     :param R: The accumulated cost matrix from the forward pass.
+     :type R: np.ndarray
+     :param gamma: The smoothing parameter for the soft minimum.
+     :type gamma: float
+      :return: The E matrix, representing the gradient of the Soft-DTW with respect to D.
+      :rtype: np.ndarray
+    """
     N = D_.shape[0]
     M = D_.shape[1]
     D = np.zeros((N + 2, M + 2))
@@ -106,8 +145,21 @@ def compute_softdtw_backward(D_, R, gamma):
 
 
 class SoftDTWBatch(Function):
+    """
+    Pytorch autograd Function for computing the Soft-DTW loss in a batch.
+    """
     @staticmethod
-    def forward(ctx, D, gamma=1.0):  # D.shape: [batch_size, N , N]
+    def forward(ctx, D: torch.Tensor, gamma: float = 1.0) -> torch.Tensor:
+        """
+        Performs the forward pass for Soft-DTW loss computation.
+
+        :param D: The batch of pairwise distance matrices. D.shape: [batch_size, N , N]
+         :type D: torch.Tensor
+         :param gamma: The smoothing parameter for the soft minimum.
+         :type gamma: float
+          :return: The mean Soft-DTW loss across the batch.
+          :rtype: torch.Tensor
+        """
         dev = D.device
         batch_size, N, N = D.shape
         gamma = torch.FloatTensor([gamma]).to(dev)
@@ -124,7 +176,15 @@ class SoftDTWBatch(Function):
         return total_loss / batch_size
 
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx, grad_output: torch.Tensor) -> (torch.Tensor, None):
+        """
+        Performs the backward pass for Soft-DTW loss, computing the gradient w.r.t. D.
+
+        :param grad_output: The gradient of the loss w.r.t. the output of the forward pass (total_loss / batch_size).
+         :type grad_output: torch.Tensor
+          :return: The gradient of the loss w.r.t. the input D, and None for gamma (since it's not a learnable parameter).
+          :rtype: tuple of (torch.Tensor, None)
+        """
         dev = grad_output.device
         D, R, gamma = ctx.saved_tensors
         batch_size, N, N = D.shape
@@ -141,7 +201,17 @@ class SoftDTWBatch(Function):
 
 
 @jit(nopython=True)
-def my_max(x, gamma):
+def my_max(x: np.ndarray, gamma: float) -> (float, np.ndarray):
+    """
+    Computes the soft maximum of an array using the log-sum-exp trick.
+
+    :param x: The input array.
+     :type x: np.ndarray
+     :param gamma: The smoothing parameter.
+     :type gamma: float
+      :return: A tuple containing the soft maximum value and the probability array (softmax/argmax).
+      :rtype: tuple of (float, np.ndarray)
+    """
     # use the log-sum-exp trick
     max_x = np.max(x)
     exp_x = np.exp((x - max_x) / gamma)
@@ -150,23 +220,67 @@ def my_max(x, gamma):
 
 
 @jit(nopython=True)
-def my_min(x, gamma):
+def my_min(x: np.ndarray, gamma: float) -> (float, np.ndarray):
+    """
+    Computes the soft minimum of an array using the soft maximum on the negative array.
+
+    :param x: The input array.
+     :type x: np.ndarray
+     :param gamma: The smoothing parameter.
+     :type gamma: float
+      :return: A tuple containing the soft minimum value and the probability array (softmax/argmax of -x).
+      :rtype: tuple of (float, np.ndarray)
+    """
     min_x, argmax_x = my_max(-x, gamma)
     return - min_x, argmax_x
 
 
 @jit(nopython=True)
-def my_max_hessian_product(p, z, gamma):
+def my_max_hessian_product(p: np.ndarray, z: np.ndarray, gamma: float) -> np.ndarray:
+    """
+    Computes the Hessian-vector product for the soft maximum function.
+
+    :param p: The probability array (softmax output) from the first derivative calculation.
+     :type p: np.ndarray
+     :param z: The input vector (derivative of the argument of the soft-max).
+     :type z: np.ndarray
+     :param gamma: The smoothing parameter.
+     :type gamma: float
+      :return: The Hessian-vector product.
+      :rtype: np.ndarray
+    """
     return (p * z - p * np.sum(p * z)) / gamma
 
 
 @jit(nopython=True)
-def my_min_hessian_product(p, z, gamma):
+def my_min_hessian_product(p: np.ndarray, z: np.ndarray, gamma: float) -> np.ndarray:
+    """
+    Computes the Hessian-vector product for the soft minimum function.
+
+    :param p: The probability array (softmax output) from the first derivative calculation.
+     :type p: np.ndarray
+     :param z: The input vector (derivative of the argument of the soft-min).
+     :type z: np.ndarray
+     :param gamma: The smoothing parameter.
+     :type gamma: float
+      :return: The Hessian-vector product.
+      :rtype: np.ndarray
+    """
     return - my_max_hessian_product(p, z, gamma)
 
 
 @jit(nopython=True)
-def dtw_grad(theta, gamma):
+def dtw_grad(theta: np.ndarray, gamma: float) -> (float, np.ndarray, np.ndarray, np.ndarray):
+    """
+    Computes the Soft-DTW loss, its gradient (path), and intermediate matrices for the Hessian product.
+
+    :param theta: The pairwise distance matrix D (cost matrix).
+     :type theta: np.ndarray
+     :param gamma: The smoothing parameter.
+     :type gamma: float
+      :return: A tuple containing the Soft-DTW loss value (V[m, n]), the gradient (E[1:m+1, 1:n+1]), the probability matrix Q, and the full E matrix.
+      :rtype: tuple of (float, np.ndarray, np.ndarray, np.ndarray)
+    """
     m = theta.shape[0]
     n = theta.shape[1]
     V = np.zeros((m + 1, n + 1))
@@ -200,7 +314,23 @@ def dtw_grad(theta, gamma):
 
 
 @jit(nopython=True)
-def dtw_hessian_prod(theta, Z, Q, E, gamma):
+def dtw_hessian_prod(theta: np.ndarray, Z: np.ndarray, Q: np.ndarray, E: np.ndarray, gamma: float) -> (float, np.ndarray):
+    """
+    Computes the Hessian-vector product of the Soft-DTW loss with respect to the cost matrix D.
+
+    :param theta: The pairwise distance matrix D (cost matrix).
+     :type theta: np.ndarray
+     :param Z: The vector 'v' for the Hessian-vector product (e.g., the output gradient grad_output).
+     :type Z: np.ndarray
+     :param Q: The probability matrix from the dtw_grad forward pass.
+     :type Q: np.ndarray
+     :param E: The full E matrix (path/gradient) from the dtw_grad forward pass.
+     :type E: np.ndarray
+     :param gamma: The smoothing parameter.
+     :type gamma: float
+      :return: A tuple containing the final V_dot value and the Hessian-vector product matrix E_dot.
+      :rtype: tuple of (float, np.ndarray)
+    """
     m = Z.shape[0]
     n = Z.shape[1]
 
@@ -233,8 +363,22 @@ def dtw_hessian_prod(theta, Z, Q, E, gamma):
 
 
 class PathDTWBatch(Function):
+    """
+    Pytorch autograd Function for computing the Soft-DTW path (gradient) in a batch.
+    This path is used as the temporal loss component in DilateLoss.
+    """
     @staticmethod
-    def forward(ctx, D, gamma):  # D.shape: [batch_size, N , N]
+    def forward(ctx, D: torch.Tensor, gamma: float) -> torch.Tensor:
+        """
+        Performs the forward pass for Soft-DTW path computation.
+
+        :param D: The batch of pairwise distance matrices. D.shape: [batch_size, N , N]
+         :type D: torch.Tensor
+         :param gamma: The smoothing parameter for the soft minimum.
+         :type gamma: float
+          :return: The mean Soft-DTW path (gradient) across the batch.
+          :rtype: torch.Tensor
+        """
         batch_size, N, N = D.shape
         device = D.device
         D_cpu = D.detach().cpu().numpy()
@@ -253,7 +397,15 @@ class PathDTWBatch(Function):
         return torch.mean(grad_gpu, dim=0)
 
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx, grad_output: torch.Tensor) -> (torch.Tensor, None):
+        """
+        Performs the backward pass for the Soft-DTW path, computing the Hessian-vector product w.r.t. D.
+
+        :param grad_output: The gradient of the loss w.r.t. the output of the forward pass (mean path).
+         :type grad_output: torch.Tensor
+          :return: The Hessian-vector product (Hessian matrix of the Soft-DTW loss * grad_output) w.r.t. D, and None for gamma.
+          :rtype: tuple of (torch.Tensor, None)
+        """
         device = grad_output.device
         grad_gpu, D_gpu, Q_gpu, E_gpu, gamma = ctx.saved_tensors
         D_cpu = D_gpu.detach().cpu().numpy()

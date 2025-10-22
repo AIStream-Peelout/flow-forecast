@@ -31,7 +31,18 @@ from flood_forecast.temporal_decoding import decoding_function
 def stream_baseline(
     river_flow_df: pd.DataFrame, forecast_column: str, hours_forecast=336
 ) -> Tuple[pd.DataFrame, float]:
-    """Function to compute the baseline MSE by using the mean value from the train data."""
+    """
+    Function to compute the baseline MSE by using the mean value from the train data.
+
+    :param river_flow_df: The dataframe containing the river flow data.
+    :type river_flow_df: pd.DataFrame
+    :param forecast_column: The name of the column to forecast (target variable).
+    :type forecast_column: str
+    :param hours_forecast: The number of hours/time steps to consider as the test set. Defaults to 336.
+    :type hours_forecast: int
+    :return: A tuple containing the test data with baseline predictions and the mean squared error of the baseline.
+    :rtype: Tuple[pd.DataFrame, float]
+    """
     total_length = len(river_flow_df.index)
     train_river_data = river_flow_df[: total_length - hours_forecast]
     test_river_data = river_flow_df[total_length - hours_forecast:]
@@ -49,15 +60,46 @@ def get_model_r2_score(
     forecast_column: str,
     hours_forecast=336,
 ):
-    """model_evaluate_function should call any necessary preprocessing."""
+    """
+    model_evaluate_function should call any necessary preprocessing.
+
+    :param river_flow_df: The dataframe containing the river flow data.
+    :type river_flow_df: pd.DataFrame
+    :param model_evaluate_function: A callable function that evaluates the model.
+    :type model_evaluate_function: Callable
+    :param forecast_column: The name of the column to forecast (target variable).
+    :type forecast_column: str
+    :param hours_forecast: The number of hours/time steps to consider as the test set. Defaults to 336.
+    :type hours_forecast: int
+    :return: The R2 score for the model.
+    :rtype: float
+    """
     test_river_data, baseline_mse = stream_baseline(river_flow_df, forecast_column)
 
 
 def get_r2_value(model_mse, baseline_mse):
+    """
+    Calculates the R2 score given the model's MSE and the baseline's MSE.
+
+    :param model_mse: The Mean Squared Error of the forecasting model.
+    :type model_mse: float
+    :param baseline_mse: The Mean Squared Error of the baseline model.
+    :type baseline_mse: float
+    :return: The R2 score.
+    :rtype: float
+    """
     return 1 - model_mse / baseline_mse
 
 
 def get_value(the_path: str) -> None:
+    """
+    Reads a CSV, computes the stream baseline, and prints the R2 value for a hardcoded model MSE.
+
+    :param the_path: The file path to the CSV data.
+    :type the_path: str
+    :return: None
+    :rtype: None
+    """
     df = pd.read_csv(the_path)
     res = stream_baseline(df, "cfs", 336)
     print(get_r2_value(0.120, res[1]))
@@ -71,19 +113,49 @@ def evaluate_model(
     inference_params: Dict,
     eval_log: Dict,
 ) -> Tuple[Dict, pd.DataFrame, int, pd.DataFrame]:
-    """A function to evaluate a model. Called automatically at end of training. Can be imported for continuing to evaluate
-    a model in other places as well.
+    """
+    Evaluate a trained model and compute performance metrics.
 
-    .. highlight:: python
-    .. code-block:: python
+    This function is typically called automatically at the end of training,
+    but it can also be imported and used independently for evaluating a model.
 
-        from flood_forecast.evaluator import evaluate_model
-        forecast_model = PyTorchForecast(config_file)
-        e_log, df_train_test, f_idx, df_preds = evaluate_model(forecast_model, "PyTorch", ["cfs"], ["MSE", "MAPE"], {})
-        print(e_log) # {"MSE":0.2, "MAPE":0.1}
-        print(df_train_test) # will print a pandas dataframe
-        ...
-    '''
+    Example:
+        .. code-block:: python
+
+            from flood_forecast.evaluator import evaluate_model
+
+            forecast_model = PyTorchForecast(config_file)
+            e_log, df_train_test, f_idx, df_preds = evaluate_model(
+                forecast_model,
+                model_type="PyTorch",
+                target_col=["cfs"],
+                evaluation_metrics=["MSE", "MAPE"],
+                inference_params={},
+                eval_log={}
+            )
+            print(e_log)           # {'MSE': 0.2, 'MAPE': 0.1}
+            print(df_train_test)   # pandas DataFrame with predictions and ground truth
+
+    :param model: The time series model instance to evaluate.
+    :type model: Type[TimeSeriesModel]
+    :param model_type: The type of the model (e.g., "PyTorch").
+    :type model_type: str
+    :param target_col: List of target column names to evaluate.
+    :type target_col: List[str]
+    :param evaluation_metrics: List of evaluation metrics to compute.
+    :type evaluation_metrics: List
+    :param inference_params: Dictionary containing parameters for inference.
+    :type inference_params: Dict
+    :param eval_log: Dictionary to store initial evaluation logs or existing results.
+    :type eval_log: Dict
+    :return: 
+        A tuple containing:
+
+        - **eval_log** (*Dict*): Dictionary of computed evaluation metrics.
+        - **df_train_and_test** (*pd.DataFrame*): DataFrame with training, test, and prediction data.
+        - **forecast_start_idx** (*int*): Index indicating where the forecast period begins.
+        - **df_predictions** (*pd.DataFrame*): DataFrame containing model predictions.
+    :rtype: Tuple[Dict, pd.DataFrame, int, pd.DataFrame]
     """
     if model_type == "PyTorch":
         (
@@ -164,6 +236,28 @@ def evaluate_model(
 
 def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={},
                    end_tensor_0=None) -> Dict:
+    """
+    Calculates the evaluation metrics based on the model predictions.
+
+    :param model: The time series model instance.
+    :type model: Type[TimeSeriesModel]
+    :param df_train_and_test: The dataframe containing both training, test, and prediction data.
+    :type df_train_and_test: pd.DataFrame
+    :param forecast_history: The length of the historical data used for forecasting.
+    :type forecast_history: int
+    :param target_col: A list of the target column names to evaluate.
+    :type target_col: List[str]
+    :param end_tensor: The tensor containing the final model predictions.
+    :type end_tensor: torch.Tensor
+    :param g_loss: Flag indicating if Gaussian loss is used, which implies two outputs (mean and std dev). Defaults to False.
+    :type g_loss: bool
+    :param eval_log: A dictionary to store the evaluation logs. Defaults to {}.
+    :type eval_log: Dict
+    :param end_tensor_0: The second tensor output (e.g., standard deviation) when g_loss is True. Defaults to None.
+    :type end_tensor_0: torch.Tensor
+    :return: The updated evaluation log dictionary.
+    :rtype: Dict
+    """
     inference_params = model.params["inference_params"]
     for evaluation_metric in model.crit:
         idx = 0
@@ -218,19 +312,29 @@ def infer_on_torch_model(
     probabilistic: bool = False,
     criterion_params: Dict = None
 ) -> Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]:
-    """Function to handle both test evaluation and inference on a test data-frame.
+    """
+    Function to handle both test evaluation and inference on a test data-frame.
 
-    :param model: The time series model present in the model zoo
-    :param test_csv_path: The path to the test data-frame
-    :return:
-        df: df including training and test data
-        end_tensor: the final tensor after the model has finished predictions
-        history_length: num rows to use in training
-        forecast_start_idx: row index to start forecasting
-        test_data: CSVTestLoader instance
-        df_prediction_samples: has same index as df, and num cols equal to num_prediction_samples
-        or no columns if num_prediction_samples is None
-    :rtype: tuple()
+    :param model: The time series model present in the model zoo.
+    :type model: Type[TimeSeriesModel]
+    :param test_csv_path: The path to the test data-frame. Defaults to None.
+    :type test_csv_path: str
+    :param datetime_start: The datetime object indicating where to start the forecast. Defaults to datetime(2018, 9, 22, 0).
+    :type datetime_start: datetime
+    :param hours_to_forecast: The number of time-steps to forecast in the future. Defaults to 336.
+    :type hours_to_forecast: int
+    :param decoder_params: Parameters for the decoding function. Defaults to None.
+    :type decoder_params: Dict
+    :param dataset_params: A dictionary of parameters for the test dataset loader. Defaults to {}.
+    :type dataset_params: Dict
+    :param num_prediction_samples: The number of prediction samples to generate for uncertainty estimation. Defaults to None.
+    :type num_prediction_samples: int
+    :param probabilistic: Flag to indicate if the model is probabilistic. Defaults to False.
+    :type probabilistic: bool
+    :param criterion_params: Parameters for the criterion/loss function. Defaults to None.
+    :type criterion_params: Dict
+    :return: A tuple containing: the dataframe with train and test data, the final prediction tensor, history length, forecast start index, the test data loader, and a list of prediction samples dataframes.
+    :rtype: Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if isinstance(datetime_start, str):
@@ -321,6 +425,33 @@ def infer_on_torch_model(
 
 def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loader, multi_params, forecast_start_idx,
                     history, datetime_start):
+    """
+    Helper function to finalize the evaluation data structure after initial inference.
+
+    This function adds the 'preds' column to the dataframe, handles probabilistic predictions,
+    and calls `generate_prediction_samples` if required.
+
+    :param model: The time series model instance.
+    :type model: Type[TimeSeriesModel]
+    :param df_train_and_test: The dataframe containing both training and test data.
+    :type df_train_and_test: pd.DataFrame
+    :param end_tensor: The raw output tensor from the model's prediction.
+    :type end_tensor: torch.Tensor
+    :param params: The full parameters dictionary from the model.
+    :type params: Dict
+    :param csv_test_loader: The test data loader instance.
+    :type csv_test_loader: CSVTestLoader
+    :param multi_params: The number of target variables (n_targets).
+    :type multi_params: int
+    :param forecast_start_idx: The index in the dataframe where forecasting starts.
+    :type forecast_start_idx: int
+    :param history: The historical data tensor used as input.
+    :type history: torch.Tensor
+    :param datetime_start: The start datetime for the forecast period.
+    :type datetime_start: datetime
+    :return: A tuple containing: the updated dataframe, the final prediction tensor, history length, forecast start index, the test data loader, and a list of prediction samples dataframes.
+    :rtype: Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]
+    """
     targ = False
     decoder_params = None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -391,6 +522,22 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
 
 def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, model, device,
                                     hours_to_forecast: int, datetime_start) -> Tuple[List[pd.DataFrame], List]:
+    """
+    Handles inference and prediction generation for SeriesIDLoader datasets.
+
+    :param csv_series_id_loader: The SeriesIDTestLoader instance.
+    :type csv_series_id_loader: SeriesIDTestLoader
+    :param model: The time series model instance.
+    :type model: Type[TimeSeriesModel]
+    :param device: The device (e.g., 'cpu' or 'cuda') to use for tensor operations.
+    :type device: torch.device
+    :param hours_to_forecast: The number of time-steps to forecast in the future.
+    :type hours_to_forecast: int
+    :param datetime_start: The start datetime for the forecast period.
+    :type datetime_start: datetime
+    :return: A tuple containing: a list of dataframes/history tuples for each series, and a list of prediction tensors.
+    :rtype: Tuple[List[pd.DataFrame], List]
+    """
     data = csv_series_id_loader.get_from_start_date_all(datetime_start)
     end_tenor_arr = []
     for i in range(0, len(data)):
@@ -417,26 +564,27 @@ def handle_evaluation_series_loader(csv_series_id_loader: SeriesIDTestLoader, mo
 
 def handle_ci_multi(prediction_samples: torch.Tensor, csv_test_loader: CSVTestLoader, multi_params: int,
                     df_pred, decoder_param: bool, history_length: int, num_samples: int) -> List[pd.DataFrame]:
-    """Handles the CI confidence interval.
+    """
+    Handles the confidence interval (CI) and prediction samples for multi-target or single-target forecasting.
 
-    :param prediction_samples: The number of predictions to generate
+    :param prediction_samples: The tensor containing the prediction samples.
     :type prediction_samples: torch.Tensor
-    :param csv_test_loader: The test loader genreated in the previous
+    :param csv_test_loader: The test loader generated in the previous step.
     :type csv_test_loader: CSVTestLoader
-    :param multi_params: [description]
+    :param multi_params: The number of target variables (n_targets).
     :type multi_params: int
-    :param df_pred: The pandas dataframe of the returned prediction
-    :type df_pred: [type]
-    :param decoder_param: [description]
+    :param df_pred: The pandas dataframe template for the returned prediction.
+    :type df_pred: pd.DataFrame
+    :param decoder_param: The decoder parameters, used to check for probabilistic models.
     :type decoder_param: bool
-    :param history_length: The number of historical time-steps
+    :param history_length: The number of historical time-steps.
     :type history_length: int
-    :param num_samples: The number of samples to generate (i.e. larger ci)
+    :param num_samples: The number of samples to generate (i.e. larger ci).
     :type num_samples: int
-    :raises ValueError: [description]
-    :raises ValueError: [descriptsion]
-    :return: Returns an array with different CI predictions
+    :return: Returns a list of dataframes, one for each CI prediction/target.
     :rtype: List[pd.DataFrame]
+    :raises ValueError: If the length of the prediction array is less than 1.
+    :raises ValueError: If data for multiple targets is equal.
     """
     df_prediction_arr = []
     if decoder_param is not None:
@@ -482,29 +630,32 @@ def generate_predictions(
     targs=False,
     multi_params: int = 1
 ) -> torch.Tensor:
-    """A function to generate the actual model prediction.
+    """
+    A function to generate the actual model prediction.
 
-    :param model: A PyTorchForecast
+    :param model: A PyTorchForecast model instance.
     :type model: Type[TimeSeriesModel]
-    :param df: The main dataframe containing data
+    :param df: The main dataframe containing data.
     :type df: pd.DataFrame
-    :param test_data: The test data loader
+    :param test_data: The test data loader.
     :type test_data: CSVTestLoader
-    :param history: The forecast historical data
+    :param history: The forecast historical data tensor.
     :type history: torch.Tensor
-    :param device: The device usually cpu or cuda
+    :param device: The device usually cpu or cuda.
     :type device: torch.device
-    :param forecast_start_idx: The index you want the forecast to begin
+    :param forecast_start_idx: The index you want the forecast to begin.
     :type forecast_start_idx: int
-    :param forecast_length: The length of the forecast the model outputs per forward pass
+    :param forecast_length: The length of the forecast the model outputs per forward pass.
     :type forecast_length: int
-    :param hours_to_forecast: The number of time_steps to forecast in future
+    :param hours_to_forecast: The number of time_steps to forecast in future.
     :type hours_to_forecast: int
-    :param decoder_params: The parameters the decoder function takes..
+    :param decoder_params: The parameters the decoder function takes.
     :type decoder_params: Dict
-    :param multi_params: n_targets, defaults to 1
+    :param targs: Target tensor for models like Transformer, defaults to False.
+    :type targs: Union[bool, torch.Tensor]
+    :param multi_params: n_targets, defaults to 1.
     :type multi_params: int, optional
-    :return: The forecasted values for the time-series in a tensor
+    :return: The forecasted values for the time-series in a tensor.
     :rtype: torch.Tensor
     """
     if targs or model.params["dataset_params"]["class"] == "TemporalLoader":
@@ -544,21 +695,25 @@ def generate_predictions_non_decoded(
     forecast_length: int,
     hours_to_forecast: int,
 ) -> torch.Tensor:
-    """Generates predictions for the models that do not use a decoder.
+    """
+    Generates predictions for the models that do not use a decoder.
 
-    :param model: A PyTorchForecast
+    This function typically handles iterative forecasting where the model's output
+    is fed back as part of the input for the next step.
+
+    :param model: A PyTorchForecast model instance.
     :type model: Type[TimeSeriesModel]
-    :param df: [description]
+    :param df: The main dataframe containing data.
     :type df: pd.DataFrame
-    :param test_data: [description]
+    :param test_data: The test data loader.
     :type test_data: CSVTestLoader
-    :param history_dim: [description]
+    :param history_dim: The historical data tensor with batch dimension.
     :type history_dim: torch.Tensor
-    :param forecast_length: [description]
+    :param forecast_length: The length of the forecast the model outputs per forward pass.
     :type forecast_length: int
-    :param hours_to_forecast: [description]
+    :param hours_to_forecast: The number of time_steps to forecast in future.
     :type hours_to_forecast: int
-    :return: [description]
+    :return: The forecasted values for the time-series as a concatenated tensor.
     :rtype: torch.Tensor
     """
     full_history = [history_dim]
@@ -613,6 +768,30 @@ def generate_decoded_predictions(
     multi_targets: int = 1,
     targs: Union[bool, torch.Tensor] = False
 ) -> torch.Tensor:
+    """
+    Generates predictions for decoder-based models (e.g., Transformer).
+
+    :param model: A PyTorchForecast model instance.
+    :type model: Type[TimeSeriesModel]
+    :param test_data: The test data loader.
+    :type test_data: CSVTestLoader
+    :param forecast_start_idx: The index in the dataframe where forecasting starts.
+    :type forecast_start_idx: int
+    :param device: The device (e.g., 'cpu' or 'cuda') to use for tensor operations.
+    :type device: torch.device
+    :param history_dim: The historical data tensor with batch dimension.
+    :type history_dim: torch.Tensor
+    :param hours_to_forecast: The number of time_steps to forecast in future.
+    :type hours_to_forecast: int
+    :param decoder_params: The parameters the decoder function takes.
+    :type decoder_params: Dict
+    :param multi_targets: The number of target variables (n_targets), defaults to 1.
+    :type multi_targets: int, optional
+    :param targs: Target tensor for models like Transformer, defaults to False.
+    :type targs: Union[bool, torch.Tensor]
+    :return: The forecasted values for the time-series as a tensor, potentially with a second tensor for standard deviation.
+    :rtype: torch.Tensor
+    """
     probabilistic = False
     scaler = None
     if test_data.no_scale:
@@ -675,7 +854,36 @@ def generate_prediction_samples(
     multi_params=1,
     targs=False
 ) -> np.ndarray:
-    """Generates."""
+    """
+    Generates multiple prediction samples for uncertainty estimation (e.g., Monte Carlo Dropout).
+
+    :param model: A PyTorchForecast model instance.
+    :type model: Type[TimeSeriesModel]
+    :param df: The main dataframe containing data.
+    :type df: pd.DataFrame
+    :param test_data: The test data loader.
+    :type test_data: CSVTestLoader
+    :param history: The forecast historical data tensor.
+    :type history: torch.Tensor
+    :param device: The device usually cpu or cuda.
+    :type device: torch.device
+    :param forecast_start_idx: The index you want the forecast to begin.
+    :type forecast_start_idx: int
+    :param forecast_length: The length of the forecast the model outputs per forward pass.
+    :type forecast_length: int
+    :param hours_to_forecast: The number of time_steps to forecast in future.
+    :type hours_to_forecast: int
+    :param decoder_params: The parameters the decoder function takes.
+    :type decoder_params: Dict
+    :param num_prediction_samples: The number of prediction samples to generate.
+    :type num_prediction_samples: int
+    :param multi_params: n_targets, defaults to 1.
+    :type multi_params: int, optional
+    :param targs: Target tensor for models like Transformer, defaults to False.
+    :type targs: Union[bool, torch.Tensor]
+    :return: An array where each column is one array of predictions (or a tuple of arrays for probabilistic models).
+    :rtype: np.ndarray
+    """
     pred_samples = []
     std_dev_samples = []
     probabilistic = False

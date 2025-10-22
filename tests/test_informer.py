@@ -8,6 +8,12 @@ import torch
 
 class TestInformer(unittest.TestCase):
     def setUp(self):
+        """
+        Set up the Informer model and input kwargs for the test cases.
+
+        :return: None
+        :rtype: None
+        """
         self.informer = Informer(3, 3, 3, 20, 20, 20, factor=1)
         self.kwargs = {
                     "file_path": "tests/test_data/keag_small.csv",
@@ -28,6 +34,12 @@ class TestInformer(unittest.TestCase):
                 }
 
     def test_informer(self):
+        """
+        Test the Informer model with dummy inputs and verify output shape.
+
+        :return: None
+        :rtype: None
+        """
         # Format should be (batch_size, seq_len, n_time_series) (batch_size, seq_len, n_time_series)
         result = self.informer(torch.rand(2, 20, 3), torch.rand(2, 20, 4), torch.rand(2, 20, 3), torch.rand(2, 20, 4))
         self.assertEqual(len(result.shape), 3)
@@ -35,12 +47,24 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(result.shape[1], 20)
 
     def test_data_embedding(self):
+        """
+        Test the DataEmbedding module for correct output shape and attribute presence.
+
+        :return: None
+        :rtype: None
+        """
         d = DataEmbedding(5, 128, data=5)
         r = d(torch.rand(2, 10, 5), torch.rand(2, 10, 5))
         self.assertTrue(hasattr(d.temporal_embedding, "month_embed"))
         self.assertEqual(r.shape[2], 128)
 
     def test_temporal_loader(self):
+        """
+        Test the TemporalLoader for data shape, ordering, and embedding consistency.
+
+        :return: None
+        :rtype: None
+        """
         loa = TemporalLoader(["month", "day", "day_of_week", "hour"], self.kwargs)
         result = loa[0]
         self.assertEqual(len(result), 2)
@@ -72,6 +96,12 @@ class TestInformer(unittest.TestCase):
         """
 
     def test_temporal_load(self):
+        """
+        Test the TemporalLoader with label length restriction and verify sliced output.
+
+        :return: None
+        :rtype: None
+        """
         loa = TemporalLoader(["month", "day", "day_of_week", "hour"], self.kwargs, 2)
         data = loa[0]
         self.assertEqual(data[1][1].shape[0], 3)
@@ -79,6 +109,12 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(data[1][1][2, 0], 459)
 
     def test_data_temporal_loader_init(self):
+        """
+        Test initialization and output of TemporalTestLoader with all data parts.
+
+        :return: None
+        :rtype: None
+        """
         kwargs2 = self.kwargs.copy()
         kwargs3 = {
             "forecast_total": 336,
@@ -93,6 +129,12 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(trg[1][0, 0].item(), 445)
 
     def test_decodign_t(self):
+        """
+        Test decoding_function output shape given mock input tensors.
+
+        :return: None
+        :rtype: None
+        """
         src = torch.rand(20, 3)
         trg = torch.rand(355, 3)
         src1 = torch.rand(20, 4)
@@ -102,6 +144,12 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(d.shape[1], 336)
 
     def test_decoding_2(self):
+        """
+        Further test decoding_function and ensure outputs differ across time steps.
+
+        :return: None
+        :rtype: None
+        """
         src = torch.rand(20, 3)
         trg = torch.rand(355, 3)
         src1 = torch.rand(20, 4)
@@ -117,6 +165,12 @@ class TestInformer(unittest.TestCase):
         self.assertNotAlmostEqual(d[0, 21, 0].item(), trg[21, 0].item())
 
     def test_decoding_3(self):
+        """
+        Test decoding_function using a different Informer configuration and inputs.
+
+        :return: None
+        :rtype: None
+        """
         informer_model2 = Informer(3, 3, 3, 48, 24, 12, factor=1)
         src = torch.rand(1, 48, 3)
         trg = torch.rand(1, 362, 3)
@@ -127,6 +181,12 @@ class TestInformer(unittest.TestCase):
         self.assertEqual(d.shape[1], 336)
 
     def test_t_loade2(self):
+        """
+        Test the TemporalLoader with label_lens parameter and verify shapes of source and target tensors.
+
+        :return: None
+        :rtype: None
+        """
         s_wargs = {
                     "file_path": "tests/test_data/keag_small.csv",
                     "forecast_history": 39,

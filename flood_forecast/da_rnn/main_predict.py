@@ -14,7 +14,19 @@ from custom_types import TrainData
 from constants import device
 
 
-def preprocess_data(dat, col_names, scale) -> TrainData:
+def preprocess_data(dat: pd.DataFrame, col_names: typing.Tuple[str], scale) -> TrainData:
+    """
+    Scales the input data and splits it into features and targets.
+
+    :param dat: The raw input data as a pandas DataFrame.
+     :type dat: pd.DataFrame
+     :param col_names: A tuple of column names that represent the target variables.
+     :type col_names: typing.Tuple[str]
+     :param scale: The fitted scaler object (e.g., from sklearn) to transform the data.
+     :type scale: Any
+      :return: An object containing the processed features and targets.
+      :rtype: TrainData
+    """
     proc_dat = scale.transform(dat)
 
     mask = np.ones(proc_dat.shape[1], dtype=bool)
@@ -28,7 +40,23 @@ def preprocess_data(dat, col_names, scale) -> TrainData:
     return TrainData(feats, targs)
 
 
-def predict(encoder, decoder, t_dat, batch_size: int, T: int) -> np.ndarray:
+def predict(encoder: torch.nn.Module, decoder: torch.nn.Module, t_dat: TrainData, batch_size: int, T: int) -> np.ndarray:
+    """
+    Performs batch prediction using the trained DA-RNN encoder and decoder modules.
+
+    :param encoder: The trained encoder module.
+     :type encoder: torch.nn.Module
+     :param decoder: The trained decoder module.
+     :type decoder: torch.nn.Module
+     :param t_dat: The processed training/test data containing features and targets.
+     :type t_dat: TrainData
+     :param batch_size: The number of samples to process in each batch.
+     :type batch_size: int
+     :param T: The sequence length (window size) used for the model input.
+     :type T: int
+      :return: A numpy array of predicted target values.
+      :rtype: np.ndarray
+    """
     y_pred = np.zeros((t_dat.feats.shape[0] - T + 1, t_dat.targs.shape[0]))
 
     for y_i in range(0, len(y_pred), batch_size):

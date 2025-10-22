@@ -22,14 +22,14 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
 
     :param crit_multi: The list of criteria to use for training.
     :type crit_multi: List
-    :param output:
-    :type output: _type_
-    :param labels: _description_
-    :type labels: _type_
-    :param valid: _description_, defaults to None
-    :type valid: _type_, optional
-    :return: _description_
-    :rtype: _type_
+    :param output: The model's prediction output.
+    :type output: torch.Tensor
+    :param labels: The true target labels.
+    :type labels: torch.Tensor
+    :param valid: A validation dataset (not used in this function's body for loss calculation).
+    :type valid: Any, optional
+    :return: The sum of the computed losses from all criteria.
+    :rtype: float
     """
     i = 0
     loss = 0.0
@@ -47,8 +47,8 @@ def handle_meta_data(model: PyTorchForecast):
 
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
-    :return: Returns a tuple of the initial meta-representation
-    :rtype: tuple(PyTorchForecast, torch.Tensor, float)
+    :return: Returns a tuple of the initialized meta-model, its representation, and the meta-loss function.
+    :rtype: tuple(PyTorchForecast, torch.Tensor, torch.nn.Module)
     """
     meta_loss = None
     with open(model.params["meta_data"]["path"]) as f:
@@ -62,15 +62,17 @@ def handle_meta_data(model: PyTorchForecast):
     meta_name = json_data["model_name"]
     meta_model = PyTorchForecast(meta_name, training_path, valid_path, dataset_params2["test_path"], json_data)
     meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
-                                                  model.params["meta_data"]["uuid"], meta_model)
+                                                 model.params["meta_data"]["uuid"], meta_model)
     return meta_model, meta_representation, meta_loss
 
 
 def make_crit(model_params: Dict) -> Union[torch.nn.Module, List]:
-    """A function to create the criterion for training from the parameters.
+    """A function to create the criterion or list of criteria for training from the parameters.
 
-    :param model_params: The training params Dict block in FF
+    :param model_params: The training params Dict block in FF config.
     :type model_params: Dict
+    :return: A PyTorch loss module or a list of PyTorch loss modules.
+    :rtype: Union[torch.nn.Module, List]
     """
     training_params = model_params
     criterion_init_params = {}
@@ -97,16 +99,20 @@ def train_transformer_style(
         class2=False) -> None:
     """Function to train any PyTorchForecast model.
 
-    :param model:  A properly wrapped PyTorchForecast model
+    :param model: A properly wrapped PyTorchForecast model.
     :type model: PyTorchForecast
     :param training_params: A dictionary of the necessary parameters for training.
     :type training_params: Dict
-    :param takes_target: A parameter to determine whether a model requires the target, defaults to False
+    :param takes_target: A parameter to determine whether a model requires the target during its forward pass, defaults to False.
     :type takes_target: bool, optional
-    :param forward_params: [description], defaults to {}
+    :param forward_params: Extra parameters to be passed to the model's forward method, defaults to {}.
     :type forward_params: Dict, optional
-    :param model_filepath: The file path to load model weights from, defaults to "model_save"
+    :param model_filepath: The file path to save the best model weights to, defaults to "model_save".
     :type model_filepath: str, optional
+    :param class2: Flag for binary classification models (currently unused in the function body).
+    :type class2: bool, optional
+    :return: None
+    :rtype: None
     """
     use_wandb = model.wandb
     es = None
@@ -239,28 +245,39 @@ def train_transformer_style(
 
 
 def get_meta_representation(column_id: str, uuid: str, meta_model: PyTorchForecast) -> torch.Tensor:
+    """Retrieves the meta-data representation (e.g., historical data) for a specific series ID.
+
+    :param column_id: The column ID or feature name.
+    :type column_id: str
+    :param uuid: The unique identifier for the time series.
+    :type uuid: str
+    :param meta_model: The PyTorchForecast object associated with the meta-data.
+    :type meta_model: PyTorchForecast
+    :return: The initial meta-representation tensor.
+    :rtype: torch.Tensor
+    """
     return meta_model.test_data.__getitem__(0, uuid, column_id)[0]
 
 
 def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probabilistic, m, output_std):
-    """Function that handles un-scaling the model output.
+    """Function that handles un-scaling the model output and labels back to their original domain.
 
-    :param validation_dataset: A dataset object for the validation dataset. We use its inverse scale method.
-    :type validation_dataset: [type]
-    :param src: [description]
+    :param validation_dataset: A dataset object for the validation dataset, containing the inverse scale method.
+    :type validation_dataset: Any
+    :param src: The source input tensor.
     :type src: torch.Tensor
-    :param output: [description]
+    :param output: The scaled model prediction output tensor.
     :type output: torch.Tensor
-    :param labels: [description]
+    :param labels: The scaled true target labels tensor.
     :type labels: torch.Tensor
-    :param probabilistic: Whether the model is probablisitic or not.
+    :param probabilistic: Whether the model is probabilistic (outputting a distribution).
     :type probabilistic: bool
-    :param m: Whether there are multiple targets
+    :param m: The number of targets.
     :type m: int
-    :param output_std: [description]
-    :type output_std: [type]
-    :return: [description]
-    :rtype: [type]
+    :param output_std: The standard deviation of the output for probabilistic models.
+    :type output_std: Union[torch.Tensor, np.ndarray, None]
+    :return: A tuple containing the unscaled source, output, labels, and an optional output distribution.
+    :rtype: tuple(torch.Tensor, torch.Tensor, torch.Tensor, torch.distributions.Normal or None)
     """
     # To-do move to class fun ction
     output_dist = None
@@ -289,25 +306,25 @@ def handle_scaling(validation_dataset, src, output: torch.Tensor, labels, probab
 
 
 def compute_loss(labels, output, src, criterion, validation_dataset, probabilistic=None, output_std=None, m=1):
-    """Function for computing the loss.
+    """Function for computing the loss, handling different loss functions and scaling requirements.
 
-    :param labels: The real values for the target. Shape can be variable but should follow (batch_size, time)
+    :param labels: The real values for the target. Shape can be variable but should follow (batch_size, time).
     :type labels: torch.Tensor
-    :param output: The output of the model
-    :type output: torch.Tensor
-    :param src: The source values (only really needed for the MASELoss function)
+    :param output: The output of the model (mean/prediction or a tuple of mean and std for GaussianLoss).
+    :type output: Union[torch.Tensor, tuple]
+    :param src: The source values (only really needed for the MASELoss function).
     :type src: torch.Tensor
-    :param criterion: The loss function to use
-    :type criterion: torch.nn.Loss or some variation
-    :param validation_dataset: Only passed when unscaling of data is needed.
-    :type validation_dataset: torch.utils.data.dataset
-    :param probabilistic: Whether the model is a probabalistic returns a distribution, defaults to None
+    :param criterion: The loss function to use.
+    :type criterion: torch.nn.modules.loss._Loss or some custom loss variation (e.g., GaussianLoss, MASELoss).
+    :param validation_dataset: Only passed when unscaling of data is needed (e.g., for MASE loss).
+    :type validation_dataset: Any
+    :param probabilistic: Whether the model is probabilistic, returning a distribution, defaults to None.
     :type probabilistic: bool, optional
-    :param output_std: The standard distribution, defaults to None
-    :type output_std: [type], optional
-    :param m: The number of targets defaults to 1
+    :param output_std: The standard distribution, defaults to None.
+    :type output_std: Union[torch.Tensor, np.ndarray, None], optional
+    :param m: The number of targets, defaults to 1.
     :type m: int, optional
-    :return: Returns the computed loss
+    :return: Returns the computed loss.
     :rtype: float
     """
     if isinstance(criterion, GaussianLoss):
@@ -335,7 +352,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         output_dist = torch.distributions.Normal(output, output_std)
     if validation_dataset:
         src, output, labels, output_dist = handle_scaling(validation_dataset, src, output, labels,
-                                                          probabilistic, m, output_std)
+                                                         probabilistic, m, output_std)
     if probabilistic:
         if len(labels.shape) != len(output.shape):
             output_dist = output_dist[:, :, 0]
@@ -368,28 +385,27 @@ def torch_single_train(model: PyTorchForecast,
                        forward_params: Dict = {}) -> float:
     """Function that performs training of a single model. Runs through one epoch of the data.
 
-    :param model: The PyTorchForecast model that is trained
+    :param model: The PyTorchForecast model that is trained.
     :type model: PyTorchForecast
-    :param opt: The optimizer to use in the code
+    :param opt: The optimizer to use in the code.
     :type opt: optim.Optimizer
-    :param criterion: [m
-    :type criterion: Type[torch.nn.modules.loss._Loss]
-    :param data_loader: [description]
+    :param criterion: The loss function or list of loss functions to use.
+    :type criterion: Type[torch.nn.modules.loss._Loss] or List
+    :param data_loader: The data loader for the training data.
     :type data_loader: DataLoader
-    :param takes_target: A boolean that indicates whether the model takes the target during training
+    :param takes_target: A boolean that indicates whether the model takes the target during training.
     :type takes_target: bool
-    :param meta_data_model: If supplied a model that handles meta-data else None.
+    :param meta_data_model: If supplied, a model that handles meta-data, else None.
     :type meta_data_model: PyTorchForecast
-    :param meta_data_model_representation: [description]
+    :param meta_data_model_representation: The tensor representation of the meta-data.
     :type meta_data_model_representation: torch.Tensor
-    :param meta_loss: [description], defaults to None
-    :type meta_loss: [type], optional
-    :param multi_targets: [description], defaults to 1
+    :param meta_loss: The loss function for the meta-data model, defaults to None.
+    :type meta_loss: torch.nn.modules.loss._Loss, optional
+    :param multi_targets: The number of targets the model is predicting, defaults to 1.
     :type multi_targets: int, optional
-    :param forward_params: [description], defaults to {}
+    :param forward_params: Extra parameters for the model's forward pass, defaults to {}.
     :type forward_params: Dict, optional
-    :raises ValueError: [description]
-    :return: [description]
+    :return: The total training loss averaged over all batches.
     :rtype: float
     """
 
@@ -479,35 +495,37 @@ def compute_validation(validation_loader: DataLoader,
                        val_or_test="validation_loss",
                        probabilistic=False,
                        classification=False) -> float:
-    """Function to compute the validation loss metrics.
+    """Function to compute the validation or test loss metrics.
 
-    :param validation_loader: The data-loader of either validation or test-data
+    :param validation_loader: The data-loader of either validation or test-data.
     :type validation_loader: DataLoader
-    :param model: model
-    :type model: [type]
+    :param model: The PyTorch model to evaluate.
+    :type model: torch.nn.Module
     :param epoch: The epoch where the validation/test loss is being computed.
     :type epoch: int
-    :param sequence_size: The length of the sequence (equivalent too
+    :param sequence_size: The length of the sequence (equivalent to the forecast length).
     :type sequence_size: int
-    :param criterion: [description]
-    :type criterion: Type[torch.nn.modules.loss._Loss]
-    :param device: The device
+    :param criterion: The loss function(s) to use.
+    :type criterion: Type[torch.nn.modules.loss._Loss] or List
+    :param device: The device on which to perform computation.
     :type device: torch.device
-    :param decoder_structure: Whether the model should use sequential decoding, defaults to False
+    :param decoder_structure: Whether the model should use sequential decoding (e.g., greedy_decode or simple_decode), defaults to False.
     :type decoder_structure: bool, optional
-    :param meta_data_model: The model to handle the meta-data, defaults to None
+    :param meta_data_model: The model to handle the meta-data (currently unused in the function body), defaults to None.
     :type meta_data_model: PyTorchForecast, optional
-    :param use_wandb: Whether Weights and Biases is in use, defaults to False
+    :param use_wandb: Whether Weights and Biases is in use for logging, defaults to False.
     :type use_wandb: bool, optional
-    :param meta_model: Whether the model leverages meta-data, defaults to None
+    :param meta_model: Whether the model leverages meta-data (currently unused in the function body), defaults to None.
     :type meta_model: bool, optional
-    :param multi_targets: Whether the model, defaults to 1
+    :param multi_targets: The number of targets, defaults to 1.
     :type multi_targets: int, optional
-    :param val_or_test: Whether validation or test loss is computed, defaults to "validation_loss"
+    :param val_or_test: The name of the loss being computed for logging, defaults to "validation_loss".
     :type val_or_test: str, optional
-    :param probabilistic: Whether the model is probablistic, defaults to False
+    :param probabilistic: Whether the model is probabilistic, defaults to False.
     :type probabilistic: bool, optional
-    :return: The loss of the first metric in the list.
+    :param classification: Whether the task is a classification task, defaults to False.
+    :type classification: bool, optional
+    :return: The loss of the first metric in the list of criteria (scaled loss).
     :rtype: float
     """
     print('Computing validation loss')
@@ -542,9 +560,9 @@ def compute_validation(validation_loader: DataLoader,
                         targ.shape[1],
                         targ_clone,
                         device=device)[
-                        :,
-                        :,
-                        0]
+                             :,
+                             :,
+                             0]
                 elif type(model).__name__ in TEMPORAL_FEATS_MODELS:
                     multi_targets = multi_targs1
                     filled_targ = targ[1].clone()
@@ -618,6 +636,6 @@ def compute_validation(validation_loader: DataLoader,
                                                              title="roc_" + str(epoch))})
         wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output_final)})
         wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output_final,
-                   y_true=fin.detach().cpu().numpy(), class_names=None)})
+                            y_true=fin.detach().cpu().numpy(), class_names=None)})
     model.train()
     return list(scaled_crit.values())[0]

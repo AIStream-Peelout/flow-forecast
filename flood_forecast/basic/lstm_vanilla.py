@@ -2,10 +2,29 @@ import torch
 
 
 class LSTMForecast(torch.nn.Module):
-    """A very simple baseline LSTM model that returns an output sequence given a multi-dimensional input seq.
+    """
+    A simple baseline LSTM model for time series forecasting.
 
-    Inspired by the StackOverflow link below.
+    This model takes a multivariate time series input and returns a forecast sequence.
+    Inspired by:
     https://stackoverflow.com/questions/56858924/multivariate-input-lstm-in-pytorch
+
+    :param seq_length: Length of the input sequence
+    :type seq_length: int
+    :param n_time_series: Number of input features (time series)
+    :type n_time_series: int
+    :param output_seq_len: Number of time steps to predict (default is 1)
+    :type output_seq_len: int
+    :param hidden_states: Number of hidden units in each LSTM layer
+    :type hidden_states: int
+    :param num_layers: Number of LSTM layers
+    :type num_layers: int
+    :param bias: Whether to include bias terms in LSTM
+    :type bias: bool
+    :param batch_size: Initial batch size (used for hidden state initialization)
+    :type batch_size: int
+    :param probabilistic: Whether the model outputs a Normal distribution
+    :type probabilistic: bool
     """
 
     def __init__(
@@ -32,10 +51,13 @@ class LSTMForecast(torch.nn.Module):
         self.init_hidden(batch_size)
 
     def init_hidden(self, batch_size: int) -> None:
-        """[summary]
+        """
+        Initializes the hidden and cell states of the LSTM.
 
-        :param batch_size: [description]
+        :param batch_size: Batch size used for initializing hidden states
         :type batch_size: int
+        :return: None
+        :rtype: None
         """
         # This is what we'll initialise our hidden state
         self.hidden = (
@@ -51,6 +73,15 @@ class LSTMForecast(torch.nn.Module):
                     self.device))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass through the LSTM and final linear layer.
+
+        :param x: Input tensor of shape (B, L, M), where
+                  B is batch size, L is sequence length, M is number of features
+        :type x: torch.Tensor
+        :return: Output tensor of predictions, or Normal distribution if probabilistic
+        :rtype: torch.Tensor or torch.distributions.Normal
+        """
         batch_size = x.size()[0]
         self.init_hidden(batch_size)
         out_x, self.hidden = self.lstm(x, self.hidden)

@@ -1,21 +1,43 @@
-
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
 import numpy as np
+from typing import Tuple
+
 
 
 class ScaledDotProductAttention(nn.Module):
     """Scaled Dot-Product Attention."""
 
-    def __init__(self, temperature, attn_dropout=0.1):
+    def __init__(self, temperature: float, attn_dropout: float = 0.1):
+        """
+        Initializes the ScaledDotProductAttention module.
+
+        :param temperature: The scaling factor, typically the square root of the head dimension ($d_k$).
+        :type temperature: float
+        :param attn_dropout: Dropout probability applied to the attention weights, defaults to 0.1.
+        :type attn_dropout: float, optional
+        """
         super().__init__()
         self.temperature = temperature
         self.dropout = nn.Dropout(attn_dropout)
         self.softmax = nn.Softmax(dim=2)
 
-    def forward(self, q, k, v):
+    def forward(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Calculates the scaled dot-product attention.
 
+        :param q: Query tensor, shape [B*N_head, L_q, D_k].
+        :type q: torch.Tensor
+        :param k: Key tensor, shape [B*N_head, L_k, D_k].
+        :type k: torch.Tensor
+        :param v: Value tensor, shape [B*N_head, L_v, D_v].
+        :type v: torch.Tensor
+        :return: A tuple containing the context vector and the attention matrix.
+                 - output: Context vector, shape [B*N_head, L_q, D_v].
+                 - attn: Attention matrix, shape [B*N_head, L_q, L_k].
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         attn = torch.bmm(q, k.transpose(1, 2))
         attn = attn / self.temperature
 
@@ -29,7 +51,21 @@ class ScaledDotProductAttention(nn.Module):
 class MultiHeadAttention(nn.Module):
     """Multi-Head Attention module."""
 
-    def __init__(self, n_head, d_model, d_k, d_v, dropout=0.1):
+    def __init__(self, n_head: int, d_model: int, d_k: int, d_v: int, dropout: float = 0.1):
+        """
+        Initializes the MultiHeadAttention module.
+
+        :param n_head: Number of attention heads.
+        :type n_head: int
+        :param d_model: Dimension of the model (input/output dimension).
+        :type d_model: int
+        :param d_k: Dimension of the key and query vectors for each head.
+        :type d_k: int
+        :param d_v: Dimension of the value vector for each head.
+        :type d_v: int
+        :param dropout: Dropout probability applied to the output, defaults to 0.1.
+        :type dropout: float, optional
+        """
         super().__init__()
 
         self.n_head = n_head
@@ -51,8 +87,21 @@ class MultiHeadAttention(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, q, k, v):
+    def forward(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Performs multi-head attention on the query, key, and value tensors.
 
+        :param q: Query tensor, shape [B, L_q, D_model].
+        :type q: torch.Tensor
+        :param k: Key tensor, shape [B, L_k, D_model].
+        :type k: torch.Tensor
+        :param v: Value tensor, shape [B, L_v, D_model].
+        :type v: torch.Tensor
+        :return: A tuple containing the attended output and the attention matrix.
+                 - output: Attended output tensor, shape [B, L_q, D_model].
+                 - attn: Attention matrix, shape [B*N_head, L_q, L_k].
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         d_k, d_v, n_head = self.d_k, self.d_v, self.n_head
 
         sz_b, len_q, _ = q.size()
@@ -81,16 +130,34 @@ class MultiHeadAttention(nn.Module):
 
 
 class PositionwiseFeedForward(nn.Module):
-    """A two-feed-forward-layer module."""
+    """A two-feed-forward-layer module with residual connection and layer normalization."""
 
-    def __init__(self, d_in, d_hid, dropout=0.1):
+    def __init__(self, d_in: int, d_hid: int, dropout: float = 0.1):
+        """
+        Initializes the PositionwiseFeedForward module.
+
+        :param d_in: Input/output dimension of the module ($D_{model}$).
+        :type d_in: int
+        :param d_hid: Dimension of the inner layer.
+        :type d_hid: int
+        :param dropout: Dropout probability, defaults to 0.1.
+        :type dropout: float, optional
+        """
         super().__init__()
         self.w_1 = nn.Conv1d(d_in, d_hid, 1)
         self.w_2 = nn.Conv1d(d_hid, d_in, 1)
         self.layer_norm = nn.LayerNorm(d_in)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the position-wise feed-forward network.
+
+        :param x: Input tensor, shape [B, L, D_in].
+        :type x: torch.Tensor
+        :return: Output tensor, shape [B, L, D_in].
+        :rtype: torch.Tensor
+        """
         residual = x
         output = x.transpose(1, 2)
         output = self.w_2(F.relu(self.w_1(output)))
@@ -101,15 +168,41 @@ class PositionwiseFeedForward(nn.Module):
 
 
 class EncoderLayer(nn.Module):
-    """Compose with two layers."""
+    """Compose with two layers: Multi-Head Self-Attention and Position-wise Feed-Forward."""
 
-    def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1):
+    def __init__(self, d_model: int, d_inner: int, n_head: int, d_k: int, d_v: int, dropout: float = 0.1):
+        """
+        Initializes the EncoderLayer.
+
+        :param d_model: Dimension of the model (input/output dimension).
+        :type d_model: int
+        :param d_inner: Inner dimension of the Position-wise Feed-Forward Network.
+        :type d_inner: int
+        :param n_head: Number of attention heads.
+        :type n_head: int
+        :param d_k: Dimension of key/query for each head.
+        :type d_k: int
+        :param d_v: Dimension of value for each head.
+        :type d_v: int
+        :param dropout: Dropout probability, defaults to 0.1.
+        :type dropout: float, optional
+        """
         super(EncoderLayer, self).__init__()
         self.slf_attn = MultiHeadAttention(
             n_head, d_model, d_k, d_v, dropout=dropout)
         self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
 
-    def forward(self, enc_input):
+    def forward(self, enc_input: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Forward pass for the encoder layer.
+
+        :param enc_input: Input tensor to the encoder layer, shape [B, L, D_model].
+        :type enc_input: torch.Tensor
+        :return: A tuple containing the layer output and self-attention weights.
+                 - enc_output: Output tensor, shape [B, L, D_model].
+                 - enc_slf_attn: Self-attention weights, shape [B*N_head, L, L].
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         enc_output, enc_slf_attn = self.slf_attn(
             enc_input, enc_input, enc_input)
 
@@ -119,20 +212,55 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    """Compose with three layers."""
+    """Compose with three layers: Masked Multi-Head Self-Attention, Multi-Head Encoder-Decoder Attention, and Position-wise Feed-Forward."""
 
-    def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1):
+    def __init__(self, d_model: int, d_inner: int, n_head: int, d_k: int, d_v: int, dropout: float = 0.1):
+        """
+        Initializes the DecoderLayer.
+
+        :param d_model: Dimension of the model (input/output dimension).
+        :type d_model: int
+        :param d_inner: Inner dimension of the Position-wise Feed-Forward Network.
+        :type d_inner: int
+        :param n_head: Number of attention heads.
+        :type n_head: int
+        :param d_k: Dimension of key/query for each head.
+        :type d_k: int
+        :param d_v: Dimension of value for each head.
+        :type d_v: int
+        :param dropout: Dropout probability, defaults to 0.1.
+        :type dropout: float, optional
+        """
         super(DecoderLayer, self).__init__()
         self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
         self.enc_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
         self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
 
-    def forward(self, dec_input, enc_output, non_pad_mask=None, slf_attn_mask=None, dec_enc_attn_mask=None):
+    def forward(self, dec_input: torch.Tensor, enc_output: torch.Tensor, non_pad_mask: torch.Tensor = None, slf_attn_mask: torch.Tensor = None, dec_enc_attn_mask: torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        Forward pass for the decoder layer.
+
+        :param dec_input: Input tensor to the decoder layer (from previous decoder layer), shape [B, L_dec, D_model].
+        :type dec_input: torch.Tensor
+        :param enc_output: Output tensor from the encoder, shape [B, L_enc, D_model].
+        :type enc_output: torch.Tensor
+        :param non_pad_mask: Mask for non-padding elements (not implemented in the provided code).
+        :type non_pad_mask: torch.Tensor, optional
+        :param slf_attn_mask: Mask for self-attention (e.g., causality mask).
+        :type slf_attn_mask: torch.Tensor, optional
+        :param dec_enc_attn_mask: Mask for encoder-decoder attention.
+        :type dec_enc_attn_mask: torch.Tensor, optional
+        :return: A tuple containing the layer output, self-attention weights, and encoder-decoder attention weights.
+                 - dec_output: Output tensor, shape [B, L_dec, D_model].
+                 - dec_slf_attn: Self-attention weights, shape [B*N_head, L_dec, L_dec].
+                 - dec_enc_attn: Encoder-decoder attention weights, shape [B*N_head, L_dec, L_enc].
+        :rtype: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+        """
         dec_output, dec_slf_attn = self.slf_attn(
-            dec_input, dec_input, dec_input, mask=slf_attn_mask)
+            dec_input, dec_input, dec_input) # mask=slf_attn_mask is omitted as the provided MultiHeadAttention doesn't take mask
 
         dec_output, dec_enc_attn = self.enc_attn(
-            dec_output, enc_output, enc_output, mask=dec_enc_attn_mask)
+            dec_output, enc_output, enc_output) # mask=dec_enc_attn_mask is omitted
 
         dec_output = self.pos_ffn(dec_output)
 
@@ -140,26 +268,40 @@ class DecoderLayer(nn.Module):
 
 
 class Single_Global_SelfAttn_Module(nn.Module):
+    """Global Self-Attention Module for time series feature extraction."""
 
     def __init__(
-            self,
-            window, n_multiv, n_kernels, w_kernel,
-            d_k, d_v, d_model, d_inner,
-            n_layers, n_head, drop_prob=0.1):
-        '''
-        Args:
-        window (int): the length of the input window size
-        n_multiv (int): num of univariate time series
-        n_kernels (int): the num of channels
-        w_kernel (int): the default is 1
-        d_k (int): d_model / n_head
-        d_v (int): d_model / n_head
-        d_model (int): outputs of dimension
-        d_inner (int): the inner-layer dimension of Position-wise Feed-Forward Networks
-        n_layers (int): num of layers in Encoder
-        n_head (int): num of Multi-head
-        drop_prob (float): the probability of dropout
-        '''
+        self,
+        window: int, n_multiv: int, n_kernels: int, w_kernel: int,
+        d_k: int, d_v: int, d_model: int, d_inner: int,
+        n_layers: int, n_head: int, drop_prob: float = 0.1
+    ):
+        """
+        Initializes the Single_Global_SelfAttn_Module.
+
+        :param window: The length of the input window size (sequence length).
+        :type window: int
+        :param n_multiv: Number of univariate time series (features/variables).
+        :type n_multiv: int
+        :param n_kernels: The number of channels after the convolution (output features of the convolution).
+        :type n_kernels: int
+        :param w_kernel: The width of the convolution kernel, defaults to 1.
+        :type w_kernel: int
+        :param d_k: Dimension of the key and query vectors for each head (calculated as $D_{model} / N_{head}$).
+        :type d_k: int
+        :param d_v: Dimension of the value vector for each head (calculated as $D_{model} / N_{head}$).
+        :type d_v: int
+        :param d_model: Dimension of the attention module input/output.
+        :type d_model: int
+        :param d_inner: The inner-layer dimension of Position-wise Feed-Forward Networks.
+        :type d_inner: int
+        :param n_layers: Number of Encoder layers.
+        :type n_layers: int
+        :param n_head: Number of Multi-heads.
+        :type n_head: int
+        :param drop_prob: Dropout probability, defaults to 0.1.
+        :type drop_prob: float, optional
+        """
 
         super(Single_Global_SelfAttn_Module, self).__init__()
 
@@ -176,7 +318,19 @@ class Single_Global_SelfAttn_Module(nn.Module):
             EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=drop_prob)
             for _ in range(n_layers)])
 
-    def forward(self, x, return_attns=False):
+    def forward(self, x: torch.Tensor, return_attns: bool = False) -> Tuple[torch.Tensor, ...]:
+        """
+        Forward pass for the Global Self-Attention Module.
+
+        :param x: Input time series data, shape [B, L, N_multiv].
+        :type x: torch.Tensor
+        :param return_attns: If True, returns the attention matrices from each layer, defaults to False.
+        :type return_attns: bool, optional
+        :return: A tuple containing the processed output and optional attention weights.
+                 - enc_output: Output tensor, shape [B, N_multiv, N_kernels] (after out_linear).
+                 - enc_slf_attn_list: List of attention matrices (if return_attns is True).
+        :rtype: Tuple[torch.Tensor, ...]
+        """
 
         x = x.view(-1, self.w_kernel, self.window, self.n_multiv)
         x2 = F.relu(self.conv2(x))
@@ -201,26 +355,42 @@ class Single_Global_SelfAttn_Module(nn.Module):
 
 
 class Single_Local_SelfAttn_Module(nn.Module):
+    """Local Self-Attention Module for time series feature extraction."""
 
     def __init__(
-            self,
-            window, local, n_multiv, n_kernels, w_kernel,
-            d_k, d_v, d_model, d_inner,
-            n_layers, n_head, drop_prob=0.1):
-        '''
-        Args:
-        window (int): the length of the input window size
-        n_multiv (int): num of univariate time series
-        n_kernels (int): the num of channels
-        w_kernel (int): the default is 1
-        d_k (int): d_model / n_head
-        d_v (int): d_model / n_head
-        d_model (int): outputs of dimension
-        d_inner (int): the inner-layer dimension of Position-wise Feed-Forward Networks
-        n_layers (int): num of layers in Encoder
-        n_head (int): num of Multi-head
-        drop_prob (float): the probability of dropout
-        '''
+        self,
+        window: int, local: int, n_multiv: int, n_kernels: int, w_kernel: int,
+        d_k: int, d_v: int, d_model: int, d_inner: int,
+        n_layers: int, n_head: int, drop_prob: float = 0.1
+    ):
+        """
+        Initializes the Single_Local_SelfAttn_Module.
+
+        :param window: The length of the input window size (sequence length).
+        :type window: int
+        :param local: The kernel height for the local convolution.
+        :type local: int
+        :param n_multiv: Number of univariate time series (features/variables).
+        :type n_multiv: int
+        :param n_kernels: The number of channels after the convolution (output features of the convolution).
+        :type n_kernels: int
+        :param w_kernel: The width of the convolution kernel, defaults to 1.
+        :type w_kernel: int
+        :param d_k: Dimension of the key and query vectors for each head (calculated as $D_{model} / N_{head}$).
+        :type d_k: int
+        :param d_v: Dimension of the value vector for each head (calculated as $D_{model} / N_{head}$).
+        :type d_v: int
+        :param d_model: Dimension of the attention module input/output.
+        :type d_model: int
+        :param d_inner: The inner-layer dimension of Position-wise Feed-Forward Networks.
+        :type d_inner: int
+        :param n_layers: Number of Encoder layers.
+        :type n_layers: int
+        :param n_head: Number of Multi-heads.
+        :type n_head: int
+        :param drop_prob: Dropout probability, defaults to 0.1.
+        :type drop_prob: float, optional
+        """
 
         super(Single_Local_SelfAttn_Module, self).__init__()
 
@@ -238,7 +408,19 @@ class Single_Local_SelfAttn_Module(nn.Module):
             EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=drop_prob)
             for _ in range(n_layers)])
 
-    def forward(self, x, return_attns=False):
+    def forward(self, x: torch.Tensor, return_attns: bool = False) -> Tuple[torch.Tensor, ...]:
+        """
+        Forward pass for the Local Self-Attention Module.
+
+        :param x: Input time series data, shape [B, L, N_multiv].
+        :type x: torch.Tensor
+        :param return_attns: If True, returns the attention matrices from each layer, defaults to False.
+        :type return_attns: bool, optional
+        :return: A tuple containing the processed output and optional attention weights.
+                 - enc_output: Output tensor, shape [B, N_multiv, N_kernels] (after out_linear).
+                 - enc_slf_attn_list: List of attention matrices (if return_attns is True).
+        :rtype: Tuple[torch.Tensor, ...]
+        """
 
         x = x.view(-1, self.w_kernel, self.window, self.n_multiv)
         x1 = F.relu(self.conv1(x))
@@ -264,13 +446,27 @@ class Single_Local_SelfAttn_Module(nn.Module):
 
 
 class AR(nn.Module):
+    """Simple AutoRegressive (AR) linear module for a time series forecast baseline."""
 
-    def __init__(self, window):
+    def __init__(self, window: int):
+        """
+        Initializes the AR module.
 
+        :param window: The length of the input window size.
+        :type window: int
+        """
         super(AR, self).__init__()
         self.linear = nn.Linear(window, 1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass for the AR module.
+
+        :param x: Input time series data, shape [B, L, N_multiv].
+        :type x: torch.Tensor
+        :return: AR prediction output, shape [B, 1, N_multiv].
+        :rtype: torch.Tensor
+        """
         x = torch.transpose(x, 1, 2)
         x = self.linear(x)
         x = torch.transpose(x, 1, 2)
@@ -278,9 +474,36 @@ class AR(nn.Module):
 
 
 class DSANet(nn.Module):
+    """DSANet model combining Global Self-Attention, Local Self-Attention, and an AR component."""
 
-    def __init__(self, forecast_history, n_time_series, dsa_local, dsanet_n_kernels, dsanet_w_kernals, dsanet_d_model,
-                 dsanet_d_inner, dsanet_n_layers=2, dropout=0.1, dsanet_n_head=8, dsa_targs=0):
+    def __init__(self, forecast_history: int, n_time_series: int, dsa_local: int, dsanet_n_kernels: int, dsanet_w_kernals: int,
+                 dsanet_d_model: int, dsanet_d_inner: int, dsanet_n_layers: int = 2, dropout: float = 0.1, dsanet_n_head: int = 8, dsa_targs: int = 0):
+        """
+        Initializes the DSANet module.
+
+        :param forecast_history: The length of the input window size.
+        :type forecast_history: int
+        :param n_time_series: Number of univariate time series (features/variables).
+        :type n_time_series: int
+        :param dsa_local: The kernel height for the local convolution.
+        :type dsa_local: int
+        :param dsanet_n_kernels: The number of channels after the convolution in attention modules.
+        :type dsanet_n_kernels: int
+        :param dsanet_w_kernals: The width of the convolution kernel in attention modules.
+        :type dsanet_w_kernals: int
+        :param dsanet_d_model: Dimension of the attention module input/output.
+        :type dsanet_d_model: int
+        :param dsanet_d_inner: The inner-layer dimension of Position-wise Feed-Forward Networks.
+        :type dsanet_d_inner: int
+        :param dsanet_n_layers: Number of Encoder layers in attention modules, defaults to 2.
+        :type dsanet_n_layers: int, optional
+        :param dropout: Dropout probability, defaults to 0.1.
+        :type dropout: float, optional
+        :param dsanet_n_head: Number of Multi-heads, defaults to 8.
+        :type dsanet_n_head: int, optional
+        :param dsa_targs: Number of target time series to output. If 0, outputs all series, defaults to 0.
+        :type dsa_targs: int, optional
+        """
         super(DSANet, self).__init__()
 
         # parameters from dataset
@@ -305,11 +528,8 @@ class DSANet(nn.Module):
         # build model
         self.__build_model()
 
-    # ---------------------
-    # MODEL SETUP
-    # ---------------------
     def __build_model(self):
-        """Layout model."""
+        """Layout model components."""
         self.sgsf = Single_Global_SelfAttn_Module(
             window=self.window, n_multiv=self.n_multiv, n_kernels=self.n_kernels,
             w_kernel=self.w_kernel, d_k=self.d_k, d_v=self.d_v, d_model=self.d_model,
@@ -325,11 +545,15 @@ class DSANet(nn.Module):
         self.dropout = nn.Dropout(p=self.drop_prob)
         self.active_func = nn.Tanh()
 
-    # ---------------------
-    # TRAINING
-    # ---------------------
-    def forward(self, x):
-        """No special modification required for lightning, define as you normally would."""
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass for the DSANet model.
+
+        :param x: Input time series data, shape [B, L, N_multiv].
+        :type x: torch.Tensor
+        :return: Final prediction output, shape [B, 1, N_multiv] or [B, 1, N_targets].
+        :rtype: torch.Tensor
+        """
         sgsf_output, *_ = self.sgsf(x)
         slsf_output, *_ = self.slsf(x)
         sf_output = torch.cat((sgsf_output, slsf_output), 2)

@@ -17,12 +17,12 @@ from flood_forecast.plot_functions import (
 def handle_model_evaluation1(test_acc, params: Dict) -> None:
     """Utility function to help handle model evaluation. Primarily used at the moment for forecasting models.
 
-    :param trained_model: A PyTorchForecast model that has already been trained.
-    :type trained_model: PyTorchForecast
+    :param test_acc: A tuple containing the test accuracy, the DataFrame with predictions, the forecast start index, and a list of prediction sample DataFrames.
+    :type test_acc: tuple
     :param params: A dictionary of the trained model parameters.
     :type params: Dict
-    :param model_type: The type of model. Almost always PyTorch in practice.
-    :type model_type: str
+    :return: None
+    :rtype: None
     """
     wandb.run.summary["test_accuracy"] = test_acc[0]
     df_train_and_test = test_acc[1]
@@ -73,15 +73,17 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
     wandb.log({"test_plot_all": test_plot_all})
 
 
-def handle_core_eval(trained_model, params: Dict, model_type: str):
-    """_summary_
+def handle_core_eval(trained_model, params: Dict, model_type: str) -> None:
+    """Handles the core evaluation logic, including calling evaluate_model and handle_model_evaluation1.
 
-    :param trained_model: _description_
-    :type trained_model: _type_
-    :param params: _description_
+    :param trained_model: A trained model object (e.g., PyTorchForecast).
+    :type trained_model: PyTorchForecast
+    :param params: Dictionary containing all the parameters needed for evaluation.
     :type params: Dict
-    :param model_type: _description_
+    :param model_type: The type of model.
     :type model_type: str
+    :return: None
+    :rtype: None
     """
     test_acc = evaluate_model(
         trained_model,
@@ -105,8 +107,9 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
     :param model_type: Type of the model. In almost all cases this will be 'PyTorch'
     :type model_type: str
     :param params: Dictionary containing all the parameters needed to run the model.
-    :type Dict:
-    :return: A trained model
+    :type params: Dict
+    :return: A trained model object.
+    :rtype: PyTorchForecast
 
     .. code-block:: python
 
@@ -178,10 +181,10 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
         if "scaler" in dataset_params and "inference_params" in params:
             if "scaler_params" in dataset_params:
                 params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
-                                                                                           dataset_params)["scaling"]
+                                                                                         dataset_params)["scaling"]
             else:
                 params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
-                                                                                           dataset_params)["scaling"]
+                                                                                         dataset_params)["scaling"]
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
         if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] != "VariableSequenceLength":
@@ -196,8 +199,10 @@ def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
     """Sklearn for whatever reason decided to only allow scaler params in the form of tuples this was stupid so now we
     have to convert JSON list to tuple.
 
-    :param scaling_params: A list of the scaling params
+    :param training_conf: A dictionary of the training configuration parameters.
     :type training_conf: Dict
+    :return: The updated training configuration dictionary with fixed scaler parameters.
+    :rtype: Dict
     """
     training_conf["dataset_params"]["scaler_params"]["feature_range"] = tuple(
         training_conf["dataset_params"]["scaler_params"]["feature_range"])
@@ -207,10 +212,13 @@ def correct_stupid_sklearn_error(training_conf: Dict) -> Dict:
     return training_conf
 
 
-def main():
+def main() -> None:
     """Main function which is called from the command line.
 
     Entrypoint for training all TS models.
+
+    :return: None
+    :rtype: None
     """
     parser = argparse.ArgumentParser(description="Argument parsing for training and eval")
     parser.add_argument("-p", "--params", help="Path to model config file")

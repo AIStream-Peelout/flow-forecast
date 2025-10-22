@@ -11,6 +11,10 @@ from copy import deepcopy
 
 
 class CSVDataLoader(Dataset):
+    """
+    A base data loader that takes a CSV file and properly batches time series
+    data for use in training or evaluating a PyTorch model.
+    """
     def __init__(
         self,
         file_path: str,
@@ -31,26 +35,41 @@ class CSVDataLoader(Dataset):
 
     ):
         """
-        A data loader that takes a CSV file and properly batches for use in training/eval a PyTorch model
+        Initializes the CSVDataLoader.
 
         :param file_path: The path to the CSV file you wish to use (GCS compatible) or a Pandas dataframe.
-        :param forecast_history: This is the length of the historical time series data you wish to
-                                utilize for forecasting
-        :param forecast_length: The number of time steps to forecast ahead (for transformer this must
-                                equal history_length)
-        :param relevant_cols: Supply column names you wish to predict in the forecast (others will not be used)
-        :param target_col: The target column or columns you to predict. If you only have one still use a list ['cfs']
-        :param scaling: (highly reccomended) If provided should be a subclass of sklearn.base.BaseEstimator
-        and sklearn.base.TransformerMixin) i.e StandardScaler,  MaxAbsScaler, MinMaxScaler, etc) Note without
-        a scaler the loss is likely to explode and cause infinite loss which will corrupt weights
-        :param start_stamp int: Optional if you want to only use part of a CSV for training, validation
-                                or testing supply these
-        :param end_stamp int: Optional if you want to only use part of a CSV for training, validation,
-                            or testing supply these
-        :param sort_column str: The column to sort the time series on prior to forecast.
-        :param scaled_cols: The columns you want scaling applied to (if left blank will default to all columns)
-        :param feature_params: These are the datetime features you want to create.
-        :param no_scale: This means that the end labels will not be scaled when running
+        :type file_path: str
+        :param forecast_history: The length of the historical time series data you wish to
+                                 utilize for forecasting (encoder input length).
+        :type forecast_history: int
+        :param forecast_length: The number of time steps to forecast ahead (decoder output length).
+        :type forecast_length: int
+        :param relevant_cols: Supply column names you wish to use as features (including the target column).
+        :type relevant_cols: List
+        :param target_col: The target column or columns you to predict. Must be a list, e.g., ['cfs'].
+        :type target_col: List
+        :param scaling: (Highly recommended) If provided, should be a subclass of ``sklearn.base.BaseEstimator``
+                        and ``sklearn.base.TransformerMixin`` (i.e., StandardScaler, MaxAbsScaler, etc.).
+                        Note: without a scaler, the loss is likely to explode.
+        :type scaling: Optional[object]
+        :param start_stamp: Optional index to start slicing the DataFrame for training/validation/testing.
+        :type start_stamp: int
+        :param end_stamp: Optional index to end slicing the DataFrame for training/validation/testing.
+        :type end_stamp: Optional[int]
+        :param gcp_service_key: Optional path to a GCP service key file (not currently used in implementation).
+        :type gcp_service_key: Optional[str]
+        :param interpolate_param: Flag or dictionary specifying interpolation parameters to handle NaNs.
+        :type interpolate_param: Union[bool, Dict]
+        :param sort_column: The column to sort the time series on prior to forecasting (typically a datetime column).
+        :type sort_column: Optional[str]
+        :param scaled_cols: The columns you want scaling applied to. If left blank, defaults to ``relevant_cols``.
+        :type scaled_cols: Optional[List]
+        :param feature_params: Parameters for generating temporal (datetime) features.
+        :type feature_params: Optional[Dict]
+        :param no_scale: If True, the target labels will not be scaled when returned by __getitem__.
+        :type no_scale: bool
+        :param preformatted_df: If True, assumes ``file_path`` is already a Pandas DataFrame (not currently used).
+        :type preformatted_df: bool
         """
         super().__init__()
         interpolate = interpolate_param
@@ -103,7 +122,16 @@ class CSVDataLoader(Dataset):
         self.df.to_csv("temp_df.csv")
         self.no_scale = no_scale
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Retrieves a single sample of historical data (src) and target data (trg) at a given index.
+
+        :param idx: The starting index for the historical data slice.
+        :type idx: int
+        :return: A tuple containing the historical input data and the future target data.
+                 (src_data, trg_dat)
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targs_idx_start = self.forecast_history + idx
         if self.no_scale:
@@ -119,21 +147,31 @@ class CSVDataLoader(Dataset):
         return src_data, trg_dat
 
     def __len__(self) -> int:
+        """
+        Returns the total number of possible samples (batches) that can be generated.
+        The length accounts for the historical and forecast window sizes.
+
+        :return: The number of available samples.
+        :rtype: int
+        """
         return (
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
 
     def __sample_and_track_series__(self, idx, series_id=None):
+        """
+        (Placeholder) Used for custom sampling logic in multi-series contexts.
+        """
         pass
 
     def inverse_scale(
         self, result_data: Union[torch.Tensor, pd.Series, np.ndarray]
     ) -> torch.Tensor:
-        """Un-does the scaling of the data
+        """Un-does the scaling of the data using the target scaler (targ_scaler).
 
-        :param result_data: The data you want to unscale can handle multiple data types.
+        :param result_data: The data you want to unscale (can handle multiple data types).
         :type result_data: Union[torch.Tensor, pd.Series, np.ndarray]
-        :return: Returns the unscaled data as PyTorch tensor.
+        :return: Returns the unscaled data as a PyTorch tensor.
         :rtype: torch.Tensor
         """
         if isinstance(result_data, pd.Series) or isinstance(
@@ -162,16 +200,21 @@ class CSVDataLoader(Dataset):
 
 
 class CSVSeriesIDLoader(CSVDataLoader):
+    """
+    A data loader for a CSV file that contains multiple independent time series,
+    distinguished by a series ID column. It returns data as dictionaries, keyed by series ID.
+    """
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, return_all=True):
-        """A data-loader for a CSV file that contains a series ID column.
+        """Initializes the CSVSeriesIDLoader.
 
-        :param series_id_col: The id
+        :param series_id_col: The column name containing the unique series identifier.
         :type series_id_col: str
-        :param main_params: The central set of parameters
+        :param main_params: The central set of parameters passed to the parent ``CSVDataLoader`` __init__.
         :type main_params: dict
-        :param return_method: The method of return
+        :param return_method: The method for returning data (e.g., 'dict').
         :type return_method: str
-        :param return_all: Whether to return all items, defaults to True
+        :param return_all: Whether to return all series at once for each index, defaults to True.
+                           If False, sampling logic (not implemented) would be used.
         :type return_all: bool, optional
         """
         main_params1 = deepcopy(main_params)
@@ -204,7 +247,9 @@ class CSVSeriesIDLoader(CSVDataLoader):
         print("unique dict")
 
     def __validate_data__in_df(self):
-        """Makes sure the data in the data-frame is the proper length for each series e
+        """Checks if all sub-series DataFrames have equal length when ``return_all_series`` is True.
+
+        :raises IndexError: If the length of sub-series data-frames are not equal.
         """
         if self.return_all_series:
             len_first = len(self.listed_vals[0])
@@ -216,16 +261,19 @@ class CSVSeriesIDLoader(CSVDataLoader):
                     raise IndexError("The length of sub-series data-frames are not equal.")
 
     def __make_unique_dict__(self):
+        """Creates a mapping from unique series ID values to a sequential integer index."""
         for i in range(0, len(self.unique_cols)):
             self.unique_dict[self.unique_cols[i]] = i
 
     def __getitem__(self, idx: int) -> Tuple[Dict, Dict]:
-        """Returns a set of dictionaries that contain the data for each series.
+        """Returns a set of dictionaries that contain the historical (source) and target data for each series.
 
-        :param idx: The index to lookup in the dataframe
+        :param idx: The index to lookup across all parallel series.
         :type idx: int
-        :return: A set of dictionaries that contain the data for each series.
+        :return: A tuple of dictionaries: (source_data_dict, target_data_dict).
+                 Keys are sequential integer indices (from 0 to N-1), values are PyTorch Tensors.
         :rtype: Tuple[Dict, Dict]
+        :raises NotImplementedError: If ``return_all_series`` is False.
         """
         if self.return_all_series:
             src_list = {}
@@ -246,9 +294,19 @@ class CSVSeriesIDLoader(CSVDataLoader):
         return super().__getitem__(idx)
 
     def __sample_series_id__(idx, series_id):
+        """
+        (Placeholder) Used for sampling a single series from the multi-series dataset.
+        """
         pass
 
     def __len__(self) -> int:
+        """
+        Returns the total number of possible samples (batches) that can be generated.
+
+        :return: The number of available samples.
+        :rtype: int
+        :raises NotImplementedError: If ``return_all_series`` is False.
+        """
         if self.return_all_series:
             return len(self.listed_vals[0]) - self.forecast_history - self.forecast_length - 1
         else:
@@ -256,6 +314,10 @@ class CSVSeriesIDLoader(CSVDataLoader):
 
 
 class CSVTestLoader(CSVDataLoader):
+    """
+    A data loader specifically for test data. It extends CSVDataLoader to return
+    the original unscaled DataFrame slice along with the historical data tensor.
+    """
     def __init__(
         self,
         df_path: str,
@@ -268,8 +330,24 @@ class CSVTestLoader(CSVDataLoader):
         **kwargs
     ):
         """
-        :param str df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame
-        A data loader for the test data.
+        Initializes the CSVTestLoader.
+
+        :param df_path: The path to the CSV file you want to use (GCS compatible) or a Pandas DataFrame.
+        :type df_path: str
+        :param forecast_total: The total length of the sequence that should be considered for forecasting
+                               (history + forecast_length).
+        :type forecast_total: int
+        :param use_real_precip: (Antiquated/Deprecated) Flag for using real precipitation values.
+        :type use_real_precip: bool
+        :param use_real_temp: (Antiquated/Deprecated) Flag for using real temperature values.
+        :type use_real_temp: bool
+        :param target_supplied: Flag indicating if the target values are present in the test data.
+        :type target_supplied: bool
+        :param interpolate: Flag or dictionary specifying interpolation parameters to handle NaNs.
+        :type interpolate: Union[bool, Dict]
+        :param sort_column_clone: The column to sort the time series on prior to forecasting.
+        :type sort_column_clone: Optional[str]
+        :param kwargs: Additional keyword arguments passed to the parent ``CSVDataLoader``.
         """
         if "file_path" not in kwargs:
             kwargs["file_path"] = df_path
@@ -296,7 +374,18 @@ class CSVTestLoader(CSVDataLoader):
         if len(self.relevant_cols3) > 0:
             self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
 
-    def get_from_start_date(self, forecast_start: datetime, original_df=None):
+    def get_from_start_date(self, forecast_start: datetime, original_df=None) -> Tuple[torch.Tensor, pd.DataFrame, int]:
+        """
+        Retrieves a sample starting from a specified datetime stamp.
+
+        :param forecast_start: The datetime object indicating the start of the forecast window
+                               (the first time step *after* the historical window).
+        :type forecast_start: datetime
+        :param original_df: Optional DataFrame to use instead of the internally stored one.
+        :type original_df: Optional[pd.DataFrame]
+        :return: The historical data, the original full sequence rows, and the target start index.
+        :rtype: Tuple[torch.Tensor, pd.DataFrame, int]
+        """
         if original_df is None:
             original_df = self.original_df
         dt_row = original_df[
@@ -305,13 +394,24 @@ class CSVTestLoader(CSVDataLoader):
         revised_index = dt_row.index[0]
         return self.__getitem__(revised_index - self.forecast_history)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, pd.DataFrame, int]:
+        """
+        Retrieves a single test sample, consisting of historical data (scaled) and the full
+        sequence of original data (unscaled).
+
+        :param idx: The starting index for the historical data slice.
+        :type idx: int
+        :return: A tuple containing the historical input data tensor, the unscaled DataFrame slice
+                 covering the whole sequence, and the index where the target sequence begins.
+                 (historical_rows, all_rows_orig, target_idx_start)
+        :rtype: Tuple[torch.Tensor, pd.DataFrame, int]
+        """
         if self.target_supplied:
             historical_rows = self.df.iloc[idx: self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
             # targ_rows = self.df.iloc[
-            #     target_idx_start : self.forecast_total + target_idx_start
+            # target_idx_start : self.forecast_total + target_idx_start
             # ]
             all_rows_orig = self.original_df.iloc[
                 idx: self.forecast_total + target_idx_start
@@ -319,10 +419,19 @@ class CSVTestLoader(CSVDataLoader):
             historical_rows = torch.from_numpy(historical_rows.to_numpy())
             return historical_rows.float(), all_rows_orig, target_idx_start
 
-    def convert_real_batches(self, the_col: str, rows_to_convert):
+    def convert_real_batches(self, the_col: str, rows_to_convert: pd.DataFrame) -> List[torch.Tensor]:
         """
-        A helper function to return properly divided precip and temp
-        values to be stacked with t forecasted cfs.
+        A helper function to return properly divided batches of data (e.g., precipitation or temperature)
+        to be stacked with the forecasted target values.
+
+        The data is chunked into lengths equal to ``self.forecast_length``.
+
+        :param the_col: The name of the column to batch.
+        :type the_col: str
+        :param rows_to_convert: The DataFrame containing the column data.
+        :type rows_to_convert: pd.DataFrame
+        :return: A list of PyTorch tensors, where each tensor is a batch of size ``self.forecast_length``.
+        :rtype: List[torch.Tensor]
         """
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
@@ -335,14 +444,17 @@ class CSVTestLoader(CSVDataLoader):
 
     def convert_history_batches(
         self, the_col: Union[str, List[str]], rows_to_convert: pd.DataFrame
-    ):
-        """A helper function to return dataframe in batches of
-        size (history_len, num_features)
+    ) -> List[torch.Tensor]:
+        """A helper function to return dataframe in batches of size (history_len, num_features).
 
-        Args:
-            the_col (str): column names
-            rows_to_convert (pd.Dataframe): rows in a dataframe
-            to be converted into batches
+        The data is chunked into lengths equal to ``self.forecast_history``.
+
+        :param the_col: Column name or list of column names.
+        :type the_col: Union[str, List[str]]
+        :param rows_to_convert: Rows in a DataFrame to be converted into batches.
+        :type rows_to_convert: pd.DataFrame
+        :return: A list of PyTorch tensors, where each tensor is a batch of size ``self.forecast_history``.
+        :rtype: List[torch.Tensor]
         """
         the_column = torch.from_numpy(rows_to_convert[the_col].to_numpy())
         chunks = [
@@ -354,16 +466,30 @@ class CSVTestLoader(CSVDataLoader):
         return chunks
 
     def __len__(self) -> int:
+        """
+        Returns the total number of possible test samples that can be generated.
+
+        :return: The number of available test samples.
+        :rtype: int
+        """
         return (
             len(self.df.index) - self.forecast_history - self.forecast_total - 1
         )
 
 
 class TestLoaderABC(CSVTestLoader):
+    """
+    (Abstract Base Class Placeholder) A placeholder class that inherits from CSVTestLoader.
+    """
     pass
 
 
 class AEDataloader(CSVDataLoader):
+    """
+    A data loader class tailored for **AutoEncoder (AE)** models.
+    It overrides ``__len__`` and ``__getitem__`` from the generic ``CSVDataLoader``
+    and defaults ``forecast_length`` to 1.
+    """
     def __init__(
             self,
             file_path: str,
@@ -377,32 +503,31 @@ class AEDataloader(CSVDataLoader):
             forecast_history=1,
             no_scale=True,
             sort_column=None):
-        """A data loader class for autoencoders. Overrides __len__ and __getitem__ from generic dataloader.
-           Also defaults forecast_history and forecast_length to 1. Since AE will likely only use one row.
-           Same parameters as before.
+        """
+        Initializes the AEDataloader.
 
-        :param file_path: The path to the file
+        :param file_path: The path to the file.
         :type file_path: str
-        :param relevant_cols: The relevant columns
+        :param relevant_cols: The relevant columns to be included in the input/output.
         :type relevant_cols: List
-        :param scaling: [description], defaults to None
-        :type scaling: [type], optional
-        :param start_stamp: [description], defaults to 0
-        :type start_stamp: int, optional
-        :param target_col: [description], defaults to None
-        :type target_col: List, optional
-        :param end_stamp: [description], defaults to None
-        :type end_stamp: int, optional
-        :param unsqueeze_dim: [description], defaults to 1
-        :type unsqueeze_dim: int, optional
-        :param interpolate_param: [description], defaults to False
-        :type interpolate_param: bool, optional
-        :param forecast_history: [description], defaults to 1
-        :type forecast_history: int, optional
-        :param no_scale: [description], defaults to True
-        :type no_scale: bool, optionals
-        :param sort_column: [description], defaults to None
-        :type sort_column: [type], optional
+        :param scaling: Optional scaler object for data normalization, defaults to None.
+        :type scaling: Optional[object]
+        :param start_stamp: Optional index to start slicing the DataFrame, defaults to 0.
+        :type start_stamp: int
+        :param target_col: Optional list of target columns. For AE, this is usually the same as ``relevant_cols``.
+        :type target_col: Optional[List]
+        :param end_stamp: Optional index to end slicing the DataFrame, defaults to None.
+        :type end_stamp: Optional[int]
+        :param unsqueeze_dim: Dimension to unsqueeze the resulting tensor (not currently used in implementation).
+        :type unsqueeze_dim: int
+        :param interpolate_param: Flag or dictionary specifying interpolation parameters, defaults to False.
+        :type interpolate_param: Union[bool, Dict]
+        :param forecast_history: The sequence length for the autoencoder input, defaults to 1.
+        :type forecast_history: int
+        :param no_scale: If True, the target labels will not be scaled, defaults to True.
+        :type no_scale: bool
+        :param sort_column: The column to sort the time series on, defaults to None.
+        :type sort_column: Optional[str]
         """
         super().__init__(file_path=file_path, forecast_history=forecast_history, forecast_length=1,
                          target_col=target_col, relevant_cols=relevant_cols, start_stamp=start_stamp,
@@ -412,19 +537,51 @@ class AEDataloader(CSVDataLoader):
         self.start_stamp = start_stamp
 
     def __handle_params__():
+        """
+        (Placeholder) For internal parameter handling logic.
+        """
         pass
 
-    def get_from_start_date(self, forecast_start: datetime):
+    def get_from_start_date(self, forecast_start: datetime) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Retrieves a sample starting from a specified datetime stamp.
+
+        :param forecast_start: The datetime object corresponding to the start of the sequence.
+        :type forecast_start: datetime
+        :return: A tuple containing the input data (src) and the target data (targ).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        :raises ValueError: If the item was not found in the index.
+        """
         dt_row = self.original_df[
             self.original_df["datetime"] == forecast_start
         ]
         revised_index = dt_row.index[0] - self.start_stamp
         return self.__getitem__(revised_index - self.forecast_history)
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """
+        Returns the total number of possible sequences that can be generated.
+
+        :return: The number of available samples.
+        :rtype: int
+        """
         return len(self.df.index) - 1 - self.forecast_history
 
-    def __getitem__(self, idx: int, uuid: int = None, column_relevant: str = None):
+    def __getitem__(self, idx: int, uuid: int = None, column_relevant: str = None) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Retrieves a single sample for the autoencoder (src == target).
+
+        :param idx: The starting index for the data slice.
+        :type idx: int
+        :param uuid: Optional UUID for lookups (not fully implemented).
+        :type uuid: Optional[int]
+        :param column_relevant: Optional column for UUID lookups (not fully implemented).
+        :type column_relevant: Optional[str]
+        :return: A tuple containing the input data and the target data (both are the same sequence).
+                 (source_data, target_data)
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        :raises ValueError: If the item was not found in the index during UUID lookup.
+        """
         # Warning this assumes that data is
         if uuid:
             idx = self.original_df[self.original_df[column_relevant] == uuid].index.values.astype(int)[0]
@@ -435,13 +592,19 @@ class AEDataloader(CSVDataLoader):
 
 
 class GeneralClassificationLoader(CSVDataLoader):
+    """
+    A generic data loader class for time series classification problems.
+    It returns a sequence of features (src) and a one-hot encoded classification label (targ).
+    """
     def __init__(self, params: Dict, n_classes: int = 2):
-        """A generic data loader class for TS classification problems.
+        """Initializes the GeneralClassificationLoader.
 
-        :param params: The standard dictionary for a dataloader (see CSVDataLoader)
+        :param params: The standard dictionary for a dataloader, which must contain ``sequence_length``.
+                       (See ``CSVDataLoader`` for other parameters).
         :type params: Dict
-        :param n_classes: The number of classes in the problem
-        """  # noqa
+        :param n_classes: The number of classes in the classification problem, defaults to 2.
+        :type n_classes: int
+        """
         self.n_classes = n_classes
         params["forecast_history"] = params["sequence_length"]
         params["no_scale"] = True
@@ -451,7 +614,20 @@ class GeneralClassificationLoader(CSVDataLoader):
         params.pop("sequence_length")
         super().__init__(**params)
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Retrieves a single sample of historical data (src) and a one-hot encoded class label (targ).
+
+        The target is assumed to be the **first** column of the original data and is taken from the
+        **last row** of the unscaled sequence.
+
+        :param idx: The starting index for the sequence slice.
+        :type idx: int
+        :return: A tuple containing the feature sequence and the one-hot encoded label.
+                 (feature_sequence, one_hot_label)
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        :raises ValueError: If the derived class value is greater than the specified number of classes.
+        """
         rows = self.df.iloc[idx: self.forecast_history + idx]
         targ = self.unscaled_df.iloc[idx: self.forecast_history + idx]
         rows = torch.from_numpy(rows.to_numpy())
@@ -469,18 +645,22 @@ class GeneralClassificationLoader(CSVDataLoader):
 
 
 class TemporalLoader(CSVDataLoader):
+    """
+    A data loader class for creating and separating specific **temporal features** (e.g., year, month, day)
+    from other time series features. This is often used for Informer-like models.
+    """
     def __init__(
             self,
             time_feats: List[str],
             kwargs: Dict,
             label_len=0):
-        """A data loader class for creating specific temporal features/embeddings.
+        """Initializes the TemporalLoader.
 
-        :param time_feats: A list of strings of the time features (e.g. ['month', 'day', 'hour'])
+        :param time_feats: A list of strings of the temporal features to be separated (e.g., ['month', 'day', 'hour']).
         :type time_feats: List[str]
-        :param kwargs: The set of parameters
-        :type kwargs: Dict[str, Any]
-        :param label_len: For Informer based model the, defaults to 0
+        :param kwargs: The set of parameters passed to the parent ``CSVDataLoader``.
+        :type kwargs: Dict
+        :param label_len: The label length used for Informer-based models, defaults to 0.
         :type label_len: int, optional
         """
         super().__init__(**kwargs)
@@ -490,31 +670,26 @@ class TemporalLoader(CSVDataLoader):
         self.label_len = label_len
 
     @staticmethod
-    def df_to_numpy(pandas_stuff: pd.DataFrame):
+    def df_to_numpy(pandas_stuff: pd.DataFrame) -> torch.Tensor:
+        """
+        Converts a Pandas DataFrame into a float PyTorch Tensor.
+
+        :param pandas_stuff: The DataFrame to convert.
+        :type pandas_stuff: pd.DataFrame
+        :return: The converted PyTorch tensor.
+        :rtype: torch.Tensor
+        """
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> Tuple[Tuple[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor]]:
         """
-        :param idx: Index of the item to be returned
-        .. highlight:: python
-        .. code-block:: python
-            ## Example data
-            ## -----------------
-            ## 1992-01-01    0.0
-            ## 1992-01-02    1.0
-            ## 1992-01-03    2.0
-            ## 1992-01-04    3.0
-            ## 1992-01-05    4.0
-            ## 1992-01-06    5.0
-            ## -----------------
-            kwargs = {"forecast_history" : 4, "forecast_length" : 2, "batch_size" : 1, "shuffle" : False,
-            "num_workers" : 1}
-            d = TemporalLoader(time_feats=["year", "month"], kwargs, label_len=1)
-            x, y = d[0]
-            print(x[0]) # (tensor([[0.0, 1.0, 2.0, 3.0]]))]),
-            print(y[0]) # (tensor([[3.0, 4.0, 5.0, 6.0]]))])
-            print(x[1]) # ,
+        Retrieves a single sample, separating the main features and the temporal features for both source and target.
 
+        :param idx: Index of the item to be returned.
+        :type idx: int
+        :return: A tuple containing the source and target data tuples:
+                 ((src_data, temporal_feats), (tar_temp, trg_data))
+        :rtype: Tuple[Tuple[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor]]
         """
         rows = self.other_feats.iloc[idx: self.forecast_history + idx]
         temporal_feats = self.temporal_df.iloc[idx: self.forecast_history + idx]
@@ -531,24 +706,31 @@ class TemporalLoader(CSVDataLoader):
         return (src_data, temporal_feats), (tar_temp, trg_data)
 
     def __len__(self) -> int:
+        """
+        Returns the total number of possible samples (batches) that can be generated.
+
+        :return: The number of available samples.
+        :rtype: int
+        """
         return (
             len(self.df.index) - self.forecast_history - self.forecast_length - 1
         )
 
 
 class TemporalTestLoader(CSVTestLoader):
+    """
+    A test data-loader class for test data in the format of the ``TemporalLoader``.
+    It separates temporal features and main features for encoder and decoder inputs.
+    """
     def __init__(self, time_feats: List[str], kwargs={}, decoder_step_len=None):
-        """A test data-loader class for data in the format of the TemporalLoader.
+        """Initializes the TemporalTestLoader.
 
         :param time_feats: The temporal featuers to use in encoding.
         :type time_feats: List[str]
-        :param kwargs: The dict used to instantiate CSVTestLoader parent, defaults to {}
-        :type kwargs: dict, optional
-        :param decoder_step_len: [description], defaults to None
-        :type decoder_step_len: [type], optional
-
-        ...
-        ...
+        :param kwargs: The dict used to instantiate ``CSVTestLoader`` parent (must contain ``df_path`` and ``kwargs`` keys).
+        :type kwargs: dict
+        :param decoder_step_len: The length of the initial decoder input (label length for Informer), defaults to None.
+        :type decoder_step_len: Optional[int]
         """
         super().__init__(kwargs["df_path"], kwargs["forecast_total"], **kwargs["kwargs"])
         self.time_feats = time_feats
@@ -557,16 +739,37 @@ class TemporalTestLoader(CSVTestLoader):
         self.decoder_step_len = decoder_step_len
 
     @staticmethod
-    def df_to_numpy(pandas_stuff: pd.DataFrame):
+    def df_to_numpy(pandas_stuff: pd.DataFrame) -> torch.Tensor:
+        """
+        Converts a Pandas DataFrame into a float PyTorch Tensor.
+
+        :param pandas_stuff: The DataFrame to convert.
+        :type pandas_stuff: pd.DataFrame
+        :return: The converted PyTorch tensor.
+        :rtype: torch.Tensor
+        """
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[Tuple[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor], pd.DataFrame, int]:
+        """
+        Retrieves a single test sample, separating features and returning the original unscaled data.
+
+        :param idx: The starting index for the historical data slice.
+        :type idx: int
+        :return: A tuple containing:
+                 1. Source data tuple: (historical main features, historical temporal features).
+                 2. Target data tuple: (future temporal features for decoder, future main features (for target)).
+                 3. The unscaled DataFrame slice covering the whole sequence.
+                 4. The index where the target sequence begins.
+        :rtype: Tuple[Tuple[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor], pd.DataFrame, int]
+        """
         if self.target_supplied:
             historical_rows = self.df.iloc[idx: self.forecast_history + idx]
             target_idx_start = self.forecast_history + idx
             # Why aren't we using these
             # targ_rows = self.df.iloc[
-            #     target_idx_start : self.forecast_total + target_idx_start
+            # target_idx_start : self.forecast_total + target_idx_start
+            # ]
             historical_rows = self.other_feats.iloc[idx: self.forecast_history + idx]
             targs_idx_start = self.forecast_history + idx
             temporal_feat = self.temporal_df.iloc[idx: self.forecast_history + idx]
@@ -576,6 +779,7 @@ class TemporalTestLoader(CSVTestLoader):
                 targs_idx_start = targs_idx_start - self.decoder_step_len
                 print(targs_idx_start)
                 target_idx_start = target_idx_start - self.decoder_step_len
+                print(target_idx_start)
                 end_idx = self.forecast_total + target_idx_start + self.decoder_step_len
                 print(end_idx)
                 tar_temporal_feats = self.temporal_df.iloc[targs_idx_start: end_idx]
@@ -596,17 +800,24 @@ class TemporalTestLoader(CSVTestLoader):
 
 
 class VariableSequenceLength(CSVDataLoader):
+    """
+    A data loader for time-series data where sequences (examples) have **variable length**.
+    Sequences are grouped by a marker column and retrieved whole.
+    """
     def __init__(self, series_marker_column: str, csv_loader_params: Dict, pad_length=None, task="classification",
                  n_classes=9 + 90):
-        """Enables eas(ier) loading of time-series with variable length data
+        """Initializes the VariableSequenceLength loader.
 
-        :param series_marker_column: The column that dealinates when an example begins and ends
+        :param series_marker_column: The column that delineates when an example (sequence) begins and ends.
         :type series_marker_column: str
-        :param pad_length: If the specified the length to truncate sequences at or pad them till that length
-        :type pad_length: int
-        :param task: The specific task (e.g. classification, forecasting, auto_encode)
+        :param csv_loader_params: The standard parameters passed to the parent ``CSVDataLoader``.
+        :type csv_loader_params: Dict
+        :param pad_length: If specified, the length to truncate sequences at or pad them up to.
+        :type pad_length: Optional[int]
+        :param task: The specific task ('classification', 'auto', 'forecasting' - not fully implemented), defaults to "classification".
         :type task: str
-
+        :param n_classes: The maximum number of classes for classification tasks, defaults to 99.
+        :type n_classes: int
         """
         super().__init__(**csv_loader_params)
         self.pad_length = pad_length
@@ -617,9 +828,25 @@ class VariableSequenceLength(CSVDataLoader):
         self.n_classes = n_classes
 
     def get_item_forecast(self, idx: int):
+        """
+        (Placeholder) Logic for sequence-to-sequence forecasting with variable length data.
+        """
         pass
 
-    def get_item_classification(self, idx: int):
+    def get_item_classification(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Retrieves a single sequence for classification.
+
+        The sequence's label is assumed to be the **first** column of the original data and is taken from the
+        **last row** of the unscaled sequence.
+
+        :param idx: The index of the unique series to retrieve (index in ``self.uniques``).
+        :type idx: int
+        :return: A tuple containing the feature sequence and the one-hot encoded label.
+                 (feature_sequence, one_hot_label)
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        :raises ValueError: If the derived class value is greater than the specified number of classes.
+        """
         item = self.grouped_df.get_group(self.uniques[idx])
         rows = item.iloc[idx: self.forecast_history + idx]
         targ = item.iloc[idx: self.forecast_history + idx]
@@ -636,7 +863,17 @@ class VariableSequenceLength(CSVDataLoader):
         targ_labs[casted_shit] = 1
         return src.float(), targ_labs.float().unsqueeze(0)
 
-    def get_item_auto_encoder(self, idx):
+    def get_item_auto_encoder(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Retrieves a single sequence for autoencoder training (src == target).
+        Applies padding or truncation if ``pad_length`` is set.
+
+        :param idx: The index of the unique series to retrieve (index in ``self.uniques``).
+        :type idx: int
+        :return: A tuple containing the padded/truncated sequence for both source and target.
+                 (sequence, sequence)
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         item = self.grouped_df.get_group(self.uniques[idx])
         the_seq = torch.from_numpy(item.to_numpy())
         if self.pad_length:
@@ -645,8 +882,13 @@ class VariableSequenceLength(CSVDataLoader):
         else:
             return the_seq.float(), the_seq.float()
 
-    def pad_input_data(self, sequence: int):
-        """Pads a sequence to a specified length.
+    def pad_input_data(self, sequence: torch.Tensor) -> torch.Tensor:
+        """Pads a sequence to a specified length or truncates it if longer.
+
+        :param sequence: The input sequence tensor.
+        :type sequence: torch.Tensor
+        :return: The padded or truncated sequence.
+        :rtype: torch.Tensor
         """
         if self.pad_length > sequence.shape[0]:
             pad_dim = self.pad_length - sequence.shape[0]
@@ -654,33 +896,59 @@ class VariableSequenceLength(CSVDataLoader):
         else:
             return sequence[self.pad_length, :]
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Retrieves a single sample based on the specified task (auto, classification).
+
+        :param idx: The index of the unique series to retrieve.
+        :type idx: int
+        :return: A tuple containing the input data and the target data based on the task.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        :raises KeyError: If the task is not defined in the tasks dictionary.
+        """
         tasks = {"auto": self.get_item_auto_encoder, "classification": self.get_item_classification}
         return tasks[self.task](idx)
 
 
 class SeriesIDTestLoader(CSVSeriesIDLoader):
+    """
+    A test data loader specifically for multi-series data, extending ``CSVSeriesIDLoader``
+    to handle test-time sequence length requirements and to wrap each series in a
+    ``CSVTestLoader``.
+    """
     def __init__(self, series_id_col: str, main_params: dict, return_method: str, forecast_total=336, return_all=True):
-        """_summary_
+        """Initializes the SeriesIDTestLoader.
 
-        :param series_id_col: The column that contains the series_id
+        :param series_id_col: The column that contains the series_id.
         :type series_id_col: str
-        :param main_params: The core params used to instantiate the CSVSeriesIDLoader
+        :param main_params: The core parameters used to instantiate the parent ``CSVSeriesIDLoader``.
         :type main_params: dict
-        :param return_method: The method of return
+        :param return_method: The method of return (e.g., 'dict').
         :type return_method: str
-        :param return_all: _description_, defaults to True
-        :type return_all: bool, optional
-        :param forecast_total: The total length to forecast, defaults to 336
+        :param forecast_total: The total length to forecast, defaults to 336.
         :type forecast_total: int, optional
+        :param return_all: Whether to return all series at once for each index, defaults to True.
+        :type return_all: bool, optional
         """
         super().__init__(series_id_col, main_params, return_method, return_all)
         print("forecast_total is: " + str(forecast_total))
         self.forecast_total = forecast_total
+        # NOTE: self.df_orig_list holds the original dataframes, which are passed to CSVTestLoader
         self.csv_test_loaders = [CSVTestLoader(loader_1, forecast_total, **main_params) for loader_1 in self.df_orig_list]  # noqa
 
-    def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None):
+    def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None) -> List[Tuple[torch.Tensor, pd.DataFrame, int]]:
+        """
+        Retrieves a sample for **all** series starting from a specified datetime stamp.
+
+        :param forecast_start: The datetime object indicating the start of the forecast window.
+        :type forecast_start: datetime
+        :param series_id: Optional parameter for a specific series ID (not currently used for 'all' method).
+        :type series_id: Optional[int]
+        :return: A list of results, where each result is a tuple (historical_data, all_rows_orig, target_idx_start)
+                 from the underlying ``CSVTestLoader`` for a single series.
+        :rtype: List[Tuple[torch.Tensor, pd.DataFrame, int]]
+        """
         res = []
         for test_loader in self.csv_test_loaders:
-            res.append(test_loader.get_from_start_date(forecast_start, series_id))
+            res.append(test_loader.get_from_start_date(forecast_start))
         return res

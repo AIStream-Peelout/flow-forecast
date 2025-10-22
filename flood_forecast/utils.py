@@ -12,20 +12,32 @@ def numpy_to_tvar(x: torch.Tensor) -> torch.autograd.Variable:
     :param x: A numpy array you want to convert to a PyTorch tensor
     :type x: torch.Tensor
     :return: A tensor variable
-    :rtype: torch.Variable
+    :rtype: torch.autograd.Variable
     """
     return Variable(torch.from_numpy(x).type(torch.FloatTensor).to(device))
 
 
 def flatten_list_function(input_list: List) -> List:
-    """A function to flatten a list."""
+    """A function to flatten a list.
+
+    :param input_list: A list of lists to be flattened.
+    :type input_list: List
+    :return: A flattened list.
+    :rtype: List
+    """
     return [item for sublist in input_list for item in sublist]
 
 
 def make_criterion_functions(crit_list: List) -> List:
-    """crit_list should be either dict or list.
+    """Creates a list of PyTorch criterion (loss) functions based on the input list or dictionary.
 
-    If dict, then it should be a dictionary of the form . returns a list
+    If a list is provided, it contains the names of the criteria (e.g., ["MSELoss"]).
+    If a dict is provided, keys are the names and values are the keyword arguments for the criterion (e.g., {"L1Loss": {"reduction": "mean"}}).
+
+    :param crit_list: A list of criterion names (str) or a dictionary mapping criterion names to their keyword arguments.
+    :type crit_list: List
+    :return: A list of initialized PyTorch criterion functions.
+    :rtype: List
     """
     final_list = []
     if type(crit_list) == list:

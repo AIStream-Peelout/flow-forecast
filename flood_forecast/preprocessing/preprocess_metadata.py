@@ -3,6 +3,15 @@ import pandas as pd
 
 
 def make_gage_data_csv(file_path: str):
+    """Reads a JSON file, converts it into a pandas DataFrame, and sets the index name to 'id'.
+
+    This function is typically used to process metadata about river gages.
+
+    :param file_path: The path to the input JSON file containing gage data.
+    :type file_path: Union[str, TextIO]
+    :return: A DataFrame where the original JSON keys are the index (named 'id') and the values are columns.
+    :rtype: pd.DataFrame
+    """
     "returns df"
     with open(file_path) as f:
         df = pd.read_json(f)

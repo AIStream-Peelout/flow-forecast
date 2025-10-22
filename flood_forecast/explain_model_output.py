@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union, List
 import numpy as np
 import shap
 import torch
@@ -16,18 +16,25 @@ from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
 BACKGROUND_BATCH_SIZE = 5
 
 
-def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -> Tuple[torch.Tensor, int]:
+def handle_dl_output(
+    dl: Union[CSVTestLoader, 'TemporalTestLoader'],
+    dl_class: str,
+    datetime_start: datetime,
+    device: str,
+) -> Tuple[Union[torch.Tensor, List[torch.Tensor]], int]:
     """
-    :param dl: The test data-loader. Should be passed directly
+    Handles data loading output based on the data-loader class.
+
+    :param dl: The test data-loader. Should be passed directly. Assumes 'TemporalTestLoader' is a known type for 'TemporalLoader' class string.
     :type dl: Union[CSVTestLoader, TemporalTestLoader]
-    :param dl_class: A string that is the name of DL passef from the params file
+    :param dl_class: A string that is the name of DL passed from the params file.
     :type dl_class: str
-    :param datetime_start: The start datetime for the forecast
+    :param datetime_start: The start datetime for the forecast.
     :type datetime_start: datetime
-    :param device: Typical device should be either cpu or cuda
+    :param device: Typical device should be either cpu or cuda.
     :type device: str
-    :return: Returns a tuple containing either a list of tensors or a single tensor, and an integer
-    :rtype: Tuple[torch.Tensor, int]
+    :return: Returns a tuple containing either a list of tensors or a single tensor (the history data), and an integer (the forecast start index).
+    :rtype: Tuple[Union[torch.Tensor, List[torch.Tensor]], int]
     """
     if dl_class == "TemporalLoader":
         device = "cpu"
@@ -45,17 +52,17 @@ def handle_dl_output(dl, dl_class: str, datetime_start: datetime, device: str) -
 def _prepare_background_tensor(
     csv_test_loader: CSVTestLoader, backgound_batch_size: int = BACKGROUND_BATCH_SIZE
 ) -> torch.Tensor:
-    """Generate background batches for deep explainer.
+    """
+    Generate background batches for deep explainer.
 
-    Random sample batches as background data
-    background tensor of size (batch_size, history_len, num_feature)
-    Args:
-        csv_test_loader (CSVTestLoader): test data loader
-        backgound_batch_size (int): number of batches used as background data
-        for deep explainer. Default to BACKGROUND_BATCH_SIZE.
-    Returns:
-        torch.Tensor: background tensor of size
-        (batch_size, history_len, num_feature)
+    Random sample batches as background data. Returns a background tensor of size (batch_size, history_len, num_feature).
+
+    :param csv_test_loader: test data loader.
+    :type csv_test_loader: CSVTestLoader
+    :param backgound_batch_size: number of batches used as background data for deep explainer. Default to BACKGROUND_BATCH_SIZE.
+    :type backgound_batch_size: int
+    :return: background tensor of size (batch_size, history_len, num_feature).
+    :rtype: torch.Tensor
     """
     background_data = csv_test_loader.original_df
     background_batches = csv_test_loader.convert_history_batches(
@@ -72,12 +79,17 @@ def _prepare_background_tensor(
 def deep_explain_model_summary_plot(
     model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
-    """Generate feature summary plot for trained deep learning models
-    Args:
-        model (object): trained model
-        csv_test_loader (CSVTestLoader): test data loader
-        datetime_start (datetime, optional): start date of the test prediction,
-            Defaults to None, i.e. using model inference parameters.
+    """
+    Generate feature summary plot for trained deep learning models.
+
+    :param model: trained model.
+    :type model: object
+    :param csv_test_loader: test data loader.
+    :type csv_test_loader: CSVTestLoader
+    :param datetime_start: start date of the test prediction, Defaults to None, i.e. using model inference parameters.
+    :type datetime_start: Optional[datetime]
+    :return: None.
+    :rtype: None
     """
     if model.params["model_name"] == "SimpleTransformer":
         print("SimpleTransformer currently not supported.")
@@ -167,7 +179,17 @@ def deep_explain_model_summary_plot(
             )
 
 
-def fix_shap_values(shap_values, history):
+def fix_shap_values(shap_values, history) -> np.ndarray:
+    """
+    Fixes the structure of SHAP values based on the history data type.
+
+    :param shap_values: The raw SHAP values output from DeepExplainer.
+    :type shap_values: Union[List[np.ndarray], np.ndarray]
+    :param history: The history data used for explanation, which can be a single Tensor or a list of Tensors.
+    :type history: Union[torch.Tensor, List[torch.Tensor]]
+    :return: The fixed SHAP values as a NumPy array.
+    :rtype: np.ndarray
+    """
     if isinstance(history, list):
         shap_values = list(zip(*shap_values))[0]
         return shap_values
@@ -177,14 +199,17 @@ def fix_shap_values(shap_values, history):
 def deep_explain_model_heatmap(
     model, csv_test_loader: CSVTestLoader, datetime_start: Optional[datetime] = None
 ) -> None:
-    """Generate feature heatmap for prediction at a start time
-    Args:
-        model ([type]): trained model
-        csv_test_loader ([CSVTestLoader]): test data loader
-        datetime_start (Optional[datetime], optional): start date of the test prediction,
-            Defaults to None, i.e. using model inference parameters.
-    Returns:
-        None
+    """
+    Generate feature heatmap for prediction at a start time.
+
+    :param model: trained model.
+    :type model: object
+    :param csv_test_loader: test data loader.
+    :type csv_test_loader: CSVTestLoader
+    :param datetime_start: start date of the test prediction, Defaults to None, i.e. using model inference parameters.
+    :type datetime_start: Optional[datetime]
+    :return: None.
+    :rtype: None
     """
     if model.params["model_name"] == "SimpleTransformer":
         print("SimpleTransformer currently not supported.")

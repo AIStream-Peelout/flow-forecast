@@ -11,6 +11,11 @@ from flood_forecast.pytorch_training import train_transformer_style, handle_meta
 
 class PyTorchTrainTests(unittest.TestCase):
     def setUp(self):
+        """
+        Set up the test environment by initializing various PyTorchForecast models and parameters for training.
+        :return: None
+        :rtype: None
+        """
         self.test_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_init")
         self.model_params = {
             "metrics": ["MSE", "MAPE"],
@@ -208,10 +213,21 @@ class PyTorchTrainTests(unittest.TestCase):
             self.meta_model_params = json.load(f)
 
     def test_pytorch_train_base(self):
+        """
+        Test basic properties of the initialized model, such as input and embedding dimensions.
+        :return: None
+        :rtype: None
+        """
         self.assertEqual(self.model.model.dense_shape.in_features, 3)
         self.assertEqual(self.model.model.multi_attn.embed_dim, 128)
 
     def test_train_and_resume(self):
+        """
+        Trains a model, saves it, loads it into another model, and verifies that model weights are correctly loaded.
+
+        :return: None
+        :rtype: None
+        """
         train_transformer_style(self.model, self.model_params["training_params"])
         self.assertEqual(len(os.listdir("model_save")), 2)
         print("first test passed")
@@ -243,6 +259,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertTrue(torch.allclose(basic_model(data), basic_model(data)))
 
     def test_transfer_shit(self):
+        """
+        Loads pretrained weights into a new model with a modified output sequence length and checks output dimensions.
+
+        :return: None
+        :rtype: None
+        """
         self.model_params["weight_path"] = os.path.join(
             "model_save", sorted(os.listdir("model_save"))[1])
         self.model_params["model_params"]["output_seq_len"] = 6
@@ -259,6 +281,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(model3.model(data).shape, torch.Size([1, 6]))
 
     def test_removing_layer_param(self):
+        """
+        Tests weight loading with exclusion of certain layers to simulate transfer learning behavior.
+
+        :return: None
+        :rtype: None
+        """
         model3 = PyTorchForecast(
             "MultiAttnHeadSimple",
             self.keag_file,
@@ -280,6 +308,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(result.shape[1], 7)
 
     def test_train_loss(self):
+        """
+        Computes training loss over one epoch and asserts that the loss is within a specified range.
+
+        :return: None
+        :rtype: None
+        """
         print("Now begining train loss test")
         total_loss = torch_single_train(
             self.dummy_model,
@@ -303,22 +337,46 @@ class PyTorchTrainTests(unittest.TestCase):
     #     pass
 
     def linear_model_test(self):
+        """
+        Trains a simple linear model using the transformer training loop.
+
+        :return: None
+        :rtype: None
+        """
         train_transformer_style(
             self.simple_linear_model,
             self.simple_param["training_params"],
             True)
 
     def test_ae(self):
+        """
+        Verifies that all model parameters in a DARNN model have `requires_grad` set to True.
+
+        :return: None
+        :rtype: None
+        """
         model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, self.meta_model_params)
         for parameter in model.model.parameters():
             self.assertTrue(parameter.requires_grad)
 
     def test_compute_loss(self):
+        """
+        Tests loss computation by passing sample outputs and targets to the loss function.
+
+        :return: None
+        :rtype: None
+        """
         crit = self.model.crit[0]
         loss = compute_loss(torch.ones(2, 20), torch.zeros(2, 20), torch.rand(3, 20, 1), crit, None, None)
         self.assertEqual(loss.item(), 1.0)
 
     def test_test_data(self):
+        """
+        Tests different models' test datasets and ensures the shape of the target data is as expected.
+
+        :return: None
+        :rtype: None
+        """
         _, trg = self.model.test_data[0]
         _, trg1 = self.dummy_model.test_data[1]
         _, trg2 = self.transformer.test_data[0]
@@ -329,6 +387,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(trg3.shape[0], 25)
 
     def test_handle_meta(self):
+        """
+        Tests meta-learning helper function `handle_meta_data` without using a meta-loss.
+
+        :return: None
+        :rtype: None
+        """
         with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
             json_config = json.load(f)
         model = PyTorchForecast("DARNN", self.keag_file, self.keag_file, self.keag_file, json_config)
@@ -338,6 +402,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertIsInstance(meta_models, PyTorchForecast)
 
     def test_handle_meta2(self):
+        """
+        Tests meta-learning setup using a defined meta-loss and validates model and representation outputs.
+
+        :return: None
+        :rtype: None
+        """
         with open(os.path.join(os.path.dirname(__file__), "da_meta.json")) as f:
             json_config = json.load(f)
         json_config["meta_data"]["meta_loss"] = "MSE"
@@ -348,6 +418,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertIsInstance(meta_models, PyTorchForecast)
 
     def test_scaling_data(self):
+        """
+        Validates inverse scaling operation by comparing scaled and unscaled values.
+
+        :return: None
+        :rtype: None
+        """
         scaled_src, _ = self.model.test_data[0]
         data_unscaled = self.model.test_data.original_df.iloc[0:20]["cfs"].values
         print("shape bw")
@@ -357,6 +433,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertAlmostEqual(inverse_scale.numpy()[0, 9], data_unscaled[9])
 
     def test_compute_loss_no_scaling(self):
+        """
+        Verifies loss values with DilateLoss and MSELoss given consistent input tensors.
+
+        :return: None
+        :rtype: None
+        """
         exam = torch.Tensor([4.0]).repeat(2, 20, 5)
         exam2 = torch.Tensor([1.0]).repeat(2, 20, 5)
         exam11 = torch.Tensor([4.0]).repeat(2, 20)
@@ -368,6 +450,12 @@ class PyTorchTrainTests(unittest.TestCase):
         self.assertEqual(float(result), 9.0)
 
     def test_z_inf(self):
+        """
+        Tests a training run for the Informer model and ensures the run completes successfully.
+
+        :return: None
+        :rtype: None
+        """
         train_transformer_style(self.inf, self.inf_params3["training_params"], False)
 
 if __name__ == '__main__':

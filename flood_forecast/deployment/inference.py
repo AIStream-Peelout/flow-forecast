@@ -9,27 +9,30 @@ from flood_forecast.gcp_integration.basic_utils import upload_file
 from datetime import datetime
 import wandb
 import torch
-from typing import Union
+from typing import Union, Dict, Tuple, List, Any
 import pandas as pd
 
 
 class InferenceMode(object):
-    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params,
-                 csv_path: Union[str, pd.DataFrame], weight_path, wandb_proj: str = None, torch_script=False):
-        """Class to handle inference for models,
+    def __init__(self, forecast_steps: int, num_prediction_samples: int, model_params: Dict[str, Any],
+                 csv_path: Union[str, pd.DataFrame], weight_path: str, wandb_proj: Union[str, None] = None, torch_script=False):
+        """
+        Class to handle inference for time series models, providing methods for forecasting and classification.
 
-        :param forecast_steps: Number of time-steps to forecast (doesn't have to be hours)
+        :param forecast_steps: Number of time-steps to forecast (e.g., hours).
         :type forecast_steps: int
-        :param num_prediction_samples: The number of prediction samples
+        :param num_prediction_samples: The number of prediction samples to generate (e.g., for confidence intervals).
         :type num_prediction_samples: int
-        :param model_params: A dictionafry of model parameters (ideally this should come from saved JSON config file)
-        :type model_params: Dict
-        :param csv_path: Path to the CSV test file you want to be used for inference or a Pandas dataframe.
-        :type csv_path: str
-        :param weight_path: Path to the model weights (.pth file)
+        :param model_params: A dictionary of model parameters (ideally this should come from saved JSON config file).
+        :type model_params: dict
+        :param csv_path: Path to the CSV test file or a Pandas dataframe to be used for inference.
+        :type csv_path: typing.Union[str, pandas.DataFrame]
+        :param weight_path: Path to the model weights (.pth file).
         :type weight_path: str
-        :param wandb_proj: The name of the WB project leave blank if you don't want to log to Wandb, defaults to None
-        :type wandb_proj: str, optionals
+        :param wandb_proj: The name of the W&B project; leave blank if you don't want to log to Wandb. Defaults to None.
+        :type wandb_proj: typing.Union[str, None]
+        :param torch_script: Whether the model should be loaded as a torch script model.
+        :type torch_script: bool
         """
         if "inference_params" not in model_params:
             model_params["inference_params"] = {"dataset_params": {}}
@@ -49,21 +52,23 @@ class InferenceMode(object):
             wandb.init(name=date.strftime("%H-%M-%D-%Y") + "_prod", project=wandb_proj)
             wandb.config.update(model_params, allow_val_change=True)
 
-    def infer_now(self, some_date: datetime, csv_path=None, save_buck=None, save_name=None, use_torch_script=False):
-        """Performs inference on a CSV file at a specified date-time.
+    def infer_now(self, some_date: datetime, csv_path: Union[str, None] = None, save_buck: Union[str, None] = None, save_name: Union[str, None] = None, use_torch_script: bool = False) -> Tuple[pd.DataFrame, torch.Tensor, torch.Tensor, int, Any, pd.DataFrame]:
+        """
+        Performs time series forecasting inference on a CSV file at a specified date-time.
 
-        :param some_date: The date you want inference to begin on.
-        :param csv_path: A path to a CSV you want to perform inference on, defaults to None
-        :type csv_path: str, optional
-        :param save_buck: The GCP bucket where you want to save predictions, defaults to None
-        :type save_buck: str, optional
-        :param save_name: The name of the file to save the Pandas data-frame to GCP as, defaults to None
-        :type save_name: str, optional
+        :param some_date: The date and time when the forecast should begin.
+        :type some_date: datetime
+        :param csv_path: An optional path to a CSV you want to perform inference on. Overrides the instance path. Defaults to None.
+        :type csv_path: typing.Union[str, None]
+        :param save_buck: The GCP bucket where you want to save the final predictions CSV. Defaults to None.
+        :type save_buck: typing.Union[str, None]
+        :param save_name: The name of the file to save the Pandas dataframe to GCP as. Defaults to None.
+        :type save_name: typing.Union[str, None]
         :param use_torch_script: Optional parameter which allows you to use a saved torch script version of your model.
-        :return: Returns a tuple consisting of the Pandas dataframe with predictions + history,
-        the prediction tensor, a tensor of the historical values, the forecast start index, the test loader, and the
-        a dataframe of the prediction samples (e.g. the confidence interval preds)
-        :rtype: tuple(pd.DataFrame, torch.Tensor, int, CSVTestLoader, pd.DataFrame)
+        :type use_torch_script: bool
+        :return: A tuple containing the results: predictions dataframe, prediction tensor, historical tensor, 
+                 forecast start index, test data loader, and the prediction samples dataframe (for CIs).
+        :rtype: typing.Tuple[pandas.DataFrame, torch.Tensor, torch.Tensor, int, object, pandas.DataFrame]
         """
         forecast_history = self.inference_params["dataset_params"]["forecast_history"]
         self.inference_params["datetime_start"] = some_date
@@ -91,14 +96,22 @@ class InferenceMode(object):
             upload_file(save_buck, save_name, "temp3.csv", self.model.gcs_client)
         return df, tensor, history, forecast_start, test, samples
 
-    def infer_now_classification(self, data=None, over_lap_seq=True, save_buck=None, save_name=None, batch_size=1):
-        """Function to preform classification/anomaly detection on sequences in real-time.
+    def infer_now_classification(self, data: Union[pd.DataFrame, str, None] = None, over_lap_seq: bool = True, save_buck: Union[str, None] = None, save_name: Union[str, None] = None, batch_size: int = 1) -> List[Any]:
+        """
+        Function to perform classification/anomaly detection on sequences in real-time.
 
-        :param data: The data to perform inference on
-        :type data: Union[pd.DataFrame, str], optional
-        :param over_lap_seq: Whether to increment by one throughout the df or by sequence length
-        :type over_lap_seq: bool,
-        :param batch_size: The batch size to use, defaults to 1
+        :param data: The data to perform inference on (DataFrame or file path). Defaults to None, using internal test data.
+        :type data: typing.Union[pandas.DataFrame, str, None]
+        :param over_lap_seq: Whether to slide the sequence window by one step (True) or by the full sequence length (False).
+        :type over_lap_seq: bool
+        :param save_buck: The GCP bucket where you want to save the results.
+        :type save_buck: typing.Union[str, None]
+        :param save_name: The name of the file to save the results to GCP as.
+        :type save_name: typing.Union[str, None]
+        :param batch_size: The batch size to use for inference.
+        :type batch_size: int
+        :return: A list of sequence predictions/outputs from the model.
+        :rtype: typing.List[typing.Any]
         """
         if data is not None:
             dataset_params = self.model.params["dataset_params"].copy()
@@ -117,22 +130,23 @@ class InferenceMode(object):
                 loader[i]  # TODO finish implementing
         return seq_list
 
-    def make_plots(self, date: datetime, csv_path: str = None, csv_bucket: str = None,
-                   save_name=None, wandb_plot_id=None):
-        """Function to create plots in inference mode.
+    def make_plots(self, date: datetime, csv_path: Union[str, None] = None, csv_bucket: Union[str, None] = None,
+                   save_name: Union[str, None] = None, wandb_plot_id: Union[str, None] = None) -> Tuple[torch.Tensor, torch.Tensor, Any, Any]:
+        """
+        Function to create forecast plots and optionally log them to Weights & Biases.
 
-        :param date: The datetime to start inference
+        :param date: The datetime to start the inference and plotting from.
         :type date: datetime
-        :param csv_path: The path to the CSV file or  you want to use for inference, defaults to None
-        :type csv_path: str, optional
-        :param csv_bucket: The bucket where the CSV file is located, defaults to None
-        :type csv_bucket: str, optional
-        :param save_name: Where to save the output csv, defaults to None
-        :type save_name: str, optional
-        :param wandb_plot_id: The id to save wandb plot as on dashboard, defaults to None
-        :type wandb_plot_id: str, optional
-        :return: [description]
-        :rtype: tuple(torch.Tensor, torch.Tensor, CSVTestLoader, matplotlib.pyplot.plot)
+        :param csv_path: The path to the CSV file you want to use for inference. Defaults to None.
+        :type csv_path: typing.Union[str, None]
+        :param csv_bucket: The GCS bucket where the CSV file is located. Defaults to None.
+        :type csv_bucket: typing.Union[str, None]
+        :param save_name: The name to use when saving the output CSV to the bucket. Defaults to None.
+        :type save_name: typing.Union[str, None]
+        :param wandb_plot_id: The id to save the generated plot as on the Wandb dashboard. Defaults to None.
+        :type wandb_plot_id: typing.Union[str, None]
+        :return: A tuple containing the prediction tensor, history tensor, test data loader, and the last generated plot object.
+        :rtype: typing.Tuple[torch.Tensor, torch.Tensor, object, object]
         """
         if csv_path is None:
             csv_path = self.csv_path
@@ -149,14 +163,15 @@ class InferenceMode(object):
 
 
 def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchForecast:
-    """Function to convert PyTorch model to torch script and save.
+    """
+    Function to convert a PyTorch model to TorchScript using tracing and save the script.
 
-    :param model: The PyTorchForecast model you wish to convert
-    :type model: PyTorchForecast
-    :param save_path: File name to save the TorchScript model under.
+    :param model: The PyTorchForecast model you wish to convert.
+    :type model: flood_forecast.time_model.PyTorchForecast
+    :param save_path: File path to save the TorchScript model under.
     :type save_path: str
-    :return: Returns the model with an added .script_model attribute
-    :rtype: PyTorchForecast
+    :return: Returns the original model instance with the TorchScript model added as a ``.script_model`` attribute.
+    :rtype: flood_forecast.time_model.PyTorchForecast
     """
     model.model.eval()
     forecast_history = model.params["dataset_params"]["forecast_history"]
@@ -173,21 +188,27 @@ def convert_to_torch_script(model: PyTorchForecast, save_path: str) -> PyTorchFo
 
 
 def convert_to_onnx():
-    """Converts a model to ONNX."""
+    """
+    Converts a model to ONNX. (Function currently not implemented)
+
+    :return: None
+    :rtype: None
+    """
     pass
 
 
-def load_model(model_params_dict, file_path: str, weight_path: str) -> PyTorchForecast:
-    """Function to load a PyTorchForecast model from an existing config file.
+def load_model(model_params_dict: Dict[str, Any], file_path: Union[str, pd.DataFrame], weight_path: str) -> PyTorchForecast:
+    """
+    Function to load a PyTorchForecast model from an existing configuration and specified weights.
 
-    :param model_params_dict: Dictionary of model parameters
-    :type model_params_dict: Dict
-    :param file_path: The path to the CSV for running infer
-    :type file_path: str
-    :param weight_path: The path to the model weights (can be GCS)
+    :param model_params_dict: Dictionary containing all model and dataset configuration parameters.
+    :type model_params_dict: dict
+    :param file_path: The path to the CSV or DataFrame used for initializing the data loader for inference.
+    :type file_path: typing.Union[str, pandas.DataFrame]
+    :param weight_path: The path to the model weights file (can be a local path or GCS path).
     :type weight_path: str
-    :return: Returns a PyTorchForecast model initialized with the proper data
-    :rtype: PyTorchForecast
+    :return: Returns a PyTorchForecast model initialized with the proper data and weights.
+    :rtype: flood_forecast.time_model.PyTorchForecast
     """
     if weight_path:
         model_params_dict["weight_path"] = weight_path

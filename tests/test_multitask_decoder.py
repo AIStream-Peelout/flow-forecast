@@ -8,8 +8,14 @@ from flood_forecast.trainer import train_function, correct_stupid_sklearn_error
 
 class MultitTaskTests(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
-        """Modules to test model inference."""
+def setUpClass(cls) -> None:
+        """
+        Class-level setup that loads model parameters from JSON configuration files
+        and prepares file paths and corrected model configurations for use in inference tests.
+
+        :return: None
+        :rtype: None
+        """
         with open(os.path.join(os.path.dirname(__file__), "multi_decoder_test.json")) as a:
             cls.model_params = json.load(a)
         with open(os.path.join(os.path.dirname(__file__), "multitask_decoder.json")) as a:
@@ -21,7 +27,15 @@ class MultitTaskTests(unittest.TestCase):
         cls.model_params3 = correct_stupid_sklearn_error(cls.model_params3)
         # cls.forecast_model2 = train_function("PyTorch", cls.model_params)
 
-    def test_decoder_multi_step(self):
+    def test_decoder_multi_step(self) -> None:
+        """
+        Tests the multi-step decoder (`simple_decode`) for proper functionality. Verifies that
+        predicted outputs do not leak target values from the decoder input sequence.
+
+        :return: None
+        :rtype: None
+        """
+
         if "save_path" in self.model_params:
             del self.model_params["save_path"]
         forecast_model = train_function("PyTorch", self.model_params)
@@ -30,7 +44,15 @@ class MultitTaskTests(unittest.TestCase):
         # We want to check for leakage
         self.assertFalse(3 in output[:, :, 0])
 
-    def test_multivariate_single_step(self):
+    def test_multivariate_single_step(self) -> None:
+        """
+        Tests the single-step decoding functionality with multiple output targets.
+        Ensures that the decoder output does not contain values from the input targets (to avoid leakage).
+
+        :return: None
+        :rtype: None
+        """
+
         # dumb error fixes
         if "save_path" in self.model_params3:
             del self.model_params["save_path"]

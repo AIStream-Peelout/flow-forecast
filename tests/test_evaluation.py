@@ -13,6 +13,14 @@ torch.manual_seed(0)
 
 class EvaluationTest(unittest.TestCase):
     def setUp(self):
+        """
+        Sets up the test environment for evaluation tests by initializing paths,
+        model parameters, PyTorchForecast models, and dataset parameters,
+        including configurations with and without scaling.
+
+        :return: None
+        :rtype: None
+        """
         self.test_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "test_init"
         )
@@ -94,6 +102,13 @@ class EvaluationTest(unittest.TestCase):
         }
 
     def test_infer_on_torch(self):
+        """
+        Tests the infer_on_torch_model function to ensure it returns expected tensor shapes,
+        correct initial prediction values, and proper indexing.
+
+        :return: None
+        :rtype: None
+        """
         df, end_tensor, hist, idx, test_data, prediction_samples = infer_on_torch_model(
             self.model,
             os.path.join(self.test_path2, "keag_small.csv"),
@@ -106,6 +121,13 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(idx, 759)
 
     def test_evaluator(self):
+        """
+        Tests the evaluate_model function on the MultiAttnHeadSimple model,
+        verifying the presence and values of evaluation metrics like MSE and MAPE.
+
+        :return: None
+        :rtype: None
+        """
         inference_params = {
             "datetime_start": datetime.datetime(2016, 5, 31, 0),
             "hours_to_forecast": 336,
@@ -124,6 +146,13 @@ class EvaluationTest(unittest.TestCase):
 
     @unittest.skip("Issues with the prediction samples param")
     def test_evaluator_generate_prediction_samples(self):
+        """
+        Skipped test for evaluation with generation of multiple prediction samples,
+        checking the alignment of indices and number of prediction samples generated.
+
+        :return: None
+        :rtype: None
+        """
         inference_params = {
             "datetime_start": datetime.datetime(2016, 5, 31, 0),
             "hours_to_forecast": 336,
@@ -140,6 +169,13 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(100, df_prediction_samples[0].shape[1])
 
     def test_evaluator_with_scaling_not_equal_without_scaling(self):
+        """
+        Tests that evaluation results differ when using scaling versus not using scaling
+        in dataset parameters by comparing prediction outputs.
+
+        :return: None
+        :rtype: None
+        """
         inference_params = {
             "datetime_start": datetime.datetime(2016, 5, 31, 0),
             "hours_to_forecast": 336,
@@ -167,6 +203,13 @@ class EvaluationTest(unittest.TestCase):
 
     @unittest.skip("Issues with the prediction samples param")
     def test_evaluator_df_preds_with_scaling_not_equal_without_scaling(self):
+        """
+        Skipped test that checks the differences in prediction sample DataFrames
+        when scaling is applied versus when it is not.
+
+        :return: None
+        :rtype: None
+        """
         inference_params = {
             "datetime_start": datetime.datetime(2016, 5, 31, 0),
             "hours_to_forecast": 336,
@@ -196,6 +239,13 @@ class EvaluationTest(unittest.TestCase):
         self.assertFalse(model_result_1[3][0].equals(model_result_2[3][0]))
 
     def test_linear_decoder(self):
+        """
+        Tests inference using the SimpleLinearModel with specified decoder parameters,
+        ensuring the model runs without errors.
+
+        :return: None
+        :rtype: None
+        """
         decoder_params = {"decoder_function": "simple_decode", "unsqueeze_dim": 1}
         self.data_base_params["forecast_history"] = 100
         inference_params = {
@@ -208,6 +258,13 @@ class EvaluationTest(unittest.TestCase):
         infer_on_torch_model(self.linear_model, **inference_params)
 
     def test_outputs_different(self):
+        """
+        Placeholder test for verifying differences in outputs.
+        Currently no implementation.
+
+        :return: None
+        :rtype: None
+        """
         pass
 
 if __name__ == "__main__":

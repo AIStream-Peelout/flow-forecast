@@ -10,7 +10,17 @@ from typing import Tuple
 
 
 class TriangularCausalMask:
-    def __init__(self, B, L, device="cpu"):
+    def __init__(self, B: int, L: int, device: str = "cpu"):
+        """
+        Creates a triangular causal mask tensor for self-attention mechanisms.
+
+        :param B: Batch size.
+        :type B: int
+        :param L: Sequence length.
+        :type L: int
+        :param device: The device to place the mask tensor on (e.g., 'cpu' or 'cuda').
+        :type device: str
+        """
         mask_shape = [B, 1, L, L]
         with torch.no_grad():
             self._mask = torch.triu(
@@ -18,12 +28,42 @@ class TriangularCausalMask:
             ).to(device)
 
     @property
-    def mask(self):
+    def mask(self) -> torch.Tensor:
+        """
+        Returns the triangular causal mask tensor.
+
+        :return: The mask tensor of shape [B, 1, L, L].
+        :rtype: torch.Tensor
+        """
         return self._mask
 
 
 class ProbMask:
-    def __init__(self, B, H, L, index, scores, device="cpu"):
+    def __init__(
+        self,
+        B: int,
+        H: int,
+        L: int,
+        index: torch.Tensor,
+        scores: torch.Tensor,
+        device: str = "cpu",
+    ):
+        """
+        Creates a probabilistic mask used in ProbAttention (Informer).
+
+        :param B: Batch size.
+        :type B: int
+        :param H: Number of attention heads.
+        :type H: int
+        :param L: Query sequence length (L_Q).
+        :type L: int
+        :param index: The indices of the top-k queries (M_top).
+        :type index: torch.Tensor
+        :param scores: The score tensor before softmax, used to determine the shape for the mask.
+        :type scores: torch.Tensor
+        :param device: The device to place the mask tensor on (e.g., 'cpu' or 'cuda').
+        :type device: str
+        """
         _mask = torch.ones(L, scores.shape[-1], dtype=torch.bool).to(device).triu(1)
         _mask_ex = _mask[None, None, :].expand(B, H, L, scores.shape[-1])
         indicator = _mask_ex[
@@ -32,20 +72,66 @@ class ProbMask:
         self._mask = indicator.view(scores.shape).to(device)
 
     @property
-    def mask(self):
+    def mask(self) -> torch.Tensor:
+        """
+        Returns the probabilistic mask tensor.
+
+        :return: The mask tensor.
+        :rtype: torch.Tensor
+        """
         return self._mask
 
 
 # Code implementation from https://github.com/thuml/Flowformer
 class FlowAttention(nn.Module):
-    def __init__(self, attention_dropout=0.1):
+    def __init__(self, attention_dropout: float = 0.1):
+        """
+        Implementation of Flow Attention from the Flowformer paper.
+
+        :param attention_dropout: Dropout rate for attention weights.
+        :type attention_dropout: float
+        """
         super(FlowAttention, self).__init__()
         self.dropout = nn.Dropout(attention_dropout)
 
-    def kernel_method(self, x):
+    def kernel_method(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Applies a kernel function (sigmoid) to the input tensor.
+
+        :param x: The input tensor (queries or keys).
+        :type x: torch.Tensor
+        :return: The tensor after applying the sigmoid kernel.
+        :rtype: torch.Tensor
+        """
         return torch.sigmoid(x)
 
-    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
+    def forward(
+        self,
+        queries: torch.Tensor,
+        keys: torch.Tensor,
+        values: torch.Tensor,
+        attn_mask: torch.Tensor,
+        tau: float = None,
+        delta: float = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Performs the Flow Attention forward pass.
+
+        :param queries: Query tensor of shape [B, L, H, D].
+        :type queries: torch.Tensor
+        :param keys: Key tensor of shape [B, S, H, D].
+        :type keys: torch.Tensor
+        :param values: Value tensor of shape [B, S, H, D].
+        :type values: torch.Tensor
+        :param attn_mask: Attention mask (not used in this implementation).
+        :type attn_mask: torch.Tensor
+        :param tau: Temperature parameter (not used in this implementation).
+        :type tau: float
+        :param delta: Delta parameter (not used in this implementation).
+        :type delta: float
+        :return: A tuple containing the context vector and None (as no attention is output).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         queries = queries.transpose(1, 2)
         keys = keys.transpose(1, 2)
         values = values.transpose(1, 2)
@@ -81,8 +167,8 @@ class FlowAttention(nn.Module):
         kv = keys.transpose(-2, -1) @ (values * normalizer_col_refine[:, :, :, None])
         x = (
             (
-                ((queries @ kv) * normalizer_row[:, :, :, None]) *
-                normalizer_row_refine[:, :, :, None]
+                ((queries @ kv) * normalizer_row[:, :, :, None])
+                * normalizer_row_refine[:, :, :, None]
             )
             .transpose(1, 2)
             .contiguous()
@@ -94,19 +180,49 @@ class FlowAttention(nn.Module):
 class FlashAttention(nn.Module):
     def __init__(
         self,
-        mask_flag=True,
-        factor=5,
-        scale=None,
-        attention_dropout=0.1,
-        output_attention=False,
+        mask_flag: bool = True,
+        factor: int = 5,
+        scale: float = None,
+        attention_dropout: float = 0.1,
+        output_attention: bool = False,
     ):
+        """
+        Implementation of Flash Attention using tiling and re-normalization (a simplified version).
+
+        :param mask_flag: Whether to use an attention mask.
+        :type mask_flag: bool
+        :param factor: A factor parameter (not directly used in this implementation).
+        :type factor: int
+        :param scale: Scaling factor for the attention scores. If None, it's computed as 1/sqrt(D).
+        :type scale: float
+        :param attention_dropout: Dropout rate for attention weights.
+        :type attention_dropout: float
+        :param output_attention: Whether to output the attention matrix (not used in this implementation).
+        :type output_attention: bool
+        """
         super(FlashAttention, self).__init__()
         self.scale = scale
         self.mask_flag = mask_flag
         self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def flash_attention_forward(self, Q, K, V, mask=None):
+    def flash_attention_forward(
+        self, Q: torch.Tensor, K: torch.Tensor, V: torch.Tensor, mask: torch.Tensor = None
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        Performs the block-wise Flash Attention forward pass.
+
+        :param Q: Query tensor.
+        :type Q: torch.Tensor
+        :param K: Key tensor.
+        :type K: torch.Tensor
+        :param V: Value tensor.
+        :type V: torch.Tensor
+        :param mask: Attention mask tensor.
+        :type mask: torch.Tensor
+        :return: A tuple containing the output context vector (O), the normalization statistics (l3), and the maximum log-probability (m).
+        :rtype: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+        """
         BLOCK_SIZE = 32
         NEG_INF = -1e10  # -infinity
         EPSILON = 1e-10
@@ -168,8 +284,8 @@ class FlashAttention(nn.Module):
 
                 mi_new = torch.maximum(m_block_ij, mi)
                 li_new = (
-                    torch.exp(mi - mi_new) * li +
-                    torch.exp(m_block_ij - mi_new) * l_block_ij
+                    torch.exp(mi - mi_new) * li
+                    + torch.exp(m_block_ij - mi_new) * l_block_ij
                 )
 
                 O_BLOCKS[i] = (li / li_new) * torch.exp(mi - mi_new) * Oi + (
@@ -183,7 +299,33 @@ class FlashAttention(nn.Module):
         m = torch.cat(m_BLOCKS, dim=2)
         return O, l3, m
 
-    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
+    def forward(
+        self,
+        queries: torch.Tensor,
+        keys: torch.Tensor,
+        values: torch.Tensor,
+        attn_mask: torch.Tensor,
+        tau: float = None,
+        delta: float = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Performs the Flash Attention forward pass.
+
+        :param queries: Query tensor of shape [B, L, H, D].
+        :type queries: torch.Tensor
+        :param keys: Key tensor of shape [B, S, H, D].
+        :type keys: torch.Tensor
+        :param values: Value tensor of shape [B, S, H, D].
+        :type values: torch.Tensor
+        :param attn_mask: Attention mask tensor.
+        :type attn_mask: torch.Tensor
+        :param tau: Temperature parameter (not used in this implementation).
+        :type tau: float
+        :param delta: Delta parameter (not used in this implementation).
+        :type delta: float
+        :return: A tuple containing the context vector and None (as no attention is output).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         res = self.flash_attention_forward(
             queries.permute(0, 2, 1, 3),
             keys.permute(0, 2, 1, 3),
@@ -196,19 +338,20 @@ class FlashAttention(nn.Module):
 class FullAttention(nn.Module):
     def __init__(
         self,
-        mask_flag=True,
-        factor=5,
-        scale=None,
-        attention_dropout=0.1,
+        mask_flag: bool = True,
+        factor: int = 5,
+        scale: float = None,
+        attention_dropout: float = 0.1,
     ):
-        """The full attention mechanism currently used by the Informer and ITransformer models.
+        """
+        The full attention mechanism currently used by the Informer and ITransformer models.
 
         :param mask_flag: Whether to mask the attention mechanism.
         :type mask_flag: bool
-        :param factor: The factor to use in the attention mechanism.
+        :param factor: The factor to use in the attention mechanism (not used in this implementation).
         :type factor: int
-        :param scale: The scale to use in the attention mechanism.
-        :type scale: Union[float, None]
+        :param scale: The scale to use in the attention mechanism. If None, it's computed as 1/sqrt(E).
+        :type scale: float
         :param attention_dropout: The dropout to use in the attention mechanism.
         :type attention_dropout: float
         """
@@ -217,7 +360,33 @@ class FullAttention(nn.Module):
         self.mask_flag = mask_flag
         self.dropout = nn.Dropout(attention_dropout)
 
-    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self,
+        queries: torch.Tensor,
+        keys: torch.Tensor,
+        values: torch.Tensor,
+        attn_mask: TriangularCausalMask = None,
+        tau: float = None,
+        delta: float = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Performs the Full Attention forward pass.
+
+        :param queries: Query tensor of shape [B, L, H, E].
+        :type queries: torch.Tensor
+        :param keys: Key tensor of shape [B, S, H, E].
+        :type keys: torch.Tensor
+        :param values: Value tensor of shape [B, S, H, D].
+        :type values: torch.Tensor
+        :param attn_mask: Attention mask object, typically TriangularCausalMask for causal attention.
+        :type attn_mask: TriangularCausalMask
+        :param tau: Temperature parameter (not used in this implementation).
+        :type tau: float
+        :param delta: Delta parameter (not used in this implementation).
+        :type delta: float
+        :return: A tuple containing the context vector and the attention matrix.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
         scale = self.scale or 1.0 / sqrt(E)
@@ -240,12 +409,26 @@ class FullAttention(nn.Module):
 class ProbAttention(nn.Module):
     def __init__(
         self,
-        mask_flag=True,
-        factor=5,
-        scale=None,
-        attention_dropout=0.1,
-        output_attention=False,
+        mask_flag: bool = True,
+        factor: int = 5,
+        scale: float = None,
+        attention_dropout: float = 0.1,
+        output_attention: bool = False,
     ):
+        """
+        Implementation of Probabilistic Sparse Self-Attention from the Informer paper.
+
+        :param mask_flag: Whether to use a causal mask for the attention mechanism.
+        :type mask_flag: bool
+        :param factor: The constant 'c' used to determine the sparse attention sampling size: c*ln(L_k) and c*ln(L_q).
+        :type factor: int
+        :param scale: The scale to use in the attention mechanism. If None, it's computed as 1/sqrt(D).
+        :type scale: float
+        :param attention_dropout: The dropout to use in the attention mechanism.
+        :type attention_dropout: float
+        :param output_attention: Whether to output the full attention matrix (sparse + context).
+        :type output_attention: bool
+        """
         super(ProbAttention, self).__init__()
         self.factor = factor
         self.scale = scale
@@ -253,7 +436,23 @@ class ProbAttention(nn.Module):
         self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def _prob_QK(self, Q, K, sample_k, n_top):  # n_top: c*ln(L_q)
+    def _prob_QK(
+        self, Q: torch.Tensor, K: torch.Tensor, sample_k: int, n_top: int
+    ) -> Tuple[torch.Tensor, torch.Tensor]:  # n_top: c*ln(L_q)
+        """
+        Computes the sparse QK scores by sampling keys and selecting the top queries.
+
+        :param Q: Query tensor of shape [B, H, L_Q, D].
+        :type Q: torch.Tensor
+        :param K: Key tensor of shape [B, H, L_K, E].
+        :type K: torch.Tensor
+        :param sample_k: Number of keys to sample for initial sparsity measurement (U_part).
+        :type sample_k: int
+        :param n_top: Number of top queries to select (u).
+        :type n_top: int
+        :return: A tuple containing the scores for the top-u queries and the indices of those top queries.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         # Q [B, H, L, D]
         B, H, L_K, E = K.shape
         _, _, L_Q, _ = Q.shape
@@ -277,7 +476,17 @@ class ProbAttention(nn.Module):
 
         return Q_K, M_top
 
-    def _get_initial_context(self, V, L_Q):
+    def _get_initial_context(self, V: torch.Tensor, L_Q: int) -> torch.Tensor:
+        """
+        Initializes the context vector.
+
+        :param V: Value tensor of shape [B, H, L_V, D].
+        :type V: torch.Tensor
+        :param L_Q: Query sequence length (L_Q).
+        :type L_Q: int
+        :return: The initial context tensor.
+        :rtype: torch.Tensor
+        """
         B, H, L_V, D = V.shape
         if not self.mask_flag:
             # V_sum = V.sum(dim=-2)
@@ -289,7 +498,33 @@ class ProbAttention(nn.Module):
             contex = V.cumsum(dim=-2)
         return contex
 
-    def _update_context(self, context_in, V, scores, index, L_Q, attn_mask):
+    def _update_context(
+        self,
+        context_in: torch.Tensor,
+        V: torch.Tensor,
+        scores: torch.Tensor,
+        index: torch.Tensor,
+        L_Q: int,
+        attn_mask: ProbMask = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Updates the context vector with attention over the selected top queries.
+
+        :param context_in: The initial context tensor.
+        :type context_in: torch.Tensor
+        :param V: Value tensor of shape [B, H, L_V, D].
+        :type V: torch.Tensor
+        :param scores: QK scores for the selected top queries, shape [B, H, u, L_K].
+        :type scores: torch.Tensor
+        :param index: Indices of the top-u queries (M_top).
+        :type index: torch.Tensor
+        :param L_Q: Query sequence length (L_Q).
+        :type L_Q: int
+        :param attn_mask: Probabilistic mask object for causal attention.
+        :type attn_mask: ProbMask
+        :return: A tuple containing the updated context vector and the attention matrix (or None).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         B, H, L_V, D = V.shape
 
         if self.mask_flag:
@@ -310,7 +545,33 @@ class ProbAttention(nn.Module):
         else:
             return (context_in, None)
 
-    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
+    def forward(
+        self,
+        queries: torch.Tensor,
+        keys: torch.Tensor,
+        values: torch.Tensor,
+        attn_mask: ProbMask = None,
+        tau: float = None,
+        delta: float = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Performs the Probabilistic Attention forward pass.
+
+        :param queries: Query tensor of shape [B, L_Q, H, D].
+        :type queries: torch.Tensor
+        :param keys: Key tensor of shape [B, L_K, H, D].
+        :type keys: torch.Tensor
+        :param values: Value tensor of shape [B, L_K, H, D].
+        :type values: torch.Tensor
+        :param attn_mask: Attention mask object, typically ProbMask for causal attention.
+        :type attn_mask: ProbMask
+        :param tau: Temperature parameter (not used in this implementation).
+        :type tau: float
+        :param delta: Delta parameter (not used in this implementation).
+        :type delta: float
+        :return: A tuple containing the context vector and the attention matrix (or None).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         B, L_Q, H, D = queries.shape
         _, L_K, _, _ = keys.shape
 
@@ -341,7 +602,28 @@ class ProbAttention(nn.Module):
 
 
 class AttentionLayer(nn.Module):
-    def __init__(self, attention, d_model, n_heads, d_keys=None, d_values=None):
+    def __init__(
+        self,
+        attention: nn.Module,
+        d_model: int,
+        n_heads: int,
+        d_keys: int = None,
+        d_values: int = None,
+    ):
+        """
+        A wrapper layer that performs the projection of Q, K, V and then applies an attention mechanism.
+
+        :param attention: The inner attention mechanism (e.g., FullAttention, ProbAttention).
+        :type attention: nn.Module
+        :param d_model: The input/output dimension of the model.
+        :type d_model: int
+        :param n_heads: The number of attention heads.
+        :type n_heads: int
+        :param d_keys: The dimension of keys and queries per head. Defaults to d_model // n_heads.
+        :type d_keys: int
+        :param d_values: The dimension of values per head. Defaults to d_model // n_heads.
+        :type d_values: int
+        """
         super(AttentionLayer, self).__init__()
 
         d_keys = d_keys or (d_model // n_heads)
@@ -354,7 +636,33 @@ class AttentionLayer(nn.Module):
         self.out_projection = nn.Linear(d_values * n_heads, d_model)
         self.n_heads = n_heads
 
-    def forward(self, queries, keys, values, attn_mask, tau=None, delta=None):
+    def forward(
+        self,
+        queries: torch.Tensor,
+        keys: torch.Tensor,
+        values: torch.Tensor,
+        attn_mask: torch.Tensor,
+        tau: float = None,
+        delta: float = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Performs the Attention Layer forward pass.
+
+        :param queries: Query tensor of shape [B, L, D_model].
+        :type queries: torch.Tensor
+        :param keys: Key tensor of shape [B, S, D_model].
+        :type keys: torch.Tensor
+        :param values: Value tensor of shape [B, S, D_model].
+        :type values: torch.Tensor
+        :param attn_mask: Attention mask.
+        :type attn_mask: torch.Tensor
+        :param tau: Temperature parameter (passed to inner attention).
+        :type tau: float
+        :param delta: Delta parameter (passed to inner attention).
+        :type delta: float
+        :return: A tuple containing the context vector and the attention matrix (or None).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         B, L, _ = queries.shape
         _, S, _ = keys.shape
         H = self.n_heads
@@ -374,15 +682,35 @@ class AttentionLayer(nn.Module):
 class ReformerLayer(nn.Module):
     def __init__(
         self,
-        attention,
-        d_model,
-        n_heads,
-        d_keys=None,
-        d_values=None,
-        causal=False,
-        bucket_size=4,
-        n_hashes=4,
+        attention: nn.Module,
+        d_model: int,
+        n_heads: int,
+        d_keys: int = None,
+        d_values: int = None,
+        causal: bool = False,
+        bucket_size: int = 4,
+        n_hashes: int = 4,
     ):
+        """
+        A layer that wraps the LSHSelfAttention mechanism, handling sequence length padding for Reformer.
+
+        :param attention: The attention mechanism (LSHSelfAttention is imported inside).
+        :type attention: nn.Module
+        :param d_model: The input/output dimension of the model.
+        :type d_model: int
+        :param n_heads: The number of attention heads.
+        :type n_heads: int
+        :param d_keys: Key dimension per head (ignored, handled by LSHSelfAttention).
+        :type d_keys: int
+        :param d_values: Value dimension per head (ignored, handled by LSHSelfAttention).
+        :type d_values: int
+        :param causal: Whether to use causal attention.
+        :type causal: bool
+        :param bucket_size: The size of the buckets for LSH.
+        :type bucket_size: int
+        :param n_hashes: The number of hash rounds for LSH.
+        :type n_hashes: int
+        """
         super().__init__()
         import LSHSelfAttention
 
@@ -395,7 +723,15 @@ class ReformerLayer(nn.Module):
             causal=causal,
         )
 
-    def fit_length(self, queries):
+    def fit_length(self, queries: torch.Tensor) -> torch.Tensor:
+        """
+        Pads the queries tensor so its sequence length is a multiple of (bucket_size * 2).
+
+        :param queries: The input tensor of shape [B, N, C].
+        :type queries: torch.Tensor
+        :return: The padded queries tensor.
+        :rtype: torch.Tensor
+        """
         # inside reformer: assert N % (bucket_size * 2) == 0
         B, N, C = queries.shape
         if N % (self.bucket_size * 2) == 0:
@@ -407,14 +743,48 @@ class ReformerLayer(nn.Module):
                 [queries, torch.zeros([B, fill_len, C]).to(queries.device)], dim=1
             )
 
-    def forward(self, queries, keys, values, attn_mask, tau, delta):
+    def forward(
+        self,
+        queries: torch.Tensor,
+        keys: torch.Tensor,
+        values: torch.Tensor,
+        attn_mask: torch.Tensor,
+        tau: float,
+        delta: float,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Performs the Reformer attention forward pass. Assumes keys=values=queries in the LSHAttention context.
+
+        :param queries: Query tensor of shape [B, N, C].
+        :type queries: torch.Tensor
+        :param keys: Key tensor (not used by LSHSelfAttention in this configuration).
+        :type keys: torch.Tensor
+        :param values: Value tensor (not used by LSHSelfAttention in this configuration).
+        :type values: torch.Tensor
+        :param attn_mask: Attention mask (not used).
+        :type attn_mask: torch.Tensor
+        :param tau: Temperature parameter (not used).
+        :type tau: float
+        :param delta: Delta parameter (not used).
+        :type delta: float
+        :return: A tuple containing the output tensor and None (as no attention is output).
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
         # in Reformer: defalut queries=keys
         B, N, C = queries.shape
         queries = self.attn(self.fit_length(queries))[:, :N, :]
         return queries, None
 
 
-def rotate_every_two(x):
+def rotate_every_two(x: torch.Tensor) -> torch.Tensor:
+    """
+    Rotates the input tensor's dimension elements in groups of two, used for Rotary Positional Embeddings.
+
+    :param x: The input tensor. The last dimension is assumed to be an even-dimension for rotation.
+    :type x: torch.Tensor
+    :return: The tensor with elements rotated in the last dimension.
+    :rtype: torch.Tensor
+    """
     x = rearrange(x, "... (d j) -> ... d j", j=2)
     x1, x2 = x.unbind(dim=-1)
     x = torch.stack((-x2, x1), dim=-1)
@@ -422,34 +792,104 @@ def rotate_every_two(x):
 
 
 class PreNorm(nn.Module):
-    def __init__(self, dim, fn):
+    def __init__(self, dim: int, fn: nn.Module):
+        """
+        A pre-normalization wrapper (LayerNorm followed by a function/module).
+
+        :param dim: The dimension of the feature to normalize.
+        :type dim: int
+        :param fn: The function or module to apply after normalization.
+        :type fn: nn.Module
+        """
         super().__init__()
         self.norm = nn.LayerNorm(dim)
         self.fn = fn
 
-    def forward(self, x, **kwargs):
+    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Performs the PreNorm forward pass.
+
+        :param x: The input tensor to be normalized.
+        :type x: torch.Tensor
+        :return: The output of the wrapped function/module after normalization.
+        :rtype: torch.Tensor
+        """
         return self.fn(self.norm(x), **kwargs)
 
 
 class CrossPreNorm(nn.Module):
-    def __init__(self, dim, fn):
+    def __init__(self, dim: int, fn: nn.Module):
+        """
+        A pre-normalization wrapper specifically for cross-attention, using two LayerNorms (for source and target).
+
+        :param dim: The dimension of the feature to normalize.
+        :type dim: int
+        :param fn: The cross-attention function or module to apply after normalization.
+        :type fn: nn.Module
+        """
         super().__init__()
         self.norm_src = nn.LayerNorm(dim)
         self.norm_tgt = nn.LayerNorm(dim)
         self.fn = fn
 
-    def forward(self, ctx, src_pos_emb, ts, tgt_pos_emb):
+    def forward(
+        self,
+        ctx: torch.Tensor,
+        src_pos_emb: torch.Tensor,
+        ts: torch.Tensor,
+        tgt_pos_emb: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Performs the CrossPreNorm forward pass.
+
+        :param ctx: The source context tensor.
+        :type ctx: torch.Tensor
+        :param src_pos_emb: Positional embedding for the source.
+        :type src_pos_emb: torch.Tensor
+        :param ts: The target sequence tensor.
+        :type ts: torch.Tensor
+        :param tgt_pos_emb: Positional embedding for the target.
+        :type tgt_pos_emb: torch.Tensor
+        :return: The output of the wrapped cross-attention function.
+        :rtype: torch.Tensor
+        """
         return self.fn(self.norm_src(ctx), src_pos_emb, self.norm_tgt(ts), tgt_pos_emb)
 
 
 class GEGLU(nn.Module):
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Performs the Gated Exponential Linear Unit (GELU) Linear Unit.
+
+        :param x: The input tensor of shape [..., 2*D].
+        :type x: torch.Tensor
+        :return: The result of the GEGLU operation of shape [..., D].
+        :rtype: torch.Tensor
+        """
         x, gates = x.chunk(2, dim=-1)
         return F.gelu(gates) * x
 
 
 class FeedForward(nn.Module):
-    def __init__(self, dim, hidden_dim, dropout=0.0, use_glu=True):
+    def __init__(
+        self,
+        dim: int,
+        hidden_dim: int,
+        dropout: float = 0.0,
+        use_glu: bool = True,
+    ):
+        """
+        A standard FeedForward network with an optional Gated Linear Unit (GEGLU or GLU) activation.
+
+        :param dim: The input and output dimension of the feature.
+        :type dim: int
+        :param hidden_dim: The dimension of the hidden layer.
+        :type hidden_dim: int
+        :param dropout: Dropout rate to apply in the network.
+        :type dropout: float
+        :param use_glu: Whether to use the Gated Linear Unit (GEGLU) for activation.
+        :type use_glu: bool
+        """
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(dim, hidden_dim * 2 if use_glu else hidden_dim),
@@ -459,7 +899,15 @@ class FeedForward(nn.Module):
             nn.Dropout(dropout),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Performs the FeedForward network forward pass.
+
+        :param x: The input tensor.
+        :type x: torch.Tensor
+        :return: The output tensor after the feed-forward operation.
+        :rtype: torch.Tensor
+        """
         return self.net(x)
 
 
@@ -472,13 +920,19 @@ class SelfAttention(nn.Module):
         dropout: float = 0.0,
         use_rotary: bool = True,
     ):
-        """The self-attention mechanism used in the CrossVIVIT model. It is currently not used in other models and could
-        likely be consolidated with those self-attention mechanisms.
+        """
+        The self-attention mechanism used in the CrossVIVIT model.
 
         :param dim: The input dimension of the sequence.
-        :type dim: [type]
-        :param heads: [description]
-        :type heads: [type]
+        :type dim: int
+        :param heads: The number of attention heads.
+        :type heads: int
+        :param dim_head: The dimension of the heads.
+        :type dim_head: int
+        :param dropout: Dropout rate for attention weights and output projection.
+        :type dropout: float
+        :param use_rotary: Whether to use Rotary Positional Embeddings (RoPE).
+        :type use_rotary: bool
         """
         super().__init__()
         inner_dim = dim_head * heads
@@ -495,11 +949,18 @@ class SelfAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, x: torch.Tensor, pos_emb: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self, x: torch.Tensor, pos_emb: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        Args:
-            x: Sequence of shape [B, N, D]
-            pos_emb: Positional embedding of sequence's tokens of shape [B, N, D]
+        Performs the Self Attention forward pass.
+
+        :param x: Sequence of shape [B, N, D].
+        :type x: torch.Tensor
+        :param pos_emb: Positional embedding of sequence's tokens of shape [B, N, D].
+        :type pos_emb: torch.Tensor
+        :return: A tuple containing the output tensor and the attention matrix.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
         """
 
         q = self.to_q(x)
@@ -544,14 +1005,18 @@ class CrossAttention(nn.Module):
         use_rotary: bool = True,
     ):
         """
-        This is the CrossAttention module primarily used in the CrossVIVIT paper. It is currently not used in other
-        models but may in the future be incorporated into other multi-modal models.
+        This is the CrossAttention module primarily used in the CrossVIVIT paper.
+
         :param dim: The input dimension of the sequence.
         :type dim: int
         :param heads: The number of heads for the attention mechanism.
         :type heads: int
         :param dim_head: The dimension of the heads.
         :type dim_head: int
+        :param dropout: Dropout rate for attention weights and output projection.
+        :type dropout: float
+        :param use_rotary: Whether to use Rotary Positional Embeddings (RoPE).
+        :type use_rotary: bool
         """
         super().__init__()
         inner_dim = dim_head * heads
@@ -568,10 +1033,26 @@ class CrossAttention(nn.Module):
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
 
-    def forward(self, src: Float[torch.Tensor, ""], src_pos_emb, tgt, tgt_pos_emb):
+    def forward(
+        self,
+        src: Float[torch.Tensor, ""],
+        src_pos_emb: torch.Tensor,
+        tgt: torch.Tensor,
+        tgt_pos_emb: torch.Tensor,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Performs the forward pass of the CrossAttention module.
 
+        :param src: The source sequence (K, V) tensor.
+        :type src: Float[torch.Tensor, ""]
+        :param src_pos_emb: Positional embedding for the source.
+        :type src_pos_emb: torch.Tensor
+        :param tgt: The target sequence (Q) tensor.
+        :type tgt: torch.Tensor
+        :param tgt_pos_emb: Positional embedding for the target.
+        :type tgt_pos_emb: torch.Tensor
+        :return: A tuple containing the output tensor and the attention matrix.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
         """
         q = self.to_q(tgt)
 

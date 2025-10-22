@@ -1,8 +1,17 @@
 """A set of function aimed at making it easy to convert other time series datasets to our format for transfer learning
 purposes."""
 
+import pandas as pd
 
-def make_column_names(df):
+def make_column_names(df: pd.DataFrame) -> pd.DataFrame:
+    """Renames all columns in a DataFrame using a standard "solar_i" format,
+    where 'i' is the column's zero-based index.
+
+    :param df: The input pandas DataFrame with existing column names.
+    :type df: pd.DataFrame
+    :return: The DataFrame with standardized column names.
+    :rtype: pd.DataFrame
+    """
     num_cols = len(list(df))
     # generate range of ints for suffixes
     # with length exactly half that of num_cols;

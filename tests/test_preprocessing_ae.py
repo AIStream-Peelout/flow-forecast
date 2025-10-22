@@ -5,7 +5,14 @@ import os
 
 
 class TestPreprocessingDA(unittest.TestCase):
-    def test_format_data(self):
+    def test_format_data(self) -> None:
+        """
+        Tests the `format_data` function to ensure it returns a `TrainData` object.
+        
+        :return: None
+        :rtype: None
+        """
+
         df = pd.read_csv(
             os.path.join(
                 os.path.dirname(__file__),
@@ -14,7 +21,15 @@ class TestPreprocessingDA(unittest.TestCase):
         self.assertEqual(type(format_data(df, ["height"])), TrainData)
         self.assertEqual(len(format_data(df, ["height"]).feats[0]), 2)
 
-    def test_make_function(self):
+    def test_make_function(self) -> None:
+        """
+        Tests the `make_data` function with sample CSV input. 
+        Verifies that the correct number of feature-target pairs are generated.
+        
+        :return: None
+        :rtype: None
+        """
+
         result = make_data(
             os.path.join(
                 os.path.dirname(__file__),

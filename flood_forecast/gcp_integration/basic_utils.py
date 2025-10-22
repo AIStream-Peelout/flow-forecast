@@ -7,10 +7,18 @@ import os
 def get_storage_client(
     service_key_path: Optional[str] = None,
 ) -> storage.Client:
-    """Utility function to return a properly authenticated GCS storage client whether working in Colab, CircleCI,
-    Dataverse, or other environments."""
+    """
+    Utility function to return a properly authenticated GCS storage client whether working in Colab, CircleCI,
+    Dataverse, or other environments.
+
+    :param service_key_path: Optional path to a service account JSON key file for explicit authentication.
+                             Defaults to None, in which case environment variables are used.
+    :type service_key_path: typing.Optional[str]
+    :return: An authenticated GCS storage client instance.
+    :rtype: google.cloud.storage.Client
+    """
     if service_key_path is None:
-        if os.environ["ENVIRONMENT_GCP"] == "Colab":
+        if os.environ.get("ENVIRONMENT_GCP") == "Colab":
             return storage.Client(project=os.environ["GCP_PROJECT"])
         else:
             import ast
@@ -24,16 +32,19 @@ def get_storage_client(
 def upload_file(
     bucket_name: str, file_name: str, upload_name: str, client: storage.Client
 ):
-    """A function to upload a file to a GCP bucket.
+    """
+    A function to upload a file to a GCP bucket.
 
-    :param bucket_name: The name of the bucket
+    :param bucket_name: The name of the bucket to upload the file to.
     :type bucket_name: str
-    :param file_name: The name of the file
+    :param file_name: The name the file will have *inside* the bucket (destination blob name).
     :type file_name: str
-    :param upload_name: [description]
+    :param upload_name: The local path to the file to be uploaded.
     :type upload_name: str
-    :param client: [description]
-    :type client: storage.Client
+    :param client: The authenticated GCS storage client.
+    :type client: google.cloud.storage.Client
+    :return: None
+    :rtype: None
     """
     bucket = client.get_bucket(bucket_name)
     blob = bucket.blob(file_name)
@@ -46,12 +57,19 @@ def download_file(
     destination_file_name: str,
     service_key_path: Optional[str] = None,
 ) -> None:
-    """Download data file from GCS.
+    """
+    Download data file from GCS.
 
-    Args:
-        bucket_name ([str]): bucket name on GCS, eg. task_ts_data
-        source_blob_name ([str]): storage object name
-        destination_file_name ([str]): filepath to save to local
+    :param bucket_name: The name of the bucket on GCS, e.g., 'task_ts_data'.
+    :type bucket_name: str
+    :param source_blob_name: The storage object name (path to the file in the bucket).
+    :type source_blob_name: str
+    :param destination_file_name: The local filepath where the downloaded file should be saved.
+    :type destination_file_name: str
+    :param service_key_path: Optional path to a service account JSON key file.
+    :type service_key_path: typing.Optional[str]
+    :return: None
+    :rtype: None
     """
     storage_client = get_storage_client(service_key_path)
 

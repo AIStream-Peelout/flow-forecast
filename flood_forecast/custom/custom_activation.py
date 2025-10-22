@@ -15,6 +15,16 @@ from torch.autograd import Function
 
 
 def _make_ix_like(X, dim):
+    """
+    Creates an index tensor in the shape of the input tensor for use in sorting operations.
+
+    :param X: The input tensor.
+    :type X: torch.Tensor
+    :param dim: The dimension along which to create the index.
+    :type dim: int
+    :return: An index tensor with values [1, 2, ..., d] aligned to the specified dimension.
+    :rtype: torch.Tensor
+    """
     d = X.size(dim)
     rho = torch.arange(1, d + 1, device=X.device, dtype=X.dtype)
     view = [1] * X.dim()
@@ -23,6 +33,16 @@ def _make_ix_like(X, dim):
 
 
 def _roll_last(X, dim):
+    """
+    Rolls the specified dimension to the last axis of the tensor.
+
+    :param X: The input tensor.
+    :type X: torch.Tensor
+    :param dim: The dimension to move to the last position.
+    :type dim: int
+    :return: Tensor with the specified dimension rolled to the last axis.
+    :rtype: torch.Tensor
+    """
     if dim == -1:
         return X
     elif dim < 0:
@@ -33,26 +53,19 @@ def _roll_last(X, dim):
 
 
 def _sparsemax_threshold_and_support(X, dim=-1, k=None):
-    """Core computation for sparsemax: optimal threshold and support size.
-    Parameters
-    ----------
-    X : torch.Tensor
-        The input tensor to compute thresholds over.
-    dim : int
-        The dimension along which to apply sparsemax.
-    k : int or None
-        number of largest elements to partial-sort over. For optimal
-        performance, should be slightly bigger than the expected number of
-        nonzeros in the solution. If the solution is more than k-sparse,
-        this function is recursively called with a 2*k schedule.
-        If `None`, full sorting is performed from the beginning.
-    Returns
-    -------
-    tau : torch.Tensor like `X`, with all but the `dim` dimension intact
-        the threshold value for each vector
-    support_size : torch LongTensor, shape like `tau`
-        the number of nonzeros in each vector.
     """
+    Computes the threshold and support size for sparsemax.
+
+    :param X: The input tensor.
+    :type X: torch.Tensor
+    :param dim: The dimension along which to compute the threshold.
+    :type dim: int
+    :param k: Number of top elements to consider for partial sorting.
+    :type k: int or None
+    :return: A tuple containing the threshold and support size tensor.
+    :rtype: tuple
+    """
+   
 
     if k is None or k >= X.shape[dim]:  # do full sort
         topk, _ = torch.sort(X, dim=dim, descending=True)
@@ -80,25 +93,17 @@ def _sparsemax_threshold_and_support(X, dim=-1, k=None):
 
 
 def _entmax_threshold_and_support(X, dim=-1, k=None):
-    """Core computation for 1.5-entmax: optimal threshold and support size.
-    Parameters
-    ----------
-    X : torch.Tensor
-        The input tensor to compute thresholds over.
-    dim : int
-        The dimension along which to apply 1.5-entmax.
-    k : int or None
-        number of largest elements to partial-sort over. For optimal
-        performance, should be slightly bigger than the expected number of
-        nonzeros in the solution. If the solution is more than k-sparse,
-        this function is recursively called with a 2*k schedule.
-        If `None`, full sorting is performed from the beginning.
-    Returns
-    -------
-    tau : torch.Tensor like `X`, with all but the `dim` dimension intact
-        the threshold value for each vector
-    support_size : torch LongTensor, shape like `tau`
-        the number of nonzeros in each vector.
+    """
+    Computes the threshold and support size for 1.5-entmax.
+
+    :param X: The input tensor.
+    :type X: torch.Tensor
+    :param dim: The dimension along which to compute the threshold.
+    :type dim: int
+    :param k: Number of top elements to consider for partial sorting.
+    :type k: int or None
+    :return: A tuple containing the threshold and support size tensor.
+    :rtype: tuple
     """
 
     if k is None or k >= X.shape[dim]:  # do full sort
@@ -134,8 +139,25 @@ def _entmax_threshold_and_support(X, dim=-1, k=None):
 
 
 class SparsemaxFunction(Function):
+    """
+    Autograd function for the sparsemax activation.
+    Implements forward and backward passes.
+    """
     @classmethod
     def forward(cls, ctx, X, dim=-1, k=None):
+        """
+        Forward pass of sparsemax.
+
+        :param ctx: Context to save tensors for backward pass.
+        :param X: Input tensor.
+        :type X: torch.Tensor
+        :param dim: Dimension along which to apply sparsemax.
+        :type dim: int
+        :param k: Number of elements for partial sort.
+        :type k: int or None
+        :return: Sparsemax output tensor.
+        :rtype: torch.Tensor
+        """
         ctx.dim = dim
         max_val, _ = X.max(dim=dim, keepdim=True)
         X = X - max_val  # same numerical stability trick as softmax
@@ -146,6 +168,15 @@ class SparsemaxFunction(Function):
 
     @classmethod
     def backward(cls, ctx, grad_output):
+        """
+        Backward pass of sparsemax.
+
+        :param ctx: Context from forward pass.
+        :param grad_output: Gradient of loss w.r.t output.
+        :type grad_output: torch.Tensor
+        :return: Gradient of loss w.r.t input.
+        :rtype: tuple
+        """
         supp_size, output = ctx.saved_tensors
         dim = ctx.dim
         grad_input = grad_output.clone()
@@ -158,8 +189,25 @@ class SparsemaxFunction(Function):
 
 
 class Entmax15Function(Function):
+    """
+    Autograd function for the 1.5-entmax activation.
+    Implements forward and backward passes.
+    """
     @classmethod
     def forward(cls, ctx, X: torch.Tensor, dim=0, k=None):
+        """
+        Forward pass of 1.5-entmax.
+
+        :param ctx: Context to save tensors for backward pass.
+        :param X: Input tensor.
+        :type X: torch.Tensor
+        :param dim: Dimension along which to apply entmax15.
+        :type dim: int
+        :param k: Number of elements for partial sort.
+        :type k: int or None
+        :return: Output tensor after entmax15 transformation.
+        :rtype: torch.Tensor
+        """
         ctx.dim = dim
 
         max_val, _ = X.max(dim=dim, keepdim=True)
@@ -174,6 +222,15 @@ class Entmax15Function(Function):
 
     @classmethod
     def backward(cls, ctx, dY):
+        """
+        Backward pass of 1.5-entmax.
+
+        :param ctx: Context from forward pass.
+        :param dY: Gradient of loss w.r.t output.
+        :type dY: torch.Tensor
+        :return: Gradient of loss w.r.t input.
+        :rtype: tuple
+        """
         Y, = ctx.saved_tensors
         gppr = Y.sqrt()  # = 1 / g'' (Y)
         dX = dY * gppr
@@ -184,100 +241,103 @@ class Entmax15Function(Function):
 
 
 def sparsemax(X, dim=-1, k=None):
-    """sparsemax: normalizing sparse transform (a la softmax).
-    Solves the projection:
-        min_p ||x - p||_2   s.t.    p >= 0, sum(p) == 1.
-    Parameters
-    ----------
-    X : torch.Tensor
-        The input tensor.
-    dim : int
-        The dimension along which to apply sparsemax.
-    k : int or None
-        number of largest elements to partial-sort over. For optimal
-        performance, should be slightly bigger than the expected number of
-        nonzeros in the solution. If the solution is more than k-sparse,
-        this function is recursively called with a 2*k schedule.
-        If `None`, full sorting is performed from the beginning.
-    Returns
-    -------
-    P : torch tensor, same shape as X
-        The projection result, such that P.sum(dim=dim) == 1 elementwise.
+    """
+    Applies the sparsemax activation function along a given dimension.
+
+    :param X: Input tensor.
+    :type X: torch.Tensor
+    :param dim: Dimension to apply sparsemax on.
+    :type dim: int
+    :param k: Number of top elements to consider for partial sorting.
+    :type k: int or None
+    :return: Tensor with sparsemax transformation applied.
+    :rtype: torch.Tensor
     """
 
     return SparsemaxFunction.apply(X, dim, k)
 
 
 def entmax15(X, dim=-1, k=None):
-    """1.5-entmax: normalizing sparse transform (a la softmax).
-    Solves the optimization problem:
-        max_p <x, p> - H_1.5(p)    s.t.    p >= 0, sum(p) == 1.
-    where H_1.5(p) is the Tsallis alpha-entropy with alpha=1.5.
-    Parameters
-    ----------
-    X : torch.Tensor
-        The input tensor.
-    dim : int
-        The dimension along which to apply 1.5-entmax.
-    k : int or None
-        number of largest elements to partial-sort over. For optimal
-        performance, should be slightly bigger than the expected number of
-        nonzeros in the solution. If the solution is more than k-sparse,
-        this function is recursively called with a 2*k schedule.
-        If `None`, full sorting is performed from the beginning.
-    Returns
-    -------
-    P : torch tensor, same shape as X
-        The projection result, such that P.sum(dim=dim) == 1 elementwise.
+    """
+    Applies the 1.5-entmax activation function along a given dimension.
+
+    :param X: Input tensor.
+    :type X: torch.Tensor
+    :param dim: Dimension to apply entmax15 on.
+    :type dim: int
+    :param k: Number of top elements to consider for partial sorting.
+    :type k: int or None
+    :return: Tensor with entmax15 transformation applied.
+    :rtype: torch.Tensor
     """
 
     return Entmax15Function.apply(X, dim, k)
 
 
 class Sparsemax(nn.Module):
+    """
+    Torch module for the sparsemax activation function.
+
+    :param dim: Dimension to apply sparsemax.
+    :type dim: int
+    :param k: Number of top elements to consider for partial sorting.
+    :type k: int or None
+    """
     def __init__(self, dim=-1, k=None):
-        """sparsemax: normalizing sparse transform (a la softmax).
-        Solves the projection:
-            min_p ||x - p||_2   s.t.    p >= 0, sum(p) == 1.
-        Parameters
-        ----------
-        dim : int
-            The dimension along which to apply sparsemax.
-        k : int or None
-            number of largest elements to partial-sort over. For optimal
-            performance, should be slightly bigger than the expected number of
-            nonzeros in the solution. If the solution is more than k-sparse,
-            this function is recursively called with a 2*k schedule.
-            If `None`, full sorting is performed from the beginning.
+        """
+        Initializes the Sparsemax module.
+
+        :param dim: Dimension along which to apply sparsemax.
+        :type dim: int
+        :param k: Number of top elements to consider for partial sorting. If None, full sort is used.
+        :type k: int or None
         """
         self.dim = dim
         self.k = k
         super(Sparsemax, self).__init__()
 
     def forward(self, X):
+        """
+        Applies sparsemax to input tensor.
+
+        :param X: Input tensor.
+        :type X: torch.Tensor
+        :return: Output tensor after sparsemax.
+        :rtype: torch.Tensor
+        """
         return sparsemax(X, dim=self.dim, k=self.k)
 
 
 class Entmax15(nn.Module):
+    """
+    Torch module for the 1.5-entmax activation function.
+
+    :param dim: Dimension to apply entmax15.
+    :type dim: int
+    :param k: Number of top elements to consider for partial sorting.
+    :type k: int or None
+    """
     def __init__(self, dim=-1, k=None):
-        """1.5-entmax: normalizing sparse transform (a la softmax).
-        Solves the optimization problem:
-            max_p <x, p> - H_1.5(p)    s.t.    p >= 0, sum(p) == 1.
-        where H_1.5(p) is the Tsallis alpha-entropy with alpha=1.5.
-        Parameters
-        ----------
-        dim : int
-            The dimension along which to apply 1.5-entmax.
-        k : int or None
-            number of largest elements to partial-sort over. For optimal
-            performance, should be slightly bigger than the expected number of
-            nonzeros in the solution. If the solution is more than k-sparse,
-            this function is recursively called with a 2*k schedule.
-            If `None`, full sorting is performed from the beginning.
+
+        """
+        Initializes the Entmax15 module.
+
+        :param dim: Dimension along which to apply 1.5-entmax.
+        :type dim: int
+        :param k: Number of top elements to consider for partial sorting. If None, full sort is used.
+        :type k: int or None
         """
         self.dim = dim
         self.k = k
         super(Entmax15, self).__init__()
 
     def forward(self, X: torch.Tensor):
+        """
+        Applies entmax15 to input tensor.
+
+        :param X: Input tensor.
+        :type X: torch.Tensor
+        :return: Output tensor after entmax15.
+        :rtype: torch.Tensor
+        """
         return entmax15(X, dim=self.dim, k=self.k)

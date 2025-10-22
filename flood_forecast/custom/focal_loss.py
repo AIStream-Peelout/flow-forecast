@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,31 +15,29 @@ def focal_loss(
     reduction: str = 'none',
     eps: Optional[float] = None,
 ) -> torch.Tensor:
-    r"""Criterion that computes Focal loss. According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+    r"""
+    Criterion that computes **Focal Loss** for multi-class classification.
+    According to :cite:`lin2018focal`, the Focal loss is computed as follows:
 
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     Where:
-       - :math:`p_t` is the model's estimated probability for each class.
-    Args:
-        input: logits tensor with shape :math:`(N, C, *)` where C = number of classes.
-        target: labels tensor with shape :math:`(N, *)` where each value is :math:`0 ≤ targets[i] ≤ C−1`.
-        alpha: Weighting factor :math:`\alpha \in [0, 1]`.
-        gamma: Focusing parameter :math:`\gamma >= 0`.
-        reduction: Specifies the reduction to apply to the
-          output: ``'none'`` | ``'mean'`` | ``'sum'``. ``'none'``: no reduction
-          will be applied, ``'mean'``: the sum of the output will be divided by
-          the number of elements in the output, ``'sum'``: the output will be
-          summed.
-        eps: Deprecated: scalar to enforce numerical stabiliy. This is no longer used.
-    Return:
-        the computed loss.
-    Example:
-        >>> N = 5  # num_classes
-        >>> input = torch.randn(1, N, 3, 5, requires_grad=True)
-        >>> target = torch.empty(1, 3, 5, dtype=torch.long).random_(N)
-        >>> output = focal_loss(input, target, alpha=0.5, gamma=2.0, reduction='mean')
-        >>> output.backward()
+        - :math:`p_t` is the model's estimated probability for each class.
+
+    :param input: logits tensor with shape :math:`(N, C, *)` where C = number of classes.
+     :type input: torch.Tensor
+     :param target: labels tensor with shape :math:`(N, *)` where each value is :math:`0 ≤ targets[i] ≤ C−1`.
+     :type target: torch.Tensor
+     :param alpha: Weighting factor :math:`\alpha \in [0, 1]`.
+     :type alpha: float
+     :param gamma: Focusing parameter :math:`\gamma >= 0`.
+     :type gamma: float
+     :param reduction: Specifies the reduction to apply to the output: ``'none'`` | ``'mean'`` | ``'sum'``.
+     :type reduction: str
+     :param eps: Deprecated: scalar to enforce numerical stabiliy. This is no longer used.
+     :type eps: Optional[float]
+      :return: The computed Focal loss.
+      :rtype: torch.Tensor
     """
     if eps is not None and not torch.jit.is_scripting():
         warnings.warn(
@@ -92,37 +89,32 @@ def focal_loss(
 
 
 class FocalLoss(nn.Module):
-    r"""Criterion that computes Focal loss. According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+    r"""
+    Criterion that computes **Focal Loss** for multi-class classification.
+    According to :cite:`lin2018focal`, the Focal loss is computed as follows:
 
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     Where:
-       - :math:`p_t` is the model's estimated probability for each class.
-    Args:
-        alpha: Weighting factor :math:`\alpha \in [0, 1]`.
-        gamma: Focusing parameter :math:`\gamma >= 0`.
-        reduction: Specifies the reduction to apply to the
-          output: ``'none'`` | ``'mean'`` | ``'sum'``. ``'none'``: no reduction
-          will be applied, ``'mean'``: the sum of the output will be divided by
-          the number of elements in the output, ``'sum'``: the output will be
-          summed.
-        eps: Deprecated: scalar to enforce numerical stability. This is no longer
-          used.
-    Shape:
-        - Input: :math:`(N, C, *)` where C = number of classes.
-        - Target: :math:`(N, *)` where each value is
-          :math:`0 ≤ targets[i] ≤ C−1`.
-    Example:
-        >>> N = 5  # num_classes
-        >>> kwargs = {"alpha": 0.5, "gamma": 2.0, "reduction": 'mean'}
-        >>> criterion = FocalLoss(**kwargs)
-        >>> input = torch.randn(1, N, 3, 5, requires_grad=True)
-        >>> target = torch.empty(1, 3, 5, dtype=torch.long).random_(N)
-        >>> output = criterion(input, target)
-        >>> output.backward()
+        - :math:`p_t` is the model's estimated probability for each class.
+
     """
 
     def __init__(self, alpha: float, gamma: float = 2.0, reduction: str = 'none', eps: Optional[float] = None) -> None:
+        """
+        Initializes the FocalLoss module.
+
+        :param alpha: Weighting factor :math:`\alpha \in [0, 1]`.
+         :type alpha: float
+         :param gamma: Focusing parameter :math:`\gamma >= 0`.
+         :type gamma: float
+         :param reduction: Specifies the reduction to apply to the output: ``'none'`` | ``'mean'`` | ``'sum'``.
+         :type reduction: str
+         :param eps: Deprecated: scalar to enforce numerical stability. This is no longer used.
+         :type eps: Optional[float]
+          :return: None
+          :rtype: None
+        """
         super().__init__()
         self.alpha: float = alpha
         self.gamma: float = gamma
@@ -130,6 +122,16 @@ class FocalLoss(nn.Module):
         self.eps: Optional[float] = eps
 
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the Focal Loss.
+
+        :param input: logits tensor with shape :math:`(N, C, *)` where C = number of classes.
+         :type input: torch.Tensor
+         :param target: labels tensor with shape :math:`(N, *)` where each value is :math:`0 ≤ targets[i] ≤ C−1`.
+         :type target: torch.Tensor
+          :return: The computed Focal loss.
+          :rtype: torch.Tensor
+        """
         if len(target.shape) == 3:
             target = target[:, 0, :]
         if len(target.shape) == 2:
@@ -148,31 +150,28 @@ def binary_focal_loss_with_logits(
     reduction: str = 'none',
     eps: Optional[float] = None,
 ) -> torch.Tensor:
-    r"""Function that computes Binary Focal loss.
+    r"""
+    Function that computes **Binary Focal Loss** from logits.
 
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     where:
-       - :math:`p_t` is the model's estimated probability for each class.
-    Args:
-        input: input data tensor of arbitrary shape.
-        target: the target tensor with shape matching input.
-        alpha: Weighting factor for the rare class :math:`\alpha \in [0, 1]`.
-        gamma: Focusing parameter :math:`\gamma >= 0`.
-        reduction: Specifies the reduction to apply to the
-          output: ``'none'`` | ``'mean'`` | ``'sum'``. ``'none'``: no reduction
-          will be applied, ``'mean'``: the sum of the output will be divided by
-          the number of elements in the output, ``'sum'``: the output will be
-          summed.
-        eps: Deprecated: scalar for numerically stability when dividing. This is no longer used.
-    Returns:
-        the computed loss.
-    Examples:
-        >>> kwargs = {"alpha": 0.25, "gamma": 2.0, "reduction": 'mean'}
-        >>> logits = torch.tensor([[[6.325]],[[5.26]],[[87.49]]])
-        >>> labels = torch.tensor([[[1.]],[[1.]],[[0.]]])
-        >>> binary_focal_loss_with_logits(logits, labels, **kwargs)
-        tensor(21.8725)
+        - :math:`p_t` is the model's estimated probability for each class.
+
+    :param input: input data (logits) tensor of arbitrary shape.
+     :type input: torch.Tensor
+     :param target: the target tensor with shape matching input, containing values 0 or 1.
+     :type target: torch.Tensor
+     :param alpha: Weighting factor for the rare class :math:`\alpha \in [0, 1]`.
+     :type alpha: float
+     :param gamma: Focusing parameter :math:`\gamma >= 0`.
+     :type gamma: float
+     :param reduction: Specifies the reduction to apply to the output: ``'none'`` | ``'mean'`` | ``'sum'``.
+     :type reduction: str
+     :param eps: Deprecated: scalar for numerically stability when dividing. This is no longer used.
+     :type eps: Optional[float]
+      :return: The computed Binary Focal loss.
+      :rtype: torch.Tensor
     """
 
     if eps is not None and not torch.jit.is_scripting():
@@ -210,39 +209,46 @@ def binary_focal_loss_with_logits(
 
 
 class BinaryFocalLossWithLogits(nn.Module):
-    r"""Criterion that computes Focal loss. According to :cite:`lin2018focal`, the Focal loss is computed as follows:
+    r"""
+    Criterion that computes **Binary Focal Loss** from logits.
+    According to :cite:`lin2018focal`, the Focal loss is computed as follows:
 
     .. math::
         \text{FL}(p_t) = -\alpha_t (1 - p_t)^{\gamma} \, \text{log}(p_t)
     where:
-       - :math:`p_t` is the model's estimated probability for each class.
-    Args:
-        alpha): Weighting factor for the rare class :math:`\alpha \in [0, 1]`.
-        gamma: Focusing parameter :math:`\gamma >= 0`.
-        reduction: Specifies the reduction to apply to the
-          output: ``'none'`` | ``'mean'`` | ``'sum'``. ``'none'``: no reduction
-          will be applied, ``'mean'``: the sum of the output will be divided by
-          the number of elements in the output, ``'sum'``: the output will be
-          summed.
-    Shape:
-        - Input: :math:`(N, *)`.
-        - Target: :math:`(N, *)`.
-    Examples:
-        >>> kwargs = {"alpha": 0.25, "gamma": 2.0, "reduction": 'mean'}
-        >>> loss = BinaryFocalLossWithLogits(**kwargs)
-        >>> input = torch.randn(1, 3, 5, requires_grad=True)
-        >>> target = torch.empty(1, 3, 5, dtype=torch.long).random_(2)
-        >>> output = loss(input, target)
-        >>> output.backward()
+        - :math:`p_t` is the model's estimated probability for each class.
+
     """
 
     def __init__(self, alpha: float, gamma: float = 2.0, reduction: str = 'none') -> None:
+        """
+        Initializes the BinaryFocalLossWithLogits module.
+
+        :param alpha: Weighting factor for the rare class :math:`\alpha \in [0, 1]`.
+         :type alpha: float
+         :param gamma: Focusing parameter :math:`\gamma >= 0`.
+         :type gamma: float
+         :param reduction: Specifies the reduction to apply to the output: ``'none'`` | ``'mean'`` | ``'sum'``.
+         :type reduction: str
+          :return: None
+          :rtype: None
+        """
         super().__init__()
         self.alpha: float = alpha
         self.gamma: float = gamma
         self.reduction: str = reduction
 
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the Binary Focal Loss.
+
+        :param input: input data (logits) tensor of arbitrary shape.
+         :type input: torch.Tensor
+         :param target: the target tensor with shape matching input, containing values 0 or 1.
+         :type target: torch.Tensor
+          :return: The computed Binary Focal loss.
+          :rtype: torch.Tensor
+        """
         return binary_focal_loss_with_logits(input, target, self.alpha, self.gamma, self.reduction)
 
 
@@ -253,26 +259,21 @@ def one_hot(
     dtype: Optional[torch.dtype] = None,
     eps: float = 1e-6,
 ) -> torch.Tensor:
-    r"""Convert an integer label x-D tensor to a one-hot (x+1)-D tensor.
-    Args:
-        labels: tensor with labels of shape :math:`(N, *)`, where N is batch size.
-          Each value is an integer representing correct classification.
-        num_classes: number of classes in labels.
-        device: the desired device of returned tensor.
-        dtype: the desired data type of returned tensor.
-    Returns:
-        the labels in one hot tensor of shape :math:`(N, C, *)`,
-    Examples:
-        >>> labels = torch.LongTensor([[[0, 1], [2, 0]]])
-        >>> one_hot(labels, num_classes=3)
-        tensor([[[[1.0000e+00, 1.0000e-06],
-                  [1.0000e-06, 1.0000e+00]],
-        <BLANKLINE>
-                 [[1.0000e-06, 1.0000e+00],
-                  [1.0000e-06, 1.0000e-06]],
-        <BLANKLINE>
-                 [[1.0000e-06, 1.0000e-06],
-                  [1.0000e+00, 1.0000e-06]]]])
+    r"""
+    Convert an integer label x-D tensor to a one-hot (x+1)-D tensor.
+
+    :param labels: tensor with integer labels of shape :math:`(N, *)`, where N is batch size.
+     :type labels: torch.Tensor
+     :param num_classes: number of classes in labels.
+     :type num_classes: int
+     :param device: the desired device of returned tensor.
+     :type device: Optional[torch.device]
+     :param dtype: the desired data type of returned tensor.
+     :type dtype: Optional[torch.dtype]
+     :param eps: A small scalar added for numerical stability to avoid zero probabilities.
+     :type eps: float
+      :return: The labels in one-hot tensor of shape :math:`(N, C, *)`.
+      :rtype: torch.Tensor
     """
     if not isinstance(labels, torch.Tensor):
         raise TypeError(f"Input labels type is not a torch.Tensor. Got {type(labels)}")

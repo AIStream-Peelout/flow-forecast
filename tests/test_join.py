@@ -9,10 +9,22 @@ import pytz
 
 class JoinTest(unittest.TestCase):
     def setUp(self):
+        """
+        Set up the test environment by defining the path to the test data directory.
+
+        :return: None
+        :rtype: None
+        """
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
         # 1
 
     def test_join_function(self):
+        """
+        Test the combine_data function to join hydrological and ASOS weather data.
+
+        :return: None
+        :rtype: None
+        """
         df = pd.read_csv(os.path.join(self.test_data_path, "fake_test_small.csv"), sep="\t")
         asos_df = pd.read_csv(os.path.join(self.test_data_path, "asos-12N_small.csv"))
         old_timezone = pytz.timezone("America/New_York")

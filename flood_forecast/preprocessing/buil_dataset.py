@@ -20,17 +20,35 @@ import json
 from datetime import datetime
 import pytz
 import pandas as pd
+from typing import Tuple
 
 
 def build_weather_csv(
-    json_full_path,
-    asos_base_url,
-    base_url_2,
-    econet_data,
-    visited_gages_path,
-    start=0,
-    end_index=100,
+    json_full_path: str,
+    asos_base_url: str,
+    base_url_2: str,
+    econet_data: set,
+    visited_gages_path: str,
+    start: int = 0,
+    end_index: int = 100,
 ):
+    """Iterates through a directory of JSON files and retrieves/processes ASOS/ECO-NET weather data.
+
+    :param json_full_path: The full path to the directory containing the JSON metadata files.
+    :type json_full_path: str
+    :param asos_base_url: The base URL for the ASOS data source.
+    :type asos_base_url: str
+    :param base_url_2: A secondary base URL for data processing (used in process_asos_data).
+    :type base_url_2: str
+    :param econet_data: A set of ECONET station IDs.
+    :type econet_data: set
+    :param visited_gages_path: Path to the JSON file tracking visited/completed gages.
+    :type visited_gages_path: str
+    :param start: The starting index for files in the directory list to process, defaults to 0.
+    :type start: int
+    :param end_index: The ending index (exclusive) for files in the directory list to process, defaults to 100.
+    :type end_index: int
+    """
     directory = os.fsencode(json_full_path)
     sorted_list = sorted(os.listdir(directory))
     for i in range(start, end_index):
@@ -51,19 +69,30 @@ def build_weather_csv(
 
 # todo fix this function so it does more than open files
 # def make_usgs(meta_data_path: str, start, end_index: int):
-#     meta_directory = os.fsencode(meta_data_path)
-#     sorted_list = sorted(os.listdir(meta_directory))
-#     for i in range(start, end_index):
-#         with open(sorted_list[i]) as d:
-#             data = json.loads(d)
-#         # make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), data["gage_id"])
+#     meta_directory = os.fsencode(meta_data_path)
+#     sorted_list = sorted(os.listdir(meta_directory))
+#     for i in range(start, end_index):
+#         with open(sorted_list[i]) as d:
+#             data = json.loads(d)
+#         # make_usgs_data(datetime(2014, 1, 1), datetime(2019,1,1), data["gage_id"])
 
 
-def join_data(weather_csv, meta_json_file, flow_csv):
+def join_data(weather_csv: str, meta_json_file: str, flow_csv: str):
+    """Placeholder function for joining different data sources.
+
+    :param weather_csv: Path to the weather data CSV file.
+    :type weather_csv: str
+    :param meta_json_file: Path to the metadata JSON file.
+    :type meta_json_file: str
+    :param flow_csv: Path to the streamflow data CSV file.
+    :type flow_csv: str
+    """
     pass
 
 
 def create_visited():
+    """Creates a fresh `visited_gages.json` file with empty station tracking objects.
+    """
     visited_gages = {"stations_visited": {}, "saved_complete": {}}
     with open("visited_gages.json", "w+") as f:
         json.dump(visited_gages, f)
@@ -74,6 +103,11 @@ def get_eco_netset(directory_path: str) -> set:
 
     They gave us a directory of CSV files in following format `LastName_First_station_id_Hourly.txt` This code simply
     constructs a set of stations based on what is in the folder.
+
+    :param directory_path: The path to the directory containing ECONET CSV files.
+    :type directory_path: str
+    :return: A set containing the unique ECONET station IDs extracted from the filenames.
+    :rtype: set
     """
     directory = os.fsencode(directory_path)
     print(sorted(os.listdir(directory)))
@@ -86,7 +120,16 @@ def get_eco_netset(directory_path: str) -> set:
     return eco_gage_set
 
 
-def combine_data(flow_df: pd.DataFrame, precip_df: pd.DataFrame):
+def combine_data(flow_df: pd.DataFrame, precip_df: pd.DataFrame) -> Tuple[pd.DataFrame, int, int]:
+    """Combines streamflow and precipitation dataframes based on a shared timestamp.
+
+    :param flow_df: A pandas DataFrame containing streamflow data with a 'datetime' column.
+    :type flow_df: pd.DataFrame
+    :param precip_df: A pandas DataFrame containing precipitation data with an 'hour_updated' column.
+    :type precip_df: pd.DataFrame
+    :return: A tuple containing the joined DataFrame, the number of NaN values in the 'cfs' column (nan_flow), and the number of NaN values in the 'p01m' column (nan_precip).
+    :rtype: Tuple[pd.DataFrame, int, int]
+    """
     tz = pytz.timezone("UTC")
     precip_df["hour_updated"] = precip_df["hour_updated"].map(
         lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
@@ -103,6 +146,17 @@ def combine_data(flow_df: pd.DataFrame, precip_df: pd.DataFrame):
 
 
 def create_usgs(meta_data_dir: str, precip_path: str, start: int, end: int):
+    """Retrieves USGS streamflow data, combines it with local precipitation data, updates metadata, and uploads results to GCS.
+
+    :param meta_data_dir: Directory containing USGS station metadata JSON files.
+    :type meta_data_dir: str
+    :param precip_path: Directory containing local precipitation CSV files.
+    :type precip_path: str
+    :param start: The starting index for files in the directory list to process.
+    :type start: int
+    :param end: The ending index (exclusive) for files in the directory list to process.
+    :type end: int
+    """
     gage_list = sorted(os.listdir(meta_data_dir))
     exceptions = {}
     client = get_storage_client()
@@ -159,18 +213,16 @@ def create_usgs(meta_data_dir: str, precip_path: str, start: int, end: int):
 
 
 def get_data(file_path: str, gcp_service_key: Optional[str] = None) -> Union[str, pd.DataFrame]:
-    """Extract bucket name and storage object name from file_path
-    Args:
-        file_path (str): [description]
+    """Downloads data from a Google Cloud Storage (GCS) path or reads a local file.
 
-        Example,
-        file_path = "gs://task_ts_data/2020-08-17/Afghanistan____.csv"
-        bucket_name = "task_ts_data"
-        object_name = "2020-08-17/Afghanistan____.csv"
-        loal_temp_filepath = "//data/2020-08-17/Afghanistan____.csv"
+    Extracts bucket name and storage object name from file_path if it's a GCS path.
 
-    Returns:
-        str: local file name
+    :param file_path: The path to the data file. Can be a local path or a GCS URI (e.g., "gs://bucket/object.csv").
+    :type file_path: str
+    :param gcp_service_key: Optional path to the GCP service account key JSON file for authentication.
+    :type gcp_service_key: Optional[str]
+    :return: Either a pandas DataFrame if the file is a CSV, or the local file path string if it's a non-CSV file or the input was already a DataFrame.
+    :rtype: Union[str, pd.DataFrame]
     """
     if isinstance(file_path, pd.DataFrame):
         return file_path

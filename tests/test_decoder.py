@@ -9,6 +9,13 @@ from flood_forecast.transformer_xl.transformer_basic import SimpleTransformer, g
 
 class TestDecoding(unittest.TestCase):
     def setUp(self):
+        """
+        Sets up the test environment by initializing the SimpleTransformer model,
+        preparing the validation data loader with CSV data, and setting sequence size.
+
+        :return: None
+        :rtype: None
+        """
         self.model = SimpleTransformer(3, 30, 20)
         self.data_test_path = os.path.join(
             os.path.dirname(
@@ -38,17 +45,37 @@ class TestDecoding(unittest.TestCase):
         self.sequence_size = 30
 
     def test_full_forward_method(self):
+        """
+        Tests the full forward pass of the SimpleTransformer model by passing random input
+        and verifying the output shape matches the expected forecast length.
+
+        :return: None
+        :rtype: None
+        """
         test_data = torch.rand(1, 30, 3)
         result = self.model(test_data, t=torch.rand(1, 20, 3))
         self.assertEqual(result.shape, torch.Size([1, 20]))
 
     def test_encoder_seq(self):
+        """
+        Tests the encoding step of the SimpleTransformer model by encoding a random input
+        sequence and checking the shape of the resulting encoded tensor.
+
+        :return: None
+        :rtype: None
+        """
         test_data = torch.rand(1, 30, 3)
         result = self.model.encode_sequence(test_data)
         self.assertEqual(result.shape, torch.Size([30, 1, 128]))
 
     def test_for_leakage(self):
-        """Simple test to check that raw target data does NOT leak during validation steps."""
+        """
+        Tests that the model's greedy decoding does not leak raw target data during validation,
+        by comparing decoded output with original target and ensuring differences exist where expected.
+
+        :return: None
+        :rtype: None
+        """
         src, trg = next(iter(self.validation_loader))
         trg_mem = trg.clone().detach()
         result = greedy_decode(self.model, src, 20, trg)
@@ -61,6 +88,12 @@ class TestDecoding(unittest.TestCase):
         self.assertGreater(loss, 0)
 
     def test_make_function(self):
+        """
+        A placeholder test that asserts true equality (1 == 1), used to verify test setup.
+
+        :return: None
+        :rtype: None
+        """
         self.assertEqual(1, 1)
 
 if __name__ == '__main__':

@@ -10,12 +10,19 @@ from datetime import datetime
 
 
 class DataLoaderTests(unittest.TestCase):
-    """Class to test data loader functionality for the code mod.
+    """
+    Unit tests for data loader functionality used in time-series forecasting.
 
-    Specifically, reuturn types and indexing to make sure there is no overlap.
+    Ensures correctness in indexing, shapes, and consistency across different loader implementations.
     """
 
     def setUp(self):
+        """
+        Set up data loader instances and shared parameters for the tests.
+
+        :return: None
+        :rtype: None
+        """
         self.test_data_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "test_data"
         )
@@ -51,6 +58,12 @@ class DataLoaderTests(unittest.TestCase):
         )
 
     def test_loader2_get_item(self):
+        """
+        Test indexing into CSVTestLoader returns the correct tensor types and metadata.
+
+        :return: None
+        :rtype: None
+        """
         src, df, forecast_start_index = self.test_loader[0]
         self.assertEqual(type(src), torch.Tensor)
         self.assertEqual(forecast_start_index, 20)
@@ -58,6 +71,12 @@ class DataLoaderTests(unittest.TestCase):
         self.assertEqual(len(df), 356)
 
     def test_loader2_get_date(self):
+        """
+        Test retrieval by date using get_from_start_date.
+
+        :return: None
+        :rtype: None
+        """
         src, df, forecast_start_index, = self.test_loader.get_from_start_date(
             datetime(2014, 6, 3, 0)
         )
@@ -68,6 +87,12 @@ class DataLoaderTests(unittest.TestCase):
         )
 
     def test_loader_get_gcs_data(self):
+        """
+        Test CSVDataLoader can be initialized with a GCS file path.
+
+        :return: None
+        :rtype: None
+        """
         test_loader = CSVDataLoader(
             file_path="gs://flow_datasets/Afghanistan____.csv",
             forecast_history=14,
@@ -81,10 +106,22 @@ class DataLoaderTests(unittest.TestCase):
         self.assertIsInstance(test_loader, CSVDataLoader)
 
     def test_ae(self):
+        """
+        Test the AutoEncoder data loader returns tensors with matching shapes.
+
+        :return: None
+        :rtype: None
+        """
         x, y = self.ae_loader[0]
         self.assertEqual(x.shape, y.squeeze(1).shape)
 
     def test_trainer(self):
+        """
+        Test the training loader returns inputs/targets with correct dimensions and non-overlap.
+
+        :return: None
+        :rtype: None
+        """
         x, y = self.train_loader[0]
         self.assertEqual(x.shape[0], 30)
         self.assertEqual(x.shape[1], 3)
@@ -93,6 +130,12 @@ class DataLoaderTests(unittest.TestCase):
         self.assertFalse(torch.eq(x[29, 0], y[0, 0]))
 
     def test_start_end(self):
+        """
+        Test that the training and test split lengths are correct and not overlapping.
+
+        :return: None
+        :rtype: None
+        """
         self.assertEqual(len(self.train_loader.df), len(self.test_loader.df) + 20)
         self.assertEqual(len(self.train_loader2.df), 200)
 
