@@ -206,12 +206,12 @@ def evaluate_model(
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
                                       "preds"] = end_tensor[:, 0].numpy().tolist()
                 for i, target in enumerate(target_col):
-                    df_train_and_test["pred_" + target] = 0
+                    df_train_and_test["pred_" + target] = 0.0
                     df_train_and_test.loc[df_train_and_test.index[history_length:],
                                           "pred_" + target] = end_tensor[:, i].numpy().tolist()
             else:
                 df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor_list
-                df_train_and_test["pred_" + target_col[0]] = 0
+                df_train_and_test["pred_" + target_col[0]] = 0.0
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
                                       "pred_" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
@@ -462,11 +462,11 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
     forecast_length = params["dataset_params"]["forecast_length"]
     hours_to_forecast = params["inference_params"]["hours_to_forecast"]
     num_prediction_samples = params["inference_params"].get("num_prediction_samples")
-    df_train_and_test["preds"] = 0
+    df_train_and_test["preds"] = 0.0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor[0].numpy().tolist()
-            df_train_and_test["std_dev"] = 0
+            df_train_and_test["std_dev"] = 0.0
             print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             try:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
