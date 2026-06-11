@@ -336,7 +336,7 @@ def greedy_decode(
     :type output_len: int
     :param device: The device on which the tensors should reside. Defaults to 'cpu'.
     :type device: str
-    :param multi_targets: Currently not used, defaults to 1.
+    :param multi_targets: Only a single target is supported; passing a value greater than 1 raises an error.
     :type multi_targets: int
     :param probabilistic: Currently not used, defaults to False.
     :type probabilistic: bool
@@ -345,10 +345,14 @@ def greedy_decode(
     :return: The decoded sequence of forecasted values.
     :rtype: torch.Tensor
     """
+    if multi_targets > 1:
+        raise ValueError(
+            "greedy_decode only writes predictions for a single target; decoding a multi-target "
+            "model with it would feed ground-truth future values back for the other targets. "
+            "Use simple_decode for multi-target models.")
     src = src.float()
     real_target = real_target.float()
-    if hasattr(model, "mask"):
-        src_mask = model.mask
+    src_mask = model.mask if hasattr(model, "mask") else None
     memory = model.encode_sequence(src, src_mask)
     # Get last element of src array to forecast from
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)

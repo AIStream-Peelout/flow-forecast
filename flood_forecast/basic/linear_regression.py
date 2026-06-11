@@ -54,20 +54,21 @@ class SimpleLinearModel(torch.nn.Module):
 
 def handle_gaussian_loss(out: tuple):
     """
-    Processes Gaussian output by averaging mean and standard deviation.
+    Processes Gaussian output by splitting it into the point forecast (the mean) and the standard deviation.
 
     :param out: Tuple containing two output tensors (mean, std)
     :type out: tuple
-    :return: Averaged output, mean, and std tensors
+    :return: Point forecast (mean), mean, and std tensors
     :rtype: tuple
     """
-    out1 = torch.mean(torch.stack([out[0], out[1]]), dim=0)
-    return out1, out[0], out[1]
+    return out[0], out[0], out[1]
 
 
 def handle_no_scaling(scaler: torch.utils.data.Dataset, out: torch.Tensor, multi_targets: int):
     """
-    Applies inverse transformation using scaler to the output.
+    Re-applies the target scaler to raw model output. Used when a model is trained with unscaled
+    targets (no_scale) but scaled inputs, so its predictions must be transformed back into scaled
+    space before being fed into the autoregressive input window.
 
     :param scaler: Dataset containing target scaler
     :type scaler: torch.utils.data.Dataset
@@ -136,8 +137,6 @@ def simple_decode(model: Type[torch.nn.Module],
     # Use last value
     ys = src[:, -1, :].unsqueeze(unsqueeze_dim)
     ys_std_dev = []
-    upper_out = []
-    lower_out = []
     handle_gauss = False
     for i in range(0, max_seq_len, output_len):
         residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
@@ -147,9 +146,8 @@ def simple_decode(model: Type[torch.nn.Module],
             else:
                 out = model(src)
                 if isinstance(out, tuple):
-                    out, up, lower = handle_gaussian_loss(out)
-                    upper_out.append(up[:, :residual])
-                    lower_out.append(lower[:, :residual])
+                    out, _, std = handle_gaussian_loss(out)
+                    ys_std_dev.append(std[:, :residual])
                     handle_gauss = True
                 elif probabilistic:
                     out_std = out.stddev.detach()
@@ -157,25 +155,35 @@ def simple_decode(model: Type[torch.nn.Module],
                     ys_std_dev.append(out_std[:, 0:residual])
                 elif multi_targets < 2:
                     out = out.unsqueeze(2)
-            if scaler:
-                handle_no_scaling(scaler, out, multi_targets)
             if not isinstance(out, torch.Tensor):
                 out = torch.from_numpy(out)
+            out_feedback = None
+            if scaler:
+                # Model output is in raw target space; the src window is scaled. Feed the scaled
+                # version back into src but keep raw values in ys (the returned predictions).
+                out_feedback = torch.from_numpy(handle_no_scaling(scaler, out, multi_targets)).float()
+                if out_feedback.dim() == 2:
+                    out_feedback = out_feedback.unsqueeze(0)
+                out_feedback = out_feedback.to(out.device)
             if output_len == 1:
                 real_target2[:, i, 0:multi_targets] = out[:, 0]
-                src = torch.cat((src[:, 1:, :], real_target2[:, i, :].unsqueeze(1)), 1)
                 ys = torch.cat((ys, real_target2[:, i, :].unsqueeze(1)), 1)
+                src_step = real_target2[:, i, :].unsqueeze(1)
+                if out_feedback is not None:
+                    src_step = src_step.clone()
+                    src_step[:, 0, 0:multi_targets] = out_feedback[:, 0]
+                src = torch.cat((src[:, 1:, :], src_step), 1)
             else:
-                # residual = output_len if max_seq_len - output_len - i >= 0 else max_seq_len % output_len
                 if output_len != out.shape[1]:
-                    raise ValueError("Output length should laways equal the output shape")
+                    raise ValueError("Output length should always equal the output shape")
                 real_target2[:, i:i + residual, 0:multi_targets] = out[:, :residual]
-                src = torch.cat((src[:, residual:, :], real_target2[:, i:i + residual, :]), 1)
                 ys = torch.cat((ys, real_target2[:, i:i + residual, :]), 1)
-    if probabilistic:
+                src_step = real_target2[:, i:i + residual, :]
+                if out_feedback is not None:
+                    src_step = src_step.clone()
+                    src_step[:, :, 0:multi_targets] = out_feedback[:, :residual]
+                src = torch.cat((src[:, residual:, :], src_step), 1)
+    if probabilistic or handle_gauss:
         ys_std_dev = torch.cat(ys_std_dev, dim=1)
         return ys[:, 1:, 0:multi_targets], ys_std_dev
-    if handle_gauss:
-        return torch.cat(upper_out, dim=1), torch.cat(lower_out, dim=1), ys[:, 1:, 0:multi_targets]
-    else:
-        return ys[:, 1:, 0:multi_targets]
+    return ys[:, 1:, 0:multi_targets]

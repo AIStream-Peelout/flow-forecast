@@ -30,7 +30,7 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
     df_prediction_samples = test_acc[3]
     mae = (df_train_and_test.loc[forecast_start_idx:, "preds"] -
            df_train_and_test.loc[forecast_start_idx:, params["dataset_params"]["target_col"][0]]).abs()
-    inverse_mae = 1 / mae
+    inverse_mae = 1 / mae.clip(lower=1e-8)
     i = 0
     for df in df_prediction_samples:
         pred_std = df.std(axis=1)
@@ -179,12 +179,7 @@ def train_function(model_type: str, params: Dict) -> PyTorchForecast:
                                 takes_target=takes_target,
                                 forward_params={}, class2=class2)
         if "scaler" in dataset_params and "inference_params" in params:
-            if "scaler_params" in dataset_params:
-                params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
-                                                                                         dataset_params)["scaling"]
-            else:
-                params["inference_params"]["dataset_params"]["scaling"] = scaling_function({},
-                                                                                         dataset_params)["scaling"]
+            params["inference_params"]["dataset_params"]["scaling"] = scaling_function({}, dataset_params)["scaling"]
             params["inference_params"]["dataset_params"].pop('scaler_params', None)
         # TODO Move to other func
         if params["dataset_params"]["class"] != "GeneralClassificationLoader" and params["dataset_params"]["class"] != "VariableSequenceLength":
