@@ -48,8 +48,7 @@ class ITransformer(nn.Module):
         self.output_attention = output_attention
         self.use_norm = use_norm
         # Embedding
-        self.enc_embedding = DataEmbedding_inverted(self.seq_len, d_model, embed, freq,
-                                                    dropout)
+        self.enc_embedding = DataEmbedding_inverted(self.seq_len, d_model, dropout)
         self.class_strategy = class_strategy
         # Encoder-only architecture
         self.encoder = Encoder(
