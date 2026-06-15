@@ -10,6 +10,25 @@ from flood_forecast.preprocessing.temporal_feats import feature_fix
 from copy import deepcopy
 
 
+def to_tz_naive_datetime(series: pd.Series) -> pd.Series:
+    """
+    Converts a column of timestamps to timezone-naive ``datetime64[ns]``.
+
+    Some data sources (e.g. USGS/NOAA feeds) provide timezone-aware timestamps such as
+    ``2014-04-11 16:00:00+00:00``. Casting these directly with ``astype("datetime64[ns]")``
+    raises ``ValueError: cannot supply both a tz and a timezone-naive dtype``. This helper
+    parses to UTC and drops the timezone so downstream sorting and indexing behave the same
+    whether the input is tz-aware or tz-naive. For already tz-naive input the wall-clock values
+    are unchanged.
+
+    :param series: A pandas Series of datetime-like values (strings or datetimes).
+    :type series: pd.Series
+    :return: The series converted to timezone-naive ``datetime64[ns]``.
+    :rtype: pd.Series
+    """
+    return pd.to_datetime(series, utc=True).dt.tz_localize(None).astype("datetime64[ns]")
+
+
 class CSVDataLoader(Dataset):
     """
     A base data loader that takes a CSV file and properly batches time series
@@ -80,7 +99,7 @@ class CSVDataLoader(Dataset):
         print(df.columns)
         relevant_cols3 = []
         if sort_column:
-            df[sort_column] = df[sort_column].astype("datetime64[ns]")
+            df[sort_column] = to_tz_naive_datetime(df[sort_column])
             df = df.sort_values(by=sort_column)
             if feature_params:
                 df, relevant_cols3 = feature_fix(feature_params, sort_column, df)
@@ -369,7 +388,7 @@ class CSVTestLoader(CSVDataLoader):
         sort_col1 = sort_column_clone if sort_column_clone else "datetime"
         print("columns are: ")
         print(self.original_df)
-        self.original_df[sort_col1] = self.original_df["datetime"].astype("datetime64[ns]")
+        self.original_df[sort_col1] = to_tz_naive_datetime(self.original_df["datetime"])
         self.original_df["original_index"] = self.original_df.index
         if len(self.relevant_cols3) > 0:
             self.original_df[self.relevant_cols3] = self.df[self.relevant_cols3]
