@@ -24,7 +24,8 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
     :return: None
     :rtype: None
     """
-    wandb.run.summary["test_accuracy"] = test_acc[0]
+    if wandb.run is not None:
+        wandb.run.summary["test_accuracy"] = test_acc[0]
     df_train_and_test = test_acc[1]
     forecast_start_idx = test_acc[2]
     df_prediction_samples = test_acc[3]
@@ -35,7 +36,8 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
     for df in df_prediction_samples:
         pred_std = df.std(axis=1)
         average_prediction_sharpe = (inverse_mae / pred_std).mean()
-        wandb.log({'average_prediction_sharpe' + str(i): average_prediction_sharpe})
+        if wandb.run is not None:
+            wandb.log({'average_prediction_sharpe' + str(i): average_prediction_sharpe})
         i += 1
     df_train_and_test.to_csv("temp_preds.csv")
     # Log plots now
@@ -44,7 +46,8 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
             df_train_and_test,
             forecast_start_idx,
             params,)
-        wandb.log({"test_plot_prob": test_plot})
+        if wandb.run is not None:
+            wandb.log({"test_plot_prob": test_plot})
     elif len(df_prediction_samples) > 0:
         for thing in zip(df_prediction_samples, params["dataset_params"]["target_col"]):
             thing[0].to_csv(thing[1] + ".csv")
@@ -56,12 +59,14 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
                 targ_col=thing[1],
                 ci=95,
                 alpha=0.25)
-            wandb.log({"test_plot_" + thing[1]: test_plot})
+            if wandb.run is not None:
+                wandb.log({"test_plot_" + thing[1]: test_plot})
     else:
         pd.options.plotting.backend = "plotly"
         t = params["dataset_params"]["target_col"][0]
         test_plot = df_train_and_test[[t, "preds"]].plot()
-        wandb.log({"test_plot_" + t: test_plot})
+        if wandb.run is not None:
+            wandb.log({"test_plot_" + t: test_plot})
     print("Now plotting final plots")
     test_plot_all = go.Figure()
     for relevant_col in params["dataset_params"]["relevant_cols"]:
@@ -70,7 +75,8 @@ def handle_model_evaluation1(test_acc, params: Dict) -> None:
                 x=df_train_and_test.index,
                 y=df_train_and_test[relevant_col],
                 name=relevant_col))
-    wandb.log({"test_plot_all": test_plot_all})
+    if wandb.run is not None:
+        wandb.log({"test_plot_all": test_plot_all})
 
 
 def handle_core_eval(trained_model, params: Dict, model_type: str) -> None:
