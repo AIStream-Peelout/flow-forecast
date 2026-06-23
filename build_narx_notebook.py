@@ -74,7 +74,10 @@ cells.append(nbf.v4.new_code_cell(
 cells.append(nbf.v4.new_markdown_cell(
     "## 4. (Optional) Weights & Biases\n"
     "\n"
-    "Flow Forecast logs to W&B. Log in below, or set `\"wandb\": False` in the config to skip it."
+    "Flow Forecast can log metrics and plots to W&B. To enable it: uncomment and run the `wandb login` "
+    "line below, then set `USE_WANDB = True` in the training cell. Logging in only stores your API key "
+    "(authentication) -- the actual run is created by the `wandb` dict in the config, so the key alone "
+    "is not enough; you also need `USE_WANDB = True`. Leave it off to run locally with no logging."
 ))
 
 cells.append(nbf.v4.new_code_cell(
@@ -103,7 +106,17 @@ cells.append(nbf.v4.new_code_cell(
     "FORECAST_LENGTH = 24\n"
     "\n"
     "\n"
-    "def make_narx_config(flow_file_path, weight_path=None):\n"
+    "def make_narx_config(flow_file_path, weight_path=None, use_wandb=False):\n"
+    "    # Flow Forecast expects params[\"wandb\"] to be a dict (it calls .get() on it) or False.\n"
+    "    # A bare True raises 'bool' object has no attribute 'get'. The dict is what actually\n"
+    "    # creates the run, so logging only happens when use_wandb=True.\n"
+    "    wandb_cfg = False\n"
+    "    if use_wandb:\n"
+    "        wandb_cfg = {\n"
+    "            \"name\": \"narx_virgin\",\n"
+    "            \"project\": \"repo-flood_forecast\",\n"
+    "            \"tags\": [\"narx\", \"virgin_river\"],\n"
+    "        }\n"
     "    config = {\n"
     "        \"model_name\": \"NARX\",\n"
     "        \"model_type\": \"PyTorch\",\n"
@@ -152,7 +165,7 @@ cells.append(nbf.v4.new_code_cell(
     "        },\n"
     "        \"early_stopping\": {\"patience\": 2},\n"
     "        \"GCS\": False,\n"
-    "        \"wandb\": False,\n"
+    "        \"wandb\": wandb_cfg,\n"
     "        \"forward_params\": {},\n"
     "        \"metrics\": [\"MSE\"],\n"
     "        \"inference_params\": {\n"
@@ -188,8 +201,14 @@ cells.append(nbf.v4.new_markdown_cell("## 6. Train the NARX model"))
 cells.append(nbf.v4.new_code_cell(
     "from flood_forecast.trainer import train_function\n"
     "\n"
+    "# Set to True to log metrics/plots to Weights & Biases (run the `wandb login` cell above\n"
+    "# first). False runs everything locally with no logging. Note: logging in supplies the API\n"
+    "# key but does NOT start a run -- the run is created from the wandb dict in the config, which\n"
+    "# is what use_wandb=True turns on.\n"
+    "USE_WANDB = False\n"
+    "\n"
     "# flow_file_path was set in the data-prep cell; we never left /content so it is still valid.\n"
-    "config = make_narx_config(flow_file_path=flow_file_path)\n"
+    "config = make_narx_config(flow_file_path=flow_file_path, use_wandb=USE_WANDB)\n"
     "trained_model = train_function(\"PyTorch\", config)"
 ))
 
