@@ -474,14 +474,15 @@ class CyclicalEmbedding(nn.Module):
 
     def forward(
         self, time_series_data: torch.Tensor
-    ) -> Float[torch.Tensor, "batch_size time_steps n_time_series"]:
+    ) -> Float[torch.Tensor, "batch_size time_steps embedding_dim ..."]:
         """
         Forward pass for CyclicalEmbedding.
 
-        :param time_series_data: A tensor of the time series categorical features [B, L, N_feats]
+        :param time_series_data: A tensor of the time series categorical features of shape
+                                 [B, L, N_feats] or [B, L, N_feats, H, W].
         :type time_series_data: torch.Tensor
-        :return: The embeddings of the time series data in cyclical form [B, L, D_out],
-                 where D_out = 2 * N_feats.
+        :return: The embeddings of the time series data in cyclical form, with the feature
+                 axis replaced by D_out = 2 * N_feats (e.g. [B, L, D_out] or [B, L, D_out, H, W]).
         :rtype: torch.Tensor
         """
         embeddings = []
@@ -491,5 +492,4 @@ class CyclicalEmbedding(nn.Module):
                 torch.cos(2 * torch.pi * time_series_data[:, :, i] / frequency),
             ]
         embeddings = torch.stack(embeddings, axis=2)
-        embeddings = embeddings.flatten(start_dim=2)
         return embeddings

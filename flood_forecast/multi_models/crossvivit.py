@@ -595,10 +595,8 @@ class RoCrossViViT(nn.Module):
         encoded_time = self.time_coords_encoder(ts_positional_encoding)
 
         # Concatenate encoded time to video context and timeseries
-        # encoded_time is [B, T, D]; expand to [B, T, D, H, W] to match video_context
-        encoded_time_spatial = encoded_time.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, -1, height, width)
         video_context_with_time = torch.cat(
-            [video_context, encoded_time_spatial], dim=2
+            [video_context, encoded_time], dim=self.video_cat_dim
         )
         timeseries_with_time = torch.cat([timeseries, encoded_time[..., 0, 0]], dim=-1)
 
