@@ -81,13 +81,13 @@ class InferenceMode(object):
         if test.scale and self.n_targets:
             unscaled = test.inverse_scale(tensor.numpy())
             for i in range(0, self.n_targets):
-                df["pred_" + self.targ_cols[i]] = 0
+                df["pred_" + self.targ_cols[i]] = 0.0
                 print("Shape of unscaled is: ")
                 print(unscaled.shape)
-                df["pred_" + self.targ_cols[i]][forecast_history:] = unscaled[:, i].numpy()
+                df.loc[df.index[forecast_history:], "pred_" + self.targ_cols[i]] = unscaled[:, i].numpy()
         elif test.scale:
             unscaled = test.inverse_scale(tensor.numpy().reshape(-1, 1))
-            df["preds"][forecast_history:] = unscaled.numpy()[:, 0]
+            df.loc[df.index[forecast_history:], "preds"] = unscaled.numpy()[:, 0]
         if len(samples) > 0:
             for i in range(0, len(samples)):
                 samples[i][:forecast_history] = 0

@@ -194,7 +194,8 @@ def evaluate_model(
                 end_tensor_mean = end_tensor_mean.squeeze(1)
             else:
                 if "n_targets" in model.params:
-                    if model.params["model_name"] == "Informer":
+                    # Some models (e.g. Informer) output covariate channels beyond the targets
+                    if end_tensor.shape[-1] > model.params["n_targets"]:
                         end_tensor = end_tensor[:, :, 0:model.params["n_targets"]]
                     end_tensor = test_data.inverse_scale(end_tensor.detach())
                 else:
@@ -206,12 +207,12 @@ def evaluate_model(
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
                                       "preds"] = end_tensor[:, 0].numpy().tolist()
                 for i, target in enumerate(target_col):
-                    df_train_and_test["pred_" + target] = 0
+                    df_train_and_test["pred_" + target] = 0.0
                     df_train_and_test.loc[df_train_and_test.index[history_length:],
                                           "pred_" + target] = end_tensor[:, i].numpy().tolist()
             else:
                 df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor_list
-                df_train_and_test["pred_" + target_col[0]] = 0
+                df_train_and_test["pred_" + target_col[0]] = 0.0
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
                                       "pred_" + target_col[0]] = end_tensor_list
         print("Current historical dataframe ")
@@ -234,7 +235,7 @@ def evaluate_model(
     return eval_log, df_train_and_test, forecast_start_idx, df_predictions
 
 
-def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log={},
+def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_tensor, g_loss=False, eval_log=None,
                    end_tensor_0=None) -> Dict:
     """
     Calculates the evaluation metrics based on the model predictions.
@@ -251,13 +252,15 @@ def run_evaluation(model, df_train_and_test, forecast_history, target_col, end_t
     :type end_tensor: torch.Tensor
     :param g_loss: Flag indicating if Gaussian loss is used, which implies two outputs (mean and std dev). Defaults to False.
     :type g_loss: bool
-    :param eval_log: A dictionary to store the evaluation logs. Defaults to {}.
+    :param eval_log: A dictionary to store the evaluation logs. Defaults to None (a new dict is created per call).
     :type eval_log: Dict
     :param end_tensor_0: The second tensor output (e.g., standard deviation) when g_loss is True. Defaults to None.
     :type end_tensor_0: torch.Tensor
     :return: The updated evaluation log dictionary.
     :rtype: Dict
     """
+    if eval_log is None:
+        eval_log = {}
     inference_params = model.params["inference_params"]
     for evaluation_metric in model.crit:
         idx = 0
@@ -462,11 +465,11 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
     forecast_length = params["dataset_params"]["forecast_length"]
     hours_to_forecast = params["inference_params"]["hours_to_forecast"]
     num_prediction_samples = params["inference_params"].get("num_prediction_samples")
-    df_train_and_test["preds"] = 0
+    df_train_and_test["preds"] = 0.0
     if decoder_params is not None:
         if "probabilistic" in decoder_params:
             df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor[0].numpy().tolist()
-            df_train_and_test["std_dev"] = 0
+            df_train_and_test["std_dev"] = 0.0
             print('end_tensor[1][0].numpy().tolist()', end_tensor[1][0].numpy().tolist())
             try:
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
@@ -475,6 +478,9 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
                 df_train_and_test.loc[df_train_and_test.index[history_length:],
                                       "std_dev"] = [x[0] for x in end_tensor[1][0].numpy().tolist()]
                 print(e)
+    elif isinstance(end_tensor, tuple):
+        # Gaussian-loss models return (mean, std-dev); use the mean as the prediction
+        df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor[0].numpy().tolist()
     else:
         df_train_and_test.loc[df_train_and_test.index[history_length:], "preds"] = end_tensor.numpy().tolist()
     df_prediction_arr = []
@@ -729,24 +735,24 @@ def generate_predictions_non_decoded(
             break
         rel_cols = model.params["dataset_params"]["relevant_cols"]
         if test_data.use_real_precip and test_data.use_real_temp:
-            # Order here should match order of original tensor... But what is the best way todo that...?
-            # Hmm right now this will create a bug if for some reason the order [precip, temp, output]
-            intial_numpy = (
-                torch.stack(
-                    [
-                        output.view(-1).float().to(model.device),
-                        precip_cols[i].float().to(model.device),
-                        temp_cols[i].float().to(model.device),
-                    ]
-                )
-                .to("cpu")
-                .detach()
-                .numpy()
+            # Build the next window by column name so the result matches rel_cols regardless of order
+            target = model.params["dataset_params"]["target_col"][0]
+            temp_df = pd.DataFrame(
+                {
+                    target: output.view(-1).float().to("cpu").detach().numpy(),
+                    "precip": precip_cols[i].float().to("cpu").detach().numpy(),
+                    "temp": temp_cols[i].float().to("cpu").detach().numpy(),
+                }
             )
-            temp_df = pd.DataFrame(intial_numpy.T, columns=rel_cols)
             revised_np = temp_df[rel_cols].to_numpy()
             full_history.append(
                 torch.from_numpy(revised_np).to(model.device).unsqueeze(0)
+            )
+        else:
+            raise ValueError(
+                "Cannot forecast beyond one forecast_length window without real covariate data "
+                "(use_real_precip and use_real_temp). Specify decoder_params with a decoder_function "
+                "(e.g. simple_decode) in inference_params instead."
             )
     remainder = forecast_length - hours_to_forecast % forecast_length
     if remainder != forecast_length:
@@ -833,7 +839,8 @@ def generate_decoded_predictions(
             end_tensor_mean = end_tensor[0][:, :, 0].view(-1).to("cpu").detach()
             return end_tensor_mean, end_tensor[1]
         elif isinstance(end_tensor, tuple):
-            e = end_tensor[0][:, :, 0].view(-1).to("cpu").detach(), end_tensor[1][:, :, 0].view(-1).to("cpu").detach()
+            # Gaussian-loss models: (predictions [B, seq, n], std-dev [B, seq])
+            e = end_tensor[0][:, :, 0].view(-1).to("cpu").detach(), end_tensor[1].view(-1).to("cpu").detach()
             return e
         if multi_targets == 1:
             end_tensor = end_tensor[:, :, 0].view(-1)

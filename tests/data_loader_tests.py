@@ -2,9 +2,12 @@ from flood_forecast.preprocessing.pytorch_loaders import (
     CSVTestLoader,
     CSVDataLoader,
     AEDataloader,
+    to_tz_naive_datetime,
 )
 import unittest
 import os
+import tempfile
+import pandas as pd
 import torch
 from datetime import datetime
 
@@ -138,6 +141,56 @@ class DataLoaderTests(unittest.TestCase):
         """
         self.assertEqual(len(self.train_loader.df), len(self.test_loader.df) + 20)
         self.assertEqual(len(self.train_loader2.df), 200)
+
+    def test_to_tz_naive_datetime_aware(self):
+        """
+        Test that timezone-aware timestamps are converted to tz-naive datetime64[ns].
+
+        :return: None
+        :rtype: None
+        """
+        aware = pd.Series(["2014-04-11 16:00:00+00:00", "2014-04-11 17:00:00+00:00"])
+        out = to_tz_naive_datetime(aware)
+        self.assertEqual(str(out.dtype), "datetime64[ns]")
+        self.assertIsNone(out.dt.tz)
+        self.assertEqual(out.iloc[0], pd.Timestamp("2014-04-11 16:00:00"))
+
+    def test_to_tz_naive_datetime_naive_unchanged(self):
+        """
+        Test that already tz-naive timestamps keep their wall-clock values unchanged.
+
+        :return: None
+        :rtype: None
+        """
+        naive = pd.Series(["2016-05-31 00:00:00", "2016-05-31 01:00:00"])
+        out = to_tz_naive_datetime(naive)
+        self.assertTrue((out == naive.astype("datetime64[ns]")).all())
+
+    def test_loader_tz_aware_sort_column(self):
+        """
+        Test that CSVDataLoader can load and sort a file with a timezone-aware sort column.
+
+        :return: None
+        :rtype: None
+        """
+        df = pd.DataFrame({
+            "hour_updated": pd.date_range("2014-04-11", periods=50, freq="h", tz="UTC"),
+            "cfs": range(50),
+            "precip": range(50),
+            "temp": range(50),
+        })
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "tz_aware.csv")
+            df.to_csv(path, index=False)
+            loader = CSVDataLoader(
+                path, 10, 5,
+                target_col=["cfs"],
+                relevant_cols=["cfs", "precip", "temp"],
+                sort_column="hour_updated",
+                interpolate_param=False,
+            )
+            self.assertEqual(str(loader.original_df["hour_updated"].dtype), "datetime64[ns]")
+            self.assertTrue(len(loader) > 0)
 
 
 if __name__ == "__main__":

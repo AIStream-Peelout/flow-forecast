@@ -171,6 +171,8 @@ jobs:
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_da_rnn.py
             bash <(curl -s https://codecov.io/bash) -cF python
+            coverage run -m unittest -v tests/test_narx.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_loss.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_merging_models.py
@@ -386,6 +388,8 @@ jobs:
               coverage run flood_forecast/trainer.py -p  tests/full_transformer.json
               echo -e 'running da_rnn_test \n'
               coverage run flood_forecast/trainer.py -p tests/da_rnn.json
+              echo -e 'running narx_test \n'
+              coverage run flood_forecast/trainer.py -p tests/narx_test.json
               echo -e 'running auto_encoder \n'
               coverage run flood_forecast/meta_train.py -p tests/auto_encoder.json
               echo -e 'running trainer_decoder_test   \n'

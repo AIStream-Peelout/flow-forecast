@@ -2,6 +2,7 @@ from math import radians, cos, sin, asin, sqrt
 import pandas as pd
 import os
 import json
+import time
 from typing import Set, Dict, Tuple
 import requests
 from datetime import datetime, timedelta
@@ -145,6 +146,35 @@ def convert_temp(temparature: str) -> float:
         return 50
 
 
+def download_asos_csv(url: str, out_path: str, max_attempts: int = 6, retry_delay: float = 10.0) -> None:
+    """Downloads an ASOS CSV from the IEM web service and writes it to a file.
+
+    The service rate-limits rapid requests by returning a plain-text message instead of CSV data,
+    so the response is validated against the expected CSV header and retried after a delay if needed.
+
+    :param url: The full URL to request the ASOS CSV data from.
+    :type url: str
+    :param out_path: The file path where the downloaded CSV should be written.
+    :type out_path: str
+    :param max_attempts: The maximum number of request attempts before giving up.
+    :type max_attempts: int
+    :param retry_delay: The number of seconds to wait between attempts.
+    :type retry_delay: float
+    """
+    for attempt in range(max_attempts):
+        response = requests.get(url)
+        if response.status_code == 200 and response.text.startswith("station"):
+            with open(out_path, "w+") as f:
+                f.write(response.text)
+            return
+        if attempt < max_attempts - 1:
+            time.sleep(retry_delay)
+    raise RuntimeError(
+        "Could not download valid ASOS CSV data from " + url +
+        " after " + str(max_attempts) + " attempts. Last response: " + response.text[:100]
+    )
+
+
 def process_asos_data(file_path: str, base_url: str) -> Dict:
     """Retrieves ASOS data for stations marked 'ASOS' in the gage metadata, processes it, saves it to a CSV file, and updates the metadata with missing value counts.
 
@@ -159,9 +189,7 @@ def process_asos_data(file_path: str, base_url: str) -> Dict:
         gage_data = json.load(f)
         for station in gage_data["stations"]:
             if station["cat"] == "ASOS":
-                response = requests.get(base_url.format(station["station_id"]))
-                with open("temp_weather_data.csv", "w+") as f:
-                    f.write(response.text)
+                download_asos_csv(base_url.format(station["station_id"]), "temp_weather_data.csv")
                 df, missing_precip, missing_temp = process_asos_csv("temp_weather_data.csv")
                 station["missing_precip"] = missing_precip
                 station["missing_temp"] = missing_temp
@@ -192,9 +220,9 @@ def process_asos_csv(path: str) -> Tuple[pd.DataFrame, int, int]:
     # replace missing values with an average of the two closest values
     # But since ASOS stations record at different intervals this could
     # actually cause an overestimation of precip. Instead for now we are replacing with 0
-    # df['p01m']=(df['p01m'].fillna(method='ffill') + df['p01m'].fillna(method='bfill'))/2
+    # df['p01m'] = (df['p01m'].ffill() + df['p01m'].bfill()) / 2
     df['p01m'] = df['p01m'].fillna(0)
-    df['tmpf'] = (df['tmpf'].fillna(method='ffill') + df['tmpf'].fillna(method='bfill')) / 2
+    df['tmpf'] = (df['tmpf'].ffill() + df['tmpf'].bfill()) / 2
     df = df.groupby(by=['hour_updated'], as_index=False).agg(
         {'p01m': 'sum', 'valid': 'first', 'tmpf': 'mean'})
     return df, int(missing_precip), int(missing_temp)

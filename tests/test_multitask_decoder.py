@@ -8,7 +8,7 @@ from flood_forecast.trainer import train_function, correct_stupid_sklearn_error
 
 class MultitTaskTests(unittest.TestCase):
     @classmethod
-def setUpClass(cls) -> None:
+    def setUpClass(cls) -> None:
         """
         Class-level setup that loads model parameters from JSON configuration files
         and prepares file paths and corrected model configurations for use in inference tests.
@@ -55,7 +55,7 @@ def setUpClass(cls) -> None:
 
         # dumb error fixes
         if "save_path" in self.model_params3:
-            del self.model_params["save_path"]
+            del self.model_params3["save_path"]
         t = torch.Tensor([3, 6, 5]).repeat(1, 100, 1)
         forecast_model3 = train_function("PyTorch", self.model_params3)
         output = simple_decode(forecast_model3.model, torch.ones(1, 5, 3), 100, t, output_len=1, multi_targets=2)
