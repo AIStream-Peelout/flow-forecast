@@ -103,6 +103,12 @@ This documentation describes the internal Python code that makes up Flow Forecas
 
    model
 
+.. toctree::
+   :maxdepth: 2
+   :caption: ODE Models:
+
+   neural_ode
+
 Indices and tables
 ==================
 

@@ -7,6 +7,7 @@ from flood_forecast.transformer_xl.dummy_torch import DummyTorchModel
 from flood_forecast.basic.linear_regression import SimpleLinearModel
 from flood_forecast.basic.lstm_vanilla import LSTMForecast
 from flood_forecast.basic.narx import NARX
+from flood_forecast.ode.neural_ode import ODEForecast
 from flood_forecast.custom.custom_opt import BertAdam, QuantileLoss
 from torch.optim import Adam, SGD
 from torch.nn import MSELoss, SmoothL1Loss, PoissonNLLLoss, L1Loss, CrossEntropyLoss, BCELoss, BCEWithLogitsLoss
@@ -53,6 +54,7 @@ pytorch_model_dict = {
     "ITransformer": ITransformer,
     "CrossVIVIT": RoCrossViViT,
     "NARX": NARX,
+    "NeuralODE": ODEForecast,
 }
 
 pytorch_criterion_dict = {
