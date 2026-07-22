@@ -62,6 +62,86 @@ class BaseDynamics(torch.nn.Module):
         raise NotImplementedError
 
 
+class ForcedDynamics(BaseDynamics):
+    """
+    Abstract base class for dynamics driven by exogenous forcing time series.
+
+    Many physical systems are non-autonomous: their evolution depends on external drivers (precipitation,
+    vaccination rates, ambient temperature) that are known at discrete observation times but must be
+    evaluated at the arbitrary continuous times an ODE solver visits. Subclasses set ``self.forcing_dim``
+    and call :meth:`forcing_at` inside ``forward`` to obtain the interpolated forcing. The forcing tensor
+    is attached with :meth:`set_forcing` before each integration, which keeps the
+    :class:`~flood_forecast.ode.neural_ode.NeuralODE` wrapper unchanged and lets upstream networks (e.g. a
+    Crossformer generating effective precipitation) pass gradients through the forcing values.
+
+    .. note:: Direct backpropagation (``adjoint=False``) should be used when the forcing tensor requires
+        gradients, as ``odeint_adjoint`` only tracks parameters registered on the dynamics module.
+    """
+
+    forcing_dim: int
+
+    def __init__(self, interpolation: str = "previous"):
+        """
+        Initializes the forced dynamics base class.
+
+        :param interpolation: How to evaluate the forcing between observation times. Either "previous"
+            (zero-order hold, recommended for fixed-step solvers on regularly sampled data) or "linear",
+            defaults to "previous".
+        :type interpolation: str, optional
+        """
+        super().__init__()
+        if interpolation not in ("previous", "linear"):
+            raise ValueError("interpolation must be 'previous' or 'linear' but got " + interpolation)
+        self.interpolation = interpolation
+        self._forcing: Optional[torch.Tensor] = None
+        self._forcing_times: Optional[torch.Tensor] = None
+
+    def set_forcing(self, forcing: torch.Tensor, times: torch.Tensor) -> None:
+        """
+        Attaches the forcing series to integrate with. Must be called before the solver runs.
+
+        :param forcing: The forcing values of shape (batch_size, n_times, forcing_dim).
+        :type forcing: torch.Tensor
+        :param times: A 1D increasing tensor of the n_times observation times of the forcing.
+        :type times: torch.Tensor
+        :return: None
+        :rtype: None
+        """
+        if forcing.shape[-1] != self.forcing_dim:
+            raise ValueError("Expected forcing with " + str(self.forcing_dim) + " channels but got " +
+                             str(forcing.shape[-1]))
+        if forcing.shape[1] != times.shape[0]:
+            raise ValueError("Forcing has " + str(forcing.shape[1]) + " time steps but times has " +
+                             str(times.shape[0]))
+        self._forcing = forcing
+        self._forcing_times = times
+
+    def forcing_at(self, t: torch.Tensor) -> torch.Tensor:
+        """
+        Evaluates the forcing at an arbitrary solver time by interpolating the attached series.
+
+        :param t: A scalar tensor with the current integration time.
+        :type t: torch.Tensor
+        :return: The interpolated forcing of shape (batch_size, forcing_dim).
+        :rtype: torch.Tensor
+        """
+        if self._forcing is None:
+            raise RuntimeError("No forcing attached. Call set_forcing before integrating.")
+        times = self._forcing_times
+        idx = torch.searchsorted(times, t.reshape(1), right=True) - 1
+        idx = idx.clamp(0, times.shape[0] - 1)
+        if self.interpolation == "previous":
+            return self._forcing[:, idx[0], :]
+        next_idx = (idx + 1).clamp(0, times.shape[0] - 1)
+        t0, t1 = times[idx[0]], times[next_idx[0]]
+        f0 = self._forcing[:, idx[0], :]
+        f1 = self._forcing[:, next_idx[0], :]
+        if t1 == t0:
+            return f0
+        weight = ((t - t0) / (t1 - t0)).clamp(0.0, 1.0)
+        return f0 + weight * (f1 - f0)
+
+
 class MLPDynamics(BaseDynamics):
     """
     Fully learned dynamics where ``f(t, state)`` is a multi-layer perceptron (the classic Neural ODE).
