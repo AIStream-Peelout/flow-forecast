@@ -178,4 +178,54 @@ class GR4Dynamics(ForcedDynamics):
         return pet * fill * (2.0 - fill)
 
 
+class GR4ParameterHead(torch.nn.Module):
+    """
+    A hypernetwork head mapping a catchment embedding to the four GR4 parameters.
+
+    Each parameter is squashed by a scaled sigmoid into a physically realistic range, so the ODE can
+    never receive degenerate values regardless of the embedding. The output plugs straight into
+    :meth:`GR4Dynamics.set_parameters`.
+    """
+
+    def __init__(self, embedding_dim: int = 256, hidden_dim: int = 64,
+                 x1_range: tuple = (10.0, 2000.0), x2_range: tuple = (-10.0, 10.0),
+                 x3_range: tuple = (5.0, 500.0), x4_range: tuple = (0.5, 120.0)):
+        """
+        Initializes the parameter head.
+
+        :param embedding_dim: The catchment embedding dimension, defaults to 256.
+        :type embedding_dim: int, optional
+        :param hidden_dim: The hidden layer width, defaults to 64.
+        :type hidden_dim: int, optional
+        :param x1_range: Bounds (mm) for the production store capacity, defaults to (10, 2000).
+        :type x1_range: tuple, optional
+        :param x2_range: Bounds (mm per unit time) for the exchange coefficient, defaults to (-10, 10).
+        :type x2_range: tuple, optional
+        :param x3_range: Bounds (mm) for the routing store capacity, defaults to (5, 500).
+        :type x3_range: tuple, optional
+        :param x4_range: Bounds (time units) for the unit hydrograph constant, defaults to (0.5, 120).
+        :type x4_range: tuple, optional
+        """
+        super().__init__()
+        self.net = torch.nn.Sequential(
+            torch.nn.Linear(embedding_dim, hidden_dim), torch.nn.GELU(),
+            torch.nn.Linear(hidden_dim, 4),
+        )
+        bounds = torch.tensor([x1_range, x2_range, x3_range, x4_range])
+        self.register_buffer("lower", bounds[:, 0])
+        self.register_buffer("upper", bounds[:, 1])
+
+    def forward(self, embedding: torch.Tensor) -> torch.Tensor:
+        """
+        Maps embeddings to bounded GR4 parameters.
+
+        :param embedding: Catchment embeddings of shape (batch_size, embedding_dim).
+        :type embedding: torch.Tensor
+        :return: Parameters (X1, X2, X3, X4) of shape (batch_size, 4), each within its range.
+        :rtype: torch.Tensor
+        """
+        squashed = torch.sigmoid(self.net(embedding))
+        return self.lower + squashed * (self.upper - self.lower)
+
+
 register_dynamics("gr4", GR4Dynamics)

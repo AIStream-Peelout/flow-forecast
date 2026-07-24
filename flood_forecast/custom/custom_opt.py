@@ -515,7 +515,7 @@ def l1_regularizer(model, lambda_l1=0.01):
     Applies L1 regularization to the model weights.
 
     source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
-    
+
     :param model: The model to regularize.
     :type model: torch.nn.Module
     :param lambda_l1: Regularization strength.
@@ -553,3 +553,47 @@ def orth_regularizer(model, lambda_orth=0.01):
             lossorth += lambda_orth * sym.sum()
 
         return lossorth
+
+
+class InfoNCELoss(torch.nn.Module):
+    """
+    The InfoNCE contrastive loss for aligning paired embeddings (CLIP-style).
+
+    Given a batch of anchor and positive embeddings where row i of each tensor describes the same
+    entity (e.g. the visual and temporal embeddings of the same site), every other row in the batch
+    serves as an in-batch negative. Embeddings are L2-normalized internally.
+    """
+
+    def __init__(self, temperature: float = 0.07, symmetric: bool = True):
+        """
+        Initializes the InfoNCE loss.
+
+        :param temperature: The softmax temperature scaling the cosine similarities, defaults to 0.07.
+        :type temperature: float
+        :param symmetric: Whether to average the anchor->positive and positive->anchor directions,
+            defaults to True.
+        :type symmetric: bool
+        """
+        super().__init__()
+        self.temperature = temperature
+        self.symmetric = symmetric
+
+    def forward(self, anchor: torch.Tensor, positive: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the contrastive loss over a batch of paired embeddings.
+
+        :param anchor: Anchor embeddings of shape (batch_size, dim).
+        :type anchor: torch.Tensor
+        :param positive: Positive embeddings of shape (batch_size, dim), row-aligned with the anchors.
+        :type positive: torch.Tensor
+        :return: The scalar InfoNCE loss.
+        :rtype: torch.Tensor
+        """
+        anchor = torch.nn.functional.normalize(anchor, dim=-1)
+        positive = torch.nn.functional.normalize(positive, dim=-1)
+        logits = anchor @ positive.t() / self.temperature
+        targets = torch.arange(anchor.shape[0], device=anchor.device)
+        loss = torch.nn.functional.cross_entropy(logits, targets)
+        if self.symmetric:
+            loss = (loss + torch.nn.functional.cross_entropy(logits.t(), targets)) / 2.0
+        return loss
