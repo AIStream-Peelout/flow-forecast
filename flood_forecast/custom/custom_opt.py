@@ -597,3 +597,63 @@ class InfoNCELoss(torch.nn.Module):
         if self.symmetric:
             loss = (loss + torch.nn.functional.cross_entropy(logits.t(), targets)) / 2.0
         return loss
+
+
+class NSELoss(torch.nn.Module):
+    """
+    Nash-Sutcliffe efficiency loss for streamflow: sum((sim - obs)^2) / sum((obs - mean(obs))^2).
+
+    Equals 1 - NSE, so minimizing it maximizes the Nash-Sutcliffe efficiency. Values below 1 beat
+    the mean-flow baseline. Computed per batch element and averaged.
+    """
+
+    def __init__(self, eps: float = 1e-6):
+        """
+        Initializes the NSE loss.
+
+        :param eps: Stabilizer added to the observed variance, defaults to 1e-6.
+        :type eps: float
+        """
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, simulated: torch.Tensor, observed: torch.Tensor) -> torch.Tensor:
+        """
+        Computes 1 - NSE averaged over the batch.
+
+        :param simulated: Simulated series of shape (batch_size, n_steps).
+        :type simulated: torch.Tensor
+        :param observed: Observed series of the same shape.
+        :type observed: torch.Tensor
+        :return: The scalar loss.
+        :rtype: torch.Tensor
+        """
+        numerator = ((simulated - observed) ** 2).sum(dim=-1)
+        denominator = ((observed - observed.mean(dim=-1, keepdim=True)) ** 2).sum(dim=-1)
+        return (numerator / (denominator + self.eps)).mean()
+
+
+class MaskedMSELoss(torch.nn.Module):
+    """
+    MSE over only the observed entries of a sparsely observed target (e.g. satellite ET passes).
+
+    The mask is 1 where the target is observed and 0 elsewhere; gradients only flow on observed
+    entries, implementing the masked-loss pattern for sparse supervision.
+    """
+
+    def forward(self, simulated: torch.Tensor, observed: torch.Tensor,
+                mask: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the masked MSE.
+
+        :param simulated: Simulated values of any shape.
+        :type simulated: torch.Tensor
+        :param observed: Observed values of the same shape (entries where mask is 0 are ignored).
+        :type observed: torch.Tensor
+        :param mask: Binary observation mask of the same shape.
+        :type mask: torch.Tensor
+        :return: The scalar masked MSE (zero when nothing is observed).
+        :rtype: torch.Tensor
+        """
+        squared = (simulated - observed) ** 2 * mask
+        return squared.sum() / mask.sum().clamp(min=1.0)
