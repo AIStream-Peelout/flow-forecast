@@ -764,6 +764,7 @@ class DSW_embedding(nn.Module):
 
         return x_embed
 
+
 class CrossformerEncoderOnly(nn.Module):
     """
     Encoder-only Crossformer producing per-time-step features instead of forecasts.
@@ -784,8 +785,9 @@ class CrossformerEncoderOnly(nn.Module):
         :type n_time_series: int
         :param seq_len: The input window length in time steps.
         :type seq_len: int
-        :param seg_len: The segment length of the DSW embedding; seq_len is padded to a multiple of
-            it, defaults to 3 (short segments keep effective-forcing timing sharp; 6+ was too blocky to localize storm pulses in overfit tests).
+        :param seg_len: The segment length of the DSW embedding; seq_len is padded to a multiple
+            of it. Defaults to 3 — short segments keep effective-forcing timing sharp; 6+ was too
+            blocky to localize storm pulses in overfit tests.
         :type seg_len: int, optional
         :param d_model: The model embedding dimension, defaults to 64.
         :type d_model: int, optional

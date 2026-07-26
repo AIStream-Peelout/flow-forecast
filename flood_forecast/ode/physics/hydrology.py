@@ -211,10 +211,11 @@ class GR4ParameterHead(torch.nn.Module):
             torch.nn.Linear(embedding_dim, hidden_dim), torch.nn.GELU(),
             torch.nn.Linear(hidden_dim, 4),
         )
-        # Zero-init the output layer so every catchment starts at mid-range parameters, keeping the
-        # scaled sigmoid in its linear region — otherwise early training slams parameters into the
-        # bounds where the sigmoid saturates and gradients vanish.
-        torch.nn.init.zeros_(self.net[-1].weight)
+        # Near-zero-init the output layer so every catchment starts close to mid-range parameters,
+        # keeping the scaled sigmoid in its linear region — otherwise early training slams parameters
+        # into the bounds where the sigmoid saturates and gradients vanish. The weights stay small but
+        # nonzero so the embedding has a nonzero Jacobian into the parameters from the first step.
+        torch.nn.init.normal_(self.net[-1].weight, std=1e-3)
         torch.nn.init.zeros_(self.net[-1].bias)
         bounds = torch.tensor([x1_range, x2_range, x3_range, x4_range])
         self.register_buffer("lower", bounds[:, 0])

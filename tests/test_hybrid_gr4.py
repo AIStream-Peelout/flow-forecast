@@ -81,26 +81,30 @@ class TestHybridGR4(unittest.TestCase):
         self.assertGreater(context.grad.abs().sum().item(), 0.0)
 
     def test_single_batch_overfit(self):
-        """The spec's Phase 3 gate on synthetic data: loss must drop substantially."""
+        """The spec's Phase 3 gate on synthetic data: the model must fit a storm response well.
+
+        The 48-hour window requires a fast-responding parameter range: with the production default
+        X4 up to 120 h, mid-range routing (~60 h) cannot respond inside the window at all.
+        """
         torch.manual_seed(1)
-        model = HybridGR4Model(n_met_features=4, seq_len=48, context_dim=32, dim=32, depth=1)
+        model = HybridGR4Model(n_met_features=4, seq_len=48, context_dim=32, dim=32, depth=1,
+                               parameter_head_params={"x4_range": (0.5, 24.0),
+                                                      "x1_range": (10.0, 500.0)})
         met, context = self.make_batch()
         # A synthetic storm-response target: delayed, smoothed response to the precip burst.
         target = torch.zeros(2, 48)
         target[:, 14:] = 2.0 * torch.exp(-torch.arange(34.0) / 8.0)
         optimizer = torch.optim.Adam(model.parameters(), lr=5e-3)
-        criterion = NSELoss()
-        first_loss = None
+        nse = NSELoss()
+        mse = torch.nn.MSELoss()
         for _ in range(150):
             optimizer.zero_grad()
-            loss = criterion(model(met, context)["flow"], target)
-            if first_loss is None:
-                first_loss = loss.item()
+            flow = model(met, context)["flow"]
+            loss = mse(flow, target) + nse(flow, target)
             loss.backward()
             optimizer.step()
-        self.assertLess(loss.item(), 0.5 * first_loss)
-        # Must also decisively beat the mean-flow baseline (NSE loss < 1).
-        self.assertLess(loss.item(), 0.6)
+        # NSE loss < 0.5 means the fit decisively beats the mean-flow baseline (NSE > 0.5).
+        self.assertLess(nse(model(met, context)["flow"], target).item(), 0.5)
 
 
 class TestForcingGenerator(unittest.TestCase):
