@@ -53,10 +53,10 @@ class CatchmentEmbeddingDataset(Dataset):
 
         statics, log_flows = [], []
         for site_id in self.site_ids:
-            record = np.load(os.path.join(data_dir, site_id + ".npz"))
-            statics.append(record["static"])
-            history = record["history"]
-            log_flows.append(np.log1p(np.clip(history[np.isfinite(history)], 0.0, None)))
+            with np.load(os.path.join(data_dir, site_id + ".npz")) as record:
+                statics.append(record["static"])
+                history = record["history"]
+                log_flows.append(np.log1p(np.clip(history[np.isfinite(history)], 0.0, None)))
         static_matrix = np.stack(statics)
         self.static_mean = np.nanmean(static_matrix, axis=0)
         self.static_std = np.nanstd(static_matrix, axis=0)
