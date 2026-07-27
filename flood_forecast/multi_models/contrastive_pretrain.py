@@ -41,7 +41,8 @@ def contrastive_step(encoder: CatchmentEncoder, batch: Dict[str, torch.Tensor],
 def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
                                epochs: int = 30, batch_size: int = 32, lr: float = 3e-4,
                                temperature: float = 0.07, device: str = "cpu",
-                               checkpoint_path: Optional[str] = None) -> List[float]:
+                               checkpoint_path: Optional[str] = None,
+                               wandb_run=None) -> List[float]:
     """
     Pretrains the encoder with contrastive alignment across modalities.
 
@@ -61,6 +62,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
     :type device: str, optional
     :param checkpoint_path: Where to save the trained state dict, defaults to None (no save).
     :type checkpoint_path: str, optional
+    :param wandb_run: An active wandb run; per-epoch losses are logged to it, defaults to None.
+    :type wandb_run: wandb.sdk.wandb_run.Run, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
@@ -81,6 +84,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
             batches += 1
         epoch_losses.append(total / max(batches, 1))
         print("epoch %d/%d contrastive loss %.4f" % (epoch + 1, epochs, epoch_losses[-1]))
+        if wandb_run is not None:
+            wandb_run.log({"epoch": epoch + 1, "contrastive_loss": epoch_losses[-1]})
     if checkpoint_path is not None:
         torch.save(encoder.state_dict(), checkpoint_path)
     return epoch_losses

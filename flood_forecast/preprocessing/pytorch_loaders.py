@@ -971,3 +971,86 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         for test_loader in self.csv_test_loaders:
             res.append(test_loader.get_from_start_date(forecast_start))
         return res
+
+
+class CatchmentWindowLoader(CSVDataLoader):
+    """
+    CSVDataLoader variant for (spin-up -> forecast-horizon) hydrology windows.
+
+    Follows the parent's conventions (forecast_history = spin-up length, forecast_length = horizon)
+    with three differences: the source window spans spin-up AND horizon rows (so state-space models
+    can read observed history and forecast meteorology in one tensor) with the target columns zeroed
+    in the horizon segment to prevent leakage; windows overlapping data gaps beyond a tolerance are
+    skipped; and an optional drainage area converts a cfs target to mm/hr (the water-balance unit)
+    before scaling. Physical channels (target flow, temperature, shortwave) should be excluded from
+    scaling via the parent's ``scaled_cols`` so physics-based models receive real units.
+    """
+
+    def __init__(self, file_path, forecast_history: int, forecast_length: int, target_col: List,
+                 relevant_cols: List, area_sq_km: float = None, min_valid_fraction: float = 0.95,
+                 window_stride: int = 24, **kwargs):
+        """
+        Initializes the catchment window loader.
+
+        :param file_path: CSV path (or DataFrame) with the gauge's hourly record.
+        :type file_path: Union[str, pd.DataFrame]
+        :param forecast_history: The spin-up window length in time steps.
+        :type forecast_history: int
+        :param forecast_length: The forecast horizon length in time steps.
+        :type forecast_length: int
+        :param target_col: The target column list, e.g. ["cfs"].
+        :type target_col: List
+        :param relevant_cols: Feature columns (including the target).
+        :type relevant_cols: List
+        :param area_sq_km: If given, converts the (cfs) target to mm/hr over this basin area,
+            defaults to None.
+        :type area_sq_km: float, optional
+        :param min_valid_fraction: Minimum observed fraction of the combined window for it to be
+            indexed, defaults to 0.95.
+        :type min_valid_fraction: float, optional
+        :param window_stride: Spacing between window start indices, defaults to 24.
+        :type window_stride: int, optional
+        :param kwargs: Remaining CSVDataLoader keyword arguments (scaling, sort_column, ...).
+        :type kwargs: Dict
+        """
+        df = get_data(file_path)
+        if area_sq_km is not None:
+            for col in target_col:
+                df[col] = df[col] * 0.0283168 * 3.6 / area_sq_km
+        super().__init__(df, forecast_history, forecast_length, target_col, relevant_cols,
+                         **kwargs)
+        self.target_col_list = target_col
+        observed = ~self.original_df[relevant_cols].isna().any(axis=1)
+        observed = observed.to_numpy()
+        window = forecast_history + forecast_length
+        self.valid_starts = [start for start in range(0, len(self.df) - window, window_stride)
+                             if observed[start:start + window].mean() >= min_valid_fraction]
+
+    def __len__(self) -> int:
+        """
+        Returns the number of valid (gap-filtered) windows.
+
+        :return: The window count.
+        :rtype: int
+        """
+        return len(self.valid_starts)
+
+    def __getitem__(self, idx: int):
+        """
+        Returns one (source, target) pair.
+
+        :param idx: The valid-window index.
+        :type idx: int
+        :return: A tuple of (src of shape (forecast_history + forecast_length, n_features) with
+            target columns zeroed in the horizon segment, trg of shape (forecast_length,
+            n_features)) matching the parent's target convention.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
+        start = self.valid_starts[idx]
+        split = start + self.forecast_history
+        end = split + self.forecast_length
+        src = self.df.iloc[start:end].copy()
+        src.loc[src.index[self.forecast_history:], self.target_col_list] = 0.0
+        trg = self.df.iloc[split:end]
+        return (torch.from_numpy(src.to_numpy()).float(),
+                torch.from_numpy(trg.to_numpy()).float())

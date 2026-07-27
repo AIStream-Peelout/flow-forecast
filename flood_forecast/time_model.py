@@ -6,9 +6,9 @@ import os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
-from flood_forecast.preprocessing.pytorch_loaders import (CSVDataLoader, AEDataloader, TemporalLoader,
-                                                         CSVSeriesIDLoader, GeneralClassificationLoader,
-                                                         VariableSequenceLength)
+from flood_forecast.preprocessing.pytorch_loaders import (CatchmentWindowLoader, CSVDataLoader, AEDataloader, TemporalLoader,
+                                                          CSVSeriesIDLoader, GeneralClassificationLoader,
+                                                          VariableSequenceLength)
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 from flood_forecast.utils import make_criterion_functions
 from flood_forecast.preprocessing.buil_dataset import get_data
@@ -356,6 +356,17 @@ class PyTorchForecast(TimeSeriesModel):
                 **start_end_params)
         elif the_class == "default":
             loader = CSVDataLoader(
+                data_path,
+                dataset_params["forecast_history"],
+                dataset_params["forecast_length"],
+                dataset_params["target_col"],
+                dataset_params["relevant_cols"],
+                **start_end_params)
+        elif the_class == "CatchmentWindow":
+            for key in ("area_sq_km", "min_valid_fraction", "window_stride"):
+                if key in dataset_params:
+                    start_end_params[key] = dataset_params[key]
+            loader = CatchmentWindowLoader(
                 data_path,
                 dataset_params["forecast_history"],
                 dataset_params["forecast_length"],

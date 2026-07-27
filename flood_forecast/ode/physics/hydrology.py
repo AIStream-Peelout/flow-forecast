@@ -107,10 +107,23 @@ class GR4Dynamics(ForcedDynamics):
         :return: The state derivative of the same shape.
         :rtype: torch.Tensor
         """
-        forcing = self.forcing_at(t)
+        return self._derivative(self.forcing_at(t), state)
+
+    def _derivative(self, forcing: torch.Tensor, state: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the GR4 derivative for an explicit liquid forcing (shared with subclasses).
+
+        :param forcing: Forcing of shape (batch_size, >=2) whose first two channels are
+            [P_liquid, PET].
+        :type forcing: torch.Tensor
+        :param state: The GR4 state ``[S, R, V_1..V_n]`` of shape (batch_size, 2 + n_reservoirs).
+        :type state: torch.Tensor
+        :return: The state derivative of the same shape.
+        :rtype: torch.Tensor
+        """
         precip, pet = forcing[:, 0].clamp(min=0.0), forcing[:, 1].clamp(min=0.0)
         params = self.gr4_parameters()
-        x1, x2, x3, x4 = params.unbind(-1)
+        x1, x2, x3, x4 = params[..., 0], params[..., 1], params[..., 2], params[..., 3]
         production = state[:, 0]
         routing = state[:, 1]
         cascade = state[:, 2:]
@@ -178,6 +191,286 @@ class GR4Dynamics(ForcedDynamics):
         return pet * fill * (2.0 - fill)
 
 
+def smooth_step(x: torch.Tensor) -> torch.Tensor:
+    """
+    The smoothed step function of Höge et al. (2022, HESS 26:5085), verbatim from HydroNODE.
+
+    ``step_fct(x) = (tanh(5.0 * (x - 0.5)) + 1.0) * 0.5`` — note the -0.5 shift (a smoothed step
+    centered at x = 0.5) and steepness 5.0; both are part of the published formulation and the
+    steepness also bounds ODE stiffness.
+
+    :param x: The argument tensor.
+    :type x: torch.Tensor
+    :return: A smooth 0-to-1 step of the same shape.
+    :rtype: torch.Tensor
+    """
+    return (torch.tanh(5.0 * (x - 0.5)) + 1.0) * 0.5
+
+
+class GR4SnowDynamics(GR4Dynamics):
+    """
+    Continuous GR4 with an EXP-HYDRO snow bucket prepended (Patil & Stieglitz 2014 as smoothed by
+    Höge et al. 2022).
+
+    The state vector becomes ``[S_snow, S, R, V_1..V_n]``. Precipitation is partitioned into snowfall
+    and rainfall by temperature, snowfall accumulates in the snow store, temperature-indexed melt
+    drains it, and the production store receives rainfall + melt instead of raw precipitation — giving
+    melt-driven flow the physical (and gradient) pathway plain GR4 lacks.
+
+    Forcing has four channels: ``[P, PET, T]`` plus a spare shortwave channel reserved for an
+    enhanced temperature-index melt term (unused by the default degree-day melt). Parameters are the
+    four GR4 parameters plus ``Df`` (melt factor, mm/degC per unit time), ``Tmax`` (melt threshold,
+    degC) and ``Tmin`` (rain/snow partition temperature, degC), i.e. per-sample tensors of shape
+    (batch_size, 7) via :meth:`GR4Dynamics.set_parameters`.
+    """
+
+    forcing_dim = 4
+
+    def __init__(self, df_init: float = 0.1, tmax_init: float = 0.5, tmin_init: float = 0.0,
+                 **gr4_kwargs):
+        """
+        Initializes the snow-extended dynamics.
+
+        :param df_init: Initial degree-day melt factor in mm/degC per unit time (hourly: daily
+            literature values of 1-10 mm/degC/day divide by 24), defaults to 0.1.
+        :type df_init: float, optional
+        :param tmax_init: Initial melt threshold temperature in degC, defaults to 0.5.
+        :type tmax_init: float, optional
+        :param tmin_init: Initial rain/snow partition temperature in degC, defaults to 0.0.
+        :type tmin_init: float, optional
+        :param gr4_kwargs: Keyword arguments forwarded to :class:`GR4Dynamics`.
+        :type gr4_kwargs: dict
+        """
+        super().__init__(**gr4_kwargs)
+        self.state_dim = 3 + self.n_routing_reservoirs
+        raw_snow = torch.tensor([_inverse_softplus(df_init), tmax_init, tmin_init])
+        self.raw_snow_params = torch.nn.Parameter(raw_snow,
+                                                  requires_grad=self.raw_x2.requires_grad)
+
+    def set_parameters(self, params: Optional[torch.Tensor]) -> None:
+        """
+        Overrides parameters with per-sample values (X1, X2, X3, X4, Df, Tmax, Tmin).
+
+        :param params: A tensor of shape (batch_size, 7) with X1/X3/X4/Df already strictly positive
+            and Tmin <= Tmax, or None to revert to the global learnable parameters.
+        :type params: torch.Tensor, optional
+        :return: None
+        :rtype: None
+        """
+        if params is not None and params.shape[-1] != 7:
+            raise ValueError("Expected params of shape (batch_size, 7) but got " +
+                             str(list(params.shape)))
+        self._external_params = params
+
+    def gr4_parameters(self) -> torch.Tensor:
+        """
+        Returns the active constrained parameters, GR4 columns first.
+
+        :return: A tensor of shape (batch_size, 7) or (1, 7): (X1, X2, X3, X4, Df, Tmax, Tmin).
+        :rtype: torch.Tensor
+        """
+        if self._external_params is not None:
+            return self._external_params
+        x1, x3, x4 = torch.nn.functional.softplus(self.raw_x1_x3_x4).unbind(-1)
+        df = torch.nn.functional.softplus(self.raw_snow_params[0])
+        return torch.stack([x1, self.raw_x2, x3, x4, df, self.raw_snow_params[1],
+                            self.raw_snow_params[2]]).reshape(1, 7)
+
+    def snow_fluxes(self, forcing: torch.Tensor,
+                    snow_store: torch.Tensor) -> tuple:
+        """
+        Computes the smoothed snowfall, rainfall and melt fluxes (Höge et al. 2022, verbatim forms).
+
+        :param forcing: The interpolated forcing of shape (batch_size, 4): [P, PET, T, SW].
+        :type forcing: torch.Tensor
+        :param snow_store: The snow store S_snow of shape (batch_size,).
+        :type snow_store: torch.Tensor
+        :return: A tuple (snowfall, rainfall, melt), each of shape (batch_size,).
+        :rtype: tuple
+        """
+        params = self.gr4_parameters()
+        df, tmax, tmin = params[..., 4], params[..., 5], params[..., 6]
+        precip = forcing[:, 0].clamp(min=0.0)
+        temperature = forcing[:, 2]
+        snowfall = smooth_step(tmin - temperature) * precip
+        rainfall = smooth_step(temperature - tmin) * precip
+        melt = smooth_step(temperature - tmax) * smooth_step(snow_store) * \
+            torch.minimum(snow_store.clamp(min=0.0), df * (temperature - tmax).clamp(min=0.0))
+        return snowfall, rainfall, melt
+
+    def forward(self, t: torch.Tensor, state: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the snow + GR4 state derivatives at solver time t.
+
+        :param t: A scalar tensor with the current integration time.
+        :type t: torch.Tensor
+        :param state: The state ``[S_snow, S, R, V_1..V_n]`` of shape (batch_size, state_dim).
+        :type state: torch.Tensor
+        :return: The state derivative of the same shape.
+        :rtype: torch.Tensor
+        """
+        forcing = self.forcing_at(t)
+        snowfall, rainfall, melt = self.snow_fluxes(forcing, state[:, 0])
+        d_snow = snowfall - melt
+        # GR4 below the snow bucket sees rainfall + melt as its liquid water input.
+        liquid_forcing = torch.stack([rainfall + melt, forcing[:, 1]], dim=-1)
+        return torch.cat([d_snow.unsqueeze(-1), self._derivative(liquid_forcing, state[:, 1:])],
+                         dim=-1)
+
+    def streamflow(self, state: torch.Tensor) -> torch.Tensor:
+        """
+        Computes streamflow from a snow-extended state (indices shifted by the snow store).
+
+        :param state: States of shape (batch_size, state_dim) or (batch_size, n_times, state_dim).
+        :type state: torch.Tensor
+        :return: Streamflow in mm per unit time.
+        :rtype: torch.Tensor
+        """
+        return super().streamflow(state[..., 1:])
+
+    def swe(self, state: torch.Tensor) -> torch.Tensor:
+        """
+        Returns the snow water equivalent state (for supervision against SNOTEL SWE).
+
+        :param state: States of shape (batch_size, state_dim) or (batch_size, n_times, state_dim).
+        :type state: torch.Tensor
+        :return: SWE in mm.
+        :rtype: torch.Tensor
+        """
+        return state[..., 0]
+
+    def actual_et(self, t: torch.Tensor, state: torch.Tensor) -> torch.Tensor:
+        """
+        Computes actual evapotranspiration (production store sits at index 1 behind the snow store).
+
+        :param t: A scalar tensor with the current integration time.
+        :type t: torch.Tensor
+        :param state: The current state of shape (batch_size, state_dim).
+        :type state: torch.Tensor
+        :return: Actual ET in mm per unit time of shape (batch_size,).
+        :rtype: torch.Tensor
+        """
+        pet = self.forcing_at(t)[:, 1].clamp(min=0.0)
+        x1 = self.gr4_parameters()[:, 0]
+        fill = (state[:, 1] / x1).clamp(0.0, 1.0)
+        return pet * fill * (2.0 - fill)
+
+
+class GR4SnowBandsDynamics(GR4SnowDynamics):
+    """
+    Elevation-banded snow on top of GR4: one snow store per equal-area elevation band.
+
+    Each band sees a lapse-rate-adjusted temperature, so high bands accumulate and hold snow while
+    low bands rain and melt — reproducing the staggered melt-out (and late-season high-elevation
+    trickle) that a single lumped bucket cannot. Snow parameters (Df, Tmax, Tmin) are shared across
+    bands; the bands differ only in temperature. The state is ``[S_snow_1..S_snow_B, S, R, V_..]``
+    with band 1 the lowest. Band geometry (elevation offsets from the forcing temperature's
+    reference elevation, and area fractions) is set via :meth:`set_band_geometry` — e.g. from a
+    SNOTEL-fitted profile.
+    """
+
+    def __init__(self, n_bands: int = 5, lapse_rate: float = -0.0065, **snow_kwargs):
+        """
+        Initializes the banded snow dynamics.
+
+        :param n_bands: The number of elevation bands, defaults to 5.
+        :type n_bands: int, optional
+        :param lapse_rate: The temperature lapse rate in degC per meter, defaults to -0.0065.
+        :type lapse_rate: float, optional
+        :param snow_kwargs: Keyword arguments forwarded to :class:`GR4SnowDynamics`.
+        :type snow_kwargs: dict
+        """
+        super().__init__(**snow_kwargs)
+        self.n_bands = n_bands
+        self.lapse_rate = lapse_rate
+        self.state_dim = n_bands + 2 + self.n_routing_reservoirs
+        self.register_buffer("band_offsets_m", torch.zeros(n_bands))
+        self.register_buffer("band_fractions", torch.full((n_bands,), 1.0 / n_bands))
+
+    def set_band_geometry(self, elevation_offsets_m, area_fractions) -> None:
+        """
+        Sets the band elevations (relative to the forcing temperature's reference elevation) and
+        area fractions.
+
+        :param elevation_offsets_m: Per-band elevation offsets in meters (positive = higher than the
+            reference), lowest band first.
+        :type elevation_offsets_m: Sequence[float]
+        :param area_fractions: Per-band area fractions summing to 1.
+        :type area_fractions: Sequence[float]
+        :return: None
+        :rtype: None
+        """
+        self.band_offsets_m = torch.as_tensor(elevation_offsets_m, dtype=torch.float32)
+        self.band_fractions = torch.as_tensor(area_fractions, dtype=torch.float32)
+
+    def forward(self, t: torch.Tensor, state: torch.Tensor) -> torch.Tensor:
+        """
+        Computes banded-snow + GR4 derivatives at solver time t.
+
+        :param t: A scalar tensor with the current integration time.
+        :type t: torch.Tensor
+        :param state: The state ``[S_snow_1..S_snow_B, S, R, V..]`` of shape (batch_size, state_dim).
+        :type state: torch.Tensor
+        :return: The state derivative of the same shape.
+        :rtype: torch.Tensor
+        """
+        forcing = self.forcing_at(t)
+        params = self.gr4_parameters()
+        df, tmax, tmin = params[..., 4:5], params[..., 5:6], params[..., 6:7]
+        precip = forcing[:, 0:1].clamp(min=0.0)
+        band_temp = forcing[:, 2:3] + self.lapse_rate * self.band_offsets_m.unsqueeze(0)
+        snow_states = state[:, :self.n_bands]
+
+        snowfall = smooth_step(tmin - band_temp) * precip
+        rainfall = smooth_step(band_temp - tmin) * precip
+        melt = smooth_step(band_temp - tmax) * smooth_step(snow_states) * \
+            torch.minimum(snow_states.clamp(min=0.0), df * (band_temp - tmax).clamp(min=0.0))
+        d_snow = snowfall - melt
+
+        liquid = ((rainfall + melt) * self.band_fractions.unsqueeze(0)).sum(dim=-1)
+        liquid_forcing = torch.stack([liquid, forcing[:, 1]], dim=-1)
+        return torch.cat([d_snow, self._derivative(liquid_forcing, state[:, self.n_bands:])],
+                         dim=-1)
+
+    def streamflow(self, state: torch.Tensor) -> torch.Tensor:
+        """
+        Computes streamflow from a banded state.
+
+        :param state: States of shape (..., state_dim).
+        :type state: torch.Tensor
+        :return: Streamflow in mm per unit time.
+        :rtype: torch.Tensor
+        """
+        return GR4Dynamics.streamflow(self, state[..., self.n_bands:])
+
+    def swe(self, state: torch.Tensor) -> torch.Tensor:
+        """
+        Returns the area-weighted basin-mean SWE (per-band states are in ``state[..., :n_bands]``).
+
+        :param state: States of shape (..., state_dim).
+        :type state: torch.Tensor
+        :return: Basin-mean SWE in mm.
+        :rtype: torch.Tensor
+        """
+        return (state[..., :self.n_bands] * self.band_fractions).sum(dim=-1)
+
+    def actual_et(self, t: torch.Tensor, state: torch.Tensor) -> torch.Tensor:
+        """
+        Computes actual ET (production store sits behind the band states).
+
+        :param t: A scalar tensor with the current integration time.
+        :type t: torch.Tensor
+        :param state: The current state of shape (batch_size, state_dim).
+        :type state: torch.Tensor
+        :return: Actual ET in mm per unit time of shape (batch_size,).
+        :rtype: torch.Tensor
+        """
+        pet = self.forcing_at(t)[:, 1].clamp(min=0.0)
+        x1 = self.gr4_parameters()[:, 0]
+        fill = (state[:, self.n_bands] / x1).clamp(0.0, 1.0)
+        return pet * fill * (2.0 - fill)
+
+
 class GR4ParameterHead(torch.nn.Module):
     """
     A hypernetwork head mapping a catchment embedding to the four GR4 parameters.
@@ -234,6 +527,61 @@ class GR4ParameterHead(torch.nn.Module):
         return self.lower + squashed * (self.upper - self.lower)
 
 
+class GR4SnowParameterHead(GR4ParameterHead):
+    """
+    Hypernetwork head emitting the seven GR4-with-snow parameters.
+
+    Emits (X1, X2, X3, X4, Df, Tmax, Tmin) with Tmin derived as ``Tmax - delta`` (delta >= 0), so the
+    rain/snow partition temperature can never exceed the melt threshold.
+    """
+
+    def __init__(self, embedding_dim: int = 256, hidden_dim: int = 64,
+                 df_range: tuple = (0.0, 0.5), tmax_range: tuple = (-2.0, 3.0),
+                 delta_range: tuple = (0.0, 4.0), **gr4_ranges):
+        """
+        Initializes the snow parameter head.
+
+        :param embedding_dim: The catchment embedding dimension, defaults to 256.
+        :type embedding_dim: int, optional
+        :param hidden_dim: The hidden layer width, defaults to 64.
+        :type hidden_dim: int, optional
+        :param df_range: Bounds for the melt factor in mm/degC per unit time (hourly: literature
+            daily values 1-10 mm/degC/day divided by 24), defaults to (0, 0.5).
+        :type df_range: tuple, optional
+        :param tmax_range: Bounds (degC) for the melt threshold, defaults to (-2, 3).
+        :type tmax_range: tuple, optional
+        :param delta_range: Bounds (degC) for Tmax - Tmin, defaults to (0, 4).
+        :type delta_range: tuple, optional
+        :param gr4_ranges: The x1_range/x2_range/x3_range/x4_range keyword arguments of
+            :class:`GR4ParameterHead`.
+        :type gr4_ranges: dict
+        """
+        super().__init__(embedding_dim=embedding_dim, hidden_dim=hidden_dim, **gr4_ranges)
+        self.snow_net = torch.nn.Linear(hidden_dim, 3)
+        torch.nn.init.normal_(self.snow_net.weight, std=1e-3)
+        torch.nn.init.zeros_(self.snow_net.bias)
+        snow_bounds = torch.tensor([df_range, tmax_range, delta_range])
+        self.register_buffer("snow_lower", snow_bounds[:, 0])
+        self.register_buffer("snow_upper", snow_bounds[:, 1])
+
+    def forward(self, embedding: torch.Tensor) -> torch.Tensor:
+        """
+        Maps embeddings to the seven bounded parameters.
+
+        :param embedding: Catchment embeddings of shape (batch_size, embedding_dim).
+        :type embedding: torch.Tensor
+        :return: Parameters (X1, X2, X3, X4, Df, Tmax, Tmin) of shape (batch_size, 7).
+        :rtype: torch.Tensor
+        """
+        hidden = self.net[:-1](embedding)
+        gr4 = self.lower + torch.sigmoid(self.net[-1](hidden)) * (self.upper - self.lower)
+        snow = self.snow_lower + torch.sigmoid(self.snow_net(hidden)) * \
+            (self.snow_upper - self.snow_lower)
+        df, tmax, delta = snow.unbind(-1)
+        return torch.cat([gr4, df.unsqueeze(-1), tmax.unsqueeze(-1),
+                          (tmax - delta).unsqueeze(-1)], dim=-1)
+
+
 class EffectiveForcingGenerator(torch.nn.Module):
     """
     The dynamic module: maps recent hourly meteorology to effective precipitation and PET.
@@ -275,6 +623,7 @@ class EffectiveForcingGenerator(torch.nn.Module):
         """
         super().__init__()
         from flood_forecast.meta_models.merging_model import GatedFusion
+        self.seq_len = seq_len
         if encoder_type == "crossformer":
             from flood_forecast.transformer_xl.cross_former import CrossformerEncoderOnly
             self.embed = torch.nn.Identity()
@@ -300,10 +649,20 @@ class EffectiveForcingGenerator(torch.nn.Module):
         :type met: torch.Tensor
         :param context: Catchment embeddings of shape (batch_size, context_dim).
         :type context: torch.Tensor
-        :return: Non-negative effective forcing (P_eff, E_eff) of shape (batch_size, seq_len, 2).
+        :return: Non-negative effective forcing (P_eff, E_eff) of shape (batch_size, n_steps, 2).
         :rtype: torch.Tensor
         """
-        hidden = self.encoder(self.embed(met))
+        n_steps = met.shape[1]
+        if n_steps > self.seq_len:
+            raise ValueError("Window of %d steps exceeds the encoder's seq_len %d; construct the "
+                             "model with seq_len >= the longest window (e.g. the spin-up length)."
+                             % (n_steps, self.seq_len))
+        if n_steps < self.seq_len:
+            # The encoder's positional embedding (and Crossformer's TSA router) are fixed-length,
+            # so shorter windows are left-padded by repeating the first step, then the tail sliced.
+            padding = met[:, :1, :].expand(-1, self.seq_len - n_steps, -1)
+            met = torch.cat([padding, met], dim=1)
+        hidden = self.encoder(self.embed(met))[:, -n_steps:, :]
         fused = self.fusion(hidden, context)
         return torch.nn.functional.softplus(self.head(fused))
 
@@ -321,7 +680,7 @@ class HybridGR4Model(torch.nn.Module):
     def __init__(self, n_met_features: int, seq_len: int, context_dim: int = 256, dim: int = 64,
                  depth: int = 2, heads: int = 4, n_routing_reservoirs: int = 3,
                  solver_params: Optional[dict] = None, parameter_head_params: Optional[dict] = None,
-                 encoder_type: str = "crossformer"):
+                 encoder_type: str = "crossformer", snow: bool = False):
         """
         Initializes the hybrid model.
 
@@ -347,23 +706,36 @@ class HybridGR4Model(torch.nn.Module):
         :param encoder_type: The forcing generator backbone, "crossformer" (default) or
             "transformer".
         :type encoder_type: str, optional
+        :param snow: Whether to use the snow-extended dynamics (EXP-HYDRO bucket + GR4). When True,
+            :meth:`forward` requires the ``raw_forcing`` argument carrying [T degC, SW] channels and
+            the parameter head emits seven parameters. Defaults to False.
+        :type snow: bool, optional
         """
         super().__init__()
         from flood_forecast.ode.neural_ode import NeuralODE
+        self.snow = snow
         self.forcing_generator = EffectiveForcingGenerator(n_met_features, seq_len,
                                                            context_dim=context_dim, dim=dim,
                                                            depth=depth, heads=heads,
                                                            encoder_type=encoder_type)
-        self.parameter_head = GR4ParameterHead(embedding_dim=context_dim,
-                                               **(parameter_head_params or {}))
-        self.dynamics = GR4Dynamics(n_routing_reservoirs=n_routing_reservoirs, learnable=False)
+        if snow:
+            self.parameter_head = GR4SnowParameterHead(embedding_dim=context_dim,
+                                                       **(parameter_head_params or {}))
+            self.dynamics = GR4SnowDynamics(n_routing_reservoirs=n_routing_reservoirs,
+                                            learnable=False)
+        else:
+            self.parameter_head = GR4ParameterHead(embedding_dim=context_dim,
+                                                   **(parameter_head_params or {}))
+            self.dynamics = GR4Dynamics(n_routing_reservoirs=n_routing_reservoirs, learnable=False)
         if solver_params is None:
             solver_params = {"method": "rk4"}
         self.node = NeuralODE(self.dynamics, **solver_params)
-        self.register_buffer("times", torch.arange(float(seq_len)))
+        # times are built per forward from the met window length, so the same model can run
+        # spin-up and forecast-horizon windows of different lengths.
 
     def forward(self, met: torch.Tensor, context: torch.Tensor,
-                initial_state: Optional[torch.Tensor] = None) -> dict:
+                initial_state: Optional[torch.Tensor] = None,
+                raw_forcing: Optional[torch.Tensor] = None) -> dict:
         """
         Simulates streamflow for a met window conditioned on catchment embeddings.
 
@@ -372,25 +744,37 @@ class HybridGR4Model(torch.nn.Module):
         :param context: Catchment embeddings of shape (batch_size, context_dim).
         :type context: torch.Tensor
         :param initial_state: Initial ODE state of shape (batch_size, state_dim), defaults to None
-            which starts the production store at 60% of X1 and the routing store at 30% of X3
-            (moist antecedent conditions; a dry production store squares away most effective rain
-            before it reaches routing, starving short windows of response).
+            which starts the production store at 60% of X1, the routing store at 30% of X3 (moist
+            antecedent conditions; a dry production store squares away most effective rain before it
+            reaches routing, starving short windows of response) and, with snow, an empty snow store.
         :type initial_state: torch.Tensor, optional
+        :param raw_forcing: Required when ``snow=True``: physical channels of shape
+            (batch_size, seq_len, 2) holding [temperature degC, shortwave W/m2]. Temperature drives
+            the rain/snow partition and melt and is deliberately NOT a learned quantity.
+        :type raw_forcing: torch.Tensor, optional
         :return: A dict with "flow" (batch_size, seq_len), "forcing", "parameters" and "states"
-            (for auxiliary supervision such as actual ET).
+            (for auxiliary supervision such as actual ET and, with snow, SWE via
+            ``self.dynamics.swe(states)``).
         :rtype: dict
         """
         parameters = self.parameter_head(context)
         self.dynamics.set_parameters(parameters)
         forcing = self.forcing_generator(met, context)
-        self.dynamics.set_forcing(forcing, self.times)
+        if self.snow:
+            if raw_forcing is None:
+                raise ValueError("snow=True requires raw_forcing with [temperature, shortwave].")
+            forcing = torch.cat([forcing, raw_forcing], dim=-1)
+        times = torch.arange(float(met.shape[1]), device=met.device)
+        self.dynamics.set_forcing(forcing, times)
         if initial_state is None:
             initial_state = torch.zeros(met.shape[0], self.dynamics.state_dim, device=met.device)
-            initial_state[:, 0] = 0.6 * parameters[:, 0]
-            initial_state[:, 1] = 0.3 * parameters[:, 2]
-        states = self.node(initial_state, self.times)
+            offset = 1 if self.snow else 0
+            initial_state[:, offset] = 0.6 * parameters[:, 0]
+            initial_state[:, offset + 1] = 0.3 * parameters[:, 2]
+        states = self.node(initial_state, times)
         return {"flow": self.dynamics.streamflow(states), "forcing": forcing,
                 "parameters": parameters, "states": states}
 
 
 register_dynamics("gr4", GR4Dynamics)
+register_dynamics("gr4_snow", GR4SnowDynamics)
