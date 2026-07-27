@@ -25,3 +25,4 @@ einops
 pytorch-tsmixer
 einsum
 jaxtyping
+torchdiffeq

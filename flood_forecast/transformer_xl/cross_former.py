@@ -763,3 +763,75 @@ class DSW_embedding(nn.Module):
         )
 
         return x_embed
+
+
+class CrossformerEncoderOnly(nn.Module):
+    """
+    Encoder-only Crossformer producing per-time-step features instead of forecasts.
+
+    Reuses the DSW segment embedding and the cross-dimension (two-stage attention) encoder of
+    :class:`Crossformer`, then maps the finest-scale segment features back onto the time axis so the
+    output aligns step-for-step with the input window. Useful as a sequence backbone wherever
+    cross-covariate attention matters (e.g. generating effective forcings from multivariate weather).
+    """
+
+    def __init__(self, n_time_series: int, seq_len: int, seg_len: int = 3, d_model: int = 64,
+                 n_heads: int = 4, e_layers: int = 2, d_ff: int = 128, dropout: float = 0.0,
+                 factor: int = 10, win_size: int = 2):
+        """
+        Initializes the encoder-only Crossformer.
+
+        :param n_time_series: The number of input covariates.
+        :type n_time_series: int
+        :param seq_len: The input window length in time steps.
+        :type seq_len: int
+        :param seg_len: The segment length of the DSW embedding; seq_len is padded to a multiple
+            of it. Defaults to 3 — short segments keep effective-forcing timing sharp; 6+ was too
+            blocky to localize storm pulses in overfit tests.
+        :type seg_len: int, optional
+        :param d_model: The model embedding dimension, defaults to 64.
+        :type d_model: int, optional
+        :param n_heads: The number of attention heads, defaults to 4.
+        :type n_heads: int, optional
+        :param e_layers: The number of encoder scale blocks, defaults to 2.
+        :type e_layers: int, optional
+        :param d_ff: The feed-forward dimension, defaults to 128.
+        :type d_ff: int, optional
+        :param dropout: Dropout probability, defaults to 0.0.
+        :type dropout: float, optional
+        :param factor: Router factor of the two-stage attention, defaults to 10.
+        :type factor: int, optional
+        :param win_size: Segment-merging window of coarser scales, defaults to 2.
+        :type win_size: int, optional
+        """
+        super().__init__()
+        self.in_len = seq_len
+        self.seg_len = seg_len
+        self.pad_in_len = ceil(1.0 * seq_len / seg_len) * seg_len
+        self.in_len_add = self.pad_in_len - self.in_len
+        self.enc_value_embedding = DSW_embedding(seg_len, d_model)
+        self.enc_pos_embedding = nn.Parameter(
+            torch.randn(1, n_time_series, self.pad_in_len // seg_len, d_model))
+        self.pre_norm = nn.LayerNorm(d_model)
+        self.encoder = Encoder(e_layers, win_size, d_model, n_heads, d_ff, block_depth=1,
+                               dropout=dropout, in_seg_num=self.pad_in_len // seg_len,
+                               factor=factor)
+
+    def forward(self, x_seq: torch.Tensor) -> torch.Tensor:
+        """
+        Encodes a multivariate window into per-time-step features.
+
+        :param x_seq: Input of shape [Batch, seq_len, n_time_series].
+        :type x_seq: torch.Tensor
+        :return: Per-step features of shape [Batch, seq_len, d_model] (covariate-averaged,
+            segment features repeated across their steps).
+        :rtype: torch.Tensor
+        """
+        if self.in_len_add != 0:
+            x_seq = torch.cat((x_seq[:, :1, :].expand(-1, self.in_len_add, -1), x_seq), dim=1)
+        tokens = self.pre_norm(self.enc_value_embedding(x_seq) + self.enc_pos_embedding)
+        scales = self.encoder(tokens)
+        finest = scales[1] if len(scales) > 1 else scales[0]  # [B, ts_d, seg_num, d_model]
+        per_segment = finest.mean(dim=1)  # average over covariate dimension -> [B, seg_num, d_model]
+        per_step = per_segment.repeat_interleave(self.seg_len, dim=1)
+        return per_step[:, self.in_len_add:self.in_len_add + self.in_len, :]
