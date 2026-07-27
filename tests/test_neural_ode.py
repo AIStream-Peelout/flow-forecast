@@ -64,10 +64,12 @@ class TestODEDynamics(unittest.TestCase):
                 return -state
 
         register_dynamics("decay_test", Decay)
-        self.assertIn("decay_test", ode_dynamics_dict)
-        dynamics = build_dynamics({"type": "decay_test"})
-        self.assertEqual(dynamics.state_dim, 2)
-        del ode_dynamics_dict["decay_test"]
+        try:
+            self.assertIn("decay_test", ode_dynamics_dict)
+            dynamics = build_dynamics({"type": "decay_test"})
+            self.assertEqual(dynamics.state_dim, 2)
+        finally:
+            ode_dynamics_dict.pop("decay_test", None)
 
     def test_missing_dynamics_raises(self):
         """build_dynamics should raise a KeyError for unknown dynamics types."""
