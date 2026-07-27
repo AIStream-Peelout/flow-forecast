@@ -97,22 +97,28 @@ class ForcedDynamics(BaseDynamics):
         self._forcing_times: Optional[torch.Tensor] = None
 
     def set_forcing(self, forcing: torch.Tensor, times: torch.Tensor) -> None:
-        """
-        Attaches the forcing series to integrate with. Must be called before the solver runs.
-
-        :param forcing: The forcing values of shape (batch_size, n_times, forcing_dim).
-        :type forcing: torch.Tensor
-        :param times: A 1D increasing tensor of the n_times observation times of the forcing.
-        :type times: torch.Tensor
-        :return: None
-        :rtype: None
-        """
+        """Attaches the forcing series to integrate with."""
+        if forcing.dim() != 3:
+            raise ValueError(
+                "forcing must have shape (batch_size, n_times, forcing_dim)"
+            )
+        if times.dim() != 1:
+            raise ValueError("times must be a 1D tensor")
         if forcing.shape[-1] != self.forcing_dim:
-            raise ValueError("Expected forcing with " + str(self.forcing_dim) + " channels but got " +
-                             str(forcing.shape[-1]))
+            raise ValueError(
+                f"Expected forcing with {self.forcing_dim} channels, "
+                f"but got {forcing.shape[-1]}"
+            )
         if forcing.shape[1] != times.shape[0]:
-            raise ValueError("Forcing has " + str(forcing.shape[1]) + " time steps but times has " +
-                             str(times.shape[0]))
+            raise ValueError(
+                f"Forcing has {forcing.shape[1]} time steps, "
+                f"but times has {times.shape[0]}"
+            )
+        if forcing.device != times.device:
+            raise ValueError("forcing and times must be on the same device")
+        if not torch.all(times[1:] > times[:-1]):
+            raise ValueError("times must be strictly increasing")
+    
         self._forcing = forcing
         self._forcing_times = times
 
@@ -300,7 +306,7 @@ class SEIRDynamics(BaseDynamics):
 
 class HybridDynamics(BaseDynamics):
     """
-    A physics-based dynamics with an additive learned residual: ``f = f_physics + f_mlp``.
+    A physics-based dynamics with an additive learned residual: ``f = f_physics + f_mlp``...
 
     This is the universal differential equation pattern: the equation structure comes from domain science
     while the MLP absorbs unmodeled parameter interactions and forcings.

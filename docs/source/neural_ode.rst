@@ -193,9 +193,9 @@ Conventions for physical parameters:
 Current limitations
 -------------------
 
-* **No external forcing during integration.** The dynamics are autonomous: known future covariates
-  (e.g. precipitation ``P(t)``) are not injected into the ODE mid-integration. Their influence enters
-  through the encoder's initial state and, in hybrid mode, the residual term.
+* **External forcing support varies by dynamics.** Dynamics can optionally subclass
+  :class:`~flood_forecast.ode.dynamics.ForcedDynamics` and use ``set_forcing``/``forcing_at`` to inject
+  known covariates during integration.
 * **ODEs only.** Delay differential equations (DDEs) are not supported by torchdiffeq; incubation-style
   delays should be approximated with additional compartments (as SEIR does with the E compartment).
 * **Regular time grid.** Integration runs on an evenly spaced grid derived from ``forecast_length`` and
