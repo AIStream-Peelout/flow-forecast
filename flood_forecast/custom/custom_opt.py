@@ -515,7 +515,7 @@ def l1_regularizer(model, lambda_l1=0.01):
     Applies L1 regularization to the model weights.
 
     source: https://stackoverflow.com/questions/58172188/how-to-add-l1-regularization-to-pytorch-nn-model
-    
+
     :param model: The model to regularize.
     :type model: torch.nn.Module
     :param lambda_l1: Regularization strength.
@@ -553,3 +553,107 @@ def orth_regularizer(model, lambda_orth=0.01):
             lossorth += lambda_orth * sym.sum()
 
         return lossorth
+
+
+class InfoNCELoss(torch.nn.Module):
+    """
+    The InfoNCE contrastive loss for aligning paired embeddings (CLIP-style).
+
+    Given a batch of anchor and positive embeddings where row i of each tensor describes the same
+    entity (e.g. the visual and temporal embeddings of the same site), every other row in the batch
+    serves as an in-batch negative. Embeddings are L2-normalized internally.
+    """
+
+    def __init__(self, temperature: float = 0.07, symmetric: bool = True):
+        """
+        Initializes the InfoNCE loss.
+
+        :param temperature: The softmax temperature scaling the cosine similarities, defaults to 0.07.
+        :type temperature: float
+        :param symmetric: Whether to average the anchor->positive and positive->anchor directions,
+            defaults to True.
+        :type symmetric: bool
+        """
+        super().__init__()
+        self.temperature = temperature
+        self.symmetric = symmetric
+
+    def forward(self, anchor: torch.Tensor, positive: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the contrastive loss over a batch of paired embeddings.
+
+        :param anchor: Anchor embeddings of shape (batch_size, dim).
+        :type anchor: torch.Tensor
+        :param positive: Positive embeddings of shape (batch_size, dim), row-aligned with the anchors.
+        :type positive: torch.Tensor
+        :return: The scalar InfoNCE loss.
+        :rtype: torch.Tensor
+        """
+        anchor = torch.nn.functional.normalize(anchor, dim=-1)
+        positive = torch.nn.functional.normalize(positive, dim=-1)
+        logits = anchor @ positive.t() / self.temperature
+        targets = torch.arange(anchor.shape[0], device=anchor.device)
+        loss = torch.nn.functional.cross_entropy(logits, targets)
+        if self.symmetric:
+            loss = (loss + torch.nn.functional.cross_entropy(logits.t(), targets)) / 2.0
+        return loss
+
+
+class NSELoss(torch.nn.Module):
+    """
+    Nash-Sutcliffe efficiency loss for streamflow: sum((sim - obs)^2) / sum((obs - mean(obs))^2).
+
+    Equals 1 - NSE, so minimizing it maximizes the Nash-Sutcliffe efficiency. Values below 1 beat
+    the mean-flow baseline. Computed per batch element and averaged.
+    """
+
+    def __init__(self, eps: float = 1e-6):
+        """
+        Initializes the NSE loss.
+
+        :param eps: Stabilizer added to the observed variance, defaults to 1e-6.
+        :type eps: float
+        """
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, simulated: torch.Tensor, observed: torch.Tensor) -> torch.Tensor:
+        """
+        Computes 1 - NSE averaged over the batch.
+
+        :param simulated: Simulated series of shape (batch_size, n_steps).
+        :type simulated: torch.Tensor
+        :param observed: Observed series of the same shape.
+        :type observed: torch.Tensor
+        :return: The scalar loss.
+        :rtype: torch.Tensor
+        """
+        numerator = ((simulated - observed) ** 2).sum(dim=-1)
+        denominator = ((observed - observed.mean(dim=-1, keepdim=True)) ** 2).sum(dim=-1)
+        return (numerator / (denominator + self.eps)).mean()
+
+
+class MaskedMSELoss(torch.nn.Module):
+    """
+    MSE over only the observed entries of a sparsely observed target (e.g. satellite ET passes).
+
+    The mask is 1 where the target is observed and 0 elsewhere; gradients only flow on observed
+    entries, implementing the masked-loss pattern for sparse supervision.
+    """
+
+    def forward(self, simulated: torch.Tensor, observed: torch.Tensor,
+                mask: torch.Tensor) -> torch.Tensor:
+        """
+        Computes the masked MSE.
+
+        :param simulated: Simulated values of any shape.
+        :type simulated: torch.Tensor
+        :param observed: Observed values of the same shape (entries where mask is 0 are ignored).
+        :type observed: torch.Tensor
+        :param mask: Binary observation mask of the same shape.
+        :type mask: torch.Tensor
+        :return: The scalar masked MSE (zero when nothing is observed).
+        :rtype: torch.Tensor
+        """
+        squared = (simulated - observed) ** 2 * mask
+        return squared.sum() / mask.sum().clamp(min=1.0)

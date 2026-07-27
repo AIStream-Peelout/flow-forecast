@@ -24,7 +24,8 @@ class MergingModel(torch.nn.Module):
         super().__init__()
         # Note: MultiModalSelfAttention and Concatenation must be defined elsewhere or imported
         self.method_dict = {"Bilinear": torch.nn.Bilinear, "Bilinear2": torch.nn.Bilinear,
-                            "MultiAttn": MultiModalSelfAttention, "Concat": Concatenation, "Other": "other"}
+                            "MultiAttn": MultiModalSelfAttention, "Concat": Concatenation,
+                            "GatedFusion": GatedFusion, "Other": "other"}
         self.method_layer = self.method_dict[method](**other_params)
         self.method = method
 
@@ -70,6 +71,47 @@ class MergingModel(torch.nn.Module):
 
 
 # A class to handle concatenation
+class GatedFusion(torch.nn.Module):
+    """
+    Gated injection of a static context vector into a temporal sequence.
+
+    At every time step: ``g_t = sigmoid(W [h_t, c])`` and ``h'_t = g_t * h_t + (1 - g_t) * MLP(c)``.
+    The learned gate prevents either modality from dominating — with g_t near 1 the sequence passes
+    through untouched, near 0 the context overrides it.
+    """
+
+    def __init__(self, hidden_dim: int, context_dim: int):
+        """
+        Initializes the gated fusion layer.
+
+        :param hidden_dim: The dimension of the temporal hidden states h_t.
+        :type hidden_dim: int
+        :param context_dim: The dimension of the static context vector c.
+        :type context_dim: int
+        """
+        super().__init__()
+        self.gate = torch.nn.Linear(hidden_dim + context_dim, hidden_dim)
+        self.context_projection = torch.nn.Sequential(
+            torch.nn.Linear(context_dim, hidden_dim), torch.nn.GELU(),
+            torch.nn.Linear(hidden_dim, hidden_dim))
+
+    def forward(self, temporal_data: torch.Tensor, meta_data: torch.Tensor) -> torch.Tensor:
+        """
+        Fuses the context into every time step of the sequence.
+
+        :param temporal_data: Hidden states of shape (batch_size, n_steps, hidden_dim).
+        :type temporal_data: torch.Tensor
+        :param meta_data: Context vectors of shape (batch_size, context_dim).
+        :type meta_data: torch.Tensor
+        :return: The fused sequence of shape (batch_size, n_steps, hidden_dim).
+        :rtype: torch.Tensor
+        """
+        expanded = meta_data.unsqueeze(1).expand(-1, temporal_data.shape[1], -1)
+        gate = torch.sigmoid(self.gate(torch.cat([temporal_data, expanded], dim=-1)))
+        projected = self.context_projection(meta_data).unsqueeze(1)
+        return gate * temporal_data + (1.0 - gate) * projected
+
+
 class Concatenation(torch.nn.Module):
     def __init__(self, cat_dim: int, repeat: bool = True, use_layer: bool = False,
                  combined_d: int = 1, out_shape: int = 1):

@@ -22,3 +22,7 @@ mypy
 .idea/workspace.xml
 wandb
 .idea/*
+# Artifacts written to the repo root by training/test runs (model checkpoints,
+# temp prediction CSVs, and downloaded ASOS/USGS CSVs). Real data lives in tests/ and data/.
+model_save/
+/*.csv

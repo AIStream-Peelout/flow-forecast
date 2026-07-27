@@ -1,0 +1,63 @@
+{
+    "model_name": "HybridGR4",
+    "model_type": "PyTorch",
+    "model_params": {
+        "n_time_series": 5,
+        "spinup_length": 120,
+        "forecast_length": 48,
+        "raw_temp_index": 2,
+        "raw_sw_index": 3,
+        "context_dim": 16,
+        "dim": 32,
+        "depth": 1,
+        "snow": true
+    },
+    "dataset_params": {
+        "class": "CatchmentWindow",
+        "training_path": "tests/test_data/catchment_synth.csv",
+        "validation_path": "tests/test_data/catchment_synth.csv",
+        "test_path": "tests/test_data/catchment_synth.csv",
+        "batch_size": 4,
+        "forecast_history": 120,
+        "forecast_length": 48,
+        "train_start": 0,
+        "train_end": 2000,
+        "valid_start": 2000,
+        "valid_end": 3000,
+        "test_start": 2000,
+        "test_end": 3000,
+        "target_col": [
+            "cfs"
+        ],
+        "relevant_cols": [
+            "cfs",
+            "precipitation",
+            "temperature",
+            "shortwave_radiation",
+            "pet"
+        ],
+        "area_sq_km": 100.0,
+        "window_stride": 48,
+        "scaler": "StandardScaler",
+        "scaled_cols": [
+            "precipitation",
+            "pet"
+        ],
+        "no_scale": true,
+        "interpolate": false
+    },
+    "training_params": {
+        "criterion": "NSELoss",
+        "optimizer": "Adam",
+        "optim_params": {},
+        "lr": 0.003,
+        "epochs": 1,
+        "batch_size": 4
+    },
+    "GCS": false,
+    "wandb": false,
+    "forward_params": {},
+    "metrics": [
+        "NSELoss"
+    ]
+}
