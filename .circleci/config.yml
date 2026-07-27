@@ -181,6 +181,8 @@ jobs:
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_contrastive_pretrain.py
             bash <(curl -s https://codecov.io/bash) -cF python
+            coverage run -m unittest -v tests/test_multimodal_encoder.py
+            bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_hybrid_gr4.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_forecast_training.py
