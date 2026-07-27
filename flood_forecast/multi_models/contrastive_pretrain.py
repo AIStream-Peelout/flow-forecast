@@ -1,21 +1,24 @@
 """
 Contrastive (InfoNCE) pretraining of the catchment encoder, and embedding extraction for analysis.
 
-Positives are the different modality views of the *same* site (vision vs. history, vision vs. tabular,
-tabular vs. history); every other site in the batch is a negative. After pretraining,
-:func:`extract_embeddings` produces the per-site embedding matrix used for clustering and as the
-context input of the hybrid ODE model.
+This module is a thin hydrology-flavored layer over the generic training utilities in
+:mod:`flood_forecast.meta_models.contrastive_train`. Positives are the different modality views of
+the *same* site (vision vs. history, vision vs. tabular, tabular vs. history); every other site in
+the batch is a negative. After pretraining, :func:`extract_embeddings` produces the per-site
+embedding matrix used for clustering and as the context input of the hybrid ODE model.
 """
 from typing import Dict, List, Optional, Tuple
 
 import torch
-from torch.utils.data import DataLoader
 
 from flood_forecast.custom.custom_opt import InfoNCELoss
+from flood_forecast.meta_models import contrastive_train
 from flood_forecast.multi_models.catchment_embedding import CatchmentEncoder
 from flood_forecast.preprocessing.catchment_loader import CatchmentEmbeddingDataset
 
 MODALITY_PAIRS = (("vision", "history"), ("vision", "tabular"), ("tabular", "history"))
+# Maps each modality name of the CatchmentEncoder to its key in the dataset batches.
+INPUT_KEYS = {"vision": "image", "tabular": "static", "history": "history"}
 
 
 def contrastive_step(encoder: CatchmentEncoder, batch: Dict[str, torch.Tensor],
@@ -32,10 +35,9 @@ def contrastive_step(encoder: CatchmentEncoder, batch: Dict[str, torch.Tensor],
     :return: The scalar loss averaged over the modality pairs.
     :rtype: torch.Tensor
     """
-    _, modalities = encoder(batch["image"], batch["static"], batch["history"],
-                            return_modalities=True)
-    losses = [criterion(modalities[a], modalities[b]) for a, b in MODALITY_PAIRS]
-    return torch.stack(losses).mean()
+    inputs = {name: batch[key] for name, key in INPUT_KEYS.items()}
+    return contrastive_train.contrastive_step(encoder, inputs, criterion,
+                                              modality_pairs=MODALITY_PAIRS)
 
 
 def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
@@ -67,28 +69,13 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
-    encoder = encoder.to(device).train()
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=len(dataset) > batch_size)
-    optimizer = torch.optim.Adam(encoder.parameters(), lr=lr)
-    criterion = InfoNCELoss(temperature=temperature)
-    epoch_losses: List[float] = []
-    for epoch in range(epochs):
-        total, batches = 0.0, 0
-        for batch in loader:
-            batch = {key: value.to(device) for key, value in batch.items()}
-            optimizer.zero_grad()
-            loss = contrastive_step(encoder, batch, criterion)
-            loss.backward()
-            optimizer.step()
-            total += loss.item()
-            batches += 1
-        epoch_losses.append(total / max(batches, 1))
-        print("epoch %d/%d contrastive loss %.4f" % (epoch + 1, epochs, epoch_losses[-1]))
-        if wandb_run is not None:
-            wandb_run.log({"epoch": epoch + 1, "contrastive_loss": epoch_losses[-1]})
-    if checkpoint_path is not None:
-        torch.save(encoder.state_dict(), checkpoint_path)
-    return epoch_losses
+    return contrastive_train.pretrain_encoder(encoder, dataset, epochs=epochs,
+                                              batch_size=batch_size, lr=lr,
+                                              temperature=temperature, device=device,
+                                              checkpoint_path=checkpoint_path,
+                                              wandb_run=wandb_run,
+                                              modality_pairs=MODALITY_PAIRS,
+                                              input_keys=INPUT_KEYS)
 
 
 def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
@@ -111,16 +98,6 @@ def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDat
     :return: A tuple of (site ids, embedding matrix of shape (n_sites, embedding_dim)).
     :rtype: Tuple[List[str], torch.Tensor]
     """
-    encoder = encoder.to(device).eval()
-    accumulated: Optional[torch.Tensor] = None
-    with torch.no_grad():
-        for _ in range(n_history_samples):
-            loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
-            chunks = []
-            for batch in loader:
-                embedding = encoder(batch["image"].to(device), batch["static"].to(device),
-                                    batch["history"].to(device))
-                chunks.append(embedding.cpu())
-            stacked = torch.cat(chunks)
-            accumulated = stacked if accumulated is None else accumulated + stacked
-    return dataset.site_ids, accumulated / n_history_samples
+    return contrastive_train.extract_embeddings(encoder, dataset, batch_size=batch_size,
+                                                device=device, n_samples=n_history_samples,
+                                                input_keys=INPUT_KEYS)

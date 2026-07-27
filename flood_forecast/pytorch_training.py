@@ -11,6 +11,8 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
+from flood_forecast.meta_models.contrastive_train import load_embedding
+from flood_forecast.meta_models.multimodal_encoder import StaticEmbeddingMetaModel
 from flood_forecast.series_id_helper import handle_csv_id_output, handle_csv_id_validation
 from torch.nn import CrossEntropyLoss
 
@@ -45,12 +47,22 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
 def handle_meta_data(model: PyTorchForecast):
     """A function to initialize models with meta-data.
 
+    Two config styles are supported. The classic style points ``path`` at the config of a trainable
+    meta-model (e.g. an auto-encoder). Alternatively, ``embedding_path`` points at a file written by
+    :func:`flood_forecast.meta_models.contrastive_train.save_embeddings` (e.g. from a contrastively
+    pretrained :class:`~flood_forecast.meta_models.multimodal_encoder.MultiModalEncoder`), with
+    ``entity_id`` selecting the entity whose precomputed embedding becomes the representation.
+
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initialized meta-model, its representation, and the meta-loss function.
     :rtype: tuple(PyTorchForecast, torch.Tensor, torch.nn.Module)
     """
     meta_loss = None
+    if "embedding_path" in model.params["meta_data"]:
+        representation = load_embedding(model.params["meta_data"]["embedding_path"],
+                                        model.params["meta_data"].get("entity_id"))
+        return StaticEmbeddingMetaModel(), representation, None
     with open(model.params["meta_data"]["path"]) as f:
         json_data = json.load(f)
     if "meta_loss" in model.params["meta_data"]:
