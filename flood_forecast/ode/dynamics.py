@@ -306,7 +306,7 @@ class SEIRDynamics(BaseDynamics):
 
 class HybridDynamics(BaseDynamics):
     """
-    A physics-based dynamics with an additive learned residual: ``f = f_physics + f_mlp``.
+    A physics-based dynamics with an additive learned residual: ``f = f_physics + f_mlp``...
 
     This is the universal differential equation pattern: the equation structure comes from domain science
     while the MLP absorbs unmodeled parameter interactions and forcings.
