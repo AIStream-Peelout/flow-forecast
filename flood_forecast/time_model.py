@@ -6,7 +6,8 @@ import os
 from datetime import datetime
 from flood_forecast.model_dict_function import pytorch_model_dict
 from flood_forecast.pre_dict import scaler_dict
-from flood_forecast.preprocessing.pytorch_loaders import (CatchmentWindowLoader, CSVDataLoader, AEDataloader, TemporalLoader,
+from flood_forecast.preprocessing.pytorch_loaders import (CatchmentWindowLoader, MultiBasinWindowLoader,
+                                                          CSVDataLoader, AEDataloader, TemporalLoader,
                                                           CSVSeriesIDLoader, GeneralClassificationLoader,
                                                           VariableSequenceLength)
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
@@ -373,6 +374,25 @@ class PyTorchForecast(TimeSeriesModel):
                 dataset_params["target_col"],
                 dataset_params["relevant_cols"],
                 **start_end_params)
+        elif the_class == "MultiBasinCatchmentWindow":
+            multi_params = {}
+            for key in ("min_valid_fraction", "window_stride", "basin_sample_power",
+                        "datetime_col", "max_basins", "scaled_cols"):
+                if key in dataset_params:
+                    multi_params[key] = dataset_params[key]
+            # Per-split settings use the loader_type prefix, e.g. "train_start_date";
+            # a per-split window_stride overrides the shared one.
+            for key in ("start_date", "end_date", "basin_split", "samples_per_epoch",
+                        "window_stride"):
+                if loader_type + "_" + key in dataset_params:
+                    multi_params[key] = dataset_params[loader_type + "_" + key]
+            loader = MultiBasinWindowLoader(
+                data_path,
+                dataset_params["forecast_history"],
+                dataset_params["forecast_length"],
+                dataset_params["target_col"],
+                dataset_params["relevant_cols"],
+                **multi_params)
         elif the_class == "AutoEncoder":
             loader = AEDataloader(
                 data_path,

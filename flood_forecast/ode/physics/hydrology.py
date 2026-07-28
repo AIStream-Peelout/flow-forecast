@@ -735,7 +735,8 @@ class HybridGR4Model(torch.nn.Module):
 
     def forward(self, met: torch.Tensor, context: torch.Tensor,
                 initial_state: Optional[torch.Tensor] = None,
-                raw_forcing: Optional[torch.Tensor] = None) -> dict:
+                raw_forcing: Optional[torch.Tensor] = None,
+                initial_snow: Optional[torch.Tensor] = None) -> dict:
         """
         Simulates streamflow for a met window conditioned on catchment embeddings.
 
@@ -752,6 +753,11 @@ class HybridGR4Model(torch.nn.Module):
             (batch_size, seq_len, 2) holding [temperature degC, shortwave W/m2]. Temperature drives
             the rain/snow partition and melt and is deliberately NOT a learned quantity.
         :type raw_forcing: torch.Tensor, optional
+        :param initial_snow: Optional observed SWE in mm of shape (batch_size,) (e.g. SNODAS
+            basin means) seeding the snow store on top of ``initial_state`` (or the default
+            initialization). Negative entries mean "no observation" and leave the state untouched;
+            ignored when ``snow=False``. Defaults to None.
+        :type initial_snow: torch.Tensor, optional
         :return: A dict with "flow" (batch_size, seq_len), "forcing", "parameters" and "states"
             (for auxiliary supervision such as actual ET and, with snow, SWE via
             ``self.dynamics.swe(states)``).
@@ -771,6 +777,10 @@ class HybridGR4Model(torch.nn.Module):
             offset = 1 if self.snow else 0
             initial_state[:, offset] = 0.6 * parameters[:, 0]
             initial_state[:, offset + 1] = 0.3 * parameters[:, 2]
+        if initial_snow is not None and self.snow:
+            initial_state = initial_state.clone()
+            initial_state[:, 0] = torch.where(initial_snow >= 0.0, initial_snow,
+                                              initial_state[:, 0])
         states = self.node(initial_state, times)
         return {"flow": self.dynamics.streamflow(states), "forcing": forcing,
                 "parameters": parameters, "states": states}

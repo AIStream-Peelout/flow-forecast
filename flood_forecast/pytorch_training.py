@@ -74,7 +74,7 @@ def handle_meta_data(model: PyTorchForecast):
     meta_name = json_data["model_name"]
     meta_model = PyTorchForecast(meta_name, training_path, valid_path, dataset_params2["test_path"], json_data)
     meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
-                                                 model.params["meta_data"]["uuid"], meta_model)
+                                                  model.params["meta_data"]["uuid"], meta_model)
     return meta_model, meta_representation, meta_loss
 
 
@@ -115,7 +115,8 @@ def train_transformer_style(
     :type model: PyTorchForecast
     :param training_params: A dictionary of the necessary parameters for training.
     :type training_params: Dict
-    :param takes_target: A parameter to determine whether a model requires the target during its forward pass, defaults to False.
+    :param takes_target: A parameter to determine whether a model requires the target during its
+        forward pass, defaults to False.
     :type takes_target: bool, optional
     :param forward_params: Extra parameters to be passed to the model's forward method, defaults to {}.
     :type forward_params: Dict, optional
@@ -152,11 +153,23 @@ def train_transformer_style(
     else:
         probabilistic = False
     max_epochs = training_params["epochs"]
+    train_sampler = None
+    train_shuffle = training_params["shuffle"]
+    sample_weights = getattr(model.training, "sample_weights", None)
+    if sample_weights is not None:
+        # Datasets exposing sample_weights (e.g. MultiBasinWindowLoader) opt into weighted
+        # sampling with replacement; samples_per_epoch caps the draws for very large datasets.
+        num_samples = getattr(model.training, "samples_per_epoch", None) or len(model.training)
+        train_sampler = torch.utils.data.WeightedRandomSampler(
+            torch.as_tensor(sample_weights, dtype=torch.double), num_samples=num_samples,
+            replacement=True)
+        train_shuffle = False
+        print("Using weighted sampler with %d samples per epoch" % num_samples)
     data_loader = DataLoader(
         model.training,
         batch_size=training_params["batch_size"],
-        shuffle=training_params["shuffle"],
-        sampler=None,
+        shuffle=train_shuffle,
+        sampler=train_sampler,
         batch_sampler=None,
         num_workers=worker_num,
         collate_fn=None,
@@ -233,6 +246,12 @@ def train_transformer_style(
                 print("Stopping model now")
                 model.model.load_state_dict(torch.load("checkpoint.pth"))
                 break
+    else:
+        if es:
+            # Training ran to max_epochs without triggering: still restore the best-validation
+            # checkpoint rather than keeping the (possibly past-peak) final-epoch weights.
+            print("Restoring best validation checkpoint (val loss %s)" % es.best_score)
+            model.model.load_state_dict(torch.load("checkpoint.pth"))
     decoder_structure = True
     the_ae = model.params["dataset_params"]["class"] == "AutoEncoder"
     if the_ae or model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
@@ -364,7 +383,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         output_dist = torch.distributions.Normal(output, output_std)
     if validation_dataset:
         src, output, labels, output_dist = handle_scaling(validation_dataset, src, output, labels,
-                                                         probabilistic, m, output_std)
+                                                          probabilistic, m, output_std)
     if probabilistic:
         if len(labels.shape) != len(output.shape):
             output_dist = output_dist[:, :, 0]
@@ -521,7 +540,8 @@ def compute_validation(validation_loader: DataLoader,
     :type criterion: Type[torch.nn.modules.loss._Loss] or List
     :param device: The device on which to perform computation.
     :type device: torch.device
-    :param decoder_structure: Whether the model should use sequential decoding (e.g., greedy_decode or simple_decode), defaults to False.
+    :param decoder_structure: Whether the model should use sequential decoding (e.g., greedy_decode
+        or simple_decode), defaults to False.
     :type decoder_structure: bool, optional
     :param meta_data_model: The model to handle the meta-data (currently unused in the function body), defaults to None.
     :type meta_data_model: PyTorchForecast, optional
@@ -648,6 +668,7 @@ def compute_validation(validation_loader: DataLoader,
                                                              title="roc_" + str(epoch))})
         wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output_final)})
         wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output_final,
-                            y_true=fin.detach().cpu().numpy(), class_names=None)})
+                                                        y_true=fin.detach().cpu().numpy(),
+                                                        class_names=None)})
     model.train()
     return list(scaled_crit.values())[0]

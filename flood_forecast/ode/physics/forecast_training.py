@@ -66,7 +66,8 @@ def match_current_flow(model: HybridGR4Model, state: torch.Tensor, parameters: t
 
 def estimate_initial_state(model: HybridGR4Model, batch: Dict[str, torch.Tensor],
                            context: torch.Tensor, match_flow: bool = True,
-                           spinup_start_state: Optional[torch.Tensor] = None) -> torch.Tensor:
+                           spinup_start_state: Optional[torch.Tensor] = None,
+                           initial_snow: Optional[torch.Tensor] = None) -> torch.Tensor:
     """
     Estimates the ODE state at forecast issue time from the spin-up window.
 
@@ -79,17 +80,20 @@ def estimate_initial_state(model: HybridGR4Model, batch: Dict[str, torch.Tensor]
     :param match_flow: Whether to correct the runoff states to the observed flow at t0,
         defaults to True.
     :type match_flow: bool, optional
-    :param spinup_start_state: Optional state at the *start* of the spin-up window (e.g. with the
-        snow store seeded from SNOTEL/gridded SWE — a 30-day spin-up cannot build a seasonal
-        snowpack on its own), defaults to None which uses the model's default initialization.
+    :param spinup_start_state: Optional state at the *start* of the spin-up window, defaults to
+        None which uses the model's default initialization.
     :type spinup_start_state: torch.Tensor, optional
+    :param initial_snow: Optional observed SWE in mm of shape (batch_size,) seeding the snow store
+        at the start of the spin-up (a 30-day spin-up cannot build a seasonal snowpack on its own);
+        negative entries mean "no observation", defaults to None.
+    :type initial_snow: torch.Tensor, optional
     :return: The state at t0 of shape (batch_size, state_dim), detached.
     :rtype: torch.Tensor
     """
     with torch.no_grad():
         raw = batch["spinup_raw"] if model.snow else None
         out = model(batch["spinup_met"], context, initial_state=spinup_start_state,
-                    raw_forcing=raw)
+                    raw_forcing=raw, initial_snow=initial_snow)
         state = out["states"][:, -1, :].clamp(min=0.0)
         if match_flow:
             state = match_current_flow(model, state, out["parameters"],
@@ -317,7 +321,7 @@ class HybridGR4Forecast(torch.nn.Module):
                  raw_temp_index: int, raw_sw_index: int, context_dim: int = 256, dim: int = 64,
                  depth: int = 2, heads: int = 4, snow: bool = True, temp_offset_c: float = 0.0,
                  match_flow: bool = True, context_path: Optional[str] = None,
-                 parameter_head_params: Optional[dict] = None):
+                 parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None):
         """
         Initializes the wrapper.
 
@@ -351,12 +355,18 @@ class HybridGR4Forecast(torch.nn.Module):
         :type context_path: str, optional
         :param parameter_head_params: Passed through to the parameter head, defaults to None.
         :type parameter_head_params: dict, optional
+        :param swe_index: Optional column index of an observed basin-mean SWE channel in mm (e.g.
+            SNODAS, daily forward-filled; negative sentinel = no observation). The value at the
+            spin-up start seeds the snow store; the channel is excluded from the learned met
+            forcing so future SWE never leaks into the horizon simulation. Defaults to None.
+        :type swe_index: int, optional
         """
         super().__init__()
         self.spinup_length = spinup_length
         self.forecast_length = forecast_length
         self.raw_indices = [raw_temp_index, raw_sw_index]
-        self.met_indices = [i for i in range(n_time_series) if i not in (0,)]
+        self.swe_index = swe_index
+        self.met_indices = [i for i in range(n_time_series) if i not in (0, swe_index)]
         self.temp_offset_c = temp_offset_c
         self.match_flow = match_flow
         self.hybrid = HybridGR4Model(n_met_features=len(self.met_indices),
@@ -381,9 +391,32 @@ class HybridGR4Forecast(torch.nn.Module):
         temp_c = segment[:, :, self.raw_indices[0]] - 273.15 + self.temp_offset_c
         return torch.stack([temp_c, segment[:, :, self.raw_indices[1]]], dim=-1)
 
+    def _forecast(self, x: torch.Tensor, context: torch.Tensor) -> torch.Tensor:
+        """
+        Runs spin-up, assimilation and the horizon simulation for a given catchment context.
+
+        :param x: Source windows of shape (batch, spinup + horizon, n_features); column 0 is the
+            physical flow (mm/hr, zeroed in the horizon segment by the loader).
+        :type x: torch.Tensor
+        :param context: Catchment embeddings of shape (batch, context_dim).
+        :type context: torch.Tensor
+        :return: Simulated horizon flow of shape (batch, forecast_length) in mm/hr.
+        :rtype: torch.Tensor
+        """
+        spin, horizon = x[:, :self.spinup_length], x[:, self.spinup_length:]
+        batch = {"spinup_met": spin[:, :, self.met_indices], "spinup_flow": spin[:, :, 0],
+                 "spinup_raw": self._raw(spin)}
+        initial_snow = x[:, 0, self.swe_index] if self.swe_index is not None else None
+        initial_state = estimate_initial_state(self.hybrid, batch, context,
+                                               match_flow=self.match_flow,
+                                               initial_snow=initial_snow)
+        out = self.hybrid(horizon[:, :, self.met_indices], context, initial_state=initial_state,
+                          raw_forcing=self._raw(horizon) if self.hybrid.snow else None)
+        return out["flow"]
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Runs spin-up, assimilation and the horizon simulation.
+        Runs spin-up, assimilation and the horizon simulation with the model's own context.
 
         :param x: Source windows of shape (batch, spinup + horizon, n_features); column 0 is the
             physical flow (mm/hr, zeroed in the horizon segment by the loader).
@@ -391,12 +424,110 @@ class HybridGR4Forecast(torch.nn.Module):
         :return: Simulated horizon flow of shape (batch, forecast_length) in mm/hr.
         :rtype: torch.Tensor
         """
-        spin, horizon = x[:, :self.spinup_length], x[:, self.spinup_length:]
-        context = self.context.expand(x.shape[0], -1)
-        batch = {"spinup_met": spin[:, :, self.met_indices], "spinup_flow": spin[:, :, 0],
-                 "spinup_raw": self._raw(spin)}
-        initial_state = estimate_initial_state(self.hybrid, batch, context,
-                                               match_flow=self.match_flow)
-        out = self.hybrid(horizon[:, :, self.met_indices], context, initial_state=initial_state,
-                          raw_forcing=self._raw(horizon) if self.hybrid.snow else None)
-        return out["flow"]
+        return self._forecast(x, self.context.expand(x.shape[0], -1))
+
+
+class HybridGR4MultiBasin(HybridGR4Forecast):
+    """
+    Multi-basin hybrid GR4 forecaster (registered as "HybridGR4MultiBasin").
+
+    Pairs with :class:`~flood_forecast.preprocessing.pytorch_loaders.MultiBasinWindowLoader`: the
+    last source channel carries the basin's position in the shared manifest, which selects (a) the
+    catchment context — the pretrained embedding as a fixed buffer where the manifest marks one
+    available, a learnable embedding row otherwise — and (b) the basin's train-period flow scale,
+    which divides the simulated flow so the criterion sees per-basin standardized errors matching
+    the loader's standardized targets. Multiply by ``flow_scales[basin]`` to recover mm/hr.
+    """
+
+    def __init__(self, n_time_series: int, spinup_length: int, forecast_length: int,
+                 raw_temp_index: int, raw_sw_index: int, basin_info_path: str,
+                 context_dim: int = 256, dim: int = 64, depth: int = 2, heads: int = 4,
+                 snow: bool = True, match_flow: bool = True,
+                 parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None):
+        """
+        Initializes the multi-basin wrapper.
+
+        :param n_time_series: Loader feature count INCLUDING the trailing basin-index channel.
+        :type n_time_series: int
+        :param spinup_length: The spin-up segment length within each source window.
+        :type spinup_length: int
+        :param forecast_length: The forecast horizon length.
+        :type forecast_length: int
+        :param raw_temp_index: Column index of the (lapse-corrected) raw temperature in Kelvin.
+        :type raw_temp_index: int
+        :param raw_sw_index: Column index of raw shortwave radiation.
+        :type raw_sw_index: int
+        :param basin_info_path: Path to the same manifest JSON the loader uses; supplies basin
+            order, per-basin flow scales, embedding availability and the embedding file path.
+        :type basin_info_path: str
+        :param context_dim: Catchment embedding dimension, defaults to 256.
+        :type context_dim: int, optional
+        :param dim: Forcing generator width, defaults to 64.
+        :type dim: int, optional
+        :param depth: Forcing generator depth, defaults to 2.
+        :type depth: int, optional
+        :param heads: Attention heads, defaults to 4.
+        :type heads: int, optional
+        :param snow: Whether to use the snow-extended dynamics, defaults to True.
+        :type snow: bool, optional
+        :param match_flow: Whether to assimilate observed flow at issue time, defaults to True.
+        :type match_flow: bool, optional
+        :param parameter_head_params: Passed through to the parameter head, defaults to None.
+        :type parameter_head_params: dict, optional
+        :param swe_index: Optional column index of the observed SWE channel (see
+            :class:`HybridGR4Forecast`), defaults to None.
+        :type swe_index: int, optional
+        """
+        import json
+        super().__init__(n_time_series - 1, spinup_length, forecast_length, raw_temp_index,
+                         raw_sw_index, context_dim=context_dim, dim=dim, depth=depth, heads=heads,
+                         snow=snow, match_flow=match_flow,
+                         parameter_head_params=parameter_head_params, swe_index=swe_index)
+        delattr(self, "context")  # replaced by per-basin context below
+        with open(basin_info_path) as f:
+            manifest = json.load(f)
+        basins = manifest["basins"]
+        n_basins = len(basins)
+        self.register_buffer("flow_scales",
+                             torch.tensor([float(b["flow_scale_mm_hr"]) for b in basins]))
+        fixed = torch.zeros(n_basins, context_dim)
+        mask = torch.zeros(n_basins, dtype=torch.bool)
+        if manifest.get("embedding_path"):
+            bank = torch.load(manifest["embedding_path"], weights_only=True)
+            lookup = {site: i for i, site in enumerate(bank["site_ids"])}
+            for i, basin in enumerate(basins):
+                if basin.get("has_embedding") and basin["site_id"] in lookup:
+                    fixed[i] = bank["embeddings"][lookup[basin["site_id"]]]
+                    mask[i] = True
+        self.register_buffer("fixed_context", fixed)
+        self.register_buffer("has_fixed_context", mask)
+        self.learned_context = torch.nn.Embedding(n_basins, context_dim)
+        torch.nn.init.normal_(self.learned_context.weight, std=0.1)
+
+    def basin_context(self, basin_idx: torch.Tensor) -> torch.Tensor:
+        """
+        Returns the per-sample catchment context for a batch of basin indices.
+
+        :param basin_idx: Basin positions (manifest order) of shape (batch,).
+        :type basin_idx: torch.Tensor
+        :return: Context vectors of shape (batch, context_dim).
+        :rtype: torch.Tensor
+        """
+        fixed = self.fixed_context[basin_idx]
+        learned = self.learned_context(basin_idx)
+        return torch.where(self.has_fixed_context[basin_idx].unsqueeze(-1), fixed, learned)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Runs spin-up, assimilation and the horizon simulation with per-basin context, returning
+        flow standardized by the basin's train-period flow scale (to match the loader's targets).
+
+        :param x: Source windows of shape (batch, spinup + horizon, n_features + 1); the last
+            channel is the constant basin index.
+        :type x: torch.Tensor
+        :return: Standardized simulated horizon flow of shape (batch, forecast_length).
+        :rtype: torch.Tensor
+        """
+        basin_idx = x[:, 0, -1].long()
+        sim = self._forecast(x[:, :, :-1], self.basin_context(basin_idx))
+        return sim / self.flow_scales[basin_idx].clamp(min=1e-8).unsqueeze(1)

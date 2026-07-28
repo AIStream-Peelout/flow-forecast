@@ -8,7 +8,7 @@ from flood_forecast.basic.linear_regression import SimpleLinearModel
 from flood_forecast.basic.lstm_vanilla import LSTMForecast
 from flood_forecast.basic.narx import NARX
 from flood_forecast.ode.neural_ode import ODEForecast
-from flood_forecast.ode.physics.forecast_training import HybridGR4Forecast
+from flood_forecast.ode.physics.forecast_training import HybridGR4Forecast, HybridGR4MultiBasin
 from flood_forecast.custom.custom_opt import NSELoss, MaskedMSELoss
 from flood_forecast.custom.custom_opt import BertAdam, QuantileLoss
 from torch.optim import Adam, SGD
@@ -58,6 +58,7 @@ pytorch_model_dict = {
     "NARX": NARX,
     "NeuralODE": ODEForecast,
     "HybridGR4": HybridGR4Forecast,
+    "HybridGR4MultiBasin": HybridGR4MultiBasin,
 }
 
 pytorch_criterion_dict = {

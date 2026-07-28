@@ -5,13 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fed11ced-c777-4db5-9ac9-1c12dcf84a69" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/docs/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/basic_ae.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/basic_ae.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/basic_utils.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/basic_utils.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/crossformer.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/crossformer.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/custom_opt.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/custom_opt.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/explain_model_output.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/explain_model_output.rst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.circleci/config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.circleci/config.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/model_dict_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/model_dict_function.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/ode/physics/forecast_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/ode/physics/forecast_training.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/ode/physics/hydrology.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/ode/physics/hydrology.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flood_forecast/preprocessing/pytorch_loaders.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/preprocessing/pytorch_loaders.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/pytorch_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/pytorch_training.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/time_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/time_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flood_forecast/training_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/flood_forecast/training_utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,31 +40,38 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding_forward.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_self_attention_dims.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_vivit_model.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_ro_crossvivit.TestRoCrossViViT.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_variable_length.TestVariableLength.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_cross_vivit.py.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;com.google.cloudcode.ide_session_index&quot;: &quot;20240803_0000&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.black.configuration.BlackFormatterConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_positional_encoding_forward.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_self_attention_dims.executor": "Run",
+    "Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_vivit_model.executor": "Run",
+    "Python tests.Python tests for test_ro_crossvivit.TestRoCrossViViT.executor": "Run",
+    "Python tests.Python tests for test_variable_length.TestVariableLength.executor": "Run",
+    "Python tests.Python tests in test_cross_vivit.py.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.google.cloudcode.ide_session_index": "20240803_0000",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "foundation__model__hydro",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/isaac/Documents/GitHub/flow-forecast",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.stylelint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.stylelint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.black.configuration.BlackFormatterConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Python tests.Python tests for test_cross_vivit.TestCrossVivVit.test_forward">
     <configuration name="Python tests for test_cross_vivit.TestCrossVivVit.test_forward" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="flow-forecast" />
@@ -74,6 +84,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_cross_vivit.TestCrossVivVit.test_forward&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
@@ -90,6 +101,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_cross_vivit.TestCrossVivVit.test_positional_encoding&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
@@ -106,6 +118,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_cross_vivit.TestCrossVivVit.test_positional_encoding_forward&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
@@ -122,6 +135,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_cross_vivit.TestCrossVivVit.test_vivit_model&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
@@ -138,6 +152,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_ro_crossvivit.TestRoCrossViViT&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
@@ -156,8 +171,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.18034.82" />
-        <option value="bundled-python-sdk-975db3bf15a3-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.18034.82" />
+        <option value="bundled-python-sdk-0978a7220b69-9867c7d4c0a4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.28294.336" />
       </set>
     </attachedChunks>
   </component>
