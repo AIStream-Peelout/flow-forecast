@@ -26,6 +26,7 @@ model_save/
 # Training run artifacts (checkpoints, eval reports, forecast plots, logs)
 /output/
 /checkpoint.pth
+/nonfinite_batch_debug.pth
 __pycache__/
 
 # Catchment-foundation experiments: keep the scripts, ignore generated outputs.

@@ -55,7 +55,7 @@ def load_env(path: str) -> None:
 
 def build_params(manifest_path: str, run_name: str, epochs: int, batch_size: int,
                  samples_per_epoch: int, max_basins: Optional[int], lr: float,
-                 use_wandb: bool, use_swe: bool = False) -> Dict:
+                 use_wandb: bool, use_swe: bool = False, patience: int = 3) -> Dict:
     """
     Builds the FF config dict for the multi-basin run.
 
@@ -78,6 +78,8 @@ def build_params(manifest_path: str, run_name: str, epochs: int, batch_size: int
     :param use_swe: Whether to add the SNODAS SWE channel and seed the snow store from it
         (requires swe series referenced by the manifest), defaults to False.
     :type use_swe: bool, optional
+    :param patience: Early-stopping patience in epochs, defaults to 3.
+    :type patience: int, optional
     :return: The config dict.
     :rtype: Dict
     """
@@ -110,9 +112,10 @@ def build_params(manifest_path: str, run_name: str, epochs: int, batch_size: int
             "valid_window_stride": 336, "test_window_stride": 672,
             "train_samples_per_epoch": samples_per_epoch,
         },
-        "early_stopping": {"patience": 3},
+        "early_stopping": {"patience": patience},
         "training_params": {"criterion": "MSE", "optimizer": "Adam", "optim_params": {},
-                            "lr": lr, "epochs": epochs, "batch_size": batch_size},
+                            "lr": lr, "epochs": epochs, "batch_size": batch_size,
+                            "max_grad_norm": 1.0},
         "GCS": False,
         "wandb": {"project": "catchment-foundation", "name": run_name,
                   "tags": ["multi_basin", "hybrid_gr4"]} if use_wandb else False,
@@ -145,6 +148,8 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=3e-3)
     parser.add_argument("--swe", action="store_true",
                         help="Add the SNODAS SWE channel and seed the snow store from it")
+    parser.add_argument("--patience", type=int, default=3,
+                        help="Early-stopping patience in epochs")
     parser.add_argument("--no-wandb", action="store_true")
     parser.add_argument("--eval-stride", type=int, default=336,
                         help="Window stride (hours) for the post-training forecast_report eval")
@@ -158,7 +163,7 @@ def main() -> None:
     os.makedirs(run_dir, exist_ok=True)
     params = build_params(args.manifest, args.name, args.epochs, args.batch_size,
                           args.samples_per_epoch, args.max_basins, args.lr, not args.no_wandb,
-                          use_swe=args.swe)
+                          use_swe=args.swe, patience=args.patience)
     with open(os.path.join(run_dir, "config.json"), "w") as f:
         json.dump(params, f, indent=1)
 

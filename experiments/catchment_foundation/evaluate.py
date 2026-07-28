@@ -152,6 +152,13 @@ def evaluate_splits(ff_model, manifest_path: str, run_dir: str, eval_stride: int
                 data["sim"], data["obs"], data["persist"], loader.basin_timestamps[local],
                 data["t0s"], full_flow=full_flow, area_km2=areas[site], out_dir=basin_dir,
                 wandb_run=None, n_examples=4)
+            if basin_dir is not None and wandb_run is not None:
+                # Predicted-vs-actual example windows, browsable in the W&B run under
+                # <split>/<site>/forecast_NN_<issue date>.
+                for name in sorted(os.listdir(basin_dir)):
+                    if name.endswith(".html"):
+                        key = "%s/%s/%s" % (split_name, site, name[:-5])
+                        wandb_run.log({key: wandb.Html(open(os.path.join(basin_dir, name)))})
         with open(os.path.join(out_dir, "per_basin_metrics.json"), "w") as f:
             json.dump(per_basin, f, indent=1)
         with open(os.path.join(out_dir, "pooled_metrics.json"), "w") as f:

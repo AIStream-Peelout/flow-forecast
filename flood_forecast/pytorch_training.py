@@ -404,6 +404,27 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
     return loss
 
 
+def _count_nonfinite_batch(kind: str, nan_batches: int, max_nan_batches: int) -> int:
+    """Records one skipped non-finite batch, aborting once the allowance is used up.
+
+    :param kind: What was non-finite ("loss" or "gradients"), for the warning text.
+    :type kind: str
+    :param nan_batches: Non-finite batches skipped so far this epoch.
+    :type nan_batches: int
+    :param max_nan_batches: Skip allowance before training aborts.
+    :type max_nan_batches: int
+    :return: The incremented skip count.
+    :rtype: int
+    """
+    nan_batches += 1
+    print("Warning: skipping non-finite %s batch %d of %d allowed" % (kind, nan_batches,
+                                                                      max_nan_batches))
+    if nan_batches >= max_nan_batches:
+        raise ValueError("Error infinite or NaN %s detected. Try normalizing data or performing "
+                         "interpolation" % kind)
+    return nan_batches
+
+
 def torch_single_train(model: PyTorchForecast,
                        opt: optim.Optimizer,
                        criterion: Type[torch.nn.modules.loss._Loss],
@@ -448,6 +469,9 @@ def torch_single_train(model: PyTorchForecast,
     output_std = None
     mulit_targets_copy = multi_targets
     running_loss = 0.0
+    nan_batches = 0
+    max_nan_batches = model.params.get("training_params", {}).get("max_nan_batches", 20)
+    max_grad_norm = model.params.get("training_params", {}).get("max_grad_norm")
     for src, trg in data_loader:
         opt.zero_grad()
         if meta_data_model:
@@ -499,10 +523,28 @@ def torch_single_train(model: PyTorchForecast,
                 loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
             if loss > 100:
                 print("Warning: high loss detected")
+            if not torch.isfinite(loss):
+                # Skip the batch BEFORE backward/step so a single pathological window (e.g. a
+                # stiff-ODE blowup) cannot poison the weights; abort only if it keeps happening.
+                nan_batches = _count_nonfinite_batch("loss", nan_batches, max_nan_batches)
+                continue
             loss.backward()
+            if max_grad_norm is not None:
+                # clip_grad_norm_ SCALES by the total norm, so a non-finite norm (gradient
+                # explosion through e.g. a stiff ODE) would poison every weight on opt.step();
+                # treat such batches exactly like non-finite losses and skip them.
+                norm = torch.nn.utils.clip_grad_norm_(model.model.parameters(), max_grad_norm)
+                if not torch.isfinite(norm):
+                    if nan_batches == 0:
+                        # Persist the first offending batch + weights so the explosion can be
+                        # reproduced and debugged offline.
+                        torch.save({"src": src.cpu(), "trg": trg.cpu(),
+                                    "state_dict": model.model.state_dict()},
+                                   "nonfinite_batch_debug.pth")
+                    nan_batches = _count_nonfinite_batch("gradients", nan_batches,
+                                                         max_nan_batches)
+                    continue
             opt.step()
-            if torch.isnan(loss) or loss == float('inf'):
-                raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
             running_loss += loss.item()
             i += 1
     print("The running loss iss: ")
