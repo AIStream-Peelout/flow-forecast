@@ -470,7 +470,10 @@ def torch_single_train(model: PyTorchForecast,
     mulit_targets_copy = multi_targets
     running_loss = 0.0
     nan_batches = 0
-    max_nan_batches = model.params.get("training_params", {}).get("max_nan_batches", 20)
+    # Allowance scales with epoch length: isolated non-finite batches (e.g. a stiff-ODE gradient
+    # blow-up on an extreme window) are skipped, but a systemic failure still aborts the run.
+    max_nan_frac = model.params.get("training_params", {}).get("max_nan_frac", 0.05)
+    max_nan_batches = max(20, int(max_nan_frac * len(data_loader)))
     max_grad_norm = model.params.get("training_params", {}).get("max_grad_norm")
     for src, trg in data_loader:
         opt.zero_grad()

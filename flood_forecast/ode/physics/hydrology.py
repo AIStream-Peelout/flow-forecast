@@ -482,7 +482,7 @@ class GR4ParameterHead(torch.nn.Module):
 
     def __init__(self, embedding_dim: int = 256, hidden_dim: int = 64,
                  x1_range: tuple = (10.0, 2000.0), x2_range: tuple = (-10.0, 10.0),
-                 x3_range: tuple = (5.0, 500.0), x4_range: tuple = (0.5, 120.0)):
+                 x3_range: tuple = (5.0, 500.0), x4_range: tuple = (2.0, 120.0)):
         """
         Initializes the parameter head.
 
@@ -496,7 +496,14 @@ class GR4ParameterHead(torch.nn.Module):
         :type x2_range: tuple, optional
         :param x3_range: Bounds (mm) for the routing store capacity, defaults to (5, 500).
         :type x3_range: tuple, optional
-        :param x4_range: Bounds (time units) for the unit hydrograph constant, defaults to (0.5, 120).
+        :param x4_range: Bounds (time units) for the unit hydrograph constant, defaults to
+            (2.0, 120). The lower bound is a SOLVER STABILITY constraint, not just a physical one:
+            the Nash cascade drains at rate ``n_routing_reservoirs / X4``, and explicit RK4 is
+            stable on the real axis only for ``rate * dt < 2.785``. With the default three
+            reservoirs and hourly steps that requires ``X4 > 3 / 2.785 = 1.077``; anything below
+            it diverges and produces gradient norms that overflow float32. 2.0 keeps a margin and
+            is physically honest — a catchment with a sub-2-hour unit hydrograph is not a
+            catchment. Lower this ONLY alongside a smaller solver step or an implicit method.
         :type x4_range: tuple, optional
         """
         super().__init__()
@@ -594,7 +601,8 @@ class EffectiveForcingGenerator(torch.nn.Module):
 
     def __init__(self, n_met_features: int, seq_len: int, context_dim: int = 256, dim: int = 64,
                  depth: int = 2, heads: int = 4, dim_head: int = 32, dropout: float = 0.0,
-                 encoder_type: str = "crossformer", seg_len: int = 3):
+                 encoder_type: str = "crossformer", seg_len: int = 3, anchored: bool = False,
+                 use_multiplier: bool = True, use_asos_gate: bool = False):
         """
         Initializes the forcing generator.
 
@@ -620,10 +628,30 @@ class EffectiveForcingGenerator(torch.nn.Module):
         :type encoder_type: str, optional
         :param seg_len: The Crossformer segment length, defaults to 3.
         :type seg_len: int, optional
+        :param anchored: When True, the network no longer invents forcing. Physical gridded
+            precipitation and PET are supplied through ``phys_forcing`` and the network may only
+            apply a bounded correction to them, which removes the degenerate optimum where
+            effective rainfall collapses to zero and the ODE coasts on storage. Defaults to False
+            (legacy generative behaviour).
+        :type anchored: bool, optional
+        :param use_multiplier: Anchored mode only: whether to learn the bounded multiplier on
+            gridded precipitation. Zero-initialized so it starts at exactly 1.0, making epoch 0
+            identical to the pure-physics baseline. Defaults to True.
+        :type use_multiplier: bool, optional
+        :param use_asos_gate: Anchored mode only: whether to add the gated station-innovation
+            term ``gate * max(P_station - P_grid, 0)``. A multiplier alone cannot recover a storm
+            the grid missed entirely (anything times zero is zero), and stations only ever ADD
+            water here -- a dry station does not imply a dry basin, while a wet one is positive
+            evidence of rain. The per-basin gate doubles as a learned areal-reduction factor for
+            a point observation, so it should fall with station distance. Defaults to False.
+        :type use_asos_gate: bool, optional
         """
         super().__init__()
         from flood_forecast.meta_models.merging_model import GatedFusion
         self.seq_len = seq_len
+        self.anchored = anchored
+        self.use_multiplier = use_multiplier
+        self.use_asos_gate = use_asos_gate
         if encoder_type == "crossformer":
             from flood_forecast.transformer_xl.cross_former import CrossformerEncoderOnly
             self.embed = torch.nn.Identity()
@@ -639,9 +667,25 @@ class EffectiveForcingGenerator(torch.nn.Module):
             raise ValueError("encoder_type must be 'crossformer' or 'transformer' but got " +
                              encoder_type)
         self.fusion = GatedFusion(dim, context_dim)
-        self.head = torch.nn.Linear(dim, 2)
+        self.head = torch.nn.Linear(dim, 1 if anchored else 2)
+        if anchored:
+            # Near-zero (NOT exactly zero) init: the multiplier starts within ~1% of 1.0, so the
+            # model begins at the physical baseline, while the head still has a non-zero Jacobian
+            # back into the encoder. Exact zeros would leave d(raw)/d(hidden) = 0 and the encoder
+            # would receive no gradient at all on the first step -- the same zero-Jacobian trap
+            # that GR4ParameterHead hit, and a real risk here because early stopping has already
+            # selected epoch-0 checkpoints on this project.
+            torch.nn.init.normal_(self.head.weight, std=1e-3)
+            torch.nn.init.zeros_(self.head.bias)
+            self.register_buffer("log_two", torch.tensor(0.6931471805599453))
+            # Static per-basin gate; the large negative bias starts it near 0 so that enabling the
+            # station term begins essentially where the multiplier-only model left off.
+            self.gate_net = torch.nn.Linear(context_dim, 1)
+            torch.nn.init.normal_(self.gate_net.weight, std=1e-3)
+            torch.nn.init.constant_(self.gate_net.bias, -6.0)
 
-    def forward(self, met: torch.Tensor, context: torch.Tensor) -> torch.Tensor:
+    def forward(self, met: torch.Tensor, context: torch.Tensor,
+                phys_forcing: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Generates the effective forcing series.
 
@@ -649,6 +693,10 @@ class EffectiveForcingGenerator(torch.nn.Module):
         :type met: torch.Tensor
         :param context: Catchment embeddings of shape (batch_size, context_dim).
         :type context: torch.Tensor
+        :param phys_forcing: Required in anchored mode: physical channels of shape
+            (batch_size, n_steps, 4) holding [gridded precip mm/hr, gridded PET mm/hr, station
+            precip mm/hr, station-observed mask]. Ignored otherwise. Defaults to None.
+        :type phys_forcing: torch.Tensor, optional
         :return: Non-negative effective forcing (P_eff, E_eff) of shape (batch_size, n_steps, 2).
         :rtype: torch.Tensor
         """
@@ -664,7 +712,23 @@ class EffectiveForcingGenerator(torch.nn.Module):
             met = torch.cat([padding, met], dim=1)
         hidden = self.encoder(self.embed(met))[:, -n_steps:, :]
         fused = self.fusion(hidden, context)
-        return torch.nn.functional.softplus(self.head(fused))
+        raw = self.head(fused)
+        if not self.anchored:
+            return torch.nn.functional.softplus(raw)
+        if phys_forcing is None:
+            raise ValueError("anchored=True requires phys_forcing with [P_grid, PET, P_station, "
+                             "station_mask].")
+        p_grid = phys_forcing[..., 0].clamp(min=0.0)
+        p_eff = p_grid
+        if self.use_multiplier:
+            # exp(ln2 * tanh(.)) is strictly within [0.5, 2.0] and equals 1.0 at zero input, so
+            # precipitation can be corrected but never zeroed out or made absurd.
+            p_eff = p_eff * torch.exp(self.log_two * torch.tanh(raw[..., 0]))
+        if self.use_asos_gate:
+            innovation = (phys_forcing[..., 2].clamp(min=0.0) - p_grid).clamp(min=0.0)
+            gate = torch.sigmoid(self.gate_net(context))
+            p_eff = p_eff + gate * innovation * phys_forcing[..., 3]
+        return torch.stack([p_eff, phys_forcing[..., 1].clamp(min=0.0)], dim=-1)
 
 
 class HybridGR4Model(torch.nn.Module):
@@ -680,7 +744,8 @@ class HybridGR4Model(torch.nn.Module):
     def __init__(self, n_met_features: int, seq_len: int, context_dim: int = 256, dim: int = 64,
                  depth: int = 2, heads: int = 4, n_routing_reservoirs: int = 3,
                  solver_params: Optional[dict] = None, parameter_head_params: Optional[dict] = None,
-                 encoder_type: str = "crossformer", snow: bool = False):
+                 encoder_type: str = "crossformer", snow: bool = False, anchored: bool = False,
+                 use_multiplier: bool = True, use_asos_gate: bool = False):
         """
         Initializes the hybrid model.
 
@@ -717,7 +782,10 @@ class HybridGR4Model(torch.nn.Module):
         self.forcing_generator = EffectiveForcingGenerator(n_met_features, seq_len,
                                                            context_dim=context_dim, dim=dim,
                                                            depth=depth, heads=heads,
-                                                           encoder_type=encoder_type)
+                                                           encoder_type=encoder_type,
+                                                           anchored=anchored,
+                                                           use_multiplier=use_multiplier,
+                                                           use_asos_gate=use_asos_gate)
         if snow:
             self.parameter_head = GR4SnowParameterHead(embedding_dim=context_dim,
                                                        **(parameter_head_params or {}))
@@ -736,7 +804,8 @@ class HybridGR4Model(torch.nn.Module):
     def forward(self, met: torch.Tensor, context: torch.Tensor,
                 initial_state: Optional[torch.Tensor] = None,
                 raw_forcing: Optional[torch.Tensor] = None,
-                initial_snow: Optional[torch.Tensor] = None) -> dict:
+                initial_snow: Optional[torch.Tensor] = None,
+                phys_forcing: Optional[torch.Tensor] = None) -> dict:
         """
         Simulates streamflow for a met window conditioned on catchment embeddings.
 
@@ -758,6 +827,10 @@ class HybridGR4Model(torch.nn.Module):
             initialization). Negative entries mean "no observation" and leave the state untouched;
             ignored when ``snow=False``. Defaults to None.
         :type initial_snow: torch.Tensor, optional
+        :param phys_forcing: Required when the forcing generator is anchored: physical channels of
+            shape (batch_size, seq_len, 4) holding [gridded precip, gridded PET, station precip,
+            station mask], all in mm/hr except the mask. Defaults to None.
+        :type phys_forcing: torch.Tensor, optional
         :return: A dict with "flow" (batch_size, seq_len), "forcing", "parameters" and "states"
             (for auxiliary supervision such as actual ET and, with snow, SWE via
             ``self.dynamics.swe(states)``).
@@ -765,7 +838,7 @@ class HybridGR4Model(torch.nn.Module):
         """
         parameters = self.parameter_head(context)
         self.dynamics.set_parameters(parameters)
-        forcing = self.forcing_generator(met, context)
+        forcing = self.forcing_generator(met, context, phys_forcing=phys_forcing)
         if self.snow:
             if raw_forcing is None:
                 raise ValueError("snow=True requires raw_forcing with [temperature, shortwave].")

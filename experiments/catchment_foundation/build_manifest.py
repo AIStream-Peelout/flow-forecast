@@ -148,7 +148,16 @@ def main() -> None:
         "embedding_path": EMBEDDING_PATH,
         "train_end": TRAIN_END,
         "preprocessing": {"fill_from": {"p01m": "precipitation"},
-                          "copy_cols": {"sw_raw": "shortwave_radiation"},
+                          # Unscaled copies for the physics path. copy_cols runs AFTER fill_from,
+                          # so asos_raw carries the gridded value where the station was missing,
+                          # which makes the station innovation exactly zero there; asos_observed
+                          # (taken BEFORE the fill) records where the station was genuinely
+                          # reporting.
+                          "copy_cols": {"sw_raw": "shortwave_radiation",
+                                        "precip_raw": "precipitation",
+                                        "pet_raw": "pet_mm_hr",
+                                        "asos_raw": "p01m"},
+                          "observed_mask_cols": {"asos_observed": "p01m"},
                           "lapse": {"source": "temperature", "target": "temp_lapse_k"},
                           "swe_col": "snodas_swe_mm"},
         "basins": basins,

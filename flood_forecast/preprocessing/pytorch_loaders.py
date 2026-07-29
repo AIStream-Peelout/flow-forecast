@@ -1110,7 +1110,8 @@ class MultiBasinWindowLoader(Dataset):
                  basin_split: Optional[str] = None, min_valid_fraction: float = 0.95,
                  window_stride: int = 24, samples_per_epoch: Optional[int] = None,
                  basin_sample_power: float = 0.5, datetime_col: str = "datetime",
-                 max_basins: Optional[int] = None):
+                 max_basins: Optional[int] = None, require_hourly: bool = True,
+                 min_target_coverage: float = 1.0, max_input_gap: int = 6):
         """
         Initializes the multi-basin window loader.
 
@@ -1154,6 +1155,18 @@ class MultiBasinWindowLoader(Dataset):
         :param max_basins: Optional cap on the number of basins loaded (smoke runs),
             defaults to None.
         :type max_basins: int, optional
+        :param require_hourly: Whether to reindex each basin onto a strict hourly grid so that
+            absent rows become explicit gaps instead of silently compressing real time,
+            defaults to True. Disable only to reproduce pre-fix behaviour.
+        :type require_hourly: bool, optional
+        :param min_target_coverage: Fraction of the horizon whose target flow must be genuinely
+            observed for a window to be kept, defaults to 1.0 (never score against interpolated
+            flow). Values below 1.0 admit windows whose targets are partly imputed.
+        :type min_target_coverage: float, optional
+        :param max_input_gap: Longest run of missing steps that may be interpolated in the INPUT
+            channels, in hours, defaults to 6. Longer runs are left missing, which rejects the
+            windows containing them.
+        :type max_input_gap: int, optional
         """
         import json
         super().__init__()
@@ -1166,6 +1179,9 @@ class MultiBasinWindowLoader(Dataset):
         self.forecast_length = forecast_length
         self.target_col_list = target_col
         self.relevant_cols = relevant_cols
+        self.require_hourly = require_hourly
+        self.min_target_coverage = min_target_coverage
+        self.max_input_gap = max_input_gap
         self.no_scale = True
         self.scale = None
         self.targ_scaler = IdentityScaler()
@@ -1228,9 +1244,11 @@ class MultiBasinWindowLoader(Dataset):
         derived = set(prep.get("copy_cols", {}))
         derived.add(prep.get("lapse", {}).get("target"))
         derived.add(prep.get("swe_col"))
+        derived.update(prep.get("observed_mask_cols", {}))
         base_cols = [col for col in self.relevant_cols if col not in derived]
         sources = list(prep.get("fill_from", {}).values()) + \
-            list(prep.get("copy_cols", {}).values())
+            list(prep.get("copy_cols", {}).values()) + \
+            list(prep.get("observed_mask_cols", {}).values())
         if prep.get("lapse"):
             sources.append(prep["lapse"]["source"])
         extra = sorted(set(source for source in sources if source not in base_cols))
@@ -1239,7 +1257,21 @@ class MultiBasinWindowLoader(Dataset):
                   if col in header or col not in prep.get("fill_from", {})]
         frame = pd.read_csv(basin["csv_path"], usecols=[datetime_col] + wanted)
         frame[datetime_col] = to_tz_naive_datetime(frame[datetime_col])
-        frame = frame.sort_values(datetime_col).set_index(datetime_col)
+        frame = frame.sort_values(datetime_col).drop_duplicates(datetime_col)
+        frame = frame.set_index(datetime_col)
+        if self.require_hourly:
+            # Reindex onto a strict hourly grid. Without this, windows are sliced by ROW COUNT, so
+            # absent rows silently compress real time -- nominal 1,056-row windows have been
+            # observed spanning 22,237 real hours, and the ODE integrates a multi-hour gap as one
+            # hour. Reindexing makes absent rows explicit NaNs that the validity filter can see.
+            frame = frame.reindex(pd.date_range(frame.index.min(), frame.index.max(), freq="h"))
+        # Provenance masks MUST be taken before fill_from runs, otherwise a station column that
+        # was silently backfilled from the gridded product is indistinguishable from one where the
+        # station genuinely agreed with the grid.
+        for mask_col, source in prep.get("observed_mask_cols", {}).items():
+            if mask_col in self.relevant_cols:
+                present = frame[source].notna() if source in frame.columns else False
+                frame[mask_col] = np.asarray(present, dtype=np.float32)
         for col, source in prep.get("fill_from", {}).items():
             if col not in frame.columns:
                 frame[col] = frame[source]
@@ -1265,18 +1297,59 @@ class MultiBasinWindowLoader(Dataset):
             mean, std = stats.get(col, (0.0, 1.0))
             frame[col] = (frame[col] - mean) / max(std, 1e-8)
         timestamps = frame.index
+        target_observed = frame[self.target_col_list[0]].notna().to_numpy()
         loader = CatchmentWindowLoader(frame.reset_index(drop=True), self.forecast_history,
                                        self.forecast_length, self.target_col_list,
                                        self.relevant_cols, area_sq_km=basin["area_sq_km"],
                                        min_valid_fraction=min_valid_fraction,
                                        window_stride=window_stride, no_scale=True)
-        # Windows are already gap-filtered against the raw NaN pattern; fill the remaining
-        # (tolerated, <= 1 - min_valid_fraction per window) holes so served tensors are finite.
-        loader.df = loader.df.interpolate(limit_direction="both").astype(np.float32)
+        loader.valid_starts = self._valid_windows(loader.valid_starts, target_observed)
+        # Fill only the INPUT holes the validity filter tolerated, and only across short runs --
+        # never bidirectionally across arbitrary spans. Target flow is never fabricated: windows
+        # whose target is not fully observed have already been rejected above.
+        loader.df = loader.df.interpolate(limit=self.max_input_gap,
+                                          limit_direction="both").astype(np.float32)
+        # Bounded interpolation deliberately leaves long gaps unfilled, so a window can still hold
+        # NaNs in an INPUT column even when its target is fully observed. Drop those outright:
+        # every served window must be finite, or the NaN reaches the ODE and the run dies.
+        finite = np.isfinite(loader.df.to_numpy()).all(axis=1)
+        cumulative = np.concatenate([[0], np.cumsum(finite)])
+        span = self.forecast_history + self.forecast_length
+        loader.valid_starts = [start for start in loader.valid_starts
+                               if cumulative[start + span] - cumulative[start] == span]
         # Drop init-time copies that __getitem__ never touches (memory: O(100) basins).
         loader.original_df = None
         loader.unscaled_df = None
         return loader, timestamps
+
+    def _valid_windows(self, starts: List[int], target_observed: np.ndarray) -> List[int]:
+        """
+        Keeps only windows whose flow observations support an honest forecast and score.
+
+        Two rules, both rejections rather than imputations: the flow at issue time must be a
+        genuine observation (the whole forecast is conditioned on it through
+        ``match_current_flow``, so assimilating an interpolated value corrupts everything
+        downstream), and the horizon target must be observed at least ``min_target_coverage`` of
+        the time. Interpolating a target would mean scoring the model partly against our own
+        interpolation, which is smooth by construction and therefore biased in favour of the
+        smooth-drift failure mode we are trying to detect.
+
+        :param starts: Candidate window start indices.
+        :type starts: List[int]
+        :param target_observed: Boolean array, True where the target column is observed.
+        :type target_observed: np.ndarray
+        :return: The surviving window start indices.
+        :rtype: List[int]
+        """
+        spinup, horizon = self.forecast_history, self.forecast_length
+        kept = []
+        for start in starts:
+            if not target_observed[start + spinup - 1]:
+                continue  # issue-time flow must be real
+            segment = target_observed[start + spinup:start + spinup + horizon]
+            if segment.mean() >= self.min_target_coverage:
+                kept.append(start)
+        return kept
 
     def _swe_column(self, swe_csv_path: Optional[str],
                     index: pd.DatetimeIndex) -> np.ndarray:

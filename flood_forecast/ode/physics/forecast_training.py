@@ -93,7 +93,8 @@ def estimate_initial_state(model: HybridGR4Model, batch: Dict[str, torch.Tensor]
     with torch.no_grad():
         raw = batch["spinup_raw"] if model.snow else None
         out = model(batch["spinup_met"], context, initial_state=spinup_start_state,
-                    raw_forcing=raw, initial_snow=initial_snow)
+                    raw_forcing=raw, initial_snow=initial_snow,
+                    phys_forcing=batch.get("spinup_phys"))
         state = out["states"][:, -1, :].clamp(min=0.0)
         if match_flow:
             state = match_current_flow(model, state, out["parameters"],
@@ -321,7 +322,9 @@ class HybridGR4Forecast(torch.nn.Module):
                  raw_temp_index: int, raw_sw_index: int, context_dim: int = 256, dim: int = 64,
                  depth: int = 2, heads: int = 4, snow: bool = True, temp_offset_c: float = 0.0,
                  match_flow: bool = True, context_path: Optional[str] = None,
-                 parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None):
+                 parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None,
+                 phys_indices: Optional[List[int]] = None, anchored: bool = False,
+                 use_multiplier: bool = True, use_asos_gate: bool = False):
         """
         Initializes the wrapper.
 
@@ -360,19 +363,46 @@ class HybridGR4Forecast(torch.nn.Module):
             spin-up start seeds the snow store; the channel is excluded from the learned met
             forcing so future SWE never leaks into the horizon simulation. Defaults to None.
         :type swe_index: int, optional
+        :param phys_indices: Required when ``anchored``: the four column indices of the physical
+            forcing channels, in the order [gridded precip mm/hr, gridded PET mm/hr, station
+            precip mm/hr, station-observed mask]. Like the raw temperature/shortwave channels
+            these carry physical units, so they are excluded from ``scaled_cols`` AND from the
+            learned met inputs. Defaults to None.
+        :type phys_indices: List[int], optional
+        :param anchored: Whether the forcing generator corrects physical forcing instead of
+            inventing it, defaults to False.
+        :type anchored: bool, optional
+        :param use_multiplier: Anchored mode: learn the bounded precipitation multiplier,
+            defaults to True.
+        :type use_multiplier: bool, optional
+        :param use_asos_gate: Anchored mode: add the gated station-innovation term, defaults
+            to False.
+        :type use_asos_gate: bool, optional
         """
         super().__init__()
         self.spinup_length = spinup_length
         self.forecast_length = forecast_length
         self.raw_indices = [raw_temp_index, raw_sw_index]
         self.swe_index = swe_index
-        self.met_indices = [i for i in range(n_time_series) if i not in (0, swe_index)]
+        # The learned forcing generator sees only scaled channels. Flow, the raw physics channels
+        # (Kelvin temperature and W/m2 shortwave, which by contract are excluded from scaled_cols)
+        # and observed SWE are all excluded: they enter through the physics instead. Feeding the
+        # raw channels to the transformer alongside z-scored ones puts inputs of O(300) and
+        # O(1000) next to inputs of O(1), which blows up the encoder's gradients — and they are
+        # redundant anyway, since their scaled counterparts are already in the met set.
+        self.phys_indices = phys_indices
+        self.anchored = anchored
+        excluded = {0, swe_index, raw_temp_index, raw_sw_index}
+        excluded.update(phys_indices or [])
+        self.met_indices = [i for i in range(n_time_series) if i not in excluded]
         self.temp_offset_c = temp_offset_c
         self.match_flow = match_flow
         self.hybrid = HybridGR4Model(n_met_features=len(self.met_indices),
                                      seq_len=spinup_length, context_dim=context_dim, dim=dim,
                                      depth=depth, heads=heads, snow=snow,
-                                     parameter_head_params=parameter_head_params)
+                                     parameter_head_params=parameter_head_params,
+                                     anchored=anchored, use_multiplier=use_multiplier,
+                                     use_asos_gate=use_asos_gate)
         if context_path is not None:
             self.register_buffer("context", torch.load(context_path,
                                                        weights_only=True).reshape(1, -1))
@@ -407,12 +437,27 @@ class HybridGR4Forecast(torch.nn.Module):
         batch = {"spinup_met": spin[:, :, self.met_indices], "spinup_flow": spin[:, :, 0],
                  "spinup_raw": self._raw(spin)}
         initial_snow = x[:, 0, self.swe_index] if self.swe_index is not None else None
+        batch["spinup_phys"] = self._phys(spin)
         initial_state = estimate_initial_state(self.hybrid, batch, context,
                                                match_flow=self.match_flow,
                                                initial_snow=initial_snow)
         out = self.hybrid(horizon[:, :, self.met_indices], context, initial_state=initial_state,
-                          raw_forcing=self._raw(horizon) if self.hybrid.snow else None)
+                          raw_forcing=self._raw(horizon) if self.hybrid.snow else None,
+                          phys_forcing=self._phys(horizon))
         return out["flow"]
+
+    def _phys(self, segment: torch.Tensor) -> Optional[torch.Tensor]:
+        """
+        Extracts the physical forcing channels from a window segment.
+
+        :param segment: A window segment of shape (batch, steps, n_features).
+        :type segment: torch.Tensor
+        :return: Physical forcing of shape (batch, steps, 4), or None when not anchored.
+        :rtype: torch.Tensor, optional
+        """
+        if not self.anchored or self.phys_indices is None:
+            return None
+        return segment[:, :, self.phys_indices]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -443,7 +488,9 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
                  raw_temp_index: int, raw_sw_index: int, basin_info_path: str,
                  context_dim: int = 256, dim: int = 64, depth: int = 2, heads: int = 4,
                  snow: bool = True, match_flow: bool = True,
-                 parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None):
+                 parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None,
+                 phys_indices: Optional[List[int]] = None, anchored: bool = False,
+                 use_multiplier: bool = True, use_asos_gate: bool = False):
         """
         Initializes the multi-basin wrapper.
 
@@ -477,12 +524,25 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
         :param swe_index: Optional column index of the observed SWE channel (see
             :class:`HybridGR4Forecast`), defaults to None.
         :type swe_index: int, optional
+        :param phys_indices: Physical forcing column indices for anchored mode (see
+            :class:`HybridGR4Forecast`), defaults to None.
+        :type phys_indices: List[int], optional
+        :param anchored: Whether to correct physical forcing rather than invent it, defaults
+            to False.
+        :type anchored: bool, optional
+        :param use_multiplier: Anchored mode: learn the bounded multiplier, defaults to True.
+        :type use_multiplier: bool, optional
+        :param use_asos_gate: Anchored mode: add the gated station-innovation term, defaults
+            to False.
+        :type use_asos_gate: bool, optional
         """
         import json
         super().__init__(n_time_series - 1, spinup_length, forecast_length, raw_temp_index,
                          raw_sw_index, context_dim=context_dim, dim=dim, depth=depth, heads=heads,
                          snow=snow, match_flow=match_flow,
-                         parameter_head_params=parameter_head_params, swe_index=swe_index)
+                         parameter_head_params=parameter_head_params, swe_index=swe_index,
+                         phys_indices=phys_indices, anchored=anchored,
+                         use_multiplier=use_multiplier, use_asos_gate=use_asos_gate)
         delattr(self, "context")  # replaced by per-basin context below
         with open(basin_info_path) as f:
             manifest = json.load(f)

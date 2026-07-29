@@ -98,7 +98,11 @@ def build_manifest(directory: str, with_swe: bool = False) -> str:
     manifest = {
         "embedding_path": os.path.join(directory, "embeddings.pt"),
         "preprocessing": {"fill_from": {"p01m": "precipitation"},
-                          "copy_cols": {"sw_raw": "shortwave_radiation"},
+                          "copy_cols": {"sw_raw": "shortwave_radiation",
+                                        "precip_raw": "precipitation",
+                                        "pet_raw": "pet_mm_hr",
+                                        "asos_raw": "p01m"},
+                          "observed_mask_cols": {"asos_observed": "p01m"},
                           "lapse": {"source": "temperature", "target": "temp_lapse_k"},
                           "swe_col": "snodas_swe_mm"},
         "basins": basins,
@@ -307,6 +311,115 @@ class TestSweSeeding(unittest.TestCase):
         with torch.no_grad():
             self.assertTrue(torch.allclose(self.model(sentinel), self.model(zero),
                                            atol=1e-6))
+
+
+class TestAnchoredForcing(unittest.TestCase):
+    """Tests for the station-observation mask and the anchored (physically driven) forcing path."""
+
+    PHYS_COLS = ["precip_raw", "pet_raw", "asos_raw", "asos_observed"]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.manifest_path = build_manifest(cls.tmp.name)
+        cls.cols = RELEVANT_COLS + cls.PHYS_COLS
+        cls.phys_indices = [cls.cols.index(c) for c in cls.PHYS_COLS]
+        cls.loader = MultiBasinWindowLoader(
+            cls.manifest_path, 120, 48, ["cfs"], cls.cols, scaled_cols=SCALED_COLS,
+            basin_split="train", window_stride=96, end_date=TRAIN_END)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_mask_records_pre_fill_availability(self):
+        # make_gauge_frame blanks p01m over the first third of the record, and the loader fills it
+        # from NLDAS precip -- the mask must still report those hours as unobserved.
+        src, _ = self.loader[0]
+        mask = src[:, self.cols.index("asos_observed")]
+        self.assertTrue(((mask == 0.0) | (mask == 1.0)).all())
+        self.assertEqual(mask[0].item(), 0.0)
+        late = self.loader[len(self.loader) - 1][0][:, self.cols.index("asos_observed")]
+        self.assertEqual(late[-1].item(), 1.0)
+
+    def test_physical_channels_are_unscaled(self):
+        src, _ = self.loader[0]
+        raw_precip = src[:, self.cols.index("precip_raw")]
+        scaled_precip = src[:, self.cols.index("precipitation")]
+        self.assertTrue((raw_precip >= 0).all())          # physical mm/hr, never negative
+        self.assertFalse(torch.allclose(raw_precip, scaled_precip))
+
+    def _model(self, **kwargs):
+        torch.manual_seed(0)
+        return HybridGR4MultiBasin(len(self.cols) + 1, 120, 48, self.cols.index("temp_lapse_k"),
+                                   self.cols.index("sw_raw"), self.manifest_path, context_dim=8,
+                                   dim=32, depth=1, snow=True, match_flow=False,
+                                   phys_indices=self.phys_indices, anchored=True, **kwargs)
+
+    def test_physical_channels_excluded_from_encoder(self):
+        model = self._model()
+        for index in self.phys_indices:
+            self.assertNotIn(index, model.met_indices)
+
+    def test_anchored_starts_at_physics_baseline(self):
+        # The multiplier is initialised near (not exactly at) 1.0 so the encoder has a live
+        # gradient path, so the anchored model starts within a fraction of a percent of the
+        # pure-physics run rather than bit-identical to it.
+        src = torch.stack([self.loader[0][0], self.loader[1][0]])
+        with torch.no_grad():
+            physics = self._model(use_multiplier=False, use_asos_gate=False)(src)
+            anchored = self._model(use_multiplier=True, use_asos_gate=True)(src)
+        self.assertTrue(torch.isfinite(anchored).all())
+        scale = physics.abs().max().clamp(min=1e-8)
+        self.assertLess(float((anchored - physics).abs().max() / scale), 0.02)
+
+    def _window_with_rain(self):
+        """
+        Returns the first window whose horizon actually contains gridded precipitation.
+
+        :return: A source tensor of shape (1, spinup + horizon, n_features + 1).
+        :rtype: torch.Tensor
+        """
+        column = self.cols.index("precip_raw")
+        for index in range(len(self.loader)):
+            src = self.loader[index][0]
+            if float(src[120:, column].sum()) > 0:
+                return src.unsqueeze(0)
+        self.skipTest("fixture contains no window with horizon rainfall")
+
+    def _encoder_grads(self, model):
+        """
+        Returns the finite gradient magnitudes of the forcing generator's encoder parameters.
+
+        :param model: A model on which backward() has already been called.
+        :type model: torch.nn.Module
+        :return: The per-parameter maximum absolute gradients.
+        :rtype: list
+        """
+        return [float(p.grad.abs().max()) for n, p in model.named_parameters()
+                if "forcing_generator.encoder" in n and p.grad is not None]
+
+    def test_gradients_reach_the_encoder_when_it_rains(self):
+        model = self._model()
+        model(self._window_with_rain()).sum().backward()
+        grads = self._encoder_grads(model)
+        self.assertTrue(grads)
+        self.assertGreater(max(grads), 0.0)
+
+    def test_dry_window_gives_the_encoder_no_gradient(self):
+        # Structural consequence of a multiplicative anchor: d(P_eff)/d(multiplier) = P_grid, so a
+        # rain-free window carries no signal for the PRECIPITATION CORRECTION specifically. This is
+        # correct attribution rather than lost training: the GR4/snow parameters still receive
+        # gradient from the same window through recession, routing and melt, which is precisely the
+        # hybrid's advantage over a pure sequence model -- recession comes from the ODE for free
+        # instead of having to be learned from data.
+        model = self._model()
+        src = torch.stack([self.loader[0][0]])
+        column = self.cols.index("precip_raw")
+        if float(src[0, :, column].sum()) > 0:
+            self.skipTest("first fixture window is not dry")
+        model(src).sum().backward()
+        self.assertEqual(max(self._encoder_grads(model)), 0.0)
 
 
 class TestMultiBasinEndToEnd(unittest.TestCase):
