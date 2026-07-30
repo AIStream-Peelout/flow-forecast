@@ -9,6 +9,7 @@ example forecast plots on disk). Pooled and per-basin metrics are logged to W&B;
 number is skill vs persistence at day 1-3.
 """
 import json
+import math
 import os
 import sys
 from typing import Dict, Optional
@@ -21,11 +22,173 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 BANDS = {"day1-3": (0, 72), "day4-7": (72, 168), "day8-14": (168, 336), "all": (0, 336)}
 
 
+def _window_shape_metrics(sim: np.ndarray, obs: np.ndarray,
+                          persist: np.ndarray) -> Dict[str, float]:
+    """Returns hydrograph-shape diagnostics for one forecast window."""
+    mse = float(np.mean((sim - obs) ** 2))
+    persistence_mse = float(np.mean((persist - obs) ** 2))
+    skill = (100.0 * (1.0 - mse / persistence_mse)
+             if persistence_mse > 0 else float("nan"))
+    correlation = (float(np.corrcoef(sim, obs)[0, 1])
+                   if np.std(sim) > 0 and np.std(obs) > 0 else float("nan"))
+    amplitude_ratio = (float(np.std(sim) / np.std(obs))
+                       if np.std(obs) > 0 else float("nan"))
+    observed_peak = float(np.max(obs))
+    return {
+        "mse_mm_hr2": mse,
+        "persistence_mse_mm_hr2": persistence_mse,
+        "skill_vs_persistence_pct": skill,
+        "correlation": correlation,
+        "amplitude_ratio": amplitude_ratio,
+        "mean_bias_mm_hr": float(np.mean(sim - obs)),
+        "peak_ratio": (float(np.max(sim) / observed_peak)
+                       if observed_peak != 0 else float("nan")),
+        "peak_lag_hours": int(np.argmax(sim) - np.argmax(obs)),
+        "negative_fraction": float(np.mean(sim < 0)),
+    }
+
+
+def save_forecast_gallery(split_outputs: Dict[str, Dict], loader, areas: Dict[str, float],
+                          out_dir: str, split_name: str, max_panels: int = 8) -> str:
+    """
+    Saves a compact PNG gallery chosen to expose hydrograph failure modes.
+
+    Cases are selected across the complete split by observed peak, best/worst skill versus
+    persistence, amplitude blow-up and absolute peak-timing error.  This makes forecast shape
+    review a standard evaluation artifact instead of requiring users to open many HTML files.
+
+    :return: Absolute path to the PNG gallery.
+    :rtype: str
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.dates as mdates
+    import matplotlib.pyplot as plt
+
+    site_to_local = {site: i for i, site in enumerate(loader.basin_site_ids)}
+    cases = []
+    for site, data in split_outputs.items():
+        sim = data["sim"].numpy()
+        obs = data["obs"].numpy()
+        persist = data["persist"].numpy()
+        for index in range(sim.shape[0]):
+            record = {
+                "site_id": site,
+                "window_index": index,
+                "issue_position": int(data["t0s"][index]),
+                "observed_peak_mm_hr": float(np.max(obs[index])),
+                "metrics": _window_shape_metrics(sim[index], obs[index], persist[index]),
+            }
+            cases.append(record)
+
+    def metric(record, key):
+        value = (record[key] if key in record else record["metrics"][key])
+        value = float(value)
+        return value if np.isfinite(value) else -np.inf
+
+    selectors = [
+        ("observed_peak_mm_hr", True, 2),
+        ("skill_vs_persistence_pct", False, 2),
+        ("skill_vs_persistence_pct", True, 2),
+        ("amplitude_ratio", True, 1),
+    ]
+    selected = []
+    for key, reverse, count in selectors:
+        ordered = sorted(range(len(cases)), key=lambda i: metric(cases[i], key),
+                         reverse=reverse)
+        for index in ordered[:count]:
+            if index not in selected:
+                selected.append(index)
+    timing_order = sorted(
+        range(len(cases)),
+        key=lambda i: abs(cases[i]["metrics"]["peak_lag_hours"]),
+        reverse=True)
+    for index in timing_order:
+        if index not in selected:
+            selected.append(index)
+            break
+    selected = selected[:max_panels]
+
+    columns = 2
+    rows = max(1, math.ceil(len(selected) / columns))
+    figure, axes = plt.subplots(rows, columns, figsize=(17, 4.5 * rows), squeeze=False)
+    history_hours = 72
+    selected_records = []
+    for panel, case_index in enumerate(selected):
+        axis = axes.flat[panel]
+        record = cases[case_index]
+        site = record["site_id"]
+        local = site_to_local[site]
+        data = split_outputs[site]
+        window_index = record["window_index"]
+        issue_position = record["issue_position"]
+        timestamps = loader.basin_timestamps[local]
+        history_start = max(0, issue_position - history_hours)
+        horizon = data["sim"].shape[1]
+        history = loader.basin_loaders[local].df[
+            loader.target_col_list[0]].to_numpy()[history_start:issue_position]
+        to_cfs = areas[site] / (0.0283168 * 3.6)
+        sim = data["sim"][window_index].numpy() * to_cfs
+        obs = data["obs"][window_index].numpy() * to_cfs
+        persist = data["persist"][window_index].numpy() * to_cfs
+        issue_time = timestamps[issue_position]
+
+        axis.plot(timestamps[history_start:issue_position], history * to_cfs,
+                  color="#888888", linewidth=1.3, label="Observed history")
+        axis.plot(timestamps[issue_position:issue_position + horizon], obs,
+                  color="#111111", linewidth=2.0, label="Observed future")
+        axis.plot(timestamps[issue_position:issue_position + horizon], sim,
+                  color="#0077b6", linewidth=1.7, label="Model")
+        axis.plot(timestamps[issue_position:issue_position + horizon], persist,
+                  color="#777777", linewidth=1.2, linestyle="--", label="Persistence")
+        axis.axvline(issue_time, color="#555555", linewidth=1.0, linestyle=":")
+        metrics = record["metrics"]
+        axis.set_title(
+            "%s · %s\nskill %+.1f%% · corr %+.2f · amp %.2f× · peak lag %+d h"
+            % (site, str(issue_time)[:10], metrics["skill_vs_persistence_pct"],
+               metrics["correlation"], metrics["amplitude_ratio"],
+               metrics["peak_lag_hours"]),
+            fontsize=10)
+        axis.set_ylabel("Flow (cfs)")
+        axis.grid(alpha=0.2)
+        locator = mdates.AutoDateLocator(minticks=3, maxticks=7)
+        axis.xaxis.set_major_locator(locator)
+        axis.xaxis.set_major_formatter(mdates.ConciseDateFormatter(locator))
+        if panel == 0:
+            axis.legend(loc="best", fontsize=8, frameon=False)
+        selected_records.append({
+            **record,
+            "issue_time": issue_time.isoformat(),
+            "observed_peak_cfs": record["observed_peak_mm_hr"] * to_cfs,
+        })
+
+    for panel in range(len(selected), rows * columns):
+        axes.flat[panel].axis("off")
+    figure.suptitle(
+        "%s forecast diagnostics — peaks, worst/best skill, amplitude and timing failures"
+        % split_name,
+        fontsize=14)
+    figure.tight_layout(rect=[0, 0, 1, 0.975])
+    os.makedirs(out_dir, exist_ok=True)
+    gallery_path = os.path.abspath(os.path.join(out_dir, "forecast_gallery.png"))
+    figure.savefig(gallery_path, dpi=150, bbox_inches="tight")
+    plt.close(figure)
+    with open(os.path.join(out_dir, "forecast_gallery_cases.json"), "w") as file:
+        json.dump({
+            "selection": ("two largest peaks, two worst and two best persistence-relative "
+                          "windows, largest amplitude ratio, largest absolute peak lag"),
+            "selected_cases": selected_records,
+            "all_cases": cases,
+        }, file, indent=2, allow_nan=True)
+    return gallery_path
+
+
 def collect_split_outputs(model, loader) -> Dict[str, Dict]:
     """
     Runs the model over every window of a split loader and groups physical-unit outputs by basin.
 
-    :param model: The trained HybridGR4MultiBasin (already on its device, eval mode is set here).
+    :param model: A trained multi-basin forecaster exposing per-manifest ``flow_scales``.
     :type model: torch.nn.Module
     :param loader: A MultiBasinWindowLoader for the split.
     :type loader: MultiBasinWindowLoader
@@ -34,6 +197,7 @@ def collect_split_outputs(model, loader) -> Dict[str, Dict]:
     """
     from torch.utils.data import DataLoader
     model.eval()
+    device = next(model.parameters()).device
     spinup = loader.forecast_history
     outputs = {site: {"sim": [], "obs": [], "persist": [], "t0s": []}
                for site in loader.basin_site_ids}
@@ -42,11 +206,11 @@ def collect_split_outputs(model, loader) -> Dict[str, Dict]:
     window = 0
     with torch.no_grad():
         for src, trg in batch_iter:
-            sim_std = model(src)
+            sim_std = model(src.to(device))
             positions = src[:, 0, -1].long()
-            scales = model.flow_scales[positions].unsqueeze(1)
+            scales = model.flow_scales[positions.to(model.flow_scales.device)].unsqueeze(1)
             sim_mm = (sim_std * scales).cpu()
-            obs_mm = (trg[:, :, 0] * scales).cpu()
+            obs_mm = trg[:, :, 0] * scales.cpu()
             persist_mm = src[:, spinup - 1, 0:1].expand(-1, sim_mm.shape[1]).cpu()
             for row in range(src.shape[0]):
                 local = position_to_local[int(positions[row])]
@@ -129,7 +293,9 @@ def evaluate_splits(ff_model, manifest_path: str, run_dir: str, eval_stride: int
             dataset_params["relevant_cols"], scaled_cols=dataset_params.get("scaled_cols"),
             start_date="2023-01-01", basin_split=basin_split, window_stride=eval_stride,
             min_valid_fraction=dataset_params.get("min_valid_fraction", 0.95),
-            max_basins=max_basins if basin_split == "train" else None)
+            max_basins=max_basins if basin_split == "train" else None,
+            require_pretrained_embedding=dataset_params.get(
+                "require_pretrained_embedding", False))
         print("[%s] %d basins, %d windows" % (split_name, len(loader.basin_loaders),
                                               len(loader)))
         outputs = collect_split_outputs(ff_model.model, loader)
@@ -163,6 +329,8 @@ def evaluate_splits(ff_model, manifest_path: str, run_dir: str, eval_stride: int
             json.dump(per_basin, f, indent=1)
         with open(os.path.join(out_dir, "pooled_metrics.json"), "w") as f:
             json.dump(pooled, f, indent=1)
+        gallery_path = save_forecast_gallery(
+            outputs, loader, areas, out_dir, split_name)
 
         skills = [per_basin[s]["day1-3"]["skill_vs_persistence_pct"] for s in per_basin]
         summary = {
@@ -180,6 +348,17 @@ def evaluate_splits(ff_model, manifest_path: str, run_dir: str, eval_stride: int
                     for band, entry in pooled.items() for key, value in entry.items()}
             wandb_run.log(flat)
             wandb_run.log(summary)
+            caption = (
+                "Actual (black), model (blue), persistence (gray dashed); selected by "
+                "peak, skill, amplitude and timing failure modes.")
+            wandb_run.log({
+                split_name + "/forecast_gallery":
+                    wandb.Image(gallery_path, caption=caption),
+                # Flat root-level alias so the diagnostic is easy to find in W&B Media without
+                # expanding nested key groups.
+                "hydrograph_gallery_" + split_name:
+                    wandb.Image(gallery_path, caption=caption),
+            })
             table = wandb.Table(columns=["site_id", "band", "skill_vs_persistence_pct",
                                          "median_window_nse", "rmse_cfs"])
             for site, bands in per_basin.items():

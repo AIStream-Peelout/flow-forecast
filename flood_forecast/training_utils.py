@@ -10,6 +10,9 @@ class EarlyStopper(object):
     :type min_delta: float, optional
     :param cumulative_delta: If True, `min_delta` defines a decrease since the last `patience` reset. Default is False.
     :type cumulative_delta: bool, optional
+    :param checkpoint_path: File used for the best-model checkpoint. Defaults to
+        ``"checkpoint.pth"`` for backward compatibility.
+    :type checkpoint_path: str, optional
     :return: An instance of EarlyStopper.
     :rtype: EarlyStopper
 
@@ -36,6 +39,7 @@ class EarlyStopper(object):
         patience: int,
         min_delta: float = 0.0,
         cumulative_delta: bool = False,
+        checkpoint_path: str = "checkpoint.pth",
     ):
 
         if patience < 1:
@@ -49,6 +53,7 @@ class EarlyStopper(object):
         self.cumulative_delta = cumulative_delta
         self.counter = 0
         self.best_score = None
+        self.checkpoint_path = checkpoint_path
 
     def check_loss(self, model, validation_loss) -> bool:
         """Checks the validation loss against the best recorded score to determine if training should stop.
@@ -86,6 +91,6 @@ class EarlyStopper(object):
         :return: None
         :rtype: None
         """
-        torch.save(model.state_dict(), "checkpoint.pth")
+        torch.save(model.state_dict(), self.checkpoint_path)
         """_summary_
         """

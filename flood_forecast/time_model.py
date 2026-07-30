@@ -377,8 +377,10 @@ class PyTorchForecast(TimeSeriesModel):
         elif the_class == "MultiBasinCatchmentWindow":
             multi_params = {}
             for key in ("min_valid_fraction", "window_stride", "basin_sample_power",
+                        "event_sample_power",
                         "datetime_col", "max_basins", "scaled_cols", "require_hourly",
-                        "min_target_coverage", "max_input_gap"):
+                        "min_target_coverage", "max_input_gap",
+                        "require_pretrained_embedding"):
                 if key in dataset_params:
                     multi_params[key] = dataset_params[key]
             # Per-split settings use the loader_type prefix, e.g. "train_start_date";

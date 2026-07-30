@@ -276,11 +276,19 @@ def forecast_report(sim: torch.Tensor, obs: torch.Tensor, persist: torch.Tensor,
             actual = _np.concatenate([_np.full(history_hours, _np.nan), obs_np[idx]])
         scale = 1.0 if to_cfs is None else to_cfs
         unit = "mm/hr" if to_cfs is None else "cfs"
-        frame = _pd.DataFrame({"preds": preds * scale, "flow_" + unit: actual * scale},
+        persistence = _np.concatenate(
+            [_np.full(history_hours, _np.nan), persist_np[idx]])
+        frame = _pd.DataFrame({"preds": preds * scale,
+                              "persistence": persistence * scale,
+                              "flow_" + unit: actual * scale},
                               index=index)
         figure = plot_df_test_with_confidence_interval(
             frame, _pd.DataFrame({"sample_0": frame["preds"]}), issue_time, {},
             targ_col="flow_" + unit, ci=95.0)
+        figure.add_scatter(
+            x=index[history_hours:], y=frame["persistence"].iloc[history_hours:],
+            name="persistence", mode="lines",
+            line={"color": "#777777", "dash": "dash", "width": 1.5})
         figure.update_layout(title="Forecast issued %s" % str(issue_time)[:16])
         figures["forecast_%02d_%s" % (rank, str(issue_time)[:10])] = figure
 
@@ -289,7 +297,8 @@ def forecast_report(sim: torch.Tensor, obs: torch.Tensor, persist: torch.Tensor,
         with open(_os.path.join(out_dir, "forecast_report.json"), "w") as f:
             _json.dump(metrics, f, indent=2)
         for name, figure in figures.items():
-            figure.write_html(_os.path.join(out_dir, name + ".html"))
+            figure.write_html(_os.path.join(out_dir, name + ".html"),
+                              include_plotlyjs="cdn")
     if wandb_run is not None:
         import wandb as _wandb
         flat = {band + "/" + key: value for band, entry in metrics.items()
@@ -591,3 +600,212 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
         basin_idx = x[:, 0, -1].long()
         sim = self._forecast(x[:, :, :-1], self.basin_context(basin_idx))
         return sim / self.flow_scales[basin_idx].clamp(min=1e-8).unsqueeze(1)
+
+
+class CrossformerMultiBasin(torch.nn.Module):
+    """
+    Direct multi-basin streamflow forecaster built around FF's native Crossformer.
+
+    This is the non-physics control for :class:`HybridGR4MultiBasin`. It consumes windows from
+    :class:`~flood_forecast.preprocessing.pytorch_loaders.MultiBasinWindowLoader`, standardizes
+    the observed source flow with the same per-basin scale used for the target, and predicts a
+    residual around persistence. The last source channel is a manifest basin position and is
+    never treated as a continuous meteorological feature.
+
+    When ``use_future_forcing`` is true, the Crossformer receives the full spin-up plus horizon
+    window. Horizon flow is already masked by the loader, while the future meteorology is the
+    same retrospective forcing used by the hybrid model. This is an apples-to-apples hindcast,
+    not an operational forecast unless those channels are replaced by NWP products. Setting it
+    false gives the history-only operational control.
+    """
+
+    def __init__(self, n_time_series: int, spinup_length: int, forecast_length: int,
+                 basin_info_path: str, seg_len: int = 24, win_size: int = 4,
+                 factor: int = 10, d_model: int = 64, d_ff: int = 128,
+                 n_heads: int = 4, e_layers: int = 2, dropout: float = 0.1,
+                 context_dim: int = 256, context_channels: int = 8,
+                 use_future_forcing: bool = True, input_clip: Optional[float] = 20.0,
+                 residual_smoothing_hours: int = 1, nonnegative: bool = False):
+        """
+        Initializes the direct Crossformer control.
+
+        :param n_time_series: Loader feature count INCLUDING the trailing basin-index channel.
+        :type n_time_series: int
+        :param spinup_length: Observed history length in hours.
+        :type spinup_length: int
+        :param forecast_length: Forecast horizon length in hours.
+        :type forecast_length: int
+        :param basin_info_path: Manifest used by the paired multi-basin loader.
+        :type basin_info_path: str
+        :param seg_len: Crossformer segment length, defaults to 24 (one day).
+        :type seg_len: int, optional
+        :param win_size: Crossformer segment-merge window, defaults to 4.
+        :type win_size: int, optional
+        :param factor: Crossformer router count, defaults to 10.
+        :type factor: int, optional
+        :param d_model: Crossformer representation width, defaults to 64.
+        :type d_model: int, optional
+        :param d_ff: Feed-forward width, defaults to 128.
+        :type d_ff: int, optional
+        :param n_heads: Attention head count, defaults to 4.
+        :type n_heads: int, optional
+        :param e_layers: Crossformer encoder depth, defaults to 2.
+        :type e_layers: int, optional
+        :param dropout: Dropout probability, defaults to 0.1.
+        :type dropout: float, optional
+        :param context_dim: Width of embeddings in the manifest bank, defaults to 256.
+        :type context_dim: int, optional
+        :param context_channels: Number of projected static context channels appended to every
+            time step; zero disables catchment context, defaults to 8.
+        :type context_channels: int, optional
+        :param use_future_forcing: Whether to include the masked horizon and its known future
+            meteorology, defaults to True.
+        :type use_future_forcing: bool, optional
+        :param input_clip: Optional absolute clip applied after flow standardization, defaults
+            to 20.0. Set to None or a non-positive number to disable.
+        :type input_clip: float, optional
+        :param residual_smoothing_hours: Moving-average width applied to the predicted residual;
+            1 disables smoothing. This is useful for testing whether the decoder is copying
+            diurnal meteorological cycles directly into flow, defaults to 1.
+        :type residual_smoothing_hours: int, optional
+        :param nonnegative: Whether to apply a differentiable nonnegative projection to final
+            standardized flow, defaults to False.
+        :type nonnegative: bool, optional
+        """
+        import json
+
+        from flood_forecast.transformer_xl.cross_former import Crossformer
+
+        super().__init__()
+        if n_time_series < 2:
+            raise ValueError("n_time_series must include at least flow and the basin marker")
+        if context_channels < 0:
+            raise ValueError("context_channels cannot be negative")
+
+        self.spinup_length = spinup_length
+        self.forecast_length = forecast_length
+        self.use_future_forcing = use_future_forcing
+        self.input_clip = input_clip if input_clip and input_clip > 0 else None
+        self.context_channels = context_channels
+        if residual_smoothing_hours < 1:
+            raise ValueError("residual_smoothing_hours must be at least 1")
+        self.residual_smoothing_hours = int(residual_smoothing_hours)
+        self.nonnegative = nonnegative
+        feature_count = n_time_series - 1
+        input_length = spinup_length + forecast_length if use_future_forcing else spinup_length
+        self.crossformer = Crossformer(
+            n_time_series=feature_count + context_channels,
+            forecast_history=input_length,
+            forecast_length=forecast_length,
+            seg_len=seg_len,
+            win_size=win_size,
+            factor=factor,
+            d_model=d_model,
+            d_ff=d_ff,
+            n_heads=n_heads,
+            e_layers=e_layers,
+            dropout=dropout,
+            baseline=False,
+            n_targs=1,
+            device=torch.device("cpu"))
+
+        # Start close to persistence while leaving a live gradient path through the full model.
+        # Exact zero initialization would block gradients before the prediction heads on step one.
+        for layer in self.crossformer.decoder.decode_layers:
+            torch.nn.init.normal_(layer.linear_pred.weight, std=1e-3)
+            torch.nn.init.zeros_(layer.linear_pred.bias)
+
+        with open(basin_info_path) as f:
+            manifest = json.load(f)
+        basins = manifest["basins"]
+        n_basins = len(basins)
+        self.register_buffer(
+            "flow_scales", torch.tensor([float(b["flow_scale_mm_hr"]) for b in basins]))
+
+        if context_channels:
+            fixed = torch.zeros(n_basins, context_dim)
+            has_fixed = torch.zeros(n_basins, dtype=torch.bool)
+            if manifest.get("embedding_path"):
+                bank = torch.load(manifest["embedding_path"], weights_only=True)
+                if bank["embeddings"].shape[1] != context_dim:
+                    raise ValueError("Manifest embeddings have width %d, expected context_dim=%d"
+                                     % (bank["embeddings"].shape[1], context_dim))
+                lookup = {site: i for i, site in enumerate(bank["site_ids"])}
+                for i, basin in enumerate(basins):
+                    if basin.get("has_embedding") and basin["site_id"] in lookup:
+                        fixed[i] = bank["embeddings"][lookup[basin["site_id"]]]
+                        has_fixed[i] = True
+            mean_fixed = fixed[has_fixed].mean(0) if has_fixed.any() else torch.zeros(context_dim)
+            # A missing embedding for a held-out basin cannot use an untrained private row.
+            can_learn = torch.tensor([b.get("split") != "holdout" for b in basins],
+                                     dtype=torch.bool)
+            self.register_buffer("fixed_context", fixed)
+            self.register_buffer("has_fixed_context", has_fixed)
+            self.register_buffer("can_learn_context", can_learn)
+            self.register_buffer("mean_fixed_context", mean_fixed)
+            self.learned_context = torch.nn.Embedding(n_basins, context_dim)
+            torch.nn.init.normal_(self.learned_context.weight, std=0.1)
+            self.context_projection = torch.nn.Linear(context_dim, context_channels)
+        else:
+            self.learned_context = None
+            self.context_projection = None
+
+    def basin_context(self, basin_idx: torch.Tensor) -> torch.Tensor:
+        """
+        Returns fixed pretrained context, a trainable fallback, or the fleet mean for an unseen
+        basin that has no pretrained context.
+
+        :param basin_idx: Manifest basin positions of shape (batch,).
+        :type basin_idx: torch.Tensor
+        :return: Catchment contexts of shape (batch, context_dim).
+        :rtype: torch.Tensor
+        """
+        if self.context_projection is None:
+            raise RuntimeError("Catchment context is disabled for this model")
+        fixed = self.fixed_context[basin_idx]
+        learned = self.learned_context(basin_idx)
+        context = torch.where(self.has_fixed_context[basin_idx].unsqueeze(-1), fixed, learned)
+        fleet_mean = self.mean_fixed_context.expand_as(context)
+        usable = self.has_fixed_context[basin_idx] | self.can_learn_context[basin_idx]
+        return torch.where(usable.unsqueeze(-1), context, fleet_mean)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Predicts standardized horizon flow as persistence plus a learned residual.
+
+        :param x: Source windows shaped (batch, spin-up + horizon, features + basin marker).
+        :type x: torch.Tensor
+        :return: Standardized flow predictions shaped (batch, forecast_length).
+        :rtype: torch.Tensor
+        """
+        expected_length = self.spinup_length + self.forecast_length
+        if x.shape[1] != expected_length:
+            raise ValueError("Expected source length %d, got %d" % (expected_length, x.shape[1]))
+        basin_idx = x[:, 0, -1].long()
+        features = x[:, :, :-1].clone()
+        scale = self.flow_scales[basin_idx].clamp(min=1e-8).unsqueeze(1)
+        features[:, :, 0] = features[:, :, 0] / scale
+        persistence = features[:, self.spinup_length - 1, 0].unsqueeze(1)
+        if not self.use_future_forcing:
+            features = features[:, :self.spinup_length]
+        if self.input_clip is not None:
+            features = features.clamp(min=-self.input_clip, max=self.input_clip)
+        if self.context_projection is not None:
+            context = self.context_projection(self.basin_context(basin_idx))
+            repeated = context.unsqueeze(1).expand(-1, features.shape[1], -1)
+            features = torch.cat([features, repeated], dim=-1)
+        residual = self.crossformer(features).squeeze(-1)
+        if self.residual_smoothing_hours > 1:
+            width = self.residual_smoothing_hours
+            left = width // 2
+            right = width - 1 - left
+            padded = torch.nn.functional.pad(
+                residual.unsqueeze(1), (left, right), mode="replicate")
+            residual = torch.nn.functional.avg_pool1d(
+                padded, kernel_size=width, stride=1).squeeze(1)
+        prediction = persistence + residual
+        if self.nonnegative:
+            # Smooth approximation of max(prediction, 0) with negligible positive offset.
+            prediction = 0.5 * (
+                prediction + torch.sqrt(prediction.square() + 1e-6))
+        return prediction

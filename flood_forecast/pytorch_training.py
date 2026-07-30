@@ -3,6 +3,7 @@ import torch.optim as optim
 from typing import Type, Dict, List, Union
 from torch.utils.data import DataLoader
 import json
+import os
 import wandb
 from flood_forecast.utils import numpy_to_tvar
 from flood_forecast.time_model import PyTorchForecast
@@ -142,7 +143,9 @@ def train_transformer_style(
         pin_memory = dataset_params["pin_memory"]
         print("Pin memory set to true")
     if "early_stopping" in model.params:
-        es = EarlyStopper(model.params["early_stopping"]['patience'])
+        os.makedirs(model_filepath, exist_ok=True)
+        es = EarlyStopper(model.params["early_stopping"]['patience'],
+                          checkpoint_path=os.path.join(model_filepath, "checkpoint.pth"))
     if "shuffle" not in training_params:
         training_params["shuffle"] = False
     criterion = make_crit(training_params)
@@ -244,14 +247,16 @@ def train_transformer_style(
         if es:
             if not es.check_loss(model.model, valid):
                 print("Stopping model now")
-                model.model.load_state_dict(torch.load("checkpoint.pth"))
+                model.model.load_state_dict(torch.load(es.checkpoint_path,
+                                                       map_location=model.device))
                 break
     else:
         if es:
             # Training ran to max_epochs without triggering: still restore the best-validation
             # checkpoint rather than keeping the (possibly past-peak) final-epoch weights.
             print("Restoring best validation checkpoint (val loss %s)" % es.best_score)
-            model.model.load_state_dict(torch.load("checkpoint.pth"))
+            model.model.load_state_dict(torch.load(es.checkpoint_path,
+                                                   map_location=model.device))
     decoder_structure = True
     the_ae = model.params["dataset_params"]["class"] == "AutoEncoder"
     if the_ae or model.params["dataset_params"]["class"] == "GeneralClassificationLoader":

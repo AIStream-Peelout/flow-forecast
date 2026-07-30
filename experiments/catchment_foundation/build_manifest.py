@@ -158,6 +158,10 @@ def main() -> None:
                                         "pet_raw": "pet_mm_hr",
                                         "asos_raw": "p01m"},
                           "observed_mask_cols": {"asos_observed": "p01m"},
+                          # Precipitation is never linearly interpolated: it would invent rain,
+                          # shift storm timing and alter totals. Windows with precipitation gaps
+                          # are rejected instead.
+                          "no_interp_cols": ["precipitation", "p01m", "precip_raw", "asos_raw"],
                           "lapse": {"source": "temperature", "target": "temp_lapse_k"},
                           "swe_col": "snodas_swe_mm"},
         "basins": basins,

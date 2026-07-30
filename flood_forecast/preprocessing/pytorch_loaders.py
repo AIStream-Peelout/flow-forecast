@@ -1109,9 +1109,11 @@ class MultiBasinWindowLoader(Dataset):
                  start_date: Optional[str] = None, end_date: Optional[str] = None,
                  basin_split: Optional[str] = None, min_valid_fraction: float = 0.95,
                  window_stride: int = 24, samples_per_epoch: Optional[int] = None,
-                 basin_sample_power: float = 0.5, datetime_col: str = "datetime",
+                 basin_sample_power: float = 0.5, event_sample_power: float = 1.0,
+                 datetime_col: str = "datetime",
                  max_basins: Optional[int] = None, require_hourly: bool = True,
-                 min_target_coverage: float = 1.0, max_input_gap: int = 6):
+                 min_target_coverage: float = 1.0, max_input_gap: int = 6,
+                 require_pretrained_embedding: bool = False):
         """
         Initializes the multi-basin window loader.
 
@@ -1149,6 +1151,9 @@ class MultiBasinWindowLoader(Dataset):
             mass across basins (1.0 = proportional to record length, 0.0 = equal mass per basin),
             defaults to 0.5.
         :type basin_sample_power: float, optional
+        :param event_sample_power: Exponent on within-basin horizon-variance sampling
+            (1.0 = current event emphasis, 0.0 = uniform across valid windows), defaults to 1.0.
+        :type event_sample_power: float, optional
         :param datetime_col: Name of the timestamp column in the basin CSVs, defaults to
             "datetime".
         :type datetime_col: str, optional
@@ -1167,6 +1172,10 @@ class MultiBasinWindowLoader(Dataset):
             channels, in hours, defaults to 6. Longer runs are left missing, which rejects the
             windows containing them.
         :type max_input_gap: int, optional
+        :param require_pretrained_embedding: Whether to load only manifest basins marked as having
+            a pretrained embedding. This prevents mixing fixed contrastive representations with
+            unrelated learned basin-ID rows, defaults to False.
+        :type require_pretrained_embedding: bool, optional
         """
         import json
         super().__init__()
@@ -1185,8 +1194,12 @@ class MultiBasinWindowLoader(Dataset):
         self.no_scale = True
         self.scale = None
         self.targ_scaler = IdentityScaler()
-        selected = [(pos, b) for pos, b in enumerate(manifest["basins"])
-                    if basin_split is None or b.get("split") == basin_split]
+        selected = [
+            (pos, basin)
+            for pos, basin in enumerate(manifest["basins"])
+            if (basin_split is None or basin.get("split") == basin_split)
+            and (not require_pretrained_embedding or basin.get("has_embedding", False))
+        ]
         if max_basins is not None:
             selected = selected[:max_basins]
         prep = manifest.get("preprocessing", {})
@@ -1207,7 +1220,8 @@ class MultiBasinWindowLoader(Dataset):
             self.basin_loaders.append(loader)
             self.basin_timestamps.append(timestamps)
             self.flow_scales.append(float(basin["flow_scale_mm_hr"]))
-            weight_blocks.append(self._window_weights(loader, basin_sample_power))
+            weight_blocks.append(
+                self._window_weights(loader, basin_sample_power, event_sample_power))
         if not self.basin_loaders:
             raise ValueError("No basins with valid windows for split=%s in [%s, %s)"
                              % (basin_split, start_date, end_date))
@@ -1307,8 +1321,9 @@ class MultiBasinWindowLoader(Dataset):
         # Fill only the INPUT holes the validity filter tolerated, and only across short runs --
         # never bidirectionally across arbitrary spans. Target flow is never fabricated: windows
         # whose target is not fully observed have already been rejected above.
-        loader.df = loader.df.interpolate(limit=self.max_input_gap,
-                                          limit_direction="both").astype(np.float32)
+        protected = set(self.target_col_list) | set(prep.get("observed_mask_cols", {})) | \
+            set(prep.get("no_interp_cols", []))
+        loader.df = self._interpolate_short_gaps(loader.df, protected).astype(np.float32)
         # Bounded interpolation deliberately leaves long gaps unfilled, so a window can still hold
         # NaNs in an INPUT column even when its target is fully observed. Drop those outright:
         # every served window must be finite, or the NaN reaches the ODE and the run dies.
@@ -1321,6 +1336,39 @@ class MultiBasinWindowLoader(Dataset):
         loader.original_df = None
         loader.unscaled_df = None
         return loader, timestamps
+
+    def _interpolate_short_gaps(self, frame: pd.DataFrame, protected: set) -> pd.DataFrame:
+        """
+        Interpolates only continuous inputs, and only across genuinely short gaps.
+
+        Columns in ``protected`` are never touched: target flow (scoring against our own
+        interpolation biases metrics toward the smooth-drift failure mode), precipitation (linear
+        interpolation invents rain, shifts storm timing and changes totals -- the very signal the
+        model must learn) and observation masks (which are provenance, not a physical series).
+        Everything else is filled only where the run of consecutive missing steps is at most
+        ``max_input_gap`` long. Note that pandas' own ``limit`` counts forward and backward
+        separately, so ``limit=6, limit_direction="both"`` would fill a 12-hour gap entirely;
+        run lengths are therefore measured explicitly here.
+
+        :param frame: The basin frame, indexed positionally.
+        :type frame: pd.DataFrame
+        :param protected: Names of columns that must never be interpolated.
+        :type protected: set
+        :return: The frame with short input gaps filled and long ones left missing.
+        :rtype: pd.DataFrame
+        """
+        for column in frame.columns:
+            if column in protected:
+                continue
+            series = frame[column]
+            missing = series.isna()
+            if not missing.any():
+                continue
+            runs = (missing != missing.shift()).cumsum()
+            run_length = missing.groupby(runs).transform("size")
+            fillable = missing & (run_length <= self.max_input_gap)
+            frame[column] = series.where(~fillable, series.interpolate(limit_direction="both"))
+        return frame
 
     def _valid_windows(self, starts: List[int], target_observed: np.ndarray) -> List[int]:
         """
@@ -1379,7 +1427,8 @@ class MultiBasinWindowLoader(Dataset):
         return np.where(np.isfinite(values), values, -1.0).astype(np.float32)
 
     def _window_weights(self, loader: CatchmentWindowLoader,
-                        basin_sample_power: float) -> np.ndarray:
+                        basin_sample_power: float,
+                        event_sample_power: float) -> np.ndarray:
         """
         Computes sampling weights for one basin's windows.
 
@@ -1392,6 +1441,8 @@ class MultiBasinWindowLoader(Dataset):
         :type loader: CatchmentWindowLoader
         :param basin_sample_power: Exponent on the basin's window count for its total mass.
         :type basin_sample_power: float
+        :param event_sample_power: Exponent on normalized horizon variance; zero is uniform.
+        :type event_sample_power: float
         :return: Weights of shape (len(loader),).
         :rtype: np.ndarray
         """
@@ -1399,7 +1450,10 @@ class MultiBasinWindowLoader(Dataset):
         history = self.forecast_history
         variances = np.array([np.nanvar(flow[s + history:s + history + self.forecast_length])
                               for s in loader.valid_starts])
-        weights = np.maximum(variances / max(variances.mean(), 1e-12), 0.1)
+        if event_sample_power < 0:
+            raise ValueError("event_sample_power cannot be negative")
+        normalized = np.maximum(variances / max(variances.mean(), 1e-12), 0.1)
+        weights = normalized ** event_sample_power
         mass = len(loader) ** basin_sample_power
         return weights * (mass / weights.sum())
 

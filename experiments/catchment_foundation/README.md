@@ -194,6 +194,103 @@ python experiments/catchment_foundation/run_training.py \
 Each run writes its resolved config to `experiments/catchment_foundation/runs/<name>/config.json`
 and prints the train/valid/test window and basin counts before training starts.
 
+## Direct Crossformer control
+
+`run_crossformer.py` is the non-physics control. It uses the same manifest, multi-basin
+loader, train/validation/test dates, flow standardization, FF training loop, W&B project,
+evaluator and persistence benchmark as `run_training.py`.
+`CrossformerMultiBasin` directly predicts standardized flow as a residual around the last
+observed flow; it does not use GR4, snow dynamics, state assimilation or an ODE.
+
+The default is deliberately labelled a **hindcast**: the model sees the same realized
+meteorology over the 336-hour horizon that the hybrid currently sees. This holds the
+information set constant, but it is not an operational 14-day forecast until those
+covariates come from an NWP forecast product. `--history-only` removes all horizon
+meteorology and is the operational information control. Do not compare a history-only
+score with a hindcast score as though only the model changed.
+
+Small end-to-end smoke run:
+
+```bash
+python experiments/catchment_foundation/run_crossformer.py \
+    --name crossformer_smoke --max-basins 3 --epochs 3 \
+    --samples-per-epoch 128 --no-wandb
+```
+
+Fleet-scale hindcast control with W&B monitoring:
+
+```bash
+python experiments/catchment_foundation/run_crossformer.py \
+    --name crossformer_hindcast_v1 --epochs 30 --samples-per-epoch 16384
+```
+
+History-only control:
+
+```bash
+python experiments/catchment_foundation/run_crossformer.py \
+    --name crossformer_history_v1 --history-only \
+    --epochs 30 --samples-per-epoch 16384
+```
+
+The direct model uses only the ten learned channels (`cfs` plus the nine standardized met
+columns); raw ODE-only duplicates are excluded. Historical flow is divided by the same
+per-basin train-period scale as the target. Eight projected catchment-embedding channels
+are used by default (`--context-channels 0` disables them), and standardized neural inputs
+are clipped at +/-20 by default (`--input-clip 0` disables clipping). The clip and removal
+of raw ODE-only channels are model-appropriate preprocessing, so the default comparison
+tests the overall modelling approach rather than being a one-variable architecture
+ablation.
+
+Direct Crossformer runs sample valid windows uniformly by default
+(`--event-sample-power 0`). In the controlled 10-basin tuning ladder, the original
+horizon-variance weighting (`--event-sample-power 1`) over-emphasized volatile windows,
+produced conspicuous dry-basin blow-ups, and reduced both gauged and holdout skill.
+Fractional values restore a milder event emphasis. This default is scoped to
+`run_crossformer.py`; the generic multi-basin loader and hybrid experiment retain their
+original weighting.
+
+Direct runs also require a pretrained catchment embedding by default. The current manifest
+contains 50 embedded training basins and 49 training basins without embeddings. Mixing
+fixed contrastively pretrained vectors with arbitrary learned basin-ID rows gives the
+shared context projection two incompatible representation spaces, so the latter basins
+are excluded until their embeddings are filled in. `--allow-missing-embeddings` restores
+the mixed behavior for an explicit control experiment. This filter does not alter manifest
+positions and therefore remains compatible with the model's embedding and flow-scale
+buffers.
+
+The default context mode deliberately matches the hybrid, but it also inherits the current
+embedding-bank audit caveat: those embeddings were built with each site's discharge
+history extending into the evaluation era. Therefore the present `ungauged_2023` result is
+useful for same-pipeline comparison but is not an honest ungauged-generalization claim.
+Use `--context-channels 0` for a context-free control, or rebuild the embedding bank using
+only pre-split information before making that claim.
+
+After both models have been evaluated on the same stride, compare their saved artifacts:
+
+```bash
+python experiments/catchment_foundation/compare_runs.py \
+    experiments/catchment_foundation/runs/HYBRID_RUN \
+    experiments/catchment_foundation/runs/CROSSFORMER_RUN
+```
+
+The comparison reports pooled-skill delta, median-basin delta and basin win rate. It also
+checks persistence MSE equality; if that check fails, the two models were not evaluated on
+the same observation windows and the model comparison is not controlled.
+`run_crossformer.py --compare-to <HYBRID_RUN>` performs this comparison automatically
+after evaluation.
+
+For a hydrograph-level comparison between two evaluated direct runs:
+
+```bash
+python experiments/catchment_foundation/plot_forecast_comparison.py \
+    experiments/catchment_foundation/runs/REFERENCE_RUN \
+    experiments/catchment_foundation/runs/CANDIDATE_RUN \
+    --reference-label Reference --candidate-label Candidate
+```
+
+The controlled tuning results and plot-based failure diagnosis are recorded in
+`CROSSFORMER_TUNING.md`.
+
 ## Stage 3: evaluate
 
 By default, `run_training.py` calls `evaluate.evaluate_splits` right after training (skip
@@ -232,6 +329,16 @@ with the largest observed-flow variance in each split; `pooled_metrics.json` and
 `per_basin_metrics.json` are written for every basin regardless. When W&B is active, pooled
 metrics, a summary block (median basin skill, % of basins with positive skill, basin count),
 and a per-basin metrics table are all logged per split.
+
+Every split also writes `eval_<split>/forecast_gallery.png` and
+`forecast_gallery_cases.json`. The gallery deliberately includes high-flow cases, the
+best/worst persistence-relative forecasts, amplitude blow-ups, and peak-timing failures;
+each panel shows observed history, observed future, model output, and persistence. In W&B,
+look under the top-level Media keys `hydrograph_gallery_gauged_2023` and
+`hydrograph_gallery_ungauged_2023`. The same images are also logged under
+`gauged_2023/forecast_gallery` and `ungauged_2023/forecast_gallery`. Individual
+interactive examples use keys of the form
+`<split>/<site_id>/forecast_<number>_<issue-date>`.
 
 ## Data flow: loaders and model
 
@@ -297,6 +404,10 @@ so future SWE values can never leak into the horizon simulation.
   through to `elif "sweep" in self.params:` — merely having a `"sweep"` key present (any
   value) is enough to initialize W&B, even if `"wandb"` is `False`. This is meant for W&B
   sweep agents (which pre-populate `wandb.config`), but it's easy to trip accidentally.
+- **Early-stopping checkpoints are run-scoped.** `train_transformer_style` passes
+  `<run_dir>/checkpoint.pth` to `EarlyStopper`, so simultaneous hybrid and Crossformer runs
+  cannot overwrite or restore one another's best weights. Direct `EarlyStopper` callers
+  still default to the legacy working-directory `checkpoint.pth` for compatibility.
 - **New test files are not auto-discovered by CircleCI.** `.circleci/config.yml` enumerates
   each `tests/test_*.py` file explicitly with its own `coverage run -m unittest -v
   tests/test_x.py` line; a new test file (e.g. a future addition alongside

@@ -678,11 +678,14 @@ class EffectiveForcingGenerator(torch.nn.Module):
             torch.nn.init.normal_(self.head.weight, std=1e-3)
             torch.nn.init.zeros_(self.head.bias)
             self.register_buffer("log_two", torch.tensor(0.6931471805599453))
-            # Static per-basin gate; the large negative bias starts it near 0 so that enabling the
-            # station term begins essentially where the multiplier-only model left off.
+            # Static per-basin gate, initialised near 0.18 rather than ~0. A near-zero gate would
+            # be nearly untrainable: sigmoid'(-6) is itself ~0.002, so the term's gradient is
+            # scaled into irrelevance and short runs with early stopping would never activate it.
+            # ~0.18 is also a defensible prior, since the gate acts as an areal-reduction factor
+            # for a point observation over a basin.
             self.gate_net = torch.nn.Linear(context_dim, 1)
             torch.nn.init.normal_(self.gate_net.weight, std=1e-3)
-            torch.nn.init.constant_(self.gate_net.bias, -6.0)
+            torch.nn.init.constant_(self.gate_net.bias, -1.5)
 
     def forward(self, met: torch.Tensor, context: torch.Tensor,
                 phys_forcing: Optional[torch.Tensor] = None) -> torch.Tensor:

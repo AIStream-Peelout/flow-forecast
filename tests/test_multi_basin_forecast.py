@@ -196,6 +196,13 @@ class TestMultiBasinWindowLoader(unittest.TestCase):
         self.assertEqual(holdout.basin_site_ids, ["basinC"])
         self.assertEqual(holdout.basin_positions, [2])
 
+    def test_pretrained_embedding_filter(self):
+        embedded_train = MultiBasinWindowLoader(
+            self.manifest_path, 120, 48, ["cfs"], RELEVANT_COLS, scaled_cols=SCALED_COLS,
+            basin_split="train", window_stride=96, require_pretrained_embedding=True)
+        self.assertEqual(embedded_train.basin_site_ids, ["basinA"])
+        self.assertEqual(embedded_train.basin_positions, [0])
+
     def test_sample_weights(self):
         weights = self.train_loader.sample_weights
         self.assertEqual(len(weights), len(self.train_loader))
@@ -361,17 +368,34 @@ class TestAnchoredForcing(unittest.TestCase):
         for index in self.phys_indices:
             self.assertNotIn(index, model.met_indices)
 
-    def test_anchored_starts_at_physics_baseline(self):
+    def test_multiplier_starts_at_physics_baseline(self):
         # The multiplier is initialised near (not exactly at) 1.0 so the encoder has a live
-        # gradient path, so the anchored model starts within a fraction of a percent of the
-        # pure-physics run rather than bit-identical to it.
+        # gradient path; the multiplier-only model therefore starts within a fraction of a percent
+        # of the pure-physics run. The ASOS gate is deliberately NOT asserted to be inert here --
+        # that would reward initialising it so small it cannot train.
         src = torch.stack([self.loader[0][0], self.loader[1][0]])
         with torch.no_grad():
             physics = self._model(use_multiplier=False, use_asos_gate=False)(src)
-            anchored = self._model(use_multiplier=True, use_asos_gate=True)(src)
-        self.assertTrue(torch.isfinite(anchored).all())
+            multiplier = self._model(use_multiplier=True, use_asos_gate=False)(src)
+        self.assertTrue(torch.isfinite(multiplier).all())
         scale = physics.abs().max().clamp(min=1e-8)
-        self.assertLess(float((anchored - physics).abs().max() / scale), 0.02)
+        self.assertLess(float((multiplier - physics).abs().max() / scale), 0.02)
+
+    def test_asos_only_storm_is_admitted_at_init(self):
+        # A storm the grid missed entirely must produce a materially non-zero effective rainfall
+        # from the start, otherwise the station pathway is untrainable in short runs.
+        model = self._model(use_multiplier=False, use_asos_gate=True)
+        gen = model.hybrid.forcing_generator
+        steps, storm = 48, 5.0
+        phys = torch.zeros(1, steps, 4)
+        phys[..., 2] = storm          # station reports rain
+        phys[..., 3] = 1.0            # and was genuinely observing
+        with torch.no_grad():
+            p_eff = gen(torch.zeros(1, steps, len(model.met_indices)),
+                        torch.zeros(1, 8), phys_forcing=phys)[..., 0]
+        recovered = float(p_eff.mean()) / storm
+        self.assertGreater(recovered, 0.05)   # not driven to irrelevance by the init
+        self.assertLess(recovered, 1.0)       # and still a bounded fraction of the point value
 
     def _window_with_rain(self):
         """
@@ -420,6 +444,52 @@ class TestAnchoredForcing(unittest.TestCase):
             self.skipTest("first fixture window is not dry")
         model(src).sum().backward()
         self.assertEqual(max(self._encoder_grads(model)), 0.0)
+
+
+class TestGapPolicy(unittest.TestCase):
+    """Tests that interpolation respects the channel policy and the true gap limit."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.manifest_path = build_manifest(cls.tmp.name)
+        with open(cls.manifest_path) as f:
+            manifest = json.load(f)
+        manifest["preprocessing"]["no_interp_cols"] = ["precipitation", "p01m", "precip_raw",
+                                                       "asos_raw"]
+        # Punch known gaps into one basin: 6 hours (fillable) and 7 hours (not) in temperature,
+        # and a 3-hour hole in precipitation, which must never be filled.
+        path = manifest["basins"][0]["csv_path"]
+        frame = pd.read_csv(path)
+        frame.loc[3000:3005, "temperature"] = np.nan
+        frame.loc[4000:4006, "temperature"] = np.nan
+        frame.loc[5000:5002, "precipitation"] = np.nan
+        frame.to_csv(path, index=False)
+        with open(cls.manifest_path, "w") as f:
+            json.dump(manifest, f)
+        cls.cols = RELEVANT_COLS + ["precip_raw", "pet_raw", "asos_raw", "asos_observed"]
+        cls.loader = MultiBasinWindowLoader(
+            cls.manifest_path, 120, 48, ["cfs"], cls.cols, scaled_cols=SCALED_COLS,
+            basin_split="train", window_stride=24, max_basins=1, max_input_gap=6)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_six_hour_gap_filled_seven_hour_gap_not(self):
+        frame = self.loader.basin_loaders[0].df
+        self.assertTrue(np.isfinite(frame["temperature"].to_numpy()[3000:3006]).all())
+        self.assertFalse(np.isfinite(frame["temperature"].to_numpy()[4000:4007]).all())
+
+    def test_precipitation_never_interpolated(self):
+        frame = self.loader.basin_loaders[0].df
+        self.assertFalse(np.isfinite(frame["precipitation"].to_numpy()[5000:5003]).any())
+
+    def test_served_windows_are_all_finite(self):
+        for index in range(0, len(self.loader), max(1, len(self.loader) // 20)):
+            src, trg = self.loader[index]
+            self.assertTrue(torch.isfinite(src).all())
+            self.assertTrue(torch.isfinite(trg).all())
 
 
 class TestMultiBasinEndToEnd(unittest.TestCase):
