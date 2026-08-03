@@ -1,0 +1,5727 @@
+{
+ "embedding_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/embedding_dataset/COUT_v2/embeddings_concat.pt",
+ "train_end": "2022-01-01",
+ "preprocessing": {
+  "fill_from": {
+   "p01m": "precipitation"
+  },
+  "copy_cols": {
+   "sw_raw": "shortwave_radiation",
+   "precip_raw": "precipitation",
+   "pet_raw": "pet_mm_hr",
+   "asos_raw": "p01m"
+  },
+  "observed_mask_cols": {
+   "asos_observed": "p01m"
+  },
+  "no_interp_cols": [
+   "precipitation",
+   "p01m",
+   "precip_raw",
+   "asos_raw"
+  ],
+  "lapse": {
+   "source": "temperature",
+   "target": "temp_lapse_k"
+  },
+  "swe_col": "snodas_swe_mm"
+ },
+ "basins": [
+  {
+   "site_id": "06614800",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06614800/06614800_hourly_full.csv",
+   "area_sq_km": 4.0,
+   "temp_offset_c": -1.7281,
+   "flow_scale_mm_hr": 0.17849150997618732,
+   "met_stats": {
+    "precipitation": [
+     0.0913892988166427,
+     0.4206200387000022
+    ],
+    "temperature": [
+     276.5337696364141,
+     8.805883892734117
+    ],
+    "shortwave_radiation": [
+     215.88994814926951,
+     259.1495479529215
+    ],
+    "longwave_radiation": [
+     228.6865297100901,
+     41.04866093411629
+    ],
+    "specific_humidity": [
+     0.00383013290338859,
+     0.001691113245097961
+    ],
+    "wind_east": [
+     2.479904220874524,
+     2.5324201378615485
+    ],
+    "wind_north": [
+     0.6645038722700779,
+     2.2603573530987022
+    ],
+    "p01m": [
+     0.0639421971589332,
+     0.36518762429931634
+    ],
+    "pet_mm_hr": [
+     0.19241465543752126,
+     0.2459148695422685
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 198652,
+   "rows_2023_plus": 30889,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06614800_snodas_swe.csv"
+  },
+  {
+   "site_id": "06620000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06620000/06620000_hourly_full.csv",
+   "area_sq_km": 3702.6,
+   "temp_offset_c": -2.07,
+   "flow_scale_mm_hr": 0.020073979901269252,
+   "met_stats": {
+    "precipitation": [
+     0.06613710446054137,
+     0.349761747705663
+    ],
+    "temperature": [
+     281.7775041102745,
+     8.785937283545644
+    ],
+    "shortwave_radiation": [
+     225.5431957860751,
+     270.445243907763
+    ],
+    "longwave_radiation": [
+     257.6150652282692,
+     43.98046266737612
+    ],
+    "specific_humidity": [
+     0.004718919812118757,
+     0.0017943312176104946
+    ],
+    "wind_east": [
+     3.692967975438429,
+     3.2851649720167297
+    ],
+    "wind_north": [
+     1.5034366057922703,
+     2.5746229802477996
+    ],
+    "p01m": [
+     0.03686244877049181,
+     0.2469694492821926
+    ],
+    "pet_mm_hr": [
+     0.19665895799540486,
+     0.24459717060569403
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 160783,
+   "rows_2023_plus": 31113,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06620000_snodas_swe.csv"
+  },
+  {
+   "site_id": "06696980",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06696980/06696980_hourly_full.csv",
+   "area_sq_km": 61.9,
+   "temp_offset_c": -2.7334,
+   "flow_scale_mm_hr": 0.04773554713258036,
+   "met_stats": {
+    "precipitation": [
+     0.07365345625655322,
+     0.3725634388593328
+    ],
+    "temperature": [
+     282.3717102268368,
+     6.326914375362304
+    ],
+    "shortwave_radiation": [
+     253.57483850343965,
+     285.2426075098159
+    ],
+    "longwave_radiation": [
+     248.94651011431344,
+     38.07152350186627
+    ],
+    "specific_humidity": [
+     0.004939664437511188,
+     0.0016298771057298414
+    ],
+    "wind_east": [
+     2.6954826991944354,
+     2.6446882014017303
+    ],
+    "wind_north": [
+     0.5234883504539294,
+     2.228201624531463
+    ],
+    "p01m": [
+     0.06368743702529218,
+     0.5456254833342801
+    ],
+    "pet_mm_hr": [
+     0.24106295806517147,
+     0.2708369778298731
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 78682,
+   "rows_2023_plus": 13194,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06696980_snodas_swe.csv"
+  },
+  {
+   "site_id": "06700000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06700000/06700000_hourly_full.csv",
+   "area_sq_km": 4213.5,
+   "temp_offset_c": -5.4977,
+   "flow_scale_mm_hr": 0.004821798799574993,
+   "met_stats": {
+    "precipitation": [
+     0.06462000880636995,
+     0.3559120978497321
+    ],
+    "temperature": [
+     287.27602208931125,
+     7.283855089776335
+    ],
+    "shortwave_radiation": [
+     249.54063107425483,
+     280.34658055711117
+    ],
+    "longwave_radiation": [
+     277.47388006213384,
+     42.35170572905272
+    ],
+    "specific_humidity": [
+     0.00589476112843846,
+     0.0021623510718997833
+    ],
+    "wind_east": [
+     1.800317884944777,
+     3.0144782088287227
+    ],
+    "wind_north": [
+     0.9643763983414669,
+     2.95438210015371
+    ],
+    "p01m": [
+     0.019964394133979133,
+     0.19307083280767956
+    ],
+    "pet_mm_hr": [
+     0.26915024277247523,
+     0.297875111258763
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 82308,
+   "rows_2023_plus": 15930,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06700000_snodas_swe.csv"
+  },
+  {
+   "site_id": "06701900",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06701900/06701900_hourly_full.csv",
+   "area_sq_km": 5252.6,
+   "temp_offset_c": -6.0695,
+   "flow_scale_mm_hr": 0.003930273422630668,
+   "met_stats": {
+    "precipitation": [
+     0.05027402447948265,
+     0.35189638511547766
+    ],
+    "temperature": [
+     281.84931671347,
+     9.800659099377754
+    ],
+    "shortwave_radiation": [
+     196.95794839544934,
+     253.15812321216978
+    ],
+    "longwave_radiation": [
+     251.97346565429768,
+     51.71300113329018
+    ],
+    "specific_humidity": [
+     0.004510876065895715,
+     0.0023896957050047333
+    ],
+    "wind_east": [
+     2.2097950446747427,
+     2.7609929377800366
+    ],
+    "wind_north": [
+     0.5069583260259216,
+     2.7972879507130055
+    ],
+    "p01m": [
+     0.018494833290595352,
+     0.21334769968512385
+    ],
+    "pet_mm_hr": [
+     0.18353046360032646,
+     0.24798556068987634
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 159869,
+   "rows_2023_plus": 31155,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06701900_snodas_swe.csv"
+  },
+  {
+   "site_id": "06708600",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06708600/06708600_hourly_full.csv",
+   "area_sq_km": 69.67073099999999,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.0160235690500504,
+   "met_stats": {
+    "precipitation": [
+     0.06746206239901516,
+     0.3957923825450739
+    ],
+    "temperature": [
+     290.1408440409325,
+     7.96365574842614
+    ],
+    "shortwave_radiation": [
+     254.9623236323767,
+     292.91815667402744
+    ],
+    "longwave_radiation": [
+     295.95721454951143,
+     45.10290591165272
+    ],
+    "specific_humidity": [
+     0.006002277483265369,
+     0.0024474946427263684
+    ],
+    "wind_east": [
+     1.3579010537431713,
+     2.670284393673507
+    ],
+    "wind_north": [
+     0.8190699772255136,
+     2.7111224646922176
+    ],
+    "p01m": [
+     0.09686874471031777,
+     1.0202310116920648
+    ],
+    "pet_mm_hr": [
+     0.286422616741071,
+     0.30331572041653576
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 52336,
+   "rows_2023_plus": 20251,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06708600_snodas_swe.csv"
+  },
+  {
+   "site_id": "06708690",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06708690/06708690_hourly_full.csv",
+   "area_sq_km": 354.82863,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.012015726247812854,
+   "met_stats": {
+    "precipitation": [
+     0.06450747693659394,
+     0.4232123693297355
+    ],
+    "temperature": [
+     289.7513861473129,
+     8.552606548248542
+    ],
+    "shortwave_radiation": [
+     246.14408381900714,
+     290.7647703902252
+    ],
+    "longwave_radiation": [
+     294.07854034265637,
+     47.860354960878986
+    ],
+    "specific_humidity": [
+     0.006087521798213502,
+     0.0025523540656749886
+    ],
+    "wind_east": [
+     1.050637574368136,
+     2.577007716215878
+    ],
+    "wind_north": [
+     0.6699001313808757,
+     2.579599755556991
+    ],
+    "p01m": [
+     0.09491035290672134,
+     1.9240198193183335
+    ],
+    "pet_mm_hr": [
+     0.2663248088903793,
+     0.29807982662669813
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 30188,
+   "rows_2023_plus": 31191,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06708690_snodas_swe.csv"
+  },
+  {
+   "site_id": "06708800",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06708800/06708800_hourly_full.csv",
+   "area_sq_km": 303.7,
+   "temp_offset_c": -2.2165,
+   "flow_scale_mm_hr": 0.009334720627638921,
+   "met_stats": {
+    "precipitation": [
+     0.050170892977688536,
+     0.33869473575406406
+    ],
+    "temperature": [
+     284.60125029569747,
+     10.001996787585309
+    ],
+    "shortwave_radiation": [
+     203.1929425106307,
+     263.7667833670144
+    ],
+    "longwave_radiation": [
+     267.9284926638164,
+     54.164477015020566
+    ],
+    "specific_humidity": [
+     0.00471606692514958,
+     0.0025710066048864814
+    ],
+    "wind_east": [
+     1.658988800399033,
+     2.60662950264168
+    ],
+    "wind_north": [
+     0.455104574639826,
+     2.6613699835826257
+    ],
+    "p01m": [
+     0.07478361749144641,
+     1.206623231664043
+    ],
+    "pet_mm_hr": [
+     0.19991634785673124,
+     0.2617215491679745
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 173207,
+   "rows_2023_plus": 30806,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06708800_snodas_swe.csv"
+  },
+  {
+   "site_id": "06709000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06709000/06709000_hourly_full.csv",
+   "area_sq_km": 711.3,
+   "temp_offset_c": -2.6535,
+   "flow_scale_mm_hr": 0.007372813053576253,
+   "met_stats": {
+    "precipitation": [
+     0.050171838290254414,
+     0.33132548827533875
+    ],
+    "temperature": [
+     284.2275214318012,
+     10.037066438210191
+    ],
+    "shortwave_radiation": [
+     199.95506914005185,
+     262.0094926267172
+    ],
+    "longwave_radiation": [
+     266.6800346507701,
+     54.06090939546886
+    ],
+    "specific_humidity": [
+     0.004707325751381879,
+     0.002597615706510067
+    ],
+    "wind_east": [
+     1.6846729163802634,
+     2.57853020668532
+    ],
+    "wind_north": [
+     0.4412677277639872,
+     2.631857388928559
+    ],
+    "p01m": [
+     0.064479166166822,
+     1.1127149854069478
+    ],
+    "pet_mm_hr": [
+     0.1933969432189799,
+     0.256956328929708
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 217476,
+   "rows_2023_plus": 30970,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06709000_snodas_swe.csv"
+  },
+  {
+   "site_id": "06709530",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06709530/06709530_hourly_full.csv",
+   "area_sq_km": 819.0,
+   "temp_offset_c": -2.8087,
+   "flow_scale_mm_hr": 0.008347719602104642,
+   "met_stats": {
+    "precipitation": [
+     0.05370147717546672,
+     0.336195112785839
+    ],
+    "temperature": [
+     285.7524227849971,
+     9.66747811921356
+    ],
+    "shortwave_radiation": [
+     206.7874693768492,
+     265.7947222561411
+    ],
+    "longwave_radiation": [
+     274.2553543266035,
+     53.497059808763375
+    ],
+    "specific_humidity": [
+     0.005191877192410794,
+     0.0026320809534483847
+    ],
+    "wind_east": [
+     1.359533646492447,
+     2.5974843537469674
+    ],
+    "wind_north": [
+     0.44266464963222674,
+     2.6348299036846403
+    ],
+    "p01m": [
+     0.061128408256541936,
+     1.0587154165892012
+    ],
+    "pet_mm_hr": [
+     0.19819251241784097,
+     0.2585435592148225
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 230678,
+   "rows_2023_plus": 28994,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06709530_snodas_swe.csv"
+  },
+  {
+   "site_id": "06709740",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06709740/06709740_hourly_full.csv",
+   "area_sq_km": 6.3454755,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.05421689645109852,
+   "met_stats": {
+    "precipitation": [
+     0.07196615509761388,
+     0.4898514762931335
+    ],
+    "temperature": [
+     292.01412066160526,
+     7.75384020195578
+    ],
+    "shortwave_radiation": [
+     256.2160337581345,
+     294.6455119527671
+    ],
+    "longwave_radiation": [
+     307.9224975596529,
+     45.62253291970707
+    ],
+    "specific_humidity": [
+     0.006935621071041215,
+     0.0024854576287875797
+    ],
+    "wind_east": [
+     0.6907342728731019,
+     2.4952809710659043
+    ],
+    "wind_north": [
+     0.6098142621475054,
+     2.589211402153505
+    ],
+    "p01m": [
+     0.1135720363340564,
+     1.9924448272925395
+    ],
+    "pet_mm_hr": [
+     0.28005527655249457,
+     0.3035079568745131
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 37059,
+   "rows_2023_plus": 15751,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06709740_snodas_swe.csv"
+  },
+  {
+   "site_id": "06709910",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06709910/06709910_hourly_full.csv",
+   "area_sq_km": 38.072852999999995,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.0335535098569766,
+   "met_stats": {
+    "precipitation": [
+     0.0671949958487433,
+     0.4727310307942969
+    ],
+    "temperature": [
+     291.5797403577628,
+     7.923845711456448
+    ],
+    "shortwave_radiation": [
+     250.171251968702,
+     291.78270893791205
+    ],
+    "longwave_radiation": [
+     304.5938631846428,
+     47.084495837742274
+    ],
+    "specific_humidity": [
+     0.006747369600221401,
+     0.0025663503916160055
+    ],
+    "wind_east": [
+     0.7784066717880594,
+     2.5313026073664675
+    ],
+    "wind_north": [
+     0.6524819479709161,
+     2.5689631384688925
+    ],
+    "p01m": [
+     0.10671614713060106,
+     1.9228033704734266
+    ],
+    "pet_mm_hr": [
+     0.27374336676539107,
+     0.3009653580665602
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 39905,
+   "rows_2023_plus": 30798,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06709910_snodas_swe.csv"
+  },
+  {
+   "site_id": "06710150",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06710150/06710150_hourly_full.csv",
+   "area_sq_km": 29.0,
+   "temp_offset_c": -0.7573,
+   "flow_scale_mm_hr": 0.038282683098963606,
+   "met_stats": {
+    "precipitation": [
+     0.046233092355901124,
+     0.33301648060194433
+    ],
+    "temperature": [
+     284.40294087818074,
+     10.33736719226549
+    ],
+    "shortwave_radiation": [
+     196.67579146133744,
+     259.97839240905057
+    ],
+    "longwave_radiation": [
+     267.75736240231964,
+     55.12037698044373
+    ],
+    "specific_humidity": [
+     0.004562768339856194,
+     0.0025549364927377077
+    ],
+    "wind_east": [
+     1.5120752442106906,
+     2.682436253905227
+    ],
+    "wind_north": [
+     0.34057821467968635,
+     2.693368927567274
+    ],
+    "p01m": [
+     0.06938451741668726,
+     1.1831395582176614
+    ],
+    "pet_mm_hr": [
+     0.19260428229690932,
+     0.2586450547037861
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 154340,
+   "rows_2023_plus": 31194,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06710150_snodas_swe.csv"
+  },
+  {
+   "site_id": "06710247",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06710247/06710247_hourly_full.csv",
+   "area_sq_km": 8028.8,
+   "temp_offset_c": -7.2335,
+   "flow_scale_mm_hr": 0.003740881154639194,
+   "met_stats": {
+    "precipitation": [
+     0.0471053856945019,
+     0.3202190851135523
+    ],
+    "temperature": [
+     285.24952231074985,
+     10.324089925521351
+    ],
+    "shortwave_radiation": [
+     197.2787048479344,
+     260.656932683236
+    ],
+    "longwave_radiation": [
+     273.3960700796748,
+     55.74458256921054
+    ],
+    "specific_humidity": [
+     0.004914953611445837,
+     0.0026590186127943144
+    ],
+    "wind_east": [
+     1.369588495958706,
+     2.5413193825408062
+    ],
+    "wind_north": [
+     0.3877247696962285,
+     2.5191129327869675
+    ],
+    "p01m": [
+     0.06682412816316252,
+     1.1265541371315373
+    ],
+    "pet_mm_hr": [
+     0.19313188922226776,
+     0.2598100455638358
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 223130,
+   "rows_2023_plus": 31007,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06710247_snodas_swe.csv"
+  },
+  {
+   "site_id": "06710385",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06710385/06710385_hourly_full.csv",
+   "area_sq_km": 267.4,
+   "temp_offset_c": -5.0074,
+   "flow_scale_mm_hr": 0.021658885410703956,
+   "met_stats": {
+    "precipitation": [
+     0.07046346055185028,
+     0.3745595921607195
+    ],
+    "temperature": [
+     286.26243837969264,
+     7.791768495985517
+    ],
+    "shortwave_radiation": [
+     233.6575708438357,
+     277.94251882205623
+    ],
+    "longwave_radiation": [
+     274.1294741362004,
+     44.93524094950562
+    ],
+    "specific_humidity": [
+     0.005378228330842498,
+     0.0021834918924526873
+    ],
+    "wind_east": [
+     0.718094621513215,
+     2.3046653769862533
+    ],
+    "wind_north": [
+     0.6140287401641721,
+     2.298196909867944
+    ],
+    "p01m": [
+     0.07183625002788249,
+     0.4696819534399955
+    ],
+    "pet_mm_hr": [
+     0.24934885010311394,
+     0.28567696271323145
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 179820,
+   "rows_2023_plus": 28677,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06710385_snodas_swe.csv"
+  },
+  {
+   "site_id": "06710605",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06710605/06710605_hourly_full.csv",
+   "area_sq_km": 456.0,
+   "temp_offset_c": -6.1899,
+   "flow_scale_mm_hr": 0.018481625897712604,
+   "met_stats": {
+    "precipitation": [
+     0.06264197047339436,
+     0.3555225042754167
+    ],
+    "temperature": [
+     286.1829103857354,
+     9.460859774017203
+    ],
+    "shortwave_radiation": [
+     220.33168850567154,
+     274.4921768194137
+    ],
+    "longwave_radiation": [
+     277.83003779022835,
+     51.78142789867323
+    ],
+    "specific_humidity": [
+     0.005396554910038926,
+     0.002527670841396058
+    ],
+    "wind_east": [
+     1.0287492145059383,
+     2.4112409021170684
+    ],
+    "wind_north": [
+     0.5072604464936923,
+     2.3923718303847776
+    ],
+    "p01m": [
+     0.014171860032647888,
+     0.16526497184320382
+    ],
+    "pet_mm_hr": [
+     0.22335338285759898,
+     0.27601676418959015
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 167539,
+   "rows_2023_plus": 15838,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06710605_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711040",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711040/06711040_hourly_full.csv",
+   "area_sq_km": 131.053494,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.01332099288399349,
+   "met_stats": {
+    "precipitation": [
+     0.05112896924622257,
+     0.2754828165800279
+    ],
+    "temperature": [
+     283.3375886388408,
+     10.41414288005419
+    ],
+    "shortwave_radiation": [
+     195.10799715757304,
+     257.6060892279071
+    ],
+    "longwave_radiation": [
+     262.1811769357355,
+     53.77758803259265
+    ],
+    "specific_humidity": [
+     0.0045672121412237395,
+     0.0023946098090251874
+    ],
+    "wind_east": [
+     1.136387125387361,
+     2.3651333816191196
+    ],
+    "wind_north": [
+     0.38360795790643504,
+     2.35008861033983
+    ],
+    "p01m": [
+     0.032084618836955826,
+     0.7480751469224514
+    ],
+    "pet_mm_hr": [
+     0.1900121091263115,
+     0.2592473589625577
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 46742,
+   "rows_2023_plus": 31160,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711040_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711515",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711515/06711515_hourly_full.csv",
+   "area_sq_km": 3.6777857999999997,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.26898936313177646,
+   "met_stats": {
+    "precipitation": [
+     0.06960219695674473,
+     0.48482697077683584
+    ],
+    "temperature": [
+     291.799511027526,
+     7.951045298261242
+    ],
+    "shortwave_radiation": [
+     258.4351489428392,
+     297.9691018209188
+    ],
+    "longwave_radiation": [
+     308.14192597025135,
+     45.13734097685508
+    ],
+    "specific_humidity": [
+     0.006639232777682795,
+     0.0024262177910789415
+    ],
+    "wind_east": [
+     0.7179962381945632,
+     2.5772987968097185
+    ],
+    "wind_north": [
+     0.584290191770673,
+     2.651163323429776
+    ],
+    "p01m": [
+     0.11852080982504133,
+     2.0376850762883607
+    ],
+    "pet_mm_hr": [
+     0.287889927044509,
+     0.3090864695255809
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 35200,
+   "rows_2023_plus": 14993,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711515_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711555",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711555/06711555_hourly_full.csv",
+   "area_sq_km": 61.38276299999999,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.052800769139338295,
+   "met_stats": {
+    "precipitation": [
+     0.05544428904428905,
+     0.3814719790474203
+    ],
+    "temperature": [
+     292.7778925619835,
+     8.048110424523257
+    ],
+    "shortwave_radiation": [
+     260.4209140178004,
+     301.0838904762458
+    ],
+    "longwave_radiation": [
+     314.0515824327188,
+     45.427153818000505
+    ],
+    "specific_humidity": [
+     0.006681457006251324,
+     0.0024161746216858015
+    ],
+    "wind_east": [
+     0.7119612201525748,
+     2.5770623830011776
+    ],
+    "wind_north": [
+     0.6049539094617503,
+     2.618927356186167
+    ],
+    "p01m": [
+     0.11269781468531469,
+     1.9728492245277276
+    ],
+    "pet_mm_hr": [
+     0.2933474703191884,
+     0.31318217628249584
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 37984,
+   "rows_2023_plus": 15715,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711555_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711565",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711565/06711565_hourly_full.csv",
+   "area_sq_km": 8781.4,
+   "temp_offset_c": -7.1381,
+   "flow_scale_mm_hr": 0.004809395965366169,
+   "met_stats": {
+    "precipitation": [
+     0.04781163536146447,
+     0.3074495557484212
+    ],
+    "temperature": [
+     285.2182608801692,
+     10.236139500405542
+    ],
+    "shortwave_radiation": [
+     197.35991243602206,
+     260.90303604018965
+    ],
+    "longwave_radiation": [
+     273.60109681443004,
+     55.51604570707782
+    ],
+    "specific_humidity": [
+     0.004916766186200625,
+     0.002634247563705139
+    ],
+    "wind_east": [
+     1.3518394631713546,
+     2.5250292534050445
+    ],
+    "wind_north": [
+     0.3936312279301634,
+     2.504772001464353
+    ],
+    "p01m": [
+     0.0528181033611718,
+     0.971095946377462
+    ],
+    "pet_mm_hr": [
+     0.1931986055948241,
+     0.2597159837796734
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 287862,
+   "rows_2023_plus": 31177,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711565_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711570",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711570/06711570_hourly_full.csv",
+   "area_sq_km": 5.0763804,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.14089445385240762,
+   "met_stats": {
+    "precipitation": [
+     0.054468280292843264,
+     0.37680003290902475
+    ],
+    "temperature": [
+     292.65701820665515,
+     8.163716453938664
+    ],
+    "shortwave_radiation": [
+     260.1207053211244,
+     301.4082339845188
+    ],
+    "longwave_radiation": [
+     312.26447226313206,
+     45.84944325834091
+    ],
+    "specific_humidity": [
+     0.006439919495848541,
+     0.0024476292777600066
+    ],
+    "wind_east": [
+     0.7537621391901986,
+     2.629115480768698
+    ],
+    "wind_north": [
+     0.6212123538451687,
+     2.670954631943013
+    ],
+    "p01m": [
+     0.11421387377003693,
+     1.907350533493173
+    ],
+    "pet_mm_hr": [
+     0.2952039593487439,
+     0.3152932442154385
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 47170,
+   "rows_2023_plus": 15794,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711570_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711575",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711575/06711575_hourly_full.csv",
+   "area_sq_km": 10.3081602,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.101676156332407,
+   "met_stats": {
+    "precipitation": [
+     0.05396901649833188,
+     0.37972218986120493
+    ],
+    "temperature": [
+     292.70539120698317,
+     8.137848038008153
+    ],
+    "shortwave_radiation": [
+     260.844397468123,
+     301.58517848413214
+    ],
+    "longwave_radiation": [
+     312.6891903934921,
+     45.612243724499415
+    ],
+    "specific_humidity": [
+     0.006474542015904209,
+     0.002430582106090433
+    ],
+    "wind_east": [
+     0.7200788350898039,
+     2.612301795358954
+    ],
+    "wind_north": [
+     0.594015127050866,
+     2.655047695724542
+    ],
+    "p01m": [
+     0.11156660801608703,
+     1.9319012160474165
+    ],
+    "pet_mm_hr": [
+     0.2958967186012979,
+     0.3152555885503466
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 43831,
+   "rows_2023_plus": 15753,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711575_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711618",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711618/06711618_hourly_full.csv",
+   "area_sq_km": 14.3744445,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.043786870449546184,
+   "met_stats": {
+    "precipitation": [
+     0.06721273356581481,
+     0.40397691121753865
+    ],
+    "temperature": [
+     292.2065289127153,
+     8.025279150113796
+    ],
+    "shortwave_radiation": [
+     257.88144909696564,
+     297.506248546777
+    ],
+    "longwave_radiation": [
+     310.40550200385155,
+     45.561856980338796
+    ],
+    "specific_humidity": [
+     0.006717310950918648,
+     0.00246717813840427
+    ],
+    "wind_east": [
+     0.6301923172227138,
+     2.493989029685334
+    ],
+    "wind_north": [
+     0.5536238480716182,
+     2.5200071356320306
+    ],
+    "p01m": [
+     0.004875938166866184,
+     0.09024240634530419
+    ],
+    "pet_mm_hr": [
+     0.2874393483396138,
+     0.3085351582900841
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 38617,
+   "rows_2023_plus": 15056,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711618_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711770",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711770/06711770_hourly_full.csv",
+   "area_sq_km": 8.8577658,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.13056753297179194,
+   "met_stats": {
+    "precipitation": [
+     0.0667354180593064,
+     0.40553782183726245
+    ],
+    "temperature": [
+     292.6065151474638,
+     7.841765925585895
+    ],
+    "shortwave_radiation": [
+     258.323090884783,
+     298.2182365218479
+    ],
+    "longwave_radiation": [
+     312.03926896441084,
+     45.16269130829316
+    ],
+    "specific_humidity": [
+     0.006814703810262306,
+     0.0024343584553958714
+    ],
+    "wind_east": [
+     0.6329278853445278,
+     2.4729423969805557
+    ],
+    "wind_north": [
+     0.5983895287574534,
+     2.492794634597472
+    ],
+    "p01m": [
+     0.00511400037434156,
+     0.0932853331772686
+    ],
+    "pet_mm_hr": [
+     0.2903236503499559,
+     0.3109341458465989
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 37625,
+   "rows_2023_plus": 13416,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711770_snodas_swe.csv"
+  },
+  {
+   "site_id": "06711780",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06711780/06711780_hourly_full.csv",
+   "area_sq_km": 40.662842999999995,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.07233162388323201,
+   "met_stats": {
+    "precipitation": [
+     0.06676189641150757,
+     0.4021021347001357
+    ],
+    "temperature": [
+     292.27137440276505,
+     8.00847595641271
+    ],
+    "shortwave_radiation": [
+     257.9801758157975,
+     297.7564339322156
+    ],
+    "longwave_radiation": [
+     310.56240596726644,
+     45.44416479698786
+    ],
+    "specific_humidity": [
+     0.006721501667174952,
+     0.0024595214585465034
+    ],
+    "wind_east": [
+     0.6375632810206363,
+     2.4912800566049635
+    ],
+    "wind_north": [
+     0.5528812134288908,
+     2.5191227674798315
+    ],
+    "p01m": [
+     0.004976847616143133,
+     0.09116603487742166
+    ],
+    "pet_mm_hr": [
+     0.2879633195902714,
+     0.3091276534713118
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 39538,
+   "rows_2023_plus": 15950,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06711780_snodas_swe.csv"
+  },
+  {
+   "site_id": "06712000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06712000/06712000_hourly_full.csv",
+   "area_sq_km": 436.3,
+   "temp_offset_c": -1.8258,
+   "flow_scale_mm_hr": 0.0067849014278401135,
+   "met_stats": {
+    "precipitation": [
+     0.052734541057766475,
+     0.3543106112949837
+    ],
+    "temperature": [
+     283.84370656048696,
+     9.893510537936944
+    ],
+    "shortwave_radiation": [
+     202.6851123798703,
+     265.622815857348
+    ],
+    "longwave_radiation": [
+     263.74962960453627,
+     52.6287473505518
+    ],
+    "specific_humidity": [
+     0.004515173938898038,
+     0.002479436443984972
+    ],
+    "wind_east": [
+     1.7832923861679417,
+     2.441678413464512
+    ],
+    "wind_north": [
+     0.5259679158933894,
+     2.8344405469883807
+    ],
+    "p01m": [
+     0.05847255571306468,
+     0.7385207321880958
+    ],
+    "pet_mm_hr": [
+     0.20060384880944462,
+     0.2596522062935258
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 191646,
+   "rows_2023_plus": 30186,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06712000_snodas_swe.csv"
+  },
+  {
+   "site_id": "06713000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06713000/06713000_hourly_full.csv",
+   "area_sq_km": 1001.0,
+   "temp_offset_c": -2.1481,
+   "flow_scale_mm_hr": 0.0028111871143936323,
+   "met_stats": {
+    "precipitation": [
+     0.04619613665943601,
+     0.3350357778652665
+    ],
+    "temperature": [
+     284.7651614967462,
+     10.502913626942659
+    ],
+    "shortwave_radiation": [
+     196.81371554772235,
+     262.9212690285471
+    ],
+    "longwave_radiation": [
+     273.4988198481562,
+     55.14527548427293
+    ],
+    "specific_humidity": [
+     0.004778240253796096,
+     0.002630064012131982
+    ],
+    "wind_east": [
+     1.2150529819609543,
+     2.4231604489010063
+    ],
+    "wind_north": [
+     0.4502366583036876,
+     2.611588025560058
+    ],
+    "p01m": [
+     0.046471082971800436,
+     0.9981344369299217
+    ],
+    "pet_mm_hr": [
+     0.19200352110891758,
+     0.25863660942427985
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 185032,
+   "rows_2023_plus": 31052,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06713000_snodas_swe.csv"
+  },
+  {
+   "site_id": "06713500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06713500/06713500_hourly_full.csv",
+   "area_sq_km": 1063.2,
+   "temp_offset_c": -2.6159,
+   "flow_scale_mm_hr": 0.005250038410346937,
+   "met_stats": {
+    "precipitation": [
+     0.0432889579259903,
+     0.2976666517826042
+    ],
+    "temperature": [
+     284.9703886233616,
+     10.607855071937816
+    ],
+    "shortwave_radiation": [
+     195.53985166558044,
+     260.5931881131744
+    ],
+    "longwave_radiation": [
+     273.5508364110363,
+     56.539796907302446
+    ],
+    "specific_humidity": [
+     0.004725209203780143,
+     0.0026209891739303382
+    ],
+    "wind_east": [
+     1.4857148231211528,
+     2.628400847308678
+    ],
+    "wind_north": [
+     0.3729269304880773,
+     2.618932547137763
+    ],
+    "p01m": [
+     0.010315865739734956,
+     0.1423640748307274
+    ],
+    "pet_mm_hr": [
+     0.1914840657842215,
+     0.26112100216932993
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 277125,
+   "rows_2023_plus": 31004,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06713500_snodas_swe.csv"
+  },
+  {
+   "site_id": "06714215",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06714215/06714215_hourly_full.csv",
+   "area_sq_km": 10080.3,
+   "temp_offset_c": -6.7709,
+   "flow_scale_mm_hr": 0.004719220598464193,
+   "met_stats": {
+    "precipitation": [
+     0.04289067468645291,
+     0.30085295716013144
+    ],
+    "temperature": [
+     285.7922242457441,
+     10.730131811302043
+    ],
+    "shortwave_radiation": [
+     198.79910725337737,
+     264.1852295197525
+    ],
+    "longwave_radiation": [
+     278.6883231366802,
+     57.12537619149245
+    ],
+    "specific_humidity": [
+     0.004835908305885366,
+     0.0026598747909169383
+    ],
+    "wind_east": [
+     1.4007265109773799,
+     2.5951986017281556
+    ],
+    "wind_north": [
+     0.3715715756785586,
+     2.550503902317229
+    ],
+    "p01m": [
+     0.01022776607929202,
+     0.13930743570373225
+    ],
+    "pet_mm_hr": [
+     0.19944405163657564,
+     0.2679341089393361
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 282080,
+   "rows_2023_plus": 31243,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06714215_snodas_swe.csv"
+  },
+  {
+   "site_id": "06714360",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06714360/06714360_hourly_full.csv",
+   "area_sq_km": 484.32813,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.032665110737158005,
+   "met_stats": {
+    "precipitation": [
+     0.04271887230650835,
+     0.32185191550688147
+    ],
+    "temperature": [
+     285.2938237961742,
+     10.825006713033629
+    ],
+    "shortwave_radiation": [
+     193.76000757200967,
+     259.5252124100189
+    ],
+    "longwave_radiation": [
+     275.2946517700088,
+     56.73048479656615
+    ],
+    "specific_humidity": [
+     0.004650636773032102,
+     0.0026351833400979656
+    ],
+    "wind_east": [
+     1.3565600257360182,
+     2.641159311564371
+    ],
+    "wind_north": [
+     0.2905771758844353,
+     2.543695083331364
+    ],
+    "p01m": [
+     0.0034424829595426564,
+     0.08057524346721853
+    ],
+    "pet_mm_hr": [
+     0.19190989167452727,
+     0.26079305156321003
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 72810,
+   "rows_2023_plus": 31084,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06714360_snodas_swe.csv"
+  },
+  {
+   "site_id": "06714400",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06714400/06714400_hourly_full.csv",
+   "area_sq_km": 29.266887,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.04865437965688675,
+   "met_stats": {
+    "precipitation": [
+     0.07421539565395655,
+     0.3311344583720308
+    ],
+    "temperature": [
+     275.9551418614186,
+     8.811103263059007
+    ],
+    "shortwave_radiation": [
+     199.5768249965833,
+     246.48784429836593
+    ],
+    "longwave_radiation": [
+     221.8225619789531,
+     44.6724931069193
+    ],
+    "specific_humidity": [
+     0.003873687924012574,
+     0.0018016006761589222
+    ],
+    "wind_east": [
+     2.7474497741916086,
+     3.082199017849882
+    ],
+    "wind_north": [
+     0.037246684930435967,
+     2.4453133517343892
+    ],
+    "p01m": [
+     0.060920612272789394,
+     0.4455387078382933
+    ],
+    "pet_mm_hr": [
+     0.17132966103092523,
+     0.23326732423096883
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 71881,
+   "rows_2023_plus": 30996,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06714400_snodas_swe.csv"
+  },
+  {
+   "site_id": "06714500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06714500/06714500_hourly_full.csv",
+   "area_sq_km": 35.482862999999995,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.037766865312222966,
+   "met_stats": {
+    "precipitation": [
+     0.07675449297145884,
+     0.344606911795236
+    ],
+    "temperature": [
+     274.32965907732245,
+     9.44683768808979
+    ],
+    "shortwave_radiation": [
+     190.8789466582404,
+     240.6437077220603
+    ],
+    "longwave_radiation": [
+     213.76801714861563,
+     45.8275436416547
+    ],
+    "specific_humidity": [
+     0.0034897786581720666,
+     0.0017733790347251896
+    ],
+    "wind_east": [
+     2.8825178056809064,
+     3.1881294982292823
+    ],
+    "wind_north": [
+     -0.06831093069909645,
+     2.563280186956877
+    ],
+    "p01m": [
+     0.05300129468632039,
+     0.4341434074746646
+    ],
+    "pet_mm_hr": [
+     0.16200716344432337,
+     0.2292517522573315
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 58720,
+   "rows_2023_plus": 31095,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06714500_snodas_swe.csv"
+  },
+  {
+   "site_id": "06714800",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06714800/06714800_hourly_full.csv",
+   "area_sq_km": 72.5,
+   "temp_offset_c": -4.7681,
+   "flow_scale_mm_hr": 0.03168639057944448,
+   "met_stats": {
+    "precipitation": [
+     0.07718348945698825,
+     0.3250547352007487
+    ],
+    "temperature": [
+     279.20630281768985,
+     7.142330648209352
+    ],
+    "shortwave_radiation": [
+     229.15135764881506,
+     262.3174595524633
+    ],
+    "longwave_radiation": [
+     235.07941474155626,
+     40.2978957351473
+    ],
+    "specific_humidity": [
+     0.004440805751072961,
+     0.0016793513145693553
+    ],
+    "wind_east": [
+     2.362718566580332,
+     2.922399346601031
+    ],
+    "wind_north": [
+     0.27377786827691736,
+     2.5193702980691097
+    ],
+    "p01m": [
+     0.07270310878895317,
+     0.4202727846438398
+    ],
+    "pet_mm_hr": [
+     0.2125659324310864,
+     0.25869955615973306
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 134483,
+   "rows_2023_plus": 20701,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06714800_snodas_swe.csv"
+  },
+  {
+   "site_id": "06715000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06715000/06715000_hourly_full.csv",
+   "area_sq_km": 220.2,
+   "temp_offset_c": -6.1303,
+   "flow_scale_mm_hr": 0.05793973267339047,
+   "met_stats": {
+    "precipitation": [
+     0.08946451186913598,
+     0.36274987551884424
+    ],
+    "temperature": [
+     275.4059053877038,
+     8.580825309800677
+    ],
+    "shortwave_radiation": [
+     207.96464907506999,
+     253.0091692377241
+    ],
+    "longwave_radiation": [
+     218.99541512689166,
+     43.935998959433796
+    ],
+    "specific_humidity": [
+     0.0038487244241152733,
+     0.0017670068949953142
+    ],
+    "wind_east": [
+     2.702233729513406,
+     3.34860621897013
+    ],
+    "wind_north": [
+     -0.131706994783757,
+     2.609067730756945
+    ],
+    "p01m": [
+     0.07579940201706088,
+     0.419353798848124
+    ],
+    "pet_mm_hr": [
+     0.17036563059953141,
+     0.2295188248077444
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 188399,
+   "rows_2023_plus": 31244,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06715000_snodas_swe.csv"
+  },
+  {
+   "site_id": "06716100",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06716100/06716100_hourly_full.csv",
+   "area_sq_km": 149.1,
+   "temp_offset_c": -5.6126,
+   "flow_scale_mm_hr": 0.07741968427203824,
+   "met_stats": {
+    "precipitation": [
+     0.0898461084068553,
+     0.36012141024152344
+    ],
+    "temperature": [
+     277.2295078465673,
+     7.696103153144424
+    ],
+    "shortwave_radiation": [
+     222.19537051896359,
+     260.84361616034425
+    ],
+    "longwave_radiation": [
+     226.25467149629853,
+     41.79841875457699
+    ],
+    "specific_humidity": [
+     0.004158725550780854,
+     0.0017040911679527904
+    ],
+    "wind_east": [
+     2.4742995763307385,
+     3.245834209971528
+    ],
+    "wind_north": [
+     0.047298764499036604,
+     2.570305714680872
+    ],
+    "p01m": [
+     0.08043298410404623,
+     0.4362093857613053
+    ],
+    "pet_mm_hr": [
+     0.18907529216575145,
+     0.24035320768206747
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 158147,
+   "rows_2023_plus": 31200,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06716100_snodas_swe.csv"
+  },
+  {
+   "site_id": "06716500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06716500/06716500_hourly_full.csv",
+   "area_sq_km": 379.8,
+   "temp_offset_c": -6.167,
+   "flow_scale_mm_hr": 0.0592099778310624,
+   "met_stats": {
+    "precipitation": [
+     0.08964950297058397,
+     0.3664050982929469
+    ],
+    "temperature": [
+     274.54793498526783,
+     8.74464412103675
+    ],
+    "shortwave_radiation": [
+     201.27450789257597,
+     248.99655643321393
+    ],
+    "longwave_radiation": [
+     215.73209298169348,
+     44.10297340738736
+    ],
+    "specific_humidity": [
+     0.003700944567453992,
+     0.0017593555959816388
+    ],
+    "wind_east": [
+     2.7950760272847344,
+     3.358764098062102
+    ],
+    "wind_north": [
+     -0.21093928535208137,
+     2.6132066161332412
+    ],
+    "p01m": [
+     0.07728905279428101,
+     0.418157613514023
+    ],
+    "pet_mm_hr": [
+     0.16043978985626045,
+     0.22224111205829086
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 207362,
+   "rows_2023_plus": 29983,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06716500_snodas_swe.csv"
+  },
+  {
+   "site_id": "06718550",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06718550/06718550_hourly_full.csv",
+   "area_sq_km": 155.9,
+   "temp_offset_c": -4.4454,
+   "flow_scale_mm_hr": 0.02034990526807135,
+   "met_stats": {
+    "precipitation": [
+     0.07284011817670231,
+     0.35678467338969155
+    ],
+    "temperature": [
+     281.2276284749578,
+     8.554976339601582
+    ],
+    "shortwave_radiation": [
+     212.49741827799662,
+     260.46073846893273
+    ],
+    "longwave_radiation": [
+     248.48735830050643,
+     46.44069253794804
+    ],
+    "specific_humidity": [
+     0.004510188642656163,
+     0.002068964552988609
+    ],
+    "wind_east": [
+     1.4838523910250907,
+     2.469987813928025
+    ],
+    "wind_north": [
+     0.3620138421922341,
+     2.3009015717638244
+    ],
+    "p01m": [
+     0.07215494766460326,
+     0.4535597539860095
+    ],
+    "pet_mm_hr": [
+     0.20295160492485087,
+     0.25497145425577433
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 178252,
+   "rows_2023_plus": 27846,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06718550_snodas_swe.csv"
+  },
+  {
+   "site_id": "06719505",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06719505/06719505_hourly_full.csv",
+   "area_sq_km": 1020.4,
+   "temp_offset_c": -8.4555,
+   "flow_scale_mm_hr": 0.027781567839201233,
+   "met_stats": {
+    "precipitation": [
+     0.05539085615495768,
+     0.3242568123831717
+    ],
+    "temperature": [
+     286.53424516617355,
+     9.693308534428416
+    ],
+    "shortwave_radiation": [
+     212.20817161374114,
+     270.96392819152277
+    ],
+    "longwave_radiation": [
+     279.87625967625405,
+     52.88736247279212
+    ],
+    "specific_humidity": [
+     0.0051057611887600635,
+     0.0025735830018902826
+    ],
+    "wind_east": [
+     1.070152024026354,
+     2.3948936569600474
+    ],
+    "wind_north": [
+     0.41860567191564024,
+     2.219355623054963
+    ],
+    "p01m": [
+     0.012328155318929333,
+     0.15114961926102552
+    ],
+    "pet_mm_hr": [
+     0.2237391892282478,
+     0.2785096689579702
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 232150,
+   "rows_2023_plus": 31211,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06719505_snodas_swe.csv"
+  },
+  {
+   "site_id": "06719560",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06719560/06719560_hourly_full.csv",
+   "area_sq_km": 23.4653094,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.05740262933404543,
+   "met_stats": {
+    "precipitation": [
+     0.08173979805725971,
+     0.4311538417374717
+    ],
+    "temperature": [
+     290.46021344580777,
+     7.851663288049794
+    ],
+    "shortwave_radiation": [
+     254.85412650818,
+     292.59872122926566
+    ],
+    "longwave_radiation": [
+     299.45862781186094,
+     44.45039875525629
+    ],
+    "specific_humidity": [
+     0.006418389969325153,
+     0.002336142774124518
+    ],
+    "wind_east": [
+     0.5363811345092023,
+     2.3513862443549236
+    ],
+    "wind_north": [
+     0.5416912061349693,
+     2.40624406486384
+    ],
+    "p01m": [
+     0.006596566973415133,
+     0.12194713601362486
+    ],
+    "pet_mm_hr": [
+     0.283780748960634,
+     0.3056216913035698
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 39310,
+   "rows_2023_plus": 15876,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06719560_snodas_swe.csv"
+  },
+  {
+   "site_id": "06719840",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06719840/06719840_hourly_full.csv",
+   "area_sq_km": 26.935896,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.0738577845342217,
+   "met_stats": {
+    "precipitation": [
+     0.05854317962941562,
+     0.40791748008579526
+    ],
+    "temperature": [
+     288.96023036326517,
+     10.111351589269404
+    ],
+    "shortwave_radiation": [
+     225.63047590431066,
+     281.9745258616243
+    ],
+    "longwave_radiation": [
+     293.96963249739974,
+     54.55913408168714
+    ],
+    "specific_humidity": [
+     0.005680226407026465,
+     0.0027051524777748767
+    ],
+    "wind_east": [
+     0.9546559954543702,
+     2.4643672562890506
+    ],
+    "wind_north": [
+     0.45528178978389,
+     2.3552120656599356
+    ],
+    "p01m": [
+     0.004600986170499633,
+     0.1133794787618847
+    ],
+    "pet_mm_hr": [
+     0.2422750683580935,
+     0.29380736379646766
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 51338,
+   "rows_2023_plus": 30860,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06719840_snodas_swe.csv"
+  },
+  {
+   "site_id": "06719845",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06719845/06719845_hourly_full.csv",
+   "area_sq_km": 32.892872999999994,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.035136309734063356,
+   "met_stats": {
+    "precipitation": [
+     0.04588883345805271,
+     0.35893007758296974
+    ],
+    "temperature": [
+     286.1453504614617,
+     10.77211733880129
+    ],
+    "shortwave_radiation": [
+     201.7040958676312,
+     266.6831376265978
+    ],
+    "longwave_radiation": [
+     276.7568375322192,
+     55.051268443000914
+    ],
+    "specific_humidity": [
+     0.004786788147501456,
+     0.002546081516078559
+    ],
+    "wind_east": [
+     1.244709403176187,
+     2.4716024858077694
+    ],
+    "wind_north": [
+     0.45674316047227076,
+     2.3093516902713267
+    ],
+    "p01m": [
+     0.0030664879022200054,
+     0.0676660468709024
+    ],
+    "pet_mm_hr": [
+     0.2041506942469236,
+     0.27338326326753365
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 24012,
+   "rows_2023_plus": 29845,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06719845_snodas_swe.csv"
+  },
+  {
+   "site_id": "06720460",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06720460/06720460_hourly_full.csv",
+   "area_sq_km": 73.037718,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.014572878889965162,
+   "met_stats": {
+    "precipitation": [
+     0.043721350501101076,
+     0.32810655392625815
+    ],
+    "temperature": [
+     286.12724043863193,
+     10.60311958283182
+    ],
+    "shortwave_radiation": [
+     204.1469310008539,
+     269.0681837279603
+    ],
+    "longwave_radiation": [
+     280.5541288481416,
+     56.19202344945218
+    ],
+    "specific_humidity": [
+     0.0048923056851377465,
+     0.002656680874569691
+    ],
+    "wind_east": [
+     1.049921396104265,
+     2.4365944090567333
+    ],
+    "wind_north": [
+     0.43635953310986375,
+     2.517320319872581
+    ],
+    "p01m": [
+     0.0694101348254011,
+     1.2322539837099862
+    ],
+    "pet_mm_hr": [
+     0.2087604893794553,
+     0.27175285578077685
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 219012,
+   "rows_2023_plus": 31212,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06720460_snodas_swe.csv"
+  },
+  {
+   "site_id": "06720820",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06720820/06720820_hourly_full.csv",
+   "area_sq_km": 105.4,
+   "temp_offset_c": -0.8305,
+   "flow_scale_mm_hr": 0.026158288601002274,
+   "met_stats": {
+    "precipitation": [
+     0.045027877276593756,
+     0.28827846570351456
+    ],
+    "temperature": [
+     285.9161349273859,
+     10.476840254043113
+    ],
+    "shortwave_radiation": [
+     200.95602780270102,
+     265.8709618423048
+    ],
+    "longwave_radiation": [
+     278.95553556516234,
+     56.11432325754179
+    ],
+    "specific_humidity": [
+     0.004915456868137203,
+     0.0026794106618987516
+    ],
+    "wind_east": [
+     1.5629156319150717,
+     2.489481650096485
+    ],
+    "wind_north": [
+     0.2316115683237146,
+     2.1080460898069946
+    ],
+    "p01m": [
+     0.009681043436379667,
+     0.12642573542577953
+    ],
+    "pet_mm_hr": [
+     0.2057753511850647,
+     0.2714524845213274
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 258355,
+   "rows_2023_plus": 29884,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06720820_snodas_swe.csv"
+  },
+  {
+   "site_id": "06720990",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06720990/06720990_hourly_full.csv",
+   "area_sq_km": 272.4,
+   "temp_offset_c": -0.9253,
+   "flow_scale_mm_hr": 0.015165828215036918,
+   "met_stats": {
+    "precipitation": [
+     0.03958855127299054,
+     0.2755551771205116
+    ],
+    "temperature": [
+     286.8692159085033,
+     10.518915435307699
+    ],
+    "shortwave_radiation": [
+     204.02273783893267,
+     269.18855084611215
+    ],
+    "longwave_radiation": [
+     285.6700296054333,
+     56.309326646828374
+    ],
+    "specific_humidity": [
+     0.00509255503378553,
+     0.0027075131495010382
+    ],
+    "wind_east": [
+     0.5474850887645872,
+     2.246040516318522
+    ],
+    "wind_north": [
+     0.27835359973419144,
+     1.8590395942263245
+    ],
+    "p01m": [
+     0.024397701808215405,
+     0.21019733605098723
+    ],
+    "pet_mm_hr": [
+     0.21231589251894747,
+     0.2778943852015243
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 232880,
+   "rows_2023_plus": 30904,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06720990_snodas_swe.csv"
+  },
+  {
+   "site_id": "06721000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06721000/06721000_hourly_full.csv",
+   "area_sq_km": 13064.8,
+   "temp_offset_c": -6.6284,
+   "flow_scale_mm_hr": 0.005366638740780617,
+   "met_stats": {
+    "precipitation": [
+     0.03792509222241536,
+     0.27771819011400617
+    ],
+    "temperature": [
+     286.22580431465707,
+     11.024330990348918
+    ],
+    "shortwave_radiation": [
+     199.3866847506293,
+     265.8257952634208
+    ],
+    "longwave_radiation": [
+     281.84481475043617,
+     57.546180019576056
+    ],
+    "specific_humidity": [
+     0.004870502121920287,
+     0.002681466190198758
+    ],
+    "wind_east": [
+     0.6204606926859416,
+     2.248622036076085
+    ],
+    "wind_north": [
+     0.2548760366695546,
+     1.8675364057435249
+    ],
+    "p01m": [
+     0.014992833368741593,
+     0.17171975880459936
+    ],
+    "pet_mm_hr": [
+     0.20641333856659394,
+     0.27546749280234134
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 155849,
+   "rows_2023_plus": 31217,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06721000_snodas_swe.csv"
+  },
+  {
+   "site_id": "06724970",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06724970/06724970_hourly_full.csv",
+   "area_sq_km": 185.44328399999998,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.024360694845181417,
+   "met_stats": {
+    "precipitation": [
+     0.053747881031193434,
+     0.30841089987783604
+    ],
+    "temperature": [
+     285.89597241019453,
+     10.036064923493264
+    ],
+    "shortwave_radiation": [
+     198.9501273990249,
+     261.1668276632758
+    ],
+    "longwave_radiation": [
+     277.81892950902534,
+     53.321486296469615
+    ],
+    "specific_humidity": [
+     0.0050479628581212195,
+     0.0026264666421402256
+    ],
+    "wind_east": [
+     2.051567824376842,
+     2.726069906519378
+    ],
+    "wind_north": [
+     -0.05285388335449981,
+     1.783720475129886
+    ],
+    "p01m": [
+     0.043986544262722777,
+     0.45206930145528756
+    ],
+    "pet_mm_hr": [
+     0.1966042574675559,
+     0.2604254787633659
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 61165,
+   "rows_2023_plus": 31099,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06724970_snodas_swe.csv"
+  },
+  {
+   "site_id": "06727410",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06727410/06727410_hourly_full.csv",
+   "area_sq_km": 49.727807999999996,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.0242535722512135,
+   "met_stats": {
+    "precipitation": [
+     0.08253435540864014,
+     0.48217700620483406
+    ],
+    "temperature": [
+     291.53631482959076,
+     8.182169507319083
+    ],
+    "shortwave_radiation": [
+     256.0703700558532,
+     294.59301281572573
+    ],
+    "longwave_radiation": [
+     303.54620540294087,
+     45.28303488666502
+    ],
+    "specific_humidity": [
+     0.0056595042801778185,
+     0.0023275647381862247
+    ],
+    "wind_east": [
+     2.618279379687678,
+     3.514424766667638
+    ],
+    "wind_north": [
+     0.056298870739769746,
+     2.148779794613489
+    ],
+    "p01m": [
+     0.07922892967058018,
+     0.8882912908882743
+    ],
+    "pet_mm_hr": [
+     0.3069220220989399,
+     0.3231423358238344
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 17587,
+   "rows_2023_plus": 15916,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06727410_snodas_swe.csv"
+  },
+  {
+   "site_id": "06727500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06727500/06727500_hourly_full.csv",
+   "area_sq_km": 62.67775799999999,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.027082597144803967,
+   "met_stats": {
+    "precipitation": [
+     0.06925806471655442,
+     0.3871571700295725
+    ],
+    "temperature": [
+     288.69005169371474,
+     9.245139405884425
+    ],
+    "shortwave_radiation": [
+     235.18071348510077,
+     284.2392159783838
+    ],
+    "longwave_radiation": [
+     292.8672453214703,
+     49.338803873401794
+    ],
+    "specific_humidity": [
+     0.0055133740052687825,
+     0.002410856091091033
+    ],
+    "wind_east": [
+     3.0263885228521015,
+     3.3865662365574507
+    ],
+    "wind_north": [
+     -0.10838432343365563,
+     2.0544944445426454
+    ],
+    "p01m": [
+     0.06932851852772323,
+     0.6422638048141425
+    ],
+    "pet_mm_hr": [
+     0.2653202947273778,
+     0.3036701439548866
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 80696,
+   "rows_2023_plus": 15241,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06727500_snodas_swe.csv"
+  },
+  {
+   "site_id": "06730160",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06730160/06730160_hourly_full.csv",
+   "area_sq_km": 4.661982,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.029032467507992436,
+   "met_stats": {
+    "precipitation": [
+     0.0804857225922402,
+     0.4404118098810893
+    ],
+    "temperature": [
+     291.1027447404588,
+     7.977409633482912
+    ],
+    "shortwave_radiation": [
+     255.29851702082675,
+     293.1742591847975
+    ],
+    "longwave_radiation": [
+     305.30718442752936,
+     42.933910920648394
+    ],
+    "specific_humidity": [
+     0.006197956834760546,
+     0.0022341004063843816
+    ],
+    "wind_east": [
+     2.526080452214822,
+     3.3129925330208794
+    ],
+    "wind_north": [
+     0.11423062654614653,
+     2.0157724860871897
+    ],
+    "p01m": [
+     0.08439946611692567,
+     0.8391839120579494
+    ],
+    "pet_mm_hr": [
+     0.2943470028334919,
+     0.31392823757045607
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 37977,
+   "rows_2023_plus": 15620,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06730160_snodas_swe.csv"
+  },
+  {
+   "site_id": "06730200",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06730200/06730200_hourly_full.csv",
+   "area_sq_km": 799.6,
+   "temp_offset_c": -6.5208,
+   "flow_scale_mm_hr": 0.020874470443090126,
+   "met_stats": {
+    "precipitation": [
+     0.050749424548212636,
+     0.3106555364538572
+    ],
+    "temperature": [
+     285.8336133095898,
+     10.487805630011103
+    ],
+    "shortwave_radiation": [
+     196.92348565492682,
+     261.58221928346103
+    ],
+    "longwave_radiation": [
+     278.92958428142725,
+     56.11140426226623
+    ],
+    "specific_humidity": [
+     0.004892255154333201,
+     0.00269622743958725
+    ],
+    "wind_east": [
+     2.9986148344956143,
+     3.1167486244902713
+    ],
+    "wind_north": [
+     -0.16048344724378474,
+     1.9427523730522587
+    ],
+    "p01m": [
+     0.049573399370135864,
+     0.4389688625847372
+    ],
+    "pet_mm_hr": [
+     0.20156655079464617,
+     0.2689959442435382
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 243404,
+   "rows_2023_plus": 30920,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06730200_snodas_swe.csv"
+  },
+  {
+   "site_id": "06730500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06730500/06730500_hourly_full.csv",
+   "area_sq_km": 1184.5,
+   "temp_offset_c": -5.2148,
+   "flow_scale_mm_hr": 0.012495664811717717,
+   "met_stats": {
+    "precipitation": [
+     0.0427214872719984,
+     0.27221847293995755
+    ],
+    "temperature": [
+     286.408974383644,
+     10.381820594515464
+    ],
+    "shortwave_radiation": [
+     202.47192044898776,
+     267.1699404237995
+    ],
+    "longwave_radiation": [
+     282.80579739426736,
+     55.82377318399633
+    ],
+    "specific_humidity": [
+     0.0051596036580477045,
+     0.002711251437050209
+    ],
+    "wind_east": [
+     1.3808113844233314,
+     2.4049868083212775
+    ],
+    "wind_north": [
+     0.11103675901687714,
+     1.990521481975833
+    ],
+    "p01m": [
+     0.04113914612146723,
+     0.3263208401067096
+    ],
+    "pet_mm_hr": [
+     0.20371107873313613,
+     0.27168725131703986
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 250173,
+   "rows_2023_plus": 30846,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06730500_snodas_swe.csv"
+  },
+  {
+   "site_id": "06730525",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06730525/06730525_hourly_full.csv",
+   "area_sq_km": 2258.4712799999998,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.018223453760059106,
+   "met_stats": {
+    "precipitation": [
+     0.046462120012442376,
+     0.29666972341911957
+    ],
+    "temperature": [
+     285.6738627944461,
+     10.510533755113725
+    ],
+    "shortwave_radiation": [
+     194.30703898142124,
+     259.683847271755
+    ],
+    "longwave_radiation": [
+     278.3174119842774,
+     55.39154351220409
+    ],
+    "specific_humidity": [
+     0.004934906963492916,
+     0.002669979197477529
+    ],
+    "wind_east": [
+     1.4780046933178745,
+     2.4310996831467278
+    ],
+    "wind_north": [
+     0.06477886330910838,
+     1.9619305829421747
+    ],
+    "p01m": [
+     0.042759583462941494,
+     0.4604475037656214
+    ],
+    "pet_mm_hr": [
+     0.19263392665478044,
+     0.26158418169726805
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 70948,
+   "rows_2023_plus": 30847,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06730525_snodas_swe.csv"
+  },
+  {
+   "site_id": "06741510",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06741510/06741510_hourly_full.csv",
+   "area_sq_km": 1386.1,
+   "temp_offset_c": -6.3249,
+   "flow_scale_mm_hr": 0.011439348540346532,
+   "met_stats": {
+    "precipitation": [
+     0.04605621268157919,
+     0.31530486046837475
+    ],
+    "temperature": [
+     285.6151979547277,
+     10.469569253379209
+    ],
+    "shortwave_radiation": [
+     199.08847845557437,
+     263.18424010837987
+    ],
+    "longwave_radiation": [
+     280.07438912901404,
+     55.585748342151156
+    ],
+    "specific_humidity": [
+     0.005211570524017467,
+     0.0027110373500029796
+    ],
+    "wind_east": [
+     0.5419239588968549,
+     2.3383717476612866
+    ],
+    "wind_north": [
+     0.1891206206204141,
+     2.3539724595610303
+    ],
+    "p01m": [
+     0.09668087885809346,
+     2.8177213708236897
+    ],
+    "pet_mm_hr": [
+     0.19305079905927428,
+     0.2633950636435497
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 269862,
+   "rows_2023_plus": 29741,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06741510_snodas_swe.csv"
+  },
+  {
+   "site_id": "06746110",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06746110/06746110_hourly_full.csv",
+   "area_sq_km": 18.2,
+   "temp_offset_c": -1.7517,
+   "flow_scale_mm_hr": 0.2047001125074799,
+   "met_stats": {
+    "precipitation": [
+     0.09765016408087906,
+     0.4635038006647233
+    ],
+    "temperature": [
+     279.53945987314256,
+     7.460836366418486
+    ],
+    "shortwave_radiation": [
+     224.94317255590963,
+     262.0728047812307
+    ],
+    "longwave_radiation": [
+     239.8023984395938,
+     38.486571604249335
+    ],
+    "specific_humidity": [
+     0.004397686644233346,
+     0.0016294622144039617
+    ],
+    "wind_east": [
+     2.0018805272338525,
+     2.4497254920234632
+    ],
+    "wind_north": [
+     0.7117766587320211,
+     2.116095450599129
+    ],
+    "p01m": [
+     0.06353616390220661,
+     0.37830387547051625
+    ],
+    "pet_mm_hr": [
+     0.20904521662485928,
+     0.2474057463170218
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 168804,
+   "rows_2023_plus": 29287,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06746110_snodas_swe.csv"
+  },
+  {
+   "site_id": "06751150",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06751150/06751150_hourly_full.csv",
+   "area_sq_km": 917.2,
+   "temp_offset_c": -3.6183,
+   "flow_scale_mm_hr": 0.014309442587138963,
+   "met_stats": {
+    "precipitation": [
+     0.05161562100924887,
+     0.30583060167309983
+    ],
+    "temperature": [
+     281.2978947215665,
+     10.721532902840806
+    ],
+    "shortwave_radiation": [
+     185.9589426541156,
+     245.2855400229614
+    ],
+    "longwave_radiation": [
+     257.6656235246314,
+     52.452226123703205
+    ],
+    "specific_humidity": [
+     0.004122607011628807,
+     0.0022892727008083573
+    ],
+    "wind_east": [
+     5.4269399885898375,
+     5.0572787514027056
+    ],
+    "wind_north": [
+     0.8099384686815526,
+     2.4925231730245034
+    ],
+    "p01m": [
+     0.12078980496110832,
+     3.307813353640063
+    ],
+    "pet_mm_hr": [
+     0.18734794121942264,
+     0.24981523548108409
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 207193,
+   "rows_2023_plus": 30249,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06751150_snodas_swe.csv"
+  },
+  {
+   "site_id": "06751490",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06751490/06751490_hourly_full.csv",
+   "area_sq_km": 1399.3,
+   "temp_offset_c": -4.1817,
+   "flow_scale_mm_hr": 0.012365489086896038,
+   "met_stats": {
+    "precipitation": [
+     0.057551948939756126,
+     0.335468328233393
+    ],
+    "temperature": [
+     284.8257694721998,
+     9.58850086333623
+    ],
+    "shortwave_radiation": [
+     205.05508265688684,
+     258.82447397045394
+    ],
+    "longwave_radiation": [
+     273.17036915060106,
+     49.541301081377014
+    ],
+    "specific_humidity": [
+     0.004967158429497652,
+     0.002412461895056725
+    ],
+    "wind_east": [
+     2.8557469427365128,
+     3.5498836183885856
+    ],
+    "wind_north": [
+     0.553647435545772,
+     2.29127111596742
+    ],
+    "p01m": [
+     0.1014666577811409,
+     2.749444824889724
+    ],
+    "pet_mm_hr": [
+     0.20942346979323784,
+     0.26023370986609135
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 233415,
+   "rows_2023_plus": 31209,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06751490_snodas_swe.csv"
+  },
+  {
+   "site_id": "06752260",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06752260/06752260_hourly_full.csv",
+   "area_sq_km": 2920.8,
+   "temp_offset_c": -6.5405,
+   "flow_scale_mm_hr": 0.014562048058334727,
+   "met_stats": {
+    "precipitation": [
+     0.04615647666586573,
+     0.32408787144825074
+    ],
+    "temperature": [
+     285.6343232287218,
+     10.426224339754238
+    ],
+    "shortwave_radiation": [
+     196.64765049179567,
+     259.80922865934093
+    ],
+    "longwave_radiation": [
+     279.89698535851863,
+     55.1880773341284
+    ],
+    "specific_humidity": [
+     0.005122058098932699,
+     0.0027086146288948774
+    ],
+    "wind_east": [
+     0.6188615059302263,
+     2.3704449741941125
+    ],
+    "wind_north": [
+     0.19513583350550154,
+     2.518849240095731
+    ],
+    "p01m": [
+     0.0991617182231799,
+     2.9375031362202275
+    ],
+    "pet_mm_hr": [
+     0.1947225248984963,
+     0.2603370319700399
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 258681,
+   "rows_2023_plus": 31040,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06752260_snodas_swe.csv"
+  },
+  {
+   "site_id": "06752280",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06752280/06752280_hourly_full.csv",
+   "area_sq_km": 3222.6,
+   "temp_offset_c": -6.1678,
+   "flow_scale_mm_hr": 0.01222124153326248,
+   "met_stats": {
+    "precipitation": [
+     0.04584501606067541,
+     0.32153251990693843
+    ],
+    "temperature": [
+     285.5487409140773,
+     10.453292040242255
+    ],
+    "shortwave_radiation": [
+     195.8822165073753,
+     259.3220861521609
+    ],
+    "longwave_radiation": [
+     279.4816482909389,
+     55.19999592362547
+    ],
+    "specific_humidity": [
+     0.005100319195072095,
+     0.002707812191207802
+    ],
+    "wind_east": [
+     0.6225752713709581,
+     2.369179777642947
+    ],
+    "wind_north": [
+     0.1986615563716235,
+     2.518341788797686
+    ],
+    "p01m": [
+     0.10070541761702194,
+     2.9402828288235026
+    ],
+    "pet_mm_hr": [
+     0.1937316477751529,
+     0.25967540214234763
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 254276,
+   "rows_2023_plus": 31207,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06752280_snodas_swe.csv"
+  },
+  {
+   "site_id": "06759500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/06759500/06759500_hourly_full.csv",
+   "area_sq_km": 37912.9,
+   "temp_offset_c": -5.1239,
+   "flow_scale_mm_hr": 0.003910945308082833,
+   "met_stats": {
+    "precipitation": [
+     0.043393515356338196,
+     0.4098307118740304
+    ],
+    "temperature": [
+     285.7620588758449,
+     11.686279845075065
+    ],
+    "shortwave_radiation": [
+     201.42105619589708,
+     270.13122957249306
+    ],
+    "longwave_radiation": [
+     286.0241948298352,
+     59.8301803908336
+    ],
+    "specific_humidity": [
+     0.005072083099727262,
+     0.0029379848384001083
+    ],
+    "wind_east": [
+     0.4317726781427724,
+     2.765187171491893
+    ],
+    "wind_north": [
+     0.20472583709426415,
+     2.3784044702755844
+    ],
+    "p01m": [
+     0.02232733013162576,
+     0.2868247436666198
+    ],
+    "pet_mm_hr": [
+     0.214893359390504,
+     0.2898290456041484
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 169132,
+   "rows_2023_plus": 30232,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/06759500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07079300",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07079300/07079300_hourly_full.csv",
+   "area_sq_km": 129.3,
+   "temp_offset_c": -3.1205,
+   "flow_scale_mm_hr": 0.06134936323466573,
+   "met_stats": {
+    "precipitation": [
+     0.06388322541284075,
+     0.30248747050715696
+    ],
+    "temperature": [
+     277.1295923117544,
+     8.307584366132756
+    ],
+    "shortwave_radiation": [
+     224.42674763523388,
+     271.16426781591633
+    ],
+    "longwave_radiation": [
+     230.24754033560455,
+     40.96947951669026
+    ],
+    "specific_humidity": [
+     0.0040855940369441835,
+     0.001700609717733224
+    ],
+    "wind_east": [
+     3.835213251678791,
+     3.152441762516151
+    ],
+    "wind_north": [
+     0.07961179295876461,
+     2.5617931563026834
+    ],
+    "p01m": [
+     0.08312284633249765,
+     0.6382687745177895
+    ],
+    "pet_mm_hr": [
+     0.17316299016384454,
+     0.22848461110144974
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 195140,
+   "rows_2023_plus": 30823,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07079300_snodas_swe.csv"
+  },
+  {
+   "site_id": "07081200",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07081200/07081200_hourly_full.csv",
+   "area_sq_km": 254.2,
+   "temp_offset_c": -2.8822,
+   "flow_scale_mm_hr": 0.055930293422043906,
+   "met_stats": {
+    "precipitation": [
+     0.05075039938320946,
+     0.24168673691934087
+    ],
+    "temperature": [
+     279.57638485915294,
+     7.85465507406169
+    ],
+    "shortwave_radiation": [
+     230.37196920015649,
+     274.72310799324504
+    ],
+    "longwave_radiation": [
+     237.01476884527514,
+     42.627140332713495
+    ],
+    "specific_humidity": [
+     0.004555815908433817,
+     0.0018310460411713957
+    ],
+    "wind_east": [
+     3.8006994447139126,
+     3.1915512315227494
+    ],
+    "wind_north": [
+     0.05305849795404683,
+     2.630354632306936
+    ],
+    "p01m": [
+     0.08266991955645503,
+     0.6953998925533991
+    ],
+    "pet_mm_hr": [
+     0.17883401699533683,
+     0.22702095486779408
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 173580,
+   "rows_2023_plus": 30248,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07081200_snodas_swe.csv"
+  },
+  {
+   "site_id": "07083000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07083000/07083000_hourly_full.csv",
+   "area_sq_km": 60.8,
+   "temp_offset_c": -4.2238,
+   "flow_scale_mm_hr": 0.09296210607319426,
+   "met_stats": {
+    "precipitation": [
+     0.06929594946468975,
+     0.3088095851592047
+    ],
+    "temperature": [
+     277.6027726795849,
+     7.390198423421593
+    ],
+    "shortwave_radiation": [
+     237.33138709188125,
+     277.56050537668995
+    ],
+    "longwave_radiation": [
+     228.58983978612872,
+     39.28601829402228
+    ],
+    "specific_humidity": [
+     0.0041912838225070465,
+     0.0015976922155246658
+    ],
+    "wind_east": [
+     3.5008441087861666,
+     3.1420144636716327
+    ],
+    "wind_north": [
+     -0.14756563445451443,
+     2.75084883636995
+    ],
+    "p01m": [
+     0.08774138321135591,
+     0.7190906581312106
+    ],
+    "pet_mm_hr": [
+     0.17874221490464778,
+     0.22864233110413595
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 156428,
+   "rows_2023_plus": 22687,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07083000_snodas_swe.csv"
+  },
+  {
+   "site_id": "07083200",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07083200/07083200_hourly_full.csv",
+   "area_sq_km": 63.5,
+   "temp_offset_c": -4.2864,
+   "flow_scale_mm_hr": 0.06887260821086234,
+   "met_stats": {
+    "precipitation": [
+     0.060672782861449025,
+     0.2895573557071145
+    ],
+    "temperature": [
+     280.9338688771665,
+     5.790727417761643
+    ],
+    "shortwave_radiation": [
+     256.305776832813,
+     284.94008668085434
+    ],
+    "longwave_radiation": [
+     241.0040219614598,
+     36.363494922652656
+    ],
+    "specific_humidity": [
+     0.004688158503606416,
+     0.001540287935517286
+    ],
+    "wind_east": [
+     2.8961055006480785,
+     2.9168326141264234
+    ],
+    "wind_north": [
+     0.0918779195349338,
+     2.608475398121257
+    ],
+    "p01m": [
+     0.09446002799009581,
+     0.897377700220736
+    ],
+    "pet_mm_hr": [
+     0.22835749161724192,
+     0.2605760046868083
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 46633,
+   "rows_2023_plus": 13078,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07083200_snodas_swe.csv"
+  },
+  {
+   "site_id": "07083710",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07083710/07083710_hourly_full.csv",
+   "area_sq_km": 616.4176199999999,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.04881858475042772,
+   "met_stats": {
+    "precipitation": [
+     0.05247175894865623,
+     0.2562691728208401
+    ],
+    "temperature": [
+     282.23074917452675,
+     7.099990324523408
+    ],
+    "shortwave_radiation": [
+     255.94376720996615,
+     287.04969787171126
+    ],
+    "longwave_radiation": [
+     249.617141955089,
+     40.64375393909884
+    ],
+    "specific_humidity": [
+     0.005098208675690964,
+     0.0017929532654996753
+    ],
+    "wind_east": [
+     3.315971032374337,
+     2.907446387777135
+    ],
+    "wind_north": [
+     0.18395135250272965,
+     2.5190882988734393
+    ],
+    "p01m": [
+     0.07887826538800531,
+     0.7737579909854536
+    ],
+    "pet_mm_hr": [
+     0.22005748448712786,
+     0.2534810259944922
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 76537,
+   "rows_2023_plus": 8640,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07083710_snodas_swe.csv"
+  },
+  {
+   "site_id": "07087050",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07087050/07087050_hourly_full.csv",
+   "area_sq_km": 1416.7,
+   "temp_offset_c": -5.0348,
+   "flow_scale_mm_hr": 0.04989278096179332,
+   "met_stats": {
+    "precipitation": [
+     0.04924542691212142,
+     0.2924865841160593
+    ],
+    "temperature": [
+     283.78841876943824,
+     7.000192191054371
+    ],
+    "shortwave_radiation": [
+     259.22282648737337,
+     292.69428535924567
+    ],
+    "longwave_radiation": [
+     254.6466350286353,
+     42.246435258524826
+    ],
+    "specific_humidity": [
+     0.005145443163266333,
+     0.0019106283647086937
+    ],
+    "wind_east": [
+     3.6086819718981813,
+     3.1582343132267385
+    ],
+    "wind_north": [
+     0.3822523722359667,
+     3.0094273400388643
+    ],
+    "p01m": [
+     0.02806239570018016,
+     0.22343373997964344
+    ],
+    "pet_mm_hr": [
+     0.2362437631357765,
+     0.2593309038956561
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 99353,
+   "rows_2023_plus": 15622,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07087050_snodas_swe.csv"
+  },
+  {
+   "site_id": "07091200",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07091200/07091200_hourly_full.csv",
+   "area_sq_km": 2731.2,
+   "temp_offset_c": -6.3409,
+   "flow_scale_mm_hr": 0.029953956238086776,
+   "met_stats": {
+    "precipitation": [
+     0.04374716467120245,
+     0.28045353470474305
+    ],
+    "temperature": [
+     285.2993931180933,
+     7.492970704678367
+    ],
+    "shortwave_radiation": [
+     251.48786839715558,
+     288.05609898081826
+    ],
+    "longwave_radiation": [
+     262.84151594741473,
+     45.83675398784017
+    ],
+    "specific_humidity": [
+     0.0055687934191592505,
+     0.002135737456644238
+    ],
+    "wind_east": [
+     2.0465606529484903,
+     3.035309529899839
+    ],
+    "wind_north": [
+     1.0825362878075973,
+     2.1430492392379397
+    ],
+    "p01m": [
+     0.02912067016862488,
+     0.2067621363742778
+    ],
+    "pet_mm_hr": [
+     0.23650122240463545,
+     0.2656865309643646
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 143865,
+   "rows_2023_plus": 18163,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07091200_snodas_swe.csv"
+  },
+  {
+   "site_id": "07094500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07094500/07094500_hourly_full.csv",
+   "area_sq_km": 6373.4,
+   "temp_offset_c": -7.6815,
+   "flow_scale_mm_hr": 0.01421408796213761,
+   "met_stats": {
+    "precipitation": [
+     0.05311964890382036,
+     0.3406499222276844
+    ],
+    "temperature": [
+     289.3773247506872,
+     8.245982809523026
+    ],
+    "shortwave_radiation": [
+     253.27054893303412,
+     299.8670477211313
+    ],
+    "longwave_radiation": [
+     290.03574368916566,
+     49.58701107982942
+    ],
+    "specific_humidity": [
+     0.006215469410546164,
+     0.0025924848624768442
+    ],
+    "wind_east": [
+     1.9167816401473967,
+     3.3818431919092227
+    ],
+    "wind_north": [
+     0.6008109465624709,
+     2.688728926095949
+    ],
+    "p01m": [
+     0.0533180594101478,
+     0.4364091932346929
+    ],
+    "pet_mm_hr": [
+     0.2630078445437742,
+     0.2935817139067991
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 150944,
+   "rows_2023_plus": 15961,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07094500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07096000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07096000/07096000_hourly_full.csv",
+   "area_sq_km": 7940.4,
+   "temp_offset_c": -7.9711,
+   "flow_scale_mm_hr": 0.008427094405894328,
+   "met_stats": {
+    "precipitation": [
+     0.04679740458517798,
+     0.33588465856274646
+    ],
+    "temperature": [
+     284.2314547160185,
+     9.789980720790876
+    ],
+    "shortwave_radiation": [
+     212.38108034759136,
+     274.47614983614113
+    ],
+    "longwave_radiation": [
+     266.3298660324879,
+     54.8715308835055
+    ],
+    "specific_humidity": [
+     0.005317491874722273,
+     0.002699807844150282
+    ],
+    "wind_east": [
+     2.584236269679564,
+     3.4806310003405434
+    ],
+    "wind_north": [
+     0.20402610068958707,
+     2.6636905613264075
+    ],
+    "p01m": [
+     0.04679740458517798,
+     0.33588465856274646
+    ],
+    "pet_mm_hr": [
+     0.18987059953042246,
+     0.25567888930908583
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 60964,
+   "rows_2023_plus": 0,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07096000_snodas_swe.csv"
+  },
+  {
+   "site_id": "07096250",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07096250/07096250_hourly_full.csv",
+   "area_sq_km": 702.6,
+   "temp_offset_c": -4.0334,
+   "flow_scale_mm_hr": 0.00424517714007436,
+   "met_stats": {
+    "precipitation": [
+     0.054409544686728484,
+     0.314805586367891
+    ],
+    "temperature": [
+     280.54821344524066,
+     9.212334059624055
+    ],
+    "shortwave_radiation": [
+     216.72769997256856,
+     273.38223418848196
+    ],
+    "longwave_radiation": [
+     244.20749483856375,
+     49.052059206601136
+    ],
+    "specific_humidity": [
+     0.004297667348441462,
+     0.0021739383317649227
+    ],
+    "wind_east": [
+     1.5751647082096913,
+     2.752493386471906
+    ],
+    "wind_north": [
+     0.5707864138523805,
+     2.3303965941481977
+    ],
+    "p01m": [
+     0.05178731417626365,
+     0.3794244191912643
+    ],
+    "pet_mm_hr": [
+     0.19858404691903883,
+     0.24991199643112877
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 206964,
+   "rows_2023_plus": 31044,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07096250_snodas_swe.csv"
+  },
+  {
+   "site_id": "07099050",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07099050/07099050_hourly_full.csv",
+   "area_sq_km": 315.97878,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.0199265627014667,
+   "met_stats": {
+    "precipitation": [
+     0.05648724300386885,
+     0.33764629716113
+    ],
+    "temperature": [
+     286.2639914800932,
+     8.322151307847887
+    ],
+    "shortwave_radiation": [
+     236.0290255597206,
+     290.4964017045529
+    ],
+    "longwave_radiation": [
+     272.8902202179316,
+     48.15930447374041
+    ],
+    "specific_humidity": [
+     0.005306941548384767,
+     0.0024259003988629105
+    ],
+    "wind_east": [
+     0.7321490496469725,
+     2.4711484424216565
+    ],
+    "wind_north": [
+     0.6771672499666064,
+     2.0818745582257163
+    ],
+    "p01m": [
+     0.053776548595358575,
+     0.41954388577804635
+    ],
+    "pet_mm_hr": [
+     0.23462522817611414,
+     0.2675360040691139
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 166450,
+   "rows_2023_plus": 25459,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07099050_snodas_swe.csv"
+  },
+  {
+   "site_id": "07099060",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07099060/07099060_hourly_full.csv",
+   "area_sq_km": 355.6,
+   "temp_offset_c": -7.2191,
+   "flow_scale_mm_hr": 0.014777876154755877,
+   "met_stats": {
+    "precipitation": [
+     0.04510954456894974,
+     0.31208107350481934
+    ],
+    "temperature": [
+     289.7882223011593,
+     8.756598442067435
+    ],
+    "shortwave_radiation": [
+     236.89096667420156,
+     293.8892007721804
+    ],
+    "longwave_radiation": [
+     294.52723210729704,
+     51.685741786050585
+    ],
+    "specific_humidity": [
+     0.005768213371761337,
+     0.0027856646004711114
+    ],
+    "wind_east": [
+     1.1659527879183218,
+     2.5550412364560287
+    ],
+    "wind_north": [
+     0.7814395956422354,
+     1.9734319406522278
+    ],
+    "p01m": [
+     0.044739277833392536,
+     0.36807826311199965
+    ],
+    "pet_mm_hr": [
+     0.25273698397920796,
+     0.28485451006660994
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 186307,
+   "rows_2023_plus": 24006,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07099060_snodas_swe.csv"
+  },
+  {
+   "site_id": "07099230",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07099230/07099230_hourly_full.csv",
+   "area_sq_km": 162.1,
+   "temp_offset_c": -2.6468,
+   "flow_scale_mm_hr": 0.011341121316893115,
+   "met_stats": {
+    "precipitation": [
+     0.04213668872155337,
+     0.2927653308017792
+    ],
+    "temperature": [
+     286.4255487442468,
+     10.415256575807462
+    ],
+    "shortwave_radiation": [
+     213.03389437231988,
+     279.57169072036544
+    ],
+    "longwave_radiation": [
+     279.163204049454,
+     57.126798615367235
+    ],
+    "specific_humidity": [
+     0.005022284841563393,
+     0.0028002125068150073
+    ],
+    "wind_east": [
+     0.8279773352209104,
+     2.308801530098238
+    ],
+    "wind_north": [
+     0.5357015548919114,
+     1.9287707501288884
+    ],
+    "p01m": [
+     0.03380057273937412,
+     1.4775481188881316
+    ],
+    "pet_mm_hr": [
+     0.21474828543189484,
+     0.2715386045225918
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 204288,
+   "rows_2023_plus": 15656,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07099230_snodas_swe.csv"
+  },
+  {
+   "site_id": "07099400",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07099400/07099400_hourly_full.csv",
+   "area_sq_km": 11952.3,
+   "temp_offset_c": -7.7496,
+   "flow_scale_mm_hr": 0.006774641832303077,
+   "met_stats": {
+    "precipitation": [
+     0.0393343177356812,
+     0.3028204610535597
+    ],
+    "temperature": [
+     287.89895187258855,
+     10.39196097946012
+    ],
+    "shortwave_radiation": [
+     218.18211196851456,
+     285.96614347045426
+    ],
+    "longwave_radiation": [
+     288.6360627774071,
+     58.17018133156093
+    ],
+    "specific_humidity": [
+     0.005394198660709969,
+     0.003037738060026115
+    ],
+    "wind_east": [
+     0.5052435375281638,
+     2.2254416573491924
+    ],
+    "wind_north": [
+     0.5116355763623394,
+     1.9723624214823274
+    ],
+    "p01m": [
+     0.058025060679024874,
+     1.0759680084335426
+    ],
+    "pet_mm_hr": [
+     0.22114124042933478,
+     0.2788746047764113
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 103813,
+   "rows_2023_plus": 0,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07099400_snodas_swe.csv"
+  },
+  {
+   "site_id": "07099970",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07099970/07099970_hourly_full.csv",
+   "area_sq_km": 12259.3,
+   "temp_offset_c": -7.7808,
+   "flow_scale_mm_hr": 0.006845441389996287,
+   "met_stats": {
+    "precipitation": [
+     0.03635280240797144,
+     0.33307013134901053
+    ],
+    "temperature": [
+     287.4335466286014,
+     10.720293869988323
+    ],
+    "shortwave_radiation": [
+     209.69113529332242,
+     280.9094293595579
+    ],
+    "longwave_radiation": [
+     284.971591463948,
+     59.28437019045894
+    ],
+    "specific_humidity": [
+     0.005041470977105186,
+     0.002947841012882061
+    ],
+    "wind_east": [
+     0.06932174322292262,
+     2.304911192722648
+    ],
+    "wind_north": [
+     0.33165277467653814,
+     1.9335659456197491
+    ],
+    "p01m": [
+     0.07006669874114306,
+     1.3672002306495927
+    ],
+    "pet_mm_hr": [
+     0.21351844583567386,
+     0.274185967947137
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 252340,
+   "rows_2023_plus": 31248,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07099970_snodas_swe.csv"
+  },
+  {
+   "site_id": "07099973",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07099973/07099973_hourly_full.csv",
+   "area_sq_km": 12263.1,
+   "temp_offset_c": -7.7837,
+   "flow_scale_mm_hr": 0.00014788444122334034,
+   "met_stats": {
+    "precipitation": [
+     0.03411656785738679,
+     0.33688183740204786
+    ],
+    "temperature": [
+     287.2920523188307,
+     10.911095085032256
+    ],
+    "shortwave_radiation": [
+     207.50445554948433,
+     278.79025251031976
+    ],
+    "longwave_radiation": [
+     283.0282190424151,
+     59.59362072756603
+    ],
+    "specific_humidity": [
+     0.004795711502629601,
+     0.002854310069540722
+    ],
+    "wind_east": [
+     0.10137504165780062,
+     2.337215994828833
+    ],
+    "wind_north": [
+     0.28408803829519846,
+     1.9849270444707816
+    ],
+    "p01m": [
+     0.07439185369851786,
+     1.4751425919720764
+    ],
+    "pet_mm_hr": [
+     0.21473653298608564,
+     0.27545769742250525
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 146877,
+   "rows_2023_plus": 31250,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07099973_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103100",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103100/07103100_hourly_full.csv",
+   "area_sq_km": 4.7396817,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.07817728207758669,
+   "met_stats": {
+    "precipitation": [
+     0.06781165466018875,
+     0.4264476311318786
+    ],
+    "temperature": [
+     284.5970478025353,
+     8.056936222123039
+    ],
+    "shortwave_radiation": [
+     237.89356299212602,
+     283.01974533652475
+    ],
+    "longwave_radiation": [
+     263.8211302842464,
+     45.619707612800525
+    ],
+    "specific_humidity": [
+     0.005045329293013905,
+     0.0022016913188056928
+    ],
+    "wind_east": [
+     1.6313452837996314,
+     2.819566586706534
+    ],
+    "wind_north": [
+     0.9011054327916458,
+     2.3408080506591493
+    ],
+    "p01m": [
+     0.05820803037918133,
+     1.1450269484002418
+    ],
+    "pet_mm_hr": [
+     0.24915458757804212,
+     0.27523693329783955
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 25111,
+   "rows_2023_plus": 11195,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103100_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103700",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103700/07103700_hourly_full.csv",
+   "area_sq_km": 264.2,
+   "temp_offset_c": -5.8914,
+   "flow_scale_mm_hr": 0.011113627003748376,
+   "met_stats": {
+    "precipitation": [
+     0.055703177713289136,
+     0.3484704044322772
+    ],
+    "temperature": [
+     279.0094476335727,
+     9.539432628107582
+    ],
+    "shortwave_radiation": [
+     201.79070788762033,
+     262.62099479594093
+    ],
+    "longwave_radiation": [
+     237.9805127906402,
+     49.39911375423438
+    ],
+    "specific_humidity": [
+     0.003893805794445974,
+     0.002137711409286709
+    ],
+    "wind_east": [
+     1.3688216577389907,
+     2.3855505950453098
+    ],
+    "wind_north": [
+     0.5594171645321866,
+     2.129448002510112
+    ],
+    "p01m": [
+     0.0544801556200442,
+     0.38108085621563764
+    ],
+    "pet_mm_hr": [
+     0.1904722393719349,
+     0.24106561804774573
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 284240,
+   "rows_2023_plus": 30850,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103700_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103703",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103703/07103703_hourly_full.csv",
+   "area_sq_km": 25.2,
+   "temp_offset_c": -3.915,
+   "flow_scale_mm_hr": 0.027846035241628,
+   "met_stats": {
+    "precipitation": [
+     0.04724746502997432,
+     0.3313638109732645
+    ],
+    "temperature": [
+     283.500316626565,
+     9.869314128164062
+    ],
+    "shortwave_radiation": [
+     203.1685173524734,
+     264.872286842539
+    ],
+    "longwave_radiation": [
+     261.5484182129603,
+     53.62061563830263
+    ],
+    "specific_humidity": [
+     0.004764676260348273,
+     0.002631949838774162
+    ],
+    "wind_east": [
+     1.852908567611435,
+     2.479788038228191
+    ],
+    "wind_north": [
+     0.6789191292177318,
+     2.565179544176748
+    ],
+    "p01m": [
+     0.04219784348109784,
+     0.9497602730321757
+    ],
+    "pet_mm_hr": [
+     0.19784798904315176,
+     0.25085536303388767
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 232768,
+   "rows_2023_plus": 16817,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103703_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103780",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103780/07103780_hourly_full.csv",
+   "area_sq_km": 213.0,
+   "temp_offset_c": -2.8309,
+   "flow_scale_mm_hr": 0.010361215542503164,
+   "met_stats": {
+    "precipitation": [
+     0.058037443307500124,
+     0.36456851980905924
+    ],
+    "temperature": [
+     283.28425010741734,
+     9.671542236899423
+    ],
+    "shortwave_radiation": [
+     210.56246471936217,
+     268.3794142005664
+    ],
+    "longwave_radiation": [
+     261.25948519231684,
+     51.605937782301154
+    ],
+    "specific_humidity": [
+     0.004646174348334632,
+     0.0024782766040400465
+    ],
+    "wind_east": [
+     1.8032111819427423,
+     2.4658601127797333
+    ],
+    "wind_north": [
+     0.6691079972738212,
+     2.6853855557011386
+    ],
+    "p01m": [
+     0.04673427409729627,
+     0.9330462988824952
+    ],
+    "pet_mm_hr": [
+     0.20693929801436367,
+     0.2581079711860423
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 252260,
+   "rows_2023_plus": 30742,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103780_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103790",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103790/07103790_hourly_full.csv",
+   "area_sq_km": 315.97878,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.003786254573800202,
+   "met_stats": {
+    "precipitation": [
+     0.05184071144227825,
+     0.2996924163651955
+    ],
+    "temperature": [
+     289.4205205675207,
+     7.794412580013561
+    ],
+    "shortwave_radiation": [
+     248.48221348371953,
+     294.8720728029227
+    ],
+    "longwave_radiation": [
+     290.04737878942535,
+     45.9119384127499
+    ],
+    "specific_humidity": [
+     0.0060653470756353986,
+     0.0023840686282319366
+    ],
+    "wind_east": [
+     1.3306129423292845,
+     2.4093264442986193
+    ],
+    "wind_north": [
+     1.0496304986220273,
+     2.39588901247029
+    ],
+    "p01m": [
+     0.024007435949780546,
+     0.19085847934205655
+    ],
+    "pet_mm_hr": [
+     0.2718551801480045,
+     0.2948833611969057
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 19641,
+   "rows_2023_plus": 0,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103790_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103797",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103797/07103797_hourly_full.csv",
+   "area_sq_km": 18.8,
+   "temp_offset_c": -0.9342,
+   "flow_scale_mm_hr": 0.01444223423406778,
+   "met_stats": {
+    "precipitation": [
+     0.05355193506768277,
+     0.33240535934369386
+    ],
+    "temperature": [
+     279.5723882912744,
+     9.747735970530538
+    ],
+    "shortwave_radiation": [
+     198.39301688024528,
+     258.4174390162229
+    ],
+    "longwave_radiation": [
+     240.6929141550958,
+     51.00372942160963
+    ],
+    "specific_humidity": [
+     0.004016785073698097,
+     0.0022478242095480107
+    ],
+    "wind_east": [
+     2.334792802714778,
+     2.7523581868170237
+    ],
+    "wind_north": [
+     0.7056778010822489,
+     2.3595083913675765
+    ],
+    "p01m": [
+     0.04267385947372133,
+     0.9591370093473969
+    ],
+    "pet_mm_hr": [
+     0.18992228612712733,
+     0.2435991444161056
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 241847,
+   "rows_2023_plus": 30344,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103797_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103800",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103800/07103800_hourly_full.csv",
+   "area_sq_km": 38.5,
+   "temp_offset_c": -3.6253,
+   "flow_scale_mm_hr": 0.01317618934868049,
+   "met_stats": {
+    "precipitation": [
+     0.05584353920914015,
+     0.3362655879947017
+    ],
+    "temperature": [
+     280.4381879961421,
+     9.375783436481747
+    ],
+    "shortwave_radiation": [
+     204.43151292751685,
+     262.7390809476874
+    ],
+    "longwave_radiation": [
+     244.6862921210772,
+     49.801747515606785
+    ],
+    "specific_humidity": [
+     0.0041582917260182505,
+     0.0022196872614202077
+    ],
+    "wind_east": [
+     2.2302998363795536,
+     2.762277512715118
+    ],
+    "wind_north": [
+     0.7301974911101609,
+     2.3716614111042453
+    ],
+    "p01m": [
+     0.04350069812300616,
+     0.882400589681544
+    ],
+    "pet_mm_hr": [
+     0.19930652085716366,
+     0.24895214867960952
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 270326,
+   "rows_2023_plus": 29817,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103800_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103960",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103960/07103960_hourly_full.csv",
+   "area_sq_km": 41.957837999999995,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.005560023906722946,
+   "met_stats": {
+    "precipitation": [
+     0.05497337315771434,
+     0.43061285992832804
+    ],
+    "temperature": [
+     289.2489869265045,
+     8.22689801218684
+    ],
+    "shortwave_radiation": [
+     249.70070680115558,
+     295.0884272442738
+    ],
+    "longwave_radiation": [
+     286.8216207217353,
+     44.80256505162269
+    ],
+    "specific_humidity": [
+     0.005847876134750037,
+     0.002483041154022658
+    ],
+    "wind_east": [
+     1.0170572390931791,
+     2.5281974294397247
+    ],
+    "wind_north": [
+     0.9471066930225728,
+     2.5752814476210153
+    ],
+    "p01m": [
+     0.03612925623072027,
+     0.47707772757542977
+    ],
+    "pet_mm_hr": [
+     0.27311757329775255,
+     0.29340228059162876
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 20539,
+   "rows_2023_plus": 18189,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103960_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103965",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103965/07103965_hourly_full.csv",
+   "area_sq_km": 9.1426647,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.02923474512422507,
+   "met_stats": {
+    "precipitation": [
+     0.04126520007297494,
+     0.3477011969925431
+    ],
+    "temperature": [
+     283.69751307467766,
+     10.277131892979884
+    ],
+    "shortwave_radiation": [
+     204.34827408173194,
+     266.474184112085
+    ],
+    "longwave_radiation": [
+     260.58465549744585,
+     53.007703572558285
+    ],
+    "specific_humidity": [
+     0.004650887019581611,
+     0.002550658325672062
+    ],
+    "wind_east": [
+     1.6545761366455851,
+     2.568984735678788
+    ],
+    "wind_north": [
+     0.7416711254317685,
+     2.6039563540913204
+    ],
+    "p01m": [
+     0.02478808379956215,
+     0.3854693042872479
+    ],
+    "pet_mm_hr": [
+     0.1998666625884213,
+     0.2575518744999749
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 32949,
+   "rows_2023_plus": 10050,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103965_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103970",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103970/07103970_hourly_full.csv",
+   "area_sq_km": 466.0,
+   "temp_offset_c": -2.8698,
+   "flow_scale_mm_hr": 0.012107313200248663,
+   "met_stats": {
+    "precipitation": [
+     0.04868238731756118,
+     0.34806071912918746
+    ],
+    "temperature": [
+     283.9620728319062,
+     9.689006769340983
+    ],
+    "shortwave_radiation": [
+     206.6838012054458,
+     267.2074425303994
+    ],
+    "longwave_radiation": [
+     263.299545357746,
+     53.11606646346992
+    ],
+    "specific_humidity": [
+     0.004821926931362887,
+     0.0026274361669508875
+    ],
+    "wind_east": [
+     1.7882388302421293,
+     2.5029832722083944
+    ],
+    "wind_north": [
+     0.7273383606089631,
+     2.603066479183131
+    ],
+    "p01m": [
+     0.044821753988024786,
+     1.0421291534717647
+    ],
+    "pet_mm_hr": [
+     0.20349470423623192,
+     0.25396573431892916
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 201508,
+   "rows_2023_plus": 31208,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103970_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103980",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103980/07103980_hourly_full.csv",
+   "area_sq_km": 26.7,
+   "temp_offset_c": -0.8753,
+   "flow_scale_mm_hr": 0.03832088133905571,
+   "met_stats": {
+    "precipitation": [
+     0.05110967364873513,
+     0.37612627106076135
+    ],
+    "temperature": [
+     283.1278621645834,
+     10.031114926932661
+    ],
+    "shortwave_radiation": [
+     205.4177201569899,
+     268.4502274661363
+    ],
+    "longwave_radiation": [
+     261.23035851712814,
+     53.26173894060137
+    ],
+    "specific_humidity": [
+     0.004592149922784864,
+     0.0026000071614691233
+    ],
+    "wind_east": [
+     1.3868783747720597,
+     2.323060114031279
+    ],
+    "wind_north": [
+     0.6735767236122971,
+     2.8930231952470766
+    ],
+    "p01m": [
+     0.04523835885841048,
+     0.9389471677270765
+    ],
+    "pet_mm_hr": [
+     0.20166490889192706,
+     0.2566855099635466
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 234693,
+   "rows_2023_plus": 30918,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103980_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103987",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103987/07103987_hourly_full.csv",
+   "area_sq_km": 41.698839,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.03954608411999166,
+   "met_stats": {
+    "precipitation": [
+     0.042461101986426594,
+     0.3546809571095692
+    ],
+    "temperature": [
+     283.7096079828938,
+     10.362344892047295
+    ],
+    "shortwave_radiation": [
+     203.779832067929,
+     266.1783484436285
+    ],
+    "longwave_radiation": [
+     260.80175431528716,
+     53.32251712418532
+    ],
+    "specific_humidity": [
+     0.004683297616907868,
+     0.0025635961351243744
+    ],
+    "wind_east": [
+     1.633347794539651,
+     2.5576171383343285
+    ],
+    "wind_north": [
+     0.740148748743376,
+     2.580378368779138
+    ],
+    "p01m": [
+     0.02491657937959032,
+     0.3857569922597531
+    ],
+    "pet_mm_hr": [
+     0.19867659051312406,
+     0.25801712130394056
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 32345,
+   "rows_2023_plus": 29966,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103987_snodas_swe.csv"
+  },
+  {
+   "site_id": "07103990",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07103990/07103990_hourly_full.csv",
+   "area_sq_km": 51.4,
+   "temp_offset_c": -1.3367,
+   "flow_scale_mm_hr": 0.046357042636502546,
+   "met_stats": {
+    "precipitation": [
+     0.04705903609622986,
+     0.32360510630588774
+    ],
+    "temperature": [
+     283.6924058267621,
+     9.753151695048317
+    ],
+    "shortwave_radiation": [
+     204.42331576476252,
+     266.017491315876
+    ],
+    "longwave_radiation": [
+     262.30009635024777,
+     53.14382396169684
+    ],
+    "specific_humidity": [
+     0.0047825963570697645,
+     0.002607708655276552
+    ],
+    "wind_east": [
+     1.7983449502357594,
+     2.488851706053361
+    ],
+    "wind_north": [
+     0.7092762283122857,
+     2.557638898606684
+    ],
+    "p01m": [
+     0.04102260278095467,
+     0.9298059641278011
+    ],
+    "pet_mm_hr": [
+     0.19961004511701133,
+     0.2522733946648378
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 249995,
+   "rows_2023_plus": 30922,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07103990_snodas_swe.csv"
+  },
+  {
+   "site_id": "07104000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07104000/07104000_hourly_full.csv",
+   "area_sq_km": 529.2,
+   "temp_offset_c": -2.8148,
+   "flow_scale_mm_hr": 0.015566483406735917,
+   "met_stats": {
+    "precipitation": [
+     0.05123644141455814,
+     0.34049099539692845
+    ],
+    "temperature": [
+     284.40481408790316,
+     9.374479865342808
+    ],
+    "shortwave_radiation": [
+     210.64689753706023,
+     269.846973830887
+    ],
+    "longwave_radiation": [
+     265.4920249057722,
+     52.138584738061894
+    ],
+    "specific_humidity": [
+     0.0049211808368147215,
+     0.002611073783022824
+    ],
+    "wind_east": [
+     1.7454735816262852,
+     2.497121793609472
+    ],
+    "wind_north": [
+     0.7245762842105093,
+     2.5852488859276104
+    ],
+    "p01m": [
+     0.04324280764716956,
+     0.921981055837195
+    ],
+    "pet_mm_hr": [
+     0.2084831663520936,
+     0.25516735809354946
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 249839,
+   "rows_2023_plus": 30786,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07104000_snodas_swe.csv"
+  },
+  {
+   "site_id": "07104905",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07104905/07104905_hourly_full.csv",
+   "area_sq_km": 613.5,
+   "temp_offset_c": -3.0075,
+   "flow_scale_mm_hr": 0.01786688411685233,
+   "met_stats": {
+    "precipitation": [
+     0.05074165396244633,
+     0.3789456411940873
+    ],
+    "temperature": [
+     284.5981745941002,
+     9.912866804822299
+    ],
+    "shortwave_radiation": [
+     205.54958889142972,
+     268.42181334701604
+    ],
+    "longwave_radiation": [
+     266.18436618644716,
+     54.42893487985936
+    ],
+    "specific_humidity": [
+     0.004832837856035776,
+     0.0026678296083945487
+    ],
+    "wind_east": [
+     1.0911589417356418,
+     2.3057722153085525
+    ],
+    "wind_north": [
+     0.5319954505018167,
+     2.3687438866830726
+    ],
+    "p01m": [
+     0.04981716594252611,
+     0.43458973924948563
+    ],
+    "pet_mm_hr": [
+     0.20230796552077143,
+     0.25291746766791007
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 157170,
+   "rows_2023_plus": 31139,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07104905_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105000/07105000_hourly_full.csv",
+   "area_sq_km": 18.1,
+   "temp_offset_c": -4.5773,
+   "flow_scale_mm_hr": 0.02059566343308711,
+   "met_stats": {
+    "precipitation": [
+     0.05495117316296648,
+     0.3351625605194037
+    ],
+    "temperature": [
+     279.5161841890675,
+     9.472159930264118
+    ],
+    "shortwave_radiation": [
+     205.4462141403541,
+     265.62464976442294
+    ],
+    "longwave_radiation": [
+     240.28388303114963,
+     49.15421240025963
+    ],
+    "specific_humidity": [
+     0.004049211048791383,
+     0.002169010463188781
+    ],
+    "wind_east": [
+     1.363530407998355,
+     2.368353973638717
+    ],
+    "wind_north": [
+     0.6313197980840819,
+     2.0617854848982025
+    ],
+    "p01m": [
+     0.05235150075516383,
+     0.3881490272642202
+    ],
+    "pet_mm_hr": [
+     0.1933469158528019,
+     0.2436980449409122
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 141455,
+   "rows_2023_plus": 31150,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105000_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105490",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105490/07105490_hourly_full.csv",
+   "area_sq_km": 56.4,
+   "temp_offset_c": -5.178,
+   "flow_scale_mm_hr": 0.03410338381185111,
+   "met_stats": {
+    "precipitation": [
+     0.04642363339701053,
+     0.33715148346244045
+    ],
+    "temperature": [
+     284.1117813192893,
+     9.911858247833004
+    ],
+    "shortwave_radiation": [
+     203.8067985202118,
+     267.265701828887
+    ],
+    "longwave_radiation": [
+     264.8075778161008,
+     54.29177863098105
+    ],
+    "specific_humidity": [
+     0.004841127935848919,
+     0.0026799622711137275
+    ],
+    "wind_east": [
+     1.1560907170832282,
+     2.2787311848864817
+    ],
+    "wind_north": [
+     0.5334494316414469,
+     2.3143681474807236
+    ],
+    "p01m": [
+     0.04565785753807506,
+     0.35556245498198624
+    ],
+    "pet_mm_hr": [
+     0.19499740711272806,
+     0.24835617091113799
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 248344,
+   "rows_2023_plus": 31257,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105490_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105500/07105500_hourly_full.csv",
+   "area_sq_km": 1017.9,
+   "temp_offset_c": -4.1311,
+   "flow_scale_mm_hr": 0.018802414275116603,
+   "met_stats": {
+    "precipitation": [
+     0.04608908724578971,
+     0.3322958859159394
+    ],
+    "temperature": [
+     284.1406772770798,
+     9.865529481607178
+    ],
+    "shortwave_radiation": [
+     203.82414692847405,
+     267.19876894497037
+    ],
+    "longwave_radiation": [
+     264.8391971707147,
+     54.214314549471766
+    ],
+    "specific_humidity": [
+     0.004836474546755471,
+     0.0026748092399520953
+    ],
+    "wind_east": [
+     1.142150832826397,
+     2.274313927991869
+    ],
+    "wind_north": [
+     0.5476062124353184,
+     2.308501598553531
+    ],
+    "p01m": [
+     0.04560261036099374,
+     0.3684588952230593
+    ],
+    "pet_mm_hr": [
+     0.19524276959621387,
+     0.2482009026583919
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 281848,
+   "rows_2023_plus": 30511,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105530",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105530/07105530_hourly_full.csv",
+   "area_sq_km": 1072.0,
+   "temp_offset_c": -4.0473,
+   "flow_scale_mm_hr": 0.021903747208249485,
+   "met_stats": {
+    "precipitation": [
+     0.04454012670044342,
+     0.3241239052913559
+    ],
+    "temperature": [
+     283.9312923369946,
+     9.96358539732844
+    ],
+    "shortwave_radiation": [
+     202.27452992855694,
+     266.0549292434511
+    ],
+    "longwave_radiation": [
+     263.8384862195388,
+     54.3792114643628
+    ],
+    "specific_humidity": [
+     0.004797126823153885,
+     0.0026784269745589715
+    ],
+    "wind_east": [
+     1.1653242409911642,
+     2.2666935199062226
+    ],
+    "wind_north": [
+     0.5378535062383488,
+     2.31279217311351
+    ],
+    "p01m": [
+     0.04412236981774107,
+     0.3634583814597631
+    ],
+    "pet_mm_hr": [
+     0.1928235434439213,
+     0.24699536300186073
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 266562,
+   "rows_2023_plus": 29880,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105530_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105600",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105600/07105600_hourly_full.csv",
+   "area_sq_km": 134.5,
+   "temp_offset_c": -1.6612,
+   "flow_scale_mm_hr": 0.04828607057632605,
+   "met_stats": {
+    "precipitation": [
+     0.06130123757139835,
+     0.4178515337944748
+    ],
+    "temperature": [
+     287.36473591425147,
+     9.245907974818294
+    ],
+    "shortwave_radiation": [
+     228.07320665855718,
+     284.24409120459825
+    ],
+    "longwave_radiation": [
+     280.06017276637755,
+     52.609017443879594
+    ],
+    "specific_humidity": [
+     0.005507061233340386,
+     0.0027073613702909348
+    ],
+    "wind_east": [
+     0.8058528128795447,
+     2.300409287501867
+    ],
+    "wind_north": [
+     0.6987366005641351,
+     2.364409433859587
+    ],
+    "p01m": [
+     0.10296656706156124,
+     1.7448466822314506
+    ],
+    "pet_mm_hr": [
+     0.2367331508537127,
+     0.2729442940069841
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 110026,
+   "rows_2023_plus": 24812,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105600_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105800",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105800/07105800_hourly_full.csv",
+   "area_sq_km": 1316.8,
+   "temp_offset_c": -3.9381,
+   "flow_scale_mm_hr": 0.018716675166361225,
+   "met_stats": {
+    "precipitation": [
+     0.04617560561435155,
+     0.3401110550786426
+    ],
+    "temperature": [
+     285.4531554656784,
+     10.415775468756863
+    ],
+    "shortwave_radiation": [
+     205.38311254773748,
+     272.2756781724361
+    ],
+    "longwave_radiation": [
+     273.7553128126717,
+     56.844121165134325
+    ],
+    "specific_humidity": [
+     0.004850395003241218,
+     0.0027944984256687033
+    ],
+    "wind_east": [
+     0.2844961660049886,
+     2.1861834111685234
+    ],
+    "wind_north": [
+     0.3899375698184869,
+     2.191583295833377
+    ],
+    "p01m": [
+     0.03324784635222164,
+     1.2853731678944973
+    ],
+    "pet_mm_hr": [
+     0.2012951180591277,
+     0.2590603862724324
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 284739,
+   "rows_2023_plus": 31181,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105800_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105900",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105900/07105900_hourly_full.csv",
+   "area_sq_km": 170.4,
+   "temp_offset_c": -1.0478,
+   "flow_scale_mm_hr": 0.014948344172168318,
+   "met_stats": {
+    "precipitation": [
+     0.04784790772727604,
+     0.3493519478127775
+    ],
+    "temperature": [
+     285.792363860214,
+     10.330414744199485
+    ],
+    "shortwave_radiation": [
+     206.84200450945966,
+     273.63456992913234
+    ],
+    "longwave_radiation": [
+     275.6033773230274,
+     56.7507729735852
+    ],
+    "specific_humidity": [
+     0.004947256450567142,
+     0.0028147487337566585
+    ],
+    "wind_east": [
+     0.2558892514847706,
+     2.1874129062908194
+    ],
+    "wind_north": [
+     0.39945948255137287,
+     2.189258359072531
+    ],
+    "p01m": [
+     0.03507914393117064,
+     1.3072879575452738
+    ],
+    "pet_mm_hr": [
+     0.20436754023575238,
+     0.26134057454763104
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 275489,
+   "rows_2023_plus": 31226,
+   "split": "train"
+  },
+  {
+   "site_id": "07105940",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105940/07105940_hourly_full.csv",
+   "area_sq_km": 69.411732,
+   "temp_offset_c": 0.0,
+   "flow_scale_mm_hr": 0.04331847581035997,
+   "met_stats": {
+    "precipitation": [
+     0.06754769505033557,
+     0.4300002649004788
+    ],
+    "temperature": [
+     290.43425880872485,
+     8.532227759709535
+    ],
+    "shortwave_radiation": [
+     241.7976947776846,
+     296.504026384788
+    ],
+    "longwave_radiation": [
+     301.5878489932886,
+     49.61740704701851
+    ],
+    "specific_humidity": [
+     0.006239080536912751,
+     0.0027236273738255688
+    ],
+    "wind_east": [
+     -0.3078359903607383,
+     2.038783517892492
+    ],
+    "wind_north": [
+     0.6096860310067114,
+     2.1882017602783366
+    ],
+    "p01m": [
+     0.05765535654362417,
+     0.7011959768022028
+    ],
+    "pet_mm_hr": [
+     0.26083781666619127,
+     0.28565360246167026
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 47893,
+   "rows_2023_plus": 16680,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105940_snodas_swe.csv"
+  },
+  {
+   "site_id": "07105945",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07105945/07105945_hourly_full.csv",
+   "area_sq_km": 17.5,
+   "temp_offset_c": -3.5628,
+   "flow_scale_mm_hr": 0.059132968242120096,
+   "met_stats": {
+    "precipitation": [
+     0.049748242430089115,
+     0.3554278939519459
+    ],
+    "temperature": [
+     284.4238309999558,
+     9.795754590455234
+    ],
+    "shortwave_radiation": [
+     207.31892698799348,
+     271.6339223390796
+    ],
+    "longwave_radiation": [
+     266.47016223103856,
+     54.159271299293174
+    ],
+    "specific_humidity": [
+     0.0048400990361000245,
+     0.0026414050254070834
+    ],
+    "wind_east": [
+     0.31845848266015964,
+     2.198684842253478
+    ],
+    "wind_north": [
+     0.41602123800096713,
+     2.1242832549266883
+    ],
+    "p01m": [
+     0.04908559455907002,
+     0.39478371587309646
+    ],
+    "pet_mm_hr": [
+     0.1985203721069133,
+     0.25029634184293303
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 249605,
+   "rows_2023_plus": 20381,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07105945_snodas_swe.csv"
+  },
+  {
+   "site_id": "07106000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07106000/07106000_hourly_full.csv",
+   "area_sq_km": 1768.5,
+   "temp_offset_c": -3.7654,
+   "flow_scale_mm_hr": 0.01908108243587112,
+   "met_stats": {
+    "precipitation": [
+     0.043581398859106474,
+     0.3196191170081741
+    ],
+    "temperature": [
+     285.9710229102018,
+     10.554006565902233
+    ],
+    "shortwave_radiation": [
+     205.46580359931434,
+     274.18704678013546
+    ],
+    "longwave_radiation": [
+     276.7769966238865,
+     57.82403644468356
+    ],
+    "specific_humidity": [
+     0.004867545267620222,
+     0.002836969700114791
+    ],
+    "wind_east": [
+     0.16145790992946124,
+     2.2255656866366014
+    ],
+    "wind_north": [
+     0.33561253595950263,
+     2.0457085095793768
+    ],
+    "p01m": [
+     0.03454437361252173,
+     1.3696605254603573
+    ],
+    "pet_mm_hr": [
+     0.2030377586417458,
+     0.2629542092982622
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 249960,
+   "rows_2023_plus": 30010,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07106000_snodas_swe.csv"
+  },
+  {
+   "site_id": "07106300",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07106300/07106300_hourly_full.csv",
+   "area_sq_km": 2194.8,
+   "temp_offset_c": -3.8373,
+   "flow_scale_mm_hr": 0.011362892686657688,
+   "met_stats": {
+    "precipitation": [
+     0.03787793454073996,
+     0.30408048590839354
+    ],
+    "temperature": [
+     286.70817596136686,
+     10.728785816345438
+    ],
+    "shortwave_radiation": [
+     208.12198320726338,
+     278.2019069831059
+    ],
+    "longwave_radiation": [
+     281.3949660029936,
+     58.830212659912355
+    ],
+    "specific_humidity": [
+     0.004932729165680322,
+     0.0029030860538748586
+    ],
+    "wind_east": [
+     0.009191391110156126,
+     2.2788699799299272
+    ],
+    "wind_north": [
+     0.32150544461032615,
+     1.9876824492586185
+    ],
+    "p01m": [
+     0.06331551916906727,
+     1.2700273262385333
+    ],
+    "pet_mm_hr": [
+     0.21025214084618277,
+     0.2711537741453892
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 275515,
+   "rows_2023_plus": 26273,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07106300_snodas_swe.csv"
+  },
+  {
+   "site_id": "07106500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07106500/07106500_hourly_full.csv",
+   "area_sq_km": 2404.4,
+   "temp_offset_c": -4.0815,
+   "flow_scale_mm_hr": 0.013078695954767372,
+   "met_stats": {
+    "precipitation": [
+     0.03621256156647721,
+     0.3264528893399731
+    ],
+    "temperature": [
+     287.36671684342156,
+     10.687264985215204
+    ],
+    "shortwave_radiation": [
+     209.85340395994123,
+     280.46025242171993
+    ],
+    "longwave_radiation": [
+     284.9764493596357,
+     59.23883908922957
+    ],
+    "specific_humidity": [
+     0.005047367806428798,
+     0.0029493958633082535
+    ],
+    "wind_east": [
+     0.055225976795512124,
+     2.2950939381077013
+    ],
+    "wind_north": [
+     0.33707313411928896,
+     1.9263286687542254
+    ],
+    "p01m": [
+     0.0670231471725903,
+     1.319147975954962
+    ],
+    "pet_mm_hr": [
+     0.21314329682717748,
+     0.27348534511562284
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 275225,
+   "rows_2023_plus": 16391,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07106500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07108900",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07108900/07108900_hourly_full.csv",
+   "area_sq_km": 1227.3,
+   "temp_offset_c": -4.1505,
+   "flow_scale_mm_hr": 0.009524885023948946,
+   "met_stats": {
+    "precipitation": [
+     0.037075617051109136,
+     0.3300992955397206
+    ],
+    "temperature": [
+     288.06076286491555,
+     10.734286517414642
+    ],
+    "shortwave_radiation": [
+     210.57660472151736,
+     279.08742872087987
+    ],
+    "longwave_radiation": [
+     288.98721570689406,
+     59.24268062951788
+    ],
+    "specific_humidity": [
+     0.005125157436237417,
+     0.002944785179393153
+    ],
+    "wind_east": [
+     0.08674599289927755,
+     2.49353341176612
+    ],
+    "wind_north": [
+     0.35675235420158646,
+     1.8507293907207025
+    ],
+    "p01m": [
+     0.06821968124423716,
+     1.3425903155097567
+    ],
+    "pet_mm_hr": [
+     0.22425200638611603,
+     0.27937610884748787
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 263328,
+   "rows_2023_plus": 31071,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07108900_snodas_swe.csv"
+  },
+  {
+   "site_id": "07109500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07109500/07109500_hourly_full.csv",
+   "area_sq_km": 16200.6,
+   "temp_offset_c": -7.0756,
+   "flow_scale_mm_hr": 0.005669036166117304,
+   "met_stats": {
+    "precipitation": [
+     0.03606097841065687,
+     0.31907726155466
+    ],
+    "temperature": [
+     287.5764339422635,
+     10.961832303154226
+    ],
+    "shortwave_radiation": [
+     207.79570530723296,
+     276.96491906955526
+    ],
+    "longwave_radiation": [
+     286.74668305006895,
+     59.81670207533555
+    ],
+    "specific_humidity": [
+     0.005030192286491643,
+     0.0029295370251451345
+    ],
+    "wind_east": [
+     0.11345044270647182,
+     2.489034680607809
+    ],
+    "wind_north": [
+     0.34062188379435354,
+     1.8411726254998433
+    ],
+    "p01m": [
+     0.0649556404367337,
+     1.2964548150624318
+    ],
+    "pet_mm_hr": [
+     0.218885104027681,
+     0.2770737406022518
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 283966,
+   "rows_2023_plus": 30198,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07109500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07116500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07116500/07116500_hourly_full.csv",
+   "area_sq_km": 4802.0,
+   "temp_offset_c": -5.3193,
+   "flow_scale_mm_hr": 0.0021859964999734007,
+   "met_stats": {
+    "precipitation": [
+     0.037846476403954686,
+     0.32130607058064
+    ],
+    "temperature": [
+     288.8858473361886,
+     10.438652966648913
+    ],
+    "shortwave_radiation": [
+     217.51637121642716,
+     286.2866606166393
+    ],
+    "longwave_radiation": [
+     293.38797598366887,
+     58.441827453161075
+    ],
+    "specific_humidity": [
+     0.005288986767802106,
+     0.0029653978181466947
+    ],
+    "wind_east": [
+     -0.30943537672016974,
+     2.579028152083762
+    ],
+    "wind_north": [
+     0.2901554633305848,
+     1.8046906486710734
+    ],
+    "p01m": [
+     0.06945196613697313,
+     1.3506794628141143
+    ],
+    "pet_mm_hr": [
+     0.2331155293364928,
+     0.28211256335979085
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 250713,
+   "rows_2023_plus": 17995,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07116500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07119500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07119500/07119500_hourly_full.csv",
+   "area_sq_km": 2775.2,
+   "temp_offset_c": -3.1246,
+   "flow_scale_mm_hr": 0.0023145064459377256,
+   "met_stats": {
+    "precipitation": [
+     0.03544076268691642,
+     0.3143488335352635
+    ],
+    "temperature": [
+     287.61813872387324,
+     11.4272211761342
+    ],
+    "shortwave_radiation": [
+     212.1045637384038,
+     282.8696050876726
+    ],
+    "longwave_radiation": [
+     290.32729798685074,
+     61.97888707074624
+    ],
+    "specific_humidity": [
+     0.005298496711176866,
+     0.0031683641942494567
+    ],
+    "wind_east": [
+     -0.06941345488115097,
+     2.497871675590305
+    ],
+    "wind_north": [
+     0.29011945065496114,
+     1.8823297739691371
+    ],
+    "p01m": [
+     0.05513491911925664,
+     1.4284138012739531
+    ],
+    "pet_mm_hr": [
+     0.23000608131261938,
+     0.2923092685148881
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 265832,
+   "rows_2023_plus": 31014,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07119500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07121500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07121500/07121500_hourly_full.csv",
+   "area_sq_km": 1302.7,
+   "temp_offset_c": -1.46,
+   "flow_scale_mm_hr": 0.006087133256727378,
+   "met_stats": {
+    "precipitation": [
+     0.03496329882368496,
+     0.3430390593174198
+    ],
+    "temperature": [
+     287.5328927507703,
+     11.544805225304106
+    ],
+    "shortwave_radiation": [
+     208.98263011998193,
+     279.6844356230532
+    ],
+    "longwave_radiation": [
+     290.782855474474,
+     61.97752071081274
+    ],
+    "specific_humidity": [
+     0.005328411213370989,
+     0.003196745223669491
+    ],
+    "wind_east": [
+     -0.14080024745452993,
+     2.6092529951831995
+    ],
+    "wind_north": [
+     0.4225940604949748,
+     1.947255751190072
+    ],
+    "p01m": [
+     0.05300215284383252,
+     1.4005099273809127
+    ],
+    "pet_mm_hr": [
+     0.22781529610736748,
+     0.2900957474443269
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 273218,
+   "rows_2023_plus": 30288,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07121500_snodas_swe.csv"
+  },
+  {
+   "site_id": "07124000",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07124000/07124000_hourly_full.csv",
+   "area_sq_km": 37084.8,
+   "temp_offset_c": -5.5277,
+   "flow_scale_mm_hr": 0.0017272642392352675,
+   "met_stats": {
+    "precipitation": [
+     0.03907227980912638,
+     0.39924555262547806
+    ],
+    "temperature": [
+     288.64363727317027,
+     11.130098158608726
+    ],
+    "shortwave_radiation": [
+     212.129923178202,
+     280.75320577857696
+    ],
+    "longwave_radiation": [
+     296.4119679100231,
+     61.27567482998587
+    ],
+    "specific_humidity": [
+     0.005665717637957518,
+     0.0033051144580555
+    ],
+    "wind_east": [
+     -0.16958492845363357,
+     2.8989097329476143
+    ],
+    "wind_north": [
+     0.8680485652208273,
+     2.814147120310384
+    ],
+    "p01m": [
+     0.05527231848967341,
+     1.4270022133998552
+    ],
+    "pet_mm_hr": [
+     0.23994275723499264,
+     0.28899489079253127
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 269698,
+   "rows_2023_plus": 30919,
+   "split": "train"
+  },
+  {
+   "site_id": "07124200",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07124200/07124200_hourly_full.csv",
+   "area_sq_km": 1306.9,
+   "temp_offset_c": -4.2293,
+   "flow_scale_mm_hr": 0.008662822076564542,
+   "met_stats": {
+    "precipitation": [
+     0.05784684534658572,
+     0.39501907141895043
+    ],
+    "temperature": [
+     284.57396430772457,
+     9.419899040214323
+    ],
+    "shortwave_radiation": [
+     217.5231375109817,
+     274.3546950424375
+    ],
+    "longwave_radiation": [
+     263.89673961597805,
+     52.03724535755237
+    ],
+    "specific_humidity": [
+     0.004770799374532867,
+     0.002547896455804239
+    ],
+    "wind_east": [
+     2.2630944664297674,
+     2.3573885575707965
+    ],
+    "wind_north": [
+     0.5226932229748807,
+     3.4831839116467465
+    ],
+    "p01m": [
+     0.06916294402265843,
+     1.2919154320672024
+    ],
+    "pet_mm_hr": [
+     0.21334883054816794,
+     0.2719341644420533
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 229639,
+   "rows_2023_plus": 31251,
+   "split": "train"
+  },
+  {
+   "site_id": "07124410",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07124410/07124410_hourly_full.csv",
+   "area_sq_km": 1740.9,
+   "temp_offset_c": -3.9901,
+   "flow_scale_mm_hr": 0.006470190749027105,
+   "met_stats": {
+    "precipitation": [
+     0.04950292397888475,
+     0.3868574200400126
+    ],
+    "temperature": [
+     283.86228234634615,
+     9.958784201370351
+    ],
+    "shortwave_radiation": [
+     208.18263417757984,
+     271.11440218360013
+    ],
+    "longwave_radiation": [
+     260.95926197854214,
+     53.967456526272194
+    ],
+    "specific_humidity": [
+     0.004617559257774179,
+     0.002629254963114658
+    ],
+    "wind_east": [
+     1.947198647801891,
+     2.245023612269545
+    ],
+    "wind_north": [
+     0.4677853506561866,
+     3.2780161652522812
+    ],
+    "p01m": [
+     0.06513927030940998,
+     1.2505047232822548
+    ],
+    "pet_mm_hr": [
+     0.20299591043981471,
+     0.267384184547145
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 257732,
+   "rows_2023_plus": 24109,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07124410_snodas_swe.csv"
+  },
+  {
+   "site_id": "07126200",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07126200/07126200_hourly_full.csv",
+   "area_sq_km": 455.1,
+   "temp_offset_c": -1.1241,
+   "flow_scale_mm_hr": 0.00407071196175389,
+   "met_stats": {
+    "precipitation": [
+     0.04319740841694867,
+     0.37031705623133593
+    ],
+    "temperature": [
+     288.52718461759173,
+     10.402477606875271
+    ],
+    "shortwave_radiation": [
+     223.72460333420537,
+     288.2483166249874
+    ],
+    "longwave_radiation": [
+     289.97420079494344,
+     57.19273368792971
+    ],
+    "specific_humidity": [
+     0.0054029880834437416,
+     0.002929888192191377
+    ],
+    "wind_east": [
+     0.8871500175326374,
+     2.5023828109210147
+    ],
+    "wind_north": [
+     1.0560295015382348,
+     2.9603391551969898
+    ],
+    "p01m": [
+     0.062148214330922616,
+     1.2450770316915492
+    ],
+    "pet_mm_hr": [
+     0.24959993964129232,
+     0.29394852039845465
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 236975,
+   "rows_2023_plus": 17717,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07126200_snodas_swe.csv"
+  },
+  {
+   "site_id": "07126300",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07126300/07126300_hourly_full.csv",
+   "area_sq_km": 4989.1,
+   "temp_offset_c": -3.9126,
+   "flow_scale_mm_hr": 0.004170557742787861,
+   "met_stats": {
+    "precipitation": [
+     0.040215644214523345,
+     0.3566673381892637
+    ],
+    "temperature": [
+     287.80714397066765,
+     10.263077633785452
+    ],
+    "shortwave_radiation": [
+     217.14099678633013,
+     283.01331172585463
+    ],
+    "longwave_radiation": [
+     285.4820465590218,
+     56.9733192632217
+    ],
+    "specific_humidity": [
+     0.005166529914998867,
+     0.0029249359052679618
+    ],
+    "wind_east": [
+     0.9493790818188153,
+     2.5401627628221832
+    ],
+    "wind_north": [
+     0.990108689095986,
+     2.9861050383263037
+    ],
+    "p01m": [
+     0.057955968368431136,
+     1.173023475652373
+    ],
+    "pet_mm_hr": [
+     0.23907079172663775,
+     0.2853090766059471
+    ]
+   },
+   "has_embedding": false,
+   "train_valid_hours": 230458,
+   "rows_2023_plus": 30581,
+   "split": "train",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07126300_snodas_swe.csv"
+  },
+  {
+   "site_id": "07128500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07128500/07128500_hourly_full.csv",
+   "area_sq_km": 8939.2,
+   "temp_offset_c": -4.2099,
+   "flow_scale_mm_hr": 0.0017198939536807142,
+   "met_stats": {
+    "precipitation": [
+     0.04012947010209043,
+     0.4074312903726792
+    ],
+    "temperature": [
+     288.87270133203697,
+     11.153340564679882
+    ],
+    "shortwave_radiation": [
+     214.165920490034,
+     282.2849895483711
+    ],
+    "longwave_radiation": [
+     297.9190750024307,
+     61.358544242227005
+    ],
+    "specific_humidity": [
+     0.005749668619543024,
+     0.003327780624199463
+    ],
+    "wind_east": [
+     -0.19328894553232864,
+     2.8988008734725947
+    ],
+    "wind_north": [
+     0.8844953610108591,
+     2.805446311349722
+    ],
+    "p01m": [
+     0.05715484569761788,
+     1.4607341737763115
+    ],
+    "pet_mm_hr": [
+     0.2430308958474283,
+     0.29062066028900646
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 257852,
+   "rows_2023_plus": 30029,
+   "split": "holdout"
+  },
+  {
+   "site_id": "07130500",
+   "csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/scrapes/CO/07130500/07130500_hourly_full.csv",
+   "area_sq_km": 47909.8,
+   "temp_offset_c": -5.373,
+   "flow_scale_mm_hr": 0.0008969487535567865,
+   "met_stats": {
+    "precipitation": [
+     0.04152707627326752,
+     0.44207072312891105
+    ],
+    "temperature": [
+     288.0598597998436,
+     11.40758858246452
+    ],
+    "shortwave_radiation": [
+     209.4775886479809,
+     278.0233052018321
+    ],
+    "longwave_radiation": [
+     295.0139929654354,
+     61.702006984538144
+    ],
+    "specific_humidity": [
+     0.005706843452981378,
+     0.0033838637568111185
+    ],
+    "wind_east": [
+     -0.397684790175945,
+     2.6035560383440917
+    ],
+    "wind_north": [
+     0.7776609492412613,
+     2.7279677771429016
+    ],
+    "p01m": [
+     0.0760976553970071,
+     1.7885765513631662
+    ],
+    "pet_mm_hr": [
+     0.2370449297645037,
+     0.2877172042250651
+    ]
+   },
+   "has_embedding": true,
+   "train_valid_hours": 265450,
+   "rows_2023_plus": 31087,
+   "split": "holdout",
+   "swe_csv_path": "/Users/isaac/Documents/GitHub/Water/pilot_data/snodas_series/CO/07130500_snodas_swe.csv"
+  }
+ ]
+}

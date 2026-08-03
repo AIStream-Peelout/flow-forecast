@@ -44,7 +44,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                epochs: int = 30, batch_size: int = 32, lr: float = 3e-4,
                                temperature: float = 0.07, device: str = "cpu",
                                checkpoint_path: Optional[str] = None,
-                               wandb_run=None) -> List[float]:
+                               wandb_run=None, cross_year_views: bool = False,
+                               blocked_batches: bool = False, seed: int = 42) -> List[float]:
     """
     Pretrains the encoder with contrastive alignment across modalities.
 
@@ -66,16 +67,34 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
     :type checkpoint_path: str, optional
     :param wandb_run: An active wandb run; per-epoch losses are logged to it, defaults to None.
     :type wandb_run: wandb.sdk.wandb_run.Run, optional
+    :param cross_year_views: Add a history<->history_alt InfoNCE pair from the dataset's
+        cross-year panel views (requires the dataset to serve "history_alt"), defaults to False.
+    :type cross_year_views: bool, optional
+    :param blocked_batches: Batch site-number-adjacent gauges together so in-batch negatives are
+        hydrologically proximate basins (harder negatives), defaults to False.
+    :type blocked_batches: bool, optional
+    :param seed: Seed for the blocked batch sampler, defaults to 42.
+    :type seed: int, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
+    view_aliases = {"history_alt": "history"} if cross_year_views else None
+    modality_pairs = MODALITY_PAIRS
+    if cross_year_views:
+        modality_pairs = tuple(MODALITY_PAIRS) + (("history", "history_alt"),)
+    batch_sampler = None
+    if blocked_batches:
+        batch_sampler = contrastive_train.KeyBlockedBatchSampler(dataset.site_ids, batch_size,
+                                                                 seed=seed)
     return contrastive_train.pretrain_encoder(encoder, dataset, epochs=epochs,
                                               batch_size=batch_size, lr=lr,
                                               temperature=temperature, device=device,
                                               checkpoint_path=checkpoint_path,
                                               wandb_run=wandb_run,
-                                              modality_pairs=MODALITY_PAIRS,
-                                              input_keys=INPUT_KEYS)
+                                              modality_pairs=modality_pairs,
+                                              input_keys=INPUT_KEYS,
+                                              view_aliases=view_aliases,
+                                              batch_sampler=batch_sampler)
 
 
 def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,

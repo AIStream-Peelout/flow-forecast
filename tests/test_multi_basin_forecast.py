@@ -11,6 +11,10 @@ from flood_forecast.ode.physics.forecast_training import HybridGR4MultiBasin
 from flood_forecast.preprocessing.pytorch_loaders import MultiBasinWindowLoader
 from flood_forecast.pytorch_training import train_transformer_style
 from flood_forecast.time_model import PyTorchForecast
+from experiments.catchment_foundation.run_training import (
+    build_params as build_fleet_params,
+    make_basin_validation_manifest,
+)
 
 RELEVANT_COLS = ["cfs", "precipitation", "temperature", "pet_mm_hr", "p01m", "temp_lapse_k",
                  "sw_raw"]
@@ -381,6 +385,19 @@ class TestAnchoredForcing(unittest.TestCase):
         scale = physics.abs().max().clamp(min=1e-8)
         self.assertLess(float((multiplier - physics).abs().max() / scale), 0.02)
 
+    def test_physics_only_path_does_not_execute_encoder(self):
+        model = self._model(use_multiplier=False, use_asos_gate=False)
+        generator = model.hybrid.forcing_generator
+
+        def fail_if_called(*args, **kwargs):
+            raise AssertionError("physics-only forcing must bypass the sequence encoder")
+
+        generator.encoder.forward = fail_if_called
+        src = torch.stack([self.loader[0][0]])
+        with torch.no_grad():
+            output = model(src)
+        self.assertTrue(torch.isfinite(output).all())
+
     def test_asos_only_storm_is_admitted_at_init(self):
         # A storm the grid missed entirely must produce a materially non-zero effective rainfall
         # from the start, otherwise the station pathway is untrainable in short runs.
@@ -446,6 +463,95 @@ class TestAnchoredForcing(unittest.TestCase):
         self.assertEqual(max(self._encoder_grads(model)), 0.0)
 
 
+class TestHybridParameterStability(unittest.TestCase):
+    """Checks the optional context and hypernetwork anti-saturation controls."""
+
+    def test_parameter_logit_limit_stays_inside_bounds(self):
+        from flood_forecast.ode.physics.hydrology import GR4SnowParameterHead
+
+        head = GR4SnowParameterHead(embedding_dim=8, hidden_dim=4, logit_limit=2.0)
+        with torch.no_grad():
+            head.net[-1].weight.fill_(1000.0)
+            head.snow_net.weight.fill_(-1000.0)
+        context = torch.full((3, 8), 1000.0, requires_grad=True)
+        emitted = head(context)
+        delta = emitted[:, 5] - emitted[:, 6]
+        values = torch.cat([emitted[:, :6], delta.unsqueeze(1)], dim=1)
+        lower = torch.cat([head.lower, head.snow_lower])
+        upper = torch.cat([head.upper, head.snow_upper])
+        fractions = (values - lower) / (upper - lower)
+        self.assertTrue((fractions > torch.sigmoid(torch.tensor(-2.01))).all())
+        self.assertTrue((fractions < torch.sigmoid(torch.tensor(2.01))).all())
+        self.assertTrue(torch.isfinite(emitted).all())
+
+    def test_decoupled_swe_gradient_does_not_change_gr4_hidden_path(self):
+        from flood_forecast.ode.physics.hydrology import GR4SnowParameterHead
+
+        head = GR4SnowParameterHead(
+            embedding_dim=8, hidden_dim=4, decouple_snow_head=True)
+        parameters = head(torch.randn(3, 8))
+        parameters[:, 4:].sum().backward()
+        gr4_grad = head.net[0].weight.grad
+        self.assertTrue(gr4_grad is None or torch.equal(gr4_grad, torch.zeros_like(gr4_grad)))
+        self.assertGreater(float(head.snow_hidden[0].weight.grad.abs().max()), 0.0)
+
+    def test_multi_basin_context_normalization(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest_path = build_manifest(directory)
+            loader = MultiBasinWindowLoader(
+                manifest_path, 120, 48, ["cfs"], RELEVANT_COLS, scaled_cols=SCALED_COLS,
+                basin_split="train", max_basins=2)
+            model = HybridGR4MultiBasin(
+                n_time_series=len(loader.relevant_cols) + 1,
+                spinup_length=120, forecast_length=48,
+                raw_temp_index=loader.relevant_cols.index("temp_lapse_k"),
+                raw_sw_index=loader.relevant_cols.index("sw_raw"),
+                basin_info_path=manifest_path, context_dim=8, dim=8, depth=1, heads=2,
+                normalize_context=True)
+            positions = torch.tensor(loader.basin_positions)
+            norms = model.basin_context(positions).norm(dim=-1)
+            self.assertTrue(torch.allclose(norms, torch.ones_like(norms), atol=1e-6))
+
+    def test_production_store_initial_fraction_is_configurable(self):
+        from flood_forecast.ode.physics.hydrology import HybridGR4Model
+
+        model = HybridGR4Model(
+            n_met_features=1, seq_len=2, context_dim=4, dim=4, depth=1, heads=1,
+            snow=False, production_store_init_fraction=0.1)
+        context = torch.zeros(1, 4)
+        met = torch.zeros(1, 2, 1)
+        output = model(met, context)
+        expected = 0.1 * output["parameters"][0, 0]
+        self.assertTrue(torch.allclose(output["states"][0, 0, 0], expected))
+
+    def test_swe_supervision_is_target_only_and_differentiable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest_path = build_manifest(directory, with_swe=True)
+            loader = MultiBasinWindowLoader(
+                manifest_path, 120, 48, ["cfs"], SWE_RELEVANT_COLS,
+                scaled_cols=SCALED_COLS, basin_split="train", max_basins=1,
+                start_date="2022-02-01", end_date="2022-04-01")
+            swe_index = SWE_RELEVANT_COLS.index("snodas_swe_mm")
+            model = HybridGR4MultiBasin(
+                n_time_series=len(SWE_RELEVANT_COLS) + 1,
+                spinup_length=120, forecast_length=48,
+                raw_temp_index=SWE_RELEVANT_COLS.index("temp_lapse_k"),
+                raw_sw_index=SWE_RELEVANT_COLS.index("sw_raw"),
+                basin_info_path=manifest_path, context_dim=8, dim=8, depth=1, heads=2,
+                swe_index=swe_index, swe_supervision_weight=0.5)
+            src = loader[0][0].unsqueeze(0)
+            changed_target = src.clone()
+            changed_target[:, 120:, swe_index] = 2.0 * changed_target[:, 120:, swe_index]
+            model.train()
+            flow = model(src)
+            loss = model.auxiliary_loss
+            changed_flow = model(changed_target)
+            changed_loss = model.auxiliary_loss
+            self.assertTrue(torch.allclose(flow, changed_flow, atol=1e-6))
+            self.assertIsNotNone(loss)
+            self.assertTrue(loss.requires_grad)
+            self.assertFalse(torch.allclose(loss, changed_loss))
+
 class TestGapPolicy(unittest.TestCase):
     """Tests that interpolation respects the channel policy and the true gap limit."""
 
@@ -490,6 +596,34 @@ class TestGapPolicy(unittest.TestCase):
             src, trg = self.loader[index]
             self.assertTrue(torch.isfinite(src).all())
             self.assertTrue(torch.isfinite(trg).all())
+
+
+class TestBasinValidationSplit(unittest.TestCase):
+    """Tests the development split that keeps the final holdout untouched."""
+
+    def test_reserves_whole_embedded_training_basin(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        source = build_manifest(tmp.name)
+        with open(source) as f:
+            source_manifest = json.load(f)
+        source_manifest["basins"][1]["has_embedding"] = True
+        with open(source, "w") as f:
+            json.dump(source_manifest, f)
+        derived = os.path.join(tmp.name, "development_manifest.json")
+        selected = make_basin_validation_manifest(
+            source, derived, count=1, seed=42, require_pretrained_embedding=True)
+        with open(derived) as f:
+            manifest = json.load(f)
+        splits = {basin["site_id"]: basin["split"] for basin in manifest["basins"]}
+        self.assertEqual(selected, ["basinA"])
+        self.assertEqual(splits["basinA"], "basin_valid")
+        self.assertEqual(splits["basinB"], "train")
+        self.assertEqual(splits["basinC"], "holdout")
+        params = build_fleet_params(
+            derived, "test", 1, 2, 4, None, 1e-3, False,
+            valid_basin_split="basin_valid")
+        self.assertEqual(params["dataset_params"]["valid_basin_split"], "basin_valid")
 
 
 class TestMultiBasinEndToEnd(unittest.TestCase):

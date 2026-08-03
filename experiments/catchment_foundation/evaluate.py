@@ -1,9 +1,10 @@
 """
 Split-wise evaluation of a trained multi-basin forecaster with ``forecast_report``.
 
-For each split — "gauged_2023" (basins seen in training, 2023+ held-out time) and
-"ungauged_2023" (basins never trained on, 2023+) — runs the model over every eval window,
-converts simulated/observed/persistence flows back to physical mm/hr, and produces the standard
+For each requested split — "gauged_2023" (basins seen in training),
+"basin_valid_2023" (development basins held out of hypernetwork fitting), and
+"ungauged_2023" (final basin holdout) — runs the model over every eval window, converts
+simulated/observed/persistence flows back to physical mm/hr, and produces the standard
 :func:`~flood_forecast.ode.physics.forecast_training.forecast_report` per basin (metrics JSON +
 example forecast plots on disk). Pooled and per-basin metrics are logged to W&B; the headline
 number is skill vs persistence at day 1-3.
@@ -256,9 +257,10 @@ def pooled_metrics(split_outputs: Dict[str, Dict]) -> Dict:
 
 
 def evaluate_splits(ff_model, manifest_path: str, run_dir: str, eval_stride: int = 336,
-                    max_basins: Optional[int] = None, n_report_basins: int = 3) -> Dict:
+                    max_basins: Optional[int] = None, n_report_basins: int = 3,
+                    split_names=None) -> Dict:
     """
-    Evaluates the gauged-time-holdout and ungauged-basin splits and logs everything to W&B.
+    Evaluates requested time/basin holdout splits and logs everything to W&B.
 
     :param ff_model: The trained PyTorchForecast wrapper (or any object with .model and .params).
     :type ff_model: PyTorchForecast
@@ -284,7 +286,13 @@ def evaluate_splits(ff_model, manifest_path: str, run_dir: str, eval_stride: int
     manifest = json.load(open(manifest_path))
     areas = {b["site_id"]: b["area_sq_km"] for b in manifest["basins"]}
     wandb_run = wandb.run if ff_model.wandb else None
-    splits = {"gauged_2023": "train", "ungauged_2023": "holdout"}
+    splits = {"gauged_2023": "train", "basin_valid_2023": "basin_valid",
+              "ungauged_2023": "holdout"}
+    available_basin_splits = {basin.get("split") for basin in manifest["basins"]}
+    splits = {name: basin_split for name, basin_split in splits.items()
+              if basin_split in available_basin_splits}
+    if split_names is not None:
+        splits = {name: split for name, split in splits.items() if name in split_names}
     all_metrics = {}
     for split_name, basin_split in splits.items():
         loader = MultiBasinWindowLoader(

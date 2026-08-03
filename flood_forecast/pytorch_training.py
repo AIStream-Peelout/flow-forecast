@@ -130,7 +130,11 @@ def train_transformer_style(
     """
     use_wandb = model.wandb
     es = None
-    worker_num = 1
+    # Multiprocessing data loaders can terminate Python outright on macOS when
+    # torch_shm_manager cannot create its shared-memory socket.  Keep the
+    # portable single-process path as the default; experiments that benefit
+    # from workers can still opt in explicitly through dataset_params.
+    worker_num = 0
     pin_memory = False
     dataset_params = model.params["dataset_params"]
     num_targets = 1
@@ -474,6 +478,8 @@ def torch_single_train(model: PyTorchForecast,
     output_std = None
     mulit_targets_copy = multi_targets
     running_loss = 0.0
+    running_auxiliary_loss = 0.0
+    auxiliary_batches = 0
     nan_batches = 0
     # Allowance scales with epoch length: isolated non-finite batches (e.g. a stiff-ODE gradient
     # blow-up on an extreme window) are skipped, but a systemic failure still aborts the run.
@@ -529,6 +535,15 @@ def torch_single_train(model: PyTorchForecast,
                 loss = multi_crit(criterion, output, labels, None)
             else:
                 loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
+            auxiliary_loss = getattr(model.model, "auxiliary_loss", None)
+            if auxiliary_loss is not None:
+                if not torch.isfinite(auxiliary_loss):
+                    nan_batches = _count_nonfinite_batch("auxiliary loss", nan_batches,
+                                                         max_nan_batches)
+                    continue
+                running_auxiliary_loss += auxiliary_loss.detach().item()
+                auxiliary_batches += 1
+                loss = loss + auxiliary_loss
             if loss > 100:
                 print("Warning: high loss detected")
             if not torch.isfinite(loss):
@@ -558,6 +573,9 @@ def torch_single_train(model: PyTorchForecast,
     print("The running loss iss: ")
     print(running_loss)
     print("The number of items in train is: " + str(i))
+    if auxiliary_batches:
+        print("Mean auxiliary loss: " +
+              str(running_auxiliary_loss / float(auxiliary_batches)))
     total_loss = running_loss / float(i)
     return total_loss
 

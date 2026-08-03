@@ -9,13 +9,64 @@ pathway in :func:`flood_forecast.pytorch_training.handle_meta_data`) can feed it
 model through :class:`flood_forecast.meta_models.merging_model.MergingModel`.
 """
 from itertools import combinations
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Sampler
 
 from flood_forecast.custom.custom_opt import InfoNCELoss
 from flood_forecast.meta_models.multimodal_encoder import MultiModalEncoder
+
+
+class KeyBlockedBatchSampler(Sampler):
+    """
+    Batch sampler yielding batches of entities that are ADJACENT under a sort key.
+
+    For in-batch contrastive learning the entities sharing a batch are each other's negatives,
+    so batches of similar entities give harder negatives than uniform sampling. Sorting by a
+    domain key and batching contiguous blocks is a cheap, deterministic-data hard-negative
+    scheme; for USGS gauges the site number encodes downstream ordering, so blocks are
+    hydrologically proximate basins. A random block offset and shuffled block order each epoch
+    keep the pairings from being identical every epoch.
+    """
+
+    def __init__(self, sort_keys: Sequence, batch_size: int, seed: int = 42,
+                 drop_last: bool = True):
+        """
+        Initializes the sampler.
+
+        :param sort_keys: One sortable key per dataset index (e.g. site id strings).
+        :type sort_keys: Sequence
+        :param batch_size: Entities per batch.
+        :type batch_size: int
+        :param seed: Base seed; the epoch counter advances it, defaults to 42.
+        :type seed: int, optional
+        :param drop_last: Whether to drop a final short batch, defaults to True.
+        :type drop_last: bool, optional
+        """
+        self.order = sorted(range(len(sort_keys)), key=lambda i: sort_keys[i])
+        self.batch_size = batch_size
+        self.seed = seed
+        self.drop_last = drop_last
+        self.epoch = 0
+
+    def __iter__(self) -> Iterator[List[int]]:
+        generator = torch.Generator().manual_seed(self.seed + self.epoch)
+        self.epoch += 1
+        offset = int(torch.randint(0, self.batch_size, (1,), generator=generator))
+        rotated = self.order[offset:] + self.order[:offset]
+        blocks = [rotated[i:i + self.batch_size]
+                  for i in range(0, len(rotated), self.batch_size)]
+        if self.drop_last and len(blocks) > 1 and len(blocks[-1]) < self.batch_size:
+            blocks = blocks[:-1]
+        for block_index in torch.randperm(len(blocks), generator=generator).tolist():
+            yield blocks[block_index]
+
+    def __len__(self) -> int:
+        n_blocks, remainder = divmod(len(self.order), self.batch_size)
+        if remainder and not (self.drop_last and n_blocks >= 1):
+            n_blocks += 1
+        return n_blocks
 
 
 def _modality_inputs(batch: Dict[str, torch.Tensor], encoder: MultiModalEncoder,
@@ -36,30 +87,44 @@ def _modality_inputs(batch: Dict[str, torch.Tensor], encoder: MultiModalEncoder,
     :rtype: Dict[str, torch.Tensor]
     """
     keys = input_keys or {}
-    return {name: batch[keys.get(name, name)].to(device) for name in encoder.encoders}
+    names = list(encoder.encoders)
+    names += [key for key in batch if key.endswith("_alt") and key not in names]
+    return {name: batch[keys.get(name, name)].to(device) for name in names}
 
 
 def contrastive_step(encoder: MultiModalEncoder, inputs: Dict[str, torch.Tensor],
                      criterion: InfoNCELoss,
-                     modality_pairs: Optional[Sequence[Tuple[str, str]]] = None) -> torch.Tensor:
+                     modality_pairs: Optional[Sequence[Tuple[str, str]]] = None,
+                     view_aliases: Optional[Dict[str, str]] = None) -> torch.Tensor:
     """
     Computes the multi-pair InfoNCE loss for one batch of modality inputs.
 
     :param encoder: The multi-modal encoder.
     :type encoder: MultiModalEncoder
-    :param inputs: A dict mapping each modality name to its input tensor.
+    :param inputs: A dict mapping each modality name (and any alias view) to its input tensor.
     :type inputs: Dict[str, torch.Tensor]
     :param criterion: The InfoNCE loss module.
     :type criterion: InfoNCELoss
     :param modality_pairs: The (anchor, positive) modality name pairs to align; defaults to None
-        (every unordered pair of the encoder's modalities).
+        (every unordered pair of the encoder's modalities, plus each alias view paired with its
+        base modality).
     :type modality_pairs: Sequence[Tuple[str, str]], optional
+    :param view_aliases: Optional alias -> base-modality mapping for extra views of an existing
+        modality (e.g. ``{"history_alt": "history"}`` for a different-year sample of the same
+        entity). Alias inputs are encoded with the base modality's tower and contrastive head,
+        so alias pairs teach invariance to whatever differs between the views. Defaults to None.
+    :type view_aliases: Dict[str, str], optional
     :return: The scalar loss averaged over the modality pairs.
     :rtype: torch.Tensor
     """
     _, modalities = encoder.encode(inputs, return_modalities=True)
+    for alias, base in (view_aliases or {}).items():
+        encoded = encoder.encoders[base](inputs[alias])
+        pooled = encoded.mean(dim=1) if encoded.dim() == 3 else encoded
+        modalities[alias] = encoder.contrastive_heads[base](pooled)
     if modality_pairs is None:
-        modality_pairs = tuple(combinations(encoder.encoders, 2))
+        modality_pairs = tuple(combinations(encoder.encoders, 2)) + \
+            tuple((base, alias) for alias, base in (view_aliases or {}).items())
     losses = [criterion(modalities[a], modalities[b]) for a, b in modality_pairs]
     return torch.stack(losses).mean()
 
@@ -68,7 +133,9 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
                      batch_size: int = 32, lr: float = 3e-4, temperature: float = 0.07,
                      device: str = "cpu", checkpoint_path: Optional[str] = None,
                      wandb_run=None, modality_pairs: Optional[Sequence[Tuple[str, str]]] = None,
-                     input_keys: Optional[Dict[str, str]] = None) -> List[float]:
+                     input_keys: Optional[Dict[str, str]] = None,
+                     view_aliases: Optional[Dict[str, str]] = None,
+                     batch_sampler: Optional[Sampler] = None) -> List[float]:
     """
     Pretrains a multi-modal encoder with contrastive alignment across its modalities.
 
@@ -96,12 +163,22 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
     :param input_keys: An optional dict mapping modality name to its dataset item key; defaults to
         None (item keys equal the modality names).
     :type input_keys: Dict[str, str], optional
+    :param view_aliases: Optional alias -> base-modality mapping for extra same-entity views
+        (see :func:`contrastive_step`), defaults to None.
+    :type view_aliases: Dict[str, str], optional
+    :param batch_sampler: Optional batch sampler controlling which entities share a batch (and
+        therefore serve as mutual negatives), e.g. :class:`KeyBlockedBatchSampler`; defaults to
+        None (uniform shuffling).
+    :type batch_sampler: torch.utils.data.Sampler, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
     encoder = encoder.to(device).train()
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True,
-                        drop_last=len(dataset) > batch_size)
+    if batch_sampler is not None:
+        loader = DataLoader(dataset, batch_sampler=batch_sampler)
+    else:
+        loader = DataLoader(dataset, batch_size=batch_size, shuffle=True,
+                            drop_last=len(dataset) > batch_size)
     optimizer = torch.optim.Adam(encoder.parameters(), lr=lr)
     criterion = InfoNCELoss(temperature=temperature)
     epoch_losses: List[float] = []
@@ -110,7 +187,8 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
         for batch in loader:
             optimizer.zero_grad()
             inputs = _modality_inputs(batch, encoder, input_keys, device)
-            loss = contrastive_step(encoder, inputs, criterion, modality_pairs=modality_pairs)
+            loss = contrastive_step(encoder, inputs, criterion, modality_pairs=modality_pairs,
+                                    view_aliases=view_aliases)
             loss.backward()
             optimizer.step()
             total += loss.item()

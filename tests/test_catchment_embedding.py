@@ -25,6 +25,39 @@ def make_encoder(fusion: str) -> CatchmentEncoder:
                             contrastive_dim=16)
 
 
+class TestPanelHistoryMode(unittest.TestCase):
+    """Shape and gradient tests for the hourly-panel history pathway."""
+
+    def _panel_encoder(self, fusion: str) -> CatchmentEncoder:
+        return CatchmentEncoder(image_size=64, image_channels=4, static_features=12,
+                                history_features=6, history_len=240, patch_size=16, dim=32,
+                                embedding_dim=64, depth=1, heads=2, dim_head=16,
+                                fusion=fusion, contrastive_dim=16, history_mode="panel")
+
+    def test_panel_forward_and_gradients(self):
+        encoder = self._panel_encoder("concat")
+        images = torch.randn(3, 4, 64, 64)
+        static = torch.randn(3, 12)
+        panel = torch.randn(3, 5, 240, 6)
+        embedding = encoder(images, static, panel)
+        self.assertEqual(embedding.shape, (3, 64))
+        embedding.sum().backward()
+        tokenizer_grad = encoder.history_encoder.tokenizer.weight.grad
+        self.assertIsNotNone(tokenizer_grad)
+        self.assertGreater(float(tokenizer_grad.abs().sum()), 0.0)
+
+    def test_panel_cross_attention(self):
+        encoder = self._panel_encoder("cross_attention")
+        embedding = encoder(torch.randn(2, 4, 64, 64), torch.randn(2, 12),
+                            torch.randn(2, 5, 240, 6))
+        self.assertEqual(embedding.shape, (2, 64))
+
+    def test_invalid_history_mode_raises(self):
+        with self.assertRaises(ValueError):
+            CatchmentEncoder(image_size=64, image_channels=4, static_features=12,
+                             history_features=6, history_len=240, history_mode="bogus")
+
+
 class TestModalityEncoders(unittest.TestCase):
     """Shape tests for the individual modality encoders."""
 

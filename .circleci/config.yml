@@ -188,6 +188,7 @@ jobs:
             coverage run -m unittest -v tests/test_forecast_training.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_multi_basin_forecast.py
+            coverage run -m unittest -v tests/test_gr4_calibration.py
             coverage run -m unittest -v tests/test_crossformer_foundation.py
             bash <(curl -s https://codecov.io/bash) -cF python
             coverage run -m unittest -v tests/test_loss.py

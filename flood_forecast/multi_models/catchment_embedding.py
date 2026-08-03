@@ -18,7 +18,8 @@ from typing import Dict, Tuple, Union
 import torch
 
 from flood_forecast.meta_models.multimodal_encoder import (ImagePatchEncoder, MultiModalEncoder,
-                                                           SequenceEncoder, TabularEncoder)
+                                                           PanelSequenceEncoder, SequenceEncoder,
+                                                           TabularEncoder)
 
 # Backwards-compatible alias: the history encoder is a generic sequence encoder.
 HistoryEncoder = SequenceEncoder
@@ -41,7 +42,8 @@ class CatchmentEncoder(MultiModalEncoder):
                  static_features: int, history_features: int, history_len: int,
                  patch_size: int = 16, dim: int = 128, embedding_dim: int = 256,
                  depth: int = 4, heads: int = 4, dim_head: int = 32, dropout: float = 0.0,
-                 fusion: str = "concat", contrastive_dim: int = 128):
+                 fusion: str = "concat", contrastive_dim: int = 128,
+                 history_mode: str = "sequence"):
         """
         Initializes the catchment encoder.
 
@@ -74,15 +76,28 @@ class CatchmentEncoder(MultiModalEncoder):
         :param contrastive_dim: The dimension of the shared contrastive projection space,
             defaults to 128.
         :type contrastive_dim: int, optional
+        :param history_mode: "sequence" for a single (history_len, features) series, or
+            "panel" for a set of long slices of shape (n_slices, history_len, features) —
+            e.g. the hourly seasonal/extreme panels — encoded per slice by a shared
+            conv-tokenized transformer (:class:`PanelSequenceEncoder`), defaults to "sequence".
+        :type history_mode: str, optional
         """
+        if history_mode not in ("sequence", "panel"):
+            raise ValueError("history_mode must be 'sequence' or 'panel'")
+        if history_mode == "panel":
+            history_encoder = PanelSequenceEncoder(history_features, history_len, dim=dim,
+                                                   depth=depth, heads=heads, dim_head=dim_head,
+                                                   mlp_dim=dim * 2, dropout=dropout)
+        else:
+            history_encoder = SequenceEncoder(history_features, history_len, dim=dim,
+                                              depth=depth, heads=heads, dim_head=dim_head,
+                                              mlp_dim=dim * 2, dropout=dropout)
         encoders = {
             "vision": ImagePatchEncoder(image_size, patch_size, image_channels, dim=dim,
                                         depth=depth, heads=heads, dim_head=dim_head,
                                         mlp_dim=dim * 2, dropout=dropout),
             "tabular": TabularEncoder(static_features, dim=dim, dropout=dropout),
-            "history": SequenceEncoder(history_features, history_len, dim=dim, depth=depth,
-                                       heads=heads, dim_head=dim_head, mlp_dim=dim * 2,
-                                       dropout=dropout),
+            "history": history_encoder,
         }
         super().__init__(encoders, dim, embedding_dim=embedding_dim, fusion=fusion,
                          query_modality="history", sequence_modalities=("vision", "history"),

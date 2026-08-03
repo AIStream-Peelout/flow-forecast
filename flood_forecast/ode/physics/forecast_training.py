@@ -333,7 +333,9 @@ class HybridGR4Forecast(torch.nn.Module):
                  match_flow: bool = True, context_path: Optional[str] = None,
                  parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None,
                  phys_indices: Optional[List[int]] = None, anchored: bool = False,
-                 use_multiplier: bool = True, use_asos_gate: bool = False):
+                 use_multiplier: bool = True, use_asos_gate: bool = False,
+                 production_store_init_fraction: float = 0.6,
+                 swe_supervision_weight: float = 0.0):
         """
         Initializes the wrapper.
 
@@ -387,8 +389,18 @@ class HybridGR4Forecast(torch.nn.Module):
         :param use_asos_gate: Anchored mode: add the gated station-innovation term, defaults
             to False.
         :type use_asos_gate: bool, optional
+        :param production_store_init_fraction: Fraction of X1 used to initialize the production
+            store before the 30-day spin-up, defaults to 0.6.
+        :type production_store_init_fraction: float, optional
+        :param swe_supervision_weight: Weight on a log-SWE Smooth L1 auxiliary loss during
+            training. Horizon SWE is used only as a target and remains excluded from the forcing
+            generator, so this constrains snow equifinality without forecast leakage. Defaults
+            to 0.0.
+        :type swe_supervision_weight: float, optional
         """
         super().__init__()
+        if swe_supervision_weight < 0.0:
+            raise ValueError("swe_supervision_weight must be non-negative")
         self.spinup_length = spinup_length
         self.forecast_length = forecast_length
         self.raw_indices = [raw_temp_index, raw_sw_index]
@@ -406,12 +418,16 @@ class HybridGR4Forecast(torch.nn.Module):
         self.met_indices = [i for i in range(n_time_series) if i not in excluded]
         self.temp_offset_c = temp_offset_c
         self.match_flow = match_flow
+        self.swe_supervision_weight = swe_supervision_weight
+        self.auxiliary_loss = None
         self.hybrid = HybridGR4Model(n_met_features=len(self.met_indices),
                                      seq_len=spinup_length, context_dim=context_dim, dim=dim,
                                      depth=depth, heads=heads, snow=snow,
                                      parameter_head_params=parameter_head_params,
                                      anchored=anchored, use_multiplier=use_multiplier,
-                                     use_asos_gate=use_asos_gate)
+                                     use_asos_gate=use_asos_gate,
+                                     production_store_init_fraction=
+                                     production_store_init_fraction)
         if context_path is not None:
             self.register_buffer("context", torch.load(context_path,
                                                        weights_only=True).reshape(1, -1))
@@ -453,6 +469,20 @@ class HybridGR4Forecast(torch.nn.Module):
         out = self.hybrid(horizon[:, :, self.met_indices], context, initial_state=initial_state,
                           raw_forcing=self._raw(horizon) if self.hybrid.snow else None,
                           phys_forcing=self._phys(horizon))
+        self.auxiliary_loss = None
+        if (self.training and self.swe_supervision_weight > 0.0 and
+                self.swe_index is not None and self.hybrid.snow):
+            observed_swe = horizon[:, :, self.swe_index]
+            valid = torch.isfinite(observed_swe) & (observed_swe >= 0.0)
+            if valid.any():
+                simulated_swe = self.hybrid.dynamics.swe(out["states"]).clamp(min=0.0)
+                # Log-space prevents a few deep alpine snowpacks from overwhelming the
+                # basin-standardized flow loss while retaining melt timing and snow/no-snow
+                # information.
+                self.auxiliary_loss = self.swe_supervision_weight * \
+                    torch.nn.functional.smooth_l1_loss(
+                        torch.log1p(simulated_swe[valid]),
+                        torch.log1p(observed_swe[valid].clamp(min=0.0)))
         return out["flow"]
 
     def _phys(self, segment: torch.Tensor) -> Optional[torch.Tensor]:
@@ -499,7 +529,10 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
                  snow: bool = True, match_flow: bool = True,
                  parameter_head_params: Optional[dict] = None, swe_index: Optional[int] = None,
                  phys_indices: Optional[List[int]] = None, anchored: bool = False,
-                 use_multiplier: bool = True, use_asos_gate: bool = False):
+                 use_multiplier: bool = True, use_asos_gate: bool = False,
+                 normalize_context: bool = False,
+                 production_store_init_fraction: float = 0.6,
+                 swe_supervision_weight: float = 0.0):
         """
         Initializes the multi-basin wrapper.
 
@@ -544,6 +577,17 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
         :param use_asos_gate: Anchored mode: add the gated station-innovation term, defaults
             to False.
         :type use_asos_gate: bool, optional
+        :param normalize_context: L2-normalize both pretrained and learned catchment contexts
+            before they reach the parameter and forcing heads. Contrastive pretraining uses cosine
+            geometry, and normalization prevents the two context sources from presenting different
+            vector scales to the shared hypernetwork. Defaults to False for compatibility.
+        :type normalize_context: bool, optional
+        :param production_store_init_fraction: Fraction of X1 used to initialize the production
+            store before the spin-up, defaults to 0.6.
+        :type production_store_init_fraction: float, optional
+        :param swe_supervision_weight: Weight on log-SWE auxiliary supervision during training
+            (see :class:`HybridGR4Forecast`), defaults to 0.0.
+        :type swe_supervision_weight: float, optional
         """
         import json
         super().__init__(n_time_series - 1, spinup_length, forecast_length, raw_temp_index,
@@ -551,7 +595,9 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
                          snow=snow, match_flow=match_flow,
                          parameter_head_params=parameter_head_params, swe_index=swe_index,
                          phys_indices=phys_indices, anchored=anchored,
-                         use_multiplier=use_multiplier, use_asos_gate=use_asos_gate)
+                         use_multiplier=use_multiplier, use_asos_gate=use_asos_gate,
+                         production_store_init_fraction=production_store_init_fraction,
+                         swe_supervision_weight=swe_supervision_weight)
         delattr(self, "context")  # replaced by per-basin context below
         with open(basin_info_path) as f:
             manifest = json.load(f)
@@ -572,6 +618,7 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
         self.register_buffer("has_fixed_context", mask)
         self.learned_context = torch.nn.Embedding(n_basins, context_dim)
         torch.nn.init.normal_(self.learned_context.weight, std=0.1)
+        self.normalize_context = normalize_context
 
     def basin_context(self, basin_idx: torch.Tensor) -> torch.Tensor:
         """
@@ -584,7 +631,10 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
         """
         fixed = self.fixed_context[basin_idx]
         learned = self.learned_context(basin_idx)
-        return torch.where(self.has_fixed_context[basin_idx].unsqueeze(-1), fixed, learned)
+        context = torch.where(self.has_fixed_context[basin_idx].unsqueeze(-1), fixed, learned)
+        if self.normalize_context:
+            context = torch.nn.functional.normalize(context, dim=-1)
+        return context
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -598,8 +648,9 @@ class HybridGR4MultiBasin(HybridGR4Forecast):
         :rtype: torch.Tensor
         """
         basin_idx = x[:, 0, -1].long()
+        scales = self.flow_scales[basin_idx].clamp(min=1e-8)
         sim = self._forecast(x[:, :, :-1], self.basin_context(basin_idx))
-        return sim / self.flow_scales[basin_idx].clamp(min=1e-8).unsqueeze(1)
+        return sim / scales.unsqueeze(1)
 
 
 class CrossformerMultiBasin(torch.nn.Module):

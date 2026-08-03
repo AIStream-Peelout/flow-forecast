@@ -482,7 +482,8 @@ class GR4ParameterHead(torch.nn.Module):
 
     def __init__(self, embedding_dim: int = 256, hidden_dim: int = 64,
                  x1_range: tuple = (10.0, 2000.0), x2_range: tuple = (-10.0, 10.0),
-                 x3_range: tuple = (5.0, 500.0), x4_range: tuple = (2.0, 120.0)):
+                 x3_range: tuple = (5.0, 500.0), x4_range: tuple = (2.0, 120.0),
+                 logit_limit: Optional[float] = None):
         """
         Initializes the parameter head.
 
@@ -505,8 +506,16 @@ class GR4ParameterHead(torch.nn.Module):
             is physically honest — a catchment with a sub-2-hour unit hydrograph is not a
             catchment. Lower this ONLY alongside a smaller solver step or an implicit method.
         :type x4_range: tuple, optional
+        :param logit_limit: Optional smooth limit on the logits before the bounded sigmoid.
+            A value such as 2.0 keeps every emitted parameter between sigmoid(-2) and sigmoid(2)
+            of its configured range, preventing the hypernetwork from collapsing onto a hard
+            boundary where gradients vanish. Defaults to None for backwards compatibility.
+        :type logit_limit: float, optional
         """
         super().__init__()
+        if logit_limit is not None and logit_limit <= 0:
+            raise ValueError("logit_limit must be positive")
+        self.logit_limit = logit_limit
         self.net = torch.nn.Sequential(
             torch.nn.Linear(embedding_dim, hidden_dim), torch.nn.GELU(),
             torch.nn.Linear(hidden_dim, 4),
@@ -521,6 +530,12 @@ class GR4ParameterHead(torch.nn.Module):
         self.register_buffer("lower", bounds[:, 0])
         self.register_buffer("upper", bounds[:, 1])
 
+    def _squash(self, logits: torch.Tensor) -> torch.Tensor:
+        """Maps unconstrained logits into (0, 1), optionally keeping them away from saturation."""
+        if self.logit_limit is not None:
+            logits = self.logit_limit * torch.tanh(logits / self.logit_limit)
+        return torch.sigmoid(logits)
+
     def forward(self, embedding: torch.Tensor) -> torch.Tensor:
         """
         Maps embeddings to bounded GR4 parameters.
@@ -530,7 +545,7 @@ class GR4ParameterHead(torch.nn.Module):
         :return: Parameters (X1, X2, X3, X4) of shape (batch_size, 4), each within its range.
         :rtype: torch.Tensor
         """
-        squashed = torch.sigmoid(self.net(embedding))
+        squashed = self._squash(self.net(embedding))
         return self.lower + squashed * (self.upper - self.lower)
 
 
@@ -544,7 +559,8 @@ class GR4SnowParameterHead(GR4ParameterHead):
 
     def __init__(self, embedding_dim: int = 256, hidden_dim: int = 64,
                  df_range: tuple = (0.0, 0.5), tmax_range: tuple = (-2.0, 3.0),
-                 delta_range: tuple = (0.0, 4.0), **gr4_ranges):
+                 delta_range: tuple = (0.0, 4.0), decouple_snow_head: bool = False,
+                 **gr4_ranges):
         """
         Initializes the snow parameter head.
 
@@ -559,11 +575,20 @@ class GR4SnowParameterHead(GR4ParameterHead):
         :type tmax_range: tuple, optional
         :param delta_range: Bounds (degC) for Tmax - Tmin, defaults to (0, 4).
         :type delta_range: tuple, optional
+        :param decouple_snow_head: Give snow parameters their own hidden projection from the
+            catchment embedding. This prevents an auxiliary SWE loss from changing GR4 soil and
+            routing parameters through a shared hidden layer. Defaults to False for checkpoint
+            compatibility.
+        :type decouple_snow_head: bool, optional
         :param gr4_ranges: The x1_range/x2_range/x3_range/x4_range keyword arguments of
             :class:`GR4ParameterHead`.
         :type gr4_ranges: dict
         """
         super().__init__(embedding_dim=embedding_dim, hidden_dim=hidden_dim, **gr4_ranges)
+        self.decouple_snow_head = decouple_snow_head
+        if decouple_snow_head:
+            self.snow_hidden = torch.nn.Sequential(
+                torch.nn.Linear(embedding_dim, hidden_dim), torch.nn.GELU())
         self.snow_net = torch.nn.Linear(hidden_dim, 3)
         torch.nn.init.normal_(self.snow_net.weight, std=1e-3)
         torch.nn.init.zeros_(self.snow_net.bias)
@@ -581,8 +606,9 @@ class GR4SnowParameterHead(GR4ParameterHead):
         :rtype: torch.Tensor
         """
         hidden = self.net[:-1](embedding)
-        gr4 = self.lower + torch.sigmoid(self.net[-1](hidden)) * (self.upper - self.lower)
-        snow = self.snow_lower + torch.sigmoid(self.snow_net(hidden)) * \
+        snow_hidden = self.snow_hidden(embedding) if self.decouple_snow_head else hidden
+        gr4 = self.lower + self._squash(self.net[-1](hidden)) * (self.upper - self.lower)
+        snow = self.snow_lower + self._squash(self.snow_net(snow_hidden)) * \
             (self.snow_upper - self.snow_lower)
         df, tmax, delta = snow.unbind(-1)
         return torch.cat([gr4, df.unsqueeze(-1), tmax.unsqueeze(-1),
@@ -708,6 +734,21 @@ class EffectiveForcingGenerator(torch.nn.Module):
             raise ValueError("Window of %d steps exceeds the encoder's seq_len %d; construct the "
                              "model with seq_len >= the longest window (e.g. the spin-up length)."
                              % (n_steps, self.seq_len))
+        if self.anchored and phys_forcing is None:
+            raise ValueError("anchored=True requires phys_forcing with [P_grid, PET, P_station, "
+                             "station_mask].")
+        if self.anchored and not self.use_multiplier:
+            # Neither the physical baseline nor the static ASOS innovation gate depends on the
+            # sequence encoder. Bypassing it here is more than a speed optimization: a
+            # physics-only ablation should not execute an untrained neural forcing path or expose
+            # it to numerical failures when its output cannot affect the forecast.
+            p_grid = phys_forcing[..., 0].clamp(min=0.0)
+            p_eff = p_grid
+            if self.use_asos_gate:
+                innovation = (phys_forcing[..., 2].clamp(min=0.0) - p_grid).clamp(min=0.0)
+                gate = torch.sigmoid(self.gate_net(context))
+                p_eff = p_eff + gate * innovation * phys_forcing[..., 3]
+            return torch.stack([p_eff, phys_forcing[..., 1].clamp(min=0.0)], dim=-1)
         if n_steps < self.seq_len:
             # The encoder's positional embedding (and Crossformer's TSA router) are fixed-length,
             # so shorter windows are left-padded by repeating the first step, then the tail sliced.
@@ -718,9 +759,6 @@ class EffectiveForcingGenerator(torch.nn.Module):
         raw = self.head(fused)
         if not self.anchored:
             return torch.nn.functional.softplus(raw)
-        if phys_forcing is None:
-            raise ValueError("anchored=True requires phys_forcing with [P_grid, PET, P_station, "
-                             "station_mask].")
         p_grid = phys_forcing[..., 0].clamp(min=0.0)
         p_eff = p_grid
         if self.use_multiplier:
@@ -748,7 +786,8 @@ class HybridGR4Model(torch.nn.Module):
                  depth: int = 2, heads: int = 4, n_routing_reservoirs: int = 3,
                  solver_params: Optional[dict] = None, parameter_head_params: Optional[dict] = None,
                  encoder_type: str = "crossformer", snow: bool = False, anchored: bool = False,
-                 use_multiplier: bool = True, use_asos_gate: bool = False):
+                 use_multiplier: bool = True, use_asos_gate: bool = False,
+                 production_store_init_fraction: float = 0.6):
         """
         Initializes the hybrid model.
 
@@ -778,10 +817,18 @@ class HybridGR4Model(torch.nn.Module):
             :meth:`forward` requires the ``raw_forcing`` argument carrying [T degC, SW] channels and
             the parameter head emits seven parameters. Defaults to False.
         :type snow: bool, optional
+        :param production_store_init_fraction: Fraction of X1 used to initialize the production
+            store at the beginning of each spin-up window. This is only a prior; the observed
+            meteorology then evolves the store for the full spin-up. Defaults to 0.6 for backward
+            compatibility.
+        :type production_store_init_fraction: float, optional
         """
         super().__init__()
         from flood_forecast.ode.neural_ode import NeuralODE
+        if not 0.0 <= production_store_init_fraction <= 1.0:
+            raise ValueError("production_store_init_fraction must be between 0 and 1")
         self.snow = snow
+        self.production_store_init_fraction = production_store_init_fraction
         self.forcing_generator = EffectiveForcingGenerator(n_met_features, seq_len,
                                                            context_dim=context_dim, dim=dim,
                                                            depth=depth, heads=heads,
@@ -851,7 +898,7 @@ class HybridGR4Model(torch.nn.Module):
         if initial_state is None:
             initial_state = torch.zeros(met.shape[0], self.dynamics.state_dim, device=met.device)
             offset = 1 if self.snow else 0
-            initial_state[:, offset] = 0.6 * parameters[:, 0]
+            initial_state[:, offset] = self.production_store_init_fraction * parameters[:, 0]
             initial_state[:, offset + 1] = 0.3 * parameters[:, 2]
         if initial_snow is not None and self.snow:
             initial_state = initial_state.clone()

@@ -156,6 +156,73 @@ class SequenceEncoder(nn.Module):
         return self.transformer(self.embed(sequence))
 
 
+class PanelSequenceEncoder(nn.Module):
+    """
+    Encodes a SET of long sequences (a "panel") into one token per sequence.
+
+    Designed for multi-thousand-step members (e.g. 92-day hourly hydrology slices) where full
+    self-attention over raw steps is quadratic-prohibitive: a strided 1-D convolution first
+    tokenizes each member (overlapping kernels preserve sub-daily texture inside each token),
+    a shared transformer models long-range structure over the shortened token sequence, and
+    mean-pooling yields one embedding per member. The output is a (batch, n_members, dim) token
+    sequence, so downstream fusion can attend over panel members exactly as it would over any
+    other token sequence.
+    """
+
+    def __init__(self, n_features: int, member_len: int, dim: int = 128, depth: int = 4,
+                 heads: int = 4, dim_head: int = 32, mlp_dim: int = 256, dropout: float = 0.0,
+                 token_kernel: int = 24, token_stride: int = 12):
+        """
+        Initializes the panel encoder.
+
+        :param n_features: The number of channels per sequence step.
+        :type n_features: int
+        :param member_len: The (fixed) length of each panel member sequence.
+        :type member_len: int
+        :param dim: The token embedding dimension, defaults to 128.
+        :type dim: int, optional
+        :param depth: The number of transformer blocks, defaults to 4.
+        :type depth: int, optional
+        :param heads: The number of attention heads, defaults to 4.
+        :type heads: int, optional
+        :param dim_head: The per-head dimension, defaults to 32.
+        :type dim_head: int, optional
+        :param mlp_dim: The feed-forward hidden dimension, defaults to 256.
+        :type mlp_dim: int, optional
+        :param dropout: Dropout probability, defaults to 0.0.
+        :type dropout: float, optional
+        :param token_kernel: Convolutional tokenizer kernel size in steps (24 = one day for
+            hourly data), defaults to 24.
+        :type token_kernel: int, optional
+        :param token_stride: Tokenizer stride in steps; a stride below the kernel gives
+            overlapping tokens, defaults to 12.
+        :type token_stride: int, optional
+        """
+        super().__init__()
+        if member_len < token_kernel:
+            raise ValueError("member_len must be at least token_kernel")
+        self.tokenizer = nn.Conv1d(n_features, dim, kernel_size=token_kernel,
+                                   stride=token_stride)
+        n_tokens = (member_len - token_kernel) // token_stride + 1
+        self.transformer = Transformer(dim, n_tokens, depth, heads, dim_head, mlp_dim,
+                                       dropout=dropout)
+
+    def forward(self, panel: torch.Tensor) -> torch.Tensor:
+        """
+        Encodes each panel member into one token.
+
+        :param panel: Panels of shape (batch_size, n_members, member_len, n_features).
+        :type panel: torch.Tensor
+        :return: Member tokens of shape (batch_size, n_members, dim).
+        :rtype: torch.Tensor
+        """
+        batch_size, n_members, member_len, n_features = panel.shape
+        flat = panel.reshape(batch_size * n_members, member_len, n_features)
+        tokens = self.tokenizer(flat.transpose(1, 2)).transpose(1, 2)
+        encoded = self.transformer(tokens)
+        return encoded.mean(dim=1).reshape(batch_size, n_members, -1)
+
+
 class MultiModalEncoder(nn.Module):
     """
     Fuses an arbitrary dict of named modality encoders into a single dense embedding.

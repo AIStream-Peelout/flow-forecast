@@ -20,9 +20,9 @@ import numpy as np
 import pandas as pd
 import torch
 
-WATER_CO = os.path.expanduser("~/Documents/GitHub/Water/pilot_data/scrapes/CO")
-SNODAS_DIR = os.path.expanduser("~/Documents/GitHub/Water/pilot_data/snodas_series/CO")
-EMBEDDING_PATH = os.path.expanduser(
+SCRAPE_ROOT = os.path.expanduser("~/Documents/GitHub/Water/pilot_data/scrapes")
+SNODAS_ROOT = os.path.expanduser("~/Documents/GitHub/Water/pilot_data/snodas_series")
+DEFAULT_EMBEDDING_PATH = os.path.expanduser(
     "~/Documents/GitHub/Water/pilot_data/embedding_dataset/CO/embeddings_concat.pt")
 CFS_TO_MM_HR = 0.0283168 * 3.6  # multiply by 1/area_km2 for mm/hr
 TRAIN_END = "2022-01-01"  # scale stats and training data end here (valid=2022, test=2023+)
@@ -30,7 +30,8 @@ MET_COLS = ["precipitation", "temperature", "shortwave_radiation", "longwave_rad
             "specific_humidity", "wind_east", "wind_north", "p01m", "pet_mm_hr"]
 
 
-def build_basin_entry(site_id: str, embedding_sites: set, min_train_hours: int) -> Optional[Dict]:
+def build_basin_entry(site_id: str, embedding_sites: set, min_train_hours: int,
+                      state: str = "CO") -> Optional[Dict]:
     """
     Builds one basin's manifest entry, or None when the gauge is unusable.
 
@@ -40,11 +41,14 @@ def build_basin_entry(site_id: str, embedding_sites: set, min_train_hours: int) 
     :type embedding_sites: set
     :param min_train_hours: Minimum valid pre-cutoff flow hours required to keep the gauge.
     :type min_train_hours: int
+    :param state: Two-letter state whose scrape directory holds the gauge, defaults to "CO".
+    :type state: str, optional
     :return: The manifest entry dict, or None (with a printed reason).
     :rtype: Optional[Dict]
     """
-    static_path = os.path.join(WATER_CO, site_id, site_id + "_static.json")
-    csv_path = os.path.join(WATER_CO, site_id, site_id + "_hourly_full.csv")
+    scrape_dir = os.path.join(SCRAPE_ROOT, state)
+    static_path = os.path.join(scrape_dir, site_id, site_id + "_static.json")
+    csv_path = os.path.join(scrape_dir, site_id, site_id + "_hourly_full.csv")
     if not (os.path.exists(static_path) and os.path.exists(csv_path)):
         print("skip %s: missing files" % site_id)
         return None
@@ -98,7 +102,7 @@ def build_basin_entry(site_id: str, embedding_sites: set, min_train_hours: int) 
              "temp_offset_c": round(temp_offset_c, 4), "flow_scale_mm_hr": flow_scale,
              "met_stats": met_stats, "has_embedding": site_id in embedding_sites,
              "train_valid_hours": valid_hours, "rows_2023_plus": rows_2023, "split": "train"}
-    swe_csv = os.path.join(SNODAS_DIR, site_id + "_snodas_swe.csv")
+    swe_csv = os.path.join(SNODAS_ROOT, state, site_id + "_snodas_swe.csv")
     if os.path.exists(swe_csv):
         entry["swe_csv_path"] = swe_csv
     return entry
@@ -113,30 +117,48 @@ def main() -> None:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", required=True, help="Output manifest JSON path")
+    parser.add_argument("--states", nargs="+", default=["CO"],
+                        help="States whose completed scrapes populate the manifest")
+    parser.add_argument("--embedding-bank", default=DEFAULT_EMBEDDING_PATH,
+                        help="Embedding bank path (embeddings_<fusion>.pt)")
+    parser.add_argument("--carry-splits", default=None,
+                        help="Existing manifest whose split labels (holdout/basin_valid) are "
+                             "preserved for basins it contains — keeps the final test set and "
+                             "development-validation basins IDENTICAL across manifest rebuilds")
     parser.add_argument("--n-holdout", type=int, default=15,
-                        help="Basins held out entirely for the ungauged-generalization test")
+                        help="Holdout size among basins NOT covered by --carry-splits")
     parser.add_argument("--min-train-years", type=float, default=2.0,
                         help="Minimum valid pre-cutoff years of flow to keep a gauge")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
-    with open(os.path.join(WATER_CO, "registry.json")) as f:
-        registry = json.load(f)
-    completed = sorted(k for k, v in registry.items() if v.get("status") == "completed")
-    bank = torch.load(EMBEDDING_PATH, weights_only=True)
+    bank = torch.load(args.embedding_bank, weights_only=True)
     embedding_sites = set(bank["site_ids"])
-    print("%d completed gauges, %d embedding sites" % (len(completed), len(embedding_sites)))
+    carried = {}
+    if args.carry_splits:
+        with open(args.carry_splits) as f:
+            carried = {b["site_id"]: b.get("split", "train")
+                       for b in json.load(f)["basins"]}
 
     basins = []
-    for site_id in completed:
-        entry = build_basin_entry(site_id, embedding_sites,
-                                  int(args.min_train_years * 365 * 24))
-        if entry is not None:
-            basins.append(entry)
+    for state in args.states:
+        with open(os.path.join(SCRAPE_ROOT, state, "registry.json")) as f:
+            registry = json.load(f)
+        completed = sorted(k for k, v in registry.items() if v.get("status") == "completed")
+        print("%s: %d completed gauges" % (state, len(completed)))
+        for site_id in completed:
+            entry = build_basin_entry(site_id, embedding_sites,
+                                      int(args.min_train_years * 365 * 24), state=state)
+            if entry is not None:
+                entry["state"] = state
+                basins.append(entry)
 
-    # Ungauged holdout: embedded basins with 2023+ data so the split is actually evaluable.
-    eligible = [b["site_id"] for b in basins
-                if b["has_embedding"] and b["rows_2023_plus"] > 24 * 120]
+    for basin in basins:
+        if basin["site_id"] in carried:
+            basin["split"] = carried[basin["site_id"]]
+    # Fresh holdout among carried-split-free basins: embedded with 2023+ data so evaluable.
+    eligible = [b["site_id"] for b in basins if b["site_id"] not in carried
+                and b["has_embedding"] and b["rows_2023_plus"] > 24 * 120]
     rng = np.random.default_rng(args.seed)
     holdout = set(rng.choice(eligible, size=min(args.n_holdout, len(eligible)),
                              replace=False).tolist())
@@ -145,7 +167,7 @@ def main() -> None:
             basin["split"] = "holdout"
 
     manifest = {
-        "embedding_path": EMBEDDING_PATH,
+        "embedding_path": os.path.abspath(args.embedding_bank),
         "train_end": TRAIN_END,
         "preprocessing": {"fill_from": {"p01m": "precipitation"},
                           # Unscaled copies for the physics path. copy_cols runs AFTER fill_from,
