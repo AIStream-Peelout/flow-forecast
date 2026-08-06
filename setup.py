@@ -32,7 +32,4 @@ setup(
     long_description='Flow Forecast is the top open source deep learning for time series forecasting and classification framework. We were the original TS framework to contain models like the transformer and have now expanded to include all popular deep learning models.',
     install_requires=install_requires,
     extras_require={
-        'dev': dev_requirements,
-        'mlx': [
-            'mlx>=0.32.0; platform_system == "Darwin" and platform_machine == "arm64"'
-        ]})
+        'dev': dev_requirements})
