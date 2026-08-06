@@ -10,14 +10,16 @@ class EarlyStopper(object):
     :type min_delta: float, optional
     :param cumulative_delta: If True, `min_delta` defines a decrease since the last `patience` reset. Default is False.
     :type cumulative_delta: bool, optional
+    :param checkpoint_path: File used for the best-model checkpoint. Defaults to
+        ``"checkpoint.pth"`` for backward compatibility.
+    :type checkpoint_path: str, optional
     :return: An instance of EarlyStopper.
     :rtype: EarlyStopper
 
     .. note::
-       The original docstring implies an "improvement" is a higher score.
-       However, the logic in `check_loss` (specifically `score + self.min_delta >= self.best_score`) suggests the
-       score being checked is a **loss** or a metric where **lower is better** (since it saves the model when `score < self.best_score`).
-       I've updated the description to reflect the *actual* logic of the provided code where it's used to check for a decrease in loss.
+       The score checked by :meth:`check_loss` is a **loss** (lower is better): a model checkpoint
+       is saved whenever the score improves on the best one by more than ``min_delta``, and
+       training stops after ``patience`` consecutive non-improving epochs.
 
     Examples:
     .. code-block:: python
@@ -37,6 +39,7 @@ class EarlyStopper(object):
         patience: int,
         min_delta: float = 0.0,
         cumulative_delta: bool = False,
+        checkpoint_path: str = "checkpoint.pth",
     ):
 
         if patience < 1:
@@ -50,6 +53,7 @@ class EarlyStopper(object):
         self.cumulative_delta = cumulative_delta
         self.counter = 0
         self.best_score = None
+        self.checkpoint_path = checkpoint_path
 
     def check_loss(self, model, validation_loss) -> bool:
         """Checks the validation loss against the best recorded score to determine if training should stop.
@@ -65,12 +69,12 @@ class EarlyStopper(object):
         if self.best_score is None:
             self.save_model_checkpoint(model)
             self.best_score = score
-
-        elif score + self.min_delta >= self.best_score:
-            if not self.cumulative_delta and score > self.best_score:
-                self.best_score = score
+        elif score >= self.best_score - self.min_delta:
+            # No improvement of at least min_delta over the best checkpointed score. The best
+            # score is deliberately NOT updated here: it tracks the saved checkpoint, so the bar
+            # can never slide toward worse models.
             self.counter += 1
-            print(self.counter)
+            print("Early stopping counter %d of %d" % (self.counter, self.patience))
             if self.counter >= self.patience:
                 return False
         else:
@@ -87,6 +91,6 @@ class EarlyStopper(object):
         :return: None
         :rtype: None
         """
-        torch.save(model.state_dict(), "checkpoint.pth")
+        torch.save(model.state_dict(), self.checkpoint_path)
         """_summary_
         """

@@ -131,5 +131,117 @@ class TestForcingGenerator(unittest.TestCase):
             EffectiveForcingGenerator(n_met_features=3, seq_len=24, encoder_type="lstm")
 
 
+class TestGR4Snow(unittest.TestCase):
+    """Tests for the EXP-HYDRO snow bucket extension of GR4."""
+
+    def make_snow_model(self):
+        from flood_forecast.ode.physics.hydrology import HybridGR4Model
+        return HybridGR4Model(n_met_features=4, seq_len=48, context_dim=32, dim=32, depth=1,
+                              snow=True)
+
+    def test_smooth_step_matches_hoege(self):
+        from flood_forecast.ode.physics.hydrology import smooth_step
+        # Verbatim Höge et al. form: centered at 0.5 with steepness 5.
+        self.assertAlmostEqual(smooth_step(torch.tensor(0.5)).item(), 0.5, places=6)
+        self.assertGreater(smooth_step(torch.tensor(2.0)).item(), 0.99)
+        self.assertLess(smooth_step(torch.tensor(-1.0)).item(), 0.01)
+
+    def test_cold_precip_accumulates_warm_melts(self):
+        from flood_forecast.ode import NeuralODE
+        from flood_forecast.ode.physics.hydrology import GR4SnowDynamics
+        dynamics = GR4SnowDynamics(n_routing_reservoirs=2)
+        params = torch.tensor([[300.0, 0.0, 100.0, 12.0, 0.3, 0.5, 0.0]])
+        dynamics.set_parameters(params)
+        n_hours = 96
+        forcing = torch.zeros(1, n_hours, 4)
+        forcing[:, :48, 0] = 1.0     # steady precip in the first half
+        forcing[:, :48, 2] = -5.0    # cold: accumulates as snow
+        forcing[:, 48:, 2] = 10.0    # warm: melts
+        times = torch.arange(float(n_hours))
+        dynamics.set_forcing(forcing, times)
+        initial = torch.zeros(1, dynamics.state_dim)
+        initial[:, 1] = 150.0
+        states = NeuralODE(dynamics, method="rk4")(initial, times)
+        swe = dynamics.swe(states)[0]
+        self.assertGreater(swe[47].item(), 30.0)        # accumulated most of 48 mm of snow
+        self.assertLess(swe[-1].item(), swe[47].item() * 0.2)  # melted out in the warm half
+        flow = dynamics.streamflow(states)[0]
+        self.assertGreater(flow[48:].mean().item(), flow[:48].mean().item())
+
+    def test_snow_head_orders_temperatures(self):
+        from flood_forecast.ode.physics.hydrology import GR4SnowParameterHead
+        head = GR4SnowParameterHead(embedding_dim=32)
+        params = head(5.0 * torch.randn(64, 32))
+        self.assertEqual(params.shape, (64, 7))
+        self.assertTrue((params[:, 6] <= params[:, 5] + 1e-6).all())  # Tmin <= Tmax
+        self.assertTrue((params[:, 4] >= 0.0).all())                  # Df >= 0
+
+    def test_hybrid_snow_forward_and_gradients(self):
+        model = self.make_snow_model()
+        met = torch.rand(2, 48, 4)
+        raw = torch.zeros(2, 48, 2)
+        raw[:, :, 0] = torch.linspace(-5.0, 10.0, 48)  # warming trend in degC
+        context = torch.randn(2, 32, requires_grad=True)
+        out = model(met, context, raw_forcing=raw)
+        self.assertEqual(out["flow"].shape, (2, 48))
+        self.assertTrue(torch.isfinite(out["flow"]).all())
+        swe = model.dynamics.swe(out["states"])
+        self.assertEqual(swe.shape, (2, 48))
+        out["flow"].sum().backward()
+        self.assertIsNotNone(context.grad)
+        self.assertTrue(torch.isfinite(context.grad).all())
+
+    def test_snow_requires_raw_forcing(self):
+        model = self.make_snow_model()
+        with self.assertRaises(ValueError):
+            model(torch.rand(2, 48, 4), torch.randn(2, 32))
+
+
 if __name__ == "__main__":
     unittest.main()
+class TestGR4SnowBands(unittest.TestCase):
+    """Tests for the elevation-banded snow dynamics."""
+
+    def make_dynamics(self):
+        from flood_forecast.ode.physics.hydrology import GR4SnowBandsDynamics
+        dynamics = GR4SnowBandsDynamics(n_bands=3, n_routing_reservoirs=2)
+        dynamics.set_band_geometry([-500.0, 0.0, 800.0], [0.4, 0.4, 0.2])
+        dynamics.set_parameters(torch.tensor([[300.0, 0.0, 100.0, 12.0, 0.3, 0.5, 0.0]]))
+        return dynamics
+
+    def test_state_dim_and_swe_weighting(self):
+        dynamics = self.make_dynamics()
+        self.assertEqual(dynamics.state_dim, 3 + 2 + 2)
+        state = torch.zeros(1, dynamics.state_dim)
+        state[:, 0], state[:, 1], state[:, 2] = 10.0, 20.0, 100.0
+        # Area-weighted basin mean: 0.4*10 + 0.4*20 + 0.2*100 = 32.
+        self.assertAlmostEqual(dynamics.swe(state)[0].item(), 32.0, places=4)
+
+    def test_bands_melt_staggered_by_elevation(self):
+        from flood_forecast.ode import NeuralODE
+        dynamics = self.make_dynamics()
+        n_hours = 72
+        forcing = torch.zeros(1, n_hours, 4)
+        forcing[:, :, 2] = 4.0  # basin-reference temperature: melt at low band, cold at high band
+        times = torch.arange(float(n_hours))
+        dynamics.set_forcing(forcing, times)
+        initial = torch.zeros(1, dynamics.state_dim)
+        initial[:, :3] = 50.0  # every band starts with 50 mm
+        initial[:, 3] = 150.0
+        states = NeuralODE(dynamics, method="rk4")(initial, times)
+        band_final = states[0, -1, :3]
+        # Low band (+500m warmer) melts fastest; high band (800m higher, ~5C colder) holds snow.
+        self.assertLess(band_final[0].item(), 1.0)
+        self.assertGreater(band_final[2].item(), 45.0)
+        self.assertTrue(band_final[0] < band_final[1] < band_final[2])
+
+    def test_low_band_rains_while_high_band_snows(self):
+        dynamics = self.make_dynamics()
+        forcing = torch.zeros(1, 4, 4)
+        forcing[:, :, 0] = 2.0   # precip
+        forcing[:, :, 2] = 2.0   # reference T: low band 5.25C (rain), high band -3.2C (snow)
+        dynamics.set_forcing(forcing, torch.arange(4.0))
+        state = torch.zeros(1, dynamics.state_dim)
+        derivative = dynamics(torch.tensor(1.0), state)
+        self.assertLess(derivative[0, 0].item(), 0.5)   # low band: little snow accumulation
+        self.assertGreater(derivative[0, 2].item(), 1.5)  # high band: snowing

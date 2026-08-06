@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 import numpy as np
+import os
 import pandas as pd
 import torch
 from typing import Dict, Tuple, Union, Optional, List
@@ -138,7 +139,6 @@ class CSVDataLoader(Dataset):
         if (len(self.df) - self.df.count()).max() != 0:
             print("Error nan values detected in data. Please run interpolate ffill or bfill on data")
         self.targ_col = target_col
-        self.df.to_csv("temp_df.csv")
         self.no_scale = no_scale
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -746,7 +746,8 @@ class TemporalTestLoader(CSVTestLoader):
 
         :param time_feats: The temporal featuers to use in encoding.
         :type time_feats: List[str]
-        :param kwargs: The dict used to instantiate ``CSVTestLoader`` parent (must contain ``df_path`` and ``kwargs`` keys).
+        :param kwargs: The dict used to instantiate ``CSVTestLoader`` parent (must contain ``df_path``
+            and ``kwargs`` keys).
         :type kwargs: dict
         :param decoder_step_len: The length of the initial decoder input (label length for Informer), defaults to None.
         :type decoder_step_len: Optional[int]
@@ -769,7 +770,8 @@ class TemporalTestLoader(CSVTestLoader):
         """
         return torch.from_numpy(pandas_stuff.to_numpy()).float()
 
-    def __getitem__(self, idx: int) -> Tuple[Tuple[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor], pd.DataFrame, int]:
+    def __getitem__(self, idx: int) -> Tuple[Tuple[torch.Tensor, torch.Tensor],
+                                             Tuple[torch.Tensor, torch.Tensor], pd.DataFrame, int]:
         """
         Retrieves a single test sample, separating features and returning the original unscaled data.
 
@@ -833,7 +835,8 @@ class VariableSequenceLength(CSVDataLoader):
         :type csv_loader_params: Dict
         :param pad_length: If specified, the length to truncate sequences at or pad them up to.
         :type pad_length: Optional[int]
-        :param task: The specific task ('classification', 'auto', 'forecasting' - not fully implemented), defaults to "classification".
+        :param task: The specific task ('classification', 'auto', 'forecasting' - not fully
+            implemented), defaults to "classification".
         :type task: str
         :param n_classes: The maximum number of classes for classification tasks, defaults to 99.
         :type n_classes: int
@@ -955,7 +958,8 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         # NOTE: self.df_orig_list holds the original dataframes, which are passed to CSVTestLoader
         self.csv_test_loaders = [CSVTestLoader(loader_1, forecast_total, **main_params) for loader_1 in self.df_orig_list]  # noqa
 
-    def get_from_start_date_all(self, forecast_start: datetime, series_id: int = None) -> List[Tuple[torch.Tensor, pd.DataFrame, int]]:
+    def get_from_start_date_all(self, forecast_start: datetime,
+                                series_id: int = None) -> List[Tuple[torch.Tensor, pd.DataFrame, int]]:
         """
         Retrieves a sample for **all** series starting from a specified datetime stamp.
 
@@ -971,3 +975,527 @@ class SeriesIDTestLoader(CSVSeriesIDLoader):
         for test_loader in self.csv_test_loaders:
             res.append(test_loader.get_from_start_date(forecast_start))
         return res
+
+
+class CatchmentWindowLoader(CSVDataLoader):
+    """
+    CSVDataLoader variant for (spin-up -> forecast-horizon) hydrology windows.
+
+    Follows the parent's conventions (forecast_history = spin-up length, forecast_length = horizon)
+    with three differences: the source window spans spin-up AND horizon rows (so state-space models
+    can read observed history and forecast meteorology in one tensor) with the target columns zeroed
+    in the horizon segment to prevent leakage; windows overlapping data gaps beyond a tolerance are
+    skipped; and an optional drainage area converts a cfs target to mm/hr (the water-balance unit)
+    before scaling. Physical channels (target flow, temperature, shortwave) should be excluded from
+    scaling via the parent's ``scaled_cols`` so physics-based models receive real units.
+    """
+
+    def __init__(self, file_path, forecast_history: int, forecast_length: int, target_col: List,
+                 relevant_cols: List, area_sq_km: float = None, min_valid_fraction: float = 0.95,
+                 window_stride: int = 24, **kwargs):
+        """
+        Initializes the catchment window loader.
+
+        :param file_path: CSV path (or DataFrame) with the gauge's hourly record.
+        :type file_path: Union[str, pd.DataFrame]
+        :param forecast_history: The spin-up window length in time steps.
+        :type forecast_history: int
+        :param forecast_length: The forecast horizon length in time steps.
+        :type forecast_length: int
+        :param target_col: The target column list, e.g. ["cfs"].
+        :type target_col: List
+        :param relevant_cols: Feature columns (including the target).
+        :type relevant_cols: List
+        :param area_sq_km: If given, converts the (cfs) target to mm/hr over this basin area,
+            defaults to None.
+        :type area_sq_km: float, optional
+        :param min_valid_fraction: Minimum observed fraction of the combined window for it to be
+            indexed, defaults to 0.95.
+        :type min_valid_fraction: float, optional
+        :param window_stride: Spacing between window start indices, defaults to 24.
+        :type window_stride: int, optional
+        :param kwargs: Remaining CSVDataLoader keyword arguments (scaling, sort_column, ...).
+        :type kwargs: Dict
+        """
+        df = get_data(file_path)
+        if area_sq_km is not None:
+            for col in target_col:
+                df[col] = df[col] * 0.0283168 * 3.6 / area_sq_km
+        super().__init__(df, forecast_history, forecast_length, target_col, relevant_cols,
+                         **kwargs)
+        self.target_col_list = target_col
+        observed = ~self.original_df[relevant_cols].isna().any(axis=1)
+        observed = observed.to_numpy()
+        window = forecast_history + forecast_length
+        self.valid_starts = [start for start in range(0, len(self.df) - window, window_stride)
+                             if observed[start:start + window].mean() >= min_valid_fraction]
+
+    def __len__(self) -> int:
+        """
+        Returns the number of valid (gap-filtered) windows.
+
+        :return: The window count.
+        :rtype: int
+        """
+        return len(self.valid_starts)
+
+    def __getitem__(self, idx: int):
+        """
+        Returns one (source, target) pair.
+
+        :param idx: The valid-window index.
+        :type idx: int
+        :return: A tuple of (src of shape (forecast_history + forecast_length, n_features) with
+            target columns zeroed in the horizon segment, trg of shape (forecast_length,
+            n_features)) matching the parent's target convention.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
+        start = self.valid_starts[idx]
+        split = start + self.forecast_history
+        end = split + self.forecast_length
+        src = self.df.iloc[start:end].copy()
+        src.loc[src.index[self.forecast_history:], self.target_col_list] = 0.0
+        trg = self.df.iloc[split:end]
+        return (torch.from_numpy(src.to_numpy()).float(),
+                torch.from_numpy(trg.to_numpy()).float())
+
+
+class IdentityScaler:
+    """
+    A no-op stand-in for an sklearn scaler, for datasets whose tensors are already in the space
+    the model trains in (e.g. :class:`MultiBasinWindowLoader`, which standardizes per basin).
+    """
+
+    def transform(self, values):
+        """
+        Returns the input unchanged as a NumPy array.
+
+        :param values: The values to (not) transform.
+        :type values: Union[np.ndarray, torch.Tensor, pd.DataFrame]
+        :return: The same values as a NumPy array.
+        :rtype: np.ndarray
+        """
+        return np.asarray(values)
+
+    def inverse_transform(self, values):
+        """
+        Returns the input unchanged as a NumPy array.
+
+        :param values: The values to (not) inverse-transform.
+        :type values: Union[np.ndarray, torch.Tensor, pd.DataFrame]
+        :return: The same values as a NumPy array.
+        :rtype: np.ndarray
+        """
+        return np.asarray(values)
+
+
+class MultiBasinWindowLoader(Dataset):
+    """
+    Combines per-basin :class:`CatchmentWindowLoader` instances into one training dataset.
+
+    Driven by a basin *manifest* JSON (see ``experiments/catchment_foundation/build_manifest.py``)
+    holding, per basin: the hourly CSV path, drainage area, a lapse-rate temperature offset,
+    train-period met normalization stats and the train-period flow standard deviation in mm/hr
+    (``flow_scale_mm_hr``). Each returned source window gains a trailing basin-index channel so a
+    multi-basin model can look up per-basin context, and the target flow column is divided by the
+    basin's ``flow_scale_mm_hr`` (per-basin flow standardization in the loss); the source flow stays
+    physical for spin-up and assimilation. Exposes ``sample_weights`` (horizon-flow-variance window
+    weights combined with a basin-frequency correction) and ``samples_per_epoch`` so the trainer can
+    do variance-weighted sampling across windows and basins.
+    """
+
+    def __init__(self, manifest_path: str, forecast_history: int, forecast_length: int,
+                 target_col: List, relevant_cols: List, scaled_cols: Optional[List] = None,
+                 start_date: Optional[str] = None, end_date: Optional[str] = None,
+                 basin_split: Optional[str] = None, min_valid_fraction: float = 0.95,
+                 window_stride: int = 24, samples_per_epoch: Optional[int] = None,
+                 basin_sample_power: float = 0.5, event_sample_power: float = 1.0,
+                 datetime_col: str = "datetime",
+                 max_basins: Optional[int] = None, require_hourly: bool = True,
+                 min_target_coverage: float = 1.0, max_input_gap: int = 6,
+                 require_pretrained_embedding: bool = False):
+        """
+        Initializes the multi-basin window loader.
+
+        :param manifest_path: Path to the basin manifest JSON (or an already-loaded dict).
+        :type manifest_path: Union[str, Dict]
+        :param forecast_history: The spin-up window length in time steps.
+        :type forecast_history: int
+        :param forecast_length: The forecast horizon length in time steps.
+        :type forecast_length: int
+        :param target_col: The target column list, e.g. ["cfs"].
+        :type target_col: List
+        :param relevant_cols: Feature columns (including the target and any derived columns the
+            manifest's preprocessing section creates, e.g. a lapse-corrected temperature).
+        :type relevant_cols: List
+        :param scaled_cols: Columns standardized with the manifest's per-basin train-period stats;
+            physical channels (target, raw temperature/shortwave) must be excluded, defaults to
+            None which scales nothing.
+        :type scaled_cols: List, optional
+        :param start_date: Inclusive UTC date lower bound for this split, defaults to None.
+        :type start_date: str, optional
+        :param end_date: Exclusive UTC date upper bound for this split, defaults to None.
+        :type end_date: str, optional
+        :param basin_split: If given, only basins whose manifest ``split`` equals this value are
+            loaded (e.g. "train" vs "holdout"), defaults to None which loads all.
+        :type basin_split: str, optional
+        :param min_valid_fraction: Minimum observed fraction for a window to be indexed,
+            defaults to 0.95.
+        :type min_valid_fraction: float, optional
+        :param window_stride: Spacing between window start indices, defaults to 24.
+        :type window_stride: int, optional
+        :param samples_per_epoch: Number of weighted samples drawn per epoch by the trainer,
+            defaults to None which uses the full window count.
+        :type samples_per_epoch: int, optional
+        :param basin_sample_power: Exponent on the per-basin window count when allocating sampling
+            mass across basins (1.0 = proportional to record length, 0.0 = equal mass per basin),
+            defaults to 0.5.
+        :type basin_sample_power: float, optional
+        :param event_sample_power: Exponent on within-basin horizon-variance sampling
+            (1.0 = current event emphasis, 0.0 = uniform across valid windows), defaults to 1.0.
+        :type event_sample_power: float, optional
+        :param datetime_col: Name of the timestamp column in the basin CSVs, defaults to
+            "datetime".
+        :type datetime_col: str, optional
+        :param max_basins: Optional cap on the number of basins loaded (smoke runs),
+            defaults to None.
+        :type max_basins: int, optional
+        :param require_hourly: Whether to reindex each basin onto a strict hourly grid so that
+            absent rows become explicit gaps instead of silently compressing real time,
+            defaults to True. Disable only to reproduce pre-fix behaviour.
+        :type require_hourly: bool, optional
+        :param min_target_coverage: Fraction of the horizon whose target flow must be genuinely
+            observed for a window to be kept, defaults to 1.0 (never score against interpolated
+            flow). Values below 1.0 admit windows whose targets are partly imputed.
+        :type min_target_coverage: float, optional
+        :param max_input_gap: Longest run of missing steps that may be interpolated in the INPUT
+            channels, in hours, defaults to 6. Longer runs are left missing, which rejects the
+            windows containing them.
+        :type max_input_gap: int, optional
+        :param require_pretrained_embedding: Whether to load only manifest basins marked as having
+            a pretrained embedding. This prevents mixing fixed contrastive representations with
+            unrelated learned basin-ID rows, defaults to False.
+        :type require_pretrained_embedding: bool, optional
+        """
+        import json
+        super().__init__()
+        manifest = manifest_path
+        if not isinstance(manifest, dict):
+            with open(manifest_path) as f:
+                manifest = json.load(f)
+        self.manifest = manifest
+        self.forecast_history = forecast_history
+        self.forecast_length = forecast_length
+        self.target_col_list = target_col
+        self.relevant_cols = relevant_cols
+        self.require_hourly = require_hourly
+        self.min_target_coverage = min_target_coverage
+        self.max_input_gap = max_input_gap
+        self.no_scale = True
+        self.scale = None
+        self.targ_scaler = IdentityScaler()
+        selected = [
+            (pos, basin)
+            for pos, basin in enumerate(manifest["basins"])
+            if (basin_split is None or basin.get("split") == basin_split)
+            and (not require_pretrained_embedding or basin.get("has_embedding", False))
+        ]
+        if max_basins is not None:
+            selected = selected[:max_basins]
+        prep = manifest.get("preprocessing", {})
+        self.basin_positions: List[int] = []
+        self.basin_site_ids: List[str] = []
+        self.basin_loaders: List[CatchmentWindowLoader] = []
+        self.basin_timestamps: List[pd.DatetimeIndex] = []
+        self.flow_scales: List[float] = []
+        weight_blocks: List[np.ndarray] = []
+        for pos, basin in selected:
+            loader, timestamps = self._build_basin_loader(
+                basin, prep, scaled_cols, start_date, end_date, min_valid_fraction,
+                window_stride, datetime_col)
+            if loader is None or len(loader) == 0:
+                continue
+            self.basin_positions.append(pos)
+            self.basin_site_ids.append(basin["site_id"])
+            self.basin_loaders.append(loader)
+            self.basin_timestamps.append(timestamps)
+            self.flow_scales.append(float(basin["flow_scale_mm_hr"]))
+            weight_blocks.append(
+                self._window_weights(loader, basin_sample_power, event_sample_power))
+        if not self.basin_loaders:
+            raise ValueError("No basins with valid windows for split=%s in [%s, %s)"
+                             % (basin_split, start_date, end_date))
+        self.cumulative_windows = np.cumsum([len(loader) for loader in self.basin_loaders])
+        self.sample_weights = torch.from_numpy(np.concatenate(weight_blocks)).double()
+        self.samples_per_epoch = samples_per_epoch
+
+    def _build_basin_loader(self, basin: Dict, prep: Dict, scaled_cols: Optional[List],
+                            start_date: Optional[str], end_date: Optional[str],
+                            min_valid_fraction: float, window_stride: int, datetime_col: str):
+        """
+        Reads, derives, slices and standardizes one basin's record and wraps it in a
+        :class:`CatchmentWindowLoader`.
+
+        :param basin: The basin's manifest entry.
+        :type basin: Dict
+        :param prep: The manifest's preprocessing section (fill_from / copy_cols / lapse).
+        :type prep: Dict
+        :param scaled_cols: Columns standardized with the basin's ``met_stats``.
+        :type scaled_cols: List, optional
+        :param start_date: Inclusive split lower bound.
+        :type start_date: str, optional
+        :param end_date: Exclusive split upper bound.
+        :type end_date: str, optional
+        :param min_valid_fraction: Minimum observed fraction per window.
+        :type min_valid_fraction: float
+        :param window_stride: Spacing between window starts.
+        :type window_stride: int
+        :param datetime_col: The timestamp column name.
+        :type datetime_col: str
+        :return: A (loader, timestamps) tuple; (None, None) when the slice is empty.
+        :rtype: Tuple[Optional[CatchmentWindowLoader], Optional[pd.DatetimeIndex]]
+        """
+        derived = set(prep.get("copy_cols", {}))
+        derived.add(prep.get("lapse", {}).get("target"))
+        derived.add(prep.get("swe_col"))
+        derived.update(prep.get("observed_mask_cols", {}))
+        base_cols = [col for col in self.relevant_cols if col not in derived]
+        sources = list(prep.get("fill_from", {}).values()) + \
+            list(prep.get("copy_cols", {}).values()) + \
+            list(prep.get("observed_mask_cols", {}).values())
+        if prep.get("lapse"):
+            sources.append(prep["lapse"]["source"])
+        extra = sorted(set(source for source in sources if source not in base_cols))
+        header = pd.read_csv(basin["csv_path"], nrows=0).columns
+        wanted = [col for col in base_cols + extra
+                  if col in header or col not in prep.get("fill_from", {})]
+        frame = pd.read_csv(basin["csv_path"], usecols=[datetime_col] + wanted)
+        frame[datetime_col] = to_tz_naive_datetime(frame[datetime_col])
+        frame = frame.sort_values(datetime_col).drop_duplicates(datetime_col)
+        frame = frame.set_index(datetime_col)
+        if self.require_hourly:
+            # Reindex onto a strict hourly grid. Without this, windows are sliced by ROW COUNT, so
+            # absent rows silently compress real time -- nominal 1,056-row windows have been
+            # observed spanning 22,237 real hours, and the ODE integrates a multi-hour gap as one
+            # hour. Reindexing makes absent rows explicit NaNs that the validity filter can see.
+            frame = frame.reindex(pd.date_range(frame.index.min(), frame.index.max(), freq="h"))
+        # Provenance masks MUST be taken before fill_from runs, otherwise a station column that
+        # was silently backfilled from the gridded product is indistinguishable from one where the
+        # station genuinely agreed with the grid.
+        for mask_col, source in prep.get("observed_mask_cols", {}).items():
+            if mask_col in self.relevant_cols:
+                present = frame[source].notna() if source in frame.columns else False
+                frame[mask_col] = np.asarray(present, dtype=np.float32)
+        for col, source in prep.get("fill_from", {}).items():
+            if col not in frame.columns:
+                frame[col] = frame[source]
+            else:
+                frame[col] = frame[col].fillna(frame[source])
+        for col, source in prep.get("copy_cols", {}).items():
+            frame[col] = frame[source]
+        lapse = prep.get("lapse")
+        if lapse:
+            frame[lapse["target"]] = frame[lapse["source"]] + basin.get("temp_offset_c", 0.0)
+        swe_col = prep.get("swe_col")
+        if swe_col and swe_col in self.relevant_cols:
+            frame[swe_col] = self._swe_column(basin.get("swe_csv_path"), frame.index)
+        if start_date is not None:
+            frame = frame[frame.index >= pd.Timestamp(start_date)]
+        if end_date is not None:
+            frame = frame[frame.index < pd.Timestamp(end_date)]
+        if len(frame) <= self.forecast_history + self.forecast_length:
+            return None, None
+        frame = frame[self.relevant_cols].astype(np.float32)
+        stats = basin.get("met_stats", {})
+        for col in scaled_cols or []:
+            mean, std = stats.get(col, (0.0, 1.0))
+            frame[col] = (frame[col] - mean) / max(std, 1e-8)
+        timestamps = frame.index
+        target_observed = frame[self.target_col_list[0]].notna().to_numpy()
+        loader = CatchmentWindowLoader(frame.reset_index(drop=True), self.forecast_history,
+                                       self.forecast_length, self.target_col_list,
+                                       self.relevant_cols, area_sq_km=basin["area_sq_km"],
+                                       min_valid_fraction=min_valid_fraction,
+                                       window_stride=window_stride, no_scale=True)
+        loader.valid_starts = self._valid_windows(loader.valid_starts, target_observed)
+        # Fill only the INPUT holes the validity filter tolerated, and only across short runs --
+        # never bidirectionally across arbitrary spans. Target flow is never fabricated: windows
+        # whose target is not fully observed have already been rejected above.
+        protected = set(self.target_col_list) | set(prep.get("observed_mask_cols", {})) | \
+            set(prep.get("no_interp_cols", []))
+        loader.df = self._interpolate_short_gaps(loader.df, protected).astype(np.float32)
+        # Bounded interpolation deliberately leaves long gaps unfilled, so a window can still hold
+        # NaNs in an INPUT column even when its target is fully observed. Drop those outright:
+        # every served window must be finite, or the NaN reaches the ODE and the run dies.
+        finite = np.isfinite(loader.df.to_numpy()).all(axis=1)
+        cumulative = np.concatenate([[0], np.cumsum(finite)])
+        span = self.forecast_history + self.forecast_length
+        loader.valid_starts = [start for start in loader.valid_starts
+                               if cumulative[start + span] - cumulative[start] == span]
+        # Drop init-time copies that __getitem__ never touches (memory: O(100) basins).
+        loader.original_df = None
+        loader.unscaled_df = None
+        return loader, timestamps
+
+    def _interpolate_short_gaps(self, frame: pd.DataFrame, protected: set) -> pd.DataFrame:
+        """
+        Interpolates only continuous inputs, and only across genuinely short gaps.
+
+        Columns in ``protected`` are never touched: target flow (scoring against our own
+        interpolation biases metrics toward the smooth-drift failure mode), precipitation (linear
+        interpolation invents rain, shifts storm timing and changes totals -- the very signal the
+        model must learn) and observation masks (which are provenance, not a physical series).
+        Everything else is filled only where the run of consecutive missing steps is at most
+        ``max_input_gap`` long. Note that pandas' own ``limit`` counts forward and backward
+        separately, so ``limit=6, limit_direction="both"`` would fill a 12-hour gap entirely;
+        run lengths are therefore measured explicitly here.
+
+        :param frame: The basin frame, indexed positionally.
+        :type frame: pd.DataFrame
+        :param protected: Names of columns that must never be interpolated.
+        :type protected: set
+        :return: The frame with short input gaps filled and long ones left missing.
+        :rtype: pd.DataFrame
+        """
+        for column in frame.columns:
+            if column in protected:
+                continue
+            series = frame[column]
+            missing = series.isna()
+            if not missing.any():
+                continue
+            runs = (missing != missing.shift()).cumsum()
+            run_length = missing.groupby(runs).transform("size")
+            fillable = missing & (run_length <= self.max_input_gap)
+            frame[column] = series.where(~fillable, series.interpolate(limit_direction="both"))
+        return frame
+
+    def _valid_windows(self, starts: List[int], target_observed: np.ndarray) -> List[int]:
+        """
+        Keeps only windows whose flow observations support an honest forecast and score.
+
+        Two rules, both rejections rather than imputations: the flow at issue time must be a
+        genuine observation (the whole forecast is conditioned on it through
+        ``match_current_flow``, so assimilating an interpolated value corrupts everything
+        downstream), and the horizon target must be observed at least ``min_target_coverage`` of
+        the time. Interpolating a target would mean scoring the model partly against our own
+        interpolation, which is smooth by construction and therefore biased in favour of the
+        smooth-drift failure mode we are trying to detect.
+
+        :param starts: Candidate window start indices.
+        :type starts: List[int]
+        :param target_observed: Boolean array, True where the target column is observed.
+        :type target_observed: np.ndarray
+        :return: The surviving window start indices.
+        :rtype: List[int]
+        """
+        spinup, horizon = self.forecast_history, self.forecast_length
+        kept = []
+        for start in starts:
+            if not target_observed[start + spinup - 1]:
+                continue  # issue-time flow must be real
+            segment = target_observed[start + spinup:start + spinup + horizon]
+            if segment.mean() >= self.min_target_coverage:
+                kept.append(start)
+        return kept
+
+    def _swe_column(self, swe_csv_path: Optional[str],
+                    index: pd.DatetimeIndex) -> np.ndarray:
+        """
+        Builds the hourly observed-SWE channel from a daily basin-mean series.
+
+        Each daily value (e.g. a SNODAS basin mean) is forward-filled across its calendar day;
+        hours without an observation get the -1.0 sentinel, which the model treats as "no
+        observation" (falling back to its default empty-snow-store initialization). Physically
+        missing == zero SWE only outside the snow season, which is exactly when the scraper
+        skips days, so the sentinel is safe there too.
+
+        :param swe_csv_path: Path of a CSV with "datetime" (daily) and "snodas_swe_mm" columns;
+            None when the basin has no series, which yields an all-sentinel channel.
+        :type swe_csv_path: str, optional
+        :param index: The basin frame's hourly DatetimeIndex.
+        :type index: pd.DatetimeIndex
+        :return: The SWE channel of shape (len(index),) in mm with -1.0 sentinels.
+        :rtype: np.ndarray
+        """
+        if not swe_csv_path or not os.path.exists(swe_csv_path):
+            return np.full(len(index), -1.0, dtype=np.float32)
+        daily = pd.read_csv(swe_csv_path)
+        series = pd.Series(daily["snodas_swe_mm"].to_numpy(),
+                           index=pd.to_datetime(daily["datetime"]))
+        values = series.reindex(index.floor("D")).to_numpy(dtype=np.float32)
+        return np.where(np.isfinite(values), values, -1.0).astype(np.float32)
+
+    def _window_weights(self, loader: CatchmentWindowLoader,
+                        basin_sample_power: float,
+                        event_sample_power: float) -> np.ndarray:
+        """
+        Computes sampling weights for one basin's windows.
+
+        Within the basin, windows are weighted by their horizon flow variance (floored at 0.1 of
+        the basin mean so recessions still appear); across basins, total mass is allocated
+        proportionally to ``n_windows ** basin_sample_power`` so long records do not drown out
+        short ones.
+
+        :param loader: The basin's window loader (post-interpolation).
+        :type loader: CatchmentWindowLoader
+        :param basin_sample_power: Exponent on the basin's window count for its total mass.
+        :type basin_sample_power: float
+        :param event_sample_power: Exponent on normalized horizon variance; zero is uniform.
+        :type event_sample_power: float
+        :return: Weights of shape (len(loader),).
+        :rtype: np.ndarray
+        """
+        flow = loader.df[self.target_col_list[0]].to_numpy()
+        history = self.forecast_history
+        variances = np.array([np.nanvar(flow[s + history:s + history + self.forecast_length])
+                              for s in loader.valid_starts])
+        if event_sample_power < 0:
+            raise ValueError("event_sample_power cannot be negative")
+        normalized = np.maximum(variances / max(variances.mean(), 1e-12), 0.1)
+        weights = normalized ** event_sample_power
+        mass = len(loader) ** basin_sample_power
+        return weights * (mass / weights.sum())
+
+    def __len__(self) -> int:
+        """
+        Returns the total window count across basins.
+
+        :return: The number of windows.
+        :rtype: int
+        """
+        return int(self.cumulative_windows[-1])
+
+    def locate(self, idx: int) -> Tuple[int, int]:
+        """
+        Maps a global window index to (basin position in this dataset, local window index).
+
+        :param idx: The global window index.
+        :type idx: int
+        :return: A (basin_index, local_index) tuple.
+        :rtype: Tuple[int, int]
+        """
+        basin = int(np.searchsorted(self.cumulative_windows, idx, side="right"))
+        prior = 0 if basin == 0 else int(self.cumulative_windows[basin - 1])
+        return basin, idx - prior
+
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Returns one (source, target) pair with the basin-index channel appended to the source and
+        the target flow standardized by the basin's flow scale.
+
+        :param idx: The global window index.
+        :type idx: int
+        :return: A tuple of (src of shape (spin-up + horizon, n_features + 1),
+            trg of shape (horizon, n_features + 1)); src and trg share the trailing basin
+            channel so sequence-decoding utilities can concatenate them.
+        :rtype: Tuple[torch.Tensor, torch.Tensor]
+        """
+        basin, local = self.locate(idx)
+        src, trg = self.basin_loaders[basin][local]
+        trg = trg.clone()
+        trg[:, 0] = trg[:, 0] / self.flow_scales[basin]
+        position = float(self.basin_positions[basin])
+        src_marker = torch.full((src.shape[0], 1), position)
+        trg_marker = torch.full((trg.shape[0], 1), position)
+        return (torch.cat([src, src_marker], dim=1), torch.cat([trg, trg_marker], dim=1))

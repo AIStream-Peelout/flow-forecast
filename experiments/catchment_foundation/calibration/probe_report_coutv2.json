@@ -1,0 +1,28 @@
+{
+  "probe_r2": {
+    "X1": 0.121,
+    "X2": 0.122,
+    "X3": -0.038,
+    "X4": -0.114,
+    "Df": -0.085,
+    "Tmax": 0.008,
+    "delta": -0.065
+  },
+  "final_fit_mse": 0.06882,
+  "n_embedded": 49,
+  "n_inverted": 45,
+  "median_parameters": {
+    "X1": 156.833,
+    "X2": 0.198,
+    "X3": 298.011,
+    "X4": 19.925,
+    "Df": 0.157,
+    "Tmax": 0.797,
+    "delta": 1.832
+  },
+  "artifacts": {
+    "head": "experiments/catchment_foundation/calibration/parameter_head_coutv2.pt",
+    "context_init": "experiments/catchment_foundation/calibration/context_init_coutv2.pt",
+    "manifest": "experiments/catchment_foundation/calibration/manifest_coutv2.json"
+  }
+}

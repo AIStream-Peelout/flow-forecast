@@ -1,0 +1,24 @@
+{
+  "n_sites": 143,
+  "alpha": 10.0,
+  "probe_r2": {
+    "log_mean_flow": 0.078,
+    "cv": -0.024,
+    "rb_flashiness": 0.118,
+    "bfi": 0.019,
+    "fdc_slope": -0.037,
+    "high_low_ratio": -0.045,
+    "melt_fraction": 0.239,
+    "diurnal_strength": 0.072
+  },
+  "signature_medians": {
+    "log_mean_flow": 4.112,
+    "cv": 1.597,
+    "rb_flashiness": 0.112,
+    "bfi": 0.681,
+    "fdc_slope": -0.723,
+    "high_low_ratio": 3.087,
+    "melt_fraction": 0.574,
+    "diurnal_strength": 0.068
+  }
+}

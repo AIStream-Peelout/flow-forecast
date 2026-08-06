@@ -118,7 +118,7 @@ class ForcedDynamics(BaseDynamics):
             raise ValueError("forcing and times must be on the same device")
         if not torch.all(times[1:] > times[:-1]):
             raise ValueError("times must be strictly increasing")
-    
+
         self._forcing = forcing
         self._forcing_times = times
 

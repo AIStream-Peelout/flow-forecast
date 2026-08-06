@@ -26,3 +26,6 @@ wandb
 # temp prediction CSVs, and downloaded ASOS/USGS CSVs). Real data lives in tests/ and data/.
 model_save/
 /*.csv
+output
+Experiments
+/output.pth/

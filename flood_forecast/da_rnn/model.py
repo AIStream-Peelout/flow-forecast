@@ -73,7 +73,9 @@ class DARNN(nn.Module):
          :type forecast_history: int
          :param decoder_hidden_size: dimension of hidden size of the decoder.
          :type decoder_hidden_size: int
-         :param out_feats: The number of targets (or in classification classes), defaults to 1.
+         :param out_feats: The number of targets (or in classification classes), defaults to 1. The first
+          ``out_feats`` columns of ``x`` are treated as the target history and the remaining
+          ``n_time_series - out_feats`` columns are fed to the encoder as exogenous predictors.
          :type out_feats: int, optional
          :param dropout: Dropout rate, defaults to .01.
          :type dropout: float, optional
@@ -85,12 +87,19 @@ class DARNN(nn.Module):
          :type probabilistic: bool, optional
          :param final_act: The final activation function (e.g., 'tanh', 'sigmoid'), defaults to None.
          :type final_act: typing.Optional[str]
+          :raises ValueError: If ``out_feats`` is not a positive integer smaller than ``n_time_series``.
           :return: None
           :rtype: None
         """
         super().__init__()
+        if out_feats < 1 or out_feats >= n_time_series:
+            raise ValueError(
+                "out_feats must be >= 1 and < n_time_series (got out_feats={0}, n_time_series={1}). The first "
+                "out_feats columns are the targets and at least one exogenous column must remain for the "
+                "encoder.".format(out_feats, n_time_series))
         self.probabilistic = probabilistic
-        self.encoder = Encoder(n_time_series - 1, hidden_size_encoder, forecast_history, gru_lstm, meta_data)
+        self.out_feats = out_feats
+        self.encoder = Encoder(n_time_series - out_feats, hidden_size_encoder, forecast_history, gru_lstm, meta_data)
         self.dropout = nn.Dropout(dropout)
         self.decoder = Decoder(hidden_size_encoder, decoder_hidden_size, forecast_history, out_feats, gru_lstm,
                                self.probabilistic)
@@ -106,15 +115,16 @@ class DARNN(nn.Module):
          :type x: torch.Tensor
          :param meta_data: The meta-data represented as a tensor, defaults to None.
          :type meta_data: torch.Tensor, optional
-          :return: The predicted output tensor or a torch.distributions.Normal object if probabilistic is True.
+          :return: The predicted output tensor of shape (batch_size, out_feats), or a
+           torch.distributions.Normal with batch shape (batch_size, out_feats) if probabilistic is True.
           :rtype: torch.Tensor or torch.distributions.Normal
         """
-        _, input_encoded = self.encoder(x[:, :, 1:], meta_data)
+        _, input_encoded = self.encoder(x[:, :, self.out_feats:], meta_data)
         dropped_input = self.dropout(input_encoded)
-        y_pred = self.decoder(dropped_input, x[:, :, 0].unsqueeze(2))
+        y_pred = self.decoder(dropped_input, x[:, :, :self.out_feats])
         if self.probabilistic:
-            mean = y_pred[..., 0][..., None]
-            std = torch.clamp(y_pred[..., 1][..., None], min=0.01)
+            mean = y_pred[..., :self.out_feats]
+            std = torch.clamp(y_pred[..., self.out_feats:], min=0.01)
             y_pred = torch.distributions.Normal(mean, std)
         if self.final_act:
             return self.final_act(y_pred)
@@ -179,7 +189,8 @@ class Encoder(nn.Module):
          :type input_data: torch.Tensor
          :param meta_data: Optional auxiliary meta-data, defaults to None.
          :type meta_data: torch.Tensor, optional
-          :return: A tuple containing the weighted input and the final encoded hidden states (batch_size, T - 1, hidden_size).
+          :return: A tuple containing the weighted input and the final encoded hidden states
+           (batch_size, T - 1, hidden_size).
           :rtype: Tuple[torch.Tensor, torch.Tensor]
         """
         # input_data: (batch_size, T - 1, input_size)
@@ -252,11 +263,11 @@ class Decoder(nn.Module):
          :type decoder_hidden_size: int
          :param T: Number of time steps (forecast history + 1).
          :type T: int
-         :param out_feats: Number of output features, defaults to 1.
+         :param out_feats: Number of output features (targets), defaults to 1.
          :type out_feats: int, optional
          :param gru_lstm: True to use LSTM, False to use GRU, defaults to True.
          :type gru_lstm: bool, optional
-         :param probabilistic: True for probabilistic output (mean and std), defaults to True.
+         :param probabilistic: True for probabilistic output (mean and std per target), defaults to True.
          :type probabilistic: bool, optional
           :return: None
           :rtype: None
@@ -264,6 +275,7 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         self.T = T
         self.probabalistic = probabilistic
+        self.out_feats = out_feats
         self.encoder_hidden_size = encoder_hidden_size
         self.decoder_hidden_size = decoder_hidden_size
 
@@ -281,7 +293,8 @@ class Decoder(nn.Module):
 
         self.fc = nn.Linear(encoder_hidden_size + out_feats, out_feats)
         if self.probabalistic:
-            fc_final_out_feats = 2
+            # One mean and one standard deviation per target.
+            fc_final_out_feats = 2 * out_feats
         else:
             fc_final_out_feats = out_feats
         self.fc_final = nn.Linear(decoder_hidden_size + encoder_hidden_size, fc_final_out_feats)
@@ -294,18 +307,18 @@ class Decoder(nn.Module):
 
         :param input_encoded: The final encoded hidden states from the Encoder (batch_size, T - 1, encoder_hidden_size).
          :type input_encoded: torch.Tensor
-         :param y_history: The history of the target variable (batch_size, T - 1, 1).
+         :param y_history: The history of the target variable(s) (batch_size, T - 1, out_feats).
          :type y_history: torch.Tensor
-          :return: The final predicted output (batch_size, out_feats) or (batch_size, 2) if probabilistic.
+          :return: The final predicted output (batch_size, out_feats), or (batch_size, 2 * out_feats)
+           if probabilistic.
           :rtype: torch.Tensor
         """
-        # y_history = input_encoded[:, :, 0]
         # input_encoded: (batch_size, T - 1, encoder_hidden_size)
-        # y_history: (batch_size, (T-1))
+        # y_history: (batch_size, T - 1, out_feats)
         # Initialize hidden and cell, (1, batch_size, decoder_hidden_size)
         hidden = init_hidden(input_encoded, self.decoder_hidden_size)
         cell = init_hidden(input_encoded, self.decoder_hidden_size)
-        context = Variable(torch.zeros(input_encoded.size(0), self.encoder_hidden_size))
+        context = Variable(torch.zeros(input_encoded.size(0), self.encoder_hidden_size)).to(input_encoded.device)
 
         for t in range(self.T - 1):
             # (batch_size, T, (2 * decoder_hidden_size + encoder_hidden_size))
@@ -339,4 +352,3 @@ class Decoder(nn.Module):
 
         # Eqn. 22: final output
         return self.fc_final(torch.cat((hidden[0], context), dim=1))
-        #

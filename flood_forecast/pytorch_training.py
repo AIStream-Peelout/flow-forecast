@@ -3,6 +3,7 @@ import torch.optim as optim
 from typing import Type, Dict, List, Union
 from torch.utils.data import DataLoader
 import json
+import os
 import wandb
 from flood_forecast.utils import numpy_to_tvar
 from flood_forecast.time_model import PyTorchForecast
@@ -11,6 +12,8 @@ from flood_forecast.transformer_xl.transformer_basic import greedy_decode
 from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
+from flood_forecast.meta_models.contrastive_train import load_embedding
+from flood_forecast.meta_models.multimodal_encoder import StaticEmbeddingMetaModel
 from flood_forecast.series_id_helper import handle_csv_id_output, handle_csv_id_validation
 from torch.nn import CrossEntropyLoss
 
@@ -45,12 +48,22 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
 def handle_meta_data(model: PyTorchForecast):
     """A function to initialize models with meta-data.
 
+    Two config styles are supported. The classic style points ``path`` at the config of a trainable
+    meta-model (e.g. an auto-encoder). Alternatively, ``embedding_path`` points at a file written by
+    :func:`flood_forecast.meta_models.contrastive_train.save_embeddings` (e.g. from a contrastively
+    pretrained :class:`~flood_forecast.meta_models.multimodal_encoder.MultiModalEncoder`), with
+    ``entity_id`` selecting the entity whose precomputed embedding becomes the representation.
+
     :param model: A PyTorchForecast model with meta_data parameter block in config file.
     :type model: PyTorchForecast
     :return: Returns a tuple of the initialized meta-model, its representation, and the meta-loss function.
     :rtype: tuple(PyTorchForecast, torch.Tensor, torch.nn.Module)
     """
     meta_loss = None
+    if "embedding_path" in model.params["meta_data"]:
+        representation = load_embedding(model.params["meta_data"]["embedding_path"],
+                                        model.params["meta_data"].get("entity_id"))
+        return StaticEmbeddingMetaModel(), representation, None
     with open(model.params["meta_data"]["path"]) as f:
         json_data = json.load(f)
     if "meta_loss" in model.params["meta_data"]:
@@ -62,7 +75,7 @@ def handle_meta_data(model: PyTorchForecast):
     meta_name = json_data["model_name"]
     meta_model = PyTorchForecast(meta_name, training_path, valid_path, dataset_params2["test_path"], json_data)
     meta_representation = get_meta_representation(model.params["meta_data"]["column_id"],
-                                                 model.params["meta_data"]["uuid"], meta_model)
+                                                  model.params["meta_data"]["uuid"], meta_model)
     return meta_model, meta_representation, meta_loss
 
 
@@ -103,7 +116,8 @@ def train_transformer_style(
     :type model: PyTorchForecast
     :param training_params: A dictionary of the necessary parameters for training.
     :type training_params: Dict
-    :param takes_target: A parameter to determine whether a model requires the target during its forward pass, defaults to False.
+    :param takes_target: A parameter to determine whether a model requires the target during its
+        forward pass, defaults to False.
     :type takes_target: bool, optional
     :param forward_params: Extra parameters to be passed to the model's forward method, defaults to {}.
     :type forward_params: Dict, optional
@@ -116,7 +130,11 @@ def train_transformer_style(
     """
     use_wandb = model.wandb
     es = None
-    worker_num = 1
+    # Multiprocessing data loaders can terminate Python outright on macOS when
+    # torch_shm_manager cannot create its shared-memory socket.  Keep the
+    # portable single-process path as the default; experiments that benefit
+    # from workers can still opt in explicitly through dataset_params.
+    worker_num = 0
     pin_memory = False
     dataset_params = model.params["dataset_params"]
     num_targets = 1
@@ -129,7 +147,9 @@ def train_transformer_style(
         pin_memory = dataset_params["pin_memory"]
         print("Pin memory set to true")
     if "early_stopping" in model.params:
-        es = EarlyStopper(model.params["early_stopping"]['patience'])
+        os.makedirs(model_filepath, exist_ok=True)
+        es = EarlyStopper(model.params["early_stopping"]['patience'],
+                          checkpoint_path=os.path.join(model_filepath, "checkpoint.pth"))
     if "shuffle" not in training_params:
         training_params["shuffle"] = False
     criterion = make_crit(training_params)
@@ -140,11 +160,23 @@ def train_transformer_style(
     else:
         probabilistic = False
     max_epochs = training_params["epochs"]
+    train_sampler = None
+    train_shuffle = training_params["shuffle"]
+    sample_weights = getattr(model.training, "sample_weights", None)
+    if sample_weights is not None:
+        # Datasets exposing sample_weights (e.g. MultiBasinWindowLoader) opt into weighted
+        # sampling with replacement; samples_per_epoch caps the draws for very large datasets.
+        num_samples = getattr(model.training, "samples_per_epoch", None) or len(model.training)
+        train_sampler = torch.utils.data.WeightedRandomSampler(
+            torch.as_tensor(sample_weights, dtype=torch.double), num_samples=num_samples,
+            replacement=True)
+        train_shuffle = False
+        print("Using weighted sampler with %d samples per epoch" % num_samples)
     data_loader = DataLoader(
         model.training,
         batch_size=training_params["batch_size"],
-        shuffle=training_params["shuffle"],
-        sampler=None,
+        shuffle=train_shuffle,
+        sampler=train_sampler,
         batch_sampler=None,
         num_workers=worker_num,
         collate_fn=None,
@@ -219,8 +251,16 @@ def train_transformer_style(
         if es:
             if not es.check_loss(model.model, valid):
                 print("Stopping model now")
-                model.model.load_state_dict(torch.load("checkpoint.pth"))
+                model.model.load_state_dict(torch.load(es.checkpoint_path,
+                                                       map_location=model.device))
                 break
+    else:
+        if es:
+            # Training ran to max_epochs without triggering: still restore the best-validation
+            # checkpoint rather than keeping the (possibly past-peak) final-epoch weights.
+            print("Restoring best validation checkpoint (val loss %s)" % es.best_score)
+            model.model.load_state_dict(torch.load(es.checkpoint_path,
+                                                   map_location=model.device))
     decoder_structure = True
     the_ae = model.params["dataset_params"]["class"] == "AutoEncoder"
     if the_ae or model.params["dataset_params"]["class"] == "GeneralClassificationLoader":
@@ -352,7 +392,7 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         output_dist = torch.distributions.Normal(output, output_std)
     if validation_dataset:
         src, output, labels, output_dist = handle_scaling(validation_dataset, src, output, labels,
-                                                         probabilistic, m, output_std)
+                                                          probabilistic, m, output_std)
     if probabilistic:
         if len(labels.shape) != len(output.shape):
             output_dist = output_dist[:, :, 0]
@@ -371,6 +411,27 @@ def compute_loss(labels, output, src, criterion, validation_dataset, probabilist
         assert labels.shape[0] == output.shape[0]
         loss = criterion(output, labels.float())
     return loss
+
+
+def _count_nonfinite_batch(kind: str, nan_batches: int, max_nan_batches: int) -> int:
+    """Records one skipped non-finite batch, aborting once the allowance is used up.
+
+    :param kind: What was non-finite ("loss" or "gradients"), for the warning text.
+    :type kind: str
+    :param nan_batches: Non-finite batches skipped so far this epoch.
+    :type nan_batches: int
+    :param max_nan_batches: Skip allowance before training aborts.
+    :type max_nan_batches: int
+    :return: The incremented skip count.
+    :rtype: int
+    """
+    nan_batches += 1
+    print("Warning: skipping non-finite %s batch %d of %d allowed" % (kind, nan_batches,
+                                                                      max_nan_batches))
+    if nan_batches >= max_nan_batches:
+        raise ValueError("Error infinite or NaN %s detected. Try normalizing data or performing "
+                         "interpolation" % kind)
+    return nan_batches
 
 
 def torch_single_train(model: PyTorchForecast,
@@ -417,6 +478,14 @@ def torch_single_train(model: PyTorchForecast,
     output_std = None
     mulit_targets_copy = multi_targets
     running_loss = 0.0
+    running_auxiliary_loss = 0.0
+    auxiliary_batches = 0
+    nan_batches = 0
+    # Allowance scales with epoch length: isolated non-finite batches (e.g. a stiff-ODE gradient
+    # blow-up on an extreme window) are skipped, but a systemic failure still aborts the run.
+    max_nan_frac = model.params.get("training_params", {}).get("max_nan_frac", 0.05)
+    max_nan_batches = max(20, int(max_nan_frac * len(data_loader)))
+    max_grad_norm = model.params.get("training_params", {}).get("max_grad_norm")
     for src, trg in data_loader:
         opt.zero_grad()
         if meta_data_model:
@@ -466,17 +535,47 @@ def torch_single_train(model: PyTorchForecast,
                 loss = multi_crit(criterion, output, labels, None)
             else:
                 loss = compute_loss(labels, output, src, criterion, None, probablistic, output_std, m=multi_targets)
+            auxiliary_loss = getattr(model.model, "auxiliary_loss", None)
+            if auxiliary_loss is not None:
+                if not torch.isfinite(auxiliary_loss):
+                    nan_batches = _count_nonfinite_batch("auxiliary loss", nan_batches,
+                                                         max_nan_batches)
+                    continue
+                running_auxiliary_loss += auxiliary_loss.detach().item()
+                auxiliary_batches += 1
+                loss = loss + auxiliary_loss
             if loss > 100:
                 print("Warning: high loss detected")
+            if not torch.isfinite(loss):
+                # Skip the batch BEFORE backward/step so a single pathological window (e.g. a
+                # stiff-ODE blowup) cannot poison the weights; abort only if it keeps happening.
+                nan_batches = _count_nonfinite_batch("loss", nan_batches, max_nan_batches)
+                continue
             loss.backward()
+            if max_grad_norm is not None:
+                # clip_grad_norm_ SCALES by the total norm, so a non-finite norm (gradient
+                # explosion through e.g. a stiff ODE) would poison every weight on opt.step();
+                # treat such batches exactly like non-finite losses and skip them.
+                norm = torch.nn.utils.clip_grad_norm_(model.model.parameters(), max_grad_norm)
+                if not torch.isfinite(norm):
+                    if nan_batches == 0:
+                        # Persist the first offending batch + weights so the explosion can be
+                        # reproduced and debugged offline.
+                        torch.save({"src": src.cpu(), "trg": trg.cpu(),
+                                    "state_dict": model.model.state_dict()},
+                                   "nonfinite_batch_debug.pth")
+                    nan_batches = _count_nonfinite_batch("gradients", nan_batches,
+                                                         max_nan_batches)
+                    continue
             opt.step()
-            if torch.isnan(loss) or loss == float('inf'):
-                raise ValueError("Error infinite or NaN loss detected. Try normalizing data or performing interpolation")
             running_loss += loss.item()
             i += 1
     print("The running loss iss: ")
     print(running_loss)
     print("The number of items in train is: " + str(i))
+    if auxiliary_batches:
+        print("Mean auxiliary loss: " +
+              str(running_auxiliary_loss / float(auxiliary_batches)))
     total_loss = running_loss / float(i)
     return total_loss
 
@@ -509,7 +608,8 @@ def compute_validation(validation_loader: DataLoader,
     :type criterion: Type[torch.nn.modules.loss._Loss] or List
     :param device: The device on which to perform computation.
     :type device: torch.device
-    :param decoder_structure: Whether the model should use sequential decoding (e.g., greedy_decode or simple_decode), defaults to False.
+    :param decoder_structure: Whether the model should use sequential decoding (e.g., greedy_decode
+        or simple_decode), defaults to False.
     :type decoder_structure: bool, optional
     :param meta_data_model: The model to handle the meta-data (currently unused in the function body), defaults to None.
     :type meta_data_model: PyTorchForecast, optional
@@ -636,6 +736,7 @@ def compute_validation(validation_loader: DataLoader,
                                                              title="roc_" + str(epoch))})
         wandb.log({"pr": wandb.plot.pr_curve(fin, mod_output_final)})
         wandb.log({"conf_": wandb.plot.confusion_matrix(probs=mod_output_final,
-                            y_true=fin.detach().cpu().numpy(), class_names=None)})
+                                                        y_true=fin.detach().cpu().numpy(),
+                                                        class_names=None)})
     model.train()
     return list(scaled_crit.values())[0]
