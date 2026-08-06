@@ -2,8 +2,9 @@ import torch
 from typing import List
 from torch.autograd import Variable
 from flood_forecast.model_dict_function import pytorch_criterion_dict
+from flood_forecast.device import resolve_torch_device
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = resolve_torch_device()
 
 
 def numpy_to_tvar(x: torch.Tensor) -> torch.autograd.Variable:

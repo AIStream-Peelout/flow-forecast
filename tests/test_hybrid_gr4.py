@@ -3,6 +3,7 @@ import unittest
 import torch
 
 from flood_forecast.custom.custom_opt import NSELoss, MaskedMSELoss
+from flood_forecast.device import is_mps_available
 from flood_forecast.meta_models.merging_model import GatedFusion
 from flood_forecast.ode.physics.hydrology import EffectiveForcingGenerator, HybridGR4Model
 
@@ -64,6 +65,22 @@ class TestHybridGR4(unittest.TestCase):
         self.assertTrue((out["forcing"] >= 0).all())
         self.assertTrue((out["flow"] >= 0).all())
         self.assertTrue(torch.isfinite(out["flow"]).all())
+
+    @unittest.skipUnless(is_mps_available(), "PyTorch MPS is unavailable")
+    def test_forward_and_backward_on_mps(self):
+        """The unchanged hybrid model should execute and differentiate on Apple MPS."""
+        device = torch.device("mps")
+        model = HybridGR4Model(
+            n_met_features=4, seq_len=48, context_dim=32, dim=32, depth=1).to(device)
+        met, context = self.make_batch()
+        output = model(met.to(device), context.to(device))["flow"]
+        output.mean().backward()
+
+        self.assertEqual(output.device.type, "mps")
+        gradients = [parameter.grad for parameter in model.parameters()
+                     if parameter.grad is not None]
+        self.assertGreater(len(gradients), 0)
+        self.assertTrue(all(torch.isfinite(gradient).all() for gradient in gradients))
 
     def test_gradients_reach_forcing_generator_and_context(self):
         model = HybridGR4Model(n_met_features=4, seq_len=48, context_dim=32, dim=32, depth=1)

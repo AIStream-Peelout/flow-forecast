@@ -237,7 +237,7 @@ class PyTorchTrainTests(unittest.TestCase):
             self.keag_file,
             self.keag_file,
             self.model_params)
-        data = torch.rand(2, 20, 3)
+        data = model2.to_device(torch.rand(2, 20, 3))
         self.model_params["weight_path"] = os.path.join(
             "model_save", sorted(os.listdir("model_save"))[1])
         print("Moving to next test")
@@ -278,7 +278,7 @@ class PyTorchTrainTests(unittest.TestCase):
         # Assert shape is proper
         self.assertEqual(2, 2)
         data = torch.rand(1, 20, 3)
-        self.assertEqual(model3.model(data).shape, torch.Size([1, 6]))
+        self.assertEqual(model3.model(model3.to_device(data)).shape, torch.Size([1, 6]))
 
     def test_removing_layer_param(self):
         """
@@ -304,7 +304,7 @@ class PyTorchTrainTests(unittest.TestCase):
             self.keag_file,
             self.keag_file,
             self.model_params)
-        result = model.model(torch.rand(1, 20, 3))
+        result = model.model(model.to_device(torch.rand(1, 20, 3)))
         self.assertEqual(result.shape[1], 7)
 
     def test_train_loss(self):

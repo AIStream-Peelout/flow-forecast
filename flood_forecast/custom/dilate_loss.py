@@ -19,7 +19,7 @@ class DilateLoss(torch.nn.Module):
         super().__init__()
         self.gamma = gamma
         self.alpha = alpha
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = None
 
     def forward(self, targets: torch.Tensor, outputs: torch.Tensor):
         """
@@ -34,6 +34,7 @@ class DilateLoss(torch.nn.Module):
         """
         outputs = outputs.float()
         targets = targets.float()
+        device = outputs.device
         # outputs, targets: shape (batch_size, N_output, 1)
         if len(targets.size()) < 2:
             print("begin fixed loss func")
@@ -45,14 +46,15 @@ class DilateLoss(torch.nn.Module):
         batch_size, N_output = outputs.shape[0:2]
         loss_shape = 0
         softdtw_batch = SoftDTWBatch.apply
-        D = torch.zeros((batch_size, N_output, N_output)).to(self.device)
+        D = torch.zeros((batch_size, N_output, N_output), device=device)
         for k in range(batch_size):
             Dk = pairwise_distances(targets[k, :, :].view(-1, 1), outputs[k, :, :].view(-1, 1))
             D[k:k + 1, :, :] = Dk
         loss_shape = softdtw_batch(D, self.gamma)
         path_dtw = PathDTWBatch.apply
         path = path_dtw(D, self.gamma)
-        Omega = pairwise_distances(torch.range(1, N_output).view(N_output, 1)).to(self.device)
+        Omega = pairwise_distances(
+            torch.arange(1, N_output + 1, device=device).view(N_output, 1))
         loss_temporal = torch.sum(path * Omega) / (N_output * N_output)
         loss = self.alpha * loss_shape + (1 - self.alpha) * loss_temporal
         return loss
