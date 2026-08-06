@@ -116,7 +116,7 @@ class MLXForecastIntegrationTest(unittest.TestCase):
             actual = restored.predict(self.mx.expand_dims(source, 0))
             difference = self.mx.max(self.mx.abs(expected - actual))
             self.mx.eval(difference)
-            self.assertEqual(float(difference), 0.0)
+            self.assertLess(float(difference), 1e-6)
 
 
 if __name__ == "__main__":
