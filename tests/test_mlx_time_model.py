@@ -15,32 +15,31 @@ from flood_forecast.time_model import MLXForecast, resolve_torch_device
 class TorchDeviceResolutionTest(unittest.TestCase):
     """Verify accelerator selection without requiring CUDA or MPS hardware in CI."""
 
-    @patch("torch.backends.mps.is_available", return_value=True)
     @patch("torch.cuda.is_available", return_value=False)
-    def test_auto_preserves_cpu_without_cuda(self, _cuda_available, _mps_available):
+    def test_auto_preserves_cpu_without_cuda(self, _cuda_available):
         """Automatic selection should preserve historical CPU behavior without CUDA."""
         self.assertEqual(resolve_torch_device("auto"), torch.device("cpu"))
 
-    @patch("torch.backends.mps.is_available", return_value=True)
-    def test_explicit_mps(self, _mps_available):
+    @patch.object(torch.backends, "mps", create=True)
+    def test_explicit_mps(self, mps_backend):
         """Apple MPS remains available when it is requested explicitly."""
+        mps_backend.is_available.return_value = True
         self.assertEqual(resolve_torch_device("mps"), torch.device("mps"))
 
-    @patch("torch.backends.mps.is_available", return_value=True)
     @patch("torch.cuda.is_available", return_value=True)
-    def test_auto_prefers_cuda(self, _cuda_available, _mps_available):
+    def test_auto_prefers_cuda(self, _cuda_available):
         """Automatic selection should retain CUDA precedence."""
         self.assertEqual(resolve_torch_device("auto"), torch.device("cuda"))
 
-    @patch("torch.backends.mps.is_available", return_value=False)
     @patch("torch.cuda.is_available", return_value=False)
-    def test_auto_falls_back_to_cpu(self, _cuda_available, _mps_available):
+    def test_auto_falls_back_to_cpu(self, _cuda_available):
         """Automatic selection should remain backward compatible on CPU-only hosts."""
         self.assertEqual(resolve_torch_device("auto"), torch.device("cpu"))
 
-    @patch("torch.backends.mps.is_available", return_value=False)
-    def test_explicit_unavailable_mps_fails(self, _mps_available):
+    @patch.object(torch.backends, "mps", create=True)
+    def test_explicit_unavailable_mps_fails(self, mps_backend):
         """An explicit accelerator request must not silently fall back to CPU."""
+        mps_backend.is_available.return_value = False
         with self.assertRaisesRegex(RuntimeError, "MPS was requested"):
             resolve_torch_device("mps")
 
