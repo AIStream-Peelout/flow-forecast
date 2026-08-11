@@ -3,6 +3,12 @@ from flood_forecast.preprocessing.closest_station import get_weather_data, forma
 from datetime import datetime
 import unittest
 import os
+import shutil
+import tempfile
+from types import SimpleNamespace
+from unittest.mock import patch
+
+import pandas as pd
 
 
 class DataQualityTests(unittest.TestCase):
@@ -79,9 +85,10 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(df.iloc[0]['p01m'], 0)
         self.assertEqual(df.iloc[2]['p01m'], 23)
 
-    def test_get_weather_data(self):
+    @patch("flood_forecast.preprocessing.closest_station.requests.get")
+    def test_get_weather_data(self, mock_get):
         """
-        Test the weather data download utility. This test only checks whether the call completes.
+        Test weather-station classification with deterministic HTTP responses.
 
         :return: None
         :rtype: None
@@ -91,11 +98,19 @@ class DataQualityTests(unittest.TestCase):
             "station={}&data=tmpf&data=p01m&year1=2019&month1=1&day1=1&year2=2019&month2=1&"
             "day2=2&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
         )
-        print(url)
-        get_weather_data(os.path.join(self.test_data_path, "full_out.json"), {}, url)
-        self.assertEqual(1, 1)
+        mock_get.side_effect = lambda requested_url: SimpleNamespace(
+            text=("station,valid,tmpf,p01m\n" +
+                  "CYCX,2019-01-01 00:00,17.60,0.00\n" * 4
+                  if "station=CYCX" in requested_url else "no data"))
+        result = get_weather_data(os.path.join(self.test_data_path, "full_out.json"), {}, url)
+        self.assertEqual(result["gage_id"], 1021200)
+        self.assertEqual([station["station_id"] for station in result["stations"]], ["CYCX"])
+        self.assertEqual(mock_get.call_count, 20)
 
-    def test_process_asos_data(self):
+    @patch("flood_forecast.preprocessing.closest_station.pd.DataFrame.to_csv")
+    @patch("flood_forecast.preprocessing.closest_station.process_asos_csv")
+    @patch("flood_forecast.preprocessing.closest_station.download_asos_csv")
+    def test_process_asos_data(self, mock_download, mock_process, _mock_to_csv):
         """
         Full processing test for ASOS weather data using local JSON input and validating output structure.
 
@@ -107,9 +122,14 @@ class DataQualityTests(unittest.TestCase):
             "station={}&data=tmpf&data=p01m&year1=2014&month1=1&day1=1&year2=2019&month2=1&day2=2"
             "&tz=Etc%2FUTC&format=onlycomma&latlon=no&missing=M&trace=T&direct=no&report_type=1&report_type=2"
         )
-        river_result = process_asos_data(os.path.join(self.test_data_path, "asos_process.json"), full_data_url)
+        mock_process.return_value = (pd.DataFrame({"p01m": [0.0], "tmpf": [50.0]}), 3, 4)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            metadata_path = os.path.join(temporary_directory, "asos_process.json")
+            shutil.copyfile(os.path.join(self.test_data_path, "asos_process.json"), metadata_path)
+            river_result = process_asos_data(metadata_path, full_data_url)
         self.assertGreater(river_result["stations"][1]["missing_temp"], -1)
         self.assertGreater(river_result["stations"][2]["missing_precip"], -1)
+        self.assertEqual(mock_download.call_count, len(river_result["stations"]))
 
 
 if __name__ == '__main__':

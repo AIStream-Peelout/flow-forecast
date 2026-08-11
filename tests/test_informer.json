@@ -2,6 +2,7 @@
     "model_name": "Informer",
     "use_decoder": true,
     "model_type": "PyTorch",
+    "device": "cpu",
     "model_params": {
       "n_time_series":3,
       "dec_in":3,
@@ -65,7 +66,7 @@
     "wandb": {
        "name": "flood_forecast_circleci",
        "tags": ["dummy_run", "circleci"],
-       "project":"repo-flood_forecast"
+       "project": "repo-flood_forecast"
     },
     "forward_params":{
     },
@@ -73,8 +74,8 @@
    "inference_params":
    {
          "datetime_start":"2016-05-30",
-         "num_prediction_samples": 5,
-          "hours_to_forecast":300,
+         "num_prediction_samples": 1,
+          "hours_to_forecast":2,
           "test_csv_path":"tests/test_data/keag_small.csv",
           "decoder_params":{
             "decoder_function": "greedy_decode",

@@ -107,21 +107,18 @@ jobs:
       - run:
           name: Data Quality Tests
           command: |
-            coverage run -m unittest -v tests/test_multitask_decoder.py
-            bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/data_format_tests.py
-            bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/usgs_tests.py
-            bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_join.py
-            bash <(curl -s https://codecov.io/bash) -cF python
-            coverage run -m unittest -v tests/test_preprocessing.py
-            coverage run -m unittest -v tests/test_variable_length.py
+            coverage erase
+            coverage run --append -m unittest -v tests/test_multitask_decoder.py
+            coverage run --append -m unittest -v tests/data_format_tests.py
+            coverage run --append -m unittest -v tests/usgs_tests.py
+            coverage run --append -m unittest -v tests/test_join.py
+            coverage run --append -m unittest -v tests/test_preprocessing.py
+            coverage run --append -m unittest -v tests/test_variable_length.py
 
       - run:
           name: upload_stuff
           when: always
-          command: bash <(curl -s https://codecov.io/bash) -cF python
+          command: bash <(curl -s https://codecov.io/bash) -cF data-quality
 
       - store_test_results:
           path: test-results
@@ -303,68 +300,42 @@ jobs:
           command: bash <(curl -s https://codecov.io/bash) -cF python
 
 
-  trainer_test1:
+  trainer_smoke_test:
+    parameters:
+      test_name:
+        type: string
+      configs:
+        type: string
     <<: *defaults
+    environment:
+      MPLBACKEND: Agg
     steps:
       - attach_workspace:
           at: ~/repo
-      - restore_cache:  # ensure this step occurs *before* installing dependencies
+      - restore_cache:
           key: requirements-v2-{{ .Branch }}-{{ checksum "requirements.txt" }}
-
       - run:
           name: install dependencies
           command: |
-             pip install pipenv
-             pip install --force-reinstall --upgrade --quiet -r requirements.txt
-             pip install coverage
-             python setup.py develop --no-deps
+            pip install pipenv coverage
+            pip install --force-reinstall --upgrade --quiet -r requirements.txt
+            python setup.py develop --no-deps
       - save_cache:
           key: requirements-v2-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
             - ~/.local
-
       - run:
-          name: Trainer1 tests
-          when: always
+          name: << parameters.test_name >>
           command: |
-            echo -e 'running test_informer \n'
-            coverage run flood_forecast/trainer.py -p tests/test_informer.json
-            echo -e 'running test_iTransformer \n'
-            coverage run flood_forecast/trainer.py -p tests/test_iTransformer.json
-            echo -e 'running tsmixer_test \n'
-            coverage run flood_forecast/trainer.py -p tests/tsmixer_test.json
-            echo -e 'running transformer_b_series.json \n'
-            coverage run flood_forecast/trainer.py -p tests/transformer_b_series.json
-            echo -e 'running crossfroer.json \n'
-            coverage run flood_forecast/trainer.py -p tests/cross_former.json
-            echo -e 'running nlinear.json \n'
-            coverage run flood_forecast/trainer.py -p tests/nlinear.json
-            echo -e 'running dsanet_3\n'
-            coverage run flood_forecast/trainer.py -p tests/dsanet_3.json
-            echo -e 'running variable_autoencoderl.json\n'
-            coverage run flood_forecast/trainer.py -p tests/variable_autoencoderl.json
-            echo -e 'running dlinear\n'
-            coverage run flood_forecast/trainer.py -p tests/dlinear.json
-            echo -e 'running custom_encode.json\n'
-            coverage run flood_forecast/trainer.py -p tests/custom_encode.json
-            echo -e 'running multi_decoder_test \n'
-            coverage run flood_forecast/trainer.py -p tests/multi_decoder_test.json
-            echo -e 'test_dual \n'
-            coverage run flood_forecast/trainer.py -p tests/test_dual.json
-            echo -e 'running dsanet \n'
-            coverage run flood_forecast/trainer.py -p tests/dsanet.json
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts:
-          path: test-results
-          destination: test-results-trainer2
-
+            coverage erase
+            for config in << parameters.configs >>; do
+              echo "running ${config}"
+              coverage run --append flood_forecast/trainer.py -p "${config}"
+            done
       - run:
           name: upload results
           when: always
-          command: bash <(curl -s https://codecov.io/bash) -cF python
+          command: bash <(curl -s https://codecov.io/bash) -cF trainer-smoke
 
   trainer_test2:
       <<: *defaults
@@ -486,7 +457,22 @@ workflows:
       - plot_test:
           requires:
             - setup_and_install
-      - trainer_test1:
+      - trainer_smoke_test:
+          name: trainer_modern_models
+          test_name: Modern attention model smoke tests
+          configs: "tests/test_informer.json tests/test_iTransformer.json tests/cross_former.json tests/dsanet_3.json tests/dsanet.json"
+          requires:
+            - setup_and_install
+      - trainer_smoke_test:
+          name: trainer_linear_models
+          test_name: Linear and mixer model smoke tests
+          configs: "tests/tsmixer_test.json tests/transformer_b_series.json tests/nlinear.json tests/dlinear.json"
+          requires:
+            - setup_and_install
+      - trainer_smoke_test:
+          name: trainer_decoder_variants
+          test_name: Decoder variant smoke tests
+          configs: "tests/variable_autoencoderl.json tests/custom_encode.json tests/test_dual.json"
           requires:
             - setup_and_install
       - trainer_test2:

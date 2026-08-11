@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Tuple
 
 import torch
 import numpy as np
@@ -14,7 +15,7 @@ from custom_types import TrainData
 from constants import device
 
 
-def preprocess_data(dat: pd.DataFrame, col_names: typing.Tuple[str], scale) -> TrainData:
+def preprocess_data(dat: pd.DataFrame, col_names: Tuple[str, ...], scale) -> TrainData:
     """
     Scales the input data and splits it into features and targets.
 

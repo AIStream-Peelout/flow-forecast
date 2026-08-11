@@ -11,13 +11,13 @@ from flood_forecast.plot_functions import (
     plot_summary_shap_values,
     plot_summary_shap_values_over_time_series,
 )
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 
 BACKGROUND_BATCH_SIZE = 5
 
 
 def handle_dl_output(
-    dl: Union[CSVTestLoader, 'TemporalTestLoader'],
+    dl: Union[CSVTestLoader, TemporalTestLoader],
     dl_class: str,
     datetime_start: datetime,
     device: str,
