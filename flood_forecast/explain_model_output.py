@@ -11,13 +11,13 @@ from flood_forecast.plot_functions import (
     plot_summary_shap_values,
     plot_summary_shap_values_over_time_series,
 )
-from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader
+from flood_forecast.preprocessing.pytorch_loaders import CSVTestLoader, TemporalTestLoader
 
 BACKGROUND_BATCH_SIZE = 5
 
 
 def handle_dl_output(
-    dl: Union[CSVTestLoader, 'TemporalTestLoader'],
+    dl: Union[CSVTestLoader, TemporalTestLoader],
     dl_class: str,
     datetime_start: datetime,
     device: str,
@@ -123,10 +123,6 @@ def deep_explain_model_summary_plot(
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
         shap_values = deep_explainer.shap_values(background_tensor, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
-    shap_values = np.stack(shap_values)
-    # shap_values needs to be 4-dimensional
-    if len(shap_values.shape) != 4:
-        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
         shap_values, names=["preds", "batches", "observations", "features"]
     )
@@ -161,9 +157,6 @@ def deep_explain_model_summary_plot(
 
     shap_values = deep_explainer.shap_values(history, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
-    shap_values = np.stack(shap_values)
-    if len(shap_values.shape) != 4:
-        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
         shap_values, names=["preds", "batches", "observations", "features"]
     )
@@ -181,19 +174,56 @@ def deep_explain_model_summary_plot(
 
 def fix_shap_values(shap_values, history) -> np.ndarray:
     """
-    Fixes the structure of SHAP values based on the history data type.
+    Normalize SHAP output to ``(outputs, batches, observations, features)``.
+
+    SHAP 0.45 changed multi-output explanations from lists to arrays, while
+    multi-input models still return one array per input. Temporal models use
+    inputs with different feature dimensions, so stacking that top-level list
+    produces a ragged-array error. Explanations and plots in Flow Forecast are
+    for the primary time-series input, so select that input before arranging
+    output dimensions.
 
     :param shap_values: The raw SHAP values output from DeepExplainer.
     :type shap_values: Union[List[np.ndarray], np.ndarray]
     :param history: The history data used for explanation, which can be a single Tensor or a list of Tensors.
     :type history: Union[torch.Tensor, List[torch.Tensor]]
-    :return: The fixed SHAP values as a NumPy array.
+    :return: Four-dimensional SHAP values for the primary model input.
     :rtype: np.ndarray
     """
-    if isinstance(history, list):
-        shap_values = list(zip(*shap_values))[0]
-        return shap_values
-    return shap_values
+    multi_input = isinstance(history, list)
+    input_history = history[0] if multi_input else history
+    input_ndim = input_history.ndim
+    outputs_first = False
+
+    if multi_input and isinstance(shap_values, (list, tuple)):
+        if shap_values and isinstance(shap_values[0], (list, tuple)):
+            # Legacy SHAP: one list per output, containing one array per input.
+            values = np.stack([np.asarray(output_values[0]) for output_values in shap_values])
+            outputs_first = True
+        else:
+            # Current SHAP: one array per input, with output dimensions last.
+            values = np.asarray(shap_values[0])
+    elif isinstance(shap_values, (list, tuple)):
+        # Legacy SHAP with one input: one array per model output.
+        values = np.stack([np.asarray(output_values) for output_values in shap_values])
+        outputs_first = True
+    else:
+        values = np.asarray(shap_values)
+
+    if not outputs_first:
+        if values.ndim == input_ndim:
+            values = np.expand_dims(values, axis=0)
+        elif values.ndim > input_ndim:
+            input_shape = values.shape[:input_ndim]
+            values = values.reshape(*input_shape, -1)
+            values = np.moveaxis(values, -1, 0)
+
+    if values.ndim != 4:
+        raise ValueError(
+            "Expected SHAP values with four dimensions after normalization; "
+            f"received shape {values.shape}."
+        )
+    return values
 
 
 def deep_explain_model_heatmap(
@@ -247,9 +277,6 @@ def deep_explain_model_heatmap(
         deep_explainer = shap.DeepExplainer(model.model, background_tensor)
         shap_values = deep_explainer.shap_values(background_tensor, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
-    shap_values = np.stack(shap_values)  # forecast_len x N x L x M
-    if len(shap_values.shape) != 4:
-        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
         shap_values, names=["preds", "batches", "observations", "features"]
     )
@@ -263,9 +290,6 @@ def deep_explain_model_heatmap(
     to_explain = history
     shap_values = deep_explainer.shap_values(to_explain, check_additivity=False)
     shap_values = fix_shap_values(shap_values, history)
-    shap_values = np.stack(shap_values)
-    if len(shap_values.shape) != 4:
-        shap_values = np.expand_dims(shap_values, axis=0)
     shap_values = torch.tensor(
         shap_values, names=["preds", "batches", "observations", "features"]
     )  # no fake ballo t

@@ -1,19 +1,8 @@
 import numpy as np
 import pandas as pd
-from typing import List, NamedTuple, Tuple, Optional
+from typing import List
 
-
-class TrainData(NamedTuple):
-    """
-    A named tuple to hold feature and target NumPy arrays for training.
-
-    :ivar features: NumPy array of features (X).
-    :vartype features: np.ndarray
-    :ivar targets: NumPy array of targets (Y).
-    :vartype targets: np.ndarray
-    """
-    features: np.ndarray
-    targets: np.ndarray
+from flood_forecast.da_rnn.custom_types import TrainData
 
 
 def format_data(dat: pd.DataFrame, targ_column: List[str]) -> TrainData:

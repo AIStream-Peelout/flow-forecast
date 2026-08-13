@@ -2,6 +2,7 @@
     "model_name": "DLinear",
     "use_decoder": true,
     "model_type": "PyTorch",
+    "device": "cpu",
     "model_params": {
       "forecast_history":20,
       "forecast_length": 10,
@@ -42,17 +43,17 @@
    },
    "GCS": false,
 
-   "wandb": {
-      "name": "flood_forecast_circleci",
-      "tags": ["dummy_run", "circleci"],
-      "project": "repo-flood_forecast"
-   },
+    "wandb": {
+       "name": "flood_forecast_circleci",
+       "tags": ["dummy_run", "circleci"],
+       "project": "repo-flood_forecast"
+    },
    "forward_params":{},
   "metrics":["MSE"],
   "inference_params":
   {
         "datetime_start":"2016-05-31",
-         "hours_to_forecast":334,
+         "hours_to_forecast":10,
          "test_csv_path":"tests/test_data/keag_small.csv",
          "decoder_params":{
            "decoder_function": "simple_decode",

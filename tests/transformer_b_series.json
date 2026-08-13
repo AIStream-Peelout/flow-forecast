@@ -1,6 +1,7 @@
 {
     "model_name": "DecoderTransformer",
     "model_type": "PyTorch",
+    "device": "cpu",
     "model_params": {
       "n_time_series":5,
       "n_head": 8,

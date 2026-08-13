@@ -7,7 +7,7 @@ from flood_forecast.preprocessing.interpolate_preprocess import interpolate_miss
 
 
 class DataQualityTests(unittest.TestCase):
-    def setUp():
+    def setUp(self):
         """
         Setup method to initialize paths or data needed for the tests.
 
@@ -18,7 +18,7 @@ class DataQualityTests(unittest.TestCase):
         # These are historical tests.
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
 
-    def test_intermediate_csv():
+    def test_intermediate_csv(self):
         """
         Test processing of intermediate CSV files for correct datetime and flow value bounds.
 
@@ -32,7 +32,7 @@ class DataQualityTests(unittest.TestCase):
         self.assertGreater(max_flow, 2640)
         self.assertLess(min_flow, 1600)
 
-    def test_tz_interpolate_fix():
+    def test_tz_interpolate_fix(self):
         """
         Test fixing of timezones and interpolation of missing values in river flow dataset.
 
@@ -49,6 +49,7 @@ class DataQualityTests(unittest.TestCase):
         revised_df = interpolate_missing_values(revised_df)
         self.assertEqual(0, sum(pd.isnull(revised_df['cfs'])))
         self.assertEqual(0, sum(pd.isnull(revised_df['precip'])))
+
 
 if __name__ == '__main__':
     unittest.main()
