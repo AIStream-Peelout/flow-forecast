@@ -11,7 +11,7 @@ class Informer(nn.Module):
     def __init__(self, n_time_series: int, dec_in: int, c_out: int, seq_len: int, label_len: int, out_len: int,
                  factor: int = 5, d_model: int = 512, n_heads: int = 8, e_layers: int = 3, d_layers: int = 2, d_ff: int = 512,
                  dropout: float = 0.0, attn: str = 'prob', embed: str = 'fixed', temp_depth: int = 4, activation: str = 'gelu',
-                 device: torch.device = None):
+                 device: Union[str, torch.device, None] = None):
         """
         Informer model architecture for long-term time series forecasting.
         This is based on the implementation of the Informer available from the original authors
