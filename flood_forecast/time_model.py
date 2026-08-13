@@ -63,7 +63,7 @@ class TimeSeriesModel(ABC):
         self.wandb = self.wandb_init()
         self.crit = make_criterion_functions(params["metrics"])
 
-    def to_device(self, value, non_blocking: bool = False):
+    def to_device(self, value: object, non_blocking: bool = False) -> object:
         """Move all tensors in ``value`` to this model's configured PyTorch device.
 
         :param value: Tensor or nested tensor structure.
