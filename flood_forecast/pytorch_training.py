@@ -12,6 +12,7 @@ from flood_forecast.basic.linear_regression import simple_decode
 from flood_forecast.training_utils import EarlyStopper
 from flood_forecast.custom.custom_opt import GaussianLoss, MASELoss
 from flood_forecast.series_id_helper import handle_csv_id_output, handle_csv_id_validation
+from flood_forecast.device import move_to_device
 from torch.nn import CrossEntropyLoss
 
 TEMPORAL_FEATS_MODELS = ["ITransformer", "Informer"]
@@ -35,9 +36,13 @@ def multi_crit(crit_multi: List, output, labels, valid=None):
     loss = 0.0
     for crit in crit_multi:
         if len(output.shape) == 3:
-            loss += compute_loss(labels[:, :, i], output[:, :, i], torch.rand(1, 2), crit, valid)
+            loss += compute_loss(
+                labels[:, :, i], output[:, :, i],
+                torch.rand(1, 2, device=output.device), crit, valid)
         else:
-            loss += compute_loss(labels[:, i], output[:, i], torch.rand(1, 2), crit, valid)
+            loss += compute_loss(
+                labels[:, i], output[:, i],
+                torch.rand(1, 2, device=output.device), crit, valid)
     summed_loss = loss
     return summed_loss
 
@@ -133,6 +138,12 @@ def train_transformer_style(
     if "shuffle" not in training_params:
         training_params["shuffle"] = False
     criterion = make_crit(training_params)
+    criteria = criterion if isinstance(criterion, list) else [criterion]
+    for loss_function in criteria:
+        if isinstance(loss_function, torch.nn.Module):
+            loss_function.to(model.device)
+        if hasattr(loss_function, "device"):
+            loss_function.device = model.device
     opt = pytorch_opt_dict[training_params["optimizer"]](
         model.model.parameters(), **training_params["optim_params"])
     if "probabilistic" in model.params["model_params"] or "probabilistic" in model.params:
@@ -419,30 +430,34 @@ def torch_single_train(model: PyTorchForecast,
     running_loss = 0.0
     for src, trg in data_loader:
         opt.zero_grad()
+        src, trg = model.to_device((src, trg), non_blocking=True)
         if meta_data_model:
+            meta_data_model_representation = meta_data_model.to_device(
+                meta_data_model_representation)
             representation = meta_data_model.model.generate_representation(meta_data_model_representation)
             forward_params["meta_data"] = representation
             if meta_loss:
                 output = meta_data_model.model(meta_data_model_representation)
-                met_loss = compute_loss(meta_data_model_representation, output, torch.rand(2, 3, 2), meta_loss, None)
+                met_loss = compute_loss(
+                    meta_data_model_representation, output,
+                    torch.rand(2, 3, 2, device=meta_data_model.device), meta_loss, None)
                 met_loss.backward()
         if takes_target:
             forward_params["t"] = trg
         elif "TemporalLoader" == model.params["dataset_params"]["class"]:
-            forward_params["x_mark_enc"] = src[1].to(model.device)
-            forward_params["x_dec"] = trg[1].to(model.device)
-            forward_params["x_mark_dec"] = trg[0].to(model.device)
+            forward_params["x_mark_enc"] = src[1]
+            forward_params["x_dec"] = trg[1]
+            forward_params["x_mark_dec"] = trg[0]
             src = src[0]
             pred_len = model.model.pred_len
             trg = trg[0]
-            trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float().to(model.device)
+            trg[:, -pred_len:, :] = torch.zeros_like(trg[:, -pred_len:, :].long()).float()
             # Assign to avoid other if statement
+        forward_params = model.to_device(forward_params, non_blocking=True)
         if "SeriesIDLoader" == model.params["dataset_params"]["class"]:
             running_loss += handle_csv_id_output(src, trg, model, criterion, opt, False, multi_targets)
             i += 1
         else:
-            src = src.to(model.device)
-            trg = trg.to(model.device)
             output = model.model(src, **forward_params)
             if hasattr(model.model, "pred_len"):
                 multi_targets = mulit_targets_copy
@@ -547,9 +562,7 @@ def compute_validation(validation_loader: DataLoader,
                 scaled_crit = handle_csv_id_validation(src, targ, model, criterion, False, multi_targets)
                 unscaled_crit = {}
                 continue
-            src = src if isinstance(src, list) else src.to(device)
-            targ = targ if isinstance(targ, list) else targ.to(device)
-            # targ = targ if isinstance(targ, list) else targ.to(device)
+            src, targ = move_to_device((src, targ), device, non_blocking=True)
             i += 1
             if decoder_structure:
                 if type(model).__name__ == "SimpleTransformer":
@@ -567,9 +580,10 @@ def compute_validation(validation_loader: DataLoader,
                     multi_targets = multi_targs1
                     filled_targ = targ[1].clone()
                     pred_len = model.pred_len
-                    filled_targ[:, -pred_len:, :] = torch.zeros_like(filled_targ[:, -pred_len:, :]).float().to(device)
-                    output = model(src[0].to(device), src[1].to(device), filled_targ.to(device), targ[0].to(device))
-                    labels = targ[1][:, -pred_len:, 0:multi_targets].to(device)
+                    filled_targ[:, -pred_len:, :] = torch.zeros_like(
+                        filled_targ[:, -pred_len:, :]).float()
+                    output = model(src[0], src[1], filled_targ, targ[0])
+                    labels = targ[1][:, -pred_len:, 0:multi_targets]
                     src = src[0]
                     assert output.shape[1] != 0
                     assert labels.shape[1] != 0
@@ -589,8 +603,8 @@ def compute_validation(validation_loader: DataLoader,
             else:
                 if probabilistic:
                     output_dist = model(src.float())
-                    output = output_dist.mean.detach().numpy()
-                    output_std = output_dist.stddev.detach().numpy()
+                    output = output_dist.mean.detach().cpu().numpy()
+                    output_std = output_dist.stddev.detach().cpu().numpy()
                 else:
                     output = model(src.float())
                     mod_output_list.append(output)
@@ -630,7 +644,7 @@ def compute_validation(validation_loader: DataLoader,
         label_list = label_list[:, 0, :].detach().cpu()
         mod_output1 = torch.cat(mod_output_list)[:, 0, :].detach().cpu()
         d = torch.nn.Softmax(dim=1)
-        mod_output_final = d(mod_output1).numpy()
+        mod_output_final = d(mod_output1).cpu().numpy()
         fin = label_list.max(dim=1)[1]
         wandb.log({"roc_" + str(epoch): wandb.plot.roc_curve(fin, mod_output_final, classes_to_plot=None, labels=None,
                                                              title="roc_" + str(epoch))})

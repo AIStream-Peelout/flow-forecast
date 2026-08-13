@@ -14,6 +14,7 @@ from flood_forecast.da_rnn.constants import device
 from flood_forecast.da_rnn.modules import Encoder, Decoder
 from flood_forecast.da_rnn.custom_types import DaRnnNet, TrainData, TrainConfig
 from flood_forecast.da_rnn.utils import numpy_to_tvar
+from flood_forecast.device import resolve_torch_device
 from torch.utils.tensorboard import SummaryWriter
 from typing import Tuple, List, Dict
 
@@ -55,7 +56,7 @@ def da_rnn(train_data: TrainData,
     :return: A tuple containing the training configuration and the initialized DA-RNN network wrapper.
     :rtype: typing.Tuple[dict, flood_forecast.da_rnn.custom_types.DaRnnNet]
     """
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = resolve_torch_device()
     print("Using device: " + str(device))
     train_cfg = TrainConfig(T, int(train_data.feats.shape[0] * 0.7), batch_size, nn.MSELoss())
     logger.info(f"Training size: {train_cfg.train_size:d}.")

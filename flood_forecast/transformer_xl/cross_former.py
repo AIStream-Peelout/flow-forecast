@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from einops import rearrange, repeat
 from math import ceil, sqrt
+from flood_forecast.device import resolve_torch_device
 
 
 class Crossformer(nn.Module):
@@ -24,7 +25,7 @@ class Crossformer(nn.Module):
         dropout=0.0,
         baseline=False,
         n_targs=None,
-        device=torch.device("cuda:0"),
+        device=None,
     ):
         """
         Initializes the Crossformer model.
@@ -55,8 +56,8 @@ class Crossformer(nn.Module):
         :type baseline: bool, optional
         :param n_targs: The number of target time series to forecast. If None, uses n_time_series.
         :type n_targs: int, optional
-        :param device: The device to run the model on, defaults to torch.device("cuda:0")
-        :type device: torch.device, optional
+        :param device: The device to run the model on, defaults to automatic selection.
+        :type device: str or torch.device, optional
         """
         super(Crossformer, self).__init__()
         self.data_dim = n_time_series
@@ -68,7 +69,7 @@ class Crossformer(nn.Module):
 
         self.baseline = baseline
 
-        self.device = device
+        self.device = resolve_torch_device(device)
 
         # The padding operation to handle invisible sgemnet length
         self.pad_in_len = ceil(1.0 * forecast_history / seg_len) * seg_len

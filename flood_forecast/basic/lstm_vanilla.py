@@ -1,5 +1,7 @@
 import torch
 
+from flood_forecast.device import resolve_torch_device
+
 
 class LSTMForecast(torch.nn.Module):
     """
@@ -47,7 +49,7 @@ class LSTMForecast(torch.nn.Module):
         if self.probabilistic:
             output_seq_len = 2
         self.final_layer = torch.nn.Linear(seq_length * hidden_states, output_seq_len)
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = resolve_torch_device()
         self.init_hidden(batch_size)
 
     def init_hidden(self, batch_size: int) -> None:
@@ -82,6 +84,7 @@ class LSTMForecast(torch.nn.Module):
         :return: Output tensor of predictions, or Normal distribution if probabilistic
         :rtype: torch.Tensor or torch.distributions.Normal
         """
+        self.device = x.device
         batch_size = x.size()[0]
         self.init_hidden(batch_size)
         out_x, self.hidden = self.lstm(x, self.hidden)

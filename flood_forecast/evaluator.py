@@ -339,7 +339,7 @@ def infer_on_torch_model(
     :return: A tuple containing: the dataframe with train and test data, the final prediction tensor, history length, forecast start index, the test data loader, and a list of prediction samples dataframes.
     :rtype: Tuple[pd.DataFrame, torch.Tensor, int, int, CSVTestLoader, List[pd.DataFrame]]
     """
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = model.device
     if isinstance(datetime_start, str):
         datetime_start = datetime.strptime(datetime_start, "%Y-%m-%d")
     multi_params = 1
@@ -457,7 +457,7 @@ def handle_later_ev(model, df_train_and_test, end_tensor, params, csv_test_loade
     """
     targ = False
     decoder_params = None
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = model.device
     print("These are the params " + str(params))
     if "decoder_params" in params["inference_params"]:
         decoder_params = params["inference_params"]["decoder_params"]
@@ -667,7 +667,7 @@ def generate_predictions(
     if targs or model.params["dataset_params"]["class"] == "TemporalLoader":
         history_dim = history
     else:
-        history_dim = history.unsqueeze(0).to(model.device)
+        history_dim = model.to_device(history.unsqueeze(0))
     if decoder_params is None:
         end_tensor = generate_predictions_non_decoded(
             model, df, test_data, history_dim, forecast_length, hours_to_forecast,
@@ -729,7 +729,7 @@ def generate_predictions_non_decoded(
     if test_data.use_real_temp:
         temp_cols = test_data.convert_real_batches("temp", df[forecast_length:])
     for i in range(0, int(np.ceil(hours_to_forecast / forecast_length).item())):
-        output = model.model(full_history[i].to(model.device))
+        output = model.model(model.to_device(full_history[i]))
         all_tensor.append(output.view(-1))
         if i == int(np.ceil(hours_to_forecast / forecast_length).item()) - 1:
             break
@@ -745,9 +745,7 @@ def generate_predictions_non_decoded(
                 }
             )
             revised_np = temp_df[rel_cols].to_numpy()
-            full_history.append(
-                torch.from_numpy(revised_np).to(model.device).unsqueeze(0)
-            )
+            full_history.append(model.to_device(torch.from_numpy(revised_np).unsqueeze(0)))
         else:
             raise ValueError(
                 "Cannot forecast beyond one forecast_length window without real covariate data "
@@ -806,12 +804,8 @@ def generate_decoded_predictions(
         if "probabilistic" in decoder_params:
             probabilistic = True
 
-        real_target_tensor = (
-            torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy())
-            .to(device)
-            .unsqueeze(0)
-            .to(model.device)
-        )
+        real_target_tensor = model.to_device(
+            torch.from_numpy(test_data.df[forecast_start_idx:].to_numpy()).unsqueeze(0))
         if targs:
             src = history_dim
             src0 = src[0]

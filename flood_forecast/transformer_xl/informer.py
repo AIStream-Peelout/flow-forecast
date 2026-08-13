@@ -4,13 +4,14 @@ import torch.nn.functional as F
 from flood_forecast.transformer_xl.attn import FullAttention, ProbAttention, AttentionLayer
 from flood_forecast.transformer_xl.data_embedding import DataEmbedding
 from typing import List, Tuple, Optional, Union
+from flood_forecast.device import resolve_torch_device
 
 
 class Informer(nn.Module):
     def __init__(self, n_time_series: int, dec_in: int, c_out: int, seq_len: int, label_len: int, out_len: int,
                  factor: int = 5, d_model: int = 512, n_heads: int = 8, e_layers: int = 3, d_layers: int = 2, d_ff: int = 512,
                  dropout: float = 0.0, attn: str = 'prob', embed: str = 'fixed', temp_depth: int = 4, activation: str = 'gelu',
-                 device: torch.device = torch.device('cuda:0')):
+                 device: Union[str, torch.device, None] = None):
         """
         Informer model architecture for long-term time series forecasting.
         This is based on the implementation of the Informer available from the original authors
@@ -51,14 +52,15 @@ class Informer(nn.Module):
         :type temp_depth: int, optional
         :param activation: The activation function, defaults to 'gelu'.
         :type activation: str, optional
-        :param device: The device the model uses, defaults to torch.device('cuda:0').
-        :type device: torch.device, optional
+        :param device: The device the model uses, defaults to automatic selection.
+        :type device: str or torch.device, optional
         """
         super(Informer, self).__init__()
         self.pred_len = out_len
         self.label_len = label_len
         self.attn = attn
         self.c_out = c_out
+        self.device = resolve_torch_device(device)
         # Encoding
         self.enc_embedding = DataEmbedding(n_time_series, d_model, embed, temp_depth, dropout)
         self.dec_embedding = DataEmbedding(dec_in, d_model, embed, temp_depth, dropout)

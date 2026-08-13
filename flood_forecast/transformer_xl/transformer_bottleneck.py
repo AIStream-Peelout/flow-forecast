@@ -417,7 +417,7 @@ class TransformerModel(nn.Module):
         :type seq_num: int or None
         """
         super(TransformerModel, self).__init__()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")
         self.input_dim = n_time_series
         self.n_head = n_head
         self.seq_num = None
@@ -451,6 +451,7 @@ class TransformerModel(nn.Module):
         :return: The output tensor from the final transformer block.
         :rtype: torch.Tensor
         """
+        self.device = x.device
         batch_size = x.size(0)
         length = x.size(1)  # (Batch_size, length, input_dim)
         embedding_sum = torch.zeros(batch_size, length, self.n_embd).to(self.device)

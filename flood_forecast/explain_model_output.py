@@ -96,7 +96,7 @@ def deep_explain_model_summary_plot(
         return
 
     use_wandb = model.wandb
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = model.device
 
     if model.params["model_name"] == "DARNN" and device.type == "cuda":
         print("DARNN does not work with shap on CUDA")
@@ -218,7 +218,7 @@ def deep_explain_model_heatmap(
         print("Probabilistic currently not supported.")
         return
     use_wandb = model.wandb
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = model.device
 
     if model.params["model_name"] == "DARNN" and device.type == "cuda":
         # TO-DO check if this is still true

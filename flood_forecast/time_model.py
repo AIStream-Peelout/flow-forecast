@@ -12,6 +12,7 @@ from flood_forecast.preprocessing.pytorch_loaders import (CSVDataLoader, AEDatal
 from flood_forecast.gcp_integration.basic_utils import get_storage_client, upload_file
 from flood_forecast.utils import make_criterion_functions
 from flood_forecast.preprocessing.buil_dataset import get_data
+from flood_forecast.device import move_to_device, resolve_torch_device
 import wandb
 
 
@@ -61,6 +62,18 @@ class TimeSeriesModel(ABC):
             self.gcs_client = None
         self.wandb = self.wandb_init()
         self.crit = make_criterion_functions(params["metrics"])
+
+    def to_device(self, value: object, non_blocking: bool = False) -> object:
+        """Move all tensors in ``value`` to this model's configured PyTorch device.
+
+        :param value: Tensor or nested tensor structure.
+        :type value: object
+        :param non_blocking: Request an asynchronous transfer when supported.
+        :type non_blocking: bool
+        :return: The value with every tensor moved to ``self.device``.
+        :rtype: object
+        """
+        return move_to_device(value, self.device, non_blocking=non_blocking)
 
     @abstractmethod
     def load_model(self, model_base: str, model_params: Dict, weight_path=None) -> object:
@@ -180,8 +193,13 @@ class PyTorchForecast(TimeSeriesModel):
         :return: None
         :rtype: None
         """
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = resolve_torch_device(params_dict.get("device", "auto"))
         super().__init__(model_base, training_data, validation_data, test_data, params_dict)
+        for metric in self.crit:
+            if isinstance(metric, torch.nn.Module):
+                metric.to(self.device)
+            if hasattr(metric, "device"):
+                metric.device = self.device
         print("Torch is using " + str(self.device))
         if "weight_path_add" in params_dict:
             self.__freeze_layers__(params_dict["weight_path_add"])
@@ -232,11 +250,13 @@ class PyTorchForecast(TimeSeriesModel):
                 model.load_state_dict(checkpoint, strict=strict)
                 print("Weights sucessfully loaded")
             model.to(self.device)
-            # TODO create a general loop to convert all model tensor params to device
-            if hasattr(model, "mask"):
-                model.mask = model.mask.to(self.device)
-            if hasattr(model, "tgt_mask"):
-                model.tgt_mask = model.tgt_mask.to(self.device)
+            for module in model.modules():
+                if hasattr(module, "device"):
+                    module.device = self.device
+                for tensor_name in ("mask", "tgt_mask"):
+                    tensor = getattr(module, tensor_name, None)
+                    if isinstance(tensor, torch.Tensor):
+                        setattr(module, tensor_name, self.to_device(tensor))
         else:
             raise Exception(
                 "Error the model " +

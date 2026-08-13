@@ -1,3 +1,3 @@
-import torch
+from flood_forecast.device import resolve_torch_device
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = resolve_torch_device()
