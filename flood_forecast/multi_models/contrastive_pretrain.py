@@ -45,7 +45,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                temperature: float = 0.07, device: str = "cpu",
                                checkpoint_path: Optional[str] = None,
                                wandb_run=None, cross_year_views: bool = False,
-                               blocked_batches: bool = False, seed: int = 42) -> List[float]:
+                               blocked_batches: bool = False, seed: int = 42,
+                               train_fusion: bool = True) -> List[float]:
     """
     Pretrains the encoder with contrastive alignment across modalities.
 
@@ -75,6 +76,10 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
     :type blocked_batches: bool, optional
     :param seed: Seed for the blocked batch sampler, defaults to 42.
     :type seed: int, optional
+    :param train_fusion: Include the fused-embedding InfoNCE term so the fusion layers train
+        (see :func:`flood_forecast.meta_models.contrastive_train.contrastive_step`), defaults
+        to True.
+    :type train_fusion: bool, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
@@ -94,7 +99,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                               modality_pairs=modality_pairs,
                                               input_keys=INPUT_KEYS,
                                               view_aliases=view_aliases,
-                                              batch_sampler=batch_sampler)
+                                              batch_sampler=batch_sampler,
+                                              train_fusion=train_fusion)
 
 
 def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,

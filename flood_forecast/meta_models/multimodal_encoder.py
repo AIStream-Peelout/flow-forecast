@@ -240,7 +240,8 @@ class MultiModalEncoder(nn.Module):
     def __init__(self, encoders: Dict[str, nn.Module], dim: int, embedding_dim: int = 256,
                  fusion: str = "concat", query_modality: Optional[str] = None,
                  sequence_modalities: Optional[Iterable[str]] = None, heads: int = 4,
-                 dropout: float = 0.0, contrastive_dim: int = 128):
+                 dropout: float = 0.0, contrastive_dim: int = 128,
+                 normalize_towers: bool = False):
         """
         Initializes the multi-modal encoder.
 
@@ -268,11 +269,16 @@ class MultiModalEncoder(nn.Module):
         :param contrastive_dim: The dimension of the shared contrastive projection space,
             defaults to 128.
         :type contrastive_dim: int, optional
+        :param normalize_towers: L2-normalize each pooled modality before fusion so no tower
+            dominates the fused representation by output magnitude alone (the joint LayerNorm in
+            ``projection`` cannot rebalance blocks), defaults to False.
+        :type normalize_towers: bool, optional
         """
         super().__init__()
         if fusion not in ("concat", "cross_attention"):
             raise ValueError("fusion must be 'concat' or 'cross_attention' but got " + fusion)
         self.fusion = fusion
+        self.normalize_towers = normalize_towers
         self.encoders = nn.ModuleDict(encoders)
         self.sequence_modalities = frozenset(sequence_modalities or ())
         unknown = self.sequence_modalities - set(self.encoders)
@@ -295,6 +301,60 @@ class MultiModalEncoder(nn.Module):
         self.contrastive_heads = nn.ModuleDict({
             name: nn.Linear(dim, contrastive_dim) for name in self.encoders
         })
+        # Contrastive head of the FUSED embedding: aligning two fused views (or the fused
+        # embedding with the modality projections) is what puts projection/cross_attention in
+        # the loss graph — without it the fusion stays at its random initialization.
+        self.fused_head = nn.Linear(embedding_dim, contrastive_dim)
+
+    def encode_towers(self, inputs: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        """
+        Runs every modality encoder on its raw input.
+
+        :param inputs: A dict mapping each modality name to its raw input tensor.
+        :type inputs: Dict[str, torch.Tensor]
+        :return: Modality name -> raw encoder output (token sequence or vector).
+        :rtype: Dict[str, torch.Tensor]
+        """
+        return {name: encoder(inputs[name]) for name, encoder in self.encoders.items()}
+
+    def pool_towers(self, outputs: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        """
+        Pools raw encoder outputs to one vector per modality (normalized when configured).
+
+        :param outputs: Modality name -> raw encoder output from :meth:`encode_towers`.
+        :type outputs: Dict[str, torch.Tensor]
+        :return: Modality name -> (batch_size, dim) pooled vector.
+        :rtype: Dict[str, torch.Tensor]
+        """
+        pooled = {name: out.mean(dim=1) if out.dim() == 3 else out
+                  for name, out in outputs.items()}
+        if self.normalize_towers:
+            pooled = {name: nn.functional.normalize(vec, dim=-1) for name, vec in pooled.items()}
+        return pooled
+
+    def fuse(self, outputs: Dict[str, torch.Tensor]) -> torch.Tensor:
+        """
+        Computes the fused embedding from raw encoder outputs.
+
+        :param outputs: Modality name -> raw encoder output from :meth:`encode_towers`.
+        :type outputs: Dict[str, torch.Tensor]
+        :return: The fused embedding of shape (batch_size, embedding_dim).
+        :rtype: torch.Tensor
+        """
+        pooled = self.pool_towers(outputs)
+        if self.fusion == "cross_attention":
+            query = pooled[self.query_modality].unsqueeze(1)
+            context = torch.cat(
+                [out if out.dim() == 3 else out.unsqueeze(1)
+                 for name, out in outputs.items() if name != self.query_modality], dim=1)
+            attended, _ = self.cross_attention(query, context, context)
+            parts = [attended.squeeze(1), pooled[self.query_modality]]
+            parts += [pooled[name] for name in self.encoders
+                      if name != self.query_modality and name not in self.sequence_modalities]
+            fused = torch.cat(parts, dim=-1)
+        else:
+            fused = torch.cat([pooled[name] for name in self.encoders], dim=-1)
+        return self.projection(fused)
 
     def encode(self, inputs: Dict[str, torch.Tensor], return_modalities: bool = False
                ) -> Union[torch.Tensor, Tuple[torch.Tensor, Dict[str, torch.Tensor]]]:
@@ -310,26 +370,11 @@ class MultiModalEncoder(nn.Module):
             of contrastive projections keyed by modality name) when return_modalities is True.
         :rtype: Union[torch.Tensor, Tuple[torch.Tensor, Dict[str, torch.Tensor]]]
         """
-        outputs = {name: encoder(inputs[name]) for name, encoder in self.encoders.items()}
-        pooled = {name: out.mean(dim=1) if out.dim() == 3 else out
-                  for name, out in outputs.items()}
-
-        if self.fusion == "cross_attention":
-            query = pooled[self.query_modality].unsqueeze(1)
-            context = torch.cat(
-                [out if out.dim() == 3 else out.unsqueeze(1)
-                 for name, out in outputs.items() if name != self.query_modality], dim=1)
-            attended, _ = self.cross_attention(query, context, context)
-            parts = [attended.squeeze(1), pooled[self.query_modality]]
-            parts += [pooled[name] for name in self.encoders
-                      if name != self.query_modality and name not in self.sequence_modalities]
-            fused = torch.cat(parts, dim=-1)
-        else:
-            fused = torch.cat([pooled[name] for name in self.encoders], dim=-1)
-        embedding = self.projection(fused)
-
+        outputs = self.encode_towers(inputs)
+        embedding = self.fuse(outputs)
         if not return_modalities:
             return embedding
+        pooled = self.pool_towers(outputs)
         modalities = {name: self.contrastive_heads[name](pooled[name]) for name in self.encoders}
         return embedding, modalities
 

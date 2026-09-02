@@ -33,7 +33,7 @@ class CatchmentEmbeddingDataset(Dataset):
     def __init__(self, data_dir: str, history_window_days: int = 365,
                  image_scale: float = 3000.0, min_window_observed: float = 0.5,
                  seed: Optional[int] = None, history_mode: str = "random_window",
-                 cross_year_views: bool = False):
+                 cross_year_views: bool = False, seasonal_only: bool = False):
         """
         Initializes the dataset and computes normalization statistics across sites.
 
@@ -59,13 +59,22 @@ class CatchmentEmbeddingDataset(Dataset):
             cross-year positive pairs; extraction should leave this False so the canonical
             best-coverage panel is used deterministically. Defaults to False.
         :type cross_year_views: bool, optional
+        :param seasonal_only: hourly_panel only — serve only the seasonal panel members,
+            dropping the flood/drought slices. Cross-year TRAINING views are always
+            seasonal-only (the extreme slices are single-year memorization shortcuts), so
+            extraction for a cross-year-trained encoder should set this to match the training
+            input distribution. Defaults to False (canonical panel incl. extremes).
+        :type seasonal_only: bool, optional
         """
         if history_mode not in ("random_window", "hourly_panel"):
             raise ValueError("history_mode must be 'random_window' or 'hourly_panel'")
         if cross_year_views and history_mode != "hourly_panel":
             raise ValueError("cross_year_views requires history_mode='hourly_panel'")
+        if seasonal_only and history_mode != "hourly_panel":
+            raise ValueError("seasonal_only requires history_mode='hourly_panel'")
         self.history_mode = history_mode
         self.cross_year_views = cross_year_views
+        self.seasonal_only = seasonal_only
         self.data_dir = data_dir
         self.history_window_days = history_window_days
         self.image_scale = image_scale
@@ -176,10 +185,12 @@ class CatchmentEmbeddingDataset(Dataset):
         all_types = [str(t) for t in record["panel_types"]]
         chosen = self._choose_panel_rows(all_types, avoid=avoid)
         ordered_types = list(dict.fromkeys(all_types))
-        if self.cross_year_views:
-            # Training views are seasonal-only: the flood/drought slices are single-year, so
-            # keeping them would hand both views an identical (and highly distinctive) slice —
-            # a memorization shortcut that defeats the cross-year invariance objective.
+        if self.cross_year_views or self.seasonal_only:
+            # Cross-year training views are seasonal-only: the flood/drought slices are
+            # single-year, so keeping them would hand both views an identical (and highly
+            # distinctive) slice — a memorization shortcut that defeats the cross-year
+            # invariance objective. seasonal_only applies the same restriction at extraction
+            # so the encoder sees its training input distribution.
             ordered_types = [t for t in ordered_types if t not in ("flood", "drought")]
         rows = [chosen[t] for t in ordered_types]  # stable type order
         full_panel = record["panel"].astype(np.float32)
