@@ -1,6 +1,9 @@
 from flood_forecast.preprocessing.closest_station import get_weather_data, format_dt, convert_temp, \
     process_asos_csv, process_asos_data
+from flood_forecast.preprocessing.buil_dataset import build_weather_csv
 from datetime import datetime
+import json
+import tempfile
 import unittest
 import os
 
@@ -17,6 +20,30 @@ class DataQualityTests(unittest.TestCase):
         :rtype: None
         """
         self.test_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
+
+    def test_build_weather_csv_call_arity(self):
+        """
+        Test that `build_weather_csv` calls its helpers with an argument count they accept.
+
+        A gage file whose station list is empty makes both `get_weather_data` and
+        `process_asos_data` return without any network access, so this exercises the
+        call sites only.
+
+        :return: None
+        :rtype: None
+        """
+        with tempfile.TemporaryDirectory() as gage_dir:
+            with open(os.path.join(gage_dir, "gage.json"), "w") as f:
+                json.dump({"river_id": 1, "gage_id": 1, "stations": []}, f)
+            build_weather_csv(
+                gage_dir,
+                "https://example.invalid/{}",
+                "https://example.invalid/{}",
+                set(),
+                os.path.join(gage_dir, "visited_gages.json"),
+                0,
+                1,
+            )
 
     def test_format_dt(self):
         """
