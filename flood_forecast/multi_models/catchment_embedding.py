@@ -43,7 +43,7 @@ class CatchmentEncoder(MultiModalEncoder):
                  patch_size: int = 16, dim: int = 128, embedding_dim: int = 256,
                  depth: int = 4, heads: int = 4, dim_head: int = 32, dropout: float = 0.0,
                  fusion: str = "concat", contrastive_dim: int = 128,
-                 history_mode: str = "sequence"):
+                 history_mode: str = "sequence", normalize_towers: bool = True):
         """
         Initializes the catchment encoder.
 
@@ -81,6 +81,10 @@ class CatchmentEncoder(MultiModalEncoder):
             e.g. the hourly seasonal/extreme panels — encoded per slice by a shared
             conv-tokenized transformer (:class:`PanelSequenceEncoder`), defaults to "sequence".
         :type history_mode: str, optional
+        :param normalize_towers: L2-normalize each pooled tower before fusion so no modality
+            dominates the fused embedding by magnitude (measured on trained catchment encoders:
+            the un-normalized vision block held ~88%% of the concat variance), defaults to True.
+        :type normalize_towers: bool, optional
         """
         if history_mode not in ("sequence", "panel"):
             raise ValueError("history_mode must be 'sequence' or 'panel'")
@@ -101,7 +105,8 @@ class CatchmentEncoder(MultiModalEncoder):
         }
         super().__init__(encoders, dim, embedding_dim=embedding_dim, fusion=fusion,
                          query_modality="history", sequence_modalities=("vision", "history"),
-                         heads=heads, dropout=dropout, contrastive_dim=contrastive_dim)
+                         heads=heads, dropout=dropout, contrastive_dim=contrastive_dim,
+                         normalize_towers=normalize_towers)
         # Backwards-compatible attribute aliases for the per-modality encoders.
         self.vision_encoder = self.encoders["vision"]
         self.tabular_encoder = self.encoders["tabular"]

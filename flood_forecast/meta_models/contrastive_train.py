@@ -92,10 +92,44 @@ def _modality_inputs(batch: Dict[str, torch.Tensor], encoder: MultiModalEncoder,
     return {name: batch[keys.get(name, name)].to(device) for name in names}
 
 
+def drop_modalities(outputs: Dict[str, torch.Tensor], p: float) -> Dict[str, torch.Tensor]:
+    """
+    Zeroes each modality's encoder output independently per sample with probability ``p``.
+
+    Every sample keeps at least one modality. Used on the fused contrastive views so that no
+    block is guaranteed to be shared between the two views of an entity: otherwise the fusion
+    can match views purely from the blocks that are identical across them (e.g. the same
+    image and static attributes) and learns to suppress the modality that actually differs.
+
+    :param outputs: Modality name -> raw encoder output, batch-first.
+    :type outputs: Dict[str, torch.Tensor]
+    :param p: Per-sample, per-modality drop probability; 0 returns the inputs unchanged.
+    :type p: float
+    :return: Modality name -> output with dropped samples zeroed.
+    :rtype: Dict[str, torch.Tensor]
+    """
+    if p <= 0.0:
+        return outputs
+    names = list(outputs)
+    first = next(iter(outputs.values()))
+    keep = torch.rand(first.shape[0], len(names), device=first.device) >= p
+    none_kept = (~keep.any(dim=1)).nonzero(as_tuple=True)[0]
+    if none_kept.numel():
+        keep[none_kept, torch.randint(len(names), (none_kept.numel(),), device=first.device)] = True
+    dropped = {}
+    for index, name in enumerate(names):
+        out = outputs[name]
+        mask = keep[:, index].to(out.dtype).view(out.shape[0], *([1] * (out.dim() - 1)))
+        dropped[name] = out * mask
+    return dropped
+
+
 def contrastive_step(encoder: MultiModalEncoder, inputs: Dict[str, torch.Tensor],
                      criterion: InfoNCELoss,
                      modality_pairs: Optional[Sequence[Tuple[str, str]]] = None,
-                     view_aliases: Optional[Dict[str, str]] = None) -> torch.Tensor:
+                     view_aliases: Optional[Dict[str, str]] = None,
+                     train_fusion: bool = True,
+                     fusion_modality_dropout: float = 0.5) -> torch.Tensor:
     """
     Computes the multi-pair InfoNCE loss for one batch of modality inputs.
 
@@ -114,18 +148,49 @@ def contrastive_step(encoder: MultiModalEncoder, inputs: Dict[str, torch.Tensor]
         entity). Alias inputs are encoded with the base modality's tower and contrastive head,
         so alias pairs teach invariance to whatever differs between the views. Defaults to None.
     :type view_aliases: Dict[str, str], optional
+    :param train_fusion: Add InfoNCE terms on the FUSED embedding so the fusion layers
+        (``projection``, and ``cross_attention`` when present) receive gradient: the fused
+        projection is paired with every modality projection, and, with view aliases, fused(base
+        views) is paired with fused(alias views substituted). Defaults to True — with False the
+        fusion stays at its random initialization, which silently wastes the trained towers
+        (the historical behavior, kept only for ablation).
+    :type train_fusion: bool, optional
+    :param fusion_modality_dropout: Per-sample modality dropout applied to each fused view
+        (see :func:`drop_modalities`). Without it, views that share identical blocks (an
+        entity has one image and one static vector but different-year histories) let the
+        fusion solve the pair from the shared blocks and suppress the differing one — measured
+        as a fused embedding almost insensitive to its history tower. Defaults to 0.5.
+    :type fusion_modality_dropout: float, optional
     :return: The scalar loss averaged over the modality pairs.
     :rtype: torch.Tensor
     """
-    _, modalities = encoder.encode(inputs, return_modalities=True)
+    outputs = encoder.encode_towers(inputs)
+    pooled = encoder.pool_towers(outputs)
+    modalities = {name: encoder.contrastive_heads[name](pooled[name])
+                  for name in encoder.encoders}
+    alias_outputs: Dict[str, torch.Tensor] = {}
     for alias, base in (view_aliases or {}).items():
         encoded = encoder.encoders[base](inputs[alias])
-        pooled = encoded.mean(dim=1) if encoded.dim() == 3 else encoded
-        modalities[alias] = encoder.contrastive_heads[base](pooled)
+        alias_outputs[alias] = encoded
+        alias_pooled = encoder.pool_towers({base: encoded})[base]
+        modalities[alias] = encoder.contrastive_heads[base](alias_pooled)
     if modality_pairs is None:
         modality_pairs = tuple(combinations(encoder.encoders, 2)) + \
             tuple((base, alias) for alias, base in (view_aliases or {}).items())
     losses = [criterion(modalities[a], modalities[b]) for a, b in modality_pairs]
+    if train_fusion:
+        fused = encoder.fused_head(encoder.fuse(drop_modalities(outputs,
+                                                                fusion_modality_dropout)))
+        # The fused code must stay predictive of every modality's identity code — including
+        # one dropped from its own view, which makes this a cross-modal prediction objective.
+        losses.extend(criterion(fused, modalities[name]) for name in encoder.encoders)
+        if view_aliases:
+            alt_outputs = dict(outputs)
+            for alias, base in view_aliases.items():
+                alt_outputs[base] = alias_outputs[alias]
+            fused_alt = encoder.fused_head(encoder.fuse(drop_modalities(alt_outputs,
+                                                                        fusion_modality_dropout)))
+            losses.append(criterion(fused, fused_alt))
     return torch.stack(losses).mean()
 
 
@@ -135,7 +200,9 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
                      wandb_run=None, modality_pairs: Optional[Sequence[Tuple[str, str]]] = None,
                      input_keys: Optional[Dict[str, str]] = None,
                      view_aliases: Optional[Dict[str, str]] = None,
-                     batch_sampler: Optional[Sampler] = None) -> List[float]:
+                     batch_sampler: Optional[Sampler] = None,
+                     train_fusion: bool = True,
+                     fusion_modality_dropout: float = 0.5) -> List[float]:
     """
     Pretrains a multi-modal encoder with contrastive alignment across its modalities.
 
@@ -170,6 +237,12 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
         therefore serve as mutual negatives), e.g. :class:`KeyBlockedBatchSampler`; defaults to
         None (uniform shuffling).
     :type batch_sampler: torch.utils.data.Sampler, optional
+    :param train_fusion: Include the fused-embedding InfoNCE terms so the fusion layers train
+        (see :func:`contrastive_step`), defaults to True.
+    :type train_fusion: bool, optional
+    :param fusion_modality_dropout: Per-sample modality dropout on the fused views (see
+        :func:`contrastive_step`), defaults to 0.5.
+    :type fusion_modality_dropout: float, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
@@ -188,7 +261,8 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
             optimizer.zero_grad()
             inputs = _modality_inputs(batch, encoder, input_keys, device)
             loss = contrastive_step(encoder, inputs, criterion, modality_pairs=modality_pairs,
-                                    view_aliases=view_aliases)
+                                    view_aliases=view_aliases, train_fusion=train_fusion,
+                                    fusion_modality_dropout=fusion_modality_dropout)
             loss.backward()
             optimizer.step()
             total += loss.item()
