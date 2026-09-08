@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 from flood_forecast.custom.custom_opt import InfoNCELoss
-from flood_forecast.meta_models.contrastive_train import contrastive_step
+from flood_forecast.meta_models.contrastive_train import contrastive_step, drop_modalities
 from flood_forecast.multi_models.catchment_embedding import CatchmentEncoder
 from flood_forecast.preprocessing.catchment_loader import CatchmentEmbeddingDataset
 
@@ -61,6 +61,7 @@ def step_and_backward(encoder: CatchmentEncoder, view_aliases=VIEW_ALIASES,
     :return: None
     :rtype: None
     """
+    torch.manual_seed(0)
     loss = contrastive_step(encoder, tiny_batch(), InfoNCELoss(),
                             view_aliases=view_aliases, train_fusion=train_fusion)
     loss.backward()
@@ -104,6 +105,20 @@ class TestFusionTraining(unittest.TestCase):
         for name, parameter in encoder.projection.named_parameters():
             self.assertIsNone(parameter.grad, "projection.%s unexpectedly trained" % name)
         self.assertIsNone(encoder.fused_head.weight.grad)
+
+    def test_modality_dropout_keeps_at_least_one_modality_per_sample(self):
+        torch.manual_seed(1)
+        outputs = {"vision": torch.ones(64, 5, 8), "tabular": torch.ones(64, 8),
+                   "history": torch.ones(64, 3, 8)}
+        dropped = drop_modalities(outputs, p=0.95)
+        kept = torch.stack([dropped[name].flatten(1).abs().sum(1) > 0 for name in outputs],
+                           dim=1)
+        self.assertTrue(bool(kept.any(dim=1).all()), "a sample lost every modality")
+        self.assertLess(float(kept.float().mean()), 1.0, "dropout did not drop anything")
+
+    def test_modality_dropout_zero_is_identity(self):
+        outputs = {"vision": torch.rand(4, 5, 8), "tabular": torch.rand(4, 8)}
+        self.assertIs(drop_modalities(outputs, p=0.0), outputs)
 
     def test_normalize_towers_balances_pooled_magnitudes(self):
         encoder = tiny_encoder("concat", normalize_towers=True)
