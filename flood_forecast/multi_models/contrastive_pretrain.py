@@ -18,7 +18,29 @@ from flood_forecast.preprocessing.catchment_loader import CatchmentEmbeddingData
 
 MODALITY_PAIRS = (("vision", "history"), ("vision", "tabular"), ("tabular", "history"))
 # Maps each modality name of the CatchmentEncoder to its key in the dataset batches.
-INPUT_KEYS = {"vision": "image", "tabular": "static", "history": "history"}
+INPUT_KEYS = {"vision": "image", "tabular": "static", "history": "history",
+              "vision_regional": "image_regional"}
+# Extra same-site views the dataset can serve (alias item key -> base modality): a
+# different-year history panel and an other-season regional scene.
+VIEW_ALIASES = {"history_alt": "history", "image_regional_alt": "vision_regional"}
+
+
+def modality_pairs_for(encoder: CatchmentEncoder,
+                       view_aliases: Optional[Dict[str, str]] = None
+                       ) -> Tuple[Tuple[str, str], ...]:
+    """
+    Every unordered pair of the encoder's modalities plus each alias view with its base.
+
+    :param encoder: The catchment encoder (its towers define the modalities).
+    :type encoder: CatchmentEncoder
+    :param view_aliases: Alias item key -> base modality mapping in use, defaults to None.
+    :type view_aliases: Dict[str, str], optional
+    :return: The (anchor, positive) modality name pairs.
+    :rtype: Tuple[Tuple[str, str], ...]
+    """
+    from itertools import combinations
+    pairs = tuple(combinations(encoder.encoders, 2))
+    return pairs + tuple((base, alias) for alias, base in (view_aliases or {}).items())
 
 
 def contrastive_step(encoder: CatchmentEncoder, batch: Dict[str, torch.Tensor],
@@ -35,9 +57,9 @@ def contrastive_step(encoder: CatchmentEncoder, batch: Dict[str, torch.Tensor],
     :return: The scalar loss averaged over the modality pairs.
     :rtype: torch.Tensor
     """
-    inputs = {name: batch[key] for name, key in INPUT_KEYS.items()}
+    inputs = {name: batch[INPUT_KEYS[name]] for name in encoder.encoders}
     return contrastive_train.contrastive_step(encoder, inputs, criterion,
-                                              modality_pairs=MODALITY_PAIRS)
+                                              modality_pairs=modality_pairs_for(encoder))
 
 
 def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
@@ -88,10 +110,13 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
-    view_aliases = {"history_alt": "history"} if cross_year_views else None
-    modality_pairs = MODALITY_PAIRS
+    view_aliases = None
     if cross_year_views:
-        modality_pairs = tuple(MODALITY_PAIRS) + (("history", "history_alt"),)
+        # Only the alias views the dataset actually serves for towers this encoder has.
+        sample = dataset[0]
+        view_aliases = {alias: base for alias, base in VIEW_ALIASES.items()
+                        if alias in sample and base in encoder.encoders} or None
+    modality_pairs = modality_pairs_for(encoder, view_aliases)
     batch_sampler = None
     if blocked_batches:
         batch_sampler = contrastive_train.KeyBlockedBatchSampler(dataset.site_ids, batch_size,
