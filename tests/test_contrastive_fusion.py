@@ -13,7 +13,8 @@ from flood_forecast.preprocessing.catchment_loader import CatchmentEmbeddingData
 VIEW_ALIASES = {"history_alt": "history"}
 
 
-def tiny_encoder(fusion: str = "concat", normalize_towers: bool = True) -> CatchmentEncoder:
+def tiny_encoder(fusion: str = "concat", normalize_towers: bool = True,
+                 fusion_head: str = "mlp") -> CatchmentEncoder:
     """
     Builds a small panel-mode catchment encoder for CPU tests.
 
@@ -21,6 +22,8 @@ def tiny_encoder(fusion: str = "concat", normalize_towers: bool = True) -> Catch
     :type fusion: str, optional
     :param normalize_towers: Whether to L2-normalize pooled towers, defaults to True.
     :type normalize_towers: bool, optional
+    :param fusion_head: "mlp" or "linear" fusion head, defaults to "mlp".
+    :type fusion_head: str, optional
     :return: The encoder.
     :rtype: CatchmentEncoder
     """
@@ -28,7 +31,7 @@ def tiny_encoder(fusion: str = "concat", normalize_towers: bool = True) -> Catch
                             history_features=6, history_len=48, patch_size=16, dim=16,
                             embedding_dim=24, depth=1, heads=2, dim_head=8, fusion=fusion,
                             contrastive_dim=12, history_mode="panel",
-                            normalize_towers=normalize_towers)
+                            normalize_towers=normalize_towers, fusion_head=fusion_head)
 
 
 def tiny_batch(batch_size: int = 4) -> dict:
@@ -105,6 +108,22 @@ class TestFusionTraining(unittest.TestCase):
         for name, parameter in encoder.projection.named_parameters():
             self.assertIsNone(parameter.grad, "projection.%s unexpectedly trained" % name)
         self.assertIsNone(encoder.fused_head.weight.grad)
+
+    def test_linear_fusion_head_trains_and_is_affine_in_the_fused_features(self):
+        encoder = tiny_encoder("concat", fusion_head="linear")
+        self.assertEqual(len(encoder.projection), 2)
+        step_and_backward(encoder)
+        self.assert_all_parameters_trained(encoder)
+        batch = tiny_batch()
+        outputs = encoder.encode_towers({name: batch[name] for name in encoder.encoders})
+        pooled = encoder.pool_towers(outputs)
+        fused = torch.cat([pooled[name] for name in encoder.encoders], dim=-1)
+        expected = encoder.projection[1](encoder.projection[0](fused))
+        self.assertTrue(torch.allclose(encoder.fuse(outputs), expected, atol=1e-6))
+
+    def test_invalid_fusion_head_raises(self):
+        with self.assertRaises(ValueError):
+            tiny_encoder("concat", fusion_head="quadratic")
 
     def test_modality_dropout_keeps_at_least_one_modality_per_sample(self):
         torch.manual_seed(1)
