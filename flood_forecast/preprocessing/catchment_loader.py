@@ -248,6 +248,7 @@ class CatchmentEmbeddingDataset(Dataset):
             if self.cross_year_views:
                 alt, _ = self._panel_history(record, avoid=chosen)
                 item["history_alt"] = torch.from_numpy(alt)
+            item.update(self._regional_views(record))
             return item
         window = self._sample_history_window(record["history"])
         observed = np.isfinite(window)
@@ -256,6 +257,32 @@ class CatchmentEmbeddingDataset(Dataset):
                               self.flow_mean) / self.flow_std
         history = np.stack([log_flow, observed.astype(np.float32)], axis=-1)
 
-        return {"image": torch.from_numpy(image), "static": torch.from_numpy(static),
+        item = {"image": torch.from_numpy(image), "static": torch.from_numpy(static),
                 "history": torch.from_numpy(history),
                 "site_index": torch.tensor(index, dtype=torch.long)}
+        item.update(self._regional_views(record))
+        return item
+
+    def _regional_views(self, record) -> Dict[str, torch.Tensor]:
+        """
+        Serves the regional-context image (and its cross-season view with alias views on).
+
+        Records without a regional patch yield nothing, so the item shape stays backwards
+        compatible; when present, "image_regional" is the primary (summer) scene and, with
+        ``cross_year_views``, "image_regional_alt" the other-season scene — a same-site
+        positive that differs in snow cover, leaf state and illumination.
+
+        :param record: An open .npz record.
+        :type record: numpy.lib.npyio.NpzFile
+        :return: The regional image tensors keyed by item name.
+        :rtype: Dict[str, torch.Tensor]
+        """
+        views: Dict[str, torch.Tensor] = {}
+        if "image_regional" not in record.files:
+            return views
+        for key in ("image_regional", "image_regional_alt"):
+            if key not in record.files or (key.endswith("_alt") and not self.cross_year_views):
+                continue
+            views[key] = torch.from_numpy(
+                np.clip(record[key] / self.image_scale, 0.0, 2.0).astype(np.float32))
+        return views
