@@ -45,7 +45,8 @@ class CatchmentEncoder(MultiModalEncoder):
                  fusion: str = "concat", contrastive_dim: int = 128,
                  history_mode: str = "sequence", normalize_towers: bool = True,
                  regional_image_size: Optional[Union[int, Tuple[int, int]]] = None,
-                 regional_channels: Optional[int] = None, regional_patch_size: int = 32):
+                 regional_channels: Optional[int] = None, regional_patch_size: int = 32,
+                 fusion_head: str = "mlp"):
         """
         Initializes the catchment encoder.
 
@@ -95,6 +96,10 @@ class CatchmentEncoder(MultiModalEncoder):
         :type regional_channels: int, optional
         :param regional_patch_size: ViT patch size of the regional tower, defaults to 32.
         :type regional_patch_size: int, optional
+        :param fusion_head: "mlp" or "linear" map from fused tower features to the embedding
+            (see :class:`~flood_forecast.meta_models.multimodal_encoder.MultiModalEncoder`),
+            defaults to "mlp".
+        :type fusion_head: str, optional
         """
         if history_mode not in ("sequence", "panel"):
             raise ValueError("history_mode must be 'sequence' or 'panel'")
@@ -124,7 +129,7 @@ class CatchmentEncoder(MultiModalEncoder):
         super().__init__(encoders, dim, embedding_dim=embedding_dim, fusion=fusion,
                          query_modality="history", sequence_modalities=sequence_modalities,
                          heads=heads, dropout=dropout, contrastive_dim=contrastive_dim,
-                         normalize_towers=normalize_towers)
+                         normalize_towers=normalize_towers, fusion_head=fusion_head)
         # Backwards-compatible attribute aliases for the per-modality encoders.
         self.vision_encoder = self.encoders["vision"]
         self.tabular_encoder = self.encoders["tabular"]

@@ -241,7 +241,7 @@ class MultiModalEncoder(nn.Module):
                  fusion: str = "concat", query_modality: Optional[str] = None,
                  sequence_modalities: Optional[Iterable[str]] = None, heads: int = 4,
                  dropout: float = 0.0, contrastive_dim: int = 128,
-                 normalize_towers: bool = False):
+                 normalize_towers: bool = False, fusion_head: str = "mlp"):
         """
         Initializes the multi-modal encoder.
 
@@ -273,11 +273,20 @@ class MultiModalEncoder(nn.Module):
             dominates the fused representation by output magnitude alone (the joint LayerNorm in
             ``projection`` cannot rebalance blocks), defaults to False.
         :type normalize_towers: bool, optional
+        :param fusion_head: The map from the fused tower features to the embedding: "mlp"
+            (LayerNorm -> Linear -> GELU -> Linear) or "linear" (LayerNorm -> Linear). A
+            linear head keeps whatever the towers encode linearly readable in the embedding —
+            an MLP trained on an identity objective can scramble such structure while still
+            retaining it for retrieval. Defaults to "mlp".
+        :type fusion_head: str, optional
         """
         super().__init__()
         if fusion not in ("concat", "cross_attention"):
             raise ValueError("fusion must be 'concat' or 'cross_attention' but got " + fusion)
+        if fusion_head not in ("mlp", "linear"):
+            raise ValueError("fusion_head must be 'mlp' or 'linear' but got " + fusion_head)
         self.fusion = fusion
+        self.fusion_head = fusion_head
         self.normalize_towers = normalize_towers
         self.encoders = nn.ModuleDict(encoders)
         self.sequence_modalities = frozenset(sequence_modalities or ())
@@ -296,8 +305,13 @@ class MultiModalEncoder(nn.Module):
             fused_in = dim * (2 + n_vector)
         else:
             fused_in = dim * len(self.encoders)
-        self.projection = nn.Sequential(nn.LayerNorm(fused_in), nn.Linear(fused_in, embedding_dim),
-                                        nn.GELU(), nn.Linear(embedding_dim, embedding_dim))
+        if fusion_head == "linear":
+            self.projection = nn.Sequential(nn.LayerNorm(fused_in),
+                                            nn.Linear(fused_in, embedding_dim))
+        else:
+            self.projection = nn.Sequential(nn.LayerNorm(fused_in),
+                                            nn.Linear(fused_in, embedding_dim), nn.GELU(),
+                                            nn.Linear(embedding_dim, embedding_dim))
         self.contrastive_heads = nn.ModuleDict({
             name: nn.Linear(dim, contrastive_dim) for name in self.encoders
         })
