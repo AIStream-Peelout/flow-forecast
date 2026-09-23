@@ -126,6 +126,37 @@ class TestRegionalLoaderAndTraining(unittest.TestCase):
         self.assertNotIn("image_regional", item)
         self.assertNotIn("image_regional_alt", item)
 
+    def test_mixed_records_auto_excludes_those_without_regional_and_collates(self):
+        # Two of six records lack the regional arrays: items must still share keys.
+        for site in (1, 4):
+            path = os.path.join(self.temp_dir, "%08d.npz" % site)
+            with np.load(path, allow_pickle=True) as record:
+                arrays = {k: record[k] for k in record.files
+                          if k not in ("image_regional", "image_regional_alt")}
+            np.savez_compressed(path, **arrays)
+        import warnings
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            dataset = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                                cross_year_views=True)
+        self.assertTrue(any("excluded" in str(w.message) for w in caught))
+        self.assertEqual(dataset.excluded_sites, ["00000001", "00000004"])
+        self.assertEqual(len(dataset), 4)
+        batch = next(iter(torch.utils.data.DataLoader(dataset, batch_size=4)))
+        self.assertEqual(batch["image_regional"].shape, (4, 6, 64, 64))
+        with self.assertRaises(ValueError):
+            CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                      regional="require")
+        ignored = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                            regional="ignore")
+        self.assertEqual(len(ignored), 6)
+        self.assertNotIn("image_regional", ignored[0])
+
+    def test_invalid_regional_policy_raises(self):
+        with self.assertRaises(ValueError):
+            CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                      regional="maybe")
+
     def test_pretrain_uses_regional_alias_view(self):
         dataset = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
                                             cross_year_views=True, seed=0)
