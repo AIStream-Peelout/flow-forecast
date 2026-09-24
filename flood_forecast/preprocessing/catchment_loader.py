@@ -17,6 +17,7 @@ day-of-year encodings as the calendar anchor plus flood/drought slice-type flags
 resolution preserves the flash dynamics that the daily legacy records could not represent.
 """
 import os
+import warnings
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -33,7 +34,8 @@ class CatchmentEmbeddingDataset(Dataset):
     def __init__(self, data_dir: str, history_window_days: int = 365,
                  image_scale: float = 3000.0, min_window_observed: float = 0.5,
                  seed: Optional[int] = None, history_mode: str = "random_window",
-                 cross_year_views: bool = False, seasonal_only: bool = False):
+                 cross_year_views: bool = False, seasonal_only: bool = False,
+                 regional: str = "auto", regional_half: bool = True):
         """
         Initializes the dataset and computes normalization statistics across sites.
 
@@ -65,6 +67,19 @@ class CatchmentEmbeddingDataset(Dataset):
             extraction for a cross-year-trained encoder should set this to match the training
             input distribution. Defaults to False (canonical panel incl. extremes).
         :type seasonal_only: bool, optional
+        :param regional: Policy for the optional regional-context image ("image_regional" /
+            "image_regional_alt" arrays): "auto" serves it when records carry it and, when
+            only some records do, excludes those without (see ``excluded_sites``) so every
+            item has the same keys and batches collate; "require" raises unless every record
+            has it; "ignore" never serves it. Defaults to "auto".
+        :type regional: str, optional
+        :param regional_half: Serve regional images as UNSCALED float16 digital numbers and
+            leave the reflectance scaling to :meth:`regional_transform` on the device. A
+            512x512x6 patch is 6.3 MB in float32; with two views per record a batch of 128
+            moves 3 GB from loader workers to the trainer through shared memory, which
+            dominated epoch time. Defaults to True. False serves scaled float32 like the
+            reach image.
+        :type regional_half: bool, optional
         """
         if history_mode not in ("random_window", "hourly_panel"):
             raise ValueError("history_mode must be 'random_window' or 'hourly_panel'")
@@ -72,6 +87,8 @@ class CatchmentEmbeddingDataset(Dataset):
             raise ValueError("cross_year_views requires history_mode='hourly_panel'")
         if seasonal_only and history_mode != "hourly_panel":
             raise ValueError("seasonal_only requires history_mode='hourly_panel'")
+        if regional not in ("auto", "require", "ignore"):
+            raise ValueError("regional must be 'auto', 'require' or 'ignore'")
         self.history_mode = history_mode
         self.cross_year_views = cross_year_views
         self.seasonal_only = seasonal_only
@@ -84,6 +101,9 @@ class CatchmentEmbeddingDataset(Dataset):
             name[:-4] for name in os.listdir(data_dir) if name.endswith(".npz"))
         if not self.site_ids:
             raise ValueError("No .npz records found in " + data_dir)
+        self.excluded_sites: List[str] = []
+        self.regional_half = regional_half
+        self.serve_regional = self._resolve_regional(regional)
 
         statics, log_flows = [], []
         for site_id in self.site_ids:
@@ -248,6 +268,7 @@ class CatchmentEmbeddingDataset(Dataset):
             if self.cross_year_views:
                 alt, _ = self._panel_history(record, avoid=chosen)
                 item["history_alt"] = torch.from_numpy(alt)
+            item.update(self._regional_views(record))
             return item
         window = self._sample_history_window(record["history"])
         observed = np.isfinite(window)
@@ -256,6 +277,86 @@ class CatchmentEmbeddingDataset(Dataset):
                               self.flow_mean) / self.flow_std
         history = np.stack([log_flow, observed.astype(np.float32)], axis=-1)
 
-        return {"image": torch.from_numpy(image), "static": torch.from_numpy(static),
+        item = {"image": torch.from_numpy(image), "static": torch.from_numpy(static),
                 "history": torch.from_numpy(history),
                 "site_index": torch.tensor(index, dtype=torch.long)}
+        item.update(self._regional_views(record))
+        return item
+
+    def _resolve_regional(self, policy: str) -> bool:
+        """
+        Applies the regional-image policy to the record set (see ``__init__``).
+
+        Every served item must carry the same keys for the default collate to batch them, so
+        a record set where only some records have the regional arrays is resolved here, once,
+        rather than item by item.
+
+        :param policy: "auto", "require" or "ignore".
+        :type policy: str
+        :return: Whether items will carry the regional image (and alias view).
+        :rtype: bool
+        """
+        if policy == "ignore":
+            return False
+        with_regional = []
+        for site_id in self.site_ids:
+            with np.load(os.path.join(self.data_dir, site_id + ".npz")) as record:
+                with_regional.append("image_regional" in record.files)
+        n_with = sum(with_regional)
+        if n_with == 0:
+            if policy == "require":
+                raise ValueError("regional='require' but no record in %s has image_regional"
+                                 % self.data_dir)
+            return False
+        if n_with < len(self.site_ids):
+            missing = [s for s, has in zip(self.site_ids, with_regional) if not has]
+            if policy == "require":
+                raise ValueError("regional='require' but %d records lack image_regional: %s"
+                                 % (len(missing), ", ".join(missing[:5])))
+            warnings.warn("%d of %d records lack image_regional and are excluded so items "
+                          "collate (regional='auto'); see excluded_sites"
+                          % (len(missing), len(self.site_ids)))
+            self.excluded_sites = missing
+            self.site_ids = [s for s, has in zip(self.site_ids, with_regional) if has]
+        return True
+
+    def _regional_views(self, record) -> Dict[str, torch.Tensor]:
+        """
+        Serves the regional-context image (and its cross-season view with alias views on).
+
+        Served only when the dataset resolved to carrying regional images (every served
+        record then has them). "image_regional" is the primary (summer) scene and, with
+        ``cross_year_views``, "image_regional_alt" the other-season scene — a same-site
+        positive that differs in snow cover, leaf state and illumination.
+
+        :param record: An open .npz record.
+        :type record: numpy.lib.npyio.NpzFile
+        :return: The regional image tensors keyed by item name.
+        :rtype: Dict[str, torch.Tensor]
+        """
+        views: Dict[str, torch.Tensor] = {}
+        if not self.serve_regional:
+            return views
+        for key in ("image_regional", "image_regional_alt"):
+            if key not in record.files or (key.endswith("_alt") and not self.cross_year_views):
+                continue
+            if self.regional_half:
+                views[key] = torch.from_numpy(record[key].astype(np.float16))
+            else:
+                views[key] = torch.from_numpy(
+                    np.clip(record[key] / self.image_scale, 0.0, 2.0).astype(np.float32))
+        return views
+
+    def regional_transform(self, images: torch.Tensor) -> torch.Tensor:
+        """
+        Scales unscaled regional digital numbers to the reflectance range the towers expect.
+
+        Apply on the device to items served with ``regional_half=True``; the result equals
+        the float32 scaling used for the reach image (``/image_scale``, clipped to [0, 2]).
+
+        :param images: Regional images of any float/int dtype.
+        :type images: torch.Tensor
+        :return: float32 images scaled to [0, 2].
+        :rtype: torch.Tensor
+        """
+        return (images.float() / self.image_scale).clamp_(0.0, 2.0)

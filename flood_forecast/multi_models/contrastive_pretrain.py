@@ -7,7 +7,7 @@ the *same* site (vision vs. history, vision vs. tabular, tabular vs. history); e
 the batch is a negative. After pretraining, :func:`extract_embeddings` produces the per-site
 embedding matrix used for clustering and as the context input of the hybrid ODE model.
 """
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
 
@@ -18,7 +18,46 @@ from flood_forecast.preprocessing.catchment_loader import CatchmentEmbeddingData
 
 MODALITY_PAIRS = (("vision", "history"), ("vision", "tabular"), ("tabular", "history"))
 # Maps each modality name of the CatchmentEncoder to its key in the dataset batches.
-INPUT_KEYS = {"vision": "image", "tabular": "static", "history": "history"}
+INPUT_KEYS = {"vision": "image", "tabular": "static", "history": "history",
+              "vision_regional": "image_regional"}
+# Extra same-site views the dataset can serve (alias item key -> base modality): a
+# different-year history panel and an other-season regional scene.
+VIEW_ALIASES = {"history_alt": "history", "image_regional_alt": "vision_regional"}
+
+
+def regional_transforms(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset
+                        ) -> Optional[Dict[str, Callable]]:
+    """
+    Device-side scaling for regional images served unscaled in float16 by the dataset.
+
+    :param encoder: The catchment encoder (transform only applies when it has the tower).
+    :type encoder: CatchmentEncoder
+    :param dataset: The embedding dataset.
+    :type dataset: CatchmentEmbeddingDataset
+    :return: {"vision_regional": dataset.regional_transform} or None.
+    :rtype: Dict[str, Callable], optional
+    """
+    if "vision_regional" in encoder.encoders and getattr(dataset, "regional_half", False):
+        return {"vision_regional": dataset.regional_transform}
+    return None
+
+
+def modality_pairs_for(encoder: CatchmentEncoder,
+                       view_aliases: Optional[Dict[str, str]] = None
+                       ) -> Tuple[Tuple[str, str], ...]:
+    """
+    Every unordered pair of the encoder's modalities plus each alias view with its base.
+
+    :param encoder: The catchment encoder (its towers define the modalities).
+    :type encoder: CatchmentEncoder
+    :param view_aliases: Alias item key -> base modality mapping in use, defaults to None.
+    :type view_aliases: Dict[str, str], optional
+    :return: The (anchor, positive) modality name pairs.
+    :rtype: Tuple[Tuple[str, str], ...]
+    """
+    from itertools import combinations
+    pairs = tuple(combinations(encoder.encoders, 2))
+    return pairs + tuple((base, alias) for alias, base in (view_aliases or {}).items())
 
 
 def contrastive_step(encoder: CatchmentEncoder, batch: Dict[str, torch.Tensor],
@@ -35,9 +74,9 @@ def contrastive_step(encoder: CatchmentEncoder, batch: Dict[str, torch.Tensor],
     :return: The scalar loss averaged over the modality pairs.
     :rtype: torch.Tensor
     """
-    inputs = {name: batch[key] for name, key in INPUT_KEYS.items()}
+    inputs = {name: batch[INPUT_KEYS[name]] for name in encoder.encoders}
     return contrastive_train.contrastive_step(encoder, inputs, criterion,
-                                              modality_pairs=MODALITY_PAIRS)
+                                              modality_pairs=modality_pairs_for(encoder))
 
 
 def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
@@ -47,7 +86,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                wandb_run=None, cross_year_views: bool = False,
                                blocked_batches: bool = False, seed: int = 42,
                                train_fusion: bool = True,
-                               fusion_modality_dropout: float = 0.5) -> List[float]:
+                               fusion_modality_dropout: float = 0.5,
+                               num_workers: int = 0) -> List[float]:
     """
     Pretrains the encoder with contrastive alignment across modalities.
 
@@ -85,13 +125,20 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
         has one image and one static vector but different-year histories, so without it the
         fusion matches views from the shared blocks and suppresses history. Defaults to 0.5.
     :type fusion_modality_dropout: float, optional
+    :param num_workers: DataLoader worker processes (records with regional patches decompress
+        ~12 MB each per epoch, which serializes without workers), defaults to 0.
+    :type num_workers: int, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
-    view_aliases = {"history_alt": "history"} if cross_year_views else None
-    modality_pairs = MODALITY_PAIRS
+    view_aliases = None
     if cross_year_views:
-        modality_pairs = tuple(MODALITY_PAIRS) + (("history", "history_alt"),)
+        # Only the alias views the dataset actually serves for towers this encoder has.
+        sample = dataset[0]
+        view_aliases = {alias: base for alias, base in VIEW_ALIASES.items()
+                        if alias in sample and base in encoder.encoders} or None
+    modality_pairs = modality_pairs_for(encoder, view_aliases)
+    input_transforms = regional_transforms(encoder, dataset)
     batch_sampler = None
     if blocked_batches:
         batch_sampler = contrastive_train.KeyBlockedBatchSampler(dataset.site_ids, batch_size,
@@ -106,12 +153,15 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                               view_aliases=view_aliases,
                                               batch_sampler=batch_sampler,
                                               train_fusion=train_fusion,
-                                              fusion_modality_dropout=fusion_modality_dropout)
+                                              fusion_modality_dropout=fusion_modality_dropout,
+                                              num_workers=num_workers,
+                                              input_transforms=input_transforms)
 
 
 def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
                        batch_size: int = 64, device: str = "cpu",
-                       n_history_samples: int = 1) -> Tuple[List[str], torch.Tensor]:
+                       n_history_samples: int = 1, num_workers: int = 0
+                       ) -> Tuple[List[str], torch.Tensor]:
     """
     Computes the catchment embedding of every site (averaged over history window samples).
 
@@ -126,9 +176,14 @@ def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDat
     :param n_history_samples: Average the embedding over this many random history windows,
         defaults to 1.
     :type n_history_samples: int, optional
+    :param num_workers: DataLoader worker processes for item decoding, defaults to 0.
+    :type num_workers: int, optional
     :return: A tuple of (site ids, embedding matrix of shape (n_sites, embedding_dim)).
     :rtype: Tuple[List[str], torch.Tensor]
     """
     return contrastive_train.extract_embeddings(encoder, dataset, batch_size=batch_size,
                                                 device=device, n_samples=n_history_samples,
+                                                num_workers=num_workers,
+                                                input_transforms=regional_transforms(encoder,
+                                                                                     dataset),
                                                 input_keys=INPUT_KEYS)

@@ -13,7 +13,7 @@ can be benchmarked. Per-modality projection heads map into a shared space for co
 Hydrology-specific consumers (e.g. the GR4 parameter head) live in
 :mod:`flood_forecast.ode.physics.hydrology`.
 """
-from typing import Dict, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import torch
 
@@ -43,7 +43,9 @@ class CatchmentEncoder(MultiModalEncoder):
                  patch_size: int = 16, dim: int = 128, embedding_dim: int = 256,
                  depth: int = 4, heads: int = 4, dim_head: int = 32, dropout: float = 0.0,
                  fusion: str = "concat", contrastive_dim: int = 128,
-                 history_mode: str = "sequence", normalize_towers: bool = True):
+                 history_mode: str = "sequence", normalize_towers: bool = True,
+                 regional_image_size: Optional[Union[int, Tuple[int, int]]] = None,
+                 regional_channels: Optional[int] = None, regional_patch_size: int = 32):
         """
         Initializes the catchment encoder.
 
@@ -85,9 +87,19 @@ class CatchmentEncoder(MultiModalEncoder):
             dominates the fused embedding by magnitude (measured on trained catchment encoders:
             the un-normalized vision block held ~88%% of the concat variance), defaults to True.
         :type normalize_towers: bool, optional
+        :param regional_image_size: Height/width of an optional regional-context image (a
+            coarser, catchment-scale patch — e.g. 512 px at 50 m — next to the gauge-reach
+            patch), adding a "vision_regional" tower; defaults to None (no regional tower).
+        :type regional_image_size: Union[int, Tuple[int, int]], optional
+        :param regional_channels: Number of bands of the regional image, defaults to None.
+        :type regional_channels: int, optional
+        :param regional_patch_size: ViT patch size of the regional tower, defaults to 32.
+        :type regional_patch_size: int, optional
         """
         if history_mode not in ("sequence", "panel"):
             raise ValueError("history_mode must be 'sequence' or 'panel'")
+        if (regional_image_size is None) != (regional_channels is None):
+            raise ValueError("regional_image_size and regional_channels must be given together")
         if history_mode == "panel":
             history_encoder = PanelSequenceEncoder(history_features, history_len, dim=dim,
                                                    depth=depth, heads=heads, dim_head=dim_head,
@@ -103,8 +115,14 @@ class CatchmentEncoder(MultiModalEncoder):
             "tabular": TabularEncoder(static_features, dim=dim, dropout=dropout),
             "history": history_encoder,
         }
+        sequence_modalities = ["vision", "history"]
+        if regional_image_size is not None:
+            encoders["vision_regional"] = ImagePatchEncoder(
+                regional_image_size, regional_patch_size, regional_channels, dim=dim,
+                depth=depth, heads=heads, dim_head=dim_head, mlp_dim=dim * 2, dropout=dropout)
+            sequence_modalities.append("vision_regional")
         super().__init__(encoders, dim, embedding_dim=embedding_dim, fusion=fusion,
-                         query_modality="history", sequence_modalities=("vision", "history"),
+                         query_modality="history", sequence_modalities=sequence_modalities,
                          heads=heads, dropout=dropout, contrastive_dim=contrastive_dim,
                          normalize_towers=normalize_towers)
         # Backwards-compatible attribute aliases for the per-modality encoders.
@@ -113,7 +131,7 @@ class CatchmentEncoder(MultiModalEncoder):
         self.history_encoder = self.encoders["history"]
 
     def forward(self, images: torch.Tensor, static: torch.Tensor, history: torch.Tensor,
-                return_modalities: bool = False
+                return_modalities: bool = False, images_regional: Optional[torch.Tensor] = None
                 ) -> Union[torch.Tensor, Tuple[torch.Tensor, Dict[str, torch.Tensor]]]:
         """
         Computes the catchment embedding.
@@ -127,9 +145,16 @@ class CatchmentEncoder(MultiModalEncoder):
         :param return_modalities: Whether to also return the per-modality contrastive projections,
             defaults to False.
         :type return_modalities: bool, optional
+        :param images_regional: Regional-context images of shape (batch_size, channels, height,
+            width); required when the encoder was built with a regional tower. Defaults to None.
+        :type images_regional: torch.Tensor, optional
         :return: The embedding of shape (batch_size, embedding_dim), or a tuple of (embedding, dict of
-            contrastive projections keyed "vision"/"tabular"/"history") when return_modalities is True.
+            contrastive projections keyed by modality name) when return_modalities is True.
         :rtype: Union[torch.Tensor, Tuple[torch.Tensor, Dict[str, torch.Tensor]]]
         """
         inputs = {"vision": images, "tabular": static, "history": history}
+        if "vision_regional" in self.encoders:
+            if images_regional is None:
+                raise ValueError("this encoder has a regional tower; pass images_regional")
+            inputs["vision_regional"] = images_regional
         return self.encode(inputs, return_modalities=return_modalities)
