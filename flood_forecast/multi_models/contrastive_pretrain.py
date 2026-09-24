@@ -7,7 +7,7 @@ the *same* site (vision vs. history, vision vs. tabular, tabular vs. history); e
 the batch is a negative. After pretraining, :func:`extract_embeddings` produces the per-site
 embedding matrix used for clustering and as the context input of the hybrid ODE model.
 """
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
 
@@ -23,6 +23,23 @@ INPUT_KEYS = {"vision": "image", "tabular": "static", "history": "history",
 # Extra same-site views the dataset can serve (alias item key -> base modality): a
 # different-year history panel and an other-season regional scene.
 VIEW_ALIASES = {"history_alt": "history", "image_regional_alt": "vision_regional"}
+
+
+def regional_transforms(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset
+                        ) -> Optional[Dict[str, Callable]]:
+    """
+    Device-side scaling for regional images served unscaled in float16 by the dataset.
+
+    :param encoder: The catchment encoder (transform only applies when it has the tower).
+    :type encoder: CatchmentEncoder
+    :param dataset: The embedding dataset.
+    :type dataset: CatchmentEmbeddingDataset
+    :return: {"vision_regional": dataset.regional_transform} or None.
+    :rtype: Dict[str, Callable], optional
+    """
+    if "vision_regional" in encoder.encoders and getattr(dataset, "regional_half", False):
+        return {"vision_regional": dataset.regional_transform}
+    return None
 
 
 def modality_pairs_for(encoder: CatchmentEncoder,
@@ -121,6 +138,7 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
         view_aliases = {alias: base for alias, base in VIEW_ALIASES.items()
                         if alias in sample and base in encoder.encoders} or None
     modality_pairs = modality_pairs_for(encoder, view_aliases)
+    input_transforms = regional_transforms(encoder, dataset)
     batch_sampler = None
     if blocked_batches:
         batch_sampler = contrastive_train.KeyBlockedBatchSampler(dataset.site_ids, batch_size,
@@ -136,7 +154,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                               batch_sampler=batch_sampler,
                                               train_fusion=train_fusion,
                                               fusion_modality_dropout=fusion_modality_dropout,
-                                              num_workers=num_workers)
+                                              num_workers=num_workers,
+                                              input_transforms=input_transforms)
 
 
 def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
@@ -165,4 +184,6 @@ def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDat
     return contrastive_train.extract_embeddings(encoder, dataset, batch_size=batch_size,
                                                 device=device, n_samples=n_history_samples,
                                                 num_workers=num_workers,
+                                                input_transforms=regional_transforms(encoder,
+                                                                                     dataset),
                                                 input_keys=INPUT_KEYS)

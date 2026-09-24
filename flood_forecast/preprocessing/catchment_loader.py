@@ -35,7 +35,7 @@ class CatchmentEmbeddingDataset(Dataset):
                  image_scale: float = 3000.0, min_window_observed: float = 0.5,
                  seed: Optional[int] = None, history_mode: str = "random_window",
                  cross_year_views: bool = False, seasonal_only: bool = False,
-                 regional: str = "auto"):
+                 regional: str = "auto", regional_half: bool = True):
         """
         Initializes the dataset and computes normalization statistics across sites.
 
@@ -73,6 +73,13 @@ class CatchmentEmbeddingDataset(Dataset):
             item has the same keys and batches collate; "require" raises unless every record
             has it; "ignore" never serves it. Defaults to "auto".
         :type regional: str, optional
+        :param regional_half: Serve regional images as UNSCALED float16 digital numbers and
+            leave the reflectance scaling to :meth:`regional_transform` on the device. A
+            512x512x6 patch is 6.3 MB in float32; with two views per record a batch of 128
+            moves 3 GB from loader workers to the trainer through shared memory, which
+            dominated epoch time. Defaults to True. False serves scaled float32 like the
+            reach image.
+        :type regional_half: bool, optional
         """
         if history_mode not in ("random_window", "hourly_panel"):
             raise ValueError("history_mode must be 'random_window' or 'hourly_panel'")
@@ -95,6 +102,7 @@ class CatchmentEmbeddingDataset(Dataset):
         if not self.site_ids:
             raise ValueError("No .npz records found in " + data_dir)
         self.excluded_sites: List[str] = []
+        self.regional_half = regional_half
         self.serve_regional = self._resolve_regional(regional)
 
         statics, log_flows = [], []
@@ -332,6 +340,23 @@ class CatchmentEmbeddingDataset(Dataset):
         for key in ("image_regional", "image_regional_alt"):
             if key not in record.files or (key.endswith("_alt") and not self.cross_year_views):
                 continue
-            views[key] = torch.from_numpy(
-                np.clip(record[key] / self.image_scale, 0.0, 2.0).astype(np.float32))
+            if self.regional_half:
+                views[key] = torch.from_numpy(record[key].astype(np.float16))
+            else:
+                views[key] = torch.from_numpy(
+                    np.clip(record[key] / self.image_scale, 0.0, 2.0).astype(np.float32))
         return views
+
+    def regional_transform(self, images: torch.Tensor) -> torch.Tensor:
+        """
+        Scales unscaled regional digital numbers to the reflectance range the towers expect.
+
+        Apply on the device to items served with ``regional_half=True``; the result equals
+        the float32 scaling used for the reach image (``/image_scale``, clipped to [0, 2]).
+
+        :param images: Regional images of any float/int dtype.
+        :type images: torch.Tensor
+        :return: float32 images scaled to [0, 2].
+        :rtype: torch.Tensor
+        """
+        return (images.float() / self.image_scale).clamp_(0.0, 2.0)

@@ -9,7 +9,7 @@ pathway in :func:`flood_forecast.pytorch_training.handle_meta_data`) can feed it
 model through :class:`flood_forecast.meta_models.merging_model.MergingModel`.
 """
 from itertools import combinations
-from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
 import torch
 from torch.utils.data import DataLoader, Dataset, Sampler
@@ -70,7 +70,9 @@ class KeyBlockedBatchSampler(Sampler):
 
 
 def _modality_inputs(batch: Dict[str, torch.Tensor], encoder: MultiModalEncoder,
-                     input_keys: Optional[Dict[str, str]], device: str) -> Dict[str, torch.Tensor]:
+                     input_keys: Optional[Dict[str, str]], device: str,
+                     input_transforms: Optional[Dict[str, Callable]] = None,
+                     view_aliases: Optional[Dict[str, str]] = None) -> Dict[str, torch.Tensor]:
     """
     Selects and maps the batch entries an encoder consumes, moving them to the device.
 
@@ -83,13 +85,27 @@ def _modality_inputs(batch: Dict[str, torch.Tensor], encoder: MultiModalEncoder,
     :type input_keys: Dict[str, str], optional
     :param device: The torch device string.
     :type device: str
+    :param input_transforms: Optional modality name -> callable applied to that modality's
+        tensor after it is moved to the device (e.g. scaling images served in a compact dtype
+        to keep loader traffic small). Alias views use their base modality's transform.
+    :type input_transforms: Dict[str, Callable], optional
+    :param view_aliases: Alias key -> base modality mapping, used to pick transforms for alias
+        views, defaults to None.
+    :type view_aliases: Dict[str, str], optional
     :return: A dict mapping each modality name to its input tensor on the device.
     :rtype: Dict[str, torch.Tensor]
     """
     keys = input_keys or {}
+    transforms = input_transforms or {}
+    aliases = view_aliases or {}
     names = list(encoder.encoders)
     names += [key for key in batch if key.endswith("_alt") and key not in names]
-    return {name: batch[keys.get(name, name)].to(device) for name in names}
+    inputs = {}
+    for name in names:
+        tensor = batch[keys.get(name, name)].to(device)
+        transform = transforms.get(name) or transforms.get(aliases.get(name, ""))
+        inputs[name] = transform(tensor) if transform is not None else tensor
+    return inputs
 
 
 def drop_modalities(outputs: Dict[str, torch.Tensor], p: float) -> Dict[str, torch.Tensor]:
@@ -203,7 +219,8 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
                      batch_sampler: Optional[Sampler] = None,
                      train_fusion: bool = True,
                      fusion_modality_dropout: float = 0.5,
-                     num_workers: int = 0) -> List[float]:
+                     num_workers: int = 0,
+                     input_transforms: Optional[Dict[str, Callable]] = None) -> List[float]:
     """
     Pretrains a multi-modal encoder with contrastive alignment across its modalities.
 
@@ -248,6 +265,9 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
         — e.g. decompressing large image arrays per record — otherwise serializes on the
         training process. Defaults to 0 (in-process loading).
     :type num_workers: int, optional
+    :param input_transforms: Optional modality name -> callable applied on the device (see
+        :func:`_modality_inputs`), defaults to None.
+    :type input_transforms: Dict[str, Callable], optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
@@ -265,7 +285,9 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
         total, batches = 0.0, 0
         for batch in loader:
             optimizer.zero_grad()
-            inputs = _modality_inputs(batch, encoder, input_keys, device)
+            inputs = _modality_inputs(batch, encoder, input_keys, device,
+                                      input_transforms=input_transforms,
+                                      view_aliases=view_aliases)
             loss = contrastive_step(encoder, inputs, criterion, modality_pairs=modality_pairs,
                                     view_aliases=view_aliases, train_fusion=train_fusion,
                                     fusion_modality_dropout=fusion_modality_dropout)
@@ -284,7 +306,8 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
 
 def extract_embeddings(encoder: MultiModalEncoder, dataset: Dataset, batch_size: int = 64,
                        device: str = "cpu", n_samples: int = 1,
-                       input_keys: Optional[Dict[str, str]] = None, num_workers: int = 0
+                       input_keys: Optional[Dict[str, str]] = None, num_workers: int = 0,
+                       input_transforms: Optional[Dict[str, Callable]] = None
                        ) -> Tuple[List[Union[str, int]], torch.Tensor]:
     """
     Computes the embedding of every entity in the dataset (averaged over stochastic samples).
@@ -304,6 +327,9 @@ def extract_embeddings(encoder: MultiModalEncoder, dataset: Dataset, batch_size:
     :type n_samples: int, optional
     :param num_workers: DataLoader worker processes for item decoding, defaults to 0.
     :type num_workers: int, optional
+    :param input_transforms: Optional modality name -> callable applied on the device (see
+        :func:`_modality_inputs`), defaults to None.
+    :type input_transforms: Dict[str, Callable], optional
     :param input_keys: An optional dict mapping modality name to its dataset item key; defaults to
         None (item keys equal the modality names).
     :type input_keys: Dict[str, str], optional
@@ -318,7 +344,8 @@ def extract_embeddings(encoder: MultiModalEncoder, dataset: Dataset, batch_size:
                                 num_workers=num_workers)
             chunks = []
             for batch in loader:
-                inputs = _modality_inputs(batch, encoder, input_keys, device)
+                inputs = _modality_inputs(batch, encoder, input_keys, device,
+                                          input_transforms=input_transforms)
                 chunks.append(encoder.encode(inputs).cpu())
             stacked = torch.cat(chunks)
             accumulated = stacked if accumulated is None else accumulated + stacked

@@ -113,7 +113,16 @@ class TestRegionalLoaderAndTraining(unittest.TestCase):
         item = dataset[0]
         self.assertEqual(item["image_regional"].shape, (6, 64, 64))
         self.assertEqual(item["image_regional_alt"].shape, (6, 64, 64))
-        self.assertLessEqual(float(item["image_regional"].max()), 2.0)
+        # Default: unscaled float16 digital numbers; scaling happens on the device.
+        self.assertEqual(item["image_regional"].dtype, torch.float16)
+        self.assertGreater(float(item["image_regional"].max()), 2.0)
+        scaled = dataset.regional_transform(item["image_regional"])
+        self.assertEqual(scaled.dtype, torch.float32)
+        self.assertLessEqual(float(scaled.max()), 2.0)
+        full = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                         regional_half=False)[0]
+        self.assertEqual(full["image_regional"].dtype, torch.float32)
+        self.assertTrue(torch.allclose(full["image_regional"], scaled, atol=2e-3))
         canonical = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel")[0]
         self.assertIn("image_regional", canonical)
         self.assertNotIn("image_regional_alt", canonical)
