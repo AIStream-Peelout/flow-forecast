@@ -202,7 +202,8 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
                      view_aliases: Optional[Dict[str, str]] = None,
                      batch_sampler: Optional[Sampler] = None,
                      train_fusion: bool = True,
-                     fusion_modality_dropout: float = 0.5) -> List[float]:
+                     fusion_modality_dropout: float = 0.5,
+                     num_workers: int = 0) -> List[float]:
     """
     Pretrains a multi-modal encoder with contrastive alignment across its modalities.
 
@@ -243,15 +244,20 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
     :param fusion_modality_dropout: Per-sample modality dropout on the fused views (see
         :func:`contrastive_step`), defaults to 0.5.
     :type fusion_modality_dropout: float, optional
+    :param num_workers: DataLoader worker processes (kept alive across epochs); item decoding
+        — e.g. decompressing large image arrays per record — otherwise serializes on the
+        training process. Defaults to 0 (in-process loading).
+    :type num_workers: int, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
     encoder = encoder.to(device).train()
+    worker_options = {"num_workers": num_workers, "persistent_workers": num_workers > 0}
     if batch_sampler is not None:
-        loader = DataLoader(dataset, batch_sampler=batch_sampler)
+        loader = DataLoader(dataset, batch_sampler=batch_sampler, **worker_options)
     else:
         loader = DataLoader(dataset, batch_size=batch_size, shuffle=True,
-                            drop_last=len(dataset) > batch_size)
+                            drop_last=len(dataset) > batch_size, **worker_options)
     optimizer = torch.optim.Adam(encoder.parameters(), lr=lr)
     criterion = InfoNCELoss(temperature=temperature)
     epoch_losses: List[float] = []
@@ -278,7 +284,7 @@ def pretrain_encoder(encoder: MultiModalEncoder, dataset: Dataset, epochs: int =
 
 def extract_embeddings(encoder: MultiModalEncoder, dataset: Dataset, batch_size: int = 64,
                        device: str = "cpu", n_samples: int = 1,
-                       input_keys: Optional[Dict[str, str]] = None
+                       input_keys: Optional[Dict[str, str]] = None, num_workers: int = 0
                        ) -> Tuple[List[Union[str, int]], torch.Tensor]:
     """
     Computes the embedding of every entity in the dataset (averaged over stochastic samples).
@@ -296,6 +302,8 @@ def extract_embeddings(encoder: MultiModalEncoder, dataset: Dataset, batch_size:
     :param n_samples: Average the embedding over this many passes (useful when the dataset samples
         stochastic views), defaults to 1.
     :type n_samples: int, optional
+    :param num_workers: DataLoader worker processes for item decoding, defaults to 0.
+    :type num_workers: int, optional
     :param input_keys: An optional dict mapping modality name to its dataset item key; defaults to
         None (item keys equal the modality names).
     :type input_keys: Dict[str, str], optional
@@ -306,7 +314,8 @@ def extract_embeddings(encoder: MultiModalEncoder, dataset: Dataset, batch_size:
     accumulated: Optional[torch.Tensor] = None
     with torch.no_grad():
         for _ in range(n_samples):
-            loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+            loader = DataLoader(dataset, batch_size=batch_size, shuffle=False,
+                                num_workers=num_workers)
             chunks = []
             for batch in loader:
                 inputs = _modality_inputs(batch, encoder, input_keys, device)

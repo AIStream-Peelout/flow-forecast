@@ -69,7 +69,8 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                wandb_run=None, cross_year_views: bool = False,
                                blocked_batches: bool = False, seed: int = 42,
                                train_fusion: bool = True,
-                               fusion_modality_dropout: float = 0.5) -> List[float]:
+                               fusion_modality_dropout: float = 0.5,
+                               num_workers: int = 0) -> List[float]:
     """
     Pretrains the encoder with contrastive alignment across modalities.
 
@@ -107,6 +108,9 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
         has one image and one static vector but different-year histories, so without it the
         fusion matches views from the shared blocks and suppresses history. Defaults to 0.5.
     :type fusion_modality_dropout: float, optional
+    :param num_workers: DataLoader worker processes (records with regional patches decompress
+        ~12 MB each per epoch, which serializes without workers), defaults to 0.
+    :type num_workers: int, optional
     :return: The mean loss per epoch.
     :rtype: List[float]
     """
@@ -131,12 +135,14 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
                                               view_aliases=view_aliases,
                                               batch_sampler=batch_sampler,
                                               train_fusion=train_fusion,
-                                              fusion_modality_dropout=fusion_modality_dropout)
+                                              fusion_modality_dropout=fusion_modality_dropout,
+                                              num_workers=num_workers)
 
 
 def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDataset,
                        batch_size: int = 64, device: str = "cpu",
-                       n_history_samples: int = 1) -> Tuple[List[str], torch.Tensor]:
+                       n_history_samples: int = 1, num_workers: int = 0
+                       ) -> Tuple[List[str], torch.Tensor]:
     """
     Computes the catchment embedding of every site (averaged over history window samples).
 
@@ -151,9 +157,12 @@ def extract_embeddings(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDat
     :param n_history_samples: Average the embedding over this many random history windows,
         defaults to 1.
     :type n_history_samples: int, optional
+    :param num_workers: DataLoader worker processes for item decoding, defaults to 0.
+    :type num_workers: int, optional
     :return: A tuple of (site ids, embedding matrix of shape (n_sites, embedding_dim)).
     :rtype: Tuple[List[str], torch.Tensor]
     """
     return contrastive_train.extract_embeddings(encoder, dataset, batch_size=batch_size,
                                                 device=device, n_samples=n_history_samples,
+                                                num_workers=num_workers,
                                                 input_keys=INPUT_KEYS)
