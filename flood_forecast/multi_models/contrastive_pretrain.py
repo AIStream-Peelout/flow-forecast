@@ -34,12 +34,35 @@ def regional_transforms(encoder: CatchmentEncoder, dataset: CatchmentEmbeddingDa
     :type encoder: CatchmentEncoder
     :param dataset: The embedding dataset.
     :type dataset: CatchmentEmbeddingDataset
-    :return: {"vision_regional": dataset.regional_transform} or None.
+    :return: Modality name -> ``dataset.regional_transform`` for every tower fed an unscaled
+        regional image ("vision_regional", and "vision" when the dataset's vision source is
+        the regional patch), or None.
     :rtype: Dict[str, Callable], optional
     """
-    if "vision_regional" in encoder.encoders and getattr(dataset, "regional_half", False):
-        return {"vision_regional": dataset.regional_transform}
-    return None
+    if not getattr(dataset, "regional_half", False):
+        return None
+    transforms = {}
+    if "vision_regional" in encoder.encoders:
+        transforms["vision_regional"] = dataset.regional_transform
+    if getattr(dataset, "vision_source", "reach") == "regional":
+        transforms["vision"] = dataset.regional_transform
+    return transforms or None
+
+
+def view_aliases_for(dataset: CatchmentEmbeddingDataset) -> Dict[str, str]:
+    """
+    Alias item key -> base modality mapping for the dataset's configuration.
+
+    :param dataset: The embedding dataset.
+    :type dataset: CatchmentEmbeddingDataset
+    :return: The alias mapping; the other-season regional scene aliases the main vision
+        tower when the regional patch is the vision source.
+    :rtype: Dict[str, str]
+    """
+    aliases = dict(VIEW_ALIASES)
+    if getattr(dataset, "vision_source", "reach") == "regional":
+        aliases["image_regional_alt"] = "vision"
+    return aliases
 
 
 def modality_pairs_for(encoder: CatchmentEncoder,
@@ -135,7 +158,7 @@ def pretrain_catchment_encoder(encoder: CatchmentEncoder, dataset: CatchmentEmbe
     if cross_year_views:
         # Only the alias views the dataset actually serves for towers this encoder has.
         sample = dataset[0]
-        view_aliases = {alias: base for alias, base in VIEW_ALIASES.items()
+        view_aliases = {alias: base for alias, base in view_aliases_for(dataset).items()
                         if alias in sample and base in encoder.encoders} or None
     modality_pairs = modality_pairs_for(encoder, view_aliases)
     input_transforms = regional_transforms(encoder, dataset)

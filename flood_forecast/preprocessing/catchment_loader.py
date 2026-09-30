@@ -35,7 +35,8 @@ class CatchmentEmbeddingDataset(Dataset):
                  image_scale: float = 3000.0, min_window_observed: float = 0.5,
                  seed: Optional[int] = None, history_mode: str = "random_window",
                  cross_year_views: bool = False, seasonal_only: bool = False,
-                 regional: str = "auto", regional_half: bool = True):
+                 regional: str = "auto", regional_half: bool = True,
+                 vision_source: str = "reach"):
         """
         Initializes the dataset and computes normalization statistics across sites.
 
@@ -80,6 +81,12 @@ class CatchmentEmbeddingDataset(Dataset):
             dominated epoch time. Defaults to True. False serves scaled float32 like the
             reach image.
         :type regional_half: bool, optional
+        :param vision_source: Which image the "image" item carries: "reach" (the gauge-reach
+            patch, default) or "regional" (the regional-context patch, served like a
+            regional image — unscaled float16 when ``regional_half`` — with no separate
+            "image_regional" item, and with ``cross_year_views`` the other-season scene as
+            "image_regional_alt" for the same tower). Requires regional data.
+        :type vision_source: str, optional
         """
         if history_mode not in ("random_window", "hourly_panel"):
             raise ValueError("history_mode must be 'random_window' or 'hourly_panel'")
@@ -89,6 +96,11 @@ class CatchmentEmbeddingDataset(Dataset):
             raise ValueError("seasonal_only requires history_mode='hourly_panel'")
         if regional not in ("auto", "require", "ignore"):
             raise ValueError("regional must be 'auto', 'require' or 'ignore'")
+        if vision_source not in ("reach", "regional"):
+            raise ValueError("vision_source must be 'reach' or 'regional'")
+        if vision_source == "regional" and regional == "ignore":
+            raise ValueError("vision_source='regional' needs regional data (regional != 'ignore')")
+        self.vision_source = vision_source
         self.history_mode = history_mode
         self.cross_year_views = cross_year_views
         self.seasonal_only = seasonal_only
@@ -104,6 +116,9 @@ class CatchmentEmbeddingDataset(Dataset):
         self.excluded_sites: List[str] = []
         self.regional_half = regional_half
         self.serve_regional = self._resolve_regional(regional)
+        if vision_source == "regional" and not self.serve_regional:
+            raise ValueError("vision_source='regional' but no record in %s has image_regional"
+                             % data_dir)
 
         statics, log_flows = [], []
         for site_id in self.site_ids:
@@ -255,7 +270,10 @@ class CatchmentEmbeddingDataset(Dataset):
         :rtype: Dict[str, torch.Tensor]
         """
         record = np.load(os.path.join(self.data_dir, self.site_ids[index] + ".npz"))
-        image = np.clip(record["image"] / self.image_scale, 0.0, 2.0).astype(np.float32)
+        if self.vision_source == "regional":
+            image = self._regional_array(record["image_regional"])
+        else:
+            image = np.clip(record["image"] / self.image_scale, 0.0, 2.0).astype(np.float32)
 
         static = (record["static"] - self.static_mean) / self.static_std
         static = np.nan_to_num(static, nan=0.0).astype(np.float32)
@@ -340,12 +358,23 @@ class CatchmentEmbeddingDataset(Dataset):
         for key in ("image_regional", "image_regional_alt"):
             if key not in record.files or (key.endswith("_alt") and not self.cross_year_views):
                 continue
-            if self.regional_half:
-                views[key] = torch.from_numpy(record[key].astype(np.float16))
-            else:
-                views[key] = torch.from_numpy(
-                    np.clip(record[key] / self.image_scale, 0.0, 2.0).astype(np.float32))
+            if key == "image_regional" and self.vision_source == "regional":
+                continue  # already served as "image"
+            views[key] = torch.from_numpy(self._regional_array(record[key]))
         return views
+
+    def _regional_array(self, array: np.ndarray) -> np.ndarray:
+        """
+        Prepares a regional image for serving: unscaled float16, or scaled float32.
+
+        :param array: The stored regional image (uint16 or float32 digital numbers).
+        :type array: np.ndarray
+        :return: float16 digital numbers when ``regional_half``, else float32 in [0, 2].
+        :rtype: np.ndarray
+        """
+        if self.regional_half:
+            return array.astype(np.float16)
+        return np.clip(array / self.image_scale, 0.0, 2.0).astype(np.float32)
 
     def regional_transform(self, images: torch.Tensor) -> torch.Tensor:
         """

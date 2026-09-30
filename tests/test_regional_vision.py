@@ -166,6 +166,29 @@ class TestRegionalLoaderAndTraining(unittest.TestCase):
             CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
                                       regional="maybe")
 
+    def test_regional_as_vision_source(self):
+        dataset = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                            cross_year_views=True, vision_source="regional")
+        item = dataset[0]
+        self.assertEqual(item["image"].shape, (6, 64, 64))
+        self.assertEqual(item["image"].dtype, torch.float16)
+        self.assertNotIn("image_regional", item)
+        self.assertIn("image_regional_alt", item)
+        encoder = CatchmentEncoder(image_size=64, image_channels=6, static_features=5,
+                                   history_features=6, history_len=48, patch_size=32, dim=16,
+                                   embedding_dim=24, depth=1, heads=2, dim_head=8,
+                                   contrastive_dim=12, history_mode="panel")
+        from flood_forecast.multi_models.contrastive_pretrain import (regional_transforms,
+                                                                      view_aliases_for)
+        self.assertEqual(set(regional_transforms(encoder, dataset)), {"vision"})
+        self.assertEqual(view_aliases_for(dataset)["image_regional_alt"], "vision")
+        losses = pretrain_catchment_encoder(encoder, dataset, epochs=2, batch_size=6,
+                                            cross_year_views=True)
+        self.assertTrue(np.isfinite(losses).all())
+        with self.assertRaises(ValueError):
+            CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                      vision_source="regional", regional="ignore")
+
     def test_pretrain_uses_regional_alias_view(self):
         dataset = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
                                             cross_year_views=True, seed=0)
