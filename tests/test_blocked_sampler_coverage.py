@@ -124,5 +124,29 @@ class TestHistoryLogStdChannel(unittest.TestCase):
             CatchmentEmbeddingDataset(self.temp_dir, history_log_std_channel=True)
 
 
+class TestStaticStatsInjection(unittest.TestCase):
+    """Held-out datasets must apply training-fitted static normalization, not refit it."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        write_panel_records(self.temp_dir)
+
+    def test_injected_stats_are_applied_not_refit(self):
+        fitted = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel")
+        mean, std = fitted.static_mean + 1.0, fitted.static_std * 2.0
+        injected = CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                             static_stats=(mean, std))
+        self.assertTrue(np.allclose(injected.static_mean, mean))
+        self.assertTrue(np.allclose(injected.static_std, std))
+        raw = fitted[0]["static"].numpy() * fitted.static_std + fitted.static_mean
+        expected = (raw - mean) / std
+        self.assertTrue(np.allclose(injected[0]["static"].numpy(), expected, atol=1e-5))
+
+    def test_wrong_shape_raises(self):
+        with self.assertRaises(ValueError):
+            CatchmentEmbeddingDataset(self.temp_dir, history_mode="hourly_panel",
+                                      static_stats=(np.zeros(3), np.ones(3)))
+
+
 if __name__ == "__main__":
     unittest.main()

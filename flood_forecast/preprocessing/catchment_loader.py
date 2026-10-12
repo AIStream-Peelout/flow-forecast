@@ -36,7 +36,8 @@ class CatchmentEmbeddingDataset(Dataset):
                  seed: Optional[int] = None, history_mode: str = "random_window",
                  cross_year_views: bool = False, seasonal_only: bool = False,
                  regional: str = "auto", regional_half: bool = True,
-                 vision_source: str = "reach", history_log_std_channel: bool = False):
+                 vision_source: str = "reach", history_log_std_channel: bool = False,
+                 static_stats: Optional[Tuple[np.ndarray, np.ndarray]] = None):
         """
         Initializes the dataset and computes normalization statistics across sites.
 
@@ -94,6 +95,13 @@ class CatchmentEmbeddingDataset(Dataset):
             yields identical inputs while its CV, flashiness and flow-duration shape change.
             Defaults to False (the historical six channels).
         :type history_log_std_channel: bool, optional
+        :param static_stats: Optional (mean, std) arrays for the static attributes, fitted
+            elsewhere (e.g. on the training basins), applied instead of statistics computed
+            from this directory. Required for honest held-out-basin evaluation: a dataset
+            over held-out records must not refit normalization on them. Defaults to None
+            (fit on this directory; the fitted values are exposed as ``static_mean`` /
+            ``static_std``).
+        :type static_stats: Tuple[np.ndarray, np.ndarray], optional
         """
         if history_mode not in ("random_window", "hourly_panel"):
             raise ValueError("history_mode must be 'random_window' or 'hourly_panel'")
@@ -139,8 +147,15 @@ class CatchmentEmbeddingDataset(Dataset):
                     log_flows.append(np.log1p(np.clip(history[np.isfinite(history)], 0.0,
                                                       None)))
         static_matrix = np.stack(statics)
-        self.static_mean = np.nanmean(static_matrix, axis=0)
-        self.static_std = np.nanstd(static_matrix, axis=0)
+        if static_stats is not None:
+            self.static_mean = np.asarray(static_stats[0], dtype=np.float64)
+            self.static_std = np.asarray(static_stats[1], dtype=np.float64).copy()
+            if self.static_mean.shape != (static_matrix.shape[1],):
+                raise ValueError("static_stats do not match the %d static features"
+                                 % static_matrix.shape[1])
+        else:
+            self.static_mean = np.nanmean(static_matrix, axis=0)
+            self.static_std = np.nanstd(static_matrix, axis=0)
         self.static_std[self.static_std == 0] = 1.0
         if self.history_mode == "random_window":
             # Global cross-site standardization (legacy); hourly_panel standardizes per site
