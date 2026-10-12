@@ -36,7 +36,8 @@ class CatchmentEmbeddingDataset(Dataset):
                  seed: Optional[int] = None, history_mode: str = "random_window",
                  cross_year_views: bool = False, seasonal_only: bool = False,
                  regional: str = "auto", regional_half: bool = True,
-                 vision_source: str = "reach"):
+                 vision_source: str = "reach", history_log_std_channel: bool = False,
+                 static_stats: Optional[Tuple[np.ndarray, np.ndarray]] = None):
         """
         Initializes the dataset and computes normalization statistics across sites.
 
@@ -87,6 +88,20 @@ class CatchmentEmbeddingDataset(Dataset):
             "image_regional" item, and with ``cross_year_views`` the other-season scene as
             "image_regional_alt" for the same tower). Requires regional data.
         :type vision_source: str, optional
+        :param history_log_std_channel: hourly_panel only — append a constant channel holding
+            the site's log-flow standard deviation (the spread that per-site standardization
+            otherwise discards). Standardizing each site's log flow removes absolute size, as
+            intended, but also relative variability: any affine map of a site's log history
+            yields identical inputs while its CV, flashiness and flow-duration shape change.
+            Defaults to False (the historical six channels).
+        :type history_log_std_channel: bool, optional
+        :param static_stats: Optional (mean, std) arrays for the static attributes, fitted
+            elsewhere (e.g. on the training basins), applied instead of statistics computed
+            from this directory. Required for honest held-out-basin evaluation: a dataset
+            over held-out records must not refit normalization on them. Defaults to None
+            (fit on this directory; the fitted values are exposed as ``static_mean`` /
+            ``static_std``).
+        :type static_stats: Tuple[np.ndarray, np.ndarray], optional
         """
         if history_mode not in ("random_window", "hourly_panel"):
             raise ValueError("history_mode must be 'random_window' or 'hourly_panel'")
@@ -100,7 +115,10 @@ class CatchmentEmbeddingDataset(Dataset):
             raise ValueError("vision_source must be 'reach' or 'regional'")
         if vision_source == "regional" and regional == "ignore":
             raise ValueError("vision_source='regional' needs regional data (regional != 'ignore')")
+        if history_log_std_channel and history_mode != "hourly_panel":
+            raise ValueError("history_log_std_channel requires history_mode='hourly_panel'")
         self.vision_source = vision_source
+        self.history_log_std_channel = history_log_std_channel
         self.history_mode = history_mode
         self.cross_year_views = cross_year_views
         self.seasonal_only = seasonal_only
@@ -129,8 +147,15 @@ class CatchmentEmbeddingDataset(Dataset):
                     log_flows.append(np.log1p(np.clip(history[np.isfinite(history)], 0.0,
                                                       None)))
         static_matrix = np.stack(statics)
-        self.static_mean = np.nanmean(static_matrix, axis=0)
-        self.static_std = np.nanstd(static_matrix, axis=0)
+        if static_stats is not None:
+            self.static_mean = np.asarray(static_stats[0], dtype=np.float64)
+            self.static_std = np.asarray(static_stats[1], dtype=np.float64).copy()
+            if self.static_mean.shape != (static_matrix.shape[1],):
+                raise ValueError("static_stats do not match the %d static features"
+                                 % static_matrix.shape[1])
+        else:
+            self.static_mean = np.nanmean(static_matrix, axis=0)
+            self.static_std = np.nanstd(static_matrix, axis=0)
         self.static_std[self.static_std == 0] = 1.0
         if self.history_mode == "random_window":
             # Global cross-site standardization (legacy); hourly_panel standardizes per site
@@ -253,9 +278,12 @@ class CatchmentEmbeddingDataset(Dataset):
                          dtype=np.float32)[:, None] * np.ones_like(standardized)
         drought = np.array([t == "drought" for t in selected_types],
                            dtype=np.float32)[:, None] * np.ones_like(standardized)
-        history = np.stack([standardized, observed.astype(np.float32),
-                            np.sin(2 * np.pi * day_of_year), np.cos(2 * np.pi * day_of_year),
-                            flood, drought], axis=-1).astype(np.float32)
+        channels = [standardized, observed.astype(np.float32),
+                    np.sin(2 * np.pi * day_of_year), np.cos(2 * np.pi * day_of_year),
+                    flood, drought]
+        if self.history_log_std_channel:
+            channels.append(np.full_like(standardized, site_std, dtype=np.float32))
+        history = np.stack(channels, axis=-1).astype(np.float32)
         return history, chosen
 
     def __getitem__(self, index: int) -> Dict[str, torch.Tensor]:
