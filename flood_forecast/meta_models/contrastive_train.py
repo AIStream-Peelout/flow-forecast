@@ -41,7 +41,10 @@ class KeyBlockedBatchSampler(Sampler):
         :type batch_size: int
         :param seed: Base seed; the epoch counter advances it, defaults to 42.
         :type seed: int, optional
-        :param drop_last: Whether to drop a final short batch, defaults to True.
+        :param drop_last: Whether a final short batch must be avoided; with True (default) the
+            short block is completed circularly from the start of the rotated order so every
+            batch has ``batch_size`` entities and every entity appears each epoch. With False
+            the short block is yielded as is.
         :type drop_last: bool, optional
         """
         self.order = sorted(range(len(sort_keys)), key=lambda i: sort_keys[i])
@@ -53,20 +56,29 @@ class KeyBlockedBatchSampler(Sampler):
     def __iter__(self) -> Iterator[List[int]]:
         generator = torch.Generator().manual_seed(self.seed + self.epoch)
         self.epoch += 1
-        offset = int(torch.randint(0, self.batch_size, (1,), generator=generator))
+        # Rotate by a uniform offset over the WHOLE cohort so every entity is equally likely
+        # to sit at any block boundary (an offset drawn from [0, batch_size) left the entities
+        # near the end of the sorted order systematically in the short, dropped last block —
+        # down to a third of the epochs of exposure). A short last block is completed
+        # circularly from the start of the rotated order instead of dropped: every entity
+        # appears at least once per epoch, blocks stay full and contiguous in sorted order,
+        # and no entity is repeated within a block (the filler comes from the first block).
+        n = len(self.order)
+        offset = int(torch.randint(0, n, (1,), generator=generator)) if n else 0
         rotated = self.order[offset:] + self.order[:offset]
         blocks = [rotated[i:i + self.batch_size]
                   for i in range(0, len(rotated), self.batch_size)]
-        if self.drop_last and len(blocks) > 1 and len(blocks[-1]) < self.batch_size:
-            blocks = blocks[:-1]
+        if len(blocks) > 1 and len(blocks[-1]) < self.batch_size:
+            if self.drop_last:
+                blocks[-1] = blocks[-1] + rotated[:self.batch_size - len(blocks[-1])]
         for block_index in torch.randperm(len(blocks), generator=generator).tolist():
             yield blocks[block_index]
 
     def __len__(self) -> int:
         n_blocks, remainder = divmod(len(self.order), self.batch_size)
-        if remainder and not (self.drop_last and n_blocks >= 1):
+        if remainder:
             n_blocks += 1
-        return n_blocks
+        return max(n_blocks, 1) if self.order else 0
 
 
 def _modality_inputs(batch: Dict[str, torch.Tensor], encoder: MultiModalEncoder,
