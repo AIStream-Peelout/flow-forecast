@@ -19,6 +19,9 @@ setup(
     version='1.001dev',
     packages=[
         'flood_forecast',
+        'flood_forecast.multi_models',
+        'flood_forecast.ode',
+        'flood_forecast.ode.physics',
         'flood_forecast.transformer_xl',
         'flood_forecast.preprocessing',
         'flood_forecast.da_rnn',
